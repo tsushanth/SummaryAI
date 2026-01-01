@@ -1,0 +1,116 @@
+/**
+ * Summary AI Backend
+ * Main entry point
+ */
+
+import express, { Request, Response } from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+
+import { config, logConfig } from './config/index.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import { testConnection } from './lib/supabase.js';
+import routes from './routes/index.js';
+
+// Create Express app
+const app = express();
+
+// ============================================================================
+// Middleware
+// ============================================================================
+
+// Security headers
+app.use(helmet());
+
+// CORS configuration
+app.use(cors({
+  origin: config.NODE_ENV === 'production'
+    ? ['https://summaryai.app', 'https://www.summaryai.app']
+    : '*',
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}));
+
+// Request logging
+app.use(morgan(config.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+// JSON body parsing
+app.use(express.json({ limit: '10mb' }));
+
+// Trust proxy (for Cloud Run)
+app.set('trust proxy', true);
+
+// ============================================================================
+// Routes
+// ============================================================================
+
+// API version prefix
+app.use(`/${config.API_VERSION}`, routes);
+
+// Also mount at root for health checks
+app.use('/', routes);
+
+// Root endpoint
+app.get('/', (_req: Request, res: Response) => {
+  res.json({
+    name: 'Summary AI API',
+    version: config.API_VERSION,
+    status: 'running',
+  });
+});
+
+// 404 handler
+app.use((_req: Request, res: Response) => {
+  res.status(404).json({
+    error: {
+      code: 'NOT_FOUND',
+      message: 'Endpoint not found',
+    },
+  });
+});
+
+// Global error handler
+app.use(errorHandler);
+
+// ============================================================================
+// Server Startup
+// ============================================================================
+
+async function startServer(): Promise<void> {
+  console.log('🚀 Starting Summary AI Backend...');
+  logConfig();
+
+  // Test Supabase connection
+  const dbConnected = await testConnection();
+  if (!dbConnected) {
+    console.error('❌ Failed to connect to Supabase. Check your configuration.');
+    process.exit(1);
+  }
+
+  // Start listening
+  app.listen(config.PORT, () => {
+    console.log(`✅ Server running on port ${config.PORT}`);
+    console.log(`📍 API available at http://localhost:${config.PORT}/${config.API_VERSION}`);
+  });
+}
+
+// Handle uncaught errors
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  process.exit(1);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received. Shutting down gracefully...');
+  process.exit(0);
+});
+
+// Start the server
+startServer();
