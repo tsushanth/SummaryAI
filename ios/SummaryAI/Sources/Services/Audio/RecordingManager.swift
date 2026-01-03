@@ -23,6 +23,21 @@ enum RecordingState: Equatable {
     var canStop: Bool {
         self == .recording || self == .paused
     }
+
+    static func == (lhs: RecordingState, rhs: RecordingState) -> Bool {
+        switch (lhs, rhs) {
+        case (.idle, .idle),
+             (.preparingToRecord, .preparingToRecord),
+             (.recording, .recording),
+             (.paused, .paused),
+             (.stopping, .stopping):
+            return true
+        case (.failed, .failed):
+            return true
+        default:
+            return false
+        }
+    }
 }
 
 // MARK: - Recording Error

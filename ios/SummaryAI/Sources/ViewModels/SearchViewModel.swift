@@ -89,7 +89,7 @@ final class SearchViewModel: ObservableObject {
 
     // MARK: - Initialization
 
-    init(apiClient: SummaryAIAPIClient = SummaryAIAPIClient()) {
+    init(apiClient: SummaryAIAPIClient) {
         self.apiClient = apiClient
         loadRecentSearches()
         setupSearchDebounce()

@@ -12,7 +12,7 @@ struct APIConfiguration {
     }
 
     static let production = APIConfiguration(
-        baseURL: URL(string: "https://api.summaryai.app")!,
+        baseURL: URL(string: "https://summary-ai-backend-917362189743.us-central1.run.app")!,
         apiVersion: "v1"
     )
 
@@ -23,6 +23,12 @@ struct APIConfiguration {
 
     static let development = APIConfiguration(
         baseURL: URL(string: "http://localhost:8080")!,
+        apiVersion: "v1"
+    )
+
+    /// Supabase configuration - uses Supabase Edge Functions or REST API
+    static let supabase = APIConfiguration(
+        baseURL: URL(string: "https://mlofjzlmncgnhxbiuemf.supabase.co/rest")!,
         apiVersion: "v1"
     )
 }
@@ -72,7 +78,7 @@ final class SummaryAIAPIClient: NSObject, ObservableObject {
 
     // MARK: - Initialization
 
-    init(configuration: APIConfiguration = .development) {
+    init(configuration: APIConfiguration = .production) {
         self.configuration = configuration
 
         // Configure session for uploads
@@ -268,6 +274,86 @@ final class SummaryAIAPIClient: NSObject, ObservableObject {
         return completeResponse.recording
     }
 
+    /// Import a file (audio or PDF)
+    /// - Parameters:
+    ///   - fileURL: Local file URL
+    ///   - progressHandler: Optional progress callback
+    /// - Returns: The created recording
+    func importFile(
+        fileURL: URL,
+        progressHandler: ((UploadProgress) -> Void)? = nil
+    ) async throws -> Recording {
+        // Start accessing the security-scoped resource
+        guard fileURL.startAccessingSecurityScopedResource() else {
+            throw APIError.fileError("Unable to access file")
+        }
+        defer { fileURL.stopAccessingSecurityScopedResource() }
+
+        // Get file info
+        let fileAttributes = try FileManager.default.attributesOfItem(atPath: fileURL.path)
+        let fileSize = fileAttributes[.size] as? Int64 ?? 0
+        let fileName = fileURL.deletingPathExtension().lastPathComponent
+        let fileExtension = fileURL.pathExtension.lowercased()
+
+        // Determine content type and recording type
+        let contentType: String
+        let recordingType: String
+
+        switch fileExtension {
+        case "pdf":
+            contentType = "application/pdf"
+            recordingType = "imported"
+        case "m4a", "mp4":
+            contentType = "audio/mp4"
+            recordingType = "imported"
+        case "mp3":
+            contentType = "audio/mpeg"
+            recordingType = "imported"
+        case "wav":
+            contentType = "audio/wav"
+            recordingType = "imported"
+        default:
+            contentType = "audio/mp4"
+            recordingType = "imported"
+        }
+
+        print("[APIClient] Importing file '\(fileName)' (\(fileSize) bytes, \(contentType))")
+
+        // Step 1: Create recording with appropriate content type
+        let request = CreateRecordingRequest(
+            title: fileName,
+            durationSeconds: nil,
+            fileSizeBytes: fileSize,
+            contentType: contentType,
+            recordingType: recordingType
+        )
+
+        let createResponse: CreateRecordingResponse = try await post(
+            endpoint: "/api/recordings",
+            body: request,
+            responseType: CreateRecordingResponse.self
+        )
+
+        print("[APIClient] Recording created: \(createResponse.recording.id)")
+
+        // Step 2: Upload file to storage
+        try await uploadAudioFile(
+            fileURL: fileURL,
+            uploadInfo: createResponse.upload,
+            progressHandler: progressHandler
+        )
+
+        // Step 3: Signal upload complete
+        let completeResponse = try await completeUpload(
+            recordingId: createResponse.recording.id,
+            fileSize: fileSize
+        )
+
+        print("[APIClient] Import complete. Job ID: \(completeResponse.job.id)")
+
+        return completeResponse.recording
+    }
+
     /// Get list of recordings
     /// - Parameters:
     ///   - page: Page number (1-based)
@@ -330,6 +416,102 @@ final class SummaryAIAPIClient: NSObject, ObservableObject {
         try await delete(endpoint: "/api/recordings/\(id)")
     }
 
+    // MARK: - User Account API
+
+    /// Delete the current user's account and all associated data
+    func deleteAccount() async throws {
+        try await delete(endpoint: "/api/users/account")
+    }
+
+    // MARK: - Todos API
+
+    /// Get list of todos
+    /// - Parameters:
+    ///   - page: Page number (1-based)
+    ///   - perPage: Items per page
+    ///   - completed: Filter by completion status (nil for all)
+    /// - Returns: List todos response
+    func getTodos(
+        page: Int = 1,
+        perPage: Int = 50,
+        completed: Bool? = nil
+    ) async throws -> ListTodosResponse {
+        var queryItems = [
+            URLQueryItem(name: "page", value: String(page)),
+            URLQueryItem(name: "per_page", value: String(perPage)),
+            URLQueryItem(name: "sort", value: "created_at"),
+            URLQueryItem(name: "order", value: "desc")
+        ]
+
+        if let completed = completed {
+            queryItems.append(URLQueryItem(name: "completed", value: completed ? "true" : "false"))
+        } else {
+            queryItems.append(URLQueryItem(name: "completed", value: "all"))
+        }
+
+        return try await get(
+            endpoint: "/api/todos",
+            queryItems: queryItems,
+            responseType: ListTodosResponse.self
+        )
+    }
+
+    /// Create a new todo
+    /// - Parameter request: Todo creation request
+    /// - Returns: Created todo
+    func createTodo(request: CreateTodoRequest) async throws -> TodoItem {
+        let response: TodoResponse = try await post(
+            endpoint: "/api/todos",
+            body: request,
+            responseType: TodoResponse.self
+        )
+        return response.todo
+    }
+
+    /// Create todos from transcribed text
+    /// - Parameter request: Text to parse into todos
+    /// - Returns: Created todos
+    func createTodosFromText(request: CreateTodosFromTextRequest) async throws -> [TodoItem] {
+        let response: TodosResponse = try await post(
+            endpoint: "/api/todos/from-text",
+            body: request,
+            responseType: TodosResponse.self
+        )
+        return response.todos
+    }
+
+    /// Toggle todo completion status
+    /// - Parameter id: Todo ID
+    /// - Returns: Updated todo
+    func toggleTodo(id: String) async throws -> TodoItem {
+        let response: TodoResponse = try await post(
+            endpoint: "/api/todos/\(id)/toggle",
+            body: EmptyRequest(),
+            responseType: TodoResponse.self
+        )
+        return response.todo
+    }
+
+    /// Update a todo
+    /// - Parameters:
+    ///   - id: Todo ID
+    ///   - request: Update request
+    /// - Returns: Updated todo
+    func updateTodo(id: String, request: UpdateTodoRequest) async throws -> TodoItem {
+        let response: TodoResponse = try await patchWithResponse(
+            endpoint: "/api/todos/\(id)",
+            body: request,
+            responseType: TodoResponse.self
+        )
+        return response.todo
+    }
+
+    /// Delete a todo
+    /// - Parameter id: Todo ID
+    func deleteTodo(id: String) async throws {
+        try await delete(endpoint: "/api/todos/\(id)")
+    }
+
     // MARK: - HTTP Methods
 
     func get<T: Decodable>(
@@ -363,12 +545,49 @@ final class SummaryAIAPIClient: NSObject, ObservableObject {
         return try await performRequest(request, responseType: responseType)
     }
 
-    private func delete(endpoint: String) async throws {
+    func delete(endpoint: String) async throws {
         let url = try buildURL(endpoint: endpoint)
         var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
 
         let _: EmptyResponse = try await performRequest(request, responseType: EmptyResponse.self, allowEmpty: true)
+    }
+
+    func patch<Body: Encodable>(
+        endpoint: String,
+        body: Body
+    ) async throws {
+        let url = try buildURL(endpoint: endpoint)
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        do {
+            request.httpBody = try encoder.encode(body)
+        } catch {
+            throw APIError.encodingFailed(error)
+        }
+
+        let _: EmptyResponse = try await performRequest(request, responseType: EmptyResponse.self, allowEmpty: true)
+    }
+
+    func patchWithResponse<Body: Encodable, Response: Decodable>(
+        endpoint: String,
+        body: Body,
+        responseType: Response.Type
+    ) async throws -> Response {
+        let url = try buildURL(endpoint: endpoint)
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        do {
+            request.httpBody = try encoder.encode(body)
+        } catch {
+            throw APIError.encodingFailed(error)
+        }
+
+        return try await performRequest(request, responseType: responseType)
     }
 
     // MARK: - Request Execution
@@ -380,10 +599,15 @@ final class SummaryAIAPIClient: NSObject, ObservableObject {
     ) async throws -> T {
         var request = request
 
+        // Debug: Log the request URL
+        print("[APIClient] Making request to: \(request.url?.absoluteString ?? "nil")")
+
         // Add auth header
         if let token = await accessTokenProvider?() {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            print("[APIClient] Token available, length: \(token.count)")
         } else {
+            print("[APIClient] No access token available")
             throw APIError.noAccessToken
         }
 
@@ -391,7 +615,9 @@ final class SummaryAIAPIClient: NSObject, ObservableObject {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
         do {
+            print("[APIClient] Sending request...")
             let (data, response) = try await session.data(for: request)
+            print("[APIClient] Response received")
 
             guard let httpResponse = response as? HTTPURLResponse else {
                 throw APIError.networkError(NSError(domain: "API", code: -1, userInfo: nil))
@@ -431,8 +657,10 @@ final class SummaryAIAPIClient: NSObject, ObservableObject {
             }
 
         } catch let error as APIError {
+            print("[APIClient] API Error: \(error)")
             throw error
         } catch {
+            print("[APIClient] Network Error: \(error)")
             throw APIError.networkError(error)
         }
     }
@@ -541,6 +769,7 @@ private class UploadDelegate: NSObject, URLSessionTaskDelegate, URLSessionDataDe
     }
 }
 
-// MARK: - Empty Response
+/// MARK: - Empty Types
 
 private struct EmptyResponse: Decodable {}
+private struct EmptyRequest: Encodable {}

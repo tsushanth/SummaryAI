@@ -117,12 +117,12 @@ router.post(
     // Answer the question using LLM
     let result;
     try {
-      if (config.ANTHROPIC_API_KEY) {
+      if (config.OPENAI_API_KEY) {
         // Use real LLM
         result = await answerQuestion(body.question, segments, { previousQA });
       } else {
         // Use mock for development
-        console.warn('ANTHROPIC_API_KEY not set, using mock Q&A');
+        console.warn('OPENAI_API_KEY not set, using mock Q&A');
         result = await answerQuestionMock(body.question, segments);
       }
     } catch (error) {
@@ -144,8 +144,8 @@ router.post(
         answer: result.answer,
         citations: result.citations,
         confidence: result.confidence,
-        llm_provider: config.ANTHROPIC_API_KEY ? 'anthropic' : 'mock',
-        llm_model: config.ANTHROPIC_API_KEY ? config.ANTHROPIC_MODEL : 'mock',
+        llm_provider: config.OPENAI_API_KEY ? 'openai' : 'mock',
+        llm_model: config.OPENAI_API_KEY ? config.OPENAI_MODEL : 'mock',
         prompt_tokens: result.usage.input_tokens,
         completion_tokens: result.usage.output_tokens,
         processing_duration_ms: Date.now() - startTime,

@@ -1,12 +1,27 @@
 import SwiftUI
 
-// MARK: - Search View
+// MARK: - Search View Wrapper
+
+/// Wrapper to inject the API client from environment into the view model
+struct SearchView: View {
+    @EnvironmentObject var apiClient: SummaryAIAPIClient
+
+    var body: some View {
+        SearchContentView(apiClient: apiClient)
+    }
+}
+
+// MARK: - Search Content View
 
 /// Dedicated search view for finding content across recordings
-struct SearchView: View {
-    @StateObject private var viewModel = SearchViewModel()
+struct SearchContentView: View {
+    @StateObject private var viewModel: SearchViewModel
     @State private var isSearchFieldFocused = false
     @Environment(\.dismiss) private var dismiss
+
+    init(apiClient: SummaryAIAPIClient) {
+        _viewModel = StateObject(wrappedValue: SearchViewModel(apiClient: apiClient))
+    }
 
     var body: some View {
         NavigationStack {
@@ -356,6 +371,7 @@ extension View {
 struct SearchView_Previews: PreviewProvider {
     static var previews: some View {
         SearchView()
+            .environmentObject(SummaryAIAPIClient())
     }
 }
 #endif

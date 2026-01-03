@@ -1,6 +1,7 @@
 import Foundation
 import AuthenticationServices
 import CryptoKit
+import GoogleSignIn
 
 // MARK: - Auth State
 
@@ -97,6 +98,10 @@ final class AuthService: NSObject, ObservableObject {
     private let supabaseURL: String
     private let supabaseAnonKey: String
 
+    /// Google Sign-In configuration
+    private let googleClientID: String
+    private let googleServerClientID: String  // Web Client ID for Supabase
+
     // MARK: - Session Storage Keys
 
     private let accessTokenKey = "supabase_access_token"
@@ -105,12 +110,22 @@ final class AuthService: NSObject, ObservableObject {
 
     // MARK: - Initialization
 
+    // Default configuration values
+    private static let defaultSupabaseURL = "https://mlofjzlmncgnhxbiuemf.supabase.co"
+    private static let defaultSupabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sb2ZqemxtbmNnbmh4Yml1ZW1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyOTU1NjAsImV4cCI6MjA4Mjg3MTU2MH0.fUxgMcu1BNrsYneN5vSMFWxsv-rWIygCx-xn-Vmr0Ec"
+    private static let defaultGoogleClientID = "655434901651-fnqoakiv9cnmp12julsrh8iim63oppl9.apps.googleusercontent.com"
+    private static let defaultGoogleServerClientID = "655434901651-1pu8uh26nq64dj1hujuoipfm84537ism.apps.googleusercontent.com"  // Web Client ID
+
     init(
-        supabaseURL: String = ProcessInfo.processInfo.environment["SUPABASE_URL"] ?? "",
-        supabaseAnonKey: String = ProcessInfo.processInfo.environment["SUPABASE_ANON_KEY"] ?? ""
+        supabaseURL: String = AuthService.defaultSupabaseURL,
+        supabaseAnonKey: String = AuthService.defaultSupabaseAnonKey,
+        googleClientID: String = AuthService.defaultGoogleClientID,
+        googleServerClientID: String = AuthService.defaultGoogleServerClientID
     ) {
         self.supabaseURL = supabaseURL
         self.supabaseAnonKey = supabaseAnonKey
+        self.googleClientID = googleClientID
+        self.googleServerClientID = googleServerClientID
         super.init()
 
         // Check for existing session
@@ -178,12 +193,20 @@ final class AuthService: NSObject, ObservableObject {
 
     /// Get current access token for API calls
     func getAccessToken() async -> String? {
+        let storedToken = getStoredAccessToken()
+        print("getAccessToken called - Has stored token: \(storedToken != nil)")
+
         // Check if token needs refresh
-        if let token = getStoredAccessToken(), !isTokenValid(token) {
-            try? await refreshSession()
+        if let token = storedToken {
+            if !isTokenValid(token) {
+                print("Token expired, attempting refresh...")
+                try? await refreshSession()
+            }
+            return getStoredAccessToken()
         }
 
-        return getStoredAccessToken()
+        print("No access token available")
+        return nil
     }
 
     // MARK: - Sign In with Apple
@@ -273,6 +296,98 @@ final class AuthService: NSObject, ObservableObject {
 
         let authResponse = try JSONDecoder().decode(AuthResponse.self, from: data)
         handleAuthResponse(authResponse, provider: .apple)
+    }
+
+    // MARK: - Sign In with Google
+
+    /// Start Sign in with Google flow
+    func signInWithGoogle() async throws {
+        isLoading = true
+        state = .authenticating
+
+        defer { isLoading = false }
+
+        // Get the presenting view controller
+        guard let windowScene = await UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let rootViewController = await windowScene.windows.first?.rootViewController else {
+            state = .unauthenticated
+            throw AuthError.unknown
+        }
+
+        // Configure Google Sign-In with iOS client ID and server (web) client ID
+        // The serverClientID ensures the ID token has the correct audience for Supabase
+        let config = GIDConfiguration(
+            clientID: googleClientID,
+            serverClientID: googleServerClientID
+        )
+        GIDSignIn.sharedInstance.configuration = config
+
+        do {
+            let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController)
+
+            guard let idToken = result.user.idToken?.tokenString else {
+                state = .unauthenticated
+                throw AuthError.invalidCredentials
+            }
+
+            // Exchange Google token with Supabase
+            try await exchangeGoogleToken(idToken: idToken, user: result.user)
+
+        } catch let error as GIDSignInError {
+            state = .unauthenticated
+            if error.code == .canceled {
+                throw AuthError.cancelled
+            }
+            throw AuthError.networkError(error)
+        } catch {
+            state = .unauthenticated
+            throw error
+        }
+    }
+
+    private func exchangeGoogleToken(idToken: String, user: GIDGoogleUser) async throws {
+        let url = URL(string: "\(supabaseURL)/auth/v1/token?grant_type=id_token")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+
+        var body: [String: Any] = [
+            "provider": "google",
+            "id_token": idToken
+        ]
+
+        // Include user info from Google
+        let fullName = user.profile?.name ?? ""
+        if !fullName.isEmpty {
+            body["options"] = ["data": ["full_name": fullName, "avatar_url": user.profile?.imageURL(withDimension: 200)?.absoluteString ?? ""]]
+        }
+
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            state = .unauthenticated
+            throw AuthError.networkError(NSError(domain: "Auth", code: -1))
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            state = .unauthenticated
+            let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
+            throw AuthError.serverError(errorMessage)
+        }
+
+        do {
+            let authResponse = try JSONDecoder().decode(AuthResponse.self, from: data)
+            handleAuthResponse(authResponse, provider: .google)
+        } catch {
+            // Log the actual response for debugging
+            let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode response"
+            print("Google Sign-In response decoding error: \(error)")
+            print("Response data: \(responseString)")
+            throw AuthError.serverError("Failed to parse auth response: \(error.localizedDescription)")
+        }
     }
 
     // MARK: - Sign In with Email
@@ -365,16 +480,52 @@ final class AuthService: NSObject, ObservableObject {
         state = .unauthenticated
     }
 
+    // MARK: - Delete Account
+
+    /// Delete the current user's account and all associated data
+    func deleteAccount() async throws {
+        guard let accessToken = getStoredAccessToken() else {
+            throw AuthError.invalidCredentials
+        }
+
+        isLoading = true
+        defer { isLoading = false }
+
+        // Call the backend to delete the user account
+        // This will delete all user data (recordings, meetings, etc.) and then the auth user
+        let url = URL(string: "\(supabaseURL)/auth/v1/user")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        request.setValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw AuthError.networkError(NSError(domain: "Auth", code: -1))
+        }
+
+        // Supabase returns 200 on successful deletion
+        guard httpResponse.statusCode == 200 || httpResponse.statusCode == 204 else {
+            let errorMessage = String(data: data, encoding: .utf8) ?? "Failed to delete account"
+            throw AuthError.serverError(errorMessage)
+        }
+
+        // Clear local session
+        clearSession()
+        state = .unauthenticated
+    }
+
     // MARK: - Session Storage
 
     private func handleAuthResponse(_ response: AuthResponse, provider: AuthProvider) {
         let user = User(
             id: response.user.id,
-            email: response.user.email,
+            email: response.user.emailValue,
             fullName: response.user.userMetadata?.fullName,
             avatarURL: response.user.userMetadata?.avatarURL,
             provider: provider,
-            createdAt: response.user.createdAt
+            createdAt: response.user.createdAtDate
         )
 
         // Store tokens
@@ -392,6 +543,8 @@ final class AuthService: NSObject, ObservableObject {
         // In production, use Keychain instead of UserDefaults for tokens
         UserDefaults.standard.set(accessToken, forKey: accessTokenKey)
         UserDefaults.standard.set(refreshToken, forKey: refreshTokenKey)
+        UserDefaults.standard.synchronize()
+        print("Session stored - Access token length: \(accessToken.count), Refresh token length: \(refreshToken.count)")
     }
 
     private func getStoredAccessToken() -> String? {
@@ -491,11 +644,17 @@ private struct AuthResponse: Decodable {
     let accessToken: String
     let refreshToken: String
     let user: AuthUser
+    let tokenType: String?
+    let expiresIn: Int?
+    let expiresAt: Int?
 
     enum CodingKeys: String, CodingKey {
         case accessToken = "access_token"
         case refreshToken = "refresh_token"
         case user
+        case tokenType = "token_type"
+        case expiresIn = "expires_in"
+        case expiresAt = "expires_at"
     }
 }
 
@@ -511,15 +670,32 @@ private struct TokenResponse: Decodable {
 
 private struct AuthUser: Decodable {
     let id: String
-    let email: String
+    let email: String?
     let userMetadata: UserMetadata?
-    let createdAt: Date
+    let createdAt: String  // Keep as String to avoid date parsing issues
 
     enum CodingKeys: String, CodingKey {
         case id
         case email
         case userMetadata = "user_metadata"
         case createdAt = "created_at"
+    }
+
+    var emailValue: String {
+        email ?? ""
+    }
+
+    var createdAtDate: Date {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = formatter.date(from: createdAt) {
+            return date
+        }
+        formatter.formatOptions = [.withInternetDateTime]
+        if let date = formatter.date(from: createdAt) {
+            return date
+        }
+        return Date()
     }
 }
 
