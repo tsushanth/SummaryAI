@@ -38,9 +38,10 @@ router.use('/:id/questions', questionsRouter);
 
 const createRecordingSchema = z.object({
   title: z.string().min(1).max(255),
-  duration_seconds: z.number().int().positive().max(config.MAX_RECORDING_DURATION_SECONDS),
+  duration_seconds: z.number().int().nonnegative().max(config.MAX_RECORDING_DURATION_SECONDS).optional(),
   file_size_bytes: z.number().int().positive().max(config.MAX_AUDIO_FILE_SIZE_MB * 1024 * 1024),
   content_type: z.string().optional().default('audio/mp4'),
+  recording_type: z.enum(['general', 'meeting', 'lecture', 'interview', 'voice_memo', 'imported']).optional().default('general'),
 });
 
 const completeUploadSchema = z.object({
@@ -69,9 +70,11 @@ router.post(
     // Validate request body
     const body = createRecordingSchema.parse(req.body) as CreateRecordingRequest;
 
-    // Generate recording ID and file path
+    // Generate recording ID and file path based on content type
     const recordingId = uuidv4();
-    const filePath = `${userId}/${recordingId}.m4a`;
+    const isPdf = body.content_type === 'application/pdf';
+    const fileExtension = isPdf ? 'pdf' : 'm4a';
+    const filePath = `${userId}/${recordingId}.${fileExtension}`;
 
     // Create recording in database
     const { data: recording, error: insertError } = await supabaseAdmin
@@ -80,7 +83,7 @@ router.post(
         id: recordingId,
         user_id: userId,
         title: body.title,
-        duration_seconds: body.duration_seconds,
+        duration_seconds: body.duration_seconds || null,
         file_size_bytes: body.file_size_bytes,
         file_path: filePath,
         status: 'uploading',
@@ -92,6 +95,8 @@ router.post(
         tags: [],
         is_favorite: false,
         processed_at: null,
+        recording_type: body.recording_type || (isPdf ? 'imported' : 'general'),
+        content_type: body.content_type || 'audio/mp4',
       })
       .select()
       .single();
@@ -164,11 +169,15 @@ router.post(
       );
     }
 
+    // Determine file extension from file_path
+    const fileExtension = recording.file_path.split('.').pop() || 'm4a';
+    const fileName = `${recordingId}.${fileExtension}`;
+
     // Verify file exists in storage
     const { data: files, error: listError } = await supabaseAdmin.storage
       .from(config.STORAGE_BUCKET_AUDIO)
       .list(userId, {
-        search: `${recordingId}.m4a`,
+        search: fileName,
       });
 
     if (listError) {
@@ -176,10 +185,10 @@ router.post(
       throw Errors.internal('Failed to verify upload');
     }
 
-    const uploadedFile = files?.find((f) => f.name === `${recordingId}.m4a`);
+    const uploadedFile = files?.find((f) => f.name === fileName);
 
     if (!uploadedFile) {
-      throw Errors.unprocessable('Audio file not found in storage. Please upload the file first.');
+      throw Errors.unprocessable('File not found in storage. Please upload the file first.');
     }
 
     // Optionally verify file size matches

@@ -53,7 +53,7 @@ final class RecordingsListViewModel: ObservableObject {
 
     // MARK: - Initialization
 
-    init(apiClient: SummaryAIAPIClient = SummaryAIAPIClient()) {
+    init(apiClient: SummaryAIAPIClient) {
         self.apiClient = apiClient
     }
 
@@ -102,6 +102,10 @@ final class RecordingsListViewModel: ObservableObject {
             state = recordings.isEmpty ? .empty : .loaded
 
         } catch {
+            // Don't show error for auth-related issues during sign out
+            if let apiError = error as? APIError, apiError.requiresReauth {
+                return
+            }
             // Don't change state on refresh error, just show error
             showError(error.localizedDescription)
         }
@@ -152,6 +156,10 @@ final class RecordingsListViewModel: ObservableObject {
             }
 
         } catch {
+            // Don't show error for auth-related issues during sign out
+            if let apiError = error as? APIError, apiError.requiresReauth {
+                return
+            }
             showError("Failed to delete recording: \(error.localizedDescription)")
         }
     }
@@ -218,6 +226,20 @@ final class RecordingsListViewModel: ObservableObject {
     // MARK: - Error Handling
 
     private func handleError(_ error: Error) {
+        // Don't show error alert for noAccessToken - this happens during sign out
+        if let apiError = error as? APIError {
+            if case .noAccessToken = apiError {
+                // Silently ignore - user is signing out
+                state = .idle
+                return
+            }
+            if case .unauthorized = apiError {
+                // User session expired, will be handled by auth flow
+                state = .idle
+                return
+            }
+        }
+
         let message: String
         if let apiError = error as? APIError {
             message = apiError.userMessage
@@ -259,16 +281,6 @@ final class RecordingsListViewModel: ObservableObject {
 // MARK: - Recording Status Extension
 
 extension RecordingStatus {
-    /// Whether this status indicates the recording is still being processed
-    var isProcessing: Bool {
-        switch self {
-        case .uploading, .uploaded, .transcribing, .summarizing:
-            return true
-        case .pending, .transcribed, .completed, .failed:
-            return false
-        }
-    }
-
     /// User-friendly display text
     var displayText: String {
         switch self {

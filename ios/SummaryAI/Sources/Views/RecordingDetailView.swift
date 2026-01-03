@@ -1,14 +1,29 @@
 import SwiftUI
 
-// MARK: - Recording Detail View
+// MARK: - Recording Detail View Wrapper
+
+/// Wrapper to inject the API client from environment into the view model
+struct RecordingDetailView: View {
+    @EnvironmentObject var apiClient: SummaryAIAPIClient
+    let recordingId: String
+
+    var body: some View {
+        RecordingDetailContentView(recordingId: recordingId, apiClient: apiClient)
+    }
+}
+
+// MARK: - Recording Detail Content View
 
 /// Detail view for a single recording showing summary, transcript, and Q&A
-struct RecordingDetailView: View {
+struct RecordingDetailContentView: View {
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel: RecordingDetailViewModel
     @State private var selectedTab: DetailTab = .summary
+    @State private var showShareSheet = false
+    @State private var showDeleteConfirmation = false
 
-    init(recordingId: String) {
-        _viewModel = StateObject(wrappedValue: RecordingDetailViewModel(recordingId: recordingId))
+    init(recordingId: String, apiClient: SummaryAIAPIClient) {
+        _viewModel = StateObject(wrappedValue: RecordingDetailViewModel(recordingId: recordingId, apiClient: apiClient))
     }
 
     var body: some View {
@@ -25,7 +40,52 @@ struct RecordingDetailView: View {
             }
         }
         .navigationTitle(viewModel.recording?.title ?? "Recording")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                HStack(spacing: 16) {
+                    // Favorite button
+                    Button {
+                        // Toggle favorite
+                    } label: {
+                        Image(systemName: viewModel.recording?.isFavorite == true ? "heart.fill" : "heart")
+                            .foregroundColor(viewModel.recording?.isFavorite == true ? .red : .primary)
+                    }
+
+                    // Share button
+                    Button {
+                        showShareSheet = true
+                    } label: {
+                        Image(systemName: "square.and.arrow.up")
+                    }
+
+                    // More options
+                    Menu {
+                        Button {
+                            // Rename
+                        } label: {
+                            Label("Rename", systemImage: "pencil")
+                        }
+
+                        Button {
+                            // Move to folder
+                        } label: {
+                            Label("Move to Folder", systemImage: "folder")
+                        }
+
+                        Divider()
+
+                        Button(role: .destructive) {
+                            showDeleteConfirmation = true
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
+                }
+            }
+        }
         .task {
             await viewModel.loadRecording()
         }
@@ -41,6 +101,36 @@ struct RecordingDetailView: View {
             }
         } message: {
             Text(viewModel.errorMessage ?? "An error occurred")
+        }
+        .sheet(isPresented: $showShareSheet) {
+            if let recording = viewModel.recording {
+                ShareExportView(
+                    recording: recording,
+                    summary: viewModel.summary,
+                    transcript: viewModel.transcript
+                ) {
+                    showShareSheet = false
+                }
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
+            }
+        }
+        .confirmationDialog(
+            "Delete Recording?",
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                Task {
+                    let success = await viewModel.deleteRecording()
+                    if success {
+                        dismiss()
+                    }
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will permanently delete this recording and all associated data. This action cannot be undone.")
         }
     }
 
@@ -86,6 +176,28 @@ struct RecordingDetailView: View {
                     .tag(DetailTab.qa)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
+
+            // Audio player at bottom (hide for PDFs/imported documents without audio)
+            if let recording = viewModel.recording,
+               let duration = recording.durationSeconds,
+               duration > 0,
+               recording.recordingType != .imported,
+               !viewModel.isProcessing {
+                AudioPlayerView(
+                    audioURL: viewModel.audioURL,
+                    duration: TimeInterval(duration)
+                ) { timestamp in
+                    // Seek to timestamp in transcript
+                    if let transcript = viewModel.transcript {
+                        if let segment = transcript.segments.first(where: { $0.contains(time: timestamp) }) {
+                            viewModel.selectSegment(segment)
+                            selectedTab = .transcript
+                        }
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 8)
+            }
         }
     }
 
@@ -146,9 +258,20 @@ struct RecordingDetailView: View {
         VStack(alignment: .leading, spacing: 8) {
             if let recording = viewModel.recording {
                 HStack(spacing: 16) {
-                    // Duration
-                    if let duration = viewModel.formattedDuration {
+                    // Show document icon for PDFs, duration for audio
+                    if recording.recordingType == .imported {
+                        Label("Document", systemImage: "doc.fill")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    } else if let duration = viewModel.formattedDuration {
                         Label(duration, systemImage: "clock")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+
+                    // Word count if available
+                    if let wordCount = recording.wordCount, wordCount > 0 {
+                        Label("\(wordCount) words", systemImage: "text.word.spacing")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -325,7 +448,7 @@ struct RecordingDetailView: View {
                             item: currentAnswer,
                             isLatest: true,
                             onCitationTap: { citation in
-                                jumpToTranscriptSegment(at: citation.startTime)
+                                jumpToTranscriptSegment(at: citation.timestamp)
                             }
                         )
                         .id("current")
@@ -337,7 +460,7 @@ struct RecordingDetailView: View {
                             item: item,
                             isLatest: false,
                             onCitationTap: { citation in
-                                jumpToTranscriptSegment(at: citation.startTime)
+                                jumpToTranscriptSegment(at: citation.timestamp)
                             }
                         )
                         .id(item.id)
@@ -714,6 +837,249 @@ struct FlowLayout: Layout {
     }
 }
 
+// MARK: - Audio Player View
+
+/// Full-featured audio player with scrubber and speed control
+struct AudioPlayerView: View {
+    let audioURL: URL?
+    let duration: TimeInterval
+    let onSeek: ((TimeInterval) -> Void)?
+
+    @State private var isPlaying = false
+    @State private var currentTime: TimeInterval = 0
+    @State private var playbackSpeed: Float = 1.0
+
+    init(audioURL: URL?, duration: TimeInterval, onSeek: ((TimeInterval) -> Void)? = nil) {
+        self.audioURL = audioURL
+        self.duration = duration
+        self.onSeek = onSeek
+    }
+
+    var body: some View {
+        VStack(spacing: 12) {
+            // Progress slider
+            VStack(spacing: 4) {
+                Slider(value: $currentTime, in: 0...max(duration, 1)) { editing in
+                    if !editing {
+                        onSeek?(currentTime)
+                    }
+                }
+                .tint(.blue)
+
+                // Time labels
+                HStack {
+                    Text(formatTime(currentTime))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .monospacedDigit()
+
+                    Spacer()
+
+                    Text(formatTime(duration))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .monospacedDigit()
+                }
+            }
+
+            // Controls
+            HStack(spacing: 24) {
+                // Playback speed
+                Menu {
+                    Button("0.5x") { playbackSpeed = 0.5 }
+                    Button("0.75x") { playbackSpeed = 0.75 }
+                    Button("1x") { playbackSpeed = 1.0 }
+                    Button("1.25x") { playbackSpeed = 1.25 }
+                    Button("1.5x") { playbackSpeed = 1.5 }
+                    Button("2x") { playbackSpeed = 2.0 }
+                } label: {
+                    Text(String(format: "%.2gx", playbackSpeed))
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.gray.opacity(0.15))
+                        .cornerRadius(4)
+                }
+
+                Spacer()
+
+                // Skip backward
+                Button {
+                    currentTime = max(0, currentTime - 15)
+                    onSeek?(currentTime)
+                } label: {
+                    Image(systemName: "gobackward.15")
+                        .font(.title2)
+                        .foregroundColor(.primary)
+                }
+
+                // Play/Pause
+                Button {
+                    isPlaying.toggle()
+                } label: {
+                    ZStack {
+                        Circle()
+                            .fill(Color.blue)
+                            .frame(width: 56, height: 56)
+
+                        Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                            .font(.title2)
+                            .foregroundColor(.white)
+                            .offset(x: isPlaying ? 0 : 2)
+                    }
+                }
+
+                // Skip forward
+                Button {
+                    currentTime = min(duration, currentTime + 15)
+                    onSeek?(currentTime)
+                } label: {
+                    Image(systemName: "goforward.15")
+                        .font(.title2)
+                        .foregroundColor(.primary)
+                }
+
+                Spacer()
+
+                // Download button
+                Button {
+                    // Handle download
+                } label: {
+                    Image(systemName: "square.and.arrow.down")
+                        .font(.title3)
+                        .foregroundColor(.primary)
+                }
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(16)
+    }
+
+    private func formatTime(_ time: TimeInterval) -> String {
+        let minutes = Int(time) / 60
+        let seconds = Int(time) % 60
+        return String(format: "%d:%02d", minutes, seconds)
+    }
+}
+
+// MARK: - Share Export View
+
+/// Bottom sheet for sharing/exporting recording content
+struct ShareExportView: View {
+    let recording: Recording
+    let summary: RecordingSummary?
+    let transcript: Transcript?
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Text("Share or Export")
+                    .font(.headline)
+
+                Spacer()
+
+                Button {
+                    onDismiss()
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title2)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding()
+
+            Divider()
+
+            // Export options
+            ScrollView {
+                VStack(spacing: 12) {
+                    ShareOptionRow(icon: "doc.fill", title: "Share Summary as PDF") {
+                        // Export summary as PDF
+                        onDismiss()
+                    }
+                    .disabled(summary == nil)
+                    .opacity(summary == nil ? 0.5 : 1)
+
+                    ShareOptionRow(icon: "doc.text.fill", title: "Share Summary as Text") {
+                        // Export summary as text
+                        onDismiss()
+                    }
+                    .disabled(summary == nil)
+                    .opacity(summary == nil ? 0.5 : 1)
+
+                    ShareOptionRow(icon: "doc.fill", title: "Share Transcript as PDF") {
+                        // Export transcript as PDF
+                        onDismiss()
+                    }
+                    .disabled(transcript == nil)
+                    .opacity(transcript == nil ? 0.5 : 1)
+
+                    ShareOptionRow(icon: "doc.text.fill", title: "Share Transcript as Text") {
+                        // Export transcript as text
+                        onDismiss()
+                    }
+                    .disabled(transcript == nil)
+                    .opacity(transcript == nil ? 0.5 : 1)
+
+                    ShareOptionRow(icon: "waveform", title: "Share Audio") {
+                        // Share audio file
+                        onDismiss()
+                    }
+                }
+                .padding()
+            }
+
+            // Tip
+            HStack(spacing: 8) {
+                Image(systemName: "lightbulb.fill")
+                    .foregroundColor(.yellow)
+
+                Text("Share or export with just a tap!")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding()
+        }
+    }
+}
+
+// MARK: - Share Option Row
+
+struct ShareOptionRow: View {
+    let icon: String
+    let title: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 16) {
+                ZStack {
+                    Circle()
+                        .fill(Color.gray.opacity(0.1))
+                        .frame(width: 44, height: 44)
+
+                    Image(systemName: icon)
+                        .font(.system(size: 18))
+                        .foregroundColor(.primary)
+                }
+
+                Text(title)
+                    .font(.body)
+                    .foregroundColor(.primary)
+
+                Spacer()
+            }
+            .padding()
+            .background(Color(.secondarySystemBackground))
+            .cornerRadius(12)
+        }
+    }
+}
+
 // MARK: - Preview
 
 #if DEBUG
@@ -721,6 +1087,7 @@ struct RecordingDetailView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
             RecordingDetailView(recordingId: "preview-id")
+                .environmentObject(SummaryAIAPIClient())
         }
     }
 }

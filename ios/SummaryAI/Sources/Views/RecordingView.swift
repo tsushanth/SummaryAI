@@ -1,47 +1,82 @@
 import SwiftUI
 
-// MARK: - Recording View
+// MARK: - Recording View Wrapper
 
-/// Main recording view that allows users to record audio
+/// Wrapper to inject the API client from environment into the view model
 struct RecordingView: View {
-    @StateObject private var viewModel = RecordingViewModel()
-    @State private var showCancelConfirmation = false
+    @EnvironmentObject var apiClient: SummaryAIAPIClient
 
     var body: some View {
-        VStack(spacing: 32) {
-            Spacer()
+        RecordingContentView(apiClient: apiClient)
+    }
+}
 
-            // Title input
-            titleSection
+// MARK: - Recording Content View
 
-            // Duration display
-            durationSection
+/// Main recording view that allows users to record audio
+struct RecordingContentView: View {
+    @StateObject private var viewModel: RecordingViewModel
+    @State private var showCancelConfirmation = false
+    @State private var liveTranscribeEnabled = false
+    @State private var selectedLanguage = "Auto"
+    @State private var translateEnabled = false
 
-            // Audio level indicator
+    private let languages = ["Auto", "English", "Spanish", "French", "German", "Chinese", "Japanese", "Korean", "Portuguese", "Italian"]
+
+    init(apiClient: SummaryAIAPIClient) {
+        _viewModel = StateObject(wrappedValue: RecordingViewModel(apiClient: apiClient))
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Live transcribe header (when recording)
             if viewModel.state.isRecording {
-                audioLevelIndicator
+                liveTranscribeHeader
             }
 
-            // Upload progress
-            if viewModel.state.isUploading {
-                uploadProgressSection
+            VStack(spacing: 32) {
+                Spacer()
+
+                // Title input (only when not recording)
+                if !viewModel.state.isRecording {
+                    titleSection
+                }
+
+                // Duration display
+                durationSection
+
+                // Audio level indicator
+                if viewModel.state.isRecording {
+                    audioLevelIndicator
+                }
+
+                // Live transcript preview (when enabled)
+                if viewModel.state.isRecording && liveTranscribeEnabled {
+                    liveTranscriptPreview
+                }
+
+                // Upload progress
+                if viewModel.state.isUploading {
+                    uploadProgressSection
+                }
+
+                Spacer()
+
+                // Status text
+                Text(viewModel.statusText)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .padding(.bottom, 8)
+
+                // Control buttons
+                controlButtons
+
+                Spacer()
             }
-
-            Spacer()
-
-            // Status text
-            Text(viewModel.statusText)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .padding(.bottom, 8)
-
-            // Control buttons
-            controlButtons
-
-            Spacer()
+            .padding()
         }
-        .padding()
-        .navigationTitle("Record")
+        .navigationTitle(viewModel.state.isRecording ? "" : "Record")
+        .navigationBarTitleDisplayMode(.inline)
         .alert("Error", isPresented: $viewModel.showError) {
             if case .error = viewModel.state {
                 Button("Retry") {
@@ -71,6 +106,129 @@ struct RecordingView: View {
         .task {
             await viewModel.requestMicrophonePermission()
         }
+    }
+
+    // MARK: - Live Transcribe Header
+
+    private var liveTranscribeHeader: some View {
+        VStack(spacing: 12) {
+            // Toggle row
+            HStack {
+                Text("Live Transcribe")
+                    .font(.headline)
+
+                Spacer()
+
+                Toggle("", isOn: $liveTranscribeEnabled)
+                    .labelsHidden()
+                    .tint(.blue)
+            }
+            .padding(.horizontal)
+
+            // Options row (when enabled)
+            if liveTranscribeEnabled {
+                HStack(spacing: 12) {
+                    // Language picker
+                    Menu {
+                        ForEach(languages, id: \.self) { language in
+                            Button {
+                                selectedLanguage = language
+                            } label: {
+                                HStack {
+                                    Text(language)
+                                    if selectedLanguage == language {
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "globe")
+                            Text(selectedLanguage)
+                            Image(systemName: "chevron.down")
+                                .font(.caption)
+                        }
+                        .font(.subheadline)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(8)
+                    }
+
+                    // Translate option
+                    Menu {
+                        Button("Off") { translateEnabled = false }
+                        Button("English") { translateEnabled = true }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text("Translate")
+                            Image(systemName: "chevron.down")
+                                .font(.caption)
+                        }
+                        .font(.subheadline)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(8)
+                    }
+
+                    Spacer()
+
+                    // Font size button
+                    Button {
+                        // Toggle font size
+                    } label: {
+                        Text("Aa")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color(.secondarySystemBackground))
+                            .cornerRadius(8)
+                    }
+                }
+                .padding(.horizontal)
+            }
+
+            Divider()
+        }
+        .padding(.top, 8)
+        .background(Color(.systemBackground))
+    }
+
+    // MARK: - Live Transcript Preview
+
+    private var liveTranscriptPreview: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Simulated live transcript
+            Text("Listening...")
+                .font(.caption)
+                .foregroundColor(.blue)
+                .italic()
+
+            // Connection status (placeholder)
+            if !viewModel.state.isRecording {
+                HStack {
+                    Text("Connection error")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+
+                    Spacer()
+
+                    Button("Retry") {
+                        // Retry connection
+                    }
+                    .font(.subheadline)
+                    .foregroundColor(.blue)
+                }
+                .padding()
+                .background(Color(.secondarySystemBackground))
+                .cornerRadius(8)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal)
     }
 
     // MARK: - Title Section
@@ -106,37 +264,12 @@ struct RecordingView: View {
         }
     }
 
-    // MARK: - Audio Level Indicator
+    // MARK: - Audio Level Indicator (Live Waveform)
 
     private var audioLevelIndicator: some View {
-        HStack(spacing: 4) {
-            ForEach(0..<20, id: \.self) { index in
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(barColor(for: index))
-                    .frame(width: 8, height: barHeight(for: index))
-            }
-        }
-        .frame(height: 40)
-        .animation(.easeOut(duration: 0.1), value: viewModel.audioLevel)
-    }
-
-    private func barColor(for index: Int) -> Color {
-        let threshold = Float(index) / 20.0
-        if viewModel.audioLevel > threshold {
-            if index > 15 {
-                return .red
-            } else if index > 10 {
-                return .yellow
-            }
-            return .green
-        }
-        return .gray.opacity(0.3)
-    }
-
-    private func barHeight(for index: Int) -> CGFloat {
-        let threshold = Float(index) / 20.0
-        let active = viewModel.audioLevel > threshold
-        return active ? 40 : 20
+        LiveWaveformView(audioLevel: viewModel.audioLevel)
+            .frame(height: 100)
+            .padding(.horizontal, 20)
     }
 
     // MARK: - Upload Progress Section
@@ -266,6 +399,101 @@ private struct PulsingModifier: ViewModifier {
     }
 }
 
+// MARK: - Live Waveform View
+
+/// Animated waveform visualization for recording
+struct LiveWaveformView: View {
+    let audioLevel: Float
+
+    @State private var waveformData: [Float] = Array(repeating: 0.1, count: 50)
+    @State private var animationTimer: Timer?
+
+    var body: some View {
+        GeometryReader { geometry in
+            HStack(spacing: 3) {
+                ForEach(Array(waveformData.enumerated()), id: \.offset) { index, level in
+                    WaveformBar(level: CGFloat(level), maxHeight: geometry.size.height)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .onChange(of: audioLevel) { _, newLevel in
+            updateWaveform(with: newLevel)
+        }
+        .onAppear {
+            startAnimation()
+        }
+        .onDisappear {
+            stopAnimation()
+        }
+    }
+
+    private func updateWaveform(with level: Float) {
+        // Shift all values left and add new level at the end
+        var newData = waveformData
+        newData.removeFirst()
+        // Add some variation to make it look more natural
+        let variation = Float.random(in: -0.1...0.1)
+        let adjustedLevel = max(0.05, min(1.0, level + variation))
+        newData.append(adjustedLevel)
+
+        withAnimation(.linear(duration: 0.1)) {
+            waveformData = newData
+        }
+    }
+
+    private func startAnimation() {
+        // Add subtle animation even when not receiving audio
+        animationTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+            if audioLevel < 0.1 {
+                // Add subtle movement when quiet
+                let randomIndex = Int.random(in: 0..<waveformData.count)
+                var newData = waveformData
+                newData[randomIndex] = Float.random(in: 0.05...0.15)
+                withAnimation(.easeInOut(duration: 0.1)) {
+                    waveformData = newData
+                }
+            }
+        }
+    }
+
+    private func stopAnimation() {
+        animationTimer?.invalidate()
+        animationTimer = nil
+    }
+}
+
+// MARK: - Waveform Bar
+
+struct WaveformBar: View {
+    let level: CGFloat
+    let maxHeight: CGFloat
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: 2)
+            .fill(barGradient)
+            .frame(width: 4, height: barHeight)
+    }
+
+    private var barHeight: CGFloat {
+        let minHeight: CGFloat = 4
+        let height = max(minHeight, level * maxHeight)
+        return min(height, maxHeight)
+    }
+
+    private var barGradient: LinearGradient {
+        let colors: [Color]
+        if level > 0.7 {
+            colors = [.red, .orange]
+        } else if level > 0.4 {
+            colors = [.orange, .yellow]
+        } else {
+            colors = [.blue, .cyan]
+        }
+        return LinearGradient(colors: colors, startPoint: .bottom, endPoint: .top)
+    }
+}
+
 // MARK: - Preview
 
 #if DEBUG
@@ -273,6 +501,7 @@ struct RecordingView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
             RecordingView()
+                .environmentObject(SummaryAIAPIClient())
         }
     }
 }

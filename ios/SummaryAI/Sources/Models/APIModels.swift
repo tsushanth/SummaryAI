@@ -53,6 +53,8 @@ struct Recording: Codable, Identifiable, Hashable {
     var language: String?
     var tags: [String]?
     var isFavorite: Bool?
+    var folderId: String?
+    var recordingType: RecordingType?
     let createdAt: Date
     var updatedAt: Date?
     var processedAt: Date?
@@ -71,6 +73,8 @@ struct Recording: Codable, Identifiable, Hashable {
         case language
         case tags
         case isFavorite = "is_favorite"
+        case folderId = "folder_id"
+        case recordingType = "recording_type"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
         case processedAt = "processed_at"
@@ -85,20 +89,93 @@ struct Recording: Codable, Identifiable, Hashable {
     }
 }
 
+/// Recording type for categorization
+enum RecordingType: String, Codable, CaseIterable {
+    case general
+    case meeting
+    case lecture
+    case interview
+    case voiceMemo = "voice_memo"
+    case imported
+
+    var displayName: String {
+        switch self {
+        case .general: return "General"
+        case .meeting: return "Meeting"
+        case .lecture: return "Lecture"
+        case .interview: return "Interview"
+        case .voiceMemo: return "Voice Memo"
+        case .imported: return "Imported"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .general: return "waveform"
+        case .meeting: return "person.3.fill"
+        case .lecture: return "graduationcap.fill"
+        case .interview: return "person.2.fill"
+        case .voiceMemo: return "mic.fill"
+        case .imported: return "square.and.arrow.down.fill"
+        }
+    }
+}
+
+/// Folder model for organizing recordings
+struct Folder: Codable, Identifiable, Hashable {
+    let id: String
+    let userId: String
+    var name: String
+    var color: String?
+    var icon: String?
+    var recordingCount: Int?
+    let createdAt: Date
+    var updatedAt: Date?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case userId = "user_id"
+        case name
+        case color
+        case icon
+        case recordingCount = "recording_count"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
+    static func == (lhs: Folder, rhs: Folder) -> Bool {
+        lhs.id == rhs.id
+    }
+}
+
 // MARK: - API Request Models
 
 /// Request to create a new recording
 struct CreateRecordingRequest: Codable {
     let title: String
-    let durationSeconds: Int
+    let durationSeconds: Int?
     let fileSizeBytes: Int64
     let contentType: String
+    let recordingType: String?
 
     enum CodingKeys: String, CodingKey {
         case title
         case durationSeconds = "duration_seconds"
         case fileSizeBytes = "file_size_bytes"
         case contentType = "content_type"
+        case recordingType = "recording_type"
+    }
+
+    init(title: String, durationSeconds: Int? = nil, fileSizeBytes: Int64, contentType: String = "audio/mp4", recordingType: String? = nil) {
+        self.title = title
+        self.durationSeconds = durationSeconds
+        self.fileSizeBytes = fileSizeBytes
+        self.contentType = contentType
+        self.recordingType = recordingType
     }
 }
 
@@ -326,6 +403,150 @@ struct RecordingSummary: Codable {
 
 /// Type alias for backward compatibility
 typealias Summary = RecordingSummary
+
+// MARK: - Todo Models
+
+/// Priority level for todos
+enum TodoPriority: String, Codable, CaseIterable {
+    case low
+    case medium
+    case high
+
+    var displayName: String {
+        switch self {
+        case .low: return "Low"
+        case .medium: return "Medium"
+        case .high: return "High"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .low: return "arrow.down"
+        case .medium: return "minus"
+        case .high: return "arrow.up"
+        }
+    }
+
+    var color: String {
+        switch self {
+        case .low: return "green"
+        case .medium: return "orange"
+        case .high: return "red"
+        }
+    }
+}
+
+/// Todo item model
+struct TodoItem: Codable, Identifiable, Hashable {
+    let id: String
+    let userId: String
+    var recordingId: String?
+    var title: String
+    var description: String?
+    var isCompleted: Bool
+    var priority: TodoPriority
+    var dueDate: Date?
+    var completedAt: Date?
+    let createdAt: Date
+    var updatedAt: Date?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case userId = "user_id"
+        case recordingId = "recording_id"
+        case title
+        case description
+        case isCompleted = "is_completed"
+        case priority
+        case dueDate = "due_date"
+        case completedAt = "completed_at"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
+    static func == (lhs: TodoItem, rhs: TodoItem) -> Bool {
+        lhs.id == rhs.id
+    }
+}
+
+/// Request to create a todo
+struct CreateTodoRequest: Codable {
+    let title: String
+    let description: String?
+    let priority: String?
+    let dueDate: Date?
+    let recordingId: String?
+
+    enum CodingKeys: String, CodingKey {
+        case title
+        case description
+        case priority
+        case dueDate = "due_date"
+        case recordingId = "recording_id"
+    }
+
+    init(title: String, description: String? = nil, priority: TodoPriority = .medium, dueDate: Date? = nil, recordingId: String? = nil) {
+        self.title = title
+        self.description = description
+        self.priority = priority.rawValue
+        self.dueDate = dueDate
+        self.recordingId = recordingId
+    }
+}
+
+/// Request to create todos from transcribed text
+struct CreateTodosFromTextRequest: Codable {
+    let text: String
+    let recordingId: String?
+
+    enum CodingKeys: String, CodingKey {
+        case text
+        case recordingId = "recording_id"
+    }
+
+    init(text: String, recordingId: String? = nil) {
+        self.text = text
+        self.recordingId = recordingId
+    }
+}
+
+/// Request to update a todo
+struct UpdateTodoRequest: Codable {
+    let title: String?
+    let description: String?
+    let isCompleted: Bool?
+    let priority: String?
+    let dueDate: Date?
+
+    enum CodingKeys: String, CodingKey {
+        case title
+        case description
+        case isCompleted = "is_completed"
+        case priority
+        case dueDate = "due_date"
+    }
+}
+
+/// Response containing a single todo
+struct TodoResponse: Codable {
+    let todo: TodoItem
+}
+
+/// Response containing multiple todos
+struct TodosResponse: Codable {
+    let todos: [TodoItem]
+}
+
+/// Response from listing todos with pagination
+struct ListTodosResponse: Codable {
+    let todos: [TodoItem]
+    let meta: PaginationMeta
+}
 
 // MARK: - Error Response
 

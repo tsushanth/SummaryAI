@@ -16,6 +16,7 @@ export interface CreateRecordingRequest {
   duration_seconds: number;
   file_size_bytes: number;
   content_type?: string;
+  recording_type?: string;
 }
 
 /**
