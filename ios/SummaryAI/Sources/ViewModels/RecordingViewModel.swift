@@ -99,10 +99,10 @@ final class RecordingViewModel: ObservableObject {
     // MARK: - Initialization
 
     init(
-        recordingManager: RecordingManager = RecordingManager(),
-        apiClient: SummaryAIAPIClient = SummaryAIAPIClient()
+        recordingManager: RecordingManager? = nil,
+        apiClient: SummaryAIAPIClient
     ) {
-        self.recordingManager = recordingManager
+        self.recordingManager = recordingManager ?? RecordingManager()
         self.apiClient = apiClient
 
         setupBindings()
@@ -385,7 +385,7 @@ final class RecordingViewModel: ObservableObject {
 extension RecordingViewModel {
     /// Create a view model in a specific state for previews
     static func preview(state: RecordingViewState) -> RecordingViewModel {
-        let viewModel = RecordingViewModel()
+        let viewModel = RecordingViewModel(apiClient: SummaryAIAPIClient())
         viewModel.state = state
         return viewModel
     }

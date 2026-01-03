@@ -233,7 +233,7 @@ final class ExportService {
 
         // Footer
         lines.append("---")
-        lines.append("Exported from Summary AI")
+        lines.append("Exported from Meeting Mind")
 
         return lines.joined(separator: "\n")
     }
@@ -311,7 +311,7 @@ final class ExportService {
 
         // Footer
         lines.append("---")
-        lines.append("*Exported from Summary AI*")
+        lines.append("*Exported from Meeting Mind*")
 
         return lines.joined(separator: "\n")
     }
@@ -460,7 +460,7 @@ final class ExportService {
         // Footer
         currentY += 20
         let footerFont = UIFont.systemFont(ofSize: 10)
-        drawText("Exported from Summary AI", font: footerFont, color: .gray)
+        drawText("Exported from Meeting Mind", font: footerFont, color: .gray)
     }
 
     // MARK: - File Operations

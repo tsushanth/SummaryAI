@@ -42,7 +42,7 @@ struct LoadingView: View {
 
 struct SignInView: View {
     @EnvironmentObject var authService: AuthService
-    @State private var showEmailSignIn = false
+    @Environment(\.colorScheme) private var colorScheme
     @State private var errorMessage: String?
     @State private var showError = false
 
@@ -60,7 +60,7 @@ struct SignInView: View {
                         endPoint: .bottomTrailing
                     ))
 
-                Text("Summary AI")
+                Text("Meeting Mind")
                     .font(.largeTitle)
                     .fontWeight(.bold)
 
@@ -74,7 +74,7 @@ struct SignInView: View {
 
             // Sign in buttons
             VStack(spacing: 16) {
-                // Sign in with Apple
+                // Sign in with Apple - adapts to color scheme
                 SignInWithAppleButton(
                     onRequest: { request in
                         request.requestedScopes = [.fullName, .email]
@@ -83,7 +83,7 @@ struct SignInView: View {
                         // Handled by AuthService
                     }
                 )
-                .signInWithAppleButtonStyle(.black)
+                .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
                 .frame(height: 50)
                 .cornerRadius(12)
                 .onTapGesture {
@@ -99,18 +99,37 @@ struct SignInView: View {
                     }
                 }
 
-                // Email sign in option
+                // Sign in with Google - adapts to color scheme
                 Button {
-                    showEmailSignIn = true
+                    Task {
+                        do {
+                            try await authService.signInWithGoogle()
+                        } catch AuthError.cancelled {
+                            // User cancelled, ignore
+                        } catch {
+                            errorMessage = error.localizedDescription
+                            showError = true
+                        }
+                    }
                 } label: {
-                    HStack {
-                        Image(systemName: "envelope.fill")
-                        Text("Sign in with Email")
+                    HStack(spacing: 12) {
+                        // Google "G" logo using colored circles
+                        GoogleLogoView()
+                            .frame(width: 20, height: 20)
+
+                        Text("Sign in with Google")
+                            .fontWeight(.medium)
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: 50)
+                    .background(colorScheme == .dark ? Color.white : Color.white)
+                    .foregroundColor(.black)
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(colorScheme == .dark ? Color.clear : Color.gray.opacity(0.3), lineWidth: 1)
+                    )
                 }
-                .buttonStyle(.bordered)
 
                 // Privacy notice
                 VStack(spacing: 4) {
@@ -119,10 +138,10 @@ struct SignInView: View {
                         .foregroundColor(.secondary)
 
                     HStack(spacing: 4) {
-                        Link("Terms of Service", destination: URL(string: "https://summaryai.app/terms")!)
+                        Link("Terms of Service", destination: URL(string: "https://kreativekoala.llc/terms")!)
                         Text("and")
                             .foregroundColor(.secondary)
-                        Link("Privacy Policy", destination: URL(string: "https://summaryai.app/privacy")!)
+                        Link("Privacy Policy", destination: URL(string: "https://kreativekoala.llc/privacy")!)
                     }
                     .font(.caption)
                 }
@@ -130,9 +149,6 @@ struct SignInView: View {
             }
             .padding(.horizontal, 32)
             .padding(.bottom, 40)
-        }
-        .sheet(isPresented: $showEmailSignIn) {
-            EmailSignInView()
         }
         .alert("Sign In Error", isPresented: $showError) {
             Button("OK", role: .cancel) {}
@@ -251,6 +267,50 @@ struct EmailSignInView: View {
         } catch {
             errorMessage = error.localizedDescription
             showError = true
+        }
+    }
+}
+
+// MARK: - Google Logo View
+
+/// Custom Google "G" logo using SwiftUI shapes
+struct GoogleLogoView: View {
+    var body: some View {
+        GeometryReader { geometry in
+            let size = min(geometry.size.width, geometry.size.height)
+
+            ZStack {
+                // Blue segment (right side)
+                Circle()
+                    .trim(from: 0.0, to: 0.25)
+                    .stroke(Color(red: 66/255, green: 133/255, blue: 244/255), lineWidth: size * 0.2)
+                    .rotationEffect(.degrees(-45))
+
+                // Green segment (bottom)
+                Circle()
+                    .trim(from: 0.0, to: 0.25)
+                    .stroke(Color(red: 52/255, green: 168/255, blue: 83/255), lineWidth: size * 0.2)
+                    .rotationEffect(.degrees(45))
+
+                // Yellow segment (left-bottom)
+                Circle()
+                    .trim(from: 0.0, to: 0.25)
+                    .stroke(Color(red: 251/255, green: 188/255, blue: 5/255), lineWidth: size * 0.2)
+                    .rotationEffect(.degrees(135))
+
+                // Red segment (top)
+                Circle()
+                    .trim(from: 0.0, to: 0.25)
+                    .stroke(Color(red: 234/255, green: 67/255, blue: 53/255), lineWidth: size * 0.2)
+                    .rotationEffect(.degrees(225))
+
+                // Blue horizontal bar
+                Rectangle()
+                    .fill(Color(red: 66/255, green: 133/255, blue: 244/255))
+                    .frame(width: size * 0.5, height: size * 0.2)
+                    .offset(x: size * 0.15)
+            }
+            .frame(width: size, height: size)
         }
     }
 }

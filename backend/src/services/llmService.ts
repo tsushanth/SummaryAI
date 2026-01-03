@@ -1,9 +1,9 @@
 /**
  * LLM Service
- * Handles interactions with the Anthropic Claude API for Q&A and summarization
+ * Handles interactions with the OpenAI API for Q&A and summarization
  */
 
-import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 import { config } from '../config/index.js';
 import type { TranscriptSegment } from '../types/database.js';
 import type { Citation } from '../types/api.js';
@@ -32,20 +32,20 @@ export interface RelevantSegment {
 // LLM Client
 // ============================================================================
 
-let anthropicClient: Anthropic | null = null;
+let openaiClient: OpenAI | null = null;
 
-function getAnthropicClient(): Anthropic {
-  if (!config.ANTHROPIC_API_KEY) {
-    throw new Error('ANTHROPIC_API_KEY is not configured');
+function getOpenAIClient(): OpenAI {
+  if (!config.OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY is not configured');
   }
 
-  if (!anthropicClient) {
-    anthropicClient = new Anthropic({
-      apiKey: config.ANTHROPIC_API_KEY,
+  if (!openaiClient) {
+    openaiClient = new OpenAI({
+      apiKey: config.OPENAI_API_KEY,
     });
   }
 
-  return anthropicClient;
+  return openaiClient;
 }
 
 // ============================================================================
@@ -277,7 +277,7 @@ export async function answerQuestion(
     maxTokens?: number;
   } = {}
 ): Promise<QAResult> {
-  const client = getAnthropicClient();
+  const client = getOpenAIClient();
 
   // Find relevant segments
   let relevantSegments = findRelevantSegments(segments, question);
@@ -299,11 +299,14 @@ export async function answerQuestion(
   const userPrompt = buildQAPrompt(question, relevantSegments, options.previousQA);
 
   // Call the LLM
-  const response = await client.messages.create({
-    model: config.ANTHROPIC_MODEL,
-    max_tokens: config.ANTHROPIC_MAX_TOKENS,
-    system: QA_SYSTEM_PROMPT,
+  const response = await client.chat.completions.create({
+    model: config.OPENAI_MODEL,
+    max_tokens: config.OPENAI_MAX_TOKENS,
     messages: [
+      {
+        role: 'system',
+        content: QA_SYSTEM_PROMPT,
+      },
       {
         role: 'user',
         content: userPrompt,
@@ -312,17 +315,15 @@ export async function answerQuestion(
   });
 
   // Parse the response
-  const responseText = response.content[0]?.type === 'text'
-    ? response.content[0].text
-    : '';
+  const responseText = response.choices[0]?.message?.content || '';
 
   const parsedResult = parseQAResponse(responseText, relevantSegments);
 
   return {
     ...parsedResult,
     usage: {
-      input_tokens: response.usage.input_tokens,
-      output_tokens: response.usage.output_tokens,
+      input_tokens: response.usage?.prompt_tokens || 0,
+      output_tokens: response.usage?.completion_tokens || 0,
     },
   };
 }

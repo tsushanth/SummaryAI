@@ -36,6 +36,7 @@ final class RecordingDetailViewModel: ObservableObject {
     @Published private(set) var recording: Recording?
     @Published private(set) var transcript: Transcript?
     @Published private(set) var summary: RecordingSummary?
+    @Published private(set) var audioURL: URL?
 
     /// View state
     @Published private(set) var state: RecordingDetailState = .loading
@@ -89,7 +90,7 @@ final class RecordingDetailViewModel: ObservableObject {
 
     // MARK: - Initialization
 
-    init(recordingId: String, apiClient: SummaryAIAPIClient = SummaryAIAPIClient()) {
+    init(recordingId: String, apiClient: SummaryAIAPIClient) {
         self.recordingId = recordingId
         self.apiClient = apiClient
     }
@@ -285,6 +286,20 @@ final class RecordingDetailViewModel: ObservableObject {
         pollingTask = nil
     }
 
+    // MARK: - Delete Recording
+
+    /// Delete the current recording
+    /// - Returns: true if deletion was successful
+    func deleteRecording() async -> Bool {
+        do {
+            try await apiClient.deleteRecording(id: recordingId)
+            return true
+        } catch {
+            showError("Failed to delete recording: \(error.localizedDescription)")
+            return false
+        }
+    }
+
     // MARK: - Error Handling
 
     private func handleError(_ error: Error) {
@@ -392,16 +407,16 @@ struct AskQuestionResponse: Decodable {
 
 /// Citation reference in an answer
 struct Citation: Codable, Equatable {
-    let segmentIndex: Int
+    let segmentId: String
+    let timestamp: Double
     let text: String
-    let startTime: Double
-    let endTime: Double
+    let speaker: String
 
     enum CodingKeys: String, CodingKey {
-        case segmentIndex = "segment_index"
+        case segmentId = "segment_id"
+        case timestamp
         case text
-        case startTime = "start_time"
-        case endTime = "end_time"
+        case speaker
     }
 }
 
