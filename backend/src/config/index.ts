@@ -1,4 +1,8 @@
 import { z } from 'zod';
+import { config as dotenvConfig } from 'dotenv';
+
+// Load .env file
+dotenvConfig();
 
 /**
  * Environment configuration schema with validation
@@ -29,18 +33,43 @@ const envSchema = z.object({
   // Deepgram (Speech-to-Text)
   DEEPGRAM_API_KEY: z.string().optional(),
 
-  // Anthropic (LLM for Q&A and summarization)
-  ANTHROPIC_API_KEY: z.string().optional(),
-  ANTHROPIC_MODEL: z.string().default('claude-3-5-sonnet-20241022'),
-  ANTHROPIC_MAX_TOKENS: z.string().transform(Number).default('2048'),
+  // OpenAI (LLM for Q&A and summarization)
+  OPENAI_API_KEY: z.string().optional(),
+  OPENAI_MODEL: z.string().default('gpt-4o'),
+  OPENAI_MAX_TOKENS: z.string().transform(Number).default('2048'),
 
   // Q&A Configuration
   QA_MAX_CONTEXT_TOKENS: z.string().transform(Number).default('50000'),
   QA_MAX_RELEVANT_SEGMENTS: z.string().transform(Number).default('15'),
 
-  // Optional: GCP configuration
+  // Recall.ai (Meeting Bot)
+  RECALL_API_KEY: z.string().optional(),
+  RECALL_REGION: z.string().default('us-west-2'),
+  RECALL_WEBHOOK_SECRET: z.string().optional(),
+
+  // Google Calendar OAuth
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  GOOGLE_REDIRECT_URI: z.string().optional(),
+
+  // Microsoft (Outlook/Teams) Calendar OAuth
+  MICROSOFT_CLIENT_ID: z.string().optional(),
+  MICROSOFT_CLIENT_SECRET: z.string().optional(),
+  MICROSOFT_REDIRECT_URI: z.string().optional(),
+  MICROSOFT_TENANT_ID: z.string().default('common'), // 'common' for multi-tenant
+
+  // Encryption (for storing OAuth tokens)
+  ENCRYPTION_KEY: z.string().optional(),
+
+  // GCP Configuration (for Cloud Tasks in production)
   GCP_PROJECT_ID: z.string().optional(),
+  GCP_LOCATION: z.string().default('us-central1'),
+  BOT_SCHEDULER_QUEUE: z.string().default('bot-scheduler'),
   CLOUD_TASKS_QUEUE: z.string().optional(),
+
+  // Service URL (for internal worker callbacks)
+  SERVICE_URL: z.string().optional(),
+  INTERNAL_SECRET: z.string().optional(),
 });
 
 export type Config = z.infer<typeof envSchema>;

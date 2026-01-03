@@ -16,6 +16,7 @@ enum APIError: Error, LocalizedError {
     case serverError(message: String?)
     case uploadFailed(Error)
     case noAccessToken
+    case fileError(String)
     case unknown(Error)
 
     var errorDescription: String? {
@@ -44,6 +45,8 @@ enum APIError: Error, LocalizedError {
             return "Upload failed: \(error.localizedDescription)"
         case .noAccessToken:
             return "No access token available. Please log in."
+        case .fileError(let message):
+            return "File error: \(message)"
         case .unknown(let error):
             return "An unexpected error occurred: \(error.localizedDescription)"
         }
@@ -69,5 +72,10 @@ enum APIError: Error, LocalizedError {
         default:
             return false
         }
+    }
+
+    /// User-friendly message for display
+    var userMessage: String {
+        errorDescription ?? "An unexpected error occurred"
     }
 }

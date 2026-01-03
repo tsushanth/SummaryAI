@@ -29,7 +29,11 @@ export async function authenticate(
 ): Promise<void> {
   const token = extractToken(req.headers.authorization);
 
+  // Log auth attempt for debugging
+  console.log(`[Auth] ${req.method} ${req.path} - Token present: ${!!token}, Auth header: ${req.headers.authorization?.substring(0, 30)}...`);
+
   if (!token) {
+    console.log('[Auth] No token found in authorization header');
     res.status(401).json({
       error: {
         code: 'UNAUTHORIZED',
@@ -59,6 +63,7 @@ export async function authenticate(
     const { data: { user }, error } = await supabase.auth.getUser();
 
     if (error || !user) {
+      console.log(`[Auth] Token validation failed - Error: ${error?.message}, User: ${!!user}`);
       res.status(401).json({
         error: {
           code: 'INVALID_TOKEN',
@@ -67,6 +72,8 @@ export async function authenticate(
       });
       return;
     }
+
+    console.log(`[Auth] Authenticated user: ${user.id}`);
 
     // Attach user to request
     const authenticatedUser: AuthenticatedUser = {
@@ -163,4 +170,48 @@ export function requireRole(...roles: string[]) {
 
     next();
   };
+}
+
+/**
+ * Internal authentication middleware
+ * Verifies internal service-to-service calls using a shared secret
+ * Used for Cloud Tasks callbacks and other internal services
+ */
+export function internalAuth(
+  req: Request,
+  res: Response<ErrorResponse>,
+  next: NextFunction
+): void {
+  const internalSecret = config.INTERNAL_SECRET;
+
+  // Skip verification if no secret is configured (development)
+  if (!internalSecret) {
+    console.warn('[Internal Auth] INTERNAL_SECRET not set, skipping verification');
+    next();
+    return;
+  }
+
+  const providedSecret = req.headers['x-internal-secret'] as string | undefined;
+
+  if (!providedSecret) {
+    res.status(401).json({
+      error: {
+        code: 'UNAUTHORIZED',
+        message: 'Missing internal secret header',
+      },
+    });
+    return;
+  }
+
+  if (providedSecret !== internalSecret) {
+    res.status(401).json({
+      error: {
+        code: 'INVALID_SECRET',
+        message: 'Invalid internal secret',
+      },
+    });
+    return;
+  }
+
+  next();
 }

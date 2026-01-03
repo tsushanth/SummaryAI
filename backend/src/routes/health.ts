@@ -31,9 +31,9 @@ router.get('/', (_req: Request, res: Response) => {
  * Detailed health check with dependency status
  */
 router.get('/detailed', async (_req: Request, res: Response<HealthResponse>) => {
-  const checks = {
-    database: 'ok' as const,
-    storage: 'ok' as const,
+  const checks: { database: 'ok' | 'error'; storage: 'ok' | 'error' } = {
+    database: 'ok',
+    storage: 'ok',
   };
 
   // Check database connection
@@ -57,7 +57,7 @@ router.get('/detailed', async (_req: Request, res: Response<HealthResponse>) => 
   }
 
   // Determine overall status
-  const hasErrors = Object.values(checks).some((v) => v === 'error');
+  const hasErrors = checks.database === 'error' || checks.storage === 'error';
   const status = hasErrors ? 'degraded' : 'healthy';
 
   res.status(hasErrors ? 503 : 200).json({
