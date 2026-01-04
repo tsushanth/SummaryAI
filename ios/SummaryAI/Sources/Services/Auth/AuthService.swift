@@ -113,8 +113,8 @@ final class AuthService: NSObject, ObservableObject {
     // Default configuration values
     private static let defaultSupabaseURL = "https://mlofjzlmncgnhxbiuemf.supabase.co"
     private static let defaultSupabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sb2ZqemxtbmNnbmh4Yml1ZW1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyOTU1NjAsImV4cCI6MjA4Mjg3MTU2MH0.fUxgMcu1BNrsYneN5vSMFWxsv-rWIygCx-xn-Vmr0Ec"
-    private static let defaultGoogleClientID = "655434901651-fnqoakiv9cnmp12julsrh8iim63oppl9.apps.googleusercontent.com"
-    private static let defaultGoogleServerClientID = "655434901651-1pu8uh26nq64dj1hujuoipfm84537ism.apps.googleusercontent.com"  // Web Client ID
+    private static let defaultGoogleClientID = "753424767416-8ed2ohh2206r0h6cu864asieagip9mmh.apps.googleusercontent.com"
+    private static let defaultGoogleServerClientID = "753424767416-54viqmpd45g10oohm7vug13o8tdhb8qp.apps.googleusercontent.com"  // Web Client ID
 
     init(
         supabaseURL: String = AuthService.defaultSupabaseURL,

@@ -24,10 +24,39 @@ const app = express();
 app.use(helmet());
 
 // CORS configuration
+const allowedOrigins = [
+  'https://summaryai.app',
+  'https://www.summaryai.app',
+  'https://meetingmind.app',
+  'https://www.meetingmind.app',
+  'https://meetingmind.org',
+  'https://www.meetingmind.org',
+];
+
+// Allow Cloud Run URLs in production
+const corsOrigin = config.NODE_ENV === 'production'
+  ? (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+      // Allow requests with no origin (mobile apps, curl, etc.)
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      // Allow listed origins
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      // Allow Cloud Run URLs
+      if (origin.endsWith('.run.app')) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error('Not allowed by CORS'));
+    }
+  : '*';
+
 app.use(cors({
-  origin: config.NODE_ENV === 'production'
-    ? ['https://summaryai.app', 'https://www.summaryai.app']
-    : '*',
+  origin: corsOrigin,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
