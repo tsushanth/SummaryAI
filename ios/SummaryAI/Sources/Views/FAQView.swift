@@ -83,7 +83,7 @@ struct FAQView: View {
 
                     Button {
                         // Open contact
-                        if let url = URL(string: "mailto:support@summaryai.app") {
+                        if let url = URL(string: "mailto:support@meetingmind.org") {
                             UIApplication.shared.open(url)
                         }
                     } label: {

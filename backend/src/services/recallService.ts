@@ -69,7 +69,7 @@ export class RecallService {
   static async createBot(params: RecallBotCreateRequest): Promise<RecallBotResponse> {
     const payload: Record<string, unknown> = {
       meeting_url: params.meeting_url,
-      bot_name: params.bot_name || 'Summary AI',
+      bot_name: params.bot_name || 'Meeting Mind',
       automatic_leave: params.automatic_leave || {
         waiting_room_timeout: 600, // 10 minutes
         noone_joined_timeout: 300, // 5 minutes

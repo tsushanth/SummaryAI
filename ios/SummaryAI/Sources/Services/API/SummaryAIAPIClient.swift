@@ -17,7 +17,7 @@ struct APIConfiguration {
     )
 
     static let staging = APIConfiguration(
-        baseURL: URL(string: "https://api-staging.summaryai.app")!,
+        baseURL: URL(string: "https://summary-ai-backend-917362189743.us-central1.run.app")!,
         apiVersion: "v1"
     )
 

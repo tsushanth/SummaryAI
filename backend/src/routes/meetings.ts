@@ -215,7 +215,7 @@ router.post(
       // Create bot via Recall.ai immediately
       const bot = await RecallService.createBot({
         meeting_url: join_url,
-        bot_name: bot_name || 'Summary AI',
+        bot_name: bot_name || 'Meeting Mind',
       });
 
       // Create bot run record
@@ -436,7 +436,7 @@ router.post(
     // Create bot via Recall.ai
     const bot = await RecallService.createBot({
       meeting_url: meeting.join_url,
-      bot_name: 'Summary AI',
+      bot_name: 'Meeting Mind',
     });
 
     // Create bot run record
