@@ -1,0 +1,64 @@
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_SUPABASE_URL=${_NEXT_PUBLIC_SUPABASE_URL}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_SUPABASE_ANON_KEY=${_NEXT_PUBLIC_SUPABASE_ANON_KEY}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_GOOGLE_CLIENT_ID=${_NEXT_PUBLIC_GOOGLE_CLIENT_ID}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_API_URL=${_NEXT_PUBLIC_API_URL}'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/meeting-mind/meeting-mind-web:${_BUILD_TAG}'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/meeting-mind/meeting-mind-web:latest'
+      - '.'
+
+  # Push the container image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '--all-tags'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/meeting-mind/meeting-mind-web'
+
+  # Deploy container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'meeting-mind-web'
+      - '--image'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/meeting-mind/meeting-mind-web:${_BUILD_TAG}'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--memory'
+      - '512Mi'
+      - '--cpu'
+      - '1'
+      - '--min-instances'
+      - '0'
+      - '--max-instances'
+      - '10'
+      - '--port'
+      - '8080'
+
+substitutions:
+  _NEXT_PUBLIC_SUPABASE_URL: 'https://mlofjzlmncgnhxbiuemf.supabase.co'
+  _NEXT_PUBLIC_SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sb2ZqemxtbmNnbmh4Yml1ZW1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyOTU1NjAsImV4cCI6MjA4Mjg3MTU2MH0.fUxgMcu1BNrsYneN5vSMFWxsv-rWIygCx-xn-Vmr0Ec'
+  _NEXT_PUBLIC_GOOGLE_CLIENT_ID: '753424767416-54viqmpd45g10oohm7vug13o8tdhb8qp.apps.googleusercontent.com'
+  _NEXT_PUBLIC_API_URL: 'https://summary-ai-backend-917362189743.us-central1.run.app/v1'
+  _BUILD_TAG: 'v1'
+
+images:
+  - 'us-central1-docker.pkg.dev/${PROJECT_ID}/meeting-mind/meeting-mind-web:${_BUILD_TAG}'
+  - 'us-central1-docker.pkg.dev/${PROJECT_ID}/meeting-mind/meeting-mind-web:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

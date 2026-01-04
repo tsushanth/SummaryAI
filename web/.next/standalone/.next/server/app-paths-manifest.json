@@ -1,0 +1,12 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/auth/callback/route": "app/auth/callback/route.js",
+  "/page": "app/page.js",
+  "/auth/page": "app/auth/page.js",
+  "/(dashboard)/meetings/page": "app/(dashboard)/meetings/page.js",
+  "/(dashboard)/recordings/new/page": "app/(dashboard)/recordings/new/page.js",
+  "/(dashboard)/settings/page": "app/(dashboard)/settings/page.js",
+  "/(dashboard)/recordings/[id]/page": "app/(dashboard)/recordings/[id]/page.js",
+  "/(dashboard)/todos/page": "app/(dashboard)/todos/page.js",
+  "/(dashboard)/recordings/page": "app/(dashboard)/recordings/page.js"
+}

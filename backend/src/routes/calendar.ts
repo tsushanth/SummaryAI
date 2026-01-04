@@ -36,6 +36,282 @@ export const calendarCallbackRouter = Router();
 // OAuth state expiry in milliseconds (5 minutes)
 const OAUTH_STATE_EXPIRY = 5 * 60 * 1000;
 
+/**
+ * Generate HTML page that closes the popup and notifies parent window
+ * Used for web OAuth flow (popup window)
+ */
+function generateOAuthSuccessPage(provider: string, email: string): string {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Calendar Connected</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background: #f9fafb;
+    }
+    .container {
+      text-align: center;
+      padding: 2rem;
+    }
+    .success-icon {
+      width: 64px;
+      height: 64px;
+      background: #10b981;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+    }
+    .success-icon svg {
+      width: 32px;
+      height: 32px;
+      color: white;
+    }
+    h1 {
+      color: #111827;
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    p {
+      color: #6b7280;
+      margin-bottom: 1rem;
+    }
+    .email {
+      font-weight: 500;
+      color: #374151;
+    }
+    .close-btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.75rem 1.5rem;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .close-btn:hover {
+      background: #2563eb;
+    }
+    .status {
+      font-size: 0.875rem;
+      color: #9ca3af;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="success-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+    </div>
+    <h1>Calendar Connected!</h1>
+    <p>Successfully connected <span class="email">${email}</span></p>
+    <p class="status" id="status">Closing window...</p>
+    <button class="close-btn" id="closeBtn" style="display: none;" onclick="handleClose()">Close Window</button>
+  </div>
+  <script>
+    function handleClose() {
+      // Try to close the window
+      window.close();
+      // If still here after 100ms, redirect to app
+      setTimeout(() => {
+        window.location.href = 'https://meetingmind.org/meetings';
+      }, 100);
+    }
+
+    // Try to notify parent and close
+    function tryClose() {
+      // Try postMessage to parent (works if same origin or opener exists)
+      if (window.opener) {
+        try {
+          window.opener.postMessage({
+            type: 'calendar-connected',
+            provider: '${provider}',
+            email: '${email}'
+          }, '*');
+        } catch (e) {}
+      }
+
+      // Try to close the window
+      window.close();
+
+      // If window didn't close after 500ms, show manual close button
+      setTimeout(() => {
+        if (!window.closed) {
+          document.getElementById('status').textContent = 'You can now close this window';
+          document.getElementById('closeBtn').style.display = 'inline-block';
+        }
+      }, 500);
+    }
+
+    // Execute on load
+    tryClose();
+  </script>
+</body>
+</html>
+`;
+}
+
+/**
+ * Generate HTML page for OAuth errors (web flow)
+ */
+function generateOAuthErrorPage(message: string): string {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Connection Failed</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background: #f9fafb;
+    }
+    .container {
+      text-align: center;
+      padding: 2rem;
+    }
+    .error-icon {
+      width: 64px;
+      height: 64px;
+      background: #ef4444;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+    }
+    .error-icon svg {
+      width: 32px;
+      height: 32px;
+      color: white;
+    }
+    h1 {
+      color: #111827;
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    p {
+      color: #6b7280;
+      margin-bottom: 1rem;
+    }
+    .error-msg {
+      background: #fef2f2;
+      color: #b91c1c;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    .close-btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.75rem 1.5rem;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .close-btn:hover {
+      background: #2563eb;
+    }
+    .status {
+      font-size: 0.875rem;
+      color: #9ca3af;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="error-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </div>
+    <h1>Connection Failed</h1>
+    <p class="error-msg">${message}</p>
+    <p class="status" id="status">Closing window...</p>
+    <button class="close-btn" id="closeBtn" style="display: none;" onclick="handleClose()">Close Window</button>
+  </div>
+  <script>
+    function handleClose() {
+      window.close();
+      setTimeout(() => {
+        window.location.href = 'https://meetingmind.org/meetings';
+      }, 100);
+    }
+
+    function tryClose() {
+      if (window.opener) {
+        try {
+          window.opener.postMessage({
+            type: 'calendar-error',
+            error: '${message}'
+          }, '*');
+        } catch (e) {}
+      }
+
+      window.close();
+
+      setTimeout(() => {
+        if (!window.closed) {
+          document.getElementById('status').textContent = 'You can now close this window';
+          document.getElementById('closeBtn').style.display = 'inline-block';
+        }
+      }, 500);
+    }
+
+    tryClose();
+  </script>
+</body>
+</html>
+`;
+}
+
+/**
+ * Check if request is from web (vs mobile app)
+ * Web requests come from popup windows opened by the web app
+ * iOS/mobile requests should get deep link redirects (summaryai://)
+ */
+function isWebRequest(req: Request): boolean {
+  const userAgent = req.headers['user-agent'] || '';
+
+  // Check for mobile devices - these should get deep link redirects
+  const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(userAgent);
+  if (isMobileDevice) {
+    return false;
+  }
+
+  // Desktop browsers get the HTML popup flow
+  const isDesktopBrowser = /Mozilla|Chrome|Safari|Firefox|Edge/.test(userAgent) &&
+                          !/SummaryAI|MeetingMind/.test(userAgent);
+  return isDesktopBrowser;
+}
+
 // All authenticated routes
 router.use(authenticate);
 
@@ -108,17 +384,34 @@ router.post(
  */
 calendarCallbackRouter.get('/callback/google', async (req: Request, res: Response) => {
   const { code, state, error: oauthError } = req.query;
+  const isWeb = isWebRequest(req);
+
+  // Helper to send response based on platform
+  const sendError = (message: string) => {
+    if (isWeb) {
+      res.send(generateOAuthErrorPage(message));
+    } else {
+      res.redirect(`summaryai://calendar/error?message=${encodeURIComponent(message)}`);
+    }
+  };
+
+  const sendSuccess = (provider: string, email: string) => {
+    if (isWeb) {
+      res.send(generateOAuthSuccessPage(provider, email));
+    } else {
+      res.redirect(`summaryai://calendar/connected?provider=${provider}&email=${encodeURIComponent(email)}`);
+    }
+  };
 
   // OAuth error handling
   if (oauthError) {
     console.error('[Calendar] OAuth error:', oauthError);
-    // Redirect to app with error
-    res.redirect(`summaryai://calendar/error?message=${encodeURIComponent(String(oauthError))}`);
+    sendError(String(oauthError));
     return;
   }
 
   if (!code || !state) {
-    res.redirect('summaryai://calendar/error?message=missing_params');
+    sendError('missing_params');
     return;
   }
 
@@ -126,7 +419,7 @@ calendarCallbackRouter.get('/callback/google', async (req: Request, res: Respons
     // Parse and validate state
     const stateData = parseOAuthState(state as string);
     if (!stateData) {
-      res.redirect('summaryai://calendar/error?message=invalid_state');
+      sendError('invalid_state');
       return;
     }
 
@@ -139,14 +432,14 @@ calendarCallbackRouter.get('/callback/google', async (req: Request, res: Respons
 
     if (stateError || !storedState) {
       console.error('[Calendar] State not found or expired');
-      res.redirect('summaryai://calendar/error?message=invalid_state');
+      sendError('invalid_state');
       return;
     }
 
     // Check expiry
     if (new Date(storedState.expires_at) < new Date()) {
       await supabaseAdmin.from('oauth_states').delete().eq('state', state);
-      res.redirect('summaryai://calendar/error?message=state_expired');
+      sendError('state_expired');
       return;
     }
 
@@ -192,7 +485,7 @@ calendarCallbackRouter.get('/callback/google', async (req: Request, res: Respons
 
     if (upsertError) {
       console.error('[Calendar] Failed to save connection:', upsertError);
-      res.redirect('summaryai://calendar/error?message=save_failed');
+      sendError('save_failed');
       return;
     }
 
@@ -222,13 +515,11 @@ calendarCallbackRouter.get('/callback/google', async (req: Request, res: Respons
       console.error(`[Calendar] Initial sync failed for ${userInfo.email}:`, err);
     });
 
-    // Redirect back to app with success
-    res.redirect(
-      `summaryai://calendar/connected?provider=google&email=${encodeURIComponent(userInfo.email)}`
-    );
+    // Send success response
+    sendSuccess('google', userInfo.email);
   } catch (error) {
     console.error('[Calendar] OAuth callback error:', error);
-    res.redirect('summaryai://calendar/error?message=callback_failed');
+    sendError('callback_failed');
   }
 });
 
@@ -239,16 +530,34 @@ calendarCallbackRouter.get('/callback/google', async (req: Request, res: Respons
  */
 calendarCallbackRouter.get('/callback/microsoft', async (req: Request, res: Response) => {
   const { code, state, error: oauthError, error_description } = req.query;
+  const isWeb = isWebRequest(req);
+
+  // Helper to send response based on platform
+  const sendError = (message: string) => {
+    if (isWeb) {
+      res.send(generateOAuthErrorPage(message));
+    } else {
+      res.redirect(`summaryai://calendar/error?message=${encodeURIComponent(message)}`);
+    }
+  };
+
+  const sendSuccess = (provider: string, email: string) => {
+    if (isWeb) {
+      res.send(generateOAuthSuccessPage(provider, email));
+    } else {
+      res.redirect(`summaryai://calendar/connected?provider=${provider}&email=${encodeURIComponent(email)}`);
+    }
+  };
 
   // OAuth error handling
   if (oauthError) {
     console.error('[Calendar] Microsoft OAuth error:', oauthError, error_description);
-    res.redirect(`summaryai://calendar/error?message=${encodeURIComponent(String(oauthError))}`);
+    sendError(String(oauthError));
     return;
   }
 
   if (!code || !state) {
-    res.redirect('summaryai://calendar/error?message=missing_params');
+    sendError('missing_params');
     return;
   }
 
@@ -256,7 +565,7 @@ calendarCallbackRouter.get('/callback/microsoft', async (req: Request, res: Resp
     // Parse and validate state
     const stateData = parseOAuthState(state as string);
     if (!stateData) {
-      res.redirect('summaryai://calendar/error?message=invalid_state');
+      sendError('invalid_state');
       return;
     }
 
@@ -269,14 +578,14 @@ calendarCallbackRouter.get('/callback/microsoft', async (req: Request, res: Resp
 
     if (stateError || !storedState) {
       console.error('[Calendar] Microsoft state not found or expired');
-      res.redirect('summaryai://calendar/error?message=invalid_state');
+      sendError('invalid_state');
       return;
     }
 
     // Check expiry
     if (new Date(storedState.expires_at) < new Date()) {
       await supabaseAdmin.from('oauth_states').delete().eq('state', state);
-      res.redirect('summaryai://calendar/error?message=state_expired');
+      sendError('state_expired');
       return;
     }
 
@@ -325,7 +634,7 @@ calendarCallbackRouter.get('/callback/microsoft', async (req: Request, res: Resp
 
     if (upsertError) {
       console.error('[Calendar] Failed to save Microsoft connection:', upsertError);
-      res.redirect('summaryai://calendar/error?message=save_failed');
+      sendError('save_failed');
       return;
     }
 
@@ -355,13 +664,11 @@ calendarCallbackRouter.get('/callback/microsoft', async (req: Request, res: Resp
       console.error(`[Calendar] Initial Microsoft sync failed for ${userEmail}:`, err);
     });
 
-    // Redirect back to app with success
-    res.redirect(
-      `summaryai://calendar/connected?provider=microsoft&email=${encodeURIComponent(userEmail)}`
-    );
+    // Send success response
+    sendSuccess('microsoft', userEmail);
   } catch (error) {
     console.error('[Calendar] Microsoft OAuth callback error:', error);
-    res.redirect('summaryai://calendar/error?message=callback_failed');
+    sendError('callback_failed');
   }
 });
 
@@ -432,7 +739,30 @@ router.delete(
       }
     }
 
-    // Delete connection (cascades to associated data)
+    // First, get the connection ID to delete associated meetings
+    const { data: connToDelete } = await supabaseAdmin
+      .from('calendar_connections')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('provider', provider)
+      .single();
+
+    if (connToDelete) {
+      // Delete all meetings that came from this calendar connection
+      // This ensures user data is properly removed when they disconnect
+      const { error: meetingsError, count } = await supabaseAdmin
+        .from('meetings')
+        .delete({ count: 'exact' })
+        .eq('calendar_connection_id', connToDelete.id);
+
+      if (meetingsError) {
+        console.error(`[Calendar] Failed to delete meetings for connection ${connToDelete.id}:`, meetingsError);
+      } else {
+        console.log(`[Calendar] Deleted ${count} meetings from ${provider} calendar for user ${userId}`);
+      }
+    }
+
+    // Delete connection
     const { error } = await supabaseAdmin
       .from('calendar_connections')
       .delete()

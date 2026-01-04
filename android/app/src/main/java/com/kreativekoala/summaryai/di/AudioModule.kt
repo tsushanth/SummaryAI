@@ -1,0 +1,26 @@
+package com.kreativekoala.summaryai.di
+
+import android.content.Context
+import android.media.AudioManager
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+
+/**
+ * Hilt module for audio-related dependencies
+ */
+@Module
+@InstallIn(SingletonComponent::class)
+object AudioModule {
+
+    @Provides
+    @Singleton
+    fun provideAudioManager(
+        @ApplicationContext context: Context
+    ): AudioManager {
+        return context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    }
+}
