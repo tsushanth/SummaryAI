@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Meeting Mind</string>
+
+    <!-- Auth -->
+    <string name="sign_in">Sign In</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="continue_with_email">Continue with Email</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+
+    <!-- Navigation -->
+    <string name="recordings">Recordings</string>
+    <string name="todos">Action Items</string>
+    <string name="meetings">Meetings</string>
+    <string name="settings">Settings</string>
+    <string name="search">Search</string>
+
+    <!-- Recording -->
+    <string name="start_recording">Start Recording</string>
+    <string name="stop_recording">Stop Recording</string>
+    <string name="pause_recording">Pause Recording</string>
+    <string name="resume_recording">Resume Recording</string>
+    <string name="recording_in_progress">Recording in progress</string>
+    <string name="recording_title">Recording Title</string>
+    <string name="untitled_recording">Untitled Recording</string>
+
+    <!-- Recordings List -->
+    <string name="all">All</string>
+    <string name="processing">Processing</string>
+    <string name="completed">Completed</string>
+    <string name="no_recordings">No recordings yet</string>
+    <string name="no_recordings_subtitle">Tap the microphone button to start your first recording</string>
+
+    <!-- Recording Detail -->
+    <string name="transcript">Transcript</string>
+    <string name="summary">Summary</string>
+    <string name="action_items">Action Items</string>
+    <string name="ask_a_question">Ask a question…</string>
+    <string name="export">Export</string>
+    <string name="share">Share</string>
+    <string name="delete">Delete</string>
+
+    <!-- Todos -->
+    <string name="add_todo">Add Action Item</string>
+    <string name="todo_title">Title</string>
+    <string name="todo_notes">Notes</string>
+    <string name="due_date">Due Date</string>
+    <string name="priority">Priority</string>
+    <string name="high">High</string>
+    <string name="medium">Medium</string>
+    <string name="low">Low</string>
+    <string name="none">None</string>
+    <string name="pending_items">Pending</string>
+    <string name="completed_items">Completed</string>
+
+    <!-- Meetings -->
+    <string name="upcoming_meetings">Upcoming Meetings</string>
+    <string name="past_meetings">Past Meetings</string>
+    <string name="join_meeting">Join Meeting</string>
+    <string name="meeting_url">Meeting URL</string>
+    <string name="paste_meeting_link">Paste your meeting link here</string>
+    <string name="send_bot">Send Bot to Meeting</string>
+    <string name="auto_join">Auto-join</string>
+
+    <!-- Calendar -->
+    <string name="connect_calendar">Connect Calendar</string>
+    <string name="google_calendar">Google Calendar</string>
+    <string name="microsoft_outlook">Microsoft Outlook</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="connected">Connected</string>
+
+    <!-- Settings -->
+    <string name="account">Account</string>
+    <string name="integrations">Integrations</string>
+    <string name="legal">Legal</string>
+    <string name="about">About</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="version">Version</string>
+    <string name="build">Build</string>
+    <string name="help_faq">Help &amp; FAQ</string>
+    <string name="contact_us">Contact Us</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="delete_account_warning">This will permanently delete your account and all recordings. This action cannot be undone.</string>
+
+    <!-- Subscription -->
+    <string name="upgrade_to_pro">Upgrade to Pro</string>
+    <string name="pro">PRO</string>
+    <string name="free">Free</string>
+    <string name="restore_purchases">Restore Purchases</string>
+    <string name="monthly">Monthly</string>
+    <string name="yearly">Yearly</string>
+    <string name="per_month">/month</string>
+    <string name="per_year">/year</string>
+
+    <!-- Export -->
+    <string name="export_pdf">Export as PDF</string>
+    <string name="export_text">Export as Text</string>
+    <string name="export_markdown">Export as Markdown</string>
+
+    <!-- Errors -->
+    <string name="error">Error</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="retry">Retry</string>
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="no_internet">No internet connection</string>
+    <string name="permission_required">Permission Required</string>
+    <string name="microphone_permission_required">Microphone permission is required to record audio</string>
+    <string name="notification_permission_required">Notification permission is required for background recording</string>
+
+    <!-- Onboarding -->
+    <string name="welcome_to_meeting_mind">Welcome to Meeting Mind</string>
+    <string name="onboarding_recording_title">Record Anything</string>
+    <string name="onboarding_recording_desc">Capture meetings, lectures, interviews, or any conversation with crystal-clear audio</string>
+    <string name="onboarding_transcribe_title">AI-Powered Transcription</string>
+    <string name="onboarding_transcribe_desc">Get accurate transcripts with speaker identification in over 120 languages</string>
+    <string name="onboarding_summary_title">Smart Summaries</string>
+    <string name="onboarding_summary_desc">AI generates concise summaries with key points and action items</string>
+    <string name="onboarding_qa_title">Ask Questions</string>
+    <string name="onboarding_qa_desc">Chat with your recordings to find specific information instantly</string>
+    <string name="get_started">Get Started</string>
+    <string name="next">Next</string>
+    <string name="skip">Skip</string>
+</resources>
