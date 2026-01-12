@@ -6,6 +6,9 @@ import type {
   UpdateMeetingRequest,
   UpdateMeetingResponse,
   Meeting,
+  LiveTranscriptResponse,
+  LiveInsightsResponse,
+  LiveInsightType,
 } from '@/types/api';
 
 export async function getMeetings(params?: {
@@ -54,4 +57,36 @@ export async function deleteMeeting(id: string): Promise<void> {
   await apiClient(`/api/meetings/${id}`, {
     method: 'DELETE',
   });
+}
+
+/**
+ * Get live transcript segments for a meeting in progress
+ */
+export async function getLiveTranscript(
+  meetingId: string,
+  since?: string
+): Promise<LiveTranscriptResponse> {
+  const searchParams = new URLSearchParams();
+  if (since) searchParams.set('since', since);
+
+  const query = searchParams.toString();
+  return apiClient<LiveTranscriptResponse>(
+    `/api/meetings/${meetingId}/live-transcript${query ? `?${query}` : ''}`
+  );
+}
+
+/**
+ * Get AI-generated insights for a meeting in progress
+ */
+export async function getLiveInsights(
+  meetingId: string,
+  type?: LiveInsightType
+): Promise<LiveInsightsResponse> {
+  const searchParams = new URLSearchParams();
+  if (type) searchParams.set('type', type);
+
+  const query = searchParams.toString();
+  return apiClient<LiveInsightsResponse>(
+    `/api/meetings/${meetingId}/live-insights${query ? `?${query}` : ''}`
+  );
 }

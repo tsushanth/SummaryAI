@@ -173,6 +173,50 @@ final class RecordingsListViewModel: ObservableObject {
         }
     }
 
+    /// Rename a recording
+    func renameRecording(_ recording: Recording, newTitle: String) async {
+        do {
+            let updatedRecording = try await apiClient.updateRecording(
+                id: recording.id,
+                title: newTitle
+            )
+
+            // Update in local list
+            if let index = recordings.firstIndex(where: { $0.id == recording.id }) {
+                recordings[index] = updatedRecording
+            }
+
+        } catch {
+            // Don't show error for auth-related issues during sign out
+            if let apiError = error as? APIError, apiError.requiresReauth {
+                return
+            }
+            showError("Failed to rename recording: \(error.localizedDescription)")
+        }
+    }
+
+    /// Toggle favorite status
+    func toggleFavorite(_ recording: Recording) async {
+        do {
+            let updatedRecording = try await apiClient.updateRecording(
+                id: recording.id,
+                isFavorite: !(recording.isFavorite ?? false)
+            )
+
+            // Update in local list
+            if let index = recordings.firstIndex(where: { $0.id == recording.id }) {
+                recordings[index] = updatedRecording
+            }
+
+        } catch {
+            // Don't show error for auth-related issues during sign out
+            if let apiError = error as? APIError, apiError.requiresReauth {
+                return
+            }
+            showError("Failed to update recording: \(error.localizedDescription)")
+        }
+    }
+
     // MARK: - Status Polling
 
     /// Start polling for status updates on processing recordings
@@ -285,9 +329,9 @@ extension RecordingStatus {
     var displayText: String {
         switch self {
         case .pending:
-            return "Pending"
+            return "Bot joining..."
         case .uploading:
-            return "Uploading..."
+            return "Recording..."
         case .uploaded:
             return "Processing..."
         case .transcribing:
@@ -310,9 +354,9 @@ extension RecordingStatus {
             return "green"
         case .failed:
             return "red"
-        case .uploading, .uploaded, .transcribing, .summarizing:
+        case .pending, .uploading, .uploaded, .transcribing, .summarizing:
             return "orange"
-        case .pending, .transcribed:
+        case .transcribed:
             return "blue"
         }
     }

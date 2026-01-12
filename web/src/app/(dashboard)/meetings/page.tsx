@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -20,6 +20,8 @@ import type { CreateMeetingRequest } from '@/types/api';
 
 export default function MeetingsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSyncingAfterConnect, setIsSyncingAfterConnect] = useState(false);
+  const prevConnectionCount = useRef<number>(0);
 
   // Calendar hooks
   const { connections, isLoading: isLoadingConnections } = useCalendarConnections();
@@ -28,12 +30,32 @@ export default function MeetingsPage() {
   const { sync, isSyncing } = useSyncCalendars();
 
   // Meetings hooks
-  const { meetings, isLoading: isLoadingMeetings, refresh: refreshMeetings } = useMeetings();
+  const { meetings, isLoading: isLoadingMeetings, refresh: refreshMeetings, isValidating: isRefreshing } = useMeetings();
   const { create, isCreating } = useCreateMeeting();
   const { update, isUpdating } = useUpdateMeeting();
 
   const hasGoogleConnection = connections.some((c) => c.provider === 'google');
   const hasMicrosoftConnection = connections.some((c) => c.provider === 'microsoft');
+
+  // When a new calendar is connected, refresh meetings after a delay
+  // (backend syncs meetings in background after OAuth callback)
+  useEffect(() => {
+    if (!isLoadingConnections && connections.length > prevConnectionCount.current) {
+      // New connection detected - show syncing state and poll for meetings
+      setIsSyncingAfterConnect(true);
+
+      // Poll for meetings a few times to catch the background sync
+      const pollMeetings = async () => {
+        for (let i = 0; i < 5; i++) {
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
+          await refreshMeetings();
+        }
+        setIsSyncingAfterConnect(false);
+      };
+      pollMeetings();
+    }
+    prevConnectionCount.current = connections.length;
+  }, [connections.length, isLoadingConnections, refreshMeetings]);
 
   const handleAddMeeting = async (data: CreateMeetingRequest) => {
     await create(data);
@@ -46,7 +68,7 @@ export default function MeetingsPage() {
   const handleDisconnect = async (provider: 'google' | 'microsoft') => {
     await disconnect(provider);
     // Refresh meetings list since backend deletes calendar-sourced meetings on disconnect
-    refreshMeetings();
+    await refreshMeetings();
   };
 
   const upcomingMeetings = meetings.filter(
@@ -145,14 +167,17 @@ export default function MeetingsPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Upcoming Meetings</h2>
-          <Button variant="ghost" size="sm" onClick={() => refreshMeetings()}>
-            <RefreshCw className="w-4 h-4" />
+          <Button variant="ghost" size="sm" onClick={() => refreshMeetings()} disabled={isRefreshing}>
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </Button>
         </div>
 
-        {isLoadingMeetings ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        {isLoadingMeetings || isSyncingAfterConnect ? (
+          <div className="flex flex-col items-center justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-primary mb-2" />
+            {isSyncingAfterConnect && (
+              <p className="text-sm text-gray-500">Syncing calendar events...</p>
+            )}
           </div>
         ) : upcomingMeetings.length === 0 ? (
           <Card className="p-6 text-center">

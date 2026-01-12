@@ -149,6 +149,45 @@ class RecordingsRepository @Inject constructor(
     }
 
     /**
+     * Update speaker names for a recording's transcript
+     */
+    suspend fun updateSpeakerNames(
+        recordingId: String,
+        speakerNames: Map<String, String>
+    ): Result<Transcript> = withContext(Dispatchers.IO) {
+        try {
+            val response = api.updateSpeakerNames(recordingId, UpdateSpeakerNamesRequest(speakerNames))
+            Result.success(response.transcript.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Toggle favorite status for a recording
+     */
+    suspend fun toggleFavorite(recordingId: String, isFavorite: Boolean): Result<Recording> = withContext(Dispatchers.IO) {
+        try {
+            val response = api.updateRecording(recordingId, UpdateRecordingRequest(isFavorite = isFavorite))
+            Result.success(response.recording.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Rename a recording
+     */
+    suspend fun renameRecording(recordingId: String, title: String): Result<Recording> = withContext(Dispatchers.IO) {
+        try {
+            val response = api.updateRecording(recordingId, UpdateRecordingRequest(title = title))
+            Result.success(response.recording.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
      * Poll for recording status updates
      */
     fun pollRecordingStatus(recordingId: String, intervalMs: Long = 3000): Flow<Recording> = flow {
@@ -173,8 +212,8 @@ class RecordingsRepository @Inject constructor(
 // Extension functions to convert DTOs to domain models
 private fun RecordingDto.toDomain() = Recording(
     id = id,
-    title = title,
-    durationSeconds = durationSeconds,
+    title = title ?: "Recording",
+    durationSeconds = durationSeconds ?: 0,
     status = when (status) {
         RecordingStatus.PENDING -> com.kreativekoala.summaryai.domain.model.RecordingStatus.PENDING
         RecordingStatus.UPLOADING -> com.kreativekoala.summaryai.domain.model.RecordingStatus.UPLOADING
@@ -186,35 +225,47 @@ private fun RecordingDto.toDomain() = Recording(
         RecordingStatus.FAILED -> com.kreativekoala.summaryai.domain.model.RecordingStatus.FAILED
     },
     audioUrl = audioUrl,
-    createdAt = createdAt
+    createdAt = createdAt ?: "",
+    isFavorite = isFavorite ?: false,
+    recordingType = when (recordingType) {
+        RecordingType.GENERAL -> com.kreativekoala.summaryai.domain.model.RecordingType.GENERAL
+        RecordingType.MEETING -> com.kreativekoala.summaryai.domain.model.RecordingType.MEETING
+        RecordingType.LECTURE -> com.kreativekoala.summaryai.domain.model.RecordingType.LECTURE
+        RecordingType.INTERVIEW -> com.kreativekoala.summaryai.domain.model.RecordingType.INTERVIEW
+        RecordingType.VOICE_MEMO -> com.kreativekoala.summaryai.domain.model.RecordingType.VOICE_MEMO
+        RecordingType.IMPORTED -> com.kreativekoala.summaryai.domain.model.RecordingType.IMPORTED
+        null -> null
+    },
+    meetingId = meetingId
 )
 
 private fun GetRecordingResponse.toDomain() = RecordingDetail(
-    recording = recording.toDomain(),
+    recording = recording.toDomain().copy(audioUrl = audioUrl ?: recording.audioUrl),
     transcript = transcript?.toDomain(),
     summary = summary?.toDomain()
 )
 
 private fun TranscriptDto.toDomain() = Transcript(
-    id = id,
+    id = id ?: "",
     fullText = fullText ?: "",
     segments = segments?.map { it.toDomain() } ?: emptyList(),
     language = language,
-    wordCount = wordCount ?: 0
+    wordCount = wordCount ?: 0,
+    speakerNames = speakerNames
 )
 
 private fun TranscriptSegmentDto.toDomain() = TranscriptSegment(
-    startTime = startTime,
-    endTime = endTime,
-    text = text,
+    startTime = startTime ?: 0.0,
+    endTime = endTime ?: 0.0,
+    text = text ?: "",
     speaker = speaker
 )
 
 private fun SummaryDto.toDomain() = Summary(
-    id = id,
+    id = id ?: "",
     shortSummary = shortSummary ?: "",
     detailedSummary = detailedSummary,
     keyPoints = keyPoints ?: emptyList(),
-    actionItems = actionItems?.map { it.title } ?: emptyList(),
+    actionItems = actionItems?.mapNotNull { it.title } ?: emptyList(),
     topics = topics ?: emptyList()
 )

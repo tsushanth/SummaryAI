@@ -1,5 +1,6 @@
 // Recording types
 export type RecordingStatus =
+  | 'pending'
   | 'uploading'
   | 'uploaded'
   | 'transcribing'
@@ -55,6 +56,8 @@ export interface Transcript {
   speaker_count: number;
   language: string;
   created_at: string;
+  /** Maps speaker_index (as string) to custom speaker name */
+  speaker_names?: Record<string, string>;
 }
 
 export interface ActionItem {
@@ -273,4 +276,139 @@ export interface UpdateMeetingRequest {
 
 export interface UpdateMeetingResponse {
   meeting: Meeting;
+}
+
+// Live Transcript types
+export interface LiveTranscriptSegment {
+  id: string;
+  meeting_id: string;
+  bot_run_id: string;
+  user_id: string;
+  segment_text: string;
+  speaker_id: string | null;
+  speaker_name: string | null;
+  is_host: boolean;
+  start_timestamp: number;
+  end_timestamp: number;
+  words: Array<{
+    text: string;
+    start_timestamp: number;
+    end_timestamp: number;
+  }> | null;
+  is_partial: boolean;
+  created_at: string;
+}
+
+export interface LiveTranscriptResponse {
+  segments: LiveTranscriptSegment[];
+  has_more: boolean;
+}
+
+export type LiveInsightType = 'fact_check' | 'key_point' | 'question' | 'contradiction';
+export type VerificationStatus = 'verified' | 'disputed' | 'false' | 'unknown';
+
+export interface LiveInsight {
+  id: string;
+  meeting_id: string;
+  user_id: string;
+  insight_type: LiveInsightType;
+  content: string;
+  context: string | null;
+  related_meeting_id: string | null;
+  related_recording_id: string | null;
+  confidence: number | null;
+  verification_status: VerificationStatus | null;
+  timestamp_seconds: number | null;
+  created_at: string;
+}
+
+export interface LiveInsightsResponse {
+  insights: LiveInsight[];
+}
+
+// Phone Call types
+export type PhoneCallStatus =
+  | 'initiated'
+  | 'ringing'
+  | 'in_progress'
+  | 'recording'
+  | 'completed'
+  | 'failed'
+  | 'busy'
+  | 'no_answer'
+  | 'cancelled';
+
+export interface VerifiedPhone {
+  id: string;
+  phone_number: string;
+  verified_at: string;
+  created_at: string;
+}
+
+export interface PhoneCall {
+  id: string;
+  user_id: string;
+  from_number: string;
+  to_number: string;
+  to_name: string | null;
+  twilio_call_sid: string | null;
+  conference_sid: string | null;
+  conference_name: string | null;
+  recording_sid: string | null;
+  status: PhoneCallStatus;
+  is_recording: boolean;
+  recording_url: string | null;
+  recording_duration: number | null;
+  recording_id: string | null;
+  started_at: string | null;
+  answered_at: string | null;
+  recording_started_at: string | null;
+  ended_at: string | null;
+  created_at: string;
+}
+
+export interface ListVerifiedPhonesResponse {
+  phones: VerifiedPhone[];
+}
+
+export interface ListPhoneCallsResponse {
+  calls: PhoneCall[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface SendVerificationRequest {
+  phone_number: string;
+}
+
+export interface CheckVerificationRequest {
+  phone_number: string;
+  code: string;
+}
+
+export interface CheckVerificationResponse {
+  verified: boolean;
+  phone: VerifiedPhone;
+}
+
+export interface InitiateCallRequest {
+  from: string;
+  to: string;
+  to_name?: string;
+}
+
+export interface InitiateCallResponse {
+  call_id: string;
+  status: PhoneCallStatus;
+  twilio_call_sid: string;
+}
+
+export interface StartRecordingResponse {
+  recording: boolean;
+  conference_name: string;
+}
+
+export interface PhoneCallResponse {
+  call: PhoneCall;
 }

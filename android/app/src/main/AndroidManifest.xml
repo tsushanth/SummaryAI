@@ -8,14 +8,23 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <!-- Audio recording feature -->
     <uses-feature
         android:name="android.hardware.microphone"
         android:required="true" />
+
+    <!-- Telephony feature (optional - app works without it but enhanced with it) -->
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
 
     <application
         android:name=".MeetingMindApplication"
@@ -29,6 +38,26 @@
         android:theme="@style/Theme.MeetingMind"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+
+        <!--
+        Foreground Service Permission Declarations for Play Store
+        Purpose: Recording audio during meetings and phone calls, and media playback
+        -->
+
+        <!-- Microphone foreground service: Used for recording audio during meetings and phone calls -->
+        <property
+            android:name="android.app.PROPERTY_FOREGROUND_SERVICE_MICROPHONE_DECLARATION"
+            android:value="Meeting Mind uses the microphone to record meetings and phone calls for transcription. Recording only occurs when the user explicitly starts a recording session." />
+
+        <!-- Media playback foreground service: Used for playing back recorded audio -->
+        <property
+            android:name="android.app.PROPERTY_FOREGROUND_SERVICE_MEDIA_PLAYBACK_DECLARATION"
+            android:value="Meeting Mind uses media playback to play recorded meetings and phone calls. Playback continues in the background so users can listen while using other apps." />
+
+        <!-- Phone call foreground service: Used for VoIP calling -->
+        <property
+            android:name="android.app.PROPERTY_FOREGROUND_SERVICE_PHONE_CALL_DECLARATION"
+            android:value="Meeting Mind uses VoIP calling to make phone calls through the app. This enables automatic recording and transcription of phone conversations." />
 
         <!-- Main Activity -->
         <activity
@@ -70,13 +99,15 @@
         <service
             android:name=".service.AudioRecordingService"
             android:exported="false"
-            android:foregroundServiceType="microphone" />
+            android:foregroundServiceType="microphone"
+            android:description="@string/service_description_recording" />
 
         <!-- Media Session Service for audio playback -->
         <service
             android:name=".service.PlaybackService"
             android:exported="true"
-            android:foregroundServiceType="mediaPlayback">
+            android:foregroundServiceType="mediaPlayback"
+            android:description="@string/service_description_playback">
             <intent-filter>
                 <action android:name="androidx.media3.session.MediaSessionService" />
             </intent-filter>

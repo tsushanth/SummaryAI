@@ -2,6 +2,7 @@ package com.kreativekoala.summaryai.service
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -20,6 +21,7 @@ import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.Google
+import io.github.jan.supabase.gotrue.providers.builtin.IDToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -30,6 +32,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
+
+private const val TAG = "AuthService"
 
 /**
  * Authentication service handling Google Sign-In with Supabase
@@ -135,15 +139,22 @@ class AuthService @Inject constructor(
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             val account = task.getResult(ApiException::class.java)
 
-            // Exchange Google ID token for Supabase session
+            // Get Google ID token
             val idToken = account?.idToken
                 ?: return Result.failure(Exception("No ID token received"))
 
-            // Sign in with Google using the ID token
-            supabase.auth.signInWith(Google)
+            Log.d(TAG, "Got Google ID token, exchanging with Supabase...")
+
+            // Exchange Google ID token directly with Supabase (no web redirect)
+            supabase.auth.signInWith(IDToken) {
+                this.idToken = idToken
+                provider = Google
+            }
 
             val session = supabase.auth.currentSessionOrNull()
                 ?: return Result.failure(Exception("Failed to get session"))
+
+            Log.d(TAG, "Got Supabase session for user: ${session.user?.email}")
 
             // Save tokens
             tokenManager.saveTokens(
@@ -161,9 +172,9 @@ class AuthService @Inject constructor(
                     id = user?.id ?: "",
                     email = user?.email ?: "",
                     fullName = user?.userMetadata?.get("full_name")?.toString()
-                        ?: account?.displayName,
+                        ?: account.displayName,
                     avatarUrl = user?.userMetadata?.get("avatar_url")?.toString()
-                        ?: account?.photoUrl?.toString(),
+                        ?: account.photoUrl?.toString(),
                     provider = AuthProvider.GOOGLE,
                     subscriptionStatus = SubscriptionStatus.FREE,
                     subscriptionExpiresAt = null
@@ -173,12 +184,14 @@ class AuthService @Inject constructor(
 
             Result.success(Unit)
         } catch (e: ApiException) {
+            Log.e(TAG, "Google sign-in API exception: ${e.statusCode}", e)
             _authState.value = _authState.value.copy(
                 isLoading = false,
                 error = "Google sign-in failed: ${e.statusCode}"
             )
             Result.failure(e)
         } catch (e: Exception) {
+            Log.e(TAG, "Sign-in exception: ${e.message}", e)
             _authState.value = _authState.value.copy(
                 isLoading = false,
                 error = e.message

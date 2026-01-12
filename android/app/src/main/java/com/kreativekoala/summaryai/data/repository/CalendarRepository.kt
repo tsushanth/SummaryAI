@@ -30,12 +30,9 @@ class CalendarRepository @Inject constructor(
     /**
      * Get OAuth URL for connecting a calendar
      */
-    suspend fun getAuthUrl(
-        provider: String,
-        redirectUri: String = "summaryai://calendar/connected"
-    ): Result<String> = withContext(Dispatchers.IO) {
+    suspend fun getAuthUrl(provider: String): Result<String> = withContext(Dispatchers.IO) {
         try {
-            val response = api.getCalendarAuthUrl(provider, redirectUri)
+            val response = api.connectCalendar(provider)
             Result.success(response.url)
         } catch (e: Exception) {
             Result.failure(e)
@@ -72,6 +69,6 @@ private fun CalendarConnectionDto.toDomain() = CalendarConnection(
     id = id,
     provider = provider,
     providerEmail = providerEmail,
-    isActive = isActive,
-    lastSyncAt = lastSyncAt
+    syncEnabled = syncEnabled,
+    lastSyncedAt = lastSyncedAt
 )

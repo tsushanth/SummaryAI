@@ -5,6 +5,8 @@ import android.content.pm.PackageInfo
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kreativekoala.summaryai.data.preferences.ThemeMode
+import com.kreativekoala.summaryai.data.preferences.ThemePreferences
 import com.kreativekoala.summaryai.data.repository.CalendarRepository
 import com.kreativekoala.summaryai.domain.model.User
 import com.kreativekoala.summaryai.service.AuthService
@@ -19,6 +21,7 @@ import javax.inject.Inject
 data class SettingsUiState(
     val user: User? = null,
     val hasCalendarConnected: Boolean = false,
+    val themeMode: ThemeMode = ThemeMode.LIGHT,
     val appVersion: String = "",
     val buildNumber: String = "",
     val isDeleting: Boolean = false,
@@ -30,7 +33,8 @@ data class SettingsUiState(
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val authService: AuthService,
-    private val calendarRepository: CalendarRepository
+    private val calendarRepository: CalendarRepository,
+    private val themePreferences: ThemePreferences
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -39,6 +43,7 @@ class SettingsViewModel @Inject constructor(
     init {
         loadData()
         loadAppInfo()
+        loadThemePreference()
     }
 
     private fun loadData() {
@@ -54,9 +59,23 @@ class SettingsViewModel @Inject constructor(
             val result = calendarRepository.getConnections()
             result.onSuccess { connections ->
                 _uiState.value = _uiState.value.copy(
-                    hasCalendarConnected = connections.any { it.isActive }
+                    hasCalendarConnected = connections.any { it.syncEnabled }
                 )
             }
+        }
+    }
+
+    private fun loadThemePreference() {
+        viewModelScope.launch {
+            themePreferences.themeMode.collect { mode ->
+                _uiState.value = _uiState.value.copy(themeMode = mode)
+            }
+        }
+    }
+
+    fun setThemeMode(mode: ThemeMode) {
+        viewModelScope.launch {
+            themePreferences.setThemeMode(mode)
         }
     }
 

@@ -51,7 +51,7 @@ data class Meeting(
     val title: String,
     val meetingUrl: String?,
     val platform: String?,
-    val startTime: String,
+    val startTime: String?,
     val endTime: String?,
     val status: MeetingStatus,
     val botStatus: BotStatus?,
@@ -84,8 +84,8 @@ data class CalendarConnection(
     val id: String,
     val provider: String,
     val providerEmail: String?,
-    val isActive: Boolean,
-    val lastSyncAt: String?
+    val syncEnabled: Boolean,
+    val lastSyncedAt: String?
 ) {
     val providerDisplayName: String
         get() = when (provider.lowercase()) {
@@ -99,4 +99,32 @@ data class CalendarConnection(
 
     val isMicrosoft: Boolean
         get() = provider.lowercase() == "microsoft"
+}
+
+/**
+ * Live transcript segment during a meeting
+ */
+data class LiveTranscriptSegment(
+    val id: String,
+    val meetingId: String,
+    val segmentText: String,
+    val speakerId: String?,
+    val speakerName: String?,
+    val isHost: Boolean,
+    val startTimestamp: Double,
+    val endTimestamp: Double,
+    val isPartial: Boolean,
+    val createdAt: String
+) {
+    val displaySpeakerName: String
+        get() = speakerName?.takeIf { it.isNotBlank() }
+            ?: speakerId?.let { "Speaker $it" }
+            ?: "Unknown"
+
+    val formattedTimestamp: String
+        get() {
+            val mins = (startTimestamp / 60).toInt()
+            val secs = (startTimestamp % 60).toInt()
+            return String.format("%d:%02d", mins, secs)
+        }
 }

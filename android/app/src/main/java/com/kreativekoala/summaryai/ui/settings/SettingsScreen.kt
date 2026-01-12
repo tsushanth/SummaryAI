@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.summaryai.R
+import com.kreativekoala.summaryai.data.preferences.ThemeMode
 import com.kreativekoala.summaryai.domain.model.User
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,6 +68,14 @@ fun SettingsScreen(
                 SettingsSection(title = stringResource(R.string.account)) {
                     AccountCard(user = user, onUpgradeClick = onUpgradeClick)
                 }
+            }
+
+            // Appearance Section
+            SettingsSection(title = "Appearance") {
+                ThemeSelector(
+                    currentMode = uiState.themeMode,
+                    onModeSelected = viewModel::setThemeMode
+                )
             }
 
             // Integrations Section
@@ -344,6 +353,85 @@ private fun AccountCard(user: User, onUpgradeClick: () -> Unit) {
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ThemeSelector(
+    currentMode: ThemeMode,
+    onModeSelected: (ThemeMode) -> Unit
+) {
+    Column {
+        ThemeOption(
+            icon = Icons.Default.LightMode,
+            title = "Light",
+            subtitle = "Always use light theme",
+            isSelected = currentMode == ThemeMode.LIGHT,
+            onClick = { onModeSelected(ThemeMode.LIGHT) }
+        )
+        HorizontalDivider(modifier = Modifier.padding(start = 56.dp))
+        ThemeOption(
+            icon = Icons.Default.DarkMode,
+            title = "Dark",
+            subtitle = "Always use dark theme",
+            isSelected = currentMode == ThemeMode.DARK,
+            onClick = { onModeSelected(ThemeMode.DARK) }
+        )
+        HorizontalDivider(modifier = Modifier.padding(start = 56.dp))
+        ThemeOption(
+            icon = Icons.Default.SettingsBrightness,
+            title = "System",
+            subtitle = "Follow system setting",
+            isSelected = currentMode == ThemeMode.SYSTEM,
+            onClick = { onModeSelected(ThemeMode.SYSTEM) }
+        )
+    }
+}
+
+@Composable
+private fun ThemeOption(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    subtitle: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(onClick = onClick) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            if (isSelected) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = "Selected",
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         }

@@ -1,4 +1,5 @@
 import SwiftUI
+import AVFoundation
 
 // MARK: - Recording Detail View Wrapper
 
@@ -18,12 +19,19 @@ struct RecordingDetailView: View {
 struct RecordingDetailContentView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel: RecordingDetailViewModel
+    @StateObject private var liveTranscriptViewModel: LiveTranscriptViewModel
     @State private var selectedTab: DetailTab = .summary
     @State private var showShareSheet = false
     @State private var showDeleteConfirmation = false
+    @State private var showLiveTranscript = false
+
+    private let apiClient: SummaryAIAPIClient
 
     init(recordingId: String, apiClient: SummaryAIAPIClient) {
+        self.apiClient = apiClient
         _viewModel = StateObject(wrappedValue: RecordingDetailViewModel(recordingId: recordingId, apiClient: apiClient))
+        // Initialize with empty meeting ID - will be updated when recording loads
+        _liveTranscriptViewModel = StateObject(wrappedValue: LiveTranscriptViewModel(meetingId: "", apiClient: apiClient))
     }
 
     var body: some View {
@@ -88,9 +96,19 @@ struct RecordingDetailContentView: View {
         }
         .task {
             await viewModel.loadRecording()
+            // Auto-select transcript tab with live mode if this is a live meeting
+            if let recording = viewModel.recording, recording.isLiveMeeting {
+                selectedTab = .transcript
+                showLiveTranscript = true
+                if let meetingId = recording.meetingId {
+                    liveTranscriptViewModel.updateMeetingId(meetingId)
+                    liveTranscriptViewModel.startPolling()
+                }
+            }
         }
         .onDisappear {
             viewModel.stopStatusPolling()
+            liveTranscriptViewModel.stopPolling()
         }
         .refreshable {
             await viewModel.refreshRecording()
@@ -155,14 +173,8 @@ struct RecordingDetailContentView: View {
                 processingBanner
             }
 
-            // Tab picker
-            Picker("Section", selection: $selectedTab) {
-                ForEach(DetailTab.allCases) { tab in
-                    Text(tab.title).tag(tab)
-                }
-            }
-            .pickerStyle(.segmented)
-            .padding()
+            // Styled tab picker with icons
+            styledTabPicker
 
             // Tab content
             TabView(selection: $selectedTab) {
@@ -172,8 +184,8 @@ struct RecordingDetailContentView: View {
                 transcriptTabView
                     .tag(DetailTab.transcript)
 
-                qaTabView
-                    .tag(DetailTab.qa)
+                chatTabView
+                    .tag(DetailTab.chat)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
 
@@ -205,40 +217,83 @@ struct RecordingDetailContentView: View {
 
     private var processingBanner: some View {
         HStack(spacing: 12) {
-            ProgressView()
-                .scaleEffect(0.8)
+            if viewModel.recording?.isLiveMeeting == true {
+                // Live meeting indicator
+                Circle()
+                    .fill(Color.red)
+                    .frame(width: 10, height: 10)
 
-            Text(viewModel.recording?.status.displayText ?? "Processing...")
-                .font(.subheadline)
+                Text("Live Recording in Progress")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+            } else {
+                ProgressView()
+                    .scaleEffect(0.8)
+
+                Text(viewModel.recording?.status.displayText ?? "Processing...")
+                    .font(.subheadline)
+            }
 
             Spacer()
         }
         .padding()
-        .background(Color.orange.opacity(0.15))
-        .foregroundColor(.orange)
+        .background(viewModel.recording?.isLiveMeeting == true ? Color.red.opacity(0.15) : Color.orange.opacity(0.15))
+        .foregroundColor(viewModel.recording?.isLiveMeeting == true ? .red : .orange)
+    }
+
+    // MARK: - Styled Tab Picker
+
+    private var styledTabPicker: some View {
+        HStack(spacing: 0) {
+            ForEach(DetailTab.allCases) { tab in
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        selectedTab = tab
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: tab.icon)
+                            .font(.system(size: 14))
+                        Text(tab.title)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundColor(selectedTab == tab ? .blue : .secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(selectedTab == tab ? Color.blue.opacity(0.1) : Color.clear)
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(4)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
+        .padding(.horizontal)
+        .padding(.vertical, 8)
     }
 
     // MARK: - Summary Tab
 
     private var summaryTabView: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                // Recording metadata
-                metadataSection
-
+            VStack(alignment: .leading, spacing: 20) {
                 if let summary = viewModel.summary {
-                    // Summary text
-                    summarySection(summary)
-
-                    // Key points
-                    if !summary.keyPoints.isEmpty {
-                        keyPointsSection(summary.keyPoints)
-                    }
-
-                    // Action items
+                    // Action items section (with blue checkmarks)
                     if let actionItems = summary.actionItems, !actionItems.isEmpty {
                         actionItemsSection(actionItems)
                     }
+
+                    // Overview section (key points as bullet list)
+                    if !summary.keyPoints.isEmpty {
+                        overviewSection(summary.keyPoints)
+                    }
+
+                    // Main summary section
+                    summarySection(summary)
 
                     // Topics
                     if let topics = summary.topics, !topics.isEmpty {
@@ -319,29 +374,63 @@ struct RecordingDetailContentView: View {
         }
     }
 
-    private func actionItemsSection(_ actionItems: [ActionItem]) -> some View {
+    private func overviewSection(_ keyPoints: [String]) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Action Items")
-                .font(.headline)
+            // Header with sparkle icon
+            HStack(spacing: 8) {
+                Image(systemName: "sparkles")
+                    .foregroundColor(.orange)
+                Text("Overview")
+                    .font(.headline)
+            }
 
             VStack(alignment: .leading, spacing: 8) {
-                ForEach(actionItems) { item in
+                ForEach(keyPoints, id: \.self) { point in
                     HStack(alignment: .top, spacing: 8) {
-                        Image(systemName: "square")
-                            .foregroundColor(.blue)
-                            .font(.subheadline)
+                        Text("•")
+                            .font(.body)
+                            .foregroundColor(.secondary)
+
+                        Text(point)
+                            .font(.body)
+                    }
+                }
+            }
+        }
+    }
+
+    private func actionItemsSection(_ actionItems: [ActionItem]) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(actionItems) { item in
+                    HStack(alignment: .top, spacing: 12) {
+                        // Blue checkmark circle
+                        ZStack {
+                            Circle()
+                                .fill(Color.blue)
+                                .frame(width: 22, height: 22)
+
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(.white)
+                        }
 
                         VStack(alignment: .leading, spacing: 2) {
                             Text(item.task)
                                 .font(.body)
 
                             if let assignee = item.assignee {
-                                Text("Assigned to: \(assignee)")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                                HStack(spacing: 4) {
+                                    Image(systemName: "person.fill")
+                                        .font(.caption2)
+                                    Text(assignee)
+                                }
+                                .font(.caption)
+                                .foregroundColor(.secondary)
                             }
                         }
                     }
+                    .padding(.vertical, 4)
                 }
             }
         }
@@ -369,6 +458,170 @@ struct RecordingDetailContentView: View {
     // MARK: - Transcript Tab
 
     private var transcriptTabView: some View {
+        VStack(spacing: 0) {
+            // Live/Full toggle for live meetings
+            if viewModel.recording?.isLiveMeeting == true {
+                transcriptModeToggle
+            }
+
+            // Content based on mode
+            if showLiveTranscript && viewModel.recording?.isLiveMeeting == true {
+                liveTranscriptContent
+            } else {
+                fullTranscriptContent
+            }
+        }
+    }
+
+    private var transcriptModeToggle: some View {
+        HStack(spacing: 0) {
+            // Live button
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    showLiveTranscript = true
+                    if let meetingId = viewModel.recording?.meetingId {
+                        liveTranscriptViewModel.updateMeetingId(meetingId)
+                        liveTranscriptViewModel.startPolling()
+                    }
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(Color.red)
+                        .frame(width: 8, height: 8)
+                    Text("Live")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                }
+                .foregroundColor(showLiveTranscript ? .red : .secondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(showLiveTranscript ? Color.red.opacity(0.1) : Color.clear)
+                )
+            }
+            .buttonStyle(.plain)
+
+            // Full button
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    showLiveTranscript = false
+                    liveTranscriptViewModel.stopPolling()
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "doc.text")
+                        .font(.system(size: 12))
+                    Text("Full")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                }
+                .foregroundColor(!showLiveTranscript ? .blue : .secondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(!showLiveTranscript ? Color.blue.opacity(0.1) : Color.clear)
+                )
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(4)
+        .background(Color(.tertiarySystemBackground))
+        .cornerRadius(10)
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+    }
+
+    private var liveTranscriptContent: some View {
+        VStack(spacing: 0) {
+            // Live indicator banner
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(Color.red)
+                    .frame(width: 10, height: 10)
+                    .overlay(
+                        Circle()
+                            .stroke(Color.red.opacity(0.3), lineWidth: 3)
+                            .scaleEffect(1.4)
+                    )
+
+                Text("Live")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.red)
+
+                Spacer()
+
+                Text("\(liveTranscriptViewModel.segments.count) segments")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 8)
+            .background(Color.red.opacity(0.05))
+
+            // Live transcript content
+            if liveTranscriptViewModel.segments.isEmpty {
+                VStack(spacing: 16) {
+                    Image(systemName: "waveform")
+                        .font(.system(size: 48))
+                        .foregroundColor(.gray.opacity(0.5))
+
+                    Text("Waiting for transcript...")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+
+                    Text("Transcript will appear here as the meeting progresses")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+
+                    if liveTranscriptViewModel.isLoading {
+                        ProgressView()
+                            .padding(.top, 8)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding()
+            } else {
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 12) {
+                            ForEach(liveTranscriptViewModel.segments) { segment in
+                                LiveSegmentRow(
+                                    segment: segment,
+                                    timestamp: liveTranscriptViewModel.formatTimestamp(segment.startTimestamp),
+                                    colorIndex: liveTranscriptViewModel.colorIndex(for: segment.speakerId)
+                                )
+                                .id(segment.id)
+                            }
+                        }
+                        .padding()
+                    }
+                    .onChange(of: liveTranscriptViewModel.segments.count) { _, _ in
+                        if let lastId = liveTranscriptViewModel.segments.last?.id {
+                            withAnimation(.easeOut(duration: 0.2)) {
+                                proxy.scrollTo(lastId, anchor: .bottom)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .onAppear {
+            if let meetingId = viewModel.recording?.meetingId {
+                liveTranscriptViewModel.updateMeetingId(meetingId)
+                liveTranscriptViewModel.startPolling()
+            }
+        }
+        .onDisappear {
+            liveTranscriptViewModel.stopPolling()
+        }
+    }
+
+    private var fullTranscriptContent: some View {
         Group {
             if let transcript = viewModel.transcript, !transcript.segments.isEmpty {
                 ScrollViewReader { proxy in
@@ -402,49 +655,90 @@ struct RecordingDetailContentView: View {
         }
     }
 
-    // MARK: - Q&A Tab
+    // MARK: - Chat Tab
 
-    private var qaTabView: some View {
+    private var chatTabView: some View {
         VStack(spacing: 0) {
-            // Q&A History
+            // Chat content
             if viewModel.qaHistory.isEmpty && viewModel.currentAnswer == nil {
-                emptyQAPlaceholder
+                chatWelcomeView
             } else {
-                qaHistoryList
+                chatHistoryList
             }
 
-            Divider()
-
-            // Question input
-            questionInputSection
+            // Chat input bar at bottom
+            chatInputBar
         }
     }
 
-    private var emptyQAPlaceholder: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "questionmark.bubble")
-                .font(.system(size: 48))
-                .foregroundColor(.secondary)
+    private var chatWelcomeView: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                // AI Assistant header with icon
+                HStack(spacing: 12) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.blue.opacity(0.1))
+                            .frame(width: 44, height: 44)
 
-            Text("Ask Questions")
-                .font(.headline)
+                        Image(systemName: "waveform.circle.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(.blue)
+                    }
 
-            Text("Ask questions about this recording and get AI-powered answers based on the transcript.")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
+                    Text("Meeting Mind")
+                        .font(.headline)
+                }
+                .padding(.top, 8)
+
+                // Welcome message
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Hello there! What can I answer about your recording?")
+                        .font(.body)
+                        .foregroundColor(.primary)
+                        .padding()
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(12)
+
+                    // Suggested questions
+                    VStack(spacing: 12) {
+                        SuggestedQuestionRow(
+                            text: "Key points in the meeting",
+                            onTap: {
+                                viewModel.questionText = "What are the key points discussed in this meeting?"
+                                Task { await viewModel.askQuestion() }
+                            }
+                        )
+
+                        SuggestedQuestionRow(
+                            text: "Main action items",
+                            onTap: {
+                                viewModel.questionText = "What are the main action items from this recording?"
+                                Task { await viewModel.askQuestion() }
+                            }
+                        )
+
+                        SuggestedQuestionRow(
+                            text: "Draft a follow-up email",
+                            onTap: {
+                                viewModel.questionText = "Draft a follow-up email based on this meeting"
+                                Task { await viewModel.askQuestion() }
+                            }
+                        )
+                    }
+                }
+            }
+            .padding()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    private var qaHistoryList: some View {
+    private var chatHistoryList: some View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(spacing: 16) {
                     // Current answer (if any)
                     if let currentAnswer = viewModel.currentAnswer {
-                        QAItemView(
+                        ChatMessageView(
                             item: currentAnswer,
                             isLatest: true,
                             onCitationTap: { citation in
@@ -456,7 +750,7 @@ struct RecordingDetailContentView: View {
 
                     // History
                     ForEach(viewModel.qaHistory.filter { $0.id != viewModel.currentAnswer?.id }) { item in
-                        QAItemView(
+                        ChatMessageView(
                             item: item,
                             isLatest: false,
                             onCitationTap: { citation in
@@ -478,36 +772,52 @@ struct RecordingDetailContentView: View {
         }
     }
 
-    private var questionInputSection: some View {
-        VStack(spacing: 8) {
-            if !viewModel.canAskQuestions {
-                Text("Questions available after transcription is complete")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
+    private var chatInputBar: some View {
+        VStack(spacing: 0) {
+            Divider()
 
             HStack(spacing: 12) {
-                TextField("Ask a question...", text: $viewModel.questionText, axis: .vertical)
-                    .textFieldStyle(.roundedBorder)
-                    .lineLimit(1...3)
-                    .disabled(!viewModel.canAskQuestions || viewModel.qaState == .asking)
+                // Text input field
+                HStack {
+                    TextField("Ask anything about this note", text: $viewModel.questionText, axis: .vertical)
+                        .lineLimit(1...3)
+                        .disabled(!viewModel.canAskQuestions || viewModel.qaState == .asking)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(Color(.secondarySystemBackground))
+                .cornerRadius(24)
 
+                // Mic button
                 Button {
+                    // Voice input (placeholder)
                     Task { await viewModel.askQuestion() }
                 } label: {
-                    if viewModel.qaState == .asking {
-                        ProgressView()
-                            .frame(width: 24, height: 24)
-                    } else {
-                        Image(systemName: "arrow.up.circle.fill")
-                            .font(.system(size: 28))
+                    ZStack {
+                        Circle()
+                            .fill(Color.blue)
+                            .frame(width: 48, height: 48)
+
+                        if viewModel.qaState == .asking {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else if viewModel.questionText.isEmpty {
+                            Image(systemName: "mic.fill")
+                                .font(.system(size: 20))
+                                .foregroundColor(.white)
+                        } else {
+                            Image(systemName: "arrow.up")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundColor(.white)
+                        }
                     }
                 }
-                .disabled(!viewModel.canAskQuestions || viewModel.questionText.isEmpty || viewModel.qaState == .asking)
+                .disabled(!viewModel.canAskQuestions || (viewModel.questionText.isEmpty && viewModel.qaState != .asking) || viewModel.qaState == .asking)
             }
+            .padding(.horizontal)
+            .padding(.vertical, 12)
+            .background(Color(.systemBackground))
         }
-        .padding()
-        .background(Color(.systemBackground))
     }
 
     // MARK: - Helper Functions
@@ -588,7 +898,7 @@ struct RecordingDetailContentView: View {
 enum DetailTab: String, CaseIterable, Identifiable {
     case summary
     case transcript
-    case qa
+    case chat
 
     var id: String { rawValue }
 
@@ -596,7 +906,15 @@ enum DetailTab: String, CaseIterable, Identifiable {
         switch self {
         case .summary: return "Summary"
         case .transcript: return "Transcript"
-        case .qa: return "Q&A"
+        case .chat: return "Chat"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .summary: return "list.bullet"
+        case .transcript: return "doc.text"
+        case .chat: return "bubble.left.and.bubble.right"
         }
     }
 }
@@ -790,6 +1108,123 @@ struct QAItemView: View {
     }
 }
 
+// MARK: - Suggested Question Row
+
+struct SuggestedQuestionRow: View {
+    let text: String
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack {
+                Text(text)
+                    .font(.body)
+                    .foregroundColor(.primary)
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding()
+            .background(Color(.secondarySystemBackground))
+            .cornerRadius(12)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Chat Message View
+
+struct ChatMessageView: View {
+    let item: QAItem
+    let isLatest: Bool
+    let onCitationTap: (Citation) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // User Question
+            HStack(alignment: .top, spacing: 12) {
+                Circle()
+                    .fill(Color.blue.opacity(0.1))
+                    .frame(width: 32, height: 32)
+                    .overlay(
+                        Image(systemName: "person.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(.blue)
+                    )
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("You")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+
+                    Text(item.question)
+                        .font(.body)
+                }
+
+                Spacer()
+            }
+
+            // AI Answer
+            HStack(alignment: .top, spacing: 12) {
+                Circle()
+                    .fill(Color.purple.opacity(0.1))
+                    .frame(width: 32, height: 32)
+                    .overlay(
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 14))
+                            .foregroundColor(.purple)
+                    )
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("AI Assistant")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+
+                    Text(item.answer)
+                        .font(.body)
+
+                    // Citations
+                    if !item.citations.isEmpty {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Sources:")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+
+                            ForEach(Array(item.citations.enumerated()), id: \.offset) { index, citation in
+                                Button {
+                                    onCitationTap(citation)
+                                } label: {
+                                    HStack(spacing: 4) {
+                                        Text("[\(index + 1)]")
+                                            .font(.caption)
+                                            .fontWeight(.bold)
+
+                                        Text(citation.text.prefix(50) + (citation.text.count > 50 ? "..." : ""))
+                                            .font(.caption)
+                                            .lineLimit(1)
+                                    }
+                                    .foregroundColor(.blue)
+                                }
+                            }
+                        }
+                        .padding(.top, 4)
+                    }
+                }
+
+                Spacer()
+            }
+        }
+        .padding()
+        .background(isLatest ? Color.purple.opacity(0.05) : Color(.secondarySystemBackground))
+        .cornerRadius(12)
+    }
+}
+
 // MARK: - Flow Layout (for topics)
 
 struct FlowLayout: Layout {
@@ -834,133 +1269,6 @@ struct FlowLayout: Layout {
 
             self.size = CGSize(width: maxWidth, height: currentY + lineHeight)
         }
-    }
-}
-
-// MARK: - Audio Player View
-
-/// Full-featured audio player with scrubber and speed control
-struct AudioPlayerView: View {
-    let audioURL: URL?
-    let duration: TimeInterval
-    let onSeek: ((TimeInterval) -> Void)?
-
-    @State private var isPlaying = false
-    @State private var currentTime: TimeInterval = 0
-    @State private var playbackSpeed: Float = 1.0
-
-    init(audioURL: URL?, duration: TimeInterval, onSeek: ((TimeInterval) -> Void)? = nil) {
-        self.audioURL = audioURL
-        self.duration = duration
-        self.onSeek = onSeek
-    }
-
-    var body: some View {
-        VStack(spacing: 12) {
-            // Progress slider
-            VStack(spacing: 4) {
-                Slider(value: $currentTime, in: 0...max(duration, 1)) { editing in
-                    if !editing {
-                        onSeek?(currentTime)
-                    }
-                }
-                .tint(.blue)
-
-                // Time labels
-                HStack {
-                    Text(formatTime(currentTime))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .monospacedDigit()
-
-                    Spacer()
-
-                    Text(formatTime(duration))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .monospacedDigit()
-                }
-            }
-
-            // Controls
-            HStack(spacing: 24) {
-                // Playback speed
-                Menu {
-                    Button("0.5x") { playbackSpeed = 0.5 }
-                    Button("0.75x") { playbackSpeed = 0.75 }
-                    Button("1x") { playbackSpeed = 1.0 }
-                    Button("1.25x") { playbackSpeed = 1.25 }
-                    Button("1.5x") { playbackSpeed = 1.5 }
-                    Button("2x") { playbackSpeed = 2.0 }
-                } label: {
-                    Text(String(format: "%.2gx", playbackSpeed))
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.gray.opacity(0.15))
-                        .cornerRadius(4)
-                }
-
-                Spacer()
-
-                // Skip backward
-                Button {
-                    currentTime = max(0, currentTime - 15)
-                    onSeek?(currentTime)
-                } label: {
-                    Image(systemName: "gobackward.15")
-                        .font(.title2)
-                        .foregroundColor(.primary)
-                }
-
-                // Play/Pause
-                Button {
-                    isPlaying.toggle()
-                } label: {
-                    ZStack {
-                        Circle()
-                            .fill(Color.blue)
-                            .frame(width: 56, height: 56)
-
-                        Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                            .font(.title2)
-                            .foregroundColor(.white)
-                            .offset(x: isPlaying ? 0 : 2)
-                    }
-                }
-
-                // Skip forward
-                Button {
-                    currentTime = min(duration, currentTime + 15)
-                    onSeek?(currentTime)
-                } label: {
-                    Image(systemName: "goforward.15")
-                        .font(.title2)
-                        .foregroundColor(.primary)
-                }
-
-                Spacer()
-
-                // Download button
-                Button {
-                    // Handle download
-                } label: {
-                    Image(systemName: "square.and.arrow.down")
-                        .font(.title3)
-                        .foregroundColor(.primary)
-                }
-            }
-        }
-        .padding()
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(16)
-    }
-
-    private func formatTime(_ time: TimeInterval) -> String {
-        let minutes = Int(time) / 60
-        let seconds = Int(time) % 60
-        return String(format: "%d:%02d", minutes, seconds)
     }
 }
 
@@ -1077,6 +1385,69 @@ struct ShareOptionRow: View {
             .background(Color(.secondarySystemBackground))
             .cornerRadius(12)
         }
+    }
+}
+
+// MARK: - Live Segment Row
+
+struct LiveSegmentRow: View {
+    let segment: LiveTranscriptSegment
+    let timestamp: String
+    let colorIndex: Int
+
+    private let speakerColors: [Color] = [
+        .blue, .green, .purple, .orange, .pink, .teal, .indigo, .red
+    ]
+
+    private var speakerColor: Color {
+        speakerColors[colorIndex % speakerColors.count]
+    }
+
+    private var speakerName: String {
+        if let name = segment.speakerName, !name.isEmpty {
+            return name
+        }
+        if let id = segment.speakerId {
+            return "Speaker \(id)"
+        }
+        return "Unknown"
+    }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            // Timestamp
+            Text(timestamp)
+                .font(.caption)
+                .foregroundColor(.gray)
+                .frame(width: 40, alignment: .leading)
+
+            // Content
+            VStack(alignment: .leading, spacing: 4) {
+                // Speaker badge
+                HStack(spacing: 4) {
+                    if segment.isHost {
+                        Image(systemName: "crown.fill")
+                            .font(.caption2)
+                    }
+                    Text(speakerName)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                }
+                .foregroundColor(speakerColor)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(speakerColor.opacity(0.15))
+                .cornerRadius(8)
+
+                // Transcript text
+                Text(segment.segmentText)
+                    .font(.body)
+                    .foregroundColor(.primary)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, 4)
     }
 }
 

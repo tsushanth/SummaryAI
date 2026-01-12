@@ -2,7 +2,7 @@
 
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Video, ExternalLink, Loader2 } from 'lucide-react';
+import { Video, ExternalLink, Loader2, Radio } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import type { Meeting, MeetingPlatform, MeetingStatus } from '@/types/api';
 import Link from 'next/link';
@@ -161,6 +161,15 @@ export function MeetingCard({
             </div>
             <div className="flex items-center gap-2 mt-2">
               {getStatusBadge(meeting.status)}
+              {meeting.status === 'bot_in_meeting' && (
+                <Link
+                  href={`/meetings/${meeting.id}`}
+                  className="text-xs text-red-600 hover:underline flex items-center gap-1 font-medium"
+                >
+                  <Radio className="w-3 h-3 animate-pulse" />
+                  View Live
+                </Link>
+              )}
               {meeting.recording_id && (
                 <Link
                   href={`/recordings/${meeting.recording_id}`}

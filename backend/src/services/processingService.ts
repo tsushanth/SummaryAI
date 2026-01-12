@@ -165,7 +165,7 @@ async function processRecordingAsync(
     }
 
     // Step 9: Mark as completed
-    await supabaseAdmin
+    const { error: completionError } = await supabaseAdmin
       .from('recordings')
       .update({
         status: 'completed',
@@ -177,7 +177,12 @@ async function processRecordingAsync(
       })
       .eq('id', recordingId);
 
-    console.log(`[Processing] ${jobId}: Completed successfully`);
+    if (completionError) {
+      console.error(`[Processing] ${jobId}: Failed to mark as completed:`, completionError);
+      throw new Error(`Failed to update recording status: ${completionError.message}`);
+    }
+
+    console.log(`[Processing] ${jobId}: Completed successfully, status updated to 'completed'`);
 
   } catch (error) {
     console.error(`[Processing] ${jobId}: Error:`, error);
@@ -343,6 +348,25 @@ async function extractTextFromPdf(
 }
 
 /**
+ * Format transcript with speaker labels for better context
+ */
+function formatTranscriptWithSpeakers(segments: TranscriptSegment[]): string {
+  return segments.map(segment => {
+    const timestamp = formatTimestamp(segment.start_time);
+    return `[${timestamp}] ${segment.speaker_label}: ${segment.text}`;
+  }).join('\n\n');
+}
+
+/**
+ * Format seconds to MM:SS timestamp
+ */
+function formatTimestamp(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+/**
  * Generate summary using OpenAI API
  */
 async function generateSummaryWithOpenAI(
@@ -351,23 +375,36 @@ async function generateSummaryWithOpenAI(
 ): Promise<{ summary: string; keyPoints: string[]; actionItems: any[]; topics: string[] }> {
   const openai = new OpenAI({ apiKey: config.OPENAI_API_KEY });
 
+  // Format transcript with speaker labels for better context
+  const speakerFormattedText = formatTranscriptWithSpeakers(segments);
+
   // Truncate transcript if too long (roughly 100k chars = ~25k tokens)
-  const truncatedText = fullText.length > 100000 ? fullText.substring(0, 100000) + '...' : fullText;
+  const truncatedText = speakerFormattedText.length > 100000
+    ? speakerFormattedText.substring(0, 100000) + '...'
+    : speakerFormattedText;
+
+  // Get unique speakers for the prompt
+  const uniqueSpeakers = [...new Set(segments.map(s => s.speaker_label))];
+  const speakerList = uniqueSpeakers.length > 1
+    ? `Participants: ${uniqueSpeakers.join(', ')}\n\n`
+    : '';
 
   const prompt = `Analyze this meeting transcript and provide:
-1. A concise summary (2-3 paragraphs)
-2. Key points (3-7 bullet points)
-3. Action items (if any)
+1. A concise summary (2-3 paragraphs) - attribute key statements to speakers (e.g., "John mentioned...", "Sarah proposed...")
+2. Key points (3-7 bullet points) - include speaker attribution where relevant
+3. Action items (if any) - include who committed to each action as the assignee
 4. Main topics discussed
 
-Transcript:
+${speakerList}Transcript:
 ${truncatedText}
+
+Important: When summarizing, reference speakers by name to show who said what. For action items, use the speaker's name as the assignee when they committed to do something.
 
 Respond in valid JSON format:
 {
-  "summary": "Your summary here",
-  "key_points": ["point 1", "point 2", ...],
-  "action_items": [{"task": "description", "assignee": "person or null", "priority": "high/medium/low"}],
+  "summary": "Your summary here with speaker attribution",
+  "key_points": ["point 1 (mentioned by Speaker 1)", "point 2", ...],
+  "action_items": [{"task": "description", "assignee": "Speaker name or null", "priority": "high/medium/low"}],
   "topics": ["topic1", "topic2", ...]
 }`;
 

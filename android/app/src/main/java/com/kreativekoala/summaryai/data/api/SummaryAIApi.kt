@@ -49,11 +49,23 @@ interface SummaryAIApi {
         @Body request: CompleteUploadRequest
     ): CompleteUploadResponse
 
-    @POST("api/recordings/{id}/ask")
+    @POST("api/recordings/{id}/questions")
     suspend fun askQuestion(
         @Path("id") id: String,
         @Body request: AskQuestionRequest
     ): AskQuestionResponse
+
+    @PATCH("api/recordings/{id}/speakers")
+    suspend fun updateSpeakerNames(
+        @Path("id") id: String,
+        @Body request: UpdateSpeakerNamesRequest
+    ): UpdateSpeakerNamesResponse
+
+    @PATCH("api/recordings/{id}")
+    suspend fun updateRecording(
+        @Path("id") id: String,
+        @Body request: UpdateRecordingRequest
+    ): UpdateRecordingResponse
 
     // MARK: - Todos
 
@@ -92,10 +104,10 @@ interface SummaryAIApi {
 
     @GET("api/meetings")
     suspend fun getMeetings(
-        @Query("page") page: Int = 1,
-        @Query("per_page") perPage: Int = 20,
+        @Query("limit") limit: Int = 50,
+        @Query("offset") offset: Int = 0,
         @Query("status") status: String? = null,
-        @Query("upcoming") upcoming: Boolean? = null
+        @Query("days_ahead") daysAhead: Int? = null
     ): ListMeetingsResponse
 
     @GET("api/meetings/{id}")
@@ -108,26 +120,26 @@ interface SummaryAIApi {
         @Body request: JoinMeetingRequest
     ): JoinMeetingResponse
 
-    @POST("api/meetings/{id}/schedule-bot")
-    suspend fun scheduleMeetingBot(
+    @PATCH("api/meetings/{id}")
+    suspend fun updateMeeting(
         @Path("id") id: String,
-        @Body request: ScheduleMeetingBotRequest
+        @Body request: UpdateMeetingRequest
     ): MeetingResponse
 
-    @DELETE("api/meetings/{id}/bot")
-    suspend fun cancelMeetingBot(
-        @Path("id") id: String
-    ): Response<Unit>
+    @GET("api/meetings/{id}/live-transcript")
+    suspend fun getLiveTranscript(
+        @Path("id") meetingId: String,
+        @Query("since") since: String? = null
+    ): LiveTranscriptResponse
 
     // MARK: - Calendar
 
     @GET("api/calendar/connections")
     suspend fun getCalendarConnections(): CalendarConnectionsResponse
 
-    @GET("api/calendar/auth/{provider}")
-    suspend fun getCalendarAuthUrl(
-        @Path("provider") provider: String,
-        @Query("redirect_uri") redirectUri: String
+    @POST("api/calendar/connect/{provider}")
+    suspend fun connectCalendar(
+        @Path("provider") provider: String
     ): CalendarAuthUrlResponse
 
     @DELETE("api/calendar/connections/{provider}")
@@ -145,4 +157,62 @@ interface SummaryAIApi {
 
     @DELETE("api/users/account")
     suspend fun deleteAccount(): Response<Unit>
+
+    // MARK: - Phone Verification
+
+    @POST("api/phone/verify/send")
+    suspend fun sendVerificationCode(
+        @Body request: SendVerificationRequest
+    ): SendVerificationResponse
+
+    @POST("api/phone/verify/check")
+    suspend fun checkVerificationCode(
+        @Body request: CheckVerificationRequest
+    ): CheckVerificationResponse
+
+    @GET("api/phone/verified")
+    suspend fun getVerifiedPhones(): VerifiedPhonesResponse
+
+    @DELETE("api/phone/verified/{id}")
+    suspend fun deleteVerifiedPhone(
+        @Path("id") id: String
+    ): Response<Unit>
+
+    // MARK: - VoIP
+
+    @GET("api/phone/voip/token")
+    suspend fun getVoipToken(): VoipTokenResponse
+
+    // MARK: - Phone Calls
+
+    @POST("api/phone/calls")
+    suspend fun createCall(
+        @Body request: InitiateCallRequest
+    ): CreateCallResponse
+
+    @GET("api/phone/calls")
+    suspend fun getPhoneCalls(
+        @Query("limit") limit: Int = 50,
+        @Query("offset") offset: Int = 0
+    ): ListPhoneCallsResponse
+
+    @GET("api/phone/calls/{id}")
+    suspend fun getPhoneCall(
+        @Path("id") id: String
+    ): PhoneCallResponse
+
+    @POST("api/phone/calls/{id}/record")
+    suspend fun startCallRecording(
+        @Path("id") callId: String
+    ): RecordingControlResponse
+
+    @DELETE("api/phone/calls/{id}/record")
+    suspend fun stopCallRecording(
+        @Path("id") callId: String
+    ): RecordingControlResponse
+
+    @POST("api/phone/calls/{id}/hangup")
+    suspend fun hangupCall(
+        @Path("id") callId: String
+    ): HangupResponse
 }

@@ -1,5 +1,5 @@
 /**
- * Summary AI Backend
+ * Meeting Mind Backend
  * Main entry point
  */
 
@@ -65,8 +65,10 @@ app.use(cors({
 // Request logging
 app.use(morgan(config.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
-// JSON body parsing
+// Body parsing
 app.use(express.json({ limit: '10mb' }));
+// Twilio webhooks send application/x-www-form-urlencoded data
+app.use(express.urlencoded({ extended: true }));
 
 // Trust proxy (for Cloud Run)
 app.set('trust proxy', true);
@@ -84,7 +86,7 @@ app.use('/', routes);
 // Root endpoint
 app.get('/', (_req: Request, res: Response) => {
   res.json({
-    name: 'Summary AI API',
+    name: 'Meeting Mind API',
     version: config.API_VERSION,
     status: 'running',
   });
@@ -108,7 +110,7 @@ app.use(errorHandler);
 // ============================================================================
 
 async function startServer(): Promise<void> {
-  console.log('🚀 Starting Summary AI Backend...');
+  console.log('🚀 Starting Meeting Mind Backend...');
   logConfig();
 
   // Test Supabase connection

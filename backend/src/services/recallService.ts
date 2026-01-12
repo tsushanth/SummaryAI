@@ -65,8 +65,41 @@ export class RecallService {
   /**
    * Create a bot and send it to a meeting
    * Uses the new Recall.ai API structure with recording_config
+   * Enables real-time transcript streaming via webhook when SERVICE_URL is configured
    */
-  static async createBot(params: RecallBotCreateRequest): Promise<RecallBotResponse> {
+  static async createBot(
+    params: RecallBotCreateRequest,
+    options?: { enableRealtimeTranscript?: boolean }
+  ): Promise<RecallBotResponse> {
+    // Enable real-time by default if SERVICE_URL is configured
+    const enableRealtime = options?.enableRealtimeTranscript ?? !!config.SERVICE_URL;
+
+    // Build the recording config with optional real-time endpoints
+    const recordingConfig: Record<string, unknown> = {
+      transcript: {
+        provider: {
+          recallai_streaming: {
+            // Use low latency mode for real-time, accuracy mode otherwise
+            mode: enableRealtime ? 'prioritize_low_latency' : 'prioritize_accuracy',
+            // Low latency mode only supports English
+            language_code: 'en',
+          },
+        },
+      },
+    };
+
+    // Add real-time webhook endpoint for live transcription
+    if (enableRealtime && config.SERVICE_URL) {
+      recordingConfig.realtime_endpoints = [
+        {
+          type: 'webhook',
+          url: `${config.SERVICE_URL}/v1/webhooks/recall/transcript`,
+          events: ['transcript.data', 'transcript.partial_data'],
+        },
+      ];
+      console.log(`[Recall] Real-time transcript enabled, webhook: ${config.SERVICE_URL}/v1/webhooks/recall/transcript`);
+    }
+
     const payload: Record<string, unknown> = {
       meeting_url: params.meeting_url,
       bot_name: params.bot_name || 'Meeting Mind',
@@ -75,16 +108,7 @@ export class RecallService {
         noone_joined_timeout: 300, // 5 minutes
         everyone_left_timeout: 30, // 30 seconds
       },
-      // Use Recall.ai's built-in transcription with the new API structure
-      recording_config: {
-        transcript: {
-          provider: {
-            recallai_streaming: {
-              mode: 'prioritize_accuracy',
-            },
-          },
-        },
-      },
+      recording_config: recordingConfig,
     };
 
     // Only add join_at if specified (for scheduled bots)

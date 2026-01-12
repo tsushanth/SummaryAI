@@ -5,6 +5,7 @@ import type {
   GetRecordingResponse,
   ListRecordingsResponse,
   Recording,
+  Transcript,
 } from '@/types/api';
 
 export async function createRecording(
@@ -100,4 +101,18 @@ export async function deleteRecording(id: string): Promise<void> {
   await apiClient(`/api/recordings/${id}`, {
     method: 'DELETE',
   });
+}
+
+export async function updateSpeakerNames(
+  recordingId: string,
+  speakerNames: Record<string, string>
+): Promise<Transcript> {
+  const response = await apiClient<{ transcript: Transcript }>(
+    `/api/recordings/${recordingId}/speakers`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ speaker_names: speakerNames }),
+    }
+  );
+  return response.transcript;
 }

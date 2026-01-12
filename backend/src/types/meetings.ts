@@ -391,6 +391,98 @@ export interface GoogleUserInfo {
 }
 
 // ============================================
+// Live Transcript Types
+// ============================================
+
+export interface LiveTranscript {
+  id: string;
+  meeting_id: string;
+  bot_run_id: string;
+  user_id: string;
+  segment_text: string;
+  speaker_id: string | null;
+  speaker_name: string | null;
+  is_host: boolean;
+  start_timestamp: number;
+  end_timestamp: number;
+  words: Array<{
+    text: string;
+    start_timestamp: number;
+    end_timestamp: number;
+  }> | null;
+  is_partial: boolean;
+  created_at: string;
+}
+
+export type LiveInsightType = 'fact_check' | 'key_point' | 'question' | 'contradiction';
+export type VerificationStatus = 'verified' | 'disputed' | 'false' | 'unknown';
+
+export interface LiveInsight {
+  id: string;
+  meeting_id: string;
+  user_id: string;
+  insight_type: LiveInsightType;
+  content: string;
+  context: string | null;
+  related_meeting_id: string | null;
+  related_recording_id: string | null;
+  confidence: number | null;
+  verification_status: VerificationStatus | null;
+  timestamp_seconds: number | null;
+  created_at: string;
+}
+
+// Recall.ai real-time transcript webhook payload
+// Based on Recall.ai docs: https://docs.recall.ai/docs/real-time-webhook-endpoints
+export interface RecallTranscriptWebhookPayload {
+  event: 'transcript.data' | 'transcript.partial_data';
+  data: {
+    // The actual transcript data is nested inside data.data
+    data: {
+      words: Array<{
+        text: string;
+        start_timestamp: { relative: number };
+        end_timestamp: { relative: number } | null;
+      }>;
+      participant: {
+        id: number;
+        name: string | null;
+        is_host: boolean;
+        platform?: string | null;
+        extra_data?: Record<string, unknown>;
+        email?: string | null;
+      };
+    };
+    realtime_endpoint: {
+      id: string;
+      metadata: Record<string, unknown>;
+    };
+    transcript: {
+      id: string;
+      metadata: Record<string, unknown>;
+    };
+    recording: {
+      id: string;
+      metadata: Record<string, unknown>;
+    };
+    bot: {
+      id: string;
+      metadata: Record<string, unknown>;
+    };
+  };
+}
+
+// API response types for live data
+export interface LiveTranscriptResponse {
+  segments: LiveTranscript[];
+  has_more: boolean;
+}
+
+export interface LiveInsightsResponse {
+  insights: LiveInsight[];
+}
+
+// ============================================
 // Helper Types
 // ============================================
 
