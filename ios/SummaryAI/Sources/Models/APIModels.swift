@@ -28,9 +28,9 @@ enum RecordingStatus: String, Codable, CaseIterable {
 
     var isProcessing: Bool {
         switch self {
-        case .uploading, .uploaded, .transcribing, .summarizing:
+        case .pending, .uploading, .uploaded, .transcribing, .transcribed, .summarizing:
             return true
-        case .pending, .transcribed, .completed, .failed:
+        case .completed, .failed:
             return false
         }
     }
@@ -55,6 +55,7 @@ struct Recording: Codable, Identifiable, Hashable {
     var isFavorite: Bool?
     var folderId: String?
     var recordingType: RecordingType?
+    var meetingId: String?
     let createdAt: Date
     var updatedAt: Date?
     var processedAt: Date?
@@ -75,9 +76,15 @@ struct Recording: Codable, Identifiable, Hashable {
         case isFavorite = "is_favorite"
         case folderId = "folder_id"
         case recordingType = "recording_type"
+        case meetingId = "meeting_id"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
         case processedAt = "processed_at"
+    }
+
+    /// Whether this recording is for a live meeting in progress
+    var isLiveMeeting: Bool {
+        meetingId != nil && (status == .pending || status == .uploading)
     }
 
     func hash(into hasher: inout Hasher) {
@@ -335,6 +342,8 @@ struct Transcript: Codable {
     let speakerCount: Int
     let language: String
     let createdAt: Date
+    /// Maps speaker_index (as string) to custom speaker name
+    var speakerNames: [String: String]?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -345,6 +354,12 @@ struct Transcript: Codable {
         case speakerCount = "speaker_count"
         case language
         case createdAt = "created_at"
+        case speakerNames = "speaker_names"
+    }
+
+    /// Get display name for a speaker index
+    func speakerName(for index: Int) -> String {
+        speakerNames?[String(index)] ?? "Speaker \(index + 1)"
     }
 }
 
@@ -559,4 +574,323 @@ struct APIErrorDetail: Codable {
     let code: String
     let message: String
     let details: [String: String]?
+}
+
+// MARK: - Live Transcript Models
+
+/// A single live transcript segment received during a meeting
+struct LiveTranscriptSegment: Codable, Identifiable {
+    let id: String
+    let meetingId: String
+    let segmentText: String
+    let speakerId: String?
+    let speakerName: String?
+    let isHost: Bool
+    let startTimestamp: Double
+    let endTimestamp: Double
+    let isPartial: Bool
+    let createdAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case meetingId = "meeting_id"
+        case segmentText = "segment_text"
+        case speakerId = "speaker_id"
+        case speakerName = "speaker_name"
+        case isHost = "is_host"
+        case startTimestamp = "start_timestamp"
+        case endTimestamp = "end_timestamp"
+        case isPartial = "is_partial"
+        case createdAt = "created_at"
+    }
+}
+
+/// Response for live transcript API
+struct LiveTranscriptResponse: Codable {
+    let segments: [LiveTranscriptSegment]
+    let hasMore: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case segments
+        case hasMore = "has_more"
+    }
+}
+
+// MARK: - Phone Call Models
+
+/// Status for a phone call
+enum PhoneCallStatus: String, Codable, CaseIterable {
+    case initiated
+    case ringing
+    case inProgress = "in_progress"
+    case recording
+    case completed
+    case failed
+    case busy
+    case noAnswer = "no_answer"
+    case cancelled
+
+    var displayName: String {
+        switch self {
+        case .initiated: return "Initiated"
+        case .ringing: return "Ringing"
+        case .inProgress: return "In Progress"
+        case .recording: return "Recording"
+        case .completed: return "Completed"
+        case .failed: return "Failed"
+        case .busy: return "Busy"
+        case .noAnswer: return "No Answer"
+        case .cancelled: return "Cancelled"
+        }
+    }
+
+    var isActive: Bool {
+        switch self {
+        case .initiated, .ringing, .inProgress, .recording:
+            return true
+        case .completed, .failed, .busy, .noAnswer, .cancelled:
+            return false
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .initiated: return "phone.arrow.up.right"
+        case .ringing: return "phone.badge.waveform"
+        case .inProgress: return "phone.fill"
+        case .recording: return "waveform"
+        case .completed: return "phone.down.fill"
+        case .failed: return "phone.fill.badge.xmark"
+        case .busy: return "phone.badge.minus"
+        case .noAnswer: return "phone.arrow.down.left"
+        case .cancelled: return "xmark.circle"
+        }
+    }
+}
+
+/// Verified phone number
+struct VerifiedPhone: Codable, Identifiable, Hashable {
+    let id: String
+    let phoneNumber: String
+    let verifiedAt: Date?
+    let createdAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case phoneNumber = "phone_number"
+        case verifiedAt = "verified_at"
+        case createdAt = "created_at"
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
+    static func == (lhs: VerifiedPhone, rhs: VerifiedPhone) -> Bool {
+        lhs.id == rhs.id
+    }
+}
+
+/// Phone call record
+struct PhoneCall: Codable, Identifiable, Hashable {
+    let id: String
+    let userId: String
+    let fromNumber: String
+    let toNumber: String
+    var toName: String?
+    var twilioCallSid: String?
+    var conferenceSid: String?
+    var conferenceName: String?
+    var recordingSid: String?
+    var status: PhoneCallStatus
+    var isRecording: Bool
+    var recordingUrl: String?
+    var recordingDuration: Int?
+    var recordingId: String?
+    var startedAt: Date?
+    var answeredAt: Date?
+    var recordingStartedAt: Date?
+    var endedAt: Date?
+    let createdAt: Date
+    var updatedAt: Date?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case userId = "user_id"
+        case fromNumber = "from_number"
+        case toNumber = "to_number"
+        case toName = "to_name"
+        case twilioCallSid = "twilio_call_sid"
+        case conferenceSid = "conference_sid"
+        case conferenceName = "conference_name"
+        case recordingSid = "recording_sid"
+        case status
+        case isRecording = "is_recording"
+        case recordingUrl = "recording_url"
+        case recordingDuration = "recording_duration"
+        case recordingId = "recording_id"
+        case startedAt = "started_at"
+        case answeredAt = "answered_at"
+        case recordingStartedAt = "recording_started_at"
+        case endedAt = "ended_at"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
+    static func == (lhs: PhoneCall, rhs: PhoneCall) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    /// Format phone number for display
+    var formattedToNumber: String {
+        formatPhoneNumber(toNumber)
+    }
+
+    var formattedFromNumber: String {
+        formatPhoneNumber(fromNumber)
+    }
+
+    private func formatPhoneNumber(_ phone: String) -> String {
+        // Simple US formatting
+        if phone.hasPrefix("+1") && phone.count == 12 {
+            let start = phone.index(phone.startIndex, offsetBy: 2)
+            let area = phone[start..<phone.index(start, offsetBy: 3)]
+            let prefix = phone[phone.index(start, offsetBy: 3)..<phone.index(start, offsetBy: 6)]
+            let line = phone[phone.index(start, offsetBy: 6)...]
+            return "(\(area)) \(prefix)-\(line)"
+        }
+        return phone
+    }
+
+    /// Duration formatted as mm:ss
+    var formattedDuration: String {
+        guard let duration = recordingDuration else { return "--:--" }
+        let mins = duration / 60
+        let secs = duration % 60
+        return String(format: "%d:%02d", mins, secs)
+    }
+}
+
+// MARK: - Phone API Request Models
+
+/// Request to send verification code
+struct SendVerificationRequest: Codable {
+    let phoneNumber: String
+
+    enum CodingKeys: String, CodingKey {
+        case phoneNumber = "phone_number"
+    }
+}
+
+/// Request to check verification code
+struct CheckVerificationRequest: Codable {
+    let phoneNumber: String
+    let code: String
+
+    enum CodingKeys: String, CodingKey {
+        case phoneNumber = "phone_number"
+        case code
+    }
+}
+
+/// Request to initiate a phone call
+struct InitiateCallRequest: Codable {
+    let from: String
+    let to: String
+    let toName: String?
+    let serverInitiated: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case from
+        case to
+        case toName = "to_name"
+        case serverInitiated = "server_initiated"
+    }
+
+    /// Initialize a call request
+    /// - Parameters:
+    ///   - from: User's verified phone number
+    ///   - to: Destination phone number
+    ///   - toName: Optional contact name
+    ///   - serverInitiated: If true, server places the call (legacy). Default is false for VoIP calls.
+    init(from: String, to: String, toName: String? = nil, serverInitiated: Bool = false) {
+        self.from = from
+        self.to = to
+        self.toName = toName
+        self.serverInitiated = serverInitiated
+    }
+}
+
+// MARK: - Phone API Response Models
+
+/// Response for verification code sent
+struct SendVerificationResponse: Codable {
+    let message: String
+}
+
+/// Response for verification check
+struct CheckVerificationResponse: Codable {
+    let verified: Bool
+    let phone: VerifiedPhone?
+}
+
+/// Response containing list of verified phones
+struct VerifiedPhonesResponse: Codable {
+    let phones: [VerifiedPhone]
+}
+
+/// Response for initiating a call
+struct InitiateCallResponse: Codable {
+    let callId: String
+    let status: String
+    let twilioCallSid: String?
+
+    enum CodingKeys: String, CodingKey {
+        case callId = "call_id"
+        case status
+        case twilioCallSid = "twilio_call_sid"
+    }
+}
+
+/// Response for listing phone calls
+struct ListPhoneCallsResponse: Codable {
+    let calls: [PhoneCall]
+    let total: Int
+    let limit: Int
+    let offset: Int
+}
+
+/// Response for single phone call
+struct PhoneCallResponse: Codable {
+    let call: PhoneCall
+}
+
+/// Response for recording control
+struct RecordingControlResponse: Codable {
+    let recording: Bool
+    let conferenceName: String?
+
+    enum CodingKeys: String, CodingKey {
+        case recording
+        case conferenceName = "conference_name"
+    }
+}
+
+/// Response for hangup
+struct HangupResponse: Codable {
+    let ended: Bool
+}
+
+/// Response for delete
+struct DeletePhoneResponse: Codable {
+    let deleted: Bool
+}
+
+/// Response for VoIP access token
+struct VoipTokenResponse: Codable {
+    let token: String
 }

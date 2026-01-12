@@ -1,19 +1,34 @@
 package com.kreativekoala.summaryai.ui.recordings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -64,22 +79,30 @@ fun RecordingsListScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.recordings)) },
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = "Meeting Mind",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                },
                 actions = {
-                    IconButton(onClick = onSearchClick) {
-                        Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search))
+                    // PRO badge
+                    Surface(
+                        color = Color(0xFFFF9500),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.padding(end = 16.dp)
+                    ) {
+                        Text(
+                            text = "PRO",
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
                     }
                 }
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onStartRecording,
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(Icons.Default.Mic, contentDescription = stringResource(R.string.start_recording))
-            }
         }
     ) { paddingValues ->
         Column(
@@ -87,23 +110,72 @@ fun RecordingsListScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Tab row
-            TabRow(
-                selectedTabIndex = uiState.selectedTab.ordinal
+            // Filter chips row - iOS style
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                RecordingsTab.values().forEach { tab ->
-                    Tab(
-                        selected = uiState.selectedTab == tab,
-                        onClick = { viewModel.selectTab(tab) },
-                        text = {
-                            Text(
-                                when (tab) {
-                                    RecordingsTab.ALL -> stringResource(R.string.all)
-                                    RecordingsTab.PROCESSING -> stringResource(R.string.processing)
-                                    RecordingsTab.COMPLETED -> stringResource(R.string.completed)
-                                }
-                            )
-                        }
+                FilterChipIOS(
+                    label = "All",
+                    selected = uiState.selectedTab == RecordingsTab.ALL,
+                    onClick = { viewModel.selectTab(RecordingsTab.ALL) }
+                )
+                FilterChipIOS(
+                    label = "Meetings",
+                    selected = uiState.selectedTab == RecordingsTab.MEETINGS,
+                    onClick = { viewModel.selectTab(RecordingsTab.MEETINGS) }
+                )
+                FilterChipIOS(
+                    label = "Todos",
+                    selected = uiState.selectedTab == RecordingsTab.TODOS,
+                    onClick = { viewModel.selectTab(RecordingsTab.TODOS) }
+                )
+                FilterChipIOS(
+                    label = "Favorites",
+                    selected = uiState.selectedTab == RecordingsTab.FAVORITES,
+                    onClick = { viewModel.selectTab(RecordingsTab.FAVORITES) }
+                )
+                FilterChipIOS(
+                    label = "Imported",
+                    selected = uiState.selectedTab == RecordingsTab.IMPORTED,
+                    onClick = { viewModel.selectTab(RecordingsTab.IMPORTED) }
+                )
+            }
+
+            // Search bar - iOS style
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .clickable { onSearchClick() },
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Search",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Icon(
+                        Icons.Default.History,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -111,27 +183,34 @@ fun RecordingsListScreen(
             // Content
             if (uiState.isLoading && uiState.recordings.isEmpty()) {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
                 }
             } else if (uiState.recordings.isEmpty()) {
-                EmptyRecordingsContent(onStartRecording = onStartRecording)
+                Box(modifier = Modifier.weight(1f)) {
+                    EmptyRecordingsContent(onStartRecording = onStartRecording)
+                }
             } else {
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     items(
                         items = uiState.recordings,
                         key = { it.id }
                     ) { recording ->
-                        RecordingCard(
+                        RecordingCardIOS(
                             recording = recording,
-                            onClick = { onRecordingClick(recording.id) }
+                            onClick = { onRecordingClick(recording.id) },
+                            onToggleFavorite = { viewModel.toggleFavorite(recording) },
+                            onDelete = { viewModel.deleteRecording(recording) }
                         )
                     }
 
@@ -150,7 +229,214 @@ fun RecordingsListScreen(
                     }
                 }
             }
+
+            // Bottom "New Summary" button - iOS style
+            Button(
+                onClick = onStartRecording,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .height(52.dp),
+                shape = RoundedCornerShape(26.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Text(
+                    text = "New Summary",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun FilterChipIOS(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Text(
+            text = label,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun RecordingCardIOS(
+    recording: Recording,
+    onClick: () -> Unit,
+    onToggleFavorite: () -> Unit,
+    onDelete: () -> Unit
+) {
+    var showMenu by remember { mutableStateOf(false) }
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Green checkmark circle for completed recordings
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(
+                        when (recording.status) {
+                            RecordingStatus.COMPLETED -> Color(0xFFE8F5E9)
+                            RecordingStatus.FAILED -> Color(0xFFFFEBEE)
+                            else -> Color(0xFFFFF3E0)
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = when (recording.status) {
+                        RecordingStatus.COMPLETED -> Color(0xFF4CAF50)
+                        RecordingStatus.FAILED -> RecordingRed
+                        else -> Orange50
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = recording.title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+                    if (recording.isFavorite) {
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = "Favorite",
+                            modifier = Modifier.size(14.dp),
+                            tint = Color.Red
+                        )
+                    }
+                }
+
+                Text(
+                    text = "${formatDateIOS(recording.createdAt)}  •  ${recording.formattedDuration}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            // More options menu
+            Box {
+                IconButton(
+                    onClick = { showMenu = true },
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "More options",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = {
+                            Text(if (recording.isFavorite) "Remove from Favorites" else "Add to Favorites")
+                        },
+                        onClick = {
+                            onToggleFavorite()
+                            showMenu = false
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = if (recording.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription = null,
+                                tint = if (recording.isFavorite) Color.Red else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = {
+                            Text("Delete", color = RecordingRed)
+                        },
+                        onClick = {
+                            showMenu = false
+                            showDeleteConfirmation = true
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = null,
+                                tint = RecordingRed
+                            )
+                        }
+                    )
+                }
+            }
+
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+            )
+        }
+    }
+
+    HorizontalDivider(
+        modifier = Modifier.padding(start = 56.dp),
+        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+    )
+
+    // Delete confirmation dialog
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = false },
+            title = { Text("Delete Recording") },
+            text = { Text("Are you sure you want to delete \"${recording.title}\"? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteConfirmation = false
+                        onDelete()
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = RecordingRed)
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirmation = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 
@@ -276,6 +562,17 @@ private fun formatDate(dateString: String): String {
     return try {
         val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
         val outputFormat = SimpleDateFormat("MMM d, yyyy", Locale.US)
+        val date = inputFormat.parse(dateString)
+        date?.let { outputFormat.format(it) } ?: dateString
+    } catch (e: Exception) {
+        dateString
+    }
+}
+
+private fun formatDateIOS(dateString: String): String {
+    return try {
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+        val outputFormat = SimpleDateFormat("MMM d", Locale.US)
         val date = inputFormat.parse(dateString)
         date?.let { outputFormat.format(it) } ?: dateString
     } catch (e: Exception) {

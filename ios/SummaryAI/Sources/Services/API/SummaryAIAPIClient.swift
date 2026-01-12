@@ -71,6 +71,9 @@ final class SummaryAIAPIClient: NSObject, ObservableObject {
     /// Access token provider - should be set by auth service
     var accessTokenProvider: (() async -> String?)?
 
+    /// Token refresh handler - called when a 401 is received to refresh the token
+    var tokenRefreshHandler: (() async throws -> Void)?
+
     // MARK: - Upload State
 
     private var uploadTask: URLSessionUploadTask?
@@ -416,11 +419,63 @@ final class SummaryAIAPIClient: NSObject, ObservableObject {
         try await delete(endpoint: "/api/recordings/\(id)")
     }
 
+    /// Update recording metadata
+    /// - Parameters:
+    ///   - id: Recording ID
+    ///   - title: New title (optional)
+    ///   - isFavorite: New favorite status (optional)
+    /// - Returns: Updated recording
+    func updateRecording(
+        id: String,
+        title: String? = nil,
+        isFavorite: Bool? = nil
+    ) async throws -> Recording {
+        struct UpdateRequest: Encodable {
+            let title: String?
+            let is_favorite: Bool?
+        }
+
+        struct UpdateResponse: Decodable {
+            let recording: Recording
+        }
+
+        let request = UpdateRequest(title: title, is_favorite: isFavorite)
+        let response: UpdateResponse = try await patchWithResponse(
+            endpoint: "/api/recordings/\(id)",
+            body: request,
+            responseType: UpdateResponse.self
+        )
+        return response.recording
+    }
+
     // MARK: - User Account API
 
     /// Delete the current user's account and all associated data
     func deleteAccount() async throws {
         try await delete(endpoint: "/api/users/account")
+    }
+
+    // MARK: - Live Transcript API
+
+    /// Get live transcript segments for a meeting in progress
+    /// - Parameters:
+    ///   - meetingId: The meeting ID
+    ///   - since: Optional timestamp to fetch only segments created after this time
+    /// - Returns: Live transcript response with segments
+    func getLiveTranscript(meetingId: String, since: Date? = nil) async throws -> LiveTranscriptResponse {
+        var queryItems: [URLQueryItem] = []
+
+        if let since = since {
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            queryItems.append(URLQueryItem(name: "since", value: formatter.string(from: since)))
+        }
+
+        return try await get(
+            endpoint: "/api/meetings/\(meetingId)/live-transcript",
+            queryItems: queryItems,
+            responseType: LiveTranscriptResponse.self
+        )
     }
 
     // MARK: - Todos API
@@ -595,12 +650,13 @@ final class SummaryAIAPIClient: NSObject, ObservableObject {
     private func performRequest<T: Decodable>(
         _ request: URLRequest,
         responseType: T.Type,
-        allowEmpty: Bool = false
+        allowEmpty: Bool = false,
+        isRetry: Bool = false
     ) async throws -> T {
         var request = request
 
         // Debug: Log the request URL
-        print("[APIClient] Making request to: \(request.url?.absoluteString ?? "nil")")
+        print("[APIClient] Making request to: \(request.url?.absoluteString ?? "nil")\(isRetry ? " (retry)" : "")")
 
         // Add auth header
         if let token = await accessTokenProvider?() {
@@ -628,7 +684,28 @@ final class SummaryAIAPIClient: NSObject, ObservableObject {
             case 200...299:
                 break
             case 401:
-                throw APIError.unauthorized
+                // If this is already a retry, don't try again
+                if isRetry {
+                    print("[APIClient] 401 on retry - token refresh didn't help")
+                    throw APIError.unauthorized
+                }
+
+                // Try to refresh the token and retry
+                if let refreshHandler = tokenRefreshHandler {
+                    print("[APIClient] Received 401 - attempting token refresh...")
+                    do {
+                        try await refreshHandler()
+                        print("[APIClient] Token refresh succeeded - retrying request")
+                        // Retry the request with the new token
+                        return try await performRequest(request, responseType: responseType, allowEmpty: allowEmpty, isRetry: true)
+                    } catch {
+                        print("[APIClient] Token refresh failed: \(error)")
+                        throw APIError.unauthorized
+                    }
+                } else {
+                    print("[APIClient] No token refresh handler configured")
+                    throw APIError.unauthorized
+                }
             case 403:
                 throw APIError.forbidden
             case 404:
@@ -766,6 +843,157 @@ private class UploadDelegate: NSObject, URLSessionTaskDelegate, URLSessionDataDe
         } else {
             completion(.failure(APIError.noData))
         }
+    }
+}
+
+// MARK: - Phone API
+
+extension SummaryAIAPIClient {
+
+    /// Send verification code to a phone number
+    /// - Parameter phoneNumber: Phone number to verify
+    /// - Returns: Response indicating code was sent
+    func sendVerificationCode(phoneNumber: String) async throws -> SendVerificationResponse {
+        let request = SendVerificationRequest(phoneNumber: phoneNumber)
+        return try await post(
+            endpoint: "/api/phone/verify/send",
+            body: request,
+            responseType: SendVerificationResponse.self
+        )
+    }
+
+    /// Check verification code
+    /// - Parameters:
+    ///   - phoneNumber: Phone number being verified
+    ///   - code: 6-digit verification code
+    /// - Returns: Response indicating verification status
+    func checkVerificationCode(phoneNumber: String, code: String) async throws -> CheckVerificationResponse {
+        let request = CheckVerificationRequest(phoneNumber: phoneNumber, code: code)
+        return try await post(
+            endpoint: "/api/phone/verify/check",
+            body: request,
+            responseType: CheckVerificationResponse.self
+        )
+    }
+
+    /// Get list of verified phone numbers
+    /// - Returns: List of verified phones
+    func getVerifiedPhones() async throws -> VerifiedPhonesResponse {
+        return try await get(
+            endpoint: "/api/phone/verified",
+            responseType: VerifiedPhonesResponse.self
+        )
+    }
+
+    /// Delete a verified phone number
+    /// - Parameter id: Phone ID to delete
+    func deleteVerifiedPhone(id: String) async throws {
+        try await delete(endpoint: "/api/phone/verified/\(id)")
+    }
+
+    /// Get VoIP access token for Twilio Voice SDK
+    /// - Returns: Access token for VoIP calling
+    func getVoipToken() async throws -> VoipTokenResponse {
+        return try await get(
+            endpoint: "/api/phone/voip/token",
+            responseType: VoipTokenResponse.self
+        )
+    }
+
+    /// Initiate a phone call
+    /// - Parameters:
+    ///   - from: User's verified phone number
+    ///   - to: Destination phone number
+    ///   - toName: Optional name for the contact
+    /// - Returns: Response with call ID and status
+    func initiateCall(from: String, to: String, toName: String? = nil) async throws -> InitiateCallResponse {
+        let request = InitiateCallRequest(from: from, to: to, toName: toName)
+        return try await post(
+            endpoint: "/api/phone/calls",
+            body: request,
+            responseType: InitiateCallResponse.self
+        )
+    }
+
+    /// Get list of phone calls
+    /// - Parameters:
+    ///   - limit: Number of calls to fetch
+    ///   - offset: Offset for pagination
+    /// - Returns: List of phone calls
+    func getPhoneCalls(limit: Int = 50, offset: Int = 0) async throws -> ListPhoneCallsResponse {
+        let queryItems = [
+            URLQueryItem(name: "limit", value: String(limit)),
+            URLQueryItem(name: "offset", value: String(offset))
+        ]
+        return try await get(
+            endpoint: "/api/phone/calls",
+            queryItems: queryItems,
+            responseType: ListPhoneCallsResponse.self
+        )
+    }
+
+    /// Get phone call details
+    /// - Parameter id: Call ID
+    /// - Returns: Phone call details
+    func getPhoneCall(id: String) async throws -> PhoneCallResponse {
+        return try await get(
+            endpoint: "/api/phone/calls/\(id)",
+            responseType: PhoneCallResponse.self
+        )
+    }
+
+    /// Start recording a phone call
+    /// - Parameter callId: Call ID to start recording
+    /// - Returns: Recording control response
+    func startCallRecording(callId: String) async throws -> RecordingControlResponse {
+        return try await post(
+            endpoint: "/api/phone/calls/\(callId)/record",
+            body: EmptyRequest(),
+            responseType: RecordingControlResponse.self
+        )
+    }
+
+    /// Stop recording a phone call
+    /// - Parameter callId: Call ID to stop recording
+    /// - Returns: Recording control response
+    func stopCallRecording(callId: String) async throws -> RecordingControlResponse {
+        // Using a custom delete that returns a response
+        let url = try buildURL(endpoint: "/api/phone/calls/\(callId)/record")
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        return try await performRequest(request, responseType: RecordingControlResponse.self)
+    }
+
+    /// Hang up a phone call
+    /// - Parameter callId: Call ID to hang up
+    /// - Returns: Hangup response
+    func hangupCall(callId: String) async throws -> HangupResponse {
+        return try await post(
+            endpoint: "/api/phone/calls/\(callId)/hangup",
+            body: EmptyRequest(),
+            responseType: HangupResponse.self
+        )
+    }
+
+    // Helper to build URL (exposing for extension use)
+    func buildURL(endpoint: String) throws -> URL {
+        var components = URLComponents(url: configuration.apiURL, resolvingAgainstBaseURL: true)
+        components?.path += endpoint
+
+        guard let url = components?.url else {
+            throw APIError.invalidURL
+        }
+
+        return url
+    }
+
+    // Helper to perform request (exposing for extension use)
+    // This now delegates to the private performRequest which handles token refresh
+    func performRequest<T: Decodable>(
+        _ request: URLRequest,
+        responseType: T.Type
+    ) async throws -> T {
+        return try await performRequest(request, responseType: responseType, allowEmpty: false, isRetry: false)
     }
 }
 

@@ -14,19 +14,31 @@ enum class RecordingStatus {
     FAILED;
 
     val isProcessing: Boolean
-        get() = this in listOf(PENDING, UPLOADING, UPLOADED, PROCESSING, TRANSCRIBING, SUMMARIZING)
+        get() = this != COMPLETED && this != FAILED
 
     val displayName: String
         get() = when (this) {
-            PENDING -> "Pending"
-            UPLOADING -> "Uploading"
-            UPLOADED -> "Uploaded"
-            PROCESSING -> "Processing"
-            TRANSCRIBING -> "Transcribing"
-            SUMMARIZING -> "Summarizing"
-            COMPLETED -> "Completed"
+            PENDING -> "Bot joining..."
+            UPLOADING -> "Recording..."
+            UPLOADED -> "Processing..."
+            PROCESSING -> "Processing..."
+            TRANSCRIBING -> "Transcribing..."
+            SUMMARIZING -> "Summarizing..."
+            COMPLETED -> "Ready"
             FAILED -> "Failed"
         }
+}
+
+/**
+ * Recording type
+ */
+enum class RecordingType {
+    GENERAL,
+    MEETING,
+    LECTURE,
+    INTERVIEW,
+    VOICE_MEMO,
+    IMPORTED
 }
 
 /**
@@ -38,7 +50,10 @@ data class Recording(
     val durationSeconds: Int,
     val status: RecordingStatus,
     val audioUrl: String?,
-    val createdAt: String
+    val createdAt: String,
+    val isFavorite: Boolean = false,
+    val recordingType: RecordingType? = null,
+    val meetingId: String? = null
 ) {
     val formattedDuration: String
         get() {
@@ -55,6 +70,9 @@ data class Recording(
 
     val isProcessing: Boolean
         get() = status.isProcessing
+
+    val isLiveMeeting: Boolean
+        get() = meetingId != null && (status == RecordingStatus.PENDING || status == RecordingStatus.UPLOADING)
 }
 
 /**

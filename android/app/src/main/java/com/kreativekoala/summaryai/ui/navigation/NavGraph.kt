@@ -1,15 +1,22 @@
 package com.kreativekoala.summaryai.ui.navigation
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.VideoCall
-import androidx.compose.material.icons.outlined.Checklist
+import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Mic
+import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.VideoCall
+import androidx.compose.material3.Icon
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import com.kreativekoala.summaryai.R
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,6 +37,7 @@ import com.kreativekoala.summaryai.ui.meetings.JoinMeetingScreen
 import com.kreativekoala.summaryai.ui.meetings.MeetingsScreen
 import com.kreativekoala.summaryai.ui.onboarding.OnboardingScreen
 import com.kreativekoala.summaryai.ui.paywall.PaywallScreen
+import com.kreativekoala.summaryai.ui.phone.PhoneScreen
 import com.kreativekoala.summaryai.ui.recording.RecordingScreen
 import com.kreativekoala.summaryai.ui.recordings.RecordingDetailScreen
 import com.kreativekoala.summaryai.ui.recordings.RecordingsListScreen
@@ -51,42 +59,48 @@ sealed class Screen(val route: String) {
     object JoinMeeting : Screen("meetings/join")
     object CalendarIntegration : Screen("calendar")
     object Search : Screen("search")
+    object Phone : Screen("phone")
     object Settings : Screen("settings")
     object Paywall : Screen("paywall")
 }
 
 // Bottom navigation items
+sealed class NavIcon {
+    data class Vector(val selected: ImageVector, val unselected: ImageVector) : NavIcon()
+    data class Resource(val resId: Int) : NavIcon()
+}
+
 data class BottomNavItem(
     val screen: Screen,
     val title: String,
-    val selectedIcon: ImageVector,
-    val unselectedIcon: ImageVector
+    val icon: NavIcon
 )
 
 val bottomNavItems = listOf(
     BottomNavItem(
         screen = Screen.Recordings,
         title = "Recordings",
-        selectedIcon = Icons.Filled.Mic,
-        unselectedIcon = Icons.Outlined.Mic
-    ),
-    BottomNavItem(
-        screen = Screen.Todos,
-        title = "Action Items",
-        selectedIcon = Icons.Filled.Checklist,
-        unselectedIcon = Icons.Outlined.Checklist
+        icon = NavIcon.Resource(R.drawable.ic_recordings)
     ),
     BottomNavItem(
         screen = Screen.Meetings,
-        title = "Meetings",
-        selectedIcon = Icons.Filled.VideoCall,
-        unselectedIcon = Icons.Outlined.VideoCall
+        title = "Calendar",
+        icon = NavIcon.Vector(Icons.Filled.CalendarMonth, Icons.Outlined.CalendarMonth)
+    ),
+    BottomNavItem(
+        screen = Screen.Recording,
+        title = "Record",
+        icon = NavIcon.Vector(Icons.Filled.Mic, Icons.Outlined.Mic)
+    ),
+    BottomNavItem(
+        screen = Screen.Phone,
+        title = "Phone",
+        icon = NavIcon.Vector(Icons.Filled.Phone, Icons.Outlined.Phone)
     ),
     BottomNavItem(
         screen = Screen.Settings,
         title = "Settings",
-        selectedIcon = Icons.Filled.Settings,
-        unselectedIcon = Icons.Outlined.Settings
+        icon = NavIcon.Resource(R.drawable.ic_settings)
     )
 )
 
@@ -109,8 +123,9 @@ fun MeetingMindNavGraph(
     val showBottomNav = isAuthenticated && hasCompletedOnboarding &&
             currentDestination?.route in listOf(
         Screen.Recordings.route,
-        Screen.Todos.route,
         Screen.Meetings.route,
+        Screen.Recording.route,
+        Screen.Phone.route,
         Screen.Settings.route
     )
 
@@ -135,10 +150,17 @@ fun MeetingMindNavGraph(
                                 }
                             },
                             icon = {
-                                Icon(
-                                    imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
-                                    contentDescription = item.title
-                                )
+                                when (val icon = item.icon) {
+                                    is NavIcon.Vector -> Icon(
+                                        imageVector = if (selected) icon.selected else icon.unselected,
+                                        contentDescription = item.title
+                                    )
+                                    is NavIcon.Resource -> Icon(
+                                        painter = painterResource(id = icon.resId),
+                                        contentDescription = item.title,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
                             },
                             label = { Text(item.title) }
                         )
@@ -206,15 +228,16 @@ fun MeetingMindNavGraph(
                 )
             }
 
-            // Recording (Active Recording)
+            // Recording (Active Recording) - shown as tab
             composable(Screen.Recording.route) {
                 RecordingScreen(
                     onRecordingComplete = { recordingId ->
                         navController.navigate(Screen.RecordingDetail.createRoute(recordingId)) {
-                            popUpTo(Screen.Recording.route) { inclusive = true }
+                            popUpTo(Screen.Recordings.route) { inclusive = false }
                         }
                     },
-                    onCancel = { navController.popBackStack() }
+                    onCancel = { navController.navigate(Screen.Recordings.route) },
+                    showAsTab = true
                 )
             }
 
@@ -242,11 +265,22 @@ fun MeetingMindNavGraph(
                 )
             }
 
-            // Join Meeting
+            // Join Meeting - shown as tab
             composable(Screen.JoinMeeting.route) {
                 JoinMeetingScreen(
-                    onNavigateBack = { navController.popBackStack() },
-                    onMeetingJoined = { navController.popBackStack() }
+                    onNavigateBack = { navController.navigate(Screen.Recordings.route) },
+                    onMeetingJoined = { recordingId ->
+                        if (recordingId != null) {
+                            // Navigate to recording detail to show live transcript
+                            navController.navigate(Screen.RecordingDetail.createRoute(recordingId)) {
+                                popUpTo(Screen.Recordings.route) { inclusive = false }
+                            }
+                        } else {
+                            // Fallback to recordings list if no recording ID
+                            navController.navigate(Screen.Recordings.route)
+                        }
+                    },
+                    showAsTab = true
                 )
             }
 
@@ -264,6 +298,15 @@ fun MeetingMindNavGraph(
                         navController.navigate(Screen.RecordingDetail.createRoute(recordingId))
                     },
                     onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // Phone
+            composable(Screen.Phone.route) {
+                PhoneScreen(
+                    onRecordingClick = { recordingId ->
+                        navController.navigate(Screen.RecordingDetail.createRoute(recordingId))
+                    }
                 )
             }
 

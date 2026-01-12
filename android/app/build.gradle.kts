@@ -8,14 +8,14 @@ plugins {
 
 android {
     namespace = "com.kreativekoala.summaryai"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.kreativekoala.summaryai"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        targetSdk = 35
+        versionCode = 5
+        versionName = "1.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -33,7 +33,8 @@ android {
     buildTypes {
         debug {
             isDebuggable = true
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8080\"")
+            // Use production backend for debug builds (comment out and use local for dev)
+            // buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8080\"")
         }
         release {
             isMinifyEnabled = true
@@ -59,11 +60,26 @@ android {
         buildConfig = true
     }
 
+    lint {
+        // Disable lint checks that have issues with Twilio SDK
+        disable += listOf("MissingClass", "Instantiatable")
+        // Don't abort on warnings
+        warningsAsErrors = false
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+        // Enable 16 KB page size support for newer devices (required by Play Store)
+        jniLibs {
+            useLegacyPackaging = false
+        }
     }
+
+    // Experimental flags for 16 KB page alignment
+    @Suppress("UnstableApiUsage")
+    experimentalProperties["android.experimental.enableNative16KAlignment"] = true
 }
 
 dependencies {
@@ -125,4 +141,7 @@ dependencies {
     // Accompanist
     implementation(libs.accompanist.permissions)
     implementation(libs.accompanist.systemuicontroller)
+
+    // Twilio Voice SDK (VoIP calling)
+    implementation(libs.twilio.voice)
 }

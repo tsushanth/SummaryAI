@@ -38,6 +38,14 @@
 		A1000037229E0023 /* JoinMeetingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000038229E0024 /* JoinMeetingViewModel.swift */; };
 		A1000039229E0025 /* TodosViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100003A229E0026 /* TodosViewModel.swift */; };
 		A100003B229E0027 /* TodosView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100003C229E0028 /* TodosView.swift */; };
+		A100003D229E002A /* LiveTranscriptViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100003E229E002B /* LiveTranscriptViewModel.swift */; };
+		A100003F229E002C /* LiveTranscriptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000040229E002D /* LiveTranscriptView.swift */; };
+		A1000041229E002E /* AudioPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000042229E002F /* AudioPlayerView.swift */; };
+		A1000043229E0030 /* LiveWaveformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000044229E0031 /* LiveWaveformView.swift */; };
+		A1000045229E0032 /* PhoneViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000046229E0033 /* PhoneViewModel.swift */; };
+		A1000047229E0034 /* PhoneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000048229E0035 /* PhoneView.swift */; };
+		A1000049229E0036 /* VoipService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100004A229E0037 /* VoipService.swift */; };
+		A100004E229E003B /* TwilioVoice in Frameworks */ = {isa = PBXBuildFile; productRef = A100004D229E003A /* TwilioVoice */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -74,6 +82,13 @@
 		A100003A229E0026 /* TodosViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodosViewModel.swift; sourceTree = "<group>"; };
 		A100003C229E0028 /* TodosView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodosView.swift; sourceTree = "<group>"; };
 		A100003D229E0029 /* StoreKitConfiguration.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = StoreKitConfiguration.storekit; sourceTree = "<group>"; };
+		A100003E229E002B /* LiveTranscriptViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTranscriptViewModel.swift; sourceTree = "<group>"; };
+		A1000040229E002D /* LiveTranscriptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTranscriptView.swift; sourceTree = "<group>"; };
+		A1000042229E002F /* AudioPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerView.swift; sourceTree = "<group>"; };
+		A1000044229E0031 /* LiveWaveformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveWaveformView.swift; sourceTree = "<group>"; };
+		A1000046229E0033 /* PhoneViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneViewModel.swift; sourceTree = "<group>"; };
+		A1000048229E0035 /* PhoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneView.swift; sourceTree = "<group>"; };
+		A100004A229E0037 /* VoipService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoipService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,12 +98,21 @@
 			files = (
 				88DA84B12F07436B0084B5E7 /* GoogleSignIn in Frameworks */,
 				88DA84B32F07436B0084B5E7 /* GoogleSignInSwift in Frameworks */,
+				A100004E229E003B /* TwilioVoice in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A100004B229E0038 /* VoIP */ = {
+			isa = PBXGroup;
+			children = (
+				A100004A229E0037 /* VoipService.swift */,
+			);
+			path = VoIP;
+			sourceTree = "<group>";
+		};
 		A10000A0229E00A0 = {
 			isa = PBXGroup;
 			children = (
@@ -161,6 +185,7 @@
 				A10000AB229E00AB /* Audio */,
 				A10000AC229E00AC /* Auth */,
 				A10000AD229E00AD /* Export */,
+				A100004B229E0038 /* VoIP */,
 				A1000032229E001E /* SubscriptionService.swift */,
 			);
 			path = Services;
@@ -171,6 +196,8 @@
 			children = (
 				A100002C229E0018 /* CalendarViewModel.swift */,
 				A1000038229E0024 /* JoinMeetingViewModel.swift */,
+				A100003E229E002B /* LiveTranscriptViewModel.swift */,
+				A1000046229E0033 /* PhoneViewModel.swift */,
 				A1000010229E0008 /* RecordingDetailViewModel.swift */,
 				A1000012229E0009 /* RecordingViewModel.swift */,
 				A1000014229E000A /* RecordingsListViewModel.swift */,
@@ -183,12 +210,14 @@
 		A10000A9229E00A9 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				A10000AE229E00AE /* Components */,
 				A1000018229E000C /* AuthViews.swift */,
 				A100002E229E001A /* CalendarIntegrationView.swift */,
 				A100001A229E000D /* ExportView.swift */,
 				A1000036229E0022 /* JoinMeetingView.swift */,
 				A1000030229E001C /* MeetingsView.swift */,
 				A1000034229E0020 /* PaywallView.swift */,
+				A1000048229E0035 /* PhoneView.swift */,
 				A100001C229E000E /* RecordingDetailView.swift */,
 				A100001E229E000F /* RecordingView.swift */,
 				A1000020229E0010 /* RecordingsListView.swift */,
@@ -232,6 +261,16 @@
 			path = Export;
 			sourceTree = "<group>";
 		};
+		A10000AE229E00AE /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				A1000042229E002F /* AudioPlayerView.swift */,
+				A1000040229E002D /* LiveTranscriptView.swift */,
+				A1000044229E0031 /* LiveWaveformView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -248,6 +287,11 @@
 			dependencies = (
 			);
 			name = SummaryAI;
+			packageProductDependencies = (
+				88DA84B02F07436B0084B5E7 /* GoogleSignIn */,
+				88DA84B22F07436B0084B5E7 /* GoogleSignInSwift */,
+				A100004D229E003A /* TwilioVoice */,
+			);
 			productName = SummaryAI;
 			productReference = A1000000229E0000 /* SummaryAI.app */;
 			productType = "com.apple.product-type.application";
@@ -278,6 +322,7 @@
 			mainGroup = A10000A0229E00A0;
 			packageReferences = (
 				88DA84AF2F07436B0084B5E7 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				A100004C229E0039 /* XCRemoteSwiftPackageReference "twilio-voice-ios" */,
 			);
 			productRefGroup = A10000A2229E00A2 /* Products */;
 			projectDirPath = "";
@@ -332,6 +377,13 @@
 				A1000037229E0023 /* JoinMeetingViewModel.swift in Sources */,
 				A1000039229E0025 /* TodosViewModel.swift in Sources */,
 				A100003B229E0027 /* TodosView.swift in Sources */,
+				A100003D229E002A /* LiveTranscriptViewModel.swift in Sources */,
+				A100003F229E002C /* LiveTranscriptView.swift in Sources */,
+				A1000041229E002E /* AudioPlayerView.swift in Sources */,
+				A1000043229E0030 /* LiveWaveformView.swift in Sources */,
+				A1000045229E0032 /* PhoneViewModel.swift in Sources */,
+				A1000047229E0034 /* PhoneView.swift in Sources */,
+				A1000049229E0036 /* VoipService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -464,7 +516,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SummaryAI/SummaryAI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_ASSET_PATHS = "\"SummaryAI/Preview Content\"";
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				ENABLE_PREVIEWS = YES;
@@ -482,7 +534,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.summaryai;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -498,7 +550,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SummaryAI/SummaryAI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_ASSET_PATHS = "\"SummaryAI/Preview Content\"";
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				ENABLE_PREVIEWS = YES;
@@ -516,7 +568,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.summaryai;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -557,6 +609,14 @@
 				minimumVersion = 9.0.0;
 			};
 		};
+		A100004C229E0039 /* XCRemoteSwiftPackageReference "twilio-voice-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/twilio/twilio-voice-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -569,6 +629,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 88DA84AF2F07436B0084B5E7 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignInSwift;
+		};
+		A100004D229E003A /* TwilioVoice */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A100004C229E0039 /* XCRemoteSwiftPackageReference "twilio-voice-ios" */;
+			productName = TwilioVoice;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

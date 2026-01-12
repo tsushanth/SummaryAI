@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -36,7 +37,8 @@ import com.kreativekoala.summaryai.ui.theme.RecordingRed
 fun RecordingScreen(
     viewModel: RecordingViewModel = hiltViewModel(),
     onRecordingComplete: (String) -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
+    showAsTab: Boolean = false
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val recordingState = uiState.recordingState
@@ -76,16 +78,16 @@ fun RecordingScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text("Recording") },
+            CenterAlignedTopAppBar(
+                title = { Text("Record") },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        if (recordingState.isRecording) {
+                    if (!showAsTab && recordingState.isRecording) {
+                        IconButton(onClick = {
                             viewModel.cancel()
+                            onCancel()
+                        }) {
+                            Icon(Icons.Default.Close, contentDescription = "Cancel")
                         }
-                        onCancel()
-                    }) {
-                        Icon(Icons.Default.Close, contentDescription = "Cancel")
                     }
                 }
             )
@@ -106,8 +108,10 @@ fun RecordingScreen(
                 // Uploading
                 UploadingContent(progress = uiState.uploadProgress)
             } else if (!recordingState.isRecording) {
-                // Ready to record
-                ReadyToRecordContent(
+                // Ready to record - iOS style
+                ReadyToRecordContentIOS(
+                    title = uiState.title,
+                    onTitleChange = viewModel::updateTitle,
                     onStartRecording = viewModel::startRecording
                 )
             } else {
@@ -208,6 +212,97 @@ private fun ReadyToRecordContent(
                 tint = Color.White
             )
         }
+    }
+}
+
+@Composable
+private fun ReadyToRecordContentIOS(
+    title: String,
+    onTitleChange: (String) -> Unit,
+    onStartRecording: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Recording Title input
+        Text(
+            text = "Recording Title",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = title,
+            onValueChange = onTitleChange,
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("Enter title") },
+            singleLine = true,
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                focusedBorderColor = MaterialTheme.colorScheme.primary
+            )
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        // Large timer display (00:00)
+        Text(
+            text = "00 : 00",
+            style = MaterialTheme.typography.displayLarge.copy(
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Light,
+                letterSpacing = 8.sp
+            ),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Ready to record text
+        Text(
+            text = "Ready to record",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Large red circular record button
+        Surface(
+            onClick = onStartRecording,
+            modifier = Modifier.size(80.dp),
+            shape = CircleShape,
+            color = RecordingRed,
+            shadowElevation = 4.dp
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // Inner circle (white ring effect)
+                Surface(
+                    modifier = Modifier.size(72.dp),
+                    shape = CircleShape,
+                    color = Color.Transparent,
+                    border = androidx.compose.foundation.BorderStroke(3.dp, Color.White.copy(alpha = 0.3f))
+                ) {}
+                // Inner red circle
+                Surface(
+                    modifier = Modifier.size(60.dp),
+                    shape = CircleShape,
+                    color = RecordingRed
+                ) {}
+            }
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
 

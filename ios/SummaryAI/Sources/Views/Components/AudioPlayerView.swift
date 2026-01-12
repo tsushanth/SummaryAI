@@ -104,15 +104,21 @@ struct AudioPlayerView: View {
                 } label: {
                     ZStack {
                         Circle()
-                            .fill(Color.blue)
+                            .fill(player.isLoading ? Color.gray : Color.blue)
                             .frame(width: 56, height: 56)
 
-                        Image(systemName: player.isPlaying ? "pause.fill" : "play.fill")
-                            .font(.title2)
-                            .foregroundColor(.white)
-                            .offset(x: player.isPlaying ? 0 : 2) // Visual center for play icon
+                        if player.isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else {
+                            Image(systemName: player.isPlaying ? "pause.fill" : "play.fill")
+                                .font(.title2)
+                                .foregroundColor(.white)
+                                .offset(x: player.isPlaying ? 0 : 2) // Visual center for play icon
+                        }
                     }
                 }
+                .disabled(player.isLoading)
 
                 // Skip forward
                 Button {
@@ -201,21 +207,63 @@ class AudioPlayerManager: ObservableObject {
     @Published var currentTime: TimeInterval = 0
     @Published var seekTime: TimeInterval = 0
     @Published var playbackSpeed: Float = 1.0
+    @Published var isLoading = false
+    @Published var error: String?
 
     private var player: AVPlayer?
     private var timeObserver: Any?
+    private var statusObserver: NSKeyValueObservation?
 
     func loadAudio(from url: URL) {
+        print("[AudioPlayer] Loading audio from: \(url.absoluteString.prefix(80))...")
+
+        // Configure audio session for playback
+        do {
+            let audioSession = AVAudioSession.sharedInstance()
+            try audioSession.setCategory(.playback, mode: .default, options: [])
+            try audioSession.setActive(true)
+            print("[AudioPlayer] Audio session configured successfully")
+        } catch {
+            print("[AudioPlayer] Failed to configure audio session: \(error)")
+            self.error = "Failed to configure audio: \(error.localizedDescription)"
+            return
+        }
+
+        isLoading = true
+        error = nil
+
         let playerItem = AVPlayerItem(url: url)
         player = AVPlayer(playerItem: playerItem)
 
-        // Add time observer
+        // Observe player item status to know when it's ready
+        statusObserver = playerItem.observe(\.status, options: [.new]) { [weak self] item, _ in
+            Task { @MainActor in
+                switch item.status {
+                case .readyToPlay:
+                    print("[AudioPlayer] Player ready to play")
+                    self?.isLoading = false
+                case .failed:
+                    let errorMessage = item.error?.localizedDescription ?? "Unknown error"
+                    print("[AudioPlayer] Player failed: \(errorMessage)")
+                    self?.error = errorMessage
+                    self?.isLoading = false
+                case .unknown:
+                    print("[AudioPlayer] Player status unknown")
+                @unknown default:
+                    break
+                }
+            }
+        }
+
+        // Add time observer for progress tracking
         timeObserver = player?.addPeriodicTimeObserver(
             forInterval: CMTime(seconds: 0.1, preferredTimescale: 600),
             queue: .main
         ) { [weak self] time in
             Task { @MainActor in
-                self?.currentTime = time.seconds
+                if self?.isPlaying == true {
+                    self?.currentTime = time.seconds
+                }
             }
         }
 
@@ -226,6 +274,7 @@ class AudioPlayerManager: ObservableObject {
             queue: .main
         ) { [weak self] _ in
             Task { @MainActor in
+                print("[AudioPlayer] Playback ended")
                 self?.isPlaying = false
                 self?.seek(to: 0)
             }
@@ -233,11 +282,23 @@ class AudioPlayerManager: ObservableObject {
     }
 
     func play() {
-        player?.rate = playbackSpeed
+        guard let player = player else {
+            print("[AudioPlayer] No player available")
+            return
+        }
+
+        guard player.currentItem?.status == .readyToPlay else {
+            print("[AudioPlayer] Player not ready yet, status: \(player.currentItem?.status.rawValue ?? -1)")
+            return
+        }
+
+        print("[AudioPlayer] Starting playback at rate: \(playbackSpeed)")
+        player.rate = playbackSpeed
         isPlaying = true
     }
 
     func pause() {
+        print("[AudioPlayer] Pausing")
         player?.pause()
         isPlaying = false
     }
@@ -252,6 +313,9 @@ class AudioPlayerManager: ObservableObject {
             player?.removeTimeObserver(observer)
             timeObserver = nil
         }
+
+        statusObserver?.invalidate()
+        statusObserver = nil
     }
 
     func seek(to time: TimeInterval) {

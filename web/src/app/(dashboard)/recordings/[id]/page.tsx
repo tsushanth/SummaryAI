@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils/cn';
-import { updateRecording } from '@/lib/api/recordings';
+import { updateRecording, updateSpeakerNames } from '@/lib/api/recordings';
 
 type Tab = 'summary' | 'transcript' | 'qa';
 
@@ -30,6 +30,7 @@ export default function RecordingDetailPage() {
     useRecording(id);
   const [activeTab, setActiveTab] = useState<Tab>('summary');
   const [currentTime, setCurrentTime] = useState(0);
+  const [isUpdatingSpeakers, setIsUpdatingSpeakers] = useState(false);
 
   const handleSeek = (time: number) => {
     // This would need to be wired up to the audio player
@@ -40,6 +41,19 @@ export default function RecordingDetailPage() {
     if (!recording) return;
     await updateRecording(recording.id, { is_favorite: !recording.is_favorite });
     refresh();
+  };
+
+  const handleSpeakerNameChange = async (speakerNames: Record<string, string>) => {
+    if (!recording) return;
+    setIsUpdatingSpeakers(true);
+    try {
+      await updateSpeakerNames(recording.id, speakerNames);
+      refresh();
+    } catch (error) {
+      console.error('Failed to update speaker names:', error);
+    } finally {
+      setIsUpdatingSpeakers(false);
+    }
   };
 
   if (isLoading) {
@@ -67,7 +81,7 @@ export default function RecordingDetailPage() {
     );
   }
 
-  const isProcessing = ['uploading', 'uploaded', 'transcribing', 'summarizing'].includes(
+  const isProcessing = ['pending', 'uploading', 'uploaded', 'transcribing', 'summarizing'].includes(
     recording.status
   );
 
@@ -123,11 +137,13 @@ export default function RecordingDetailPage() {
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-3">
             <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
             <span className="text-blue-800">
-              {recording.status === 'transcribing'
-                ? 'Transcribing audio...'
-                : recording.status === 'summarizing'
-                  ? 'Generating summary...'
-                  : 'Processing...'}
+              {recording.status === 'pending'
+                ? 'Waiting for meeting to start...'
+                : recording.status === 'transcribing'
+                  ? 'Transcribing audio...'
+                  : recording.status === 'summarizing'
+                    ? 'Generating summary...'
+                    : 'Processing...'}
             </span>
           </div>
         )}
@@ -178,6 +194,8 @@ export default function RecordingDetailPage() {
                 transcript={transcript}
                 currentTime={currentTime}
                 onSeek={handleSeek}
+                onSpeakerNameChange={handleSpeakerNameChange}
+                isUpdating={isUpdatingSpeakers}
               />
             ) : (
               <div className="text-center py-10 text-gray-500">

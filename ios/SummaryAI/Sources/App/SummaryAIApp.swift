@@ -21,6 +21,10 @@ struct SummaryAIApp: App {
                     apiClient.accessTokenProvider = {
                         await authService.getAccessToken()
                     }
+                    // Set up token refresh handler for automatic retry on 401
+                    apiClient.tokenRefreshHandler = {
+                        try await authService.refreshSession()
+                    }
                 }
                 .onOpenURL { url in
                     // Handle Google Sign-In callback
@@ -98,12 +102,10 @@ struct MainTabView: View {
     @EnvironmentObject var apiClient: SummaryAIAPIClient
     @State private var selectedTab: AppTab = .recordings
     @StateObject private var calendarViewModel: CalendarViewModel
-    @StateObject private var joinMeetingViewModel: JoinMeetingViewModel
 
     init() {
         // Initialize with a temporary apiClient - will be replaced by environment
         _calendarViewModel = StateObject(wrappedValue: CalendarViewModel(apiClient: SummaryAIAPIClient()))
-        _joinMeetingViewModel = StateObject(wrappedValue: JoinMeetingViewModel(apiClient: SummaryAIAPIClient()))
     }
 
     var body: some View {
@@ -132,14 +134,11 @@ struct MainTabView: View {
             }
             .tag(AppTab.record)
 
-            NavigationStack {
-                JoinMeetingView(viewModel: joinMeetingViewModel)
-                    .navigationTitle("Join")
-            }
+            PhoneView()
             .tabItem {
-                Label("Join", systemImage: "video.badge.plus")
+                Label("Phone", systemImage: "phone.fill")
             }
-            .tag(AppTab.join)
+            .tag(AppTab.phone)
 
             SettingsView(calendarViewModel: calendarViewModel)
                 .tabItem {
@@ -150,7 +149,6 @@ struct MainTabView: View {
         .onAppear {
             // Update the view models to use the correct API client
             calendarViewModel.updateApiClient(apiClient)
-            joinMeetingViewModel.updateApiClient(apiClient)
             Task {
                 await calendarViewModel.loadConnections()
                 if calendarViewModel.hasConnectedCalendars {
@@ -167,7 +165,7 @@ enum AppTab: Hashable {
     case recordings
     case calendar
     case record
-    case join
+    case phone
     case settings
 }
 

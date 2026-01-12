@@ -78,7 +78,7 @@ struct RecordingsListContentView: View {
                 // Content
                 contentView
             }
-            .navigationTitle("Summary")
+            .navigationTitle("Meeting Mind")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -327,9 +327,20 @@ struct RecordingsListContentView: View {
 
     private var recordingsListView: some View {
         List {
-            ForEach(viewModel.recordings) { recording in
+            ForEach(filteredRecordings) { recording in
                 NavigationLink(value: recording) {
-                    RecordingRowView(recording: recording)
+                    RecordingRowView(
+                        recording: recording,
+                        onRename: { newTitle in
+                            Task { await viewModel.renameRecording(recording, newTitle: newTitle) }
+                        },
+                        onToggleFavorite: {
+                            Task { await viewModel.toggleFavorite(recording) }
+                        },
+                        onDelete: {
+                            Task { await viewModel.deleteRecording(recording) }
+                        }
+                    )
                 }
                 .task {
                     await viewModel.loadMoreIfNeeded(currentItem: recording)
@@ -461,6 +472,13 @@ struct RecordingsListContentView: View {
 /// Individual row in the recordings list
 struct RecordingRowView: View {
     let recording: Recording
+    var onRename: ((String) -> Void)?
+    var onToggleFavorite: (() -> Void)?
+    var onDelete: (() -> Void)?
+
+    @State private var showRenameAlert = false
+    @State private var newTitle = ""
+    @State private var showDeleteConfirmation = false
 
     var body: some View {
         HStack(spacing: 12) {
@@ -469,9 +487,17 @@ struct RecordingRowView: View {
 
             // Recording info
             VStack(alignment: .leading, spacing: 4) {
-                Text(recording.title)
-                    .font(.headline)
-                    .lineLimit(1)
+                HStack(spacing: 6) {
+                    Text(recording.title)
+                        .font(.headline)
+                        .lineLimit(1)
+
+                    if recording.isFavorite == true {
+                        Image(systemName: "heart.fill")
+                            .font(.caption)
+                            .foregroundColor(.red)
+                    }
+                }
 
                 HStack(spacing: 8) {
                     // Date
@@ -503,9 +529,66 @@ struct RecordingRowView: View {
 
             Spacer()
 
-            // Chevron is automatic with NavigationLink
+            // More button
+            if onRename != nil || onToggleFavorite != nil || onDelete != nil {
+                Menu {
+                    Button {
+                        newTitle = recording.title
+                        showRenameAlert = true
+                    } label: {
+                        Label("Rename", systemImage: "pencil")
+                    }
+
+                    Button {
+                        onToggleFavorite?()
+                    } label: {
+                        Label(
+                            recording.isFavorite == true ? "Remove from Favorites" : "Add to Favorites",
+                            systemImage: recording.isFavorite == true ? "heart.slash" : "heart"
+                        )
+                    }
+
+                    Divider()
+
+                    Button(role: .destructive) {
+                        showDeleteConfirmation = true
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: 16))
+                        .foregroundColor(.secondary)
+                        .frame(width: 32, height: 32)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
         }
         .padding(.vertical, 4)
+        .alert("Rename Recording", isPresented: $showRenameAlert) {
+            TextField("Title", text: $newTitle)
+            Button("Cancel", role: .cancel) {}
+            Button("Save") {
+                if !newTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    onRename?(newTitle.trimmingCharacters(in: .whitespacesAndNewlines))
+                }
+            }
+        } message: {
+            Text("Enter a new title for this recording")
+        }
+        .confirmationDialog(
+            "Delete Recording",
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                onDelete?()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Are you sure you want to delete \"\(recording.title)\"? This action cannot be undone.")
+        }
     }
 
     // MARK: - Status Icon
@@ -605,9 +688,9 @@ struct RecordingRowView: View {
             return .green
         case .failed:
             return .red
-        case .uploading, .uploaded, .transcribing, .summarizing:
+        case .pending, .uploading, .uploaded, .transcribing, .summarizing:
             return .orange
-        case .pending, .transcribed:
+        case .transcribed:
             return .blue
         }
     }

@@ -16,7 +16,7 @@ export function useMeetings(params?: {
   status?: 'upcoming' | 'past' | 'all';
   days_ahead?: number;
 }) {
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, isValidating, mutate } = useSWR(
     ['meetings', params],
     () => getMeetings(params),
     {
@@ -34,12 +34,18 @@ export function useMeetings(params?: {
     }
   );
 
+  // Force refresh that clears cache and fetches fresh data
+  const refresh = useCallback(() => {
+    return mutate(undefined, { revalidate: true });
+  }, [mutate]);
+
   return {
     meetings: data?.items ?? [],
     total: data?.total ?? 0,
     isLoading,
+    isValidating,
     error,
-    refresh: mutate,
+    refresh,
   };
 }
 

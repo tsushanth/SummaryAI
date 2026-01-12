@@ -117,6 +117,14 @@ final class RecordingDetailViewModel: ObservableObject {
             transcript = response.transcript
             summary = response.summary
 
+            // Set audio URL for playback
+            if let urlString = response.audioUrl, let url = URL(string: urlString) {
+                audioURL = url
+                print("[RecordingDetailViewModel] Audio URL loaded: \(urlString.prefix(100))...")
+            } else {
+                print("[RecordingDetailViewModel] No audio URL in response")
+            }
+
             state = .loaded
 
             // Start polling if still processing
@@ -147,6 +155,11 @@ final class RecordingDetailViewModel: ObservableObject {
             recording = response.recording
             transcript = response.transcript
             summary = response.summary
+
+            // Update audio URL for playback
+            if let urlString = response.audioUrl, let url = URL(string: urlString) {
+                audioURL = url
+            }
 
             state = .loaded
 
@@ -267,6 +280,11 @@ final class RecordingDetailViewModel: ObservableObject {
                     transcript = response.transcript
                     summary = response.summary
 
+                    // Update audio URL when it becomes available
+                    if let urlString = response.audioUrl, let url = URL(string: urlString) {
+                        audioURL = url
+                    }
+
                     // Stop polling when complete
                     if !isProcessing {
                         break
@@ -284,6 +302,22 @@ final class RecordingDetailViewModel: ObservableObject {
     func stopStatusPolling() {
         pollingTask?.cancel()
         pollingTask = nil
+    }
+
+    // MARK: - Speaker Names
+
+    /// Update speaker names for the transcript
+    /// - Parameter speakerNames: Dictionary mapping speaker index to custom name
+    func updateSpeakerNames(_ speakerNames: [String: String]) async {
+        do {
+            let response = try await apiClient.updateSpeakerNames(
+                recordingId: recordingId,
+                speakerNames: speakerNames
+            )
+            transcript = response.transcript
+        } catch {
+            showError("Failed to update speaker names: \(error.localizedDescription)")
+        }
     }
 
     // MARK: - Delete Recording
@@ -429,4 +463,34 @@ struct ListQuestionsResponse: Decodable {
         case questions
         case totalCount = "total_count"
     }
+}
+
+// MARK: - Speaker Names API
+
+extension SummaryAIAPIClient {
+
+    /// Update speaker names for a recording's transcript
+    func updateSpeakerNames(recordingId: String, speakerNames: [String: String]) async throws -> UpdateSpeakerNamesResponse {
+        let request = UpdateSpeakerNamesRequest(speakerNames: speakerNames)
+
+        return try await patchWithResponse(
+            endpoint: "/api/recordings/\(recordingId)/speakers",
+            body: request,
+            responseType: UpdateSpeakerNamesResponse.self
+        )
+    }
+}
+
+/// Request to update speaker names
+struct UpdateSpeakerNamesRequest: Encodable {
+    let speakerNames: [String: String]
+
+    enum CodingKeys: String, CodingKey {
+        case speakerNames = "speaker_names"
+    }
+}
+
+/// Response from updating speaker names
+struct UpdateSpeakerNamesResponse: Decodable {
+    let transcript: Transcript
 }

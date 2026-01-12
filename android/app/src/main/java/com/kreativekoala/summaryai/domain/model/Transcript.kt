@@ -8,8 +8,17 @@ data class Transcript(
     val fullText: String,
     val segments: List<TranscriptSegment>,
     val language: String?,
-    val wordCount: Int
-)
+    val wordCount: Int,
+    /** Maps speaker_index (as string) to custom speaker name */
+    val speakerNames: Map<String, String>? = null
+) {
+    /**
+     * Get display name for a speaker index
+     */
+    fun speakerName(index: Int): String {
+        return speakerNames?.get(index.toString()) ?: "Speaker ${index + 1}"
+    }
+}
 
 /**
  * Individual segment of a transcript

@@ -5,6 +5,7 @@
 
 // Recording status enum matching Postgres
 export type RecordingStatus =
+  | 'pending'
   | 'uploading'
   | 'uploaded'
   | 'transcribing'
@@ -44,7 +45,7 @@ export interface Recording {
   title: string;
   duration_seconds: number | null;
   file_size_bytes: number | null;
-  file_path: string;
+  file_path: string | null;
   status: RecordingStatus;
   error_message: string | null;
   error_code: string | null;
@@ -56,6 +57,7 @@ export interface Recording {
   created_at: string;
   updated_at: string;
   processed_at: string | null;
+  meeting_id: string | null;
 }
 
 export type RecordingInsert = Omit<Recording, 'id' | 'created_at' | 'updated_at'>;
@@ -97,6 +99,8 @@ export interface Transcript {
   transcription_model: string | null;
   processing_duration_ms: number | null;
   created_at: string;
+  /** Maps speaker_index (as string) to custom speaker name */
+  speaker_names?: Record<string, string>;
 }
 
 /**
