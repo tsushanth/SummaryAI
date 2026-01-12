@@ -10,6 +10,7 @@ import usersRoutes from './users.js';
 import meetingsRoutes, { meetingsWorkerRouter } from './meetings.js';
 import calendarRoutes, { calendarCallbackRouter } from './calendar.js';
 import webhooksRoutes from './webhooks.js';
+import phoneRoutes from './phone.js';
 
 const router = Router();
 
@@ -31,5 +32,6 @@ router.use('/api/todos', todosRoutes);
 router.use('/api/users', usersRoutes);
 router.use('/api/meetings', meetingsRoutes);
 router.use('/api/calendar', calendarRoutes);
+router.use('/api/phone', phoneRoutes);
 
 export default router;

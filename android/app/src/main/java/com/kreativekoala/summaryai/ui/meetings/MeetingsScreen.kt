@@ -1,20 +1,28 @@
 package com.kreativekoala.summaryai.ui.meetings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.domain.model.Meeting
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,19 +46,14 @@ fun MeetingsScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.meetings)) },
-                actions = {
-                    IconButton(onClick = viewModel::refresh) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh")
-                    }
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = "Calendar",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
                 }
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = onJoinMeetingClick) {
-                Icon(Icons.Default.VideoCall, contentDescription = stringResource(R.string.join_meeting))
-            }
         }
     ) { paddingValues ->
         if (uiState.isLoading) {
@@ -68,21 +71,30 @@ fun MeetingsScreen(
                     .fillMaxSize()
                     .padding(paddingValues),
                 contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Calendar connection card
-                if (!uiState.hasCalendarConnected) {
+                // Calendar connected banner - iOS style
+                if (uiState.hasCalendarConnected) {
                     item {
-                        ConnectCalendarCard(onClick = onConnectCalendarClick)
+                        CalendarConnectedBanner(
+                            email = uiState.calendarConnections.firstOrNull()?.providerEmail ?: "Connected",
+                            onRefresh = viewModel::refresh
+                        )
+                    }
+                } else {
+                    item {
+                        ConnectCalendarCardIOS(onClick = onConnectCalendarClick)
                     }
                 }
 
-                // Upcoming meetings
+                // Upcoming meetings section
                 if (uiState.upcomingMeetings.isNotEmpty()) {
                     item {
                         Text(
-                            text = stringResource(R.string.upcoming_meetings),
-                            style = MaterialTheme.typography.titleMedium
+                            text = "Upcoming",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
                         )
                     }
 
@@ -90,7 +102,7 @@ fun MeetingsScreen(
                         items = uiState.upcomingMeetings,
                         key = { it.id }
                     ) { meeting ->
-                        MeetingCard(
+                        MeetingCardIOS(
                             meeting = meeting,
                             onToggleAutoJoin = { viewModel.toggleAutoJoin(meeting) },
                             onRecordingClick = meeting.recordingId?.let { { onRecordingClick(it) } }
@@ -98,7 +110,7 @@ fun MeetingsScreen(
                     }
                 } else if (uiState.hasCalendarConnected) {
                     item {
-                        EmptyMeetingsContent()
+                        EmptyMeetingsContentIOS()
                     }
                 }
             }
@@ -107,162 +119,216 @@ fun MeetingsScreen(
 }
 
 @Composable
-private fun ConnectCalendarCard(onClick: () -> Unit) {
+private fun CalendarConnectedBanner(
+    email: String,
+    onRefresh: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
+            containerColor = Color(0xFFE8F5E9)
+        ),
+        shape = RoundedCornerShape(12.dp)
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+            // Green checkmark circle
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF4CAF50)),
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    Icons.Default.CalendarMonth,
+                    Icons.Default.Check,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
                 )
-                Spacer(modifier = Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.connect_calendar),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    Text(
-                        text = "Connect your calendar to see upcoming meetings",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                    )
-                }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
-            Button(
-                onClick = onClick,
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text("Connect")
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Calendar Connected",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF2E7D32)
+                )
+                Text(
+                    text = email,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFF388E3C)
+                )
+            }
+
+            IconButton(onClick = onRefresh) {
+                Icon(
+                    Icons.Default.Refresh,
+                    contentDescription = "Refresh",
+                    tint = Color(0xFF388E3C)
+                )
             }
         }
     }
 }
 
 @Composable
-private fun MeetingCard(
+private fun ConnectCalendarCardIOS(onClick: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                Icons.Default.CalendarMonth,
+                contentDescription = null,
+                modifier = Modifier.size(48.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "Connect Your Calendar",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "Sync your meetings and enable auto-recording",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = onClick,
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Connect Calendar")
+            }
+        }
+    }
+}
+
+@Composable
+private fun MeetingCardIOS(
     meeting: Meeting,
     onToggleAutoJoin: () -> Unit,
     onRecordingClick: (() -> Unit)?
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
+            // Meeting title and time
+            Text(
+                text = meeting.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Date and time row
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Icon(
+                    Icons.Default.Schedule,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = formatMeetingTime(meeting.startTime),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            // Platform badge
+            meeting.platform?.let { platform ->
+                Spacer(modifier = Modifier.height(8.dp))
+                Surface(
+                    color = getPlatformColor(platform).copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(6.dp)
+                ) {
                     Text(
-                        text = meeting.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
+                        text = meeting.platformDisplayName,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Medium,
+                        color = getPlatformColor(platform)
                     )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Default.Schedule,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = meeting.startTime, // Format this properly
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    meeting.platform?.let { platform ->
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Surface(
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            shape = MaterialTheme.shapes.small
-                        ) {
-                            Text(
-                                text = meeting.platformDisplayName,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                        }
-                    }
-                }
-
-                // Bot status
-                if (meeting.hasBot) {
-                    Surface(
-                        color = if (meeting.isBotActive)
-                            MaterialTheme.colorScheme.primaryContainer
-                        else
-                            MaterialTheme.colorScheme.surfaceVariant,
-                        shape = MaterialTheme.shapes.small
-                    ) {
-                        Text(
-                            text = meeting.botStatus?.displayName ?: "",
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 12.dp),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            )
 
+            // Auto-record toggle row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Auto-join toggle
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(R.string.auto_join),
-                        style = MaterialTheme.typography.bodyMedium
+                Text(
+                    text = "Auto-record",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Switch(
+                    checked = meeting.autoJoin,
+                    onCheckedChange = { onToggleAutoJoin() },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = Color(0xFF4CAF50)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Switch(
-                        checked = meeting.autoJoin,
-                        onCheckedChange = { onToggleAutoJoin() }
-                    )
-                }
+                )
+            }
 
-                // View recording button
-                if (onRecordingClick != null) {
-                    TextButton(onClick = onRecordingClick) {
-                        Icon(Icons.Default.Mic, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("View Recording")
-                    }
+            // View recording button if available
+            if (onRecordingClick != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                TextButton(
+                    onClick = onRecordingClick,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("View Recording")
                 }
             }
         }
@@ -270,7 +336,7 @@ private fun MeetingCard(
 }
 
 @Composable
-private fun EmptyMeetingsContent() {
+private fun EmptyMeetingsContentIOS() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -278,17 +344,18 @@ private fun EmptyMeetingsContent() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
-            imageVector = Icons.Default.EventBusy,
+            imageVector = Icons.Default.EventAvailable,
             contentDescription = null,
             modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "No upcoming meetings",
-            style = MaterialTheme.typography.titleMedium
+            text = "No Upcoming Meetings",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -298,5 +365,27 @@ private fun EmptyMeetingsContent() {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+private fun formatMeetingTime(dateString: String?): String {
+    if (dateString == null) return "Now"
+    return try {
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+        val outputFormat = SimpleDateFormat("EEE, MMM d 'at' h:mm a", Locale.US)
+        val date = inputFormat.parse(dateString)
+        date?.let { outputFormat.format(it) } ?: dateString
+    } catch (e: Exception) {
+        dateString
+    }
+}
+
+private fun getPlatformColor(platform: String): Color {
+    return when (platform.lowercase()) {
+        "zoom" -> Color(0xFF2D8CFF)
+        "google_meet", "meet" -> Color(0xFF00897B)
+        "teams", "microsoft_teams" -> Color(0xFF5059C9)
+        "webex" -> Color(0xFF00BCF2)
+        else -> Color(0xFF666666)
     }
 }

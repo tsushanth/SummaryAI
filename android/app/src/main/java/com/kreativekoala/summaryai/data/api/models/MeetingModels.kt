@@ -23,37 +23,32 @@ enum class BotStatus {
 // MARK: - Meeting
 data class MeetingDto(
     val id: String,
-    @SerializedName("user_id") val userId: String,
-    val title: String,
-    @SerializedName("meeting_url") val meetingUrl: String?,
-    @SerializedName("calendar_event_id") val calendarEventId: String?,
-    val platform: String?,
-    @SerializedName("start_time") val startTime: String,
-    @SerializedName("end_time") val endTime: String?,
-    val status: MeetingStatus,
-    @SerializedName("bot_status") val botStatus: BotStatus?,
-    @SerializedName("auto_join") val autoJoin: Boolean,
-    @SerializedName("recording_id") val recordingId: String?,
-    @SerializedName("created_at") val createdAt: String,
-    @SerializedName("updated_at") val updatedAt: String
+    val title: String? = null,
+    val platform: String? = null,
+    val source: String? = null,
+    @SerializedName("scheduled_start") val scheduledStart: String? = null,
+    @SerializedName("scheduled_end") val scheduledEnd: String? = null,
+    @SerializedName("auto_join") val autoJoin: Boolean? = null,
+    val status: String,
+    @SerializedName("recording_id") val recordingId: String? = null,
+    @SerializedName("join_url") val joinUrl: String? = null
 )
 
 // MARK: - Calendar Connection
 data class CalendarConnectionDto(
     val id: String,
-    @SerializedName("user_id") val userId: String,
     val provider: String,
     @SerializedName("provider_email") val providerEmail: String?,
-    @SerializedName("is_active") val isActive: Boolean,
-    @SerializedName("last_sync_at") val lastSyncAt: String?,
+    @SerializedName("sync_enabled") val syncEnabled: Boolean,
+    @SerializedName("last_synced_at") val lastSyncedAt: String?,
     @SerializedName("created_at") val createdAt: String
 )
 
 // MARK: - API Requests
 
 data class JoinMeetingRequest(
-    @SerializedName("meeting_url") val meetingUrl: String,
-    val title: String? = null
+    @SerializedName("join_url") val joinUrl: String,
+    @SerializedName("bot_name") val botName: String? = null
 )
 
 data class ScheduleMeetingBotRequest(
@@ -61,11 +56,16 @@ data class ScheduleMeetingBotRequest(
     @SerializedName("auto_join") val autoJoin: Boolean = true
 )
 
+data class UpdateMeetingRequest(
+    @SerializedName("auto_join") val autoJoin: Boolean? = null,
+    val title: String? = null
+)
+
 // MARK: - API Responses
 
 data class ListMeetingsResponse(
-    val meetings: List<MeetingDto>,
-    val pagination: PaginationDto
+    val items: List<MeetingDto>,
+    val total: Int
 )
 
 data class MeetingResponse(
@@ -74,7 +74,8 @@ data class MeetingResponse(
 
 data class JoinMeetingResponse(
     val meeting: MeetingDto,
-    @SerializedName("bot_id") val botId: String?
+    @SerializedName("bot_id") val botId: String?,
+    @SerializedName("recording_id") val recordingId: String?
 )
 
 data class CalendarConnectionsResponse(
@@ -82,5 +83,25 @@ data class CalendarConnectionsResponse(
 )
 
 data class CalendarAuthUrlResponse(
-    val url: String
+    @SerializedName("auth_url") val url: String
+)
+
+// MARK: - Live Transcript
+
+data class LiveTranscriptSegmentDto(
+    val id: String,
+    @SerializedName("meeting_id") val meetingId: String,
+    @SerializedName("segment_text") val segmentText: String,
+    @SerializedName("speaker_id") val speakerId: String?,
+    @SerializedName("speaker_name") val speakerName: String?,
+    @SerializedName("is_host") val isHost: Boolean,
+    @SerializedName("start_timestamp") val startTimestamp: Double,
+    @SerializedName("end_timestamp") val endTimestamp: Double,
+    @SerializedName("is_partial") val isPartial: Boolean,
+    @SerializedName("created_at") val createdAt: String
+)
+
+data class LiveTranscriptResponse(
+    val segments: List<LiveTranscriptSegmentDto>,
+    @SerializedName("has_more") val hasMore: Boolean
 )

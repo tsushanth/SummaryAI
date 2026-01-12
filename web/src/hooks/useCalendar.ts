@@ -64,38 +64,84 @@ export function useConnectCalendar() {
           `width=${width},height=${height},left=${left},top=${top},popup=yes`
         );
 
+        // Cleanup function
+        const cleanup = () => {
+          setOAuthMessageHandler(null);
+          clearInterval(pollTimer);
+          window.removeEventListener('storage', storageHandler);
+          setIsConnecting(false);
+        };
+
         // Listen for postMessage from OAuth callback page
         const messageHandler = (event: MessageEvent) => {
           // Check if message is from our OAuth flow
           if (event.data?.type === 'calendar-connected' || event.data?.type === 'calendar-error') {
-            setOAuthMessageHandler(null); // Remove handler
-            setIsConnecting(false);
+            cleanup();
             refresh();
 
-            // Close popup if still open
-            if (popup && !popup.closed) {
-              popup.close();
+            // Try to close popup if still open (may fail due to COOP)
+            try {
+              if (popup && !popup.closed) {
+                popup.close();
+              }
+            } catch {
+              // Ignore COOP errors
             }
           }
         };
         setOAuthMessageHandler(messageHandler);
 
-        // Also poll for popup close (fallback)
+        // Listen for localStorage changes (works across origins)
+        const storageHandler = (event: StorageEvent) => {
+          if (event.key === 'calendar-oauth-complete' && event.newValue) {
+            try {
+              const data = JSON.parse(event.newValue);
+              if (data.type === 'calendar-connected' || data.type === 'calendar-error') {
+                cleanup();
+                refresh();
+                // Clear the localStorage item
+                localStorage.removeItem('calendar-oauth-complete');
+              }
+            } catch {
+              // Ignore parse errors
+            }
+          }
+        };
+        window.addEventListener('storage', storageHandler);
+
+        // Also check localStorage on interval (same-tab fallback)
         const pollTimer = setInterval(() => {
-          if (popup?.closed) {
-            clearInterval(pollTimer);
-            setOAuthMessageHandler(null);
-            setIsConnecting(false);
-            // Refresh connections after popup closes
-            refresh();
+          // Check localStorage for completion signal
+          try {
+            const storedData = localStorage.getItem('calendar-oauth-complete');
+            if (storedData) {
+              const data = JSON.parse(storedData);
+              // Only process if recent (within last 30 seconds)
+              if (data.timestamp && Date.now() - data.timestamp < 30000) {
+                cleanup();
+                refresh();
+                localStorage.removeItem('calendar-oauth-complete');
+                return;
+              }
+            }
+          } catch {
+            // Ignore errors
+          }
+
+          // Also try to check if popup closed (may fail due to COOP)
+          try {
+            if (popup?.closed) {
+              cleanup();
+              refresh();
+            }
+          } catch {
+            // COOP blocks access to popup.closed - continue polling
           }
         }, 500);
 
         // Timeout after 5 minutes
         setTimeout(() => {
-          clearInterval(pollTimer);
-          setOAuthMessageHandler(null);
-          setIsConnecting(false);
+          cleanup();
         }, 300000);
       } catch (error) {
         setIsConnecting(false);

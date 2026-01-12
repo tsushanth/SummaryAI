@@ -1,6 +1,29 @@
 /**
  * Calendar Routes
- * Google Calendar OAuth and sync endpoints
+ * Google Calendar and Microsoft Outlook OAuth and sync endpoints
+ *
+ * DATA SEGREGATION POLICY:
+ * ========================
+ * To comply with Google OAuth verification requirements (Option 2: Data Segregation),
+ * this module implements complete data isolation between calendar data and AI processing:
+ *
+ * 1. Meeting titles from Google/Microsoft Calendar are NOT stored - we generate generic
+ *    titles like "Zoom Meeting - Jan 15" instead of storing calendar event titles
+ *
+ * 2. Meeting descriptions/body from calendars are NOT stored
+ *
+ * 3. Only the following non-content data is used from calendars:
+ *    - Meeting join URL (to dispatch the recording bot)
+ *    - Scheduled start/end times (for scheduling)
+ *    - Timezone (for correct time display)
+ *    - Event ID and etag (for sync tracking only)
+ *
+ * 4. The AI processing pipeline (transcription, summarization) ONLY processes:
+ *    - Audio/video content from the actual meeting (captured by the bot)
+ *    - This content is user-generated during the meeting, NOT from Google APIs
+ *
+ * This ensures Google User Data obtained via Google Calendar API is never sent to
+ * or used by the AI services (OpenAI, Deepgram).
  */
 
 import { Router, Request, Response } from 'express';
@@ -136,6 +159,16 @@ function generateOAuthSuccessPage(provider: string, email: string): string {
 
     // Try to notify parent and close
     function tryClose() {
+      // Use localStorage to signal completion (works across origins)
+      try {
+        localStorage.setItem('calendar-oauth-complete', JSON.stringify({
+          type: 'calendar-connected',
+          provider: '${provider}',
+          email: '${email}',
+          timestamp: Date.now()
+        }));
+      } catch (e) {}
+
       // Try postMessage to parent (works if same origin or opener exists)
       if (window.opener) {
         try {
@@ -762,6 +795,19 @@ router.delete(
       }
     }
 
+    // Also delete any calendar-sourced meetings for this user that might not have connection_id set
+    // (handles legacy meetings created before connection tracking was added)
+    const { error: legacyError, count: legacyCount } = await supabaseAdmin
+      .from('meetings')
+      .delete({ count: 'exact' })
+      .eq('user_id', userId)
+      .eq('source', 'calendar')
+      .is('calendar_connection_id', null);
+
+    if (!legacyError && legacyCount && legacyCount > 0) {
+      console.log(`[Calendar] Deleted ${legacyCount} legacy calendar meetings for user ${userId}`);
+    }
+
     // Delete connection
     const { error } = await supabaseAdmin
       .from('calendar_connections')
@@ -893,14 +939,22 @@ async function syncGoogleCalendarConnection(
       .eq('calendar_event_id', event.id)
       .single();
 
+    // Generate a generic title based on platform and date/time
+    // We do NOT store Google Calendar event titles to ensure data segregation
+    // per Google's OAuth verification requirements
+    const meetingDate = new Date(scheduledStart);
+    const genericTitle = `${platform.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} Meeting - ${meetingDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+
     if (existing) {
       // Update if etag changed
       if (existing.calendar_event_etag !== event.etag) {
         await supabaseAdmin
           .from('meetings')
           .update({
-            title: event.summary || 'Untitled Meeting',
-            description: event.description || null,
+            // Use generic title, NOT Google Calendar title (data segregation)
+            title: genericTitle,
+            // Do NOT store description from Google Calendar
+            description: null,
             platform,
             join_url: joinUrl,
             scheduled_start: scheduledStart,
@@ -919,8 +973,10 @@ async function syncGoogleCalendarConnection(
         calendar_connection_id: connection.id,
         calendar_event_id: event.id,
         calendar_event_etag: event.etag,
-        title: event.summary || 'Untitled Meeting',
-        description: event.description || null,
+        // Use generic title, NOT Google Calendar title (data segregation)
+        title: genericTitle,
+        // Do NOT store description from Google Calendar
+        description: null,
         platform,
         join_url: joinUrl,
         scheduled_start: scheduledStart,
@@ -1006,14 +1062,22 @@ async function syncMicrosoftCalendarConnection(
       .eq('calendar_event_id', event.id)
       .single();
 
+    // Generate a generic title based on platform and date/time
+    // We do NOT store Microsoft Calendar event subjects to ensure data segregation
+    // This is applied consistently across all calendar providers
+    const meetingDate = new Date(scheduledStart);
+    const genericTitle = `${platform.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} Meeting - ${meetingDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+
     if (existing) {
       // Update if changeKey changed
       if (existing.calendar_event_etag !== event.changeKey) {
         await supabaseAdmin
           .from('meetings')
           .update({
-            title: event.subject || 'Untitled Meeting',
-            description: event.bodyPreview || null,
+            // Use generic title, NOT Microsoft Calendar subject (data segregation)
+            title: genericTitle,
+            // Do NOT store description from Microsoft Calendar
+            description: null,
             platform,
             join_url: joinUrl,
             scheduled_start: scheduledStart,
@@ -1032,8 +1096,10 @@ async function syncMicrosoftCalendarConnection(
         calendar_connection_id: connection.id,
         calendar_event_id: event.id,
         calendar_event_etag: event.changeKey,
-        title: event.subject || 'Untitled Meeting',
-        description: event.bodyPreview || null,
+        // Use generic title, NOT Microsoft Calendar subject (data segregation)
+        title: genericTitle,
+        // Do NOT store description from Microsoft Calendar
+        description: null,
         platform,
         join_url: joinUrl,
         scheduled_start: scheduledStart,

@@ -5,10 +5,12 @@ import Foundation
 struct JoinMeetingResponse: Codable {
     let meeting: JoinedMeeting
     let botId: String
+    let recordingId: String?
 
     enum CodingKeys: String, CodingKey {
         case meeting
         case botId = "bot_id"
+        case recordingId = "recording_id"
     }
 }
 
@@ -18,6 +20,7 @@ struct JoinedMeeting: Codable {
     let platform: String?
     let status: String
     let joinUrl: String
+    let recordingId: String?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -25,6 +28,7 @@ struct JoinedMeeting: Codable {
         case platform
         case status
         case joinUrl = "join_url"
+        case recordingId = "recording_id"
     }
 }
 
@@ -41,7 +45,9 @@ final class JoinMeetingViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var showError = false
     @Published var joinedMeeting: JoinedMeeting?
+    @Published var joinedRecordingId: String?
     @Published var showSuccess = false
+    @Published var navigateToRecording = false
 
     // MARK: - Computed Properties
 
@@ -130,9 +136,10 @@ final class JoinMeetingViewModel: ObservableObject {
                 responseType: JoinMeetingResponse.self
             )
 
-            print("[JoinMeetingVM] Bot joining meeting: \(response.meeting.id), bot_id: \(response.botId)")
+            print("[JoinMeetingVM] Bot joining meeting: \(response.meeting.id), bot_id: \(response.botId), recording_id: \(response.recordingId ?? "nil")")
 
             joinedMeeting = response.meeting
+            joinedRecordingId = response.recordingId ?? response.meeting.recordingId
             showSuccess = true
 
             // Reset form after successful join
@@ -167,7 +174,9 @@ final class JoinMeetingViewModel: ObservableObject {
         meetingUrl = ""
         botName = ""
         joinedMeeting = nil
+        joinedRecordingId = nil
         showSuccess = false
+        navigateToRecording = false
         errorMessage = nil
         showError = false
     }

@@ -12,9 +12,10 @@ import javax.inject.Inject
 
 data class JoinMeetingUiState(
     val meetingUrl: String = "",
-    val title: String = "",
+    val botName: String = "",
     val isJoining: Boolean = false,
     val meetingJoined: Boolean = false,
+    val joinedRecordingId: String? = null,
     val error: String? = null
 )
 
@@ -30,27 +31,31 @@ class JoinMeetingViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(meetingUrl = url)
     }
 
-    fun updateTitle(title: String) {
-        _uiState.value = _uiState.value.copy(title = title)
+    fun updateBotName(name: String) {
+        _uiState.value = _uiState.value.copy(botName = name)
     }
 
     fun joinMeeting() {
         val state = _uiState.value
         if (state.meetingUrl.isBlank()) return
 
+        // Normalize URL - add https:// if no protocol specified
+        val normalizedUrl = normalizeUrl(state.meetingUrl)
+
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isJoining = true, error = null)
 
             val result = meetingsRepository.joinMeeting(
-                meetingUrl = state.meetingUrl,
-                title = state.title.ifBlank { null }
+                joinUrl = normalizedUrl,
+                botName = state.botName.ifBlank { null }
             )
 
             result.fold(
-                onSuccess = {
+                onSuccess = { (meeting, recordingId) ->
                     _uiState.value = _uiState.value.copy(
                         isJoining = false,
-                        meetingJoined = true
+                        meetingJoined = true,
+                        joinedRecordingId = recordingId
                     )
                 },
                 onFailure = { error ->
@@ -65,5 +70,16 @@ class JoinMeetingViewModel @Inject constructor(
 
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
+    }
+
+    /**
+     * Normalize the meeting URL by adding https:// if no protocol is specified
+     */
+    private fun normalizeUrl(url: String): String {
+        val trimmed = url.trim()
+        return when {
+            trimmed.startsWith("https://") || trimmed.startsWith("http://") -> trimmed
+            else -> "https://$trimmed"
+        }
     }
 }

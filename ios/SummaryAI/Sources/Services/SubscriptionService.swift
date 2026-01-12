@@ -4,7 +4,7 @@ import StoreKit
 // MARK: - Subscription Product IDs
 
 enum SubscriptionProductID: String, CaseIterable {
-    case yearly = "com.summaryai.subscription.yearly"
+    case yearly = "com.summaryai.subscription.yearly1"
     case monthly = "com.summaryai.subscription.monthly"
     case weekly = "com.summaryai.subscription.weekly"
 
