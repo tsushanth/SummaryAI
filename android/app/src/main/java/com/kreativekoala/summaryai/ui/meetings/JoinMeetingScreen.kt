@@ -1,13 +1,22 @@
 package com.kreativekoala.summaryai.ui.meetings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.summaryai.R
@@ -17,13 +26,14 @@ import com.kreativekoala.summaryai.R
 fun JoinMeetingScreen(
     viewModel: JoinMeetingViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
-    onMeetingJoined: () -> Unit
+    onMeetingJoined: (recordingId: String?) -> Unit,
+    showAsTab: Boolean = false
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(uiState.meetingJoined) {
         if (uiState.meetingJoined) {
-            onMeetingJoined()
+            onMeetingJoined(uiState.joinedRecordingId)
         }
     }
 
@@ -38,11 +48,18 @@ fun JoinMeetingScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.join_meeting)) },
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = "Join",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    if (!showAsTab) {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
                     }
                 }
             )
@@ -52,77 +69,207 @@ fun JoinMeetingScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Icon at top - purple circle with video icon
+            Box(
+                modifier = Modifier
+                    .size(72.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFEDE7F6)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Videocam,
+                    contentDescription = null,
+                    modifier = Modifier.size(36.dp),
+                    tint = Color(0xFF7C4DFF)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Title
             Text(
-                text = "Paste a meeting link to send our recording bot",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = "Join a Meeting",
+                style = MaterialTheme.typography.headlineSmall
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Description
+            Text(
+                text = "Paste your meeting link and our bot will join to record and transcribe",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Meeting URL input
+            Text(
+                text = "Meeting URL",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            )
 
             OutlinedTextField(
                 value = uiState.meetingUrl,
                 onValueChange = viewModel::updateMeetingUrl,
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.meeting_url)) },
-                placeholder = { Text(stringResource(R.string.paste_meeting_link)) },
-                leadingIcon = { Icon(Icons.Default.Link, contentDescription = null) },
-                singleLine = true
+                placeholder = { Text("https://zoom.us/j/123456789") },
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Link,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                )
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Bot Name input
+            Text(
+                text = "Bot Name",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text(
+                text = "(Optional)",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            )
 
             OutlinedTextField(
-                value = uiState.title,
-                onValueChange = viewModel::updateTitle,
+                value = uiState.botName,
+                onValueChange = viewModel::updateBotName,
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Meeting Title (optional)") },
-                singleLine = true
+                placeholder = { Text("Meeting Mind") },
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Person,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                )
+            )
+
+            Text(
+                text = "This name will appear in the meeting participant list",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp)
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Supported platforms info
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "Supported Platforms",
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "• Zoom\n• Google Meet\n• Microsoft Teams\n• Webex",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
+            // Join Meeting button
             Button(
                 onClick = viewModel::joinMeeting,
-                modifier = Modifier.fillMaxWidth(),
-                enabled = uiState.meetingUrl.isNotBlank() && !uiState.isJoining
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                enabled = uiState.meetingUrl.isNotBlank() && !uiState.isJoining,
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                )
             ) {
                 if (uiState.isJoining) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 } else {
-                    Text(stringResource(R.string.send_bot))
+                    Icon(
+                        Icons.Default.Videocam,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Join Meeting")
                 }
             }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Supported Platforms section
+            Text(
+                text = "Supported Platforms",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Platform icons row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                PlatformIcon(name = "Zoom", color = Color(0xFF2D8CFF))
+                PlatformIcon(name = "Teams", color = Color(0xFF5059C9))
+                PlatformIcon(name = "Meet", color = Color(0xFF00897B))
+                PlatformIcon(name = "Webex", color = Color(0xFF00BCF2))
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
         }
+    }
+}
+
+@Composable
+private fun PlatformIcon(name: String, color: Color) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(color),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = name.first().toString(),
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.White
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = name,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

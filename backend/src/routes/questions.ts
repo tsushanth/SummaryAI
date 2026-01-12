@@ -61,7 +61,7 @@ router.post(
     // Verify recording exists and user owns it
     const { data: recording, error: recordingError } = await supabaseAdmin
       .from('recordings')
-      .select('id, status, title')
+      .select('id, status, title, meeting_id')
       .eq('id', recordingId)
       .eq('user_id', userId)
       .single();
@@ -70,29 +70,92 @@ router.post(
       throw Errors.notFound('Recording');
     }
 
-    // Check if recording has been transcribed
-    if (!['transcribed', 'summarizing', 'completed'].includes(recording.status)) {
-      throw Errors.unprocessable(
-        'Recording must be transcribed before asking questions',
-        { status: recording.status }
-      );
+    let segments: TranscriptSegment[] = [];
+
+    // Helper function to fetch live transcripts for a meeting
+    const fetchLiveTranscripts = async (meetingId: string): Promise<TranscriptSegment[]> => {
+      const { data: liveTranscripts } = await supabaseAdmin
+        .from('live_transcripts')
+        .select('segment_text, speaker_name, start_timestamp, end_timestamp')
+        .eq('meeting_id', meetingId)
+        .eq('is_partial', false)
+        .order('start_timestamp', { ascending: true });
+
+      if (liveTranscripts && liveTranscripts.length > 0) {
+        return liveTranscripts.map((lt, index) => ({
+          id: `live-${index}`,
+          speaker_label: lt.speaker_name || 'Speaker',
+          speaker_index: 0,
+          text: lt.segment_text || '',
+          start_time: lt.start_timestamp || 0,
+          end_time: lt.end_timestamp || 0,
+          confidence: 1.0,
+        }));
+      }
+      return [];
+    };
+
+    // For live meetings (pending/uploading status), use live_transcripts table directly
+    if (recording.meeting_id && ['pending', 'uploading'].includes(recording.status)) {
+      segments = await fetchLiveTranscripts(recording.meeting_id);
+    } else {
+      // Check if recording has been transcribed (for non-live recordings)
+      if (!['transcribed', 'summarizing', 'completed'].includes(recording.status)) {
+        throw Errors.unprocessable(
+          'Recording must be transcribed before asking questions',
+          { status: recording.status }
+        );
+      }
+
+      // Fetch transcript with full_text as fallback
+      const { data: transcript, error: transcriptError } = await supabaseAdmin
+        .from('transcripts')
+        .select('segments, full_text')
+        .eq('recording_id', recordingId)
+        .single();
+
+      if (transcriptError || !transcript) {
+        throw Errors.unprocessable('Transcript not found for this recording');
+      }
+
+      // Parse segments (stored as JSONB)
+      segments = Array.isArray(transcript.segments)
+        ? transcript.segments
+        : [];
+
+      // If no segments but we have full_text, create a single segment from it
+      if (segments.length === 0 && transcript.full_text && transcript.full_text.trim().length > 0) {
+        segments = [{
+          id: 'full-text-segment',
+          speaker_label: 'Speaker',
+          speaker_index: 0,
+          text: transcript.full_text,
+          start_time: 0,
+          end_time: 0,
+          confidence: 1.0,
+        }];
+      }
+
+      // For completed meeting recordings, if transcript segments are empty or very short,
+      // try to use live_transcripts as fallback
+      if (recording.meeting_id && segments.length === 0) {
+        console.log(`[Q&A] Transcript empty for meeting recording ${recordingId}, trying live_transcripts`);
+        segments = await fetchLiveTranscripts(recording.meeting_id);
+      } else if (recording.meeting_id) {
+        // Check if transcript content is too short (less than 100 chars total)
+        const totalTextLength = segments.reduce((sum, s) => sum + (s.text?.length || 0), 0);
+        if (totalTextLength < 100) {
+          console.log(`[Q&A] Transcript too short (${totalTextLength} chars) for meeting recording ${recordingId}, trying live_transcripts`);
+          const liveSegments = await fetchLiveTranscripts(recording.meeting_id);
+          const liveTextLength = liveSegments.reduce((sum, s) => sum + (s.text?.length || 0), 0);
+          // Use live transcripts if they have more content
+          if (liveTextLength > totalTextLength) {
+            console.log(`[Q&A] Using live_transcripts (${liveTextLength} chars) instead of transcript`);
+            segments = liveSegments;
+          }
+        }
+      }
     }
-
-    // Fetch transcript
-    const { data: transcript, error: transcriptError } = await supabaseAdmin
-      .from('transcripts')
-      .select('segments')
-      .eq('recording_id', recordingId)
-      .single();
-
-    if (transcriptError || !transcript) {
-      throw Errors.unprocessable('Transcript not found for this recording');
-    }
-
-    // Parse segments (stored as JSONB)
-    const segments: TranscriptSegment[] = Array.isArray(transcript.segments)
-      ? transcript.segments
-      : [];
 
     if (segments.length === 0) {
       throw Errors.unprocessable('Recording transcript is empty');

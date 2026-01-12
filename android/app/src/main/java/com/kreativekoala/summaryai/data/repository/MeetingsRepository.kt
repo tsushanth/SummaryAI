@@ -2,9 +2,9 @@ package com.kreativekoala.summaryai.data.repository
 
 import com.kreativekoala.summaryai.data.api.SummaryAIApi
 import com.kreativekoala.summaryai.data.api.models.*
+import com.kreativekoala.summaryai.domain.model.LiveTranscriptSegment
 import com.kreativekoala.summaryai.domain.model.Meeting
 import com.kreativekoala.summaryai.domain.model.MeetingStatus as DomainMeetingStatus
-import com.kreativekoala.summaryai.domain.model.BotStatus as DomainBotStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -21,19 +21,19 @@ class MeetingsRepository @Inject constructor(
      * Get meetings list
      */
     suspend fun getMeetings(
-        page: Int = 1,
-        perPage: Int = 20,
-        status: DomainMeetingStatus? = null,
-        upcoming: Boolean? = null
+        limit: Int = 50,
+        offset: Int = 0,
+        status: String? = null,
+        daysAhead: Int? = null
     ): Result<List<Meeting>> = withContext(Dispatchers.IO) {
         try {
             val response = api.getMeetings(
-                page = page,
-                perPage = perPage,
-                status = status?.name?.lowercase(),
-                upcoming = upcoming
+                limit = limit,
+                offset = offset,
+                status = status,
+                daysAhead = daysAhead
             )
-            Result.success(response.meetings.map { it.toDomain() })
+            Result.success(response.items.map { it.toDomain() })
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -43,7 +43,7 @@ class MeetingsRepository @Inject constructor(
      * Get upcoming meetings
      */
     suspend fun getUpcomingMeetings(): Result<List<Meeting>> {
-        return getMeetings(upcoming = true)
+        return getMeetings(status = "upcoming", daysAhead = 14)
     }
 
     /**
@@ -60,38 +60,38 @@ class MeetingsRepository @Inject constructor(
 
     /**
      * Join a meeting with bot
+     * Returns a Pair of (Meeting, recordingId)
      */
     suspend fun joinMeeting(
-        meetingUrl: String,
-        title: String? = null
-    ): Result<Meeting> = withContext(Dispatchers.IO) {
+        joinUrl: String,
+        botName: String? = null
+    ): Result<Pair<Meeting, String?>> = withContext(Dispatchers.IO) {
         try {
             val response = api.joinMeeting(
                 JoinMeetingRequest(
-                    meetingUrl = meetingUrl,
-                    title = title
+                    joinUrl = joinUrl,
+                    botName = botName
                 )
             )
-            Result.success(response.meeting.toDomain())
+            // Get recording ID from top-level response or from nested meeting
+            val recordingId = response.recordingId ?: response.meeting.recordingId
+            Result.success(Pair(response.meeting.toDomain(), recordingId))
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
     /**
-     * Schedule bot to join a meeting
+     * Update meeting (including auto_join toggle)
      */
-    suspend fun scheduleMeetingBot(
+    suspend fun updateMeeting(
         meetingId: String,
-        autoJoin: Boolean = true
+        autoJoin: Boolean? = null
     ): Result<Meeting> = withContext(Dispatchers.IO) {
         try {
-            val response = api.scheduleMeetingBot(
+            val response = api.updateMeeting(
                 id = meetingId,
-                request = ScheduleMeetingBotRequest(
-                    meetingId = meetingId,
-                    autoJoin = autoJoin
-                )
+                request = UpdateMeetingRequest(autoJoin = autoJoin)
             )
             Result.success(response.meeting.toDomain())
         } catch (e: Exception) {
@@ -100,12 +100,15 @@ class MeetingsRepository @Inject constructor(
     }
 
     /**
-     * Cancel bot for a meeting
+     * Get live transcript segments for a meeting
      */
-    suspend fun cancelMeetingBot(meetingId: String): Result<Unit> = withContext(Dispatchers.IO) {
+    suspend fun getLiveTranscript(
+        meetingId: String,
+        since: String? = null
+    ): Result<Pair<List<LiveTranscriptSegment>, Boolean>> = withContext(Dispatchers.IO) {
         try {
-            api.cancelMeetingBot(meetingId)
-            Result.success(Unit)
+            val response = api.getLiveTranscript(meetingId, since)
+            Result.success(Pair(response.segments.map { it.toDomain() }, response.hasMore))
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -115,29 +118,38 @@ class MeetingsRepository @Inject constructor(
 // Extension functions
 private fun MeetingDto.toDomain() = Meeting(
     id = id,
-    title = title,
-    meetingUrl = meetingUrl,
+    title = title ?: "Meeting",
+    meetingUrl = joinUrl,
     platform = platform,
-    startTime = startTime,
-    endTime = endTime,
-    status = status.toDomain(),
-    botStatus = botStatus?.toDomain(),
-    autoJoin = autoJoin,
+    startTime = scheduledStart,
+    endTime = scheduledEnd,
+    status = status.toDomainStatus(),
+    botStatus = null, // Not returned in list endpoint
+    autoJoin = autoJoin ?: false,
     recordingId = recordingId
 )
 
-private fun MeetingStatus.toDomain(): DomainMeetingStatus = when (this) {
-    MeetingStatus.SCHEDULED -> DomainMeetingStatus.SCHEDULED
-    MeetingStatus.IN_PROGRESS -> DomainMeetingStatus.IN_PROGRESS
-    MeetingStatus.COMPLETED -> DomainMeetingStatus.COMPLETED
-    MeetingStatus.CANCELLED -> DomainMeetingStatus.CANCELLED
+private fun String.toDomainStatus(): DomainMeetingStatus = when (this.lowercase()) {
+    "scheduled" -> DomainMeetingStatus.SCHEDULED
+    "bot_queued" -> DomainMeetingStatus.SCHEDULED
+    "bot_joining" -> DomainMeetingStatus.IN_PROGRESS
+    "bot_in_meeting" -> DomainMeetingStatus.IN_PROGRESS
+    "in_progress" -> DomainMeetingStatus.IN_PROGRESS
+    "completed" -> DomainMeetingStatus.COMPLETED
+    "cancelled", "canceled" -> DomainMeetingStatus.CANCELLED
+    "failed" -> DomainMeetingStatus.CANCELLED
+    else -> DomainMeetingStatus.SCHEDULED
 }
 
-private fun BotStatus.toDomain(): DomainBotStatus = when (this) {
-    BotStatus.WAITING -> DomainBotStatus.WAITING
-    BotStatus.JOINING -> DomainBotStatus.JOINING
-    BotStatus.IN_CALL -> DomainBotStatus.IN_CALL
-    BotStatus.RECORDING -> DomainBotStatus.RECORDING
-    BotStatus.DONE -> DomainBotStatus.DONE
-    BotStatus.ERROR -> DomainBotStatus.ERROR
-}
+private fun LiveTranscriptSegmentDto.toDomain() = LiveTranscriptSegment(
+    id = id,
+    meetingId = meetingId,
+    segmentText = segmentText,
+    speakerId = speakerId,
+    speakerName = speakerName,
+    isHost = isHost,
+    startTimestamp = startTimestamp,
+    endTimestamp = endTimestamp,
+    isPartial = isPartial,
+    createdAt = createdAt
+)

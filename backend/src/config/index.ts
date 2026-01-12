@@ -70,6 +70,17 @@ const envSchema = z.object({
   // Service URL (for internal worker callbacks)
   SERVICE_URL: z.string().optional(),
   INTERNAL_SECRET: z.string().optional(),
+
+  // Twilio (Phone Calls)
+  TWILIO_ACCOUNT_SID: z.string().optional(),
+  TWILIO_AUTH_TOKEN: z.string().optional(),
+  TWILIO_PHONE_NUMBER: z.string().optional(), // Twilio number for outbound calls
+  TWILIO_VERIFY_SERVICE_SID: z.string().optional(), // Verify service for phone verification
+
+  // Twilio Voice SDK (VoIP)
+  TWILIO_API_KEY_SID: z.string().optional(), // API Key for access tokens
+  TWILIO_API_KEY_SECRET: z.string().optional(), // API Key secret
+  TWILIO_TWIML_APP_SID: z.string().optional(), // TwiML App for VoIP calls
 });
 
 export type Config = z.infer<typeof envSchema>;

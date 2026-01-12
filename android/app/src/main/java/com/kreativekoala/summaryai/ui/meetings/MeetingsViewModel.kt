@@ -36,23 +36,31 @@ class MeetingsViewModel @Inject constructor(
     }
 
     fun refresh() {
-        loadData()
+        loadData(triggerSync = true)
     }
 
-    private fun loadData() {
+    private fun loadData(triggerSync: Boolean = false) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
 
-            // Load calendar connections
+            // Load calendar connections first
+            var hasCalendar = false
             val connectionsResult = calendarRepository.getConnections()
             connectionsResult.onSuccess { connections ->
+                hasCalendar = connections.any { it.syncEnabled }
                 _uiState.value = _uiState.value.copy(
                     calendarConnections = connections,
-                    hasCalendarConnected = connections.any { it.isActive }
+                    hasCalendarConnected = hasCalendar
                 )
             }
 
-            // Load meetings
+            // Trigger calendar sync if requested and we have calendar connections
+            // Wait for sync to complete before fetching meetings
+            if (triggerSync && hasCalendar) {
+                calendarRepository.syncCalendar()
+            }
+
+            // Load meetings (after sync completes if triggered)
             val upcomingResult = meetingsRepository.getUpcomingMeetings()
             upcomingResult.fold(
                 onSuccess = { meetings ->
@@ -74,14 +82,34 @@ class MeetingsViewModel @Inject constructor(
 
     fun toggleAutoJoin(meeting: Meeting) {
         viewModelScope.launch {
-            if (meeting.autoJoin) {
-                // Cancel bot
-                meetingsRepository.cancelMeetingBot(meeting.id)
-            } else {
-                // Schedule bot
-                meetingsRepository.scheduleMeetingBot(meeting.id, autoJoin = true)
+            val newAutoJoin = !meeting.autoJoin
+
+            // Optimistically update UI
+            val updatedMeetings = _uiState.value.upcomingMeetings.map {
+                if (it.id == meeting.id) it.copy(autoJoin = newAutoJoin) else it
             }
-            loadData()
+            _uiState.value = _uiState.value.copy(upcomingMeetings = updatedMeetings)
+
+            // Call API
+            meetingsRepository.updateMeeting(meeting.id, autoJoin = newAutoJoin).fold(
+                onSuccess = { updatedMeeting ->
+                    // Update with server response
+                    val serverUpdatedMeetings = _uiState.value.upcomingMeetings.map {
+                        if (it.id == meeting.id) updatedMeeting else it
+                    }
+                    _uiState.value = _uiState.value.copy(upcomingMeetings = serverUpdatedMeetings)
+                },
+                onFailure = { error ->
+                    // Revert on failure
+                    val revertedMeetings = _uiState.value.upcomingMeetings.map {
+                        if (it.id == meeting.id) meeting else it
+                    }
+                    _uiState.value = _uiState.value.copy(
+                        upcomingMeetings = revertedMeetings,
+                        error = "Failed to update: ${error.message}"
+                    )
+                }
+            )
         }
     }
 

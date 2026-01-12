@@ -52,7 +52,7 @@ const completeUploadSchema = z.object({
 const listQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional().default(1),
   per_page: z.coerce.number().int().positive().max(50).optional().default(20),
-  status: z.enum(['uploading', 'uploaded', 'transcribing', 'transcribed', 'summarizing', 'completed', 'failed']).optional(),
+  status: z.enum(['pending', 'uploading', 'uploaded', 'transcribing', 'transcribed', 'summarizing', 'completed', 'failed']).optional(),
   sort: z.enum(['created_at', 'updated_at', 'title', 'duration_seconds']).optional().default('created_at'),
   order: z.enum(['asc', 'desc']).optional().default('desc'),
 });
@@ -411,6 +411,66 @@ router.patch(
     }
 
     res.status(200).json({ recording });
+  })
+);
+
+// ============================================================================
+// PATCH /api/recordings/:id/speakers
+// Update speaker names for a recording's transcript
+// ============================================================================
+
+const updateSpeakersSchema = z.object({
+  speaker_names: z.record(z.string(), z.string().min(1).max(100)),
+});
+
+router.patch(
+  '/:id/speakers',
+  asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+    const recordingId = req.params.id;
+
+    // Validate request body
+    const body = updateSpeakersSchema.parse(req.body);
+
+    // Verify recording ownership
+    const { data: recording } = await supabaseAdmin
+      .from('recordings')
+      .select('id')
+      .eq('id', recordingId)
+      .eq('user_id', userId)
+      .single();
+
+    if (!recording) {
+      throw Errors.notFound('Recording');
+    }
+
+    // Check if transcript exists
+    const { data: existingTranscript } = await supabaseAdmin
+      .from('transcripts')
+      .select('id')
+      .eq('recording_id', recordingId)
+      .single();
+
+    if (!existingTranscript) {
+      throw Errors.notFound('Transcript');
+    }
+
+    // Update speaker_names in transcript
+    const { data: transcript, error } = await supabaseAdmin
+      .from('transcripts')
+      .update({
+        speaker_names: body.speaker_names,
+      })
+      .eq('recording_id', recordingId)
+      .select()
+      .single();
+
+    if (error || !transcript) {
+      console.error('Failed to update speaker names:', error);
+      throw Errors.internal('Failed to update speaker names');
+    }
+
+    res.status(200).json({ transcript });
   })
 );
 

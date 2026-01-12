@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.kreativekoala.summaryai.data.repository.RecordingsRepository
 import com.kreativekoala.summaryai.domain.model.Recording
 import com.kreativekoala.summaryai.domain.model.RecordingStatus
+import com.kreativekoala.summaryai.domain.model.RecordingType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,19 +16,25 @@ import javax.inject.Inject
 
 enum class RecordingsTab {
     ALL,
-    PROCESSING,
-    COMPLETED
+    MEETINGS,
+    TODOS,
+    FAVORITES,
+    IMPORTED
 }
 
 data class RecordingsListUiState(
-    val recordings: List<Recording> = emptyList(),
+    val allRecordings: List<Recording> = emptyList(),
+    val filteredRecordings: List<Recording> = emptyList(),
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val selectedTab: RecordingsTab = RecordingsTab.ALL,
     val error: String? = null,
     val hasMore: Boolean = true,
     val currentPage: Int = 1
-)
+) {
+    // For backwards compatibility
+    val recordings: List<Recording> get() = filteredRecordings
+}
 
 @HiltViewModel
 class RecordingsListViewModel @Inject constructor(
@@ -48,11 +55,10 @@ class RecordingsListViewModel @Inject constructor(
         if (_uiState.value.selectedTab != tab) {
             _uiState.value = _uiState.value.copy(
                 selectedTab = tab,
-                recordings = emptyList(),
                 currentPage = 1,
                 hasMore = true
             )
-            loadRecordings()
+            applyFilter()
         }
     }
 
@@ -73,35 +79,100 @@ class RecordingsListViewModel @Inject constructor(
         loadRecordings(append = true)
     }
 
+    fun toggleFavorite(recording: Recording) {
+        viewModelScope.launch {
+            val newFavoriteStatus = !recording.isFavorite
+            // Optimistically update the UI
+            val updatedRecordings = _uiState.value.allRecordings.map {
+                if (it.id == recording.id) it.copy(isFavorite = newFavoriteStatus) else it
+            }
+            _uiState.value = _uiState.value.copy(allRecordings = updatedRecordings)
+            applyFilter()
+
+            // Call API
+            recordingsRepository.toggleFavorite(recording.id, newFavoriteStatus).fold(
+                onSuccess = { updatedRecording ->
+                    // Update with server response
+                    val serverUpdatedRecordings = _uiState.value.allRecordings.map {
+                        if (it.id == recording.id) updatedRecording else it
+                    }
+                    _uiState.value = _uiState.value.copy(allRecordings = serverUpdatedRecordings)
+                    applyFilter()
+                },
+                onFailure = { error ->
+                    // Revert on failure
+                    val revertedRecordings = _uiState.value.allRecordings.map {
+                        if (it.id == recording.id) it.copy(isFavorite = recording.isFavorite) else it
+                    }
+                    _uiState.value = _uiState.value.copy(
+                        allRecordings = revertedRecordings,
+                        error = "Failed to update favorite: ${error.message}"
+                    )
+                    applyFilter()
+                }
+            )
+        }
+    }
+
+    fun deleteRecording(recording: Recording) {
+        viewModelScope.launch {
+            // Optimistically remove from UI
+            val updatedRecordings = _uiState.value.allRecordings.filter { it.id != recording.id }
+            _uiState.value = _uiState.value.copy(allRecordings = updatedRecordings)
+            applyFilter()
+
+            // Call API
+            recordingsRepository.deleteRecording(recording.id).fold(
+                onSuccess = {
+                    // Already removed from UI
+                },
+                onFailure = { error ->
+                    // Revert on failure - add the recording back
+                    val revertedRecordings = _uiState.value.allRecordings + recording
+                    _uiState.value = _uiState.value.copy(
+                        allRecordings = revertedRecordings,
+                        error = "Failed to delete recording: ${error.message}"
+                    )
+                    applyFilter()
+                }
+            )
+        }
+    }
+
+    private fun applyFilter() {
+        val allRecordings = _uiState.value.allRecordings
+        val filtered = when (_uiState.value.selectedTab) {
+            RecordingsTab.ALL -> allRecordings
+            RecordingsTab.MEETINGS -> allRecordings.filter { it.recordingType == RecordingType.MEETING }
+            RecordingsTab.TODOS -> emptyList() // Todos are handled in a separate screen
+            RecordingsTab.FAVORITES -> allRecordings.filter { it.isFavorite }
+            RecordingsTab.IMPORTED -> allRecordings.filter { it.recordingType == RecordingType.IMPORTED }
+        }
+        _uiState.value = _uiState.value.copy(filteredRecordings = filtered)
+    }
+
     private fun loadRecordings(append: Boolean = false) {
         viewModelScope.launch {
             if (!append) {
                 _uiState.value = _uiState.value.copy(isLoading = true)
             }
 
-            val status = when (_uiState.value.selectedTab) {
-                RecordingsTab.ALL -> null
-                RecordingsTab.PROCESSING -> RecordingStatus.PROCESSING
-                RecordingsTab.COMPLETED -> RecordingStatus.COMPLETED
-            }
-
             val result = recordingsRepository.getRecordings(
-                page = _uiState.value.currentPage,
-                status = status?.let {
-                    com.kreativekoala.summaryai.data.api.models.RecordingStatus.valueOf(it.name)
-                }
+                page = _uiState.value.currentPage
             )
 
             result.fold(
                 onSuccess = { recordings ->
-                    val currentRecordings = if (append) _uiState.value.recordings else emptyList()
+                    val currentRecordings = if (append) _uiState.value.allRecordings else emptyList()
+                    val allRecordings = currentRecordings + recordings
                     _uiState.value = _uiState.value.copy(
-                        recordings = currentRecordings + recordings,
+                        allRecordings = allRecordings,
                         isLoading = false,
                         isRefreshing = false,
                         hasMore = recordings.size >= 20,
                         error = null
                     )
+                    applyFilter()
                 },
                 onFailure = { error ->
                     _uiState.value = _uiState.value.copy(
@@ -121,7 +192,7 @@ class RecordingsListViewModel @Inject constructor(
                 delay(5000) // Poll every 5 seconds
 
                 // Only poll if we have processing recordings
-                val hasProcessing = _uiState.value.recordings.any { it.isProcessing }
+                val hasProcessing = _uiState.value.allRecordings.any { it.isProcessing }
                 if (hasProcessing) {
                     refreshSilently()
                 }
@@ -130,22 +201,14 @@ class RecordingsListViewModel @Inject constructor(
     }
 
     private suspend fun refreshSilently() {
-        val status = when (_uiState.value.selectedTab) {
-            RecordingsTab.ALL -> null
-            RecordingsTab.PROCESSING -> RecordingStatus.PROCESSING
-            RecordingsTab.COMPLETED -> RecordingStatus.COMPLETED
-        }
-
         val result = recordingsRepository.getRecordings(
             page = 1,
-            perPage = _uiState.value.recordings.size.coerceAtLeast(20),
-            status = status?.let {
-                com.kreativekoala.summaryai.data.api.models.RecordingStatus.valueOf(it.name)
-            }
+            perPage = _uiState.value.allRecordings.size.coerceAtLeast(20)
         )
 
         result.onSuccess { recordings ->
-            _uiState.value = _uiState.value.copy(recordings = recordings)
+            _uiState.value = _uiState.value.copy(allRecordings = recordings)
+            applyFilter()
         }
     }
 

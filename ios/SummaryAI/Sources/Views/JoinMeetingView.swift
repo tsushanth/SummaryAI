@@ -2,10 +2,16 @@ import SwiftUI
 
 // MARK: - Join Meeting View
 
+/// Focus state for text fields
+private enum FocusedField {
+    case url
+    case botName
+}
+
 /// View for manually joining a meeting by entering a URL
 struct JoinMeetingView: View {
     @ObservedObject var viewModel: JoinMeetingViewModel
-    @FocusState private var isUrlFieldFocused: Bool
+    @FocusState private var focusedField: FocusedField?
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -43,14 +49,29 @@ struct JoinMeetingView: View {
             Text(viewModel.errorMessage ?? "An error occurred")
         }
         .alert("Bot Joining", isPresented: $viewModel.showSuccess) {
-            Button("OK", role: .cancel) {
-                viewModel.showSuccess = false
+            if viewModel.joinedRecordingId != nil {
+                Button("View Recording") {
+                    viewModel.showSuccess = false
+                    viewModel.navigateToRecording = true
+                }
+                Button("OK", role: .cancel) {
+                    viewModel.showSuccess = false
+                }
+            } else {
+                Button("OK", role: .cancel) {
+                    viewModel.showSuccess = false
+                }
             }
         } message: {
             if let meeting = viewModel.joinedMeeting {
-                Text("The bot is joining your \(meeting.platform ?? "meeting"). You'll see the recording in your Recordings tab once complete.")
+                Text("The bot is joining your \(meeting.platform ?? "meeting"). You can track the recording progress in real-time.")
             } else {
-                Text("The bot is joining your meeting. You'll see the recording in your Recordings tab once complete.")
+                Text("The bot is joining your meeting. You can track the recording progress in real-time.")
+            }
+        }
+        .navigationDestination(isPresented: $viewModel.navigateToRecording) {
+            if let recordingId = viewModel.joinedRecordingId {
+                RecordingDetailView(recordingId: recordingId)
             }
         }
         .toolbar {
@@ -58,7 +79,7 @@ struct JoinMeetingView: View {
                 if !viewModel.meetingUrl.isEmpty || !viewModel.botName.isEmpty {
                     Button {
                         viewModel.reset()
-                        isUrlFieldFocused = false
+                        focusedField = nil
                     } label: {
                         Text("Clear")
                             .foregroundColor(.blue)
@@ -69,7 +90,7 @@ struct JoinMeetingView: View {
                 HStack {
                     Spacer()
                     Button("Done") {
-                        isUrlFieldFocused = false
+                        focusedField = nil
                     }
                 }
             }
@@ -129,7 +150,7 @@ struct JoinMeetingView: View {
                     .textContentType(.URL)
                     .autocapitalization(.none)
                     .autocorrectionDisabled()
-                    .focused($isUrlFieldFocused)
+                    .focused($focusedField, equals: .url)
 
                 if !viewModel.meetingUrl.isEmpty {
                     Button {
@@ -179,6 +200,7 @@ struct JoinMeetingView: View {
 
                 TextField("Meeting Mind", text: $viewModel.botName)
                     .autocapitalization(.words)
+                    .focused($focusedField, equals: .botName)
             }
             .padding()
             .background(Color(.secondarySystemBackground))

@@ -30,6 +30,9 @@
 # Supabase / Ktor
 -keep class io.ktor.** { *; }
 -keep class io.github.jan.supabase.** { *; }
+-dontwarn java.lang.management.ManagementFactory
+-dontwarn java.lang.management.RuntimeMXBean
+-dontwarn org.slf4j.impl.StaticLoggerBinder
 
 # Coroutines
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}

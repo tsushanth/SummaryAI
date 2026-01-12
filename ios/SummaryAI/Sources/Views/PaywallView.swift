@@ -400,16 +400,22 @@ struct SubscriptionOptionCard: View {
 
                 Spacer()
 
-                // Price - show per week for all plans
+                // Price - billed amount must be most prominent per App Store guidelines
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text(perWeekPrice)
+                    Text(product.displayPrice)
                         .font(.title3)
                         .fontWeight(.bold)
                         .foregroundColor(.primary)
 
-                    Text("per week")
+                    Text(periodSuffix)
                         .font(.caption)
                         .foregroundColor(.secondary)
+
+                    if product.id != SubscriptionProductID.weekly.rawValue {
+                        Text(perWeekPrice + "/wk")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
 
                     if let savings = savingsText {
                         Text(savings)

@@ -5,6 +5,7 @@ const statusConfig: Record<
   RecordingStatus,
   { label: string; className: string }
 > = {
+  pending: { label: 'Pending', className: 'bg-gray-100 text-gray-800' },
   uploading: { label: 'Uploading', className: 'bg-yellow-100 text-yellow-800' },
   uploaded: { label: 'Processing', className: 'bg-blue-100 text-blue-800' },
   transcribing: { label: 'Transcribing', className: 'bg-blue-100 text-blue-800' },

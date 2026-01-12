@@ -24,7 +24,11 @@ import {
   MeetingDetailResponse,
   BotRunResponse,
   Meeting,
+  LiveTranscriptResponse,
+  LiveInsightsResponse,
+  LiveInsightType,
 } from '../types/meetings.js';
+import { getLiveInsights } from '../services/liveInsightsService.js';
 
 const router = Router();
 
@@ -62,12 +66,12 @@ router.get(
 
     if (status === 'upcoming') {
       // Include meetings that:
-      // 1. Haven't started yet (scheduled_start >= now), OR
-      // 2. Are currently ongoing (scheduled_start < now AND scheduled_end > now)
-      // We use scheduled_end > now to capture both upcoming and ongoing meetings
+      // 1. Start time is in the future (upcoming), OR
+      // 2. Start time is in the past but end time is in the future (ongoing)
+      // Since Supabase doesn't support OR conditions easily, we use a raw filter
+      // We filter: (scheduled_start >= now AND scheduled_start <= futureDate) OR (scheduled_start < now AND scheduled_end > now)
       query = query
-        .gte('scheduled_end', now) // End time is in the future (ongoing or upcoming)
-        .lte('scheduled_start', futureDate) // Start time within the lookahead window
+        .or(`and(scheduled_start.gte.${now},scheduled_start.lte.${futureDate}),and(scheduled_start.lt.${now},scheduled_end.gt.${now})`)
         .order('scheduled_start', { ascending: true });
     } else if (status === 'past') {
       query = query
@@ -185,6 +189,34 @@ router.post(
       throw Errors.badRequest('Unsupported meeting platform. Please use Zoom, Teams, Google Meet, or other supported platforms.');
     }
 
+    // Check if there's already an active meeting with the same URL for this user
+    const { data: existingMeetings } = await supabaseAdmin
+      .from('meetings')
+      .select('id, title, platform, status, recording_id, join_url')
+      .eq('user_id', userId)
+      .eq('join_url', join_url)
+      .in('status', ['bot_joining', 'bot_in_meeting', 'in_progress']);
+
+    if (existingMeetings && existingMeetings.length > 0) {
+      const existing = existingMeetings[0];
+      console.log(`[Meetings] User ${userId} already has an active meeting for this URL: ${existing.id}`);
+
+      // Return the existing meeting instead of creating a duplicate
+      res.status(200).json({
+        meeting: {
+          id: existing.id,
+          title: existing.title,
+          platform: existing.platform,
+          status: existing.status,
+          join_url: existing.join_url,
+          recording_id: existing.recording_id,
+        },
+        recording_id: existing.recording_id,
+        already_exists: true,
+      });
+      return;
+    }
+
     // Generate a title if not provided
     const meetingTitle = title || `${platform.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} Meeting`;
 
@@ -218,6 +250,29 @@ router.post(
         bot_name: bot_name || 'Meeting Mind',
       });
 
+      // Create a pending recording so it shows up in recordings list immediately
+      const { data: pendingRecording, error: recordingError } = await supabaseAdmin
+        .from('recordings')
+        .insert({
+          user_id: userId,
+          title: meetingTitle,
+          status: 'pending',
+          source: 'meeting_bot',
+          meeting_id: meeting.id,
+        })
+        .select()
+        .single();
+
+      if (recordingError) {
+        console.error('[Meetings] Failed to create pending recording:', recordingError);
+      } else {
+        // Link the pending recording to the meeting
+        await supabaseAdmin
+          .from('meetings')
+          .update({ recording_id: pendingRecording.id })
+          .eq('id', meeting.id);
+      }
+
       // Create bot run record
       await supabaseAdmin.from('bot_runs').insert({
         meeting_id: meeting.id,
@@ -227,7 +282,7 @@ router.post(
         join_requested_at: now,
       });
 
-      console.log(`[Meetings] Instant join: created meeting ${meeting.id} with bot ${bot.id}`);
+      console.log(`[Meetings] Instant join: created meeting ${meeting.id} with bot ${bot.id}, pending recording ${pendingRecording?.id}`);
 
       res.status(201).json({
         meeting: {
@@ -236,8 +291,10 @@ router.post(
           platform: meeting.platform,
           status: meeting.status,
           join_url: meeting.join_url,
+          recording_id: pendingRecording?.id || null,
         },
         bot_id: bot.id,
+        recording_id: pendingRecording?.id || null,
       });
     } catch (botError) {
       console.error('[Meetings] Failed to create bot:', botError);
@@ -461,6 +518,98 @@ router.post(
 );
 
 /**
+ * GET /api/meetings/:id/live-transcript
+ * Get live transcript segments for a meeting in progress
+ */
+router.get(
+  '/:id/live-transcript',
+  asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+    const meetingId = req.params.id;
+    const since = req.query.since as string | undefined;
+
+    // Verify meeting ownership
+    const { data: meeting, error: meetingError } = await supabaseAdmin
+      .from('meetings')
+      .select('id')
+      .eq('id', meetingId)
+      .eq('user_id', userId)
+      .single();
+
+    if (meetingError || !meeting) {
+      throw Errors.notFound('Meeting');
+    }
+
+    // Build query for live transcripts
+    let query = supabaseAdmin
+      .from('live_transcripts')
+      .select('*')
+      .eq('meeting_id', meetingId)
+      .eq('is_partial', false) // Only return final transcripts by default
+      .order('start_timestamp', { ascending: true });
+
+    // Filter by timestamp if provided
+    if (since) {
+      const sinceDate = new Date(since);
+      if (!isNaN(sinceDate.getTime())) {
+        query = query.gt('created_at', sinceDate.toISOString());
+      }
+    }
+
+    // Limit results
+    query = query.limit(100);
+
+    const { data: segments, error: segmentsError } = await query;
+
+    if (segmentsError) {
+      console.error('[Meetings] Error fetching live transcripts:', segmentsError);
+      throw Errors.internal('Failed to fetch live transcript');
+    }
+
+    const response: LiveTranscriptResponse = {
+      segments: segments || [],
+      has_more: (segments?.length || 0) >= 100,
+    };
+
+    res.json(response);
+  })
+);
+
+/**
+ * GET /api/meetings/:id/live-insights
+ * Get AI-generated insights for a meeting in progress
+ */
+router.get(
+  '/:id/live-insights',
+  asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+    const meetingId = req.params.id;
+    const type = req.query.type as LiveInsightType | undefined;
+
+    // Verify meeting ownership
+    const { data: meeting, error: meetingError } = await supabaseAdmin
+      .from('meetings')
+      .select('id')
+      .eq('id', meetingId)
+      .eq('user_id', userId)
+      .single();
+
+    if (meetingError || !meeting) {
+      throw Errors.notFound('Meeting');
+    }
+
+    // Get insights using the service
+    const insights = await getLiveInsights(meetingId, userId, type);
+
+    const response: LiveInsightsResponse = {
+      insights,
+    };
+
+    res.json(response);
+  })
+);
+
+/**
  * DELETE /api/meetings/:id
  * Cancel/delete meeting
  */
@@ -586,8 +735,27 @@ meetingsWorkerRouter.post(
       // Create bot via Recall.ai
       const bot = await RecallService.createBot({
         meeting_url: meeting.join_url,
-        bot_name: 'Summary AI',
+        bot_name: 'Meeting Mind',
       });
+
+      // Create a pending recording so it shows up in recordings list immediately
+      const { data: pendingRecording, error: recordingError } = await supabaseAdmin
+        .from('recordings')
+        .insert({
+          user_id: userId,
+          title: meeting.title,
+          status: 'pending',
+          source: 'meeting_bot',
+          meeting_id: meetingId,
+        })
+        .select()
+        .single();
+
+      if (recordingError) {
+        console.error('[Bot Worker] Failed to create pending recording:', recordingError);
+      } else {
+        console.log(`[Bot Worker] Created pending recording ${pendingRecording.id} for meeting ${meetingId}`);
+      }
 
       // Create bot run record
       await supabaseAdmin.from('bot_runs').insert({
@@ -598,18 +766,21 @@ meetingsWorkerRouter.post(
         join_requested_at: new Date().toISOString(),
       });
 
-      // Update meeting status
+      // Update meeting status and link to pending recording
       await supabaseAdmin
         .from('meetings')
-        .update({ status: 'bot_joining' })
+        .update({
+          status: 'bot_joining',
+          recording_id: pendingRecording?.id || null,
+        })
         .eq('id', meetingId);
 
       // Mark scheduler job as executed
       await markJobExecuted(meetingId);
 
-      console.log(`[Bot Worker] Started bot ${bot.id} for meeting ${meetingId}`);
+      console.log(`[Bot Worker] Started bot ${bot.id} for meeting ${meetingId}, pending recording ${pendingRecording?.id}`);
 
-      res.json({ ok: true, bot_id: bot.id });
+      res.json({ ok: true, bot_id: bot.id, recording_id: pendingRecording?.id || null });
     } catch (error) {
       console.error(`[Bot Worker] Error for meeting ${meetingId}:`, error);
 

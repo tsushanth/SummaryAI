@@ -121,12 +121,13 @@ private val DarkColorScheme = darkColorScheme(
 
 /**
  * Meeting Mind Theme
- * Supports dynamic color on Android 12+ and dark mode
+ * Follows system light/dark mode setting
+ * Set dynamicColor to true to use Android 12+ Material You colors
  */
 @Composable
 fun MeetingMindTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // Disabled for consistent appearance across devices
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

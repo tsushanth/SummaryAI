@@ -102,6 +102,10 @@
     <string name="export_text">Export as Text</string>
     <string name="export_markdown">Export as Markdown</string>
 
+    <!-- Service Descriptions (for Play Store foreground service declarations) -->
+    <string name="service_description_recording">Records audio during meetings and phone calls for transcription</string>
+    <string name="service_description_playback">Plays recorded meetings and phone calls in the background</string>
+
     <!-- Errors -->
     <string name="error">Error</string>
     <string name="ok">OK</string>
