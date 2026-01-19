@@ -1,6 +1,7 @@
 steps:
   # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
+    dir: 'web'
     args:
       - 'build'
       - '--build-arg'
