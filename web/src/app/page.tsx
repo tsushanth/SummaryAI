@@ -356,44 +356,82 @@ export default function LandingPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Free Plan */}
+            {/* Weekly Plan */}
             <div className="bg-white rounded-2xl p-8 border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Free</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Weekly</h3>
               <div className="mb-6">
-                <span className="text-4xl font-bold text-gray-900">$0</span>
-                <span className="text-gray-500">/month</span>
+                <span className="text-4xl font-bold text-gray-900">$6.99</span>
+                <span className="text-gray-500">/week</span>
               </div>
               <ul className="space-y-3 mb-8">
                 <li className="flex items-start gap-2 text-gray-600">
                   <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  30 minutes recording/month
+                  Unlimited recording
                 </li>
                 <li className="flex items-start gap-2 text-gray-600">
                   <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  AI transcription
+                  AI transcription & summaries
                 </li>
                 <li className="flex items-start gap-2 text-gray-600">
                   <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  Basic summaries
+                  All Pro features
                 </li>
               </ul>
               <Link
                 href="/auth"
                 className="block w-full text-center bg-gray-100 text-gray-900 px-6 py-3 rounded-xl font-medium hover:bg-gray-200 transition-colors"
               >
-                Get Started
+                Start 7-Day Free Trial
               </Link>
             </div>
 
-            {/* Pro Plan */}
+            {/* Monthly Plan */}
+            <div className="bg-white rounded-2xl p-8 border border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Monthly</h3>
+              <div className="mb-6">
+                <span className="text-4xl font-bold text-gray-900">$14.99</span>
+                <span className="text-gray-500">/month</span>
+              </div>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-start gap-2 text-gray-600">
+                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  Unlimited recording
+                </li>
+                <li className="flex items-start gap-2 text-gray-600">
+                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  AI transcription & summaries
+                </li>
+                <li className="flex items-start gap-2 text-gray-600">
+                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  Q&A with your recordings
+                </li>
+                <li className="flex items-start gap-2 text-gray-600">
+                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  Meeting bot for Zoom/Teams/Meet
+                </li>
+                <li className="flex items-start gap-2 text-gray-600">
+                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  Phone call recording
+                </li>
+              </ul>
+              <Link
+                href="/auth"
+                className="block w-full text-center bg-gray-100 text-gray-900 px-6 py-3 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+              >
+                Start 7-Day Free Trial
+              </Link>
+            </div>
+
+            {/* Annual Plan */}
             <div className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl p-8 text-white relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1 rounded-full">
-                MOST POPULAR
+                BEST VALUE
               </div>
-              <h3 className="text-lg font-semibold mb-2">Pro</h3>
+              <h3 className="text-lg font-semibold mb-2">Yearly</h3>
               <div className="mb-6">
-                <span className="text-4xl font-bold">$9.99</span>
-                <span className="text-blue-200">/month</span>
+                <span className="text-4xl font-bold">$69.99</span>
+                <span className="text-blue-200">/year</span>
+                <div className="text-sm text-blue-200 mt-1">Just $5.83/month</div>
               </div>
               <ul className="space-y-3 mb-8">
                 <li className="flex items-start gap-2">
@@ -416,40 +454,14 @@ export default function LandingPage() {
                   <CheckCircle className="w-5 h-5 text-blue-200 mt-0.5 flex-shrink-0" />
                   Phone call recording
                 </li>
-              </ul>
-              <Link
-                href="/auth"
-                className="block w-full text-center bg-white text-blue-600 px-6 py-3 rounded-xl font-medium hover:bg-blue-50 transition-colors"
-              >
-                Start 7-Day Free Trial
-              </Link>
-            </div>
-
-            {/* Annual Plan */}
-            <div className="bg-white rounded-2xl p-8 border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Pro Annual</h3>
-              <div className="mb-6">
-                <span className="text-4xl font-bold text-gray-900">$99</span>
-                <span className="text-gray-500">/year</span>
-                <span className="ml-2 text-sm text-green-600 font-medium">Save 17%</span>
-              </div>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-start gap-2 text-gray-600">
-                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  Everything in Pro
-                </li>
-                <li className="flex items-start gap-2 text-gray-600">
-                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  2 months free
-                </li>
-                <li className="flex items-start gap-2 text-gray-600">
-                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="w-5 h-5 text-blue-200 mt-0.5 flex-shrink-0" />
                   Priority support
                 </li>
               </ul>
               <Link
                 href="/auth"
-                className="block w-full text-center bg-gray-100 text-gray-900 px-6 py-3 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+                className="block w-full text-center bg-white text-blue-600 px-6 py-3 rounded-xl font-medium hover:bg-blue-50 transition-colors"
               >
                 Start 7-Day Free Trial
               </Link>
