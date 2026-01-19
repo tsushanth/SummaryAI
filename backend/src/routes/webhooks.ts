@@ -7,6 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { Webhook } from 'svix';
 import { twiml as TwiML } from 'twilio';
+import Stripe from 'stripe';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
 import { RecallWebhookPayload, BotRun, Meeting, RecallTranscriptWebhookPayload } from '../types/meetings.js';
@@ -1302,5 +1303,310 @@ router.post('/twilio/recording-complete', async (req: Request, res: Response) =>
     res.status(500).json({ error: 'Internal error' });
   }
 });
+
+// ============================================================================
+// Stripe Webhooks (Subscriptions)
+// ============================================================================
+
+/**
+ * Initialize Stripe client
+ */
+function getStripeClient(): Stripe | null {
+  if (!config.STRIPE_SECRET_KEY) {
+    return null;
+  }
+  return new Stripe(config.STRIPE_SECRET_KEY, {
+    apiVersion: '2025-01-27.acacia',
+  });
+}
+
+/**
+ * POST /webhooks/stripe
+ * Handle Stripe webhook events for subscriptions
+ * IMPORTANT: This route must receive the raw body for signature verification
+ */
+router.post('/stripe', async (req: Request, res: Response) => {
+  const stripe = getStripeClient();
+  if (!stripe) {
+    console.error('[Stripe Webhook] Stripe not configured');
+    res.status(503).json({ error: 'Stripe not configured' });
+    return;
+  }
+
+  const sig = req.headers['stripe-signature'] as string;
+  const webhookSecret = config.STRIPE_WEBHOOK_SECRET;
+
+  if (!webhookSecret) {
+    console.error('[Stripe Webhook] STRIPE_WEBHOOK_SECRET not configured');
+    res.status(503).json({ error: 'Webhook secret not configured' });
+    return;
+  }
+
+  let event: Stripe.Event;
+
+  try {
+    // Verify webhook signature - req.body should be raw buffer
+    const rawBody = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+    event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
+  } catch (err) {
+    console.error('[Stripe Webhook] Signature verification failed:', err);
+    res.status(400).json({ error: 'Invalid signature' });
+    return;
+  }
+
+  console.log(`[Stripe Webhook] Received event: ${event.type}`);
+
+  // Check for duplicate events (idempotency)
+  const { data: existingEvent } = await supabaseAdmin
+    .from('stripe_webhook_events')
+    .select('id')
+    .eq('id', event.id)
+    .single();
+
+  if (existingEvent) {
+    console.log(`[Stripe Webhook] Duplicate event ${event.id}, skipping`);
+    res.json({ received: true, duplicate: true });
+    return;
+  }
+
+  // Log the event for idempotency
+  await supabaseAdmin.from('stripe_webhook_events').insert({
+    id: event.id,
+    type: event.type,
+    payload: event.data.object as Record<string, unknown>,
+  });
+
+  try {
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        await handleCheckoutCompleted(session);
+        break;
+      }
+
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object as Stripe.Subscription;
+        await handleSubscriptionUpdated(subscription);
+        break;
+      }
+
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object as Stripe.Subscription;
+        await handleSubscriptionDeleted(subscription);
+        break;
+      }
+
+      case 'invoice.paid': {
+        const invoice = event.data.object as Stripe.Invoice;
+        await handleInvoicePaid(invoice);
+        break;
+      }
+
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice;
+        await handleInvoicePaymentFailed(invoice);
+        break;
+      }
+
+      default:
+        console.log(`[Stripe Webhook] Unhandled event type: ${event.type}`);
+    }
+
+    res.json({ received: true });
+  } catch (error) {
+    console.error('[Stripe Webhook] Error processing event:', error);
+    res.status(500).json({ error: 'Webhook processing failed' });
+  }
+});
+
+/**
+ * Handle checkout.session.completed event
+ */
+async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promise<void> {
+  const userId = session.metadata?.user_id;
+  const planType = session.metadata?.plan_type;
+
+  if (!userId) {
+    console.error('[Stripe Webhook] No user_id in checkout session metadata');
+    return;
+  }
+
+  console.log(`[Stripe Webhook] Checkout completed for user ${userId}, plan: ${planType}`);
+
+  // Update user profile with subscription info
+  await supabaseAdmin
+    .from('profiles')
+    .update({
+      subscription_status: session.status === 'complete' ? 'active' : 'trialing',
+      subscription_provider: 'stripe',
+      subscription_plan: planType || null,
+      stripe_customer_id: session.customer as string,
+      stripe_subscription_id: session.subscription as string,
+      subscribed_at: new Date().toISOString(),
+    })
+    .eq('id', userId);
+
+  console.log(`[Stripe Webhook] Updated subscription for user ${userId}`);
+}
+
+/**
+ * Handle customer.subscription.created/updated events
+ */
+async function handleSubscriptionUpdated(subscription: Stripe.Subscription): Promise<void> {
+  const userId = subscription.metadata?.user_id;
+
+  if (!userId) {
+    // Try to find user by stripe_customer_id
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('id')
+      .eq('stripe_customer_id', subscription.customer as string)
+      .single();
+
+    if (!profile) {
+      console.error('[Stripe Webhook] No user found for subscription:', subscription.id);
+      return;
+    }
+
+    await updateSubscriptionStatus(profile.id, subscription);
+  } else {
+    await updateSubscriptionStatus(userId, subscription);
+  }
+}
+
+/**
+ * Update subscription status in database
+ */
+async function updateSubscriptionStatus(
+  userId: string,
+  subscription: Stripe.Subscription
+): Promise<void> {
+  // Map Stripe status to our status
+  let status: string;
+  switch (subscription.status) {
+    case 'active':
+      status = 'active';
+      break;
+    case 'trialing':
+      status = 'trialing';
+      break;
+    case 'past_due':
+      status = 'past_due';
+      break;
+    case 'canceled':
+    case 'unpaid':
+      status = 'canceled';
+      break;
+    default:
+      status = 'free';
+  }
+
+  const planType = subscription.metadata?.plan_type || null;
+  const currentPeriodEnd = subscription.current_period_end
+    ? new Date(subscription.current_period_end * 1000).toISOString()
+    : null;
+
+  await supabaseAdmin
+    .from('profiles')
+    .update({
+      subscription_status: status,
+      subscription_provider: 'stripe',
+      subscription_plan: planType,
+      subscription_expires_at: currentPeriodEnd,
+      stripe_subscription_id: subscription.id,
+    })
+    .eq('id', userId);
+
+  console.log(`[Stripe Webhook] Updated subscription status to ${status} for user ${userId}`);
+}
+
+/**
+ * Handle customer.subscription.deleted event
+ */
+async function handleSubscriptionDeleted(subscription: Stripe.Subscription): Promise<void> {
+  // Find user by stripe_subscription_id
+  const { data: profile } = await supabaseAdmin
+    .from('profiles')
+    .select('id')
+    .eq('stripe_subscription_id', subscription.id)
+    .single();
+
+  if (!profile) {
+    console.error('[Stripe Webhook] No user found for deleted subscription:', subscription.id);
+    return;
+  }
+
+  await supabaseAdmin
+    .from('profiles')
+    .update({
+      subscription_status: 'canceled',
+      // Keep the expiration date so user can use until end of period
+      subscription_expires_at: subscription.current_period_end
+        ? new Date(subscription.current_period_end * 1000).toISOString()
+        : new Date().toISOString(),
+    })
+    .eq('id', profile.id);
+
+  console.log(`[Stripe Webhook] Subscription canceled for user ${profile.id}`);
+}
+
+/**
+ * Handle invoice.paid event
+ */
+async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
+  if (!invoice.subscription) return;
+
+  // Find user by stripe_subscription_id
+  const { data: profile } = await supabaseAdmin
+    .from('profiles')
+    .select('id')
+    .eq('stripe_subscription_id', invoice.subscription as string)
+    .single();
+
+  if (!profile) {
+    console.log('[Stripe Webhook] No user found for invoice, might be new subscription');
+    return;
+  }
+
+  // Ensure subscription is marked as active after successful payment
+  await supabaseAdmin
+    .from('profiles')
+    .update({
+      subscription_status: 'active',
+    })
+    .eq('id', profile.id);
+
+  console.log(`[Stripe Webhook] Invoice paid, subscription active for user ${profile.id}`);
+}
+
+/**
+ * Handle invoice.payment_failed event
+ */
+async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void> {
+  if (!invoice.subscription) return;
+
+  // Find user by stripe_subscription_id
+  const { data: profile } = await supabaseAdmin
+    .from('profiles')
+    .select('id')
+    .eq('stripe_subscription_id', invoice.subscription as string)
+    .single();
+
+  if (!profile) {
+    console.error('[Stripe Webhook] No user found for failed invoice');
+    return;
+  }
+
+  // Mark subscription as past_due
+  await supabaseAdmin
+    .from('profiles')
+    .update({
+      subscription_status: 'past_due',
+    })
+    .eq('id', profile.id);
+
+  console.log(`[Stripe Webhook] Payment failed, subscription past_due for user ${profile.id}`);
+}
 
 export default router;
