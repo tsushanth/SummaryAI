@@ -255,7 +255,7 @@ export default function LandingPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* iOS */}
             <a
-              href="https://apps.apple.com/app/meeting-mind"
+              href="https://apps.apple.com/us/app/meeting-mind/id6757317991"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col items-center text-center"
@@ -273,11 +273,14 @@ export default function LandingPage() {
 
             {/* Android */}
             <a
-              href="https://play.google.com/store/apps/details?id=com.meetingmind"
+              href="https://play.google.com/store/apps/details?id=com.kreativekoala.summaryai"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col items-center text-center"
+              className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col items-center text-center relative"
             >
+              <div className="absolute -top-2 -right-2 bg-amber-400 text-amber-900 text-xs font-bold px-2 py-0.5 rounded-full">
+                Coming Soon
+              </div>
               <div className="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center mb-4">
                 <Play className="w-8 h-8 text-white" />
               </div>
