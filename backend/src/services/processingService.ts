@@ -26,6 +26,14 @@ interface TranscriptSegment {
   confidence: number;
 }
 
+interface TranscriptionResult {
+  segments: TranscriptSegment[];
+  fullText: string;
+  wordCount: number;
+  speakerCount: number;
+  detectedLanguage: string;
+}
+
 /**
  * Trigger async processing for a recording
  */
@@ -105,7 +113,7 @@ async function processRecordingAsync(
       transcript = createMockTranscript(recording.duration_seconds || 60);
     }
 
-    console.log(`[Processing] ${jobId}: Transcription complete (${transcript.wordCount} words, ${transcript.speakerCount} speakers)`);
+    console.log(`[Processing] ${jobId}: Transcription complete (${transcript.wordCount} words, ${transcript.speakerCount} speakers, language: ${transcript.detectedLanguage})`);
 
     // Step 4: Store transcript in database
     const { error: transcriptError } = await supabaseAdmin
@@ -117,7 +125,7 @@ async function processRecordingAsync(
         segments: transcript.segments,
         word_count: transcript.wordCount,
         speaker_count: transcript.speakerCount,
-        language: 'en',
+        language: transcript.detectedLanguage,
         transcription_provider: config.DEEPGRAM_API_KEY ? 'deepgram' : 'mock',
         transcription_model: config.DEEPGRAM_API_KEY ? 'nova-2' : 'mock',
       });
@@ -173,7 +181,7 @@ async function processRecordingAsync(
         updated_at: new Date().toISOString(),
         speaker_count: transcript.speakerCount,
         word_count: transcript.wordCount,
-        language: 'en',
+        language: transcript.detectedLanguage,
       })
       .eq('id', recordingId);
 
@@ -206,7 +214,7 @@ async function processRecordingAsync(
 async function transcribeWithDeepgram(
   audioData: Blob,
   filePath: string
-): Promise<{ segments: TranscriptSegment[]; fullText: string; wordCount: number; speakerCount: number }> {
+): Promise<TranscriptionResult> {
   const arrayBuffer = await audioData.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
@@ -214,8 +222,8 @@ async function transcribeWithDeepgram(
   const ext = filePath.split('.').pop()?.toLowerCase() || 'm4a';
   const contentType = ext === 'wav' ? 'audio/wav' : ext === 'mp3' ? 'audio/mpeg' : 'audio/mp4';
 
-  // Call Deepgram API
-  const response = await fetch('https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true&diarize=true&paragraphs=true&utterances=true', {
+  // Call Deepgram API with detect_language enabled for auto-detection
+  const response = await fetch('https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true&diarize=true&paragraphs=true&utterances=true&detect_language=true', {
     method: 'POST',
     headers: {
       'Authorization': `Token ${config.DEEPGRAM_API_KEY}`,
@@ -230,6 +238,9 @@ async function transcribeWithDeepgram(
   }
 
   const result = await response.json() as any;
+
+  // Extract detected language from Deepgram response
+  const detectedLanguage = result.results?.channels?.[0]?.detected_language || 'en';
 
   // Extract utterances/paragraphs as segments
   const utterances = result.results?.utterances || [];
@@ -253,7 +264,7 @@ async function transcribeWithDeepgram(
   const speakers = new Set(segments.map((s: TranscriptSegment) => s.speaker_index));
   const speakerCount = Math.max(1, speakers.size);
 
-  return { segments, fullText, wordCount, speakerCount };
+  return { segments, fullText, wordCount, speakerCount, detectedLanguage };
 }
 
 /**
@@ -261,7 +272,7 @@ async function transcribeWithDeepgram(
  */
 async function extractTextFromPdf(
   pdfData: Blob
-): Promise<{ segments: TranscriptSegment[]; fullText: string; wordCount: number; speakerCount: number }> {
+): Promise<TranscriptionResult> {
   try {
     const arrayBuffer = await pdfData.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
@@ -335,6 +346,7 @@ async function extractTextFromPdf(
       fullText,
       wordCount,
       speakerCount: 0, // PDFs don't have speakers
+      detectedLanguage: 'en', // PDFs default to English, could be enhanced with language detection
     };
   } catch (error) {
     console.error('PDF extraction error:', error);
@@ -343,6 +355,7 @@ async function extractTextFromPdf(
       fullText: 'Failed to extract text from PDF.',
       wordCount: 0,
       speakerCount: 0,
+      detectedLanguage: 'en',
     };
   }
 }
@@ -452,7 +465,7 @@ Respond in valid JSON format:
 /**
  * Create mock transcript for testing without Deepgram
  */
-function createMockTranscript(durationSeconds: number): { segments: TranscriptSegment[]; fullText: string; wordCount: number; speakerCount: number } {
+function createMockTranscript(durationSeconds: number): TranscriptionResult {
   const segmentCount = Math.max(3, Math.floor(durationSeconds / 10));
   const segments: TranscriptSegment[] = [];
 
@@ -491,6 +504,7 @@ function createMockTranscript(durationSeconds: number): { segments: TranscriptSe
     fullText,
     wordCount,
     speakerCount: 2,
+    detectedLanguage: 'en',
   };
 }
 

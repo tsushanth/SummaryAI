@@ -16,7 +16,47 @@ import {
   Calendar,
   Loader2,
   Star,
+  Globe,
 } from 'lucide-react';
+
+// Language code to display name mapping (Deepgram supported languages)
+const LANGUAGE_NAMES: Record<string, string> = {
+  en: 'English',
+  es: 'Spanish',
+  fr: 'French',
+  de: 'German',
+  it: 'Italian',
+  pt: 'Portuguese',
+  nl: 'Dutch',
+  ja: 'Japanese',
+  ko: 'Korean',
+  zh: 'Chinese',
+  hi: 'Hindi',
+  ru: 'Russian',
+  tr: 'Turkish',
+  pl: 'Polish',
+  uk: 'Ukrainian',
+  vi: 'Vietnamese',
+  id: 'Indonesian',
+  th: 'Thai',
+  ar: 'Arabic',
+  cs: 'Czech',
+  da: 'Danish',
+  fi: 'Finnish',
+  el: 'Greek',
+  he: 'Hebrew',
+  hu: 'Hungarian',
+  ms: 'Malay',
+  no: 'Norwegian',
+  ro: 'Romanian',
+  sk: 'Slovak',
+  sv: 'Swedish',
+  ta: 'Tamil',
+  te: 'Telugu',
+  bn: 'Bengali',
+  tl: 'Tagalog',
+  'zh-TW': 'Cantonese',
+};
 import Link from 'next/link';
 import { cn } from '@/lib/utils/cn';
 import { updateRecording, updateSpeakerNames } from '@/lib/api/recordings';
@@ -131,6 +171,12 @@ export default function RecordingDetailPage() {
                 <Calendar className="w-4 h-4" />
                 {formatDate(recording.created_at)}
               </span>
+              {recording.language && (
+                <span className="flex items-center gap-1">
+                  <Globe className="w-4 h-4" />
+                  {LANGUAGE_NAMES[recording.language] || recording.language.toUpperCase()}
+                </span>
+              )}
             </div>
           </div>
         </div>
