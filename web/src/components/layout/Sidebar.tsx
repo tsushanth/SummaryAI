@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils/cn';
-import { Mic, ListTodo, Settings, LogOut, Calendar } from 'lucide-react';
+import { Mic, ListTodo, Settings, LogOut, Calendar, Sparkles } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
+import { useSubscription } from '@/hooks/useSubscription';
 
 const navigation = [
   { name: 'Recordings', href: '/recordings', icon: Mic },
@@ -17,6 +18,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, signOut } = useAuth();
+  const { isSubscribed, isLoading: subscriptionLoading } = useSubscription();
 
   const handleSignOut = async () => {
     await signOut();
@@ -54,6 +56,22 @@ export function Sidebar() {
           );
         })}
       </nav>
+
+      {/* Upgrade CTA for free users */}
+      {!subscriptionLoading && !isSubscribed && (
+        <div className="px-4 pb-4">
+          <Link
+            href="/subscription"
+            className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-primary to-purple-600 text-white rounded-lg hover:opacity-90 transition-opacity"
+          >
+            <Sparkles className="w-5 h-5" />
+            <div className="flex-1">
+              <p className="font-medium text-sm">Upgrade to Pro</p>
+              <p className="text-xs text-white/80">Save 30% vs App Store</p>
+            </div>
+          </Link>
+        </div>
+      )}
 
       {/* User section */}
       <div className="border-t p-4">

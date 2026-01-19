@@ -34,6 +34,9 @@ struct PaywallView: View {
                 // Restore purchases
                 restorePurchasesButton
 
+                // Web discount option
+                webDiscountSection
+
                 // Terms and privacy
                 legalSection
 
@@ -288,6 +291,84 @@ struct PaywallView: View {
             Text("Restore Purchases")
                 .font(.subheadline)
                 .foregroundColor(.blue)
+        }
+    }
+
+    // MARK: - Web Discount Section
+
+    private var webDiscountSection: some View {
+        VStack(spacing: 12) {
+            // Divider with "OR" text
+            HStack {
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(height: 1)
+                Text("OR")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(.secondary)
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(height: 1)
+            }
+            .padding(.horizontal)
+
+            // Web checkout card
+            Link(destination: URL(string: "https://meetingmind.org/subscription")!) {
+                HStack(spacing: 12) {
+                    // Icon
+                    ZStack {
+                        Circle()
+                            .fill(Color.green.opacity(0.15))
+                            .frame(width: 44, height: 44)
+
+                        Image(systemName: "globe")
+                            .font(.system(size: 20))
+                            .foregroundColor(.green)
+                    }
+
+                    // Text
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Save 30% on Web")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+
+                        Text("Subscribe at meetingmind.org")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    Spacer()
+
+                    // Prices
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text("$48.99")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .foregroundColor(.green)
+
+                        Text("vs $69.99/yr")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .strikethrough()
+                    }
+
+                    Image(systemName: "arrow.up.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.green.opacity(0.5), lineWidth: 1.5)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.green.opacity(0.05))
+                        )
+                )
+            }
+            .padding(.horizontal)
         }
     }
 

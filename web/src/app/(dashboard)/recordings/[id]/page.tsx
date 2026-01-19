@@ -20,6 +20,8 @@ import {
 import Link from 'next/link';
 import { cn } from '@/lib/utils/cn';
 import { updateRecording, updateSpeakerNames } from '@/lib/api/recordings';
+import { useSubscription } from '@/hooks/useSubscription';
+import { PremiumGate } from '@/components/subscription/PremiumGate';
 
 type Tab = 'summary' | 'transcript' | 'qa';
 
@@ -28,7 +30,8 @@ export default function RecordingDetailPage() {
   const id = params.id as string;
   const { recording, transcript, summary, audioUrl, isLoading, refresh } =
     useRecording(id);
-  const [activeTab, setActiveTab] = useState<Tab>('summary');
+  const { isSubscribed } = useSubscription();
+  const [activeTab, setActiveTab] = useState<Tab>('transcript');
   const [currentTime, setCurrentTime] = useState(0);
   const [isUpdatingSpeakers, setIsUpdatingSpeakers] = useState(false);
 
@@ -152,41 +155,34 @@ export default function RecordingDetailPage() {
       {/* Tabs */}
       <div className="border-b bg-white px-6">
         <nav className="flex gap-6">
-          {(['summary', 'transcript', 'qa'] as Tab[]).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={cn(
-                'py-3 border-b-2 text-sm font-medium transition-colors capitalize',
-                activeTab === tab
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              )}
-            >
-              {tab === 'qa' ? 'Q&A' : tab}
-            </button>
-          ))}
+          {(['transcript', 'summary', 'qa'] as Tab[]).map((tab) => {
+            const isPremiumTab = tab === 'summary' || tab === 'qa';
+            const showLock = isPremiumTab && !isSubscribed;
+            return (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={cn(
+                  'py-3 border-b-2 text-sm font-medium transition-colors capitalize flex items-center gap-1.5',
+                  activeTab === tab
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                )}
+              >
+                {tab === 'qa' ? 'Q&A' : tab}
+                {showLock && (
+                  <span className="text-xs bg-gradient-to-r from-primary to-purple-600 text-white px-1.5 py-0.5 rounded-full">
+                    PRO
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </nav>
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-auto p-6">
-        {activeTab === 'summary' && (
-          <div className="max-w-3xl">
-            {summary ? (
-              <SummaryCard summary={summary} />
-            ) : (
-              <div className="text-center py-10 text-gray-500">
-                {isProcessing ? (
-                  <p>Summary will appear here once processing is complete</p>
-                ) : (
-                  <p>No summary available</p>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
         {activeTab === 'transcript' && (
           <div className="max-w-3xl">
             {transcript ? (
@@ -209,13 +205,33 @@ export default function RecordingDetailPage() {
           </div>
         )}
 
+        {activeTab === 'summary' && (
+          <div className="max-w-3xl">
+            <PremiumGate feature="aiSummaries" featureLabel="AI Summaries">
+              {summary ? (
+                <SummaryCard summary={summary} />
+              ) : (
+                <div className="text-center py-10 text-gray-500">
+                  {isProcessing ? (
+                    <p>Summary will appear here once processing is complete</p>
+                  ) : (
+                    <p>No summary available</p>
+                  )}
+                </div>
+              )}
+            </PremiumGate>
+          </div>
+        )}
+
         {activeTab === 'qa' && (
           <div className="max-w-3xl h-[500px]">
-            <QAChat
-              recordingId={recording.id}
-              isReady={recording.status === 'completed'}
-              onSeek={handleSeek}
-            />
+            <PremiumGate feature="qaChat" featureLabel="Q&A Chat">
+              <QAChat
+                recordingId={recording.id}
+                isReady={recording.status === 'completed'}
+                onSeek={handleSeek}
+              />
+            </PremiumGate>
           </div>
         )}
       </div>
