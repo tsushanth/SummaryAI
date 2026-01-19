@@ -81,6 +81,14 @@ const envSchema = z.object({
   TWILIO_API_KEY_SID: z.string().optional(), // API Key for access tokens
   TWILIO_API_KEY_SECRET: z.string().optional(), // API Key secret
   TWILIO_TWIML_APP_SID: z.string().optional(), // TwiML App for VoIP calls
+
+  // Stripe (Subscriptions)
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  STRIPE_PRICE_WEEKLY: z.string().optional(), // Stripe Price ID for weekly plan
+  STRIPE_PRICE_MONTHLY: z.string().optional(), // Stripe Price ID for monthly plan
+  STRIPE_PRICE_YEARLY: z.string().optional(), // Stripe Price ID for yearly plan
+  WEB_APP_URL: z.string().default('https://meetingmind.org'),
 });
 
 export type Config = z.infer<typeof envSchema>;
