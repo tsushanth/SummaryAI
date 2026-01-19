@@ -49,6 +49,7 @@ export async function middleware(request: NextRequest) {
     (request.nextUrl.pathname.startsWith('/recordings') ||
       request.nextUrl.pathname.startsWith('/meetings') ||
       request.nextUrl.pathname.startsWith('/todos') ||
+      request.nextUrl.pathname.startsWith('/phone') ||
       request.nextUrl.pathname.startsWith('/settings'))
   ) {
     return NextResponse.redirect(new URL('/auth', request.url));
