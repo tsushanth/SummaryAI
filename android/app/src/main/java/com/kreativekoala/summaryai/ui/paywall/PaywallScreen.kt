@@ -326,7 +326,7 @@ private fun SubscriptionOption(
 @Composable
 private fun WebDiscountCard() {
     val context = LocalContext.current
-    val greenColor = Color(0xFF22C55E)
+    val blueColor = MaterialTheme.colorScheme.primary
 
     Column {
         // Divider with "OR" text
@@ -352,7 +352,7 @@ private fun WebDiscountCard() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Web discount card
+        // Web checkout card
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -361,12 +361,12 @@ private fun WebDiscountCard() {
                     context.startActivity(intent)
                 }
                 .border(
-                    width = 1.5.dp,
-                    color = greenColor.copy(alpha = 0.5f),
+                    width = 1.dp,
+                    color = blueColor.copy(alpha = 0.3f),
                     shape = MaterialTheme.shapes.medium
                 ),
             colors = CardDefaults.cardColors(
-                containerColor = greenColor.copy(alpha = 0.05f)
+                containerColor = blueColor.copy(alpha = 0.05f)
             )
         ) {
             Row(
@@ -379,13 +379,13 @@ private fun WebDiscountCard() {
                 Surface(
                     modifier = Modifier.size(44.dp),
                     shape = MaterialTheme.shapes.small,
-                    color = greenColor.copy(alpha = 0.15f)
+                    color = blueColor.copy(alpha = 0.15f)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             imageVector = Icons.Default.Language,
                             contentDescription = null,
-                            tint = greenColor,
+                            tint = blueColor,
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -396,34 +396,16 @@ private fun WebDiscountCard() {
                 // Text content
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Save 30% on Web",
+                        text = "Subscribe on Web",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
-                        text = "Subscribe at meetingmind.org",
+                        text = "meetingmind.org",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-
-                // Prices
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = "$48.99",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = greenColor
-                    )
-                    Text(
-                        text = "vs $69.99/yr",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textDecoration = TextDecoration.LineThrough
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
 
                 Icon(
                     imageVector = Icons.Default.ArrowOutward,

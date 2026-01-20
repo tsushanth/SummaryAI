@@ -7,7 +7,6 @@ import {
   CheckCircle,
   Sparkles,
   Loader2,
-  Shield,
   Mic,
   ArrowLeft,
 } from 'lucide-react';
@@ -106,16 +105,16 @@ export default function PublicSubscriptionPage() {
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
+          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
             <Sparkles className="w-4 h-4" />
-            Save 30% vs App Store
+            Unlock All Features
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
             Upgrade to Meeting Mind Pro
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Get unlimited recordings, AI summaries, meeting bot, and more.
-            Subscribe on web and save 30% compared to App Store prices!
+            Try free for 7 days with the yearly plan!
           </p>
         </div>
 
@@ -126,7 +125,6 @@ export default function PublicSubscriptionPage() {
             name="Weekly"
             price="$4.89"
             interval="week"
-            appStorePrice="$6.99"
             features={[
               'Unlimited recordings',
               'AI transcription & summaries',
@@ -142,7 +140,6 @@ export default function PublicSubscriptionPage() {
             name="Monthly"
             price="$10.49"
             interval="month"
-            appStorePrice="$14.99"
             features={[
               'Unlimited recordings',
               'AI transcription & summaries',
@@ -160,18 +157,17 @@ export default function PublicSubscriptionPage() {
             name="Yearly"
             price="$48.99"
             interval="year"
-            appStorePrice="$69.99"
             monthlyEquivalent="$4.08/month"
             highlighted
             badge="BEST VALUE"
             trialDays={7}
             features={[
+              '7-day free trial',
               'Unlimited recordings',
               'AI transcription & summaries',
               'Q&A with your recordings',
               'Meeting bot for Zoom/Teams/Meet',
               'Phone call recording',
-              'Priority support',
             ]}
             onSelect={() => handleCheckout('yearly')}
             isLoading={checkoutLoading === 'yearly'}
@@ -233,7 +229,6 @@ interface PricingCardProps {
   name: string;
   price: string;
   interval: string;
-  appStorePrice: string;
   monthlyEquivalent?: string;
   highlighted?: boolean;
   badge?: string;
@@ -248,7 +243,6 @@ function PricingCard({
   name,
   price,
   interval,
-  appStorePrice,
   monthlyEquivalent,
   highlighted,
   badge,
@@ -280,7 +274,7 @@ function PricingCard({
 
       <h3 className="text-lg font-semibold mb-2">{name}</h3>
 
-      <div className="mb-4">
+      <div className="mb-6">
         <span className="text-4xl font-bold">{price}</span>
         <span className={subtextClasses}>/{interval}</span>
         {monthlyEquivalent && (
@@ -289,20 +283,6 @@ function PricingCard({
           </div>
         )}
       </div>
-
-      <div className={`text-sm ${subtextClasses} mb-4`}>
-        <span className="line-through">{appStorePrice}</span> on App Store
-        <span className="ml-1 text-green-400 font-medium">Save 30%</span>
-      </div>
-
-      {trialDays && (
-        <div
-          className={`text-sm ${subtextClasses} mb-4 flex items-center gap-1`}
-        >
-          <Shield className="w-4 h-4" />
-          {trialDays}-day free trial
-        </div>
-      )}
 
       <ul className="space-y-2 mb-6">
         {features.map((feature, i) => (
