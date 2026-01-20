@@ -18,7 +18,7 @@ function getStripeClient(): Stripe | null {
     return null;
   }
   return new Stripe(config.STRIPE_SECRET_KEY, {
-    apiVersion: '2025-01-27.acacia',
+    apiVersion: '2025-02-24.acacia',
   });
 }
 

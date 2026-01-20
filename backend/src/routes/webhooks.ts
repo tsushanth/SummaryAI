@@ -1316,7 +1316,7 @@ function getStripeClient(): Stripe | null {
     return null;
   }
   return new Stripe(config.STRIPE_SECRET_KEY, {
-    apiVersion: '2025-01-27.acacia',
+    apiVersion: '2025-02-24.acacia',
   });
 }
 
@@ -1373,7 +1373,7 @@ router.post('/stripe', async (req: Request, res: Response) => {
   await supabaseAdmin.from('stripe_webhook_events').insert({
     id: event.id,
     type: event.type,
-    payload: event.data.object as Record<string, unknown>,
+    payload: event.data.object as unknown as Record<string, unknown>,
   });
 
   try {
