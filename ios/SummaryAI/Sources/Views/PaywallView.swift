@@ -313,45 +313,64 @@ struct PaywallView: View {
             }
             .padding(.horizontal)
 
-            // Web checkout card
+            // Web checkout card with Save 30%
             Link(destination: URL(string: "https://meetingmind.org/subscription")!) {
-                HStack(spacing: 12) {
-                    // Icon
-                    ZStack {
-                        Circle()
-                            .fill(Color.blue.opacity(0.15))
-                            .frame(width: 44, height: 44)
+                VStack(alignment: .leading, spacing: 12) {
+                    // Save 30% badge
+                    Text("SAVE 30%")
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.green)
+                        .cornerRadius(4)
 
-                        Image(systemName: "globe")
-                            .font(.system(size: 20))
-                            .foregroundColor(.blue)
-                    }
+                    HStack(spacing: 12) {
+                        // Icon
+                        ZStack {
+                            Circle()
+                                .fill(Color.green.opacity(0.15))
+                                .frame(width: 44, height: 44)
 
-                    // Text
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Subscribe on Web")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.primary)
+                            Image(systemName: "globe")
+                                .font(.system(size: 20))
+                                .foregroundColor(.green)
+                        }
 
-                        Text("meetingmind.org")
+                        // Text
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Subscribe on Web")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.primary)
+
+                            HStack(spacing: 4) {
+                                Text("$69.99")
+                                    .font(.caption)
+                                    .strikethrough()
+                                    .foregroundColor(.secondary)
+                                Text("$48.99/year")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.green)
+                            }
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "arrow.up.right")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.green)
                     }
-
-                    Spacer()
-
-                    Image(systemName: "arrow.up.right")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
                 }
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                        .stroke(Color.green.opacity(0.5), lineWidth: 2)
                         .background(
                             RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.blue.opacity(0.05))
+                                .fill(Color.green.opacity(0.08))
                         )
                 )
             }

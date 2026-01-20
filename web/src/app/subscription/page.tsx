@@ -105,16 +105,16 @@ export default function PublicSubscriptionPage() {
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
+          <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
             <Sparkles className="w-4 h-4" />
-            Unlock All Features
+            Save 30% vs App Store
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
             Upgrade to Meeting Mind Pro
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Get unlimited recordings, AI summaries, meeting bot, and more.
-            Try free for 7 days with the yearly plan!
+            Save 30% compared to App Store prices!
           </p>
         </div>
 
@@ -125,6 +125,7 @@ export default function PublicSubscriptionPage() {
             name="Weekly"
             price="$4.89"
             interval="week"
+            appStorePrice="$6.99"
             features={[
               'Unlimited recordings',
               'AI transcription & summaries',
@@ -140,6 +141,7 @@ export default function PublicSubscriptionPage() {
             name="Monthly"
             price="$10.49"
             interval="month"
+            appStorePrice="$14.99"
             features={[
               'Unlimited recordings',
               'AI transcription & summaries',
@@ -157,6 +159,7 @@ export default function PublicSubscriptionPage() {
             name="Yearly"
             price="$48.99"
             interval="year"
+            appStorePrice="$69.99"
             monthlyEquivalent="$4.08/month"
             highlighted
             badge="BEST VALUE"
@@ -229,6 +232,7 @@ interface PricingCardProps {
   name: string;
   price: string;
   interval: string;
+  appStorePrice?: string;
   monthlyEquivalent?: string;
   highlighted?: boolean;
   badge?: string;
@@ -243,6 +247,7 @@ function PricingCard({
   name,
   price,
   interval,
+  appStorePrice,
   monthlyEquivalent,
   highlighted,
   badge,
@@ -275,6 +280,12 @@ function PricingCard({
       <h3 className="text-lg font-semibold mb-2">{name}</h3>
 
       <div className="mb-6">
+        {appStorePrice && (
+          <div className={`text-sm ${subtextClasses} mb-1`}>
+            <span className="line-through">{appStorePrice}</span>
+            <span className={highlighted ? 'text-green-300 ml-2' : 'text-green-600 ml-2'}>Save 30%</span>
+          </div>
+        )}
         <span className="text-4xl font-bold">{price}</span>
         <span className={subtextClasses}>/{interval}</span>
         {monthlyEquivalent && (
