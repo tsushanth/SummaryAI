@@ -32,6 +32,7 @@ class PaywallViewModel @Inject constructor(
     private var billingClient: BillingClient? = null
 
     companion object {
+        const val PRODUCT_WEEKLY = "pro_weekly"
         const val PRODUCT_MONTHLY = "pro_monthly"
         const val PRODUCT_YEARLY = "pro_yearly"
     }
@@ -68,6 +69,10 @@ class PaywallViewModel @Inject constructor(
     private fun queryProducts() {
         val productList = listOf(
             QueryProductDetailsParams.Product.newBuilder()
+                .setProductId(PRODUCT_WEEKLY)
+                .setProductType(BillingClient.ProductType.SUBS)
+                .build(),
+            QueryProductDetailsParams.Product.newBuilder()
                 .setProductId(PRODUCT_MONTHLY)
                 .setProductType(BillingClient.ProductType.SUBS)
                 .build(),
@@ -93,7 +98,11 @@ class PaywallViewModel @Inject constructor(
     }
 
     fun purchase() {
-        val productId = if (_uiState.value.selectedPlan == "yearly") PRODUCT_YEARLY else PRODUCT_MONTHLY
+        val productId = when (_uiState.value.selectedPlan) {
+            "yearly" -> PRODUCT_YEARLY
+            "monthly" -> PRODUCT_MONTHLY
+            else -> PRODUCT_WEEKLY
+        }
         val product = _uiState.value.products.find { it.productId == productId }
 
         if (product == null) {
@@ -116,7 +125,11 @@ class PaywallViewModel @Inject constructor(
     }
 
     fun launchPurchaseFlow(activity: Activity) {
-        val productId = if (_uiState.value.selectedPlan == "yearly") PRODUCT_YEARLY else PRODUCT_MONTHLY
+        val productId = when (_uiState.value.selectedPlan) {
+            "yearly" -> PRODUCT_YEARLY
+            "monthly" -> PRODUCT_MONTHLY
+            else -> PRODUCT_WEEKLY
+        }
         val product = _uiState.value.products.find { it.productId == productId }
 
         if (product == null) {
