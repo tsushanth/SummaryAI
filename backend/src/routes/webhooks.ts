@@ -1432,22 +1432,41 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
     return;
   }
 
-  console.log(`[Stripe Webhook] Checkout completed for user ${userId}, plan: ${planType}`);
+  console.log(`[Stripe Webhook] Checkout completed for user ${userId}, plan: ${planType}, subscription: ${session.subscription}`);
+
+  // Get the subscription to check its actual status (trialing vs active)
+  const stripe = getStripeClient();
+  let subscriptionStatus = 'active';
+  let expiresAt: string | null = null;
+
+  if (stripe && session.subscription) {
+    try {
+      const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+      subscriptionStatus = subscription.status === 'trialing' ? 'trialing' : 'active';
+      expiresAt = subscription.current_period_end
+        ? new Date(subscription.current_period_end * 1000).toISOString()
+        : null;
+      console.log(`[Stripe Webhook] Subscription status: ${subscription.status}, trial_end: ${subscription.trial_end}`);
+    } catch (err) {
+      console.error('[Stripe Webhook] Failed to fetch subscription:', err);
+    }
+  }
 
   // Update user profile with subscription info
   await supabaseAdmin
     .from('profiles')
     .update({
-      subscription_status: session.status === 'complete' ? 'active' : 'trialing',
+      subscription_status: subscriptionStatus,
       subscription_provider: 'stripe',
       subscription_plan: planType || null,
+      subscription_expires_at: expiresAt,
       stripe_customer_id: session.customer as string,
       stripe_subscription_id: session.subscription as string,
       subscribed_at: new Date().toISOString(),
     })
     .eq('id', userId);
 
-  console.log(`[Stripe Webhook] Updated subscription for user ${userId}`);
+  console.log(`[Stripe Webhook] Updated subscription for user ${userId}, status: ${subscriptionStatus}, plan: ${planType}`);
 }
 
 /**
@@ -1502,7 +1521,27 @@ async function updateSubscriptionStatus(
       status = 'free';
   }
 
-  const planType = subscription.metadata?.plan_type || null;
+  // Get plan type from metadata, or try to infer from price
+  let planType = subscription.metadata?.plan_type || null;
+
+  // If no plan type in metadata, try to determine from the price interval
+  if (!planType && subscription.items?.data?.[0]?.price) {
+    const price = subscription.items.data[0].price;
+    if (price.recurring) {
+      const interval = price.recurring.interval;
+      const intervalCount = price.recurring.interval_count || 1;
+
+      if (interval === 'week') {
+        planType = 'weekly';
+      } else if (interval === 'month') {
+        planType = 'monthly';
+      } else if (interval === 'year') {
+        planType = 'yearly';
+      }
+      console.log(`[Stripe Webhook] Inferred plan type from price: ${planType} (${intervalCount} ${interval})`);
+    }
+  }
+
   const currentPeriodEnd = subscription.current_period_end
     ? new Date(subscription.current_period_end * 1000).toISOString()
     : null;
@@ -1518,7 +1557,7 @@ async function updateSubscriptionStatus(
     })
     .eq('id', userId);
 
-  console.log(`[Stripe Webhook] Updated subscription status to ${status} for user ${userId}`);
+  console.log(`[Stripe Webhook] Updated subscription status to ${status}, plan: ${planType} for user ${userId}`);
 }
 
 /**
