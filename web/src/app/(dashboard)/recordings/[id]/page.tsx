@@ -253,7 +253,7 @@ export default function RecordingDetailPage() {
 
         {activeTab === 'summary' && (
           <div className="max-w-3xl">
-            <PremiumGate feature="aiSummaries" featureLabel="AI Summaries">
+            <PremiumGate feature="aiSummaries">
               {summary ? (
                 <SummaryCard summary={summary} />
               ) : (
@@ -271,7 +271,7 @@ export default function RecordingDetailPage() {
 
         {activeTab === 'qa' && (
           <div className="max-w-3xl h-[500px]">
-            <PremiumGate feature="qaChat" featureLabel="Q&A Chat">
+            <PremiumGate feature="qaChat">
               <QAChat
                 recordingId={recording.id}
                 isReady={recording.status === 'completed'}
