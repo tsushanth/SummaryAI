@@ -1,16 +1,16 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSubscription } from '@/hooks/useSubscription';
-import { CheckCircle, Sparkles, ArrowRight } from 'lucide-react';
+import { CheckCircle, Sparkles, ArrowRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-export default function SubscriptionSuccessPage() {
+function SuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
-  const { refresh, isPremium, isLoading } = useSubscription();
+  const { refresh, isLoading } = useSubscription();
 
   // Refresh subscription status when page loads
   useEffect(() => {
@@ -108,5 +108,19 @@ export default function SubscriptionSuccessPage() {
         .
       </p>
     </div>
+  );
+}
+
+export default function SubscriptionSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        </div>
+      }
+    >
+      <SuccessContent />
+    </Suspense>
   );
 }
