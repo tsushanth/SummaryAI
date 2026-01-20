@@ -10,13 +10,17 @@ import {
   SubscriptionPrice,
 } from '@/lib/api/subscription';
 import { useState, useCallback } from 'react';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 /**
  * Hook to get and manage subscription status
  */
 export function useSubscription() {
+  const { user, loading: authLoading } = useAuth();
+
+  // Only fetch when user is authenticated (use null key to disable fetching)
   const { data, error, isLoading, mutate } = useSWR<SubscriptionStatus>(
-    'subscription-status',
+    user ? 'subscription-status' : null,
     getSubscriptionStatus,
     {
       revalidateOnFocus: true,
@@ -45,7 +49,7 @@ export function useSubscription() {
       calendarSync: false,
       exportPdf: false,
     },
-    isLoading,
+    isLoading: authLoading || isLoading,
     error,
     refresh: mutate,
   };
