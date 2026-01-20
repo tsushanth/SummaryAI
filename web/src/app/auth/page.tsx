@@ -1,5 +1,7 @@
+import { Suspense } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { GoogleSignIn } from '@/components/auth/GoogleSignIn';
+import { Loader2 } from 'lucide-react';
 
 export default function AuthPage() {
   return (
@@ -27,7 +29,9 @@ export default function AuthPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <GoogleSignIn />
+          <Suspense fallback={<div className="h-12 flex items-center justify-center"><Loader2 className="w-5 h-5 animate-spin" /></div>}>
+            <GoogleSignIn />
+          </Suspense>
           <p className="text-xs text-center text-muted-foreground">
             By continuing, you agree to our Terms of Service and Privacy Policy
           </p>
