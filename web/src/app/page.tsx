@@ -347,11 +347,14 @@ export default function LandingPage() {
       <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
+              Save 30% vs App Store
+            </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
               Simple, transparent pricing
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Start free, upgrade when you need more. Cancel anytime.
+              Subscribe on web and save 30% compared to App Store prices. Cancel anytime.
             </p>
           </div>
 
@@ -359,6 +362,10 @@ export default function LandingPage() {
             {/* Weekly Plan */}
             <div className="bg-white rounded-2xl p-8 border border-gray-200 relative">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Weekly</h3>
+              <div className="text-sm text-gray-500 mb-1">
+                <span className="line-through">$6.99</span>
+                <span className="text-green-600 ml-2">Save 30%</span>
+              </div>
               <div className="mb-6">
                 <span className="text-4xl font-bold text-gray-900">$4.89</span>
                 <span className="text-gray-500">/week</span>
@@ -388,6 +395,10 @@ export default function LandingPage() {
             {/* Monthly Plan */}
             <div className="bg-white rounded-2xl p-8 border border-gray-200 relative">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Monthly</h3>
+              <div className="text-sm text-gray-500 mb-1">
+                <span className="line-through">$14.99</span>
+                <span className="text-green-600 ml-2">Save 30%</span>
+              </div>
               <div className="mb-6">
                 <span className="text-4xl font-bold text-gray-900">$10.49</span>
                 <span className="text-gray-500">/month</span>
@@ -428,6 +439,10 @@ export default function LandingPage() {
                 BEST VALUE
               </div>
               <h3 className="text-lg font-semibold mb-2">Yearly</h3>
+              <div className="text-sm text-blue-200 mb-1">
+                <span className="line-through">$69.99</span>
+                <span className="text-green-300 ml-2">Save 30%</span>
+              </div>
               <div className="mb-2">
                 <span className="text-4xl font-bold">$48.99</span>
                 <span className="text-blue-200">/year</span>
