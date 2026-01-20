@@ -79,11 +79,19 @@ export function useSubscriptionPrices() {
  * Hook to handle checkout flow
  */
 export function useCheckout() {
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const startCheckout = useCallback(
     async (planType: 'weekly' | 'monthly' | 'yearly') => {
+      // If not logged in, redirect to auth with return URL
+      if (!user) {
+        const returnUrl = `/subscription?plan=${planType}`;
+        window.location.href = `/auth?returnTo=${encodeURIComponent(returnUrl)}`;
+        return;
+      }
+
       setIsLoading(true);
       setError(null);
 
@@ -98,7 +106,7 @@ export function useCheckout() {
         setIsLoading(false);
       }
     },
-    []
+    [user]
   );
 
   return {
