@@ -67,7 +67,7 @@ export function Sidebar() {
             <Sparkles className="w-5 h-5" />
             <div className="flex-1">
               <p className="font-medium text-sm">Upgrade to Pro</p>
-              <p className="text-xs text-white/80">7-day free trial</p>
+              <p className="text-xs text-white/80">Save 30% on web</p>
             </div>
           </Link>
         </div>

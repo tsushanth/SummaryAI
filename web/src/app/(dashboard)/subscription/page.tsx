@@ -40,7 +40,7 @@ export default function SubscriptionPage() {
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
           {isPremium
             ? 'Thank you for being a Pro member. Manage your subscription below.'
-            : 'Get unlimited recordings, AI summaries, meeting bot, and more. Save 30% compared to App Store prices!'}
+            : 'Get unlimited recordings, AI summaries, meeting bot, and more. Save 30% vs App Store prices!'}
         </p>
       </div>
 
@@ -100,6 +100,7 @@ export default function SubscriptionPage() {
             name="Weekly"
             price="$4.89"
             interval="week"
+            appStorePrice="$6.99"
             features={[
               'Unlimited recordings',
               'AI transcription & summaries',
@@ -114,6 +115,7 @@ export default function SubscriptionPage() {
             name="Monthly"
             price="$10.49"
             interval="month"
+            appStorePrice="$14.99"
             features={[
               'Unlimited recordings',
               'AI transcription & summaries',
@@ -130,6 +132,7 @@ export default function SubscriptionPage() {
             name="Yearly"
             price="$48.99"
             interval="year"
+            appStorePrice="$69.99"
             monthlyEquivalent="$4.08/month"
             highlighted
             badge="BEST VALUE"
@@ -183,6 +186,7 @@ interface PricingCardProps {
   name: string;
   price: string;
   interval: string;
+  appStorePrice?: string;
   monthlyEquivalent?: string;
   highlighted?: boolean;
   badge?: string;
@@ -196,6 +200,7 @@ function PricingCard({
   name,
   price,
   interval,
+  appStorePrice,
   monthlyEquivalent,
   highlighted,
   badge,
@@ -229,6 +234,12 @@ function PricingCard({
       <h3 className="text-lg font-semibold mb-2">{name}</h3>
 
       <div className="mb-6">
+        {appStorePrice && (
+          <div className={`text-sm ${subtextClasses} mb-1`}>
+            <span className="line-through">{appStorePrice}</span>
+            <span className={highlighted ? 'text-green-300 ml-2' : 'text-green-600 ml-2'}>Save 30%</span>
+          </div>
+        )}
         <span className="text-4xl font-bold">{price}</span>
         <span className={subtextClasses}>/{interval}</span>
         {monthlyEquivalent && (
