@@ -26,7 +26,7 @@ function SuccessContent() {
   // Redirect if no session_id
   useEffect(() => {
     if (!sessionId && !isLoading) {
-      router.push('/subscription');
+      router.push('/pricing');
     }
   }, [sessionId, isLoading, router]);
 
