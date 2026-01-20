@@ -14,48 +14,8 @@ struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // Header
-                headerSection
-
-                // Features list
-                featuresSection
-
-                // Subscription options
-                subscriptionOptionsSection
-
-                // Free trial info
-                trialInfoSection
-
-                // Start trial button
-                startTrialButton
-
-                // Restore purchases
-                restorePurchasesButton
-
-                // Web discount option
-                webDiscountSection
-
-                // Terms and privacy
-                legalSection
-
-                Spacer(minLength: 40)
-            }
-            .padding(.top, 20)
-        }
-        .alert("Error", isPresented: $showError) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(errorMessage)
-        }
-    }
-
-    // MARK: - Header Section
-
-    private var headerSection: some View {
-        VStack(spacing: 16) {
-            // Close button (top right)
+        VStack(spacing: 0) {
+            // Close button at top right
             HStack {
                 Spacer()
                 Button {
@@ -67,153 +27,136 @@ struct PaywallView: View {
                         .foregroundColor(.secondary.opacity(0.6))
                 }
                 .padding(.trailing, 20)
+                .padding(.top, 12)
             }
 
-            // App icon
-            ZStack {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [.blue, .purple],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 80, height: 80)
-                    .shadow(color: .blue.opacity(0.3), radius: 10, y: 5)
-
-                Image(systemName: "waveform.circle.fill")
-                    .font(.system(size: 40))
-                    .foregroundColor(.white)
-            }
-
-            VStack(spacing: 8) {
-                Text("Unlock Meeting Mind")
-                    .font(.title)
-                    .fontWeight(.bold)
-
-                Text("Try free for 7 days")
-                    .font(.title3)
-                    .foregroundColor(.blue)
-                    .fontWeight(.medium)
-            }
-        }
-    }
-
-    // MARK: - Features Section
-
-    private var featuresSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            featureRow(icon: "waveform", color: .blue, title: "Unlimited Recordings", subtitle: "Record meetings, lectures, and more")
-            featureRow(icon: "doc.text.fill", color: .purple, title: "AI Summaries", subtitle: "Get instant notes and action items")
-            featureRow(icon: "video.fill", color: .green, title: "Meeting Bot", subtitle: "Auto-join Zoom, Teams, and Meet")
-            featureRow(icon: "bubble.left.and.bubble.right.fill", color: .orange, title: "Ask Questions", subtitle: "Chat with your recordings")
-        }
-        .padding(.horizontal, 24)
-    }
-
-    private func featureRow(icon: String, color: Color, title: String, subtitle: String) -> some View {
-        HStack(spacing: 16) {
-            ZStack {
-                Circle()
-                    .fill(color.opacity(0.15))
-                    .frame(width: 44, height: 44)
-
-                Image(systemName: icon)
-                    .font(.system(size: 18))
-                    .foregroundColor(color)
-            }
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
+            // Header with decorative background
+            headerSectionCompact
+                .padding(.top, 8)
 
             Spacer()
 
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundColor(.green)
+            // Compact features (Wave-style: 3 bullet points)
+            featuresSectionCompact
+                .padding(.horizontal, 24)
+
+            // "No commitment, cancel anytime" checkmark
+            HStack(spacing: 6) {
+                Image(systemName: "checkmark")
+                    .fontWeight(.bold)
+                Text("No commitment, cancel anytime")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+            }
+            .foregroundColor(.primary)
+            .padding(.top, 20)
+
+            Spacer()
+
+            // Subscription options (Wave-style: 2 compact cards)
+            subscriptionOptionsSectionCompact
+                .padding(.horizontal)
+                .padding(.top, 16)
+
+            // Continue in app button
+            startTrialButton
+                .padding(.top, 16)
+
+            // Save 30% Online button
+            webDiscountButton
+                .padding(.top, 12)
+
+            // Footer links
+            footerLinks
+                .padding(.top, 16)
+                .padding(.bottom, 24)
+        }
+        .alert("Error", isPresented: $showError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
         }
     }
 
-    // MARK: - Subscription Options Section
+    // MARK: - Header Section (Compact - Wave style)
 
-    private var subscriptionOptionsSection: some View {
-        VStack(spacing: 12) {
-            // Yearly (recommended)
+    private var headerSectionCompact: some View {
+        VStack(spacing: 8) {
+            Text("Never Take Notes Again!")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .italic()
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal)
+    }
+
+    // MARK: - Features Section (Compact - Wave style)
+
+    private var featuresSectionCompact: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            featureRowCompact(
+                text: "Record and transcribe unlimited meetings while speakers are auto-detected for you."
+            )
+            featureRowCompact(
+                text: "Instantly generate summaries and to-dos in any language and share them with one tap."
+            )
+            featureRowCompact(
+                text: "Ask Meeting Mind questions to quickly access any details from meetings you can't recall."
+            )
+        }
+    }
+
+    private func featureRowCompact(text: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 16))
+                .foregroundColor(.blue)
+                .frame(width: 20)
+
+            Text(text)
+                .font(.subheadline)
+                .foregroundColor(.primary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    // MARK: - Subscription Options Section (Compact - Wave style)
+
+    private var subscriptionOptionsSectionCompact: some View {
+        VStack(spacing: 10) {
+            // Annual Plan (with trial and discount badge)
             if let yearly = subscriptionService.yearlyProduct {
-                SubscriptionOptionCard(
-                    product: yearly,
-                    isSelected: selectedProduct?.id == yearly.id,
-                    isRecommended: true,
-                    savingsText: subscriptionService.yearlySavingsPercentage.map { "Save \($0)%" },
-                    hasTrial: true
+                CompactSubscriptionCard(
+                    planName: "Annual Plan",
+                    price: yearly.displayPrice,
+                    trialText: "3-day free trial",
+                    badgeText: "Limited Time: 70% off",
+                    isSelected: selectedProduct?.id == yearly.id
                 ) {
                     selectedProduct = yearly
                 }
             }
 
-            // Monthly
-            if let monthly = subscriptionService.monthlyProduct {
-                SubscriptionOptionCard(
-                    product: monthly,
-                    isSelected: selectedProduct?.id == monthly.id,
-                    isRecommended: false,
-                    savingsText: nil,
-                    hasTrial: false
-                ) {
-                    selectedProduct = monthly
-                }
-            }
-
-            // Weekly
+            // Weekly Plan
             if let weekly = subscriptionService.weeklyProduct {
-                SubscriptionOptionCard(
-                    product: weekly,
-                    isSelected: selectedProduct?.id == weekly.id,
-                    isRecommended: false,
-                    savingsText: nil,
-                    hasTrial: false
+                CompactSubscriptionCard(
+                    planName: "Weekly Plan",
+                    price: weekly.displayPrice,
+                    trialText: "No free trial",
+                    badgeText: nil,
+                    isSelected: selectedProduct?.id == weekly.id
                 ) {
                     selectedProduct = weekly
                 }
             }
         }
-        .padding(.horizontal)
         .onAppear {
             // Default to yearly selection
             if selectedProduct == nil {
                 selectedProduct = subscriptionService.yearlyProduct
             }
         }
-    }
-
-    // MARK: - Trial Info Section
-
-    private var trialInfoSection: some View {
-        VStack(spacing: 8) {
-            if selectedProduct?.id == SubscriptionProductID.yearly.rawValue {
-                HStack(spacing: 6) {
-                    Image(systemName: "gift.fill")
-                        .foregroundColor(.blue)
-                    Text("7-day free trial included")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                }
-                .foregroundColor(.blue)
-
-                Text("Cancel anytime during trial. No charge until trial ends.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-        }
-        .padding(.horizontal)
     }
 
     // MARK: - Start Trial Button
@@ -257,148 +200,57 @@ struct PaywallView: View {
     }
 
     private var buttonTitle: String {
-        guard let product = selectedProduct else {
-            return "Continue"
-        }
-
-        if product.id == SubscriptionProductID.yearly.rawValue {
-            return "Start Free Trial"
-        } else {
-            return "Subscribe for \(product.displayPrice)/\(periodLabel(for: product))"
-        }
+        return "Continue in app"
     }
 
-    private func periodLabel(for product: Product) -> String {
-        switch product.id {
-        case SubscriptionProductID.yearly.rawValue: return "year"
-        case SubscriptionProductID.monthly.rawValue: return "month"
-        case SubscriptionProductID.weekly.rawValue: return "week"
-        default: return "period"
+
+    // MARK: - Web Discount Button (Wave-style)
+
+    private var webDiscountButton: some View {
+        Link(destination: URL(string: "https://meetingmind.org/subscription")!) {
+            Text("Save 30% Online")
+                .fontWeight(.semibold)
+                .frame(maxWidth: .infinity)
+                .frame(height: 56)
+                .background(
+                    LinearGradient(
+                        colors: [Color(red: 0.4, green: 0.6, blue: 1.0), Color(red: 0.8, green: 0.4, blue: 0.9)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .foregroundColor(.white)
+                .cornerRadius(16)
         }
+        .padding(.horizontal)
     }
 
-    // MARK: - Restore Purchases Button
+    // MARK: - Footer Links (Terms, Privacy, Restore)
 
-    private var restorePurchasesButton: some View {
-        Button {
-            Task {
-                await subscriptionService.restorePurchases()
-                if subscriptionService.subscriptionStatus.isActive {
-                    hasCompletedPaywall = true
-                }
-            }
-        } label: {
-            Text("Restore Purchases")
+    private var footerLinks: some View {
+        HStack(spacing: 24) {
+            Link("Terms", destination: URL(string: "https://kreativekoala.llc/terms")!)
                 .font(.subheadline)
-                .foregroundColor(.blue)
-        }
-    }
+                .foregroundColor(.secondary)
 
-    // MARK: - Web Discount Section
+            Link("Privacy", destination: URL(string: "https://kreativekoala.llc/privacy")!)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
 
-    private var webDiscountSection: some View {
-        VStack(spacing: 12) {
-            // Divider with "OR" text
-            HStack {
-                Rectangle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(height: 1)
-                Text("OR")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.secondary)
-                Rectangle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(height: 1)
-            }
-            .padding(.horizontal)
-
-            // Web checkout card with Save 30%
-            Link(destination: URL(string: "https://meetingmind.org/subscription")!) {
-                VStack(alignment: .leading, spacing: 12) {
-                    // Save 30% badge
-                    Text("SAVE 30%")
-                        .font(.caption2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.green)
-                        .cornerRadius(4)
-
-                    HStack(spacing: 12) {
-                        // Icon
-                        ZStack {
-                            Circle()
-                                .fill(Color.green.opacity(0.15))
-                                .frame(width: 44, height: 44)
-
-                            Image(systemName: "globe")
-                                .font(.system(size: 20))
-                                .foregroundColor(.green)
-                        }
-
-                        // Text
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Subscribe on Web")
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.primary)
-
-                            HStack(spacing: 4) {
-                                Text("$69.99")
-                                    .font(.caption)
-                                    .strikethrough()
-                                    .foregroundColor(.secondary)
-                                Text("$48.99/year")
-                                    .font(.caption)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.green)
-                            }
-                        }
-
-                        Spacer()
-
-                        Image(systemName: "arrow.up.right")
-                            .font(.caption)
-                            .foregroundColor(.green)
+            Button {
+                Task {
+                    await subscriptionService.restorePurchases()
+                    if subscriptionService.subscriptionStatus.isActive {
+                        hasCompletedPaywall = true
                     }
                 }
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.green.opacity(0.5), lineWidth: 2)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.green.opacity(0.08))
-                        )
-                )
-            }
-            .padding(.horizontal)
-        }
-    }
-
-    // MARK: - Legal Section
-
-    private var legalSection: some View {
-        VStack(spacing: 8) {
-            Text("Payment will be charged to your Apple ID account at confirmation of purchase. Subscription automatically renews unless canceled at least 24 hours before the end of the current period. Your account will be charged for renewal within 24 hours prior to the end of the current period. You can manage and cancel your subscriptions by going to Settings > Apple ID > Subscriptions.")
-                .font(.caption2)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-
-            HStack(spacing: 16) {
-                Link("Terms of Use", destination: URL(string: "https://kreativekoala.llc/terms")!)
-                    .font(.caption)
-
-                Text("|")
+            } label: {
+                Text("Restore")
+                    .font(.subheadline)
                     .foregroundColor(.secondary)
-
-                Link("Privacy Policy", destination: URL(string: "https://kreativekoala.llc/privacy")!)
-                    .font(.caption)
             }
         }
-        .padding(.horizontal, 24)
+        .padding(.top, 8)
     }
 
     // MARK: - Purchase
@@ -422,170 +274,61 @@ struct PaywallView: View {
     }
 }
 
-// MARK: - Subscription Option Card
+// MARK: - Compact Subscription Card (Wave style)
 
-struct SubscriptionOptionCard: View {
-    let product: Product
+struct CompactSubscriptionCard: View {
+    let planName: String
+    let price: String
+    let trialText: String
+    let badgeText: String?
     let isSelected: Bool
-    let isRecommended: Bool
-    let savingsText: String?
-    let hasTrial: Bool
     let onTap: () -> Void
 
     var body: some View {
         Button(action: onTap) {
-            HStack(spacing: 16) {
-                // Selection indicator
-                ZStack {
-                    Circle()
-                        .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: 2)
-                        .frame(width: 24, height: 24)
-
-                    if isSelected {
-                        Circle()
-                            .fill(Color.blue)
-                            .frame(width: 14, height: 14)
-                    }
-                }
-
-                // Plan details
+            HStack {
+                // Plan name and price
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 8) {
-                        Text(planName)
-                            .font(.headline)
-                            .foregroundColor(.primary)
+                    Text(planName)
+                        .font(.headline)
+                        .foregroundColor(.blue)
 
-                        if isRecommended {
-                            Text("Best Value")
-                                .font(.caption2)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 3)
-                                .background(
-                                    LinearGradient(
-                                        colors: [.blue, .purple],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
-                                .cornerRadius(4)
-                        }
-                    }
-
-                    // Show full period price below plan name
-                    Text(fullPeriodPrice)
-                        .font(.caption)
+                    Text(price)
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
-
-                    if hasTrial {
-                        Text("7 days free trial")
-                            .font(.caption)
-                            .foregroundColor(.blue)
-                    }
                 }
 
                 Spacer()
 
-                // Price - billed amount must be most prominent per App Store guidelines
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(product.displayPrice)
-                        .font(.title3)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
-
-                    Text(periodSuffix)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-
-                    if product.id != SubscriptionProductID.weekly.rawValue {
-                        Text(perWeekPrice + "/wk")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
-
-                    if let savings = savingsText {
-                        Text(savings)
+                // Trial text and badge
+                VStack(alignment: .trailing, spacing: 4) {
+                    if let badge = badgeText {
+                        Text(badge)
                             .font(.caption2)
                             .fontWeight(.semibold)
-                            .foregroundColor(.green)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.blue)
+                            .cornerRadius(4)
                     }
+
+                    Text(trialText)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
             }
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.secondarySystemBackground))
+                    .fill(Color(.systemBackground))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
+                            .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
                     )
             )
         }
         .buttonStyle(PlainButtonStyle())
-    }
-
-    private var planName: String {
-        switch product.id {
-        case SubscriptionProductID.yearly.rawValue: return "Yearly"
-        case SubscriptionProductID.monthly.rawValue: return "Monthly"
-        case SubscriptionProductID.weekly.rawValue: return "Weekly"
-        default: return product.displayName
-        }
-    }
-
-    private var fullPeriodPrice: String {
-        switch product.id {
-        case SubscriptionProductID.yearly.rawValue:
-            return "\(product.displayPrice)/year"
-        case SubscriptionProductID.monthly.rawValue:
-            return "\(product.displayPrice)/month"
-        case SubscriptionProductID.weekly.rawValue:
-            return "\(product.displayPrice)/week"
-        default:
-            return product.displayPrice
-        }
-    }
-
-    private var perWeekPrice: String {
-        switch product.id {
-        case SubscriptionProductID.yearly.rawValue:
-            // Calculate weekly equivalent (52 weeks in a year)
-            let weeklyPrice = product.price / 52
-            return String(format: "$%.2f", NSDecimalNumber(decimal: weeklyPrice).doubleValue)
-        case SubscriptionProductID.monthly.rawValue:
-            // Calculate weekly equivalent (4.33 weeks in a month)
-            let weeklyPrice = product.price / Decimal(4.33)
-            return String(format: "$%.2f", NSDecimalNumber(decimal: weeklyPrice).doubleValue)
-        case SubscriptionProductID.weekly.rawValue:
-            return product.displayPrice
-        default:
-            return product.displayPrice
-        }
-    }
-
-    private var periodSuffix: String {
-        switch product.id {
-        case SubscriptionProductID.yearly.rawValue: return "per year"
-        case SubscriptionProductID.monthly.rawValue: return "per month"
-        case SubscriptionProductID.weekly.rawValue: return "per week"
-        default: return ""
-        }
-    }
-
-    private var priceDescription: String {
-        switch product.id {
-        case SubscriptionProductID.yearly.rawValue:
-            // Calculate monthly equivalent
-            let monthlyPrice = product.price / 12
-            return String(format: "%.2f/month", NSDecimalNumber(decimal: monthlyPrice).doubleValue)
-        case SubscriptionProductID.monthly.rawValue:
-            return "\(product.displayPrice)/month"
-        case SubscriptionProductID.weekly.rawValue:
-            return "\(product.displayPrice)/week"
-        default:
-            return product.displayPrice
-        }
     }
 }
 
