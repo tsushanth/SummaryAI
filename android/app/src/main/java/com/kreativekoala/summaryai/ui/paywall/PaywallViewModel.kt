@@ -32,9 +32,9 @@ class PaywallViewModel @Inject constructor(
     private var billingClient: BillingClient? = null
 
     companion object {
-        const val PRODUCT_WEEKLY = "pro_weekly"
-        const val PRODUCT_MONTHLY = "pro_monthly"
-        const val PRODUCT_YEARLY = "pro_yearly"
+        const val PRODUCT_WEEKLY = "weekly"
+        const val PRODUCT_MONTHLY = "monthly"
+        const val PRODUCT_YEARLY = "yearly"
     }
 
     init {
