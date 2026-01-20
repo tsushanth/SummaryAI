@@ -1,14 +1,25 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from './AuthProvider';
 import { Button } from '@/components/ui/button';
 
 export function GoogleSignIn() {
   const { signInWithGoogle } = useAuth();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get('returnTo');
+
+  const handleSignIn = () => {
+    // Store returnTo in sessionStorage so we can redirect after callback
+    if (returnTo) {
+      sessionStorage.setItem('authReturnTo', returnTo);
+    }
+    signInWithGoogle();
+  };
 
   return (
     <Button
-      onClick={signInWithGoogle}
+      onClick={handleSignIn}
       variant="outline"
       className="w-full flex items-center gap-3 h-12"
     >
