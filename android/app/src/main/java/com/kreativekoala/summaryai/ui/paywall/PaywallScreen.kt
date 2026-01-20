@@ -396,7 +396,7 @@ private fun WebDiscountCard() {
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://meetingmind.org/subscription"))
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://meetingmind.org/pricing"))
                     context.startActivity(intent)
                 }
                 .border(

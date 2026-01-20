@@ -32,7 +32,7 @@ export default function PublicSubscriptionPage() {
   const handleCheckout = async (planType: 'weekly' | 'monthly' | 'yearly') => {
     if (!user) {
       // Redirect to auth with return URL
-      router.push(`/auth?returnTo=/subscription&plan=${planType}`);
+      router.push(`/auth?returnTo=/pricing&plan=${planType}`);
       return;
     }
 
@@ -209,7 +209,7 @@ export default function PublicSubscriptionPage() {
           <div className="mt-8 text-center">
             <p className="text-gray-600 mb-2">
               Already have an account?{' '}
-              <Link href="/auth?returnTo=/subscription" className="text-blue-600 hover:underline font-medium">
+              <Link href="/auth?returnTo=/pricing" className="text-blue-600 hover:underline font-medium">
                 Sign in
               </Link>{' '}
               to subscribe.

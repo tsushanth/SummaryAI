@@ -314,7 +314,7 @@ struct PaywallView: View {
             .padding(.horizontal)
 
             // Web checkout card with Save 30%
-            Link(destination: URL(string: "https://meetingmind.org/subscription")!) {
+            Link(destination: URL(string: "https://meetingmind.org/pricing")!) {
                 VStack(alignment: .leading, spacing: 12) {
                     // Save 30% badge
                     Text("SAVE 30%")
