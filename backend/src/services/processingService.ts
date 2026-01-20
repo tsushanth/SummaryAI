@@ -100,7 +100,7 @@ async function processRecordingAsync(
     console.log(`[Processing] ${jobId}: Downloaded file (${fileData.size} bytes)`);
 
     // Step 3: Process based on file type
-    let transcript: { segments: TranscriptSegment[]; fullText: string; wordCount: number; speakerCount: number };
+    let transcript: TranscriptionResult;
 
     if (isPdf) {
       // Extract text from PDF
