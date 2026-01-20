@@ -1,9 +1,6 @@
 import SwiftUI
 import StoreKit
 
-// MARK: - Paywall View
-
-/// Subscription paywall shown after onboarding
 struct PaywallView: View {
     @ObservedObject var subscriptionService: SubscriptionService
     @Binding var hasCompletedPaywall: Bool
@@ -14,8 +11,8 @@ struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Close button at top right
+        VStack(spacing: 16) {
+            // Close button
             HStack {
                 Spacer()
                 Button {
@@ -23,53 +20,142 @@ struct PaywallView: View {
                     dismiss()
                 } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .font(.title3)
-                        .foregroundColor(.secondary.opacity(0.6))
+                        .font(.title2)
+                        .foregroundColor(.secondary.opacity(0.5))
                 }
-                .padding(.trailing, 16)
-                .padding(.top, 8)
             }
+            .padding(.horizontal)
+            .padding(.top, 8)
 
             // Header
-            headerSectionCompact
-
-            Spacer(minLength: 12)
-
-            // Compact features
-            featuresSectionCompact
-                .padding(.horizontal, 20)
-
-            // "No commitment, cancel anytime" checkmark
-            HStack(spacing: 5) {
-                Image(systemName: "checkmark")
-                    .font(.caption)
+            VStack(spacing: 6) {
+                Text("Never Take Notes Again!")
+                    .font(.title2)
                     .fontWeight(.bold)
-                Text("No commitment, cancel anytime")
-                    .font(.caption)
-                    .fontWeight(.medium)
+                    .multilineTextAlignment(.center)
+
+                Text("AI-powered meeting transcription & summaries")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
             }
-            .foregroundColor(.primary)
-            .padding(.top, 12)
+            .padding(.horizontal)
 
-            Spacer(minLength: 8)
+            // Features
+            VStack(alignment: .leading, spacing: 6) {
+                FeatureRow(icon: "waveform", text: "Unlimited recordings with speaker detection")
+                FeatureRow(icon: "doc.text", text: "AI summaries and action items")
+                FeatureRow(icon: "bubble.left.and.bubble.right", text: "Ask questions about your meetings")
+            }
+            .padding(.horizontal, 24)
 
-            // Subscription options (3 plans)
-            subscriptionOptionsSectionCompact
-                .padding(.horizontal)
-                .padding(.top, 8)
+            // Plans
+            VStack(spacing: 8) {
+                if let yearly = subscriptionService.yearlyProduct {
+                    PlanRow(
+                        name: "Annual",
+                        price: yearly.displayPrice,
+                        period: "/year",
+                        badge: "Best Value",
+                        subtitle: "7-day free trial",
+                        isSelected: selectedProduct?.id == yearly.id
+                    ) { selectedProduct = yearly }
+                }
 
-            // Continue in app button
-            startTrialButton
-                .padding(.top, 12)
+                if let monthly = subscriptionService.monthlyProduct {
+                    PlanRow(
+                        name: "Monthly",
+                        price: monthly.displayPrice,
+                        period: "/month",
+                        badge: nil,
+                        subtitle: nil,
+                        isSelected: selectedProduct?.id == monthly.id
+                    ) { selectedProduct = monthly }
+                }
 
-            // Save 30% Online button
-            webDiscountButton
-                .padding(.top, 8)
+                if let weekly = subscriptionService.weeklyProduct {
+                    PlanRow(
+                        name: "Weekly",
+                        price: weekly.displayPrice,
+                        period: "/week",
+                        badge: nil,
+                        subtitle: nil,
+                        isSelected: selectedProduct?.id == weekly.id
+                    ) { selectedProduct = weekly }
+                }
+            }
+            .padding(.horizontal)
+            .onAppear {
+                if selectedProduct == nil {
+                    selectedProduct = subscriptionService.yearlyProduct
+                }
+            }
 
-            // Footer links
-            footerLinks
-                .padding(.top, 12)
-                .padding(.bottom, 16)
+            Spacer(minLength: 0)
+
+            // Buttons
+            VStack(spacing: 10) {
+                // Subscribe button
+                Button {
+                    if selectedProduct != nil {
+                        Task { await purchase() }
+                    } else {
+                        hasCompletedPaywall = true
+                        dismiss()
+                    }
+                } label: {
+                    HStack {
+                        if isPurchasing {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .scaleEffect(0.8)
+                        }
+                        Text("Continue")
+                            .fontWeight(.semibold)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+                }
+                .disabled(isPurchasing)
+
+                // Web discount
+                Link(destination: URL(string: "https://meetingmind.org/subscription")!) {
+                    Text("Save 30% on Web")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 44)
+                        .background(Color.blue.opacity(0.1))
+                        .foregroundColor(.blue)
+                        .cornerRadius(10)
+                }
+            }
+            .padding(.horizontal)
+
+            // Footer
+            VStack(spacing: 8) {
+                Text("Cancel anytime. No commitment.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                HStack(spacing: 16) {
+                    Link("Terms", destination: URL(string: "https://kreativekoala.llc/terms")!)
+                    Link("Privacy", destination: URL(string: "https://kreativekoala.llc/privacy")!)
+                    Button("Restore") {
+                        Task {
+                            await subscriptionService.restorePurchases()
+                            if subscriptionService.subscriptionStatus.isActive {
+                                hasCompletedPaywall = true
+                            }
+                        }
+                    }
+                }
+                .font(.caption)
+                .foregroundColor(.secondary)
+            }
+            .padding(.bottom, 16)
         }
         .alert("Error", isPresented: $showError) {
             Button("OK", role: .cancel) {}
@@ -78,200 +164,8 @@ struct PaywallView: View {
         }
     }
 
-    // MARK: - Header Section (Compact)
-
-    private var headerSectionCompact: some View {
-        VStack(spacing: 4) {
-            Text("Never Take Notes Again!")
-                .font(.title)
-                .fontWeight(.bold)
-                .italic()
-                .multilineTextAlignment(.center)
-        }
-        .padding(.horizontal)
-    }
-
-    // MARK: - Features Section (Compact)
-
-    private var featuresSectionCompact: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            featureRowCompact(
-                text: "Record and transcribe unlimited meetings with auto speaker detection."
-            )
-            featureRowCompact(
-                text: "Instantly generate summaries and to-dos in any language."
-            )
-            featureRowCompact(
-                text: "Ask questions to quickly access details from past meetings."
-            )
-        }
-    }
-
-    private func featureRowCompact(text: String) -> some View {
-        HStack(alignment: .top, spacing: 8) {
-            Image(systemName: "sparkles")
-                .font(.system(size: 14))
-                .foregroundColor(.blue)
-                .frame(width: 16)
-
-            Text(text)
-                .font(.caption)
-                .foregroundColor(.primary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-
-    // MARK: - Subscription Options Section (3 plans, compact)
-
-    private var subscriptionOptionsSectionCompact: some View {
-        VStack(spacing: 6) {
-            // Annual Plan (with trial and discount badge)
-            if let yearly = subscriptionService.yearlyProduct {
-                CompactSubscriptionCard(
-                    planName: "Annual",
-                    price: yearly.displayPrice,
-                    trialText: "7-day free trial",
-                    badgeText: "Best Value",
-                    isSelected: selectedProduct?.id == yearly.id
-                ) {
-                    selectedProduct = yearly
-                }
-            }
-
-            // Monthly Plan
-            if let monthly = subscriptionService.monthlyProduct {
-                CompactSubscriptionCard(
-                    planName: "Monthly",
-                    price: monthly.displayPrice,
-                    trialText: nil,
-                    badgeText: nil,
-                    isSelected: selectedProduct?.id == monthly.id
-                ) {
-                    selectedProduct = monthly
-                }
-            }
-
-            // Weekly Plan
-            if let weekly = subscriptionService.weeklyProduct {
-                CompactSubscriptionCard(
-                    planName: "Weekly",
-                    price: weekly.displayPrice,
-                    trialText: nil,
-                    badgeText: nil,
-                    isSelected: selectedProduct?.id == weekly.id
-                ) {
-                    selectedProduct = weekly
-                }
-            }
-        }
-        .onAppear {
-            // Default to yearly selection
-            if selectedProduct == nil {
-                selectedProduct = subscriptionService.yearlyProduct
-            }
-        }
-    }
-
-    // MARK: - Start Trial Button
-
-    private var startTrialButton: some View {
-        Button {
-            if selectedProduct != nil {
-                Task {
-                    await purchaseSelectedProduct()
-                }
-            } else {
-                // No products loaded (simulator/testing) - just dismiss
-                hasCompletedPaywall = true
-                dismiss()
-            }
-        } label: {
-            HStack(spacing: 6) {
-                if isPurchasing {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        .scaleEffect(0.8)
-                }
-
-                Text(buttonTitle)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 48)
-            .background(
-                LinearGradient(
-                    colors: [.blue, .purple],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-            )
-            .foregroundColor(.white)
-            .cornerRadius(12)
-        }
-        .disabled(isPurchasing)
-        .padding(.horizontal)
-    }
-
-    private var buttonTitle: String {
-        return "Continue in app"
-    }
-
-
-    // MARK: - Web Discount Button (Wave-style)
-
-    private var webDiscountButton: some View {
-        Link(destination: URL(string: "https://meetingmind.org/subscription")!) {
-            Text("Save 30% Online")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .frame(maxWidth: .infinity)
-                .frame(height: 48)
-                .background(
-                    LinearGradient(
-                        colors: [Color(red: 0.4, green: 0.6, blue: 1.0), Color(red: 0.8, green: 0.4, blue: 0.9)],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .foregroundColor(.white)
-                .cornerRadius(12)
-        }
-        .padding(.horizontal)
-    }
-
-    // MARK: - Footer Links (Terms, Privacy, Restore)
-
-    private var footerLinks: some View {
-        HStack(spacing: 20) {
-            Link("Terms", destination: URL(string: "https://kreativekoala.llc/terms")!)
-                .font(.caption)
-                .foregroundColor(.secondary)
-
-            Link("Privacy", destination: URL(string: "https://kreativekoala.llc/privacy")!)
-                .font(.caption)
-                .foregroundColor(.secondary)
-
-            Button {
-                Task {
-                    await subscriptionService.restorePurchases()
-                    if subscriptionService.subscriptionStatus.isActive {
-                        hasCompletedPaywall = true
-                    }
-                }
-            } label: {
-                Text("Restore")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-        }
-    }
-
-    // MARK: - Purchase
-
-    private func purchaseSelectedProduct() async {
+    private func purchase() async {
         guard let product = selectedProduct else { return }
-
         isPurchasing = true
         defer { isPurchasing = false }
 
@@ -288,62 +182,95 @@ struct PaywallView: View {
     }
 }
 
-// MARK: - Compact Subscription Card
+// MARK: - Feature Row
 
-struct CompactSubscriptionCard: View {
-    let planName: String
+private struct FeatureRow: View {
+    let icon: String
+    let text: String
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: icon)
+                .font(.system(size: 14))
+                .foregroundColor(.blue)
+                .frame(width: 20)
+            Text(text)
+                .font(.subheadline)
+                .foregroundColor(.primary)
+        }
+    }
+}
+
+// MARK: - Plan Row
+
+private struct PlanRow: View {
+    let name: String
     let price: String
-    let trialText: String?
-    let badgeText: String?
+    let period: String
+    let badge: String?
+    let subtitle: String?
     let isSelected: Bool
     let onTap: () -> Void
 
     var body: some View {
         Button(action: onTap) {
             HStack {
-                // Plan name and price
-                HStack(spacing: 8) {
-                    Text(planName)
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.blue)
+                // Radio indicator
+                Circle()
+                    .strokeBorder(isSelected ? Color.blue : Color.gray.opacity(0.4), lineWidth: 2)
+                    .background(Circle().fill(isSelected ? Color.blue : Color.clear))
+                    .frame(width: 20, height: 20)
+                    .overlay(
+                        Circle()
+                            .fill(Color.white)
+                            .frame(width: 8, height: 8)
+                            .opacity(isSelected ? 1 : 0)
+                    )
 
-                    Text(price)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 6) {
+                        Text(name)
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+
+                        if let badge = badge {
+                            Text(badge)
+                                .font(.caption2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.orange)
+                                .cornerRadius(4)
+                        }
+                    }
+
+                    if let subtitle = subtitle {
+                        Text(subtitle)
+                            .font(.caption)
+                            .foregroundColor(.green)
+                    }
                 }
 
                 Spacer()
 
-                // Trial text and badge
-                HStack(spacing: 8) {
-                    if let badge = badgeText {
-                        Text(badge)
-                            .font(.caption2)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 3)
-                            .background(Color.blue)
-                            .cornerRadius(4)
-                    }
-
-                    if let trial = trialText {
-                        Text(trial)
-                            .font(.caption2)
-                            .foregroundColor(.green)
-                    }
+                // Price
+                HStack(spacing: 2) {
+                    Text(price)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                    Text(period)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
             .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color(.systemBackground))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
-                    )
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
             )
         }
         .buttonStyle(PlainButtonStyle())
