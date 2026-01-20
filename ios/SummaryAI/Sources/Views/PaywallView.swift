@@ -23,53 +23,53 @@ struct PaywallView: View {
                     dismiss()
                 } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .font(.title2)
+                        .font(.title3)
                         .foregroundColor(.secondary.opacity(0.6))
                 }
-                .padding(.trailing, 20)
-                .padding(.top, 12)
+                .padding(.trailing, 16)
+                .padding(.top, 8)
             }
 
-            // Header with decorative background
+            // Header
             headerSectionCompact
-                .padding(.top, 8)
 
-            Spacer()
+            Spacer(minLength: 12)
 
-            // Compact features (Wave-style: 3 bullet points)
+            // Compact features
             featuresSectionCompact
-                .padding(.horizontal, 24)
+                .padding(.horizontal, 20)
 
             // "No commitment, cancel anytime" checkmark
-            HStack(spacing: 6) {
+            HStack(spacing: 5) {
                 Image(systemName: "checkmark")
+                    .font(.caption)
                     .fontWeight(.bold)
                 Text("No commitment, cancel anytime")
-                    .font(.subheadline)
+                    .font(.caption)
                     .fontWeight(.medium)
             }
             .foregroundColor(.primary)
-            .padding(.top, 20)
+            .padding(.top, 12)
 
-            Spacer()
+            Spacer(minLength: 8)
 
-            // Subscription options (Wave-style: 2 compact cards)
+            // Subscription options (3 plans)
             subscriptionOptionsSectionCompact
                 .padding(.horizontal)
-                .padding(.top, 16)
+                .padding(.top, 8)
 
             // Continue in app button
             startTrialButton
-                .padding(.top, 16)
+                .padding(.top, 12)
 
             // Save 30% Online button
             webDiscountButton
-                .padding(.top, 12)
+                .padding(.top, 8)
 
             // Footer links
             footerLinks
-                .padding(.top, 16)
-                .padding(.bottom, 24)
+                .padding(.top, 12)
+                .padding(.bottom, 16)
         }
         .alert("Error", isPresented: $showError) {
             Button("OK", role: .cancel) {}
@@ -78,12 +78,12 @@ struct PaywallView: View {
         }
     }
 
-    // MARK: - Header Section (Compact - Wave style)
+    // MARK: - Header Section (Compact)
 
     private var headerSectionCompact: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 4) {
             Text("Never Take Notes Again!")
-                .font(.largeTitle)
+                .font(.title)
                 .fontWeight(.bold)
                 .italic()
                 .multilineTextAlignment(.center)
@@ -91,59 +91,72 @@ struct PaywallView: View {
         .padding(.horizontal)
     }
 
-    // MARK: - Features Section (Compact - Wave style)
+    // MARK: - Features Section (Compact)
 
     private var featuresSectionCompact: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             featureRowCompact(
-                text: "Record and transcribe unlimited meetings while speakers are auto-detected for you."
+                text: "Record and transcribe unlimited meetings with auto speaker detection."
             )
             featureRowCompact(
-                text: "Instantly generate summaries and to-dos in any language and share them with one tap."
+                text: "Instantly generate summaries and to-dos in any language."
             )
             featureRowCompact(
-                text: "Ask Meeting Mind questions to quickly access any details from meetings you can't recall."
+                text: "Ask questions to quickly access details from past meetings."
             )
         }
     }
 
     private func featureRowCompact(text: String) -> some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: 8) {
             Image(systemName: "sparkles")
-                .font(.system(size: 16))
+                .font(.system(size: 14))
                 .foregroundColor(.blue)
-                .frame(width: 20)
+                .frame(width: 16)
 
             Text(text)
-                .font(.subheadline)
+                .font(.caption)
                 .foregroundColor(.primary)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
 
-    // MARK: - Subscription Options Section (Compact - Wave style)
+    // MARK: - Subscription Options Section (3 plans, compact)
 
     private var subscriptionOptionsSectionCompact: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 6) {
             // Annual Plan (with trial and discount badge)
             if let yearly = subscriptionService.yearlyProduct {
                 CompactSubscriptionCard(
-                    planName: "Annual Plan",
+                    planName: "Annual",
                     price: yearly.displayPrice,
-                    trialText: "3-day free trial",
-                    badgeText: "Limited Time: 70% off",
+                    trialText: "7-day free trial",
+                    badgeText: "Best Value",
                     isSelected: selectedProduct?.id == yearly.id
                 ) {
                     selectedProduct = yearly
                 }
             }
 
+            // Monthly Plan
+            if let monthly = subscriptionService.monthlyProduct {
+                CompactSubscriptionCard(
+                    planName: "Monthly",
+                    price: monthly.displayPrice,
+                    trialText: nil,
+                    badgeText: nil,
+                    isSelected: selectedProduct?.id == monthly.id
+                ) {
+                    selectedProduct = monthly
+                }
+            }
+
             // Weekly Plan
             if let weekly = subscriptionService.weeklyProduct {
                 CompactSubscriptionCard(
-                    planName: "Weekly Plan",
+                    planName: "Weekly",
                     price: weekly.displayPrice,
-                    trialText: "No free trial",
+                    trialText: nil,
                     badgeText: nil,
                     isSelected: selectedProduct?.id == weekly.id
                 ) {
@@ -173,18 +186,19 @@ struct PaywallView: View {
                 dismiss()
             }
         } label: {
-            HStack(spacing: 8) {
+            HStack(spacing: 6) {
                 if isPurchasing {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        .scaleEffect(0.9)
+                        .scaleEffect(0.8)
                 }
 
                 Text(buttonTitle)
+                    .font(.subheadline)
                     .fontWeight(.semibold)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 56)
+            .frame(height: 48)
             .background(
                 LinearGradient(
                     colors: [.blue, .purple],
@@ -193,7 +207,7 @@ struct PaywallView: View {
                 )
             )
             .foregroundColor(.white)
-            .cornerRadius(16)
+            .cornerRadius(12)
         }
         .disabled(isPurchasing)
         .padding(.horizontal)
@@ -209,9 +223,10 @@ struct PaywallView: View {
     private var webDiscountButton: some View {
         Link(destination: URL(string: "https://meetingmind.org/subscription")!) {
             Text("Save 30% Online")
+                .font(.subheadline)
                 .fontWeight(.semibold)
                 .frame(maxWidth: .infinity)
-                .frame(height: 56)
+                .frame(height: 48)
                 .background(
                     LinearGradient(
                         colors: [Color(red: 0.4, green: 0.6, blue: 1.0), Color(red: 0.8, green: 0.4, blue: 0.9)],
@@ -220,7 +235,7 @@ struct PaywallView: View {
                     )
                 )
                 .foregroundColor(.white)
-                .cornerRadius(16)
+                .cornerRadius(12)
         }
         .padding(.horizontal)
     }
@@ -228,13 +243,13 @@ struct PaywallView: View {
     // MARK: - Footer Links (Terms, Privacy, Restore)
 
     private var footerLinks: some View {
-        HStack(spacing: 24) {
+        HStack(spacing: 20) {
             Link("Terms", destination: URL(string: "https://kreativekoala.llc/terms")!)
-                .font(.subheadline)
+                .font(.caption)
                 .foregroundColor(.secondary)
 
             Link("Privacy", destination: URL(string: "https://kreativekoala.llc/privacy")!)
-                .font(.subheadline)
+                .font(.caption)
                 .foregroundColor(.secondary)
 
             Button {
@@ -246,11 +261,10 @@ struct PaywallView: View {
                 }
             } label: {
                 Text("Restore")
-                    .font(.subheadline)
+                    .font(.caption)
                     .foregroundColor(.secondary)
             }
         }
-        .padding(.top, 8)
     }
 
     // MARK: - Purchase
@@ -274,12 +288,12 @@ struct PaywallView: View {
     }
 }
 
-// MARK: - Compact Subscription Card (Wave style)
+// MARK: - Compact Subscription Card
 
 struct CompactSubscriptionCard: View {
     let planName: String
     let price: String
-    let trialText: String
+    let trialText: String?
     let badgeText: String?
     let isSelected: Bool
     let onTap: () -> Void
@@ -288,9 +302,10 @@ struct CompactSubscriptionCard: View {
         Button(action: onTap) {
             HStack {
                 // Plan name and price
-                VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
                     Text(planName)
-                        .font(.headline)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
                         .foregroundColor(.blue)
 
                     Text(price)
@@ -301,29 +316,32 @@ struct CompactSubscriptionCard: View {
                 Spacer()
 
                 // Trial text and badge
-                VStack(alignment: .trailing, spacing: 4) {
+                HStack(spacing: 8) {
                     if let badge = badgeText {
                         Text(badge)
                             .font(.caption2)
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 3)
                             .background(Color.blue)
                             .cornerRadius(4)
                     }
 
-                    Text(trialText)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    if let trial = trialText {
+                        Text(trial)
+                            .font(.caption2)
+                            .foregroundColor(.green)
+                    }
                 }
             }
-            .padding()
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
             .background(
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: 10)
                     .fill(Color(.systemBackground))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
+                        RoundedRectangle(cornerRadius: 10)
                             .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
                     )
             )
