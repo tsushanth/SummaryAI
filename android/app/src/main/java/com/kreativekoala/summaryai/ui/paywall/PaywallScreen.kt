@@ -53,31 +53,30 @@ fun PaywallScreen(
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                title = { }
-            )
-        }
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(24.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Pro badge
-            Surface(
-                modifier = Modifier,
-                shape = MaterialTheme.shapes.medium,
-                color = Color.Transparent
+            // Back button row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                IconButton(onClick = onNavigateBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                }
+            }
+
+            // Header with PRO badge inline
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
                 Box(
                     modifier = Modifier
@@ -85,139 +84,115 @@ fun PaywallScreen(
                             brush = Brush.linearGradient(
                                 colors = listOf(ProGradientStart, ProGradientEnd)
                             ),
-                            shape = MaterialTheme.shapes.medium
+                            shape = MaterialTheme.shapes.small
                         )
-                        .padding(horizontal = 24.dp, vertical = 8.dp)
+                        .padding(horizontal = 12.dp, vertical = 4.dp)
                 ) {
                     Text(
                         text = "PRO",
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
                 }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Unlock Premium",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            Text(
-                text = stringResource(R.string.upgrade_to_pro),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            )
+            // Features in a compact 2x2 grid
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                CompactFeature(icon = Icons.Default.AllInclusive, text = "Unlimited")
+                CompactFeature(icon = Icons.Default.Speed, text = "Priority")
+                CompactFeature(icon = Icons.Default.VideoCall, text = "Meeting Bot")
+                CompactFeature(icon = Icons.Default.CloudDownload, text = "Export")
+            }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "Unlock unlimited recordings and premium features",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Features
-            FeatureItem(
-                icon = Icons.Default.AllInclusive,
-                title = "Unlimited Recording Time",
-                description = "Record as long as you need"
-            )
-            FeatureItem(
-                icon = Icons.Default.Speed,
-                title = "Priority Processing",
-                description = "Get your transcripts faster"
-            )
-            FeatureItem(
-                icon = Icons.Default.VideoCall,
-                title = "Meeting Bot",
-                description = "Auto-join and record meetings"
-            )
-            FeatureItem(
-                icon = Icons.Default.CloudDownload,
-                title = "Export Options",
-                description = "PDF, Markdown, and more"
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Subscription options
-            SubscriptionOption(
+            // Subscription options - more compact
+            CompactSubscriptionOption(
                 title = stringResource(R.string.yearly),
-                price = "$69.99",
-                period = stringResource(R.string.per_year),
-                savings = "Save 61%",
-                isRecommended = true,
-                hasTrial = true,
+                price = "$69.99/yr",
+                badge = "Best Value",
+                trial = "7-day free trial",
                 isSelected = uiState.selectedPlan == "yearly",
                 onClick = { viewModel.selectPlan("yearly") }
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            SubscriptionOption(
+            CompactSubscriptionOption(
                 title = stringResource(R.string.monthly),
-                price = "$14.99",
-                period = stringResource(R.string.per_month),
-                savings = null,
-                isRecommended = false,
-                hasTrial = false,
+                price = "$14.99/mo",
+                badge = null,
+                trial = null,
                 isSelected = uiState.selectedPlan == "monthly",
                 onClick = { viewModel.selectPlan("monthly") }
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            SubscriptionOption(
+            CompactSubscriptionOption(
                 title = "Weekly",
-                price = "$6.99",
-                period = "per week",
-                savings = null,
-                isRecommended = false,
-                hasTrial = false,
+                price = "$6.99/wk",
+                badge = null,
+                trial = null,
                 isSelected = uiState.selectedPlan == "weekly",
                 onClick = { viewModel.selectPlan("weekly") }
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Subscribe button
             Button(
                 onClick = { viewModel.purchase() },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .height(48.dp),
                 enabled = !uiState.isLoading
             ) {
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(20.dp),
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Text("Subscribe Now")
+                    Text("Subscribe with Google Play")
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Restore purchases
-            TextButton(onClick = { viewModel.restorePurchases() }) {
-                Text(stringResource(R.string.restore_purchases))
+            // Restore purchases - smaller
+            TextButton(
+                onClick = { viewModel.restorePurchases() },
+                modifier = Modifier.height(32.dp),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    stringResource(R.string.restore_purchases),
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Web discount section
             WebDiscountCard()
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // Terms
+            // Terms - smaller
             Text(
-                text = "Subscription automatically renews unless cancelled at least 24 hours before the end of the current period. Manage your subscription in Google Play settings.",
-                style = MaterialTheme.typography.bodySmall,
+                text = "Auto-renews. Cancel anytime in Google Play settings.",
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
@@ -226,48 +201,33 @@ fun PaywallScreen(
 }
 
 @Composable
-private fun FeatureItem(
+private fun CompactFeature(
     icon: ImageVector,
-    title: String,
-    description: String
+    text: String
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(32.dp)
+            modifier = Modifier.size(24.dp)
         )
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Column {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall
-            )
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
 @Composable
-private fun SubscriptionOption(
+private fun CompactSubscriptionOption(
     title: String,
     price: String,
-    period: String,
-    savings: String?,
-    isRecommended: Boolean = false,
-    hasTrial: Boolean = false,
+    badge: String?,
+    trial: String?,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
@@ -296,67 +256,53 @@ private fun SubscriptionOption(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             RadioButton(
                 selected = isSelected,
-                onClick = onClick
+                onClick = onClick,
+                modifier = Modifier.size(20.dp)
             )
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(8.dp))
 
-            Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.weight(1f)
+            )
+
+            if (badge != null) {
+                Surface(
+                    color = Color(0xFFFF9500),
+                    shape = MaterialTheme.shapes.small
                 ) {
                     Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    if (isRecommended) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = MaterialTheme.shapes.small
-                        ) {
-                            Text(
-                                text = "Best Value",
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                        }
-                    }
-                }
-                if (savings != null) {
-                    Text(
-                        text = savings,
+                        text = badge,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFF16A34A)
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     )
                 }
-                if (hasTrial) {
-                    Text(
-                        text = "7 days free trial",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
+                Spacer(modifier = Modifier.width(8.dp))
             }
 
             Column(horizontalAlignment = Alignment.End) {
                 Text(
                     text = price,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold
                 )
-                Text(
-                    text = period,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                if (trial != null) {
+                    Text(
+                        text = trial,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color(0xFF16A34A)
+                    )
+                }
             }
         }
     }
@@ -367,122 +313,85 @@ private fun WebDiscountCard() {
     val context = LocalContext.current
     val greenColor = Color(0xFF16A34A)
 
-    Column {
-        // Divider with "OR" text
+    // Web checkout card - compact single row
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://meetingmind.org/subscription"))
+                context.startActivity(intent)
+            }
+            .border(
+                width = 2.dp,
+                color = greenColor.copy(alpha = 0.5f),
+                shape = MaterialTheme.shapes.medium
+            ),
+        colors = CardDefaults.cardColors(
+            containerColor = greenColor.copy(alpha = 0.08f)
+        )
+    ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            HorizontalDivider(
-                modifier = Modifier.weight(1f),
-                color = MaterialTheme.colorScheme.outlineVariant
-            )
-            Text(
-                text = "OR",
-                modifier = Modifier.padding(horizontal = 16.dp),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            HorizontalDivider(
-                modifier = Modifier.weight(1f),
-                color = MaterialTheme.colorScheme.outlineVariant
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Web checkout card with Save 30% badge
-        Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://meetingmind.org/subscription"))
-                    context.startActivity(intent)
-                }
-                .border(
-                    width = 2.dp,
-                    color = greenColor.copy(alpha = 0.5f),
-                    shape = MaterialTheme.shapes.medium
-                ),
-            colors = CardDefaults.cardColors(
-                containerColor = greenColor.copy(alpha = 0.08f)
-            )
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                // Save 30% badge
-                Surface(
-                    color = greenColor,
-                    shape = MaterialTheme.shapes.small
-                ) {
+            // Globe icon
+            Icon(
+                imageVector = Icons.Default.Language,
+                contentDescription = null,
+                tint = greenColor,
+                modifier = Modifier.size(20.dp)
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Text content
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Subscribe on Web",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "SAVE 30%",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        text = "$69.99",
                         style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textDecoration = TextDecoration.LineThrough
                     )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Globe icon
-                    Surface(
-                        modifier = Modifier.size(44.dp),
-                        shape = MaterialTheme.shapes.small,
-                        color = greenColor.copy(alpha = 0.15f)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Default.Language,
-                                contentDescription = null,
-                                tint = greenColor,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    // Text content
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Subscribe on Web",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "$69.99",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textDecoration = TextDecoration.LineThrough
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "$48.99/year",
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = greenColor
-                            )
-                        }
-                    }
-
-                    Icon(
-                        imageVector = Icons.Default.ArrowOutward,
-                        contentDescription = "Open web",
-                        tint = greenColor,
-                        modifier = Modifier.size(16.dp)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "$48.99/yr · $10.49/mo · $4.89/wk",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = greenColor
                     )
                 }
             }
+
+            // Save badge
+            Surface(
+                color = greenColor,
+                shape = MaterialTheme.shapes.small
+            ) {
+                Text(
+                    text = "30% OFF",
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            Icon(
+                imageVector = Icons.Default.ArrowOutward,
+                contentDescription = "Open web",
+                tint = greenColor,
+                modifier = Modifier.size(14.dp)
+            )
         }
     }
 }
