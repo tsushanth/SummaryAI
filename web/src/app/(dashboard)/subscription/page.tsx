@@ -100,7 +100,6 @@ export default function SubscriptionPage() {
             name="Weekly"
             price="$4.89"
             interval="week"
-            appStorePrice="$6.99"
             features={[
               'Unlimited recordings',
               'AI transcription & summaries',
@@ -115,7 +114,6 @@ export default function SubscriptionPage() {
             name="Monthly"
             price="$10.49"
             interval="month"
-            appStorePrice="$14.99"
             features={[
               'Unlimited recordings',
               'AI transcription & summaries',
@@ -132,18 +130,17 @@ export default function SubscriptionPage() {
             name="Yearly"
             price="$48.99"
             interval="year"
-            appStorePrice="$69.99"
             monthlyEquivalent="$4.08/month"
             highlighted
             badge="BEST VALUE"
             trialDays={7}
             features={[
+              '7-day free trial',
               'Unlimited recordings',
               'AI transcription & summaries',
               'Q&A with your recordings',
               'Meeting bot for Zoom/Teams/Meet',
               'Phone call recording',
-              'Priority support',
             ]}
             onSelect={() => startCheckout('yearly')}
             isLoading={isCheckoutLoading}
@@ -186,7 +183,6 @@ interface PricingCardProps {
   name: string;
   price: string;
   interval: string;
-  appStorePrice: string;
   monthlyEquivalent?: string;
   highlighted?: boolean;
   badge?: string;
@@ -200,7 +196,6 @@ function PricingCard({
   name,
   price,
   interval,
-  appStorePrice,
   monthlyEquivalent,
   highlighted,
   badge,
@@ -233,7 +228,7 @@ function PricingCard({
 
       <h3 className="text-lg font-semibold mb-2">{name}</h3>
 
-      <div className="mb-4">
+      <div className="mb-6">
         <span className="text-4xl font-bold">{price}</span>
         <span className={subtextClasses}>/{interval}</span>
         {monthlyEquivalent && (
@@ -242,20 +237,6 @@ function PricingCard({
           </div>
         )}
       </div>
-
-      <div className={`text-sm ${subtextClasses} mb-4`}>
-        <span className="line-through">{appStorePrice}</span> on App Store
-        <span className="ml-1 text-green-400 font-medium">Save 30%</span>
-      </div>
-
-      {trialDays && (
-        <div
-          className={`text-sm ${subtextClasses} mb-4 flex items-center gap-1`}
-        >
-          <Shield className="w-4 h-4" />
-          {trialDays}-day free trial
-        </div>
-      )}
 
       <ul className="space-y-2 mb-6">
         {features.map((feature, i) => (
