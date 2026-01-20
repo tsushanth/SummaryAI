@@ -145,9 +145,9 @@ fun PaywallScreen(
             // Subscription options
             SubscriptionOption(
                 title = stringResource(R.string.yearly),
-                price = "$49.99",
+                price = "$69.99",
                 period = stringResource(R.string.per_year),
-                savings = "Save 58%",
+                savings = "Save 61%",
                 isSelected = uiState.selectedPlan == "yearly",
                 onClick = { viewModel.selectPlan("yearly") }
             )
@@ -156,7 +156,7 @@ fun PaywallScreen(
 
             SubscriptionOption(
                 title = stringResource(R.string.monthly),
-                price = "$9.99",
+                price = "$14.99",
                 period = stringResource(R.string.per_month),
                 savings = null,
                 isSelected = uiState.selectedPlan == "monthly",
@@ -326,7 +326,7 @@ private fun SubscriptionOption(
 @Composable
 private fun WebDiscountCard() {
     val context = LocalContext.current
-    val blueColor = MaterialTheme.colorScheme.primary
+    val greenColor = Color(0xFF16A34A)
 
     Column {
         // Divider with "OR" text
@@ -352,7 +352,7 @@ private fun WebDiscountCard() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Web checkout card
+        // Web checkout card with Save 30% badge
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -361,58 +361,88 @@ private fun WebDiscountCard() {
                     context.startActivity(intent)
                 }
                 .border(
-                    width = 1.dp,
-                    color = blueColor.copy(alpha = 0.3f),
+                    width = 2.dp,
+                    color = greenColor.copy(alpha = 0.5f),
                     shape = MaterialTheme.shapes.medium
                 ),
             colors = CardDefaults.cardColors(
-                containerColor = blueColor.copy(alpha = 0.05f)
+                containerColor = greenColor.copy(alpha = 0.08f)
             )
         ) {
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(16.dp)
             ) {
-                // Globe icon
+                // Save 30% badge
                 Surface(
-                    modifier = Modifier.size(44.dp),
-                    shape = MaterialTheme.shapes.small,
-                    color = blueColor.copy(alpha = 0.15f)
+                    color = greenColor,
+                    shape = MaterialTheme.shapes.small
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Default.Language,
-                            contentDescription = null,
-                            tint = blueColor,
-                            modifier = Modifier.size(24.dp)
-                        )
+                    Text(
+                        text = "SAVE 30%",
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Globe icon
+                    Surface(
+                        modifier = Modifier.size(44.dp),
+                        shape = MaterialTheme.shapes.small,
+                        color = greenColor.copy(alpha = 0.15f)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.Language,
+                                contentDescription = null,
+                                tint = greenColor,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
-                }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
 
-                // Text content
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Subscribe on Web",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold
+                    // Text content
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Subscribe on Web",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "$69.99",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textDecoration = TextDecoration.LineThrough
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "$48.99/year",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = greenColor
+                            )
+                        }
+                    }
+
+                    Icon(
+                        imageVector = Icons.Default.ArrowOutward,
+                        contentDescription = "Open web",
+                        tint = greenColor,
+                        modifier = Modifier.size(16.dp)
                     )
-                    Text(
-                        text = "meetingmind.org",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                 }
-
-                Icon(
-                    imageVector = Icons.Default.ArrowOutward,
-                    contentDescription = "Open web",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(16.dp)
-                )
             }
         }
     }
