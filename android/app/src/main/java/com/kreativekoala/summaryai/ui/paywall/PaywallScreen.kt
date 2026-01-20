@@ -148,6 +148,8 @@ fun PaywallScreen(
                 price = "$69.99",
                 period = stringResource(R.string.per_year),
                 savings = "Save 61%",
+                isRecommended = true,
+                hasTrial = true,
                 isSelected = uiState.selectedPlan == "yearly",
                 onClick = { viewModel.selectPlan("yearly") }
             )
@@ -159,8 +161,23 @@ fun PaywallScreen(
                 price = "$14.99",
                 period = stringResource(R.string.per_month),
                 savings = null,
+                isRecommended = false,
+                hasTrial = false,
                 isSelected = uiState.selectedPlan == "monthly",
                 onClick = { viewModel.selectPlan("monthly") }
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            SubscriptionOption(
+                title = "Weekly",
+                price = "$6.99",
+                period = "per week",
+                savings = null,
+                isRecommended = false,
+                hasTrial = false,
+                isSelected = uiState.selectedPlan == "weekly",
+                onClick = { viewModel.selectPlan("weekly") }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -249,6 +266,8 @@ private fun SubscriptionOption(
     price: String,
     period: String,
     savings: String?,
+    isRecommended: Boolean = false,
+    hasTrial: Boolean = false,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
@@ -288,22 +307,42 @@ private fun SubscriptionOption(
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                if (savings != null) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = MaterialTheme.shapes.small
-                    ) {
-                        Text(
-                            text = savings,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    if (isRecommended) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = MaterialTheme.shapes.small
+                        ) {
+                            Text(
+                                text = "Best Value",
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
                     }
+                }
+                if (savings != null) {
+                    Text(
+                        text = savings,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color(0xFF16A34A)
+                    )
+                }
+                if (hasTrial) {
+                    Text(
+                        text = "7 days free trial",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
 
