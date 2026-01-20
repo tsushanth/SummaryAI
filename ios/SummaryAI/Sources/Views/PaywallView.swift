@@ -319,40 +319,27 @@ struct PaywallView: View {
                     // Icon
                     ZStack {
                         Circle()
-                            .fill(Color.green.opacity(0.15))
+                            .fill(Color.blue.opacity(0.15))
                             .frame(width: 44, height: 44)
 
                         Image(systemName: "globe")
                             .font(.system(size: 20))
-                            .foregroundColor(.green)
+                            .foregroundColor(.blue)
                     }
 
                     // Text
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Save 30% on Web")
+                        Text("Subscribe on Web")
                             .font(.subheadline)
                             .fontWeight(.semibold)
                             .foregroundColor(.primary)
 
-                        Text("Subscribe at meetingmind.org")
+                        Text("meetingmind.org")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
 
                     Spacer()
-
-                    // Prices
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text("$48.99")
-                            .font(.headline)
-                            .fontWeight(.bold)
-                            .foregroundColor(.green)
-
-                        Text("vs $69.99/yr")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                            .strikethrough()
-                    }
 
                     Image(systemName: "arrow.up.right")
                         .font(.caption)
@@ -361,10 +348,10 @@ struct PaywallView: View {
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.green.opacity(0.5), lineWidth: 1.5)
+                        .stroke(Color.blue.opacity(0.3), lineWidth: 1)
                         .background(
                             RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.green.opacity(0.05))
+                                .fill(Color.blue.opacity(0.05))
                         )
                 )
             }

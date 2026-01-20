@@ -102,7 +102,7 @@ export default function SettingsPage() {
                   </Link>
                 </div>
                 <p className="text-xs text-gray-500">
-                  Save 30% compared to App Store prices
+                  7-day free trial with yearly plan
                 </p>
               </div>
             )}
