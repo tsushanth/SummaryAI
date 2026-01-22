@@ -65,10 +65,14 @@ class TokenManager @Inject constructor(
         get() = System.currentTimeMillis() > tokenExpiry
 
     fun saveTokens(accessToken: String, refreshToken: String?, expiresAt: Long, userId: String?) {
-        this.accessToken = accessToken
-        this.refreshToken = refreshToken
-        this.tokenExpiry = expiresAt
-        this.userId = userId
+        // Use commit() for synchronous write to ensure tokens are persisted
+        // before any API calls are made
+        encryptedPrefs.edit()
+            .putString(KEY_ACCESS_TOKEN, accessToken)
+            .putString(KEY_REFRESH_TOKEN, refreshToken)
+            .putLong(KEY_TOKEN_EXPIRY, expiresAt)
+            .putString(KEY_USER_ID, userId)
+            .commit()
     }
 
     fun clearTokens() {
