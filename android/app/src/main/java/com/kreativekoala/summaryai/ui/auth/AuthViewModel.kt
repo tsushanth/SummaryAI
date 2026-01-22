@@ -46,4 +46,34 @@ class AuthViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(error = null)
         authService.clearError()
     }
+
+    fun signInWithEmail(email: String, password: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            val result = authService.signInWithEmail(email, password)
+            _uiState.value = _uiState.value.copy(
+                isLoading = false,
+                error = result.exceptionOrNull()?.message
+            )
+        }
+    }
+
+    fun signUpWithEmail(email: String, password: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            val result = authService.signUpWithEmail(email, password)
+            _uiState.value = _uiState.value.copy(
+                isLoading = false,
+                error = result.exceptionOrNull()?.message
+            )
+        }
+    }
+
+    fun signInAsDemo() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            authService.signInAsDemo()
+            _uiState.value = _uiState.value.copy(isLoading = false)
+        }
+    }
 }

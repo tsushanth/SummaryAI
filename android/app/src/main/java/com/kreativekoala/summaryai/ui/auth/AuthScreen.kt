@@ -5,13 +5,27 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -24,6 +38,13 @@ fun AuthScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val authState by viewModel.authState.collectAsState()
+    val focusManager = LocalFocusManager.current
+
+    // Email/password state
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var isSignUpMode by remember { mutableStateOf(false) }
 
     // Handle auth success
     LaunchedEffect(authState.isAuthenticated) {
@@ -52,15 +73,18 @@ fun AuthScreen(
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .imePadding()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 32.dp)
+                .padding(vertical = 48.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // App Icon
             Image(
@@ -118,7 +142,121 @@ fun AuthScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Divider with "or"
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                HorizontalDivider(modifier = Modifier.weight(1f))
+                Text(
+                    text = "or",
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                HorizontalDivider(modifier = Modifier.weight(1f))
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Email field
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                ),
+                enabled = !uiState.isLoading && !authState.isLoading
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Password field
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        focusManager.clearFocus()
+                        if (email.isNotBlank() && password.isNotBlank()) {
+                            if (isSignUpMode) {
+                                viewModel.signUpWithEmail(email, password)
+                            } else {
+                                viewModel.signInWithEmail(email, password)
+                            }
+                        }
+                    }
+                ),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                        )
+                    }
+                },
+                enabled = !uiState.isLoading && !authState.isLoading
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Sign in / Sign up button
+            Button(
+                onClick = {
+                    if (isSignUpMode) {
+                        viewModel.signUpWithEmail(email, password)
+                    } else {
+                        viewModel.signInWithEmail(email, password)
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                enabled = email.isNotBlank() && password.isNotBlank() && !uiState.isLoading && !authState.isLoading
+            ) {
+                if (uiState.isLoading || authState.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Text(if (isSignUpMode) "Create Account" else "Sign In")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Toggle between sign in and sign up
+            TextButton(
+                onClick = { isSignUpMode = !isSignUpMode },
+                enabled = !uiState.isLoading && !authState.isLoading
+            ) {
+                Text(
+                    text = if (isSignUpMode) "Already have an account? Sign In" else "Don't have an account? Create one",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Terms and Privacy
             Text(
