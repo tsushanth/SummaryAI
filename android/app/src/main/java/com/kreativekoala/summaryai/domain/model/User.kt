@@ -77,6 +77,5 @@ data class AuthState(
     val isLoading: Boolean = true,
     val user: User? = null,
     val hasCompletedOnboarding: Boolean = false,
-    val hasSkippedSignIn: Boolean = false,
     val error: String? = null
 )
