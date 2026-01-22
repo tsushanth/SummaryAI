@@ -21,6 +21,7 @@ import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.Google
+import io.github.jan.supabase.gotrue.providers.builtin.Email
 import io.github.jan.supabase.gotrue.providers.builtin.IDToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -246,5 +247,172 @@ class AuthService @Inject constructor(
      */
     fun clearError() {
         _authState.value = _authState.value.copy(error = null)
+    }
+
+    /**
+     * Sign up with email and password
+     */
+    suspend fun signUpWithEmail(email: String, password: String): Result<Unit> {
+        return try {
+            _authState.value = _authState.value.copy(isLoading = true, error = null)
+
+            Log.d(TAG, "Signing up with email: $email")
+
+            try {
+                supabase.auth.signUpWith(Email) {
+                    this.email = email
+                    this.password = password
+                }
+            } catch (signupError: Exception) {
+                // Check if user already exists
+                val errorMsg = signupError.message?.lowercase() ?: ""
+                if (errorMsg.contains("already") || errorMsg.contains("exists") || errorMsg.contains("registered")) {
+                    _authState.value = _authState.value.copy(isLoading = false)
+                    return Result.failure(Exception("An account with this email already exists. Please sign in instead."))
+                }
+                throw signupError
+            }
+
+            // After signup, try to get session or sign in
+            var session = supabase.auth.currentSessionOrNull()
+
+            if (session == null) {
+                // If no session after signup, try signing in
+                Log.d(TAG, "No session after signup, attempting sign in...")
+                supabase.auth.signInWith(Email) {
+                    this.email = email
+                    this.password = password
+                }
+                session = supabase.auth.currentSessionOrNull()
+            }
+
+            if (session == null) {
+                return Result.failure(Exception("Account created but failed to sign in. Please try signing in."))
+            }
+
+            Log.d(TAG, "Got Supabase session for user: ${session.user?.email}")
+
+            // Save tokens
+            tokenManager.saveTokens(
+                accessToken = session.accessToken,
+                refreshToken = session.refreshToken,
+                expiresAt = session.expiresAt?.epochSeconds?.times(1000) ?: 0L,
+                userId = session.user?.id
+            )
+
+            val user = session.user
+            _authState.value = AuthState(
+                isAuthenticated = true,
+                isLoading = false,
+                user = User(
+                    id = user?.id ?: "",
+                    email = user?.email ?: "",
+                    fullName = user?.userMetadata?.get("full_name")?.toString(),
+                    avatarUrl = user?.userMetadata?.get("avatar_url")?.toString(),
+                    provider = AuthProvider.EMAIL,
+                    subscriptionStatus = SubscriptionStatus.FREE,
+                    subscriptionExpiresAt = null
+                ),
+                hasCompletedOnboarding = preferencesManager.hasCompletedOnboarding.first()
+            )
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e(TAG, "Email sign-up exception: ${e.message}", e)
+            _authState.value = _authState.value.copy(
+                isLoading = false,
+                error = e.message ?: "Sign up failed"
+            )
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Sign in with email and password
+     */
+    suspend fun signInWithEmail(email: String, password: String): Result<Unit> {
+        return try {
+            _authState.value = _authState.value.copy(isLoading = true, error = null)
+
+            Log.d(TAG, "Signing in with email: $email")
+
+            supabase.auth.signInWith(Email) {
+                this.email = email
+                this.password = password
+            }
+
+            val session = supabase.auth.currentSessionOrNull()
+                ?: return Result.failure(Exception("Failed to get session"))
+
+            Log.d(TAG, "Got Supabase session for user: ${session.user?.email}")
+
+            // Save tokens
+            tokenManager.saveTokens(
+                accessToken = session.accessToken,
+                refreshToken = session.refreshToken,
+                expiresAt = session.expiresAt?.epochSeconds?.times(1000) ?: 0L,
+                userId = session.user?.id
+            )
+
+            val user = session.user
+            _authState.value = AuthState(
+                isAuthenticated = true,
+                isLoading = false,
+                user = User(
+                    id = user?.id ?: "",
+                    email = user?.email ?: "",
+                    fullName = user?.userMetadata?.get("full_name")?.toString(),
+                    avatarUrl = user?.userMetadata?.get("avatar_url")?.toString(),
+                    provider = AuthProvider.EMAIL,
+                    subscriptionStatus = SubscriptionStatus.FREE,
+                    subscriptionExpiresAt = null
+                ),
+                hasCompletedOnboarding = preferencesManager.hasCompletedOnboarding.first()
+            )
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e(TAG, "Email sign-in exception: ${e.message}", e)
+            _authState.value = _authState.value.copy(
+                isLoading = false,
+                error = e.message ?: "Sign in failed"
+            )
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Sign in as demo user (for app store reviewers)
+     * This creates a local-only demo session without server authentication
+     */
+    suspend fun signInAsDemo() {
+        _authState.value = _authState.value.copy(isLoading = true)
+
+        // Create a demo user with a fake ID
+        val demoUser = User(
+            id = "demo-user-${System.currentTimeMillis()}",
+            email = "demo@meetingmind.app",
+            fullName = "Demo User",
+            avatarUrl = null,
+            provider = AuthProvider.GOOGLE,
+            subscriptionStatus = SubscriptionStatus.FREE,
+            subscriptionExpiresAt = null
+        )
+
+        // Save a fake token so the app thinks we're logged in
+        // This won't work for actual API calls, but allows reviewers to explore the UI
+        tokenManager.saveTokens(
+            accessToken = "demo-token-${System.currentTimeMillis()}",
+            refreshToken = null,
+            expiresAt = System.currentTimeMillis() + 24 * 60 * 60 * 1000, // 24 hours
+            userId = demoUser.id
+        )
+
+        _authState.value = AuthState(
+            isAuthenticated = true,
+            isLoading = false,
+            user = demoUser,
+            hasCompletedOnboarding = preferencesManager.hasCompletedOnboarding.first()
+        )
     }
 }
