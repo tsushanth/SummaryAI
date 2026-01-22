@@ -6,16 +6,13 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 
-import { authenticate } from '../middleware/auth.js';
+import { authenticate, optionalAuth } from '../middleware/auth.js';
 import { asyncHandler, Errors } from '../middleware/errorHandler.js';
 import { supabaseAdmin } from '../lib/supabase.js';
 
 import type { ErrorResponse } from '../types/api.js';
 
 const router = Router();
-
-// All routes require authentication
-router.use(authenticate);
 
 // ============================================================================
 // Types
@@ -106,11 +103,27 @@ const createFromTextSchema = z.object({
 /**
  * GET /api/todos
  * List all todos for the authenticated user
+ * Allows guest access (returns empty list for unauthenticated users)
  */
 router.get(
   '/',
+  optionalAuth,
   asyncHandler(async (req: Request, res: Response<ListTodosResponse | ErrorResponse>) => {
-    const userId = req.user!.id;
+    // Return empty list for guest users (not authenticated)
+    if (!req.user) {
+      res.json({
+        todos: [],
+        meta: {
+          page: 1,
+          per_page: 50,
+          total_count: 0,
+          total_pages: 0,
+        },
+      });
+      return;
+    }
+
+    const userId = req.user.id;
     const query = listQuerySchema.parse(req.query);
 
     // Build query
@@ -161,6 +174,7 @@ router.get(
  */
 router.post(
   '/',
+  authenticate,
   asyncHandler(async (req: Request, res: Response<{ todo: Todo } | ErrorResponse>) => {
     const userId = req.user!.id;
     const body = createTodoSchema.parse(req.body) as CreateTodoRequest;
@@ -195,6 +209,7 @@ router.post(
  */
 router.post(
   '/from-text',
+  authenticate,
   asyncHandler(async (req: Request, res: Response<{ todos: Todo[] } | ErrorResponse>) => {
     const userId = req.user!.id;
     const body = createFromTextSchema.parse(req.body) as CreateTodosFromTextRequest;
@@ -260,6 +275,7 @@ router.post(
  */
 router.get(
   '/:id',
+  authenticate,
   asyncHandler(async (req: Request, res: Response<{ todo: Todo } | ErrorResponse>) => {
     const userId = req.user!.id;
     const todoId = req.params.id;
@@ -285,6 +301,7 @@ router.get(
  */
 router.patch(
   '/:id',
+  authenticate,
   asyncHandler(async (req: Request, res: Response<{ todo: Todo } | ErrorResponse>) => {
     const userId = req.user!.id;
     const todoId = req.params.id;
@@ -327,6 +344,7 @@ router.patch(
  */
 router.delete(
   '/:id',
+  authenticate,
   asyncHandler(async (req: Request, res: Response<void | ErrorResponse>) => {
     const userId = req.user!.id;
     const todoId = req.params.id;
@@ -352,6 +370,7 @@ router.delete(
  */
 router.post(
   '/:id/toggle',
+  authenticate,
   asyncHandler(async (req: Request, res: Response<{ todo: Todo } | ErrorResponse>) => {
     const userId = req.user!.id;
     const todoId = req.params.id;

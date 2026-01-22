@@ -82,6 +82,7 @@ class AuthService @Inject constructor(
 
         try {
             val hasCompletedOnboarding = preferencesManager.hasCompletedOnboarding.first()
+            val hasSkippedSignIn = preferencesManager.hasSkippedSignIn.first()
 
             if (tokenManager.isLoggedIn && !tokenManager.isTokenExpired) {
                 // Try to refresh the session
@@ -100,7 +101,8 @@ class AuthService @Inject constructor(
                             subscriptionStatus = SubscriptionStatus.FREE,
                             subscriptionExpiresAt = null
                         ),
-                        hasCompletedOnboarding = hasCompletedOnboarding
+                        hasCompletedOnboarding = hasCompletedOnboarding,
+                        hasSkippedSignIn = false // Reset since user is now signed in
                     )
                     return
                 }
@@ -111,7 +113,8 @@ class AuthService @Inject constructor(
             _authState.value = AuthState(
                 isAuthenticated = false,
                 isLoading = false,
-                hasCompletedOnboarding = hasCompletedOnboarding
+                hasCompletedOnboarding = hasCompletedOnboarding,
+                hasSkippedSignIn = hasSkippedSignIn
             )
         } catch (e: Exception) {
             _authState.value = AuthState(
@@ -165,6 +168,8 @@ class AuthService @Inject constructor(
             )
 
             val user = session.user
+            // Clear skipped sign-in flag since user is now signed in
+            preferencesManager.setSkippedSignIn(false)
             _authState.value = AuthState(
                 isAuthenticated = true,
                 isLoading = false,
@@ -179,7 +184,8 @@ class AuthService @Inject constructor(
                     subscriptionStatus = SubscriptionStatus.FREE,
                     subscriptionExpiresAt = null
                 ),
-                hasCompletedOnboarding = preferencesManager.hasCompletedOnboarding.first()
+                hasCompletedOnboarding = preferencesManager.hasCompletedOnboarding.first(),
+                hasSkippedSignIn = false
             )
 
             Result.success(Unit)
@@ -211,10 +217,13 @@ class AuthService @Inject constructor(
             // Ignore errors during sign out
         } finally {
             tokenManager.clearTokens()
+            // Reset skipped sign-in so user sees auth screen
+            preferencesManager.setSkippedSignIn(false)
             _authState.value = AuthState(
                 isAuthenticated = false,
                 isLoading = false,
-                hasCompletedOnboarding = preferencesManager.hasCompletedOnboarding.first()
+                hasCompletedOnboarding = preferencesManager.hasCompletedOnboarding.first(),
+                hasSkippedSignIn = false
             )
         }
     }
@@ -239,6 +248,15 @@ class AuthService @Inject constructor(
     suspend fun setOnboardingCompleted() {
         preferencesManager.setOnboardingCompleted(true)
         _authState.value = _authState.value.copy(hasCompletedOnboarding = true)
+    }
+
+    /**
+     * Continue without sign in (guest mode)
+     * Users can link their calendar later when they sign in
+     */
+    suspend fun continueWithoutSignIn() {
+        preferencesManager.setSkippedSignIn(true)
+        _authState.value = _authState.value.copy(hasSkippedSignIn = true)
     }
 
     /**

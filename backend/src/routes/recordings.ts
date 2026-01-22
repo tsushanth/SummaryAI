@@ -6,7 +6,7 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 
-import { authenticate } from '../middleware/auth.js';
+import { authenticate, optionalAuth } from '../middleware/auth.js';
 import { asyncHandler, Errors } from '../middleware/errorHandler.js';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
@@ -26,11 +26,8 @@ import type {
 
 const router = Router();
 
-// All routes require authentication
-router.use(authenticate);
-
-// Mount Q&A routes as nested router
-router.use('/:id/questions', questionsRouter);
+// Mount Q&A routes as nested router (requires auth)
+router.use('/:id/questions', authenticate, questionsRouter);
 
 // ============================================================================
 // Validation Schemas
@@ -64,6 +61,7 @@ const listQuerySchema = z.object({
 
 router.post(
   '/',
+  authenticate,
   asyncHandler(async (req: Request, res: Response<CreateRecordingResponse | ErrorResponse>) => {
     const userId = req.user!.id;
 
@@ -143,6 +141,7 @@ router.post(
 
 router.post(
   '/:id/complete-upload',
+  authenticate,
   asyncHandler(async (req: Request, res: Response<CompleteUploadResponse | ErrorResponse>) => {
     const userId = req.user!.id;
     const recordingId = req.params.id;
@@ -239,12 +238,28 @@ router.post(
 // ============================================================================
 // GET /api/recordings
 // List recordings for current user with pagination
+// Allows guest access (returns empty list for unauthenticated users)
 // ============================================================================
 
 router.get(
   '/',
+  optionalAuth,
   asyncHandler(async (req: Request, res: Response<ListRecordingsResponse | ErrorResponse>) => {
-    const userId = req.user!.id;
+    // Return empty list for guest users (not authenticated)
+    if (!req.user) {
+      res.status(200).json({
+        recordings: [],
+        meta: {
+          page: 1,
+          per_page: 20,
+          total_count: 0,
+          total_pages: 0,
+        },
+      });
+      return;
+    }
+
+    const userId = req.user.id;
 
     // Parse and validate query parameters
     const query = listQuerySchema.parse(req.query) as Required<ListRecordingsQuery>;
@@ -291,6 +306,7 @@ router.get(
 
 router.get(
   '/:id',
+  authenticate,
   asyncHandler(async (req: Request, res: Response<GetRecordingResponse | ErrorResponse>) => {
     const userId = req.user!.id;
     const recordingId = req.params.id;
@@ -370,6 +386,7 @@ const updateRecordingSchema = z.object({
 
 router.patch(
   '/:id',
+  authenticate,
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
     const recordingId = req.params.id;
@@ -425,6 +442,7 @@ const updateSpeakersSchema = z.object({
 
 router.patch(
   '/:id/speakers',
+  authenticate,
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
     const recordingId = req.params.id;
@@ -481,6 +499,7 @@ router.patch(
 
 router.delete(
   '/:id',
+  authenticate,
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
     const recordingId = req.params.id;

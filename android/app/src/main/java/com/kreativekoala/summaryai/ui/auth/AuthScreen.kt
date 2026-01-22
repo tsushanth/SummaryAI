@@ -20,7 +20,8 @@ import com.kreativekoala.summaryai.R
 @Composable
 fun AuthScreen(
     viewModel: AuthViewModel = hiltViewModel(),
-    onAuthSuccess: () -> Unit
+    onAuthSuccess: () -> Unit,
+    onSkipSignIn: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val authState by viewModel.authState.collectAsState()
@@ -29,6 +30,13 @@ fun AuthScreen(
     LaunchedEffect(authState.isAuthenticated) {
         if (authState.isAuthenticated) {
             onAuthSuccess()
+        }
+    }
+
+    // Handle skip sign in
+    LaunchedEffect(authState.hasSkippedSignIn) {
+        if (authState.hasSkippedSignIn) {
+            onSkipSignIn()
         }
     }
 
@@ -118,7 +126,20 @@ fun AuthScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Continue without sign in
+            TextButton(
+                onClick = { viewModel.continueWithoutSignIn() },
+                enabled = !uiState.isLoading && !authState.isLoading
+            ) {
+                Text(
+                    text = stringResource(R.string.continue_without_sign_in),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
 
             // Terms and Privacy
             Text(

@@ -12,7 +12,7 @@ import {
   markJobExecuted,
   markJobFailed,
 } from '../services/botSchedulerService.js';
-import { authenticate, internalAuth } from '../middleware/auth.js';
+import { authenticate, optionalAuth, internalAuth } from '../middleware/auth.js';
 import { asyncHandler, Errors } from '../middleware/errorHandler.js';
 import {
   CreateManualMeetingSchema,
@@ -32,17 +32,26 @@ import { getLiveInsights } from '../services/liveInsightsService.js';
 
 const router = Router();
 
-// All routes require authentication
-router.use(authenticate);
-
 /**
  * GET /api/meetings
  * List meetings for the user
+ * Allows guest access (returns empty list for unauthenticated users)
  */
 router.get(
   '/',
+  optionalAuth,
   asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user!.id;
+    // Return empty list for guest users (not authenticated)
+    if (!req.user) {
+      const response: MeetingListResponse = {
+        items: [],
+        total: 0,
+      };
+      res.json(response);
+      return;
+    }
+
+    const userId = req.user.id;
     const parsed = ListMeetingsSchema.safeParse(req.query);
 
     if (!parsed.success) {
@@ -104,6 +113,7 @@ router.get(
  */
 router.post(
   '/',
+  authenticate,
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
     const parsed = CreateManualMeetingSchema.safeParse(req.body);
@@ -172,6 +182,7 @@ router.post(
  */
 router.post(
   '/join',
+  authenticate,
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
     const parsed = InstantJoinSchema.safeParse(req.body);
@@ -319,6 +330,7 @@ router.post(
  */
 router.get(
   '/:id',
+  authenticate,
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
     const meetingId = req.params.id;
@@ -383,6 +395,7 @@ router.get(
  */
 router.patch(
   '/:id',
+  authenticate,
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
     const meetingId = req.params.id;
@@ -467,6 +480,7 @@ router.patch(
  */
 router.post(
   '/:id/join-now',
+  authenticate,
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
     const meetingId = req.params.id;
@@ -523,6 +537,7 @@ router.post(
  */
 router.get(
   '/:id/live-transcript',
+  authenticate,
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
     const meetingId = req.params.id;
@@ -581,6 +596,7 @@ router.get(
  */
 router.get(
   '/:id/live-insights',
+  authenticate,
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
     const meetingId = req.params.id;
@@ -615,6 +631,7 @@ router.get(
  */
 router.delete(
   '/:id',
+  authenticate,
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
     const meetingId = req.params.id;
