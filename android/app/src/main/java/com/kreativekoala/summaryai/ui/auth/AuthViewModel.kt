@@ -46,10 +46,4 @@ class AuthViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(error = null)
         authService.clearError()
     }
-
-    fun continueWithoutSignIn() {
-        viewModelScope.launch {
-            authService.continueWithoutSignIn()
-        }
-    }
 }

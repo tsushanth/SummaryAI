@@ -108,14 +108,10 @@ val bottomNavItems = listOf(
 fun MeetingMindNavGraph(
     isAuthenticated: Boolean,
     hasCompletedOnboarding: Boolean,
-    hasSkippedSignIn: Boolean = false,
     navController: NavHostController = rememberNavController()
 ) {
-    // Allow access if authenticated OR if user skipped sign-in
-    val canAccessApp = isAuthenticated || hasSkippedSignIn
-
     val startDestination = when {
-        !canAccessApp -> Screen.Auth.route
+        !isAuthenticated -> Screen.Auth.route
         !hasCompletedOnboarding -> Screen.Onboarding.route
         else -> Screen.Recordings.route
     }
@@ -124,7 +120,7 @@ fun MeetingMindNavGraph(
     val currentDestination = navBackStackEntry?.destination
 
     // Determine if we should show bottom nav
-    val showBottomNav = canAccessApp && hasCompletedOnboarding &&
+    val showBottomNav = isAuthenticated && hasCompletedOnboarding &&
             currentDestination?.route in listOf(
         Screen.Recordings.route,
         Screen.Meetings.route,
@@ -182,13 +178,6 @@ fun MeetingMindNavGraph(
             composable(Screen.Auth.route) {
                 AuthScreen(
                     onAuthSuccess = {
-                        navController.navigate(
-                            if (hasCompletedOnboarding) Screen.Recordings.route else Screen.Onboarding.route
-                        ) {
-                            popUpTo(Screen.Auth.route) { inclusive = true }
-                        }
-                    },
-                    onSkipSignIn = {
                         navController.navigate(
                             if (hasCompletedOnboarding) Screen.Recordings.route else Screen.Onboarding.route
                         ) {
