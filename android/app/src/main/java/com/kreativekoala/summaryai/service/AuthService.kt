@@ -82,62 +82,38 @@ class AuthService @Inject constructor(
 
         try {
             val hasCompletedOnboarding = preferencesManager.hasCompletedOnboarding.first()
-            val hasSkippedSignIn = preferencesManager.hasSkippedSignIn.first()
 
-            if (tokenManager.isLoggedIn) {
-                // Try to restore the session using saved refresh token
-                val refreshToken = tokenManager.refreshToken
-                if (refreshToken != null) {
-                    try {
-                        Log.d(TAG, "Restoring session from saved refresh token...")
-                        val session = supabase.auth.refreshSession(refreshToken)
-
-                        // Update tokens with refreshed values
-                        tokenManager.saveTokens(
-                            accessToken = session.accessToken,
-                            refreshToken = session.refreshToken,
-                            expiresAt = session.expiresAt?.epochSeconds?.times(1000) ?: 0L,
-                            userId = session.user?.id
-                        )
-
-                        val user = session.user
-                        _authState.value = AuthState(
-                            isAuthenticated = true,
-                            isLoading = false,
-                            user = User(
-                                id = user?.id ?: "",
-                                email = user?.email ?: "",
-                                fullName = user?.userMetadata?.get("full_name")?.toString(),
-                                avatarUrl = user?.userMetadata?.get("avatar_url")?.toString(),
-                                provider = AuthProvider.GOOGLE,
-                                subscriptionStatus = SubscriptionStatus.FREE,
-                                subscriptionExpiresAt = null
-                            ),
-                            hasCompletedOnboarding = hasCompletedOnboarding,
-                            hasSkippedSignIn = false // Reset since user is now signed in
-                        )
-                        Log.d(TAG, "Session restored successfully for user: ${user?.email}")
-                        return
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Failed to restore session: ${e.message}", e)
-                        // Session refresh failed, clear tokens
-                        tokenManager.clearTokens()
-                    }
-                } else {
-                    // No refresh token, clear invalid state
-                    tokenManager.clearTokens()
+            if (tokenManager.isLoggedIn && !tokenManager.isTokenExpired) {
+                // Try to refresh the session
+                val session = supabase.auth.currentSessionOrNull()
+                if (session != null) {
+                    val user = session.user
+                    _authState.value = AuthState(
+                        isAuthenticated = true,
+                        isLoading = false,
+                        user = User(
+                            id = user?.id ?: "",
+                            email = user?.email ?: "",
+                            fullName = user?.userMetadata?.get("full_name")?.toString(),
+                            avatarUrl = user?.userMetadata?.get("avatar_url")?.toString(),
+                            provider = AuthProvider.GOOGLE,
+                            subscriptionStatus = SubscriptionStatus.FREE,
+                            subscriptionExpiresAt = null
+                        ),
+                        hasCompletedOnboarding = hasCompletedOnboarding
+                    )
+                    return
                 }
             }
 
             // No valid session
+            tokenManager.clearTokens()
             _authState.value = AuthState(
                 isAuthenticated = false,
                 isLoading = false,
-                hasCompletedOnboarding = hasCompletedOnboarding,
-                hasSkippedSignIn = hasSkippedSignIn
+                hasCompletedOnboarding = hasCompletedOnboarding
             )
         } catch (e: Exception) {
-            Log.e(TAG, "checkExistingSession error: ${e.message}", e)
             _authState.value = AuthState(
                 isAuthenticated = false,
                 isLoading = false,
@@ -189,8 +165,6 @@ class AuthService @Inject constructor(
             )
 
             val user = session.user
-            // Clear skipped sign-in flag since user is now signed in
-            preferencesManager.setSkippedSignIn(false)
             _authState.value = AuthState(
                 isAuthenticated = true,
                 isLoading = false,
@@ -205,8 +179,7 @@ class AuthService @Inject constructor(
                     subscriptionStatus = SubscriptionStatus.FREE,
                     subscriptionExpiresAt = null
                 ),
-                hasCompletedOnboarding = preferencesManager.hasCompletedOnboarding.first(),
-                hasSkippedSignIn = false
+                hasCompletedOnboarding = preferencesManager.hasCompletedOnboarding.first()
             )
 
             Result.success(Unit)
@@ -238,13 +211,10 @@ class AuthService @Inject constructor(
             // Ignore errors during sign out
         } finally {
             tokenManager.clearTokens()
-            // Reset skipped sign-in so user sees auth screen
-            preferencesManager.setSkippedSignIn(false)
             _authState.value = AuthState(
                 isAuthenticated = false,
                 isLoading = false,
-                hasCompletedOnboarding = preferencesManager.hasCompletedOnboarding.first(),
-                hasSkippedSignIn = false
+                hasCompletedOnboarding = preferencesManager.hasCompletedOnboarding.first()
             )
         }
     }
@@ -269,15 +239,6 @@ class AuthService @Inject constructor(
     suspend fun setOnboardingCompleted() {
         preferencesManager.setOnboardingCompleted(true)
         _authState.value = _authState.value.copy(hasCompletedOnboarding = true)
-    }
-
-    /**
-     * Continue without sign in (guest mode)
-     * Users can link their calendar later when they sign in
-     */
-    suspend fun continueWithoutSignIn() {
-        preferencesManager.setSkippedSignIn(true)
-        _authState.value = _authState.value.copy(hasSkippedSignIn = true)
     }
 
     /**
