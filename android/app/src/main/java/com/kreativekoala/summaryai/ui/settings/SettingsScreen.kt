@@ -64,9 +64,13 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             // Account Section
-            uiState.user?.let { user ->
-                SettingsSection(title = stringResource(R.string.account)) {
-                    AccountCard(user = user, onUpgradeClick = onUpgradeClick)
+            SettingsSection(title = stringResource(R.string.account)) {
+                if (uiState.isGuest) {
+                    GuestAccountCard(onSignInClick = onSignOut)
+                } else {
+                    uiState.user?.let { user ->
+                        AccountCard(user = user, onUpgradeClick = onUpgradeClick)
+                    }
                 }
             }
 
@@ -144,33 +148,59 @@ fun SettingsScreen(
                 )
             }
 
-            // Sign Out Section
+            // Sign In / Sign Out Section
             Spacer(modifier = Modifier.height(16.dp))
 
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                Button(
-                    onClick = { showSignOutDialog = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer
-                    )
-                ) {
-                    Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.sign_out))
-                }
+                if (uiState.isGuest) {
+                    // Guest user - show Sign In button
+                    Button(
+                        onClick = onSignOut, // This navigates to Auth screen
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Icon(Icons.Default.Login, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.sign_in))
+                    }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                TextButton(
-                    onClick = { showDeleteAccountDialog = true },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
                     Text(
-                        stringResource(R.string.delete_account),
-                        color = MaterialTheme.colorScheme.error
+                        text = "Sign in to sync your recordings and link your calendar",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 8.dp)
                     )
+                } else {
+                    // Authenticated user - show Sign Out button
+                    Button(
+                        onClick = { showSignOutDialog = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.sign_out))
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    TextButton(
+                        onClick = { showDeleteAccountDialog = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            stringResource(R.string.delete_account),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
 
@@ -355,6 +385,50 @@ private fun AccountCard(user: User, onUpgradeClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun GuestAccountCard(onSignInClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Avatar placeholder
+        Surface(
+            modifier = Modifier.size(50.dp),
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.surfaceVariant
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Guest",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = "Sign in to sync your data",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        FilledTonalButton(onClick = onSignInClick) {
+            Text(stringResource(R.string.sign_in))
         }
     }
 }
