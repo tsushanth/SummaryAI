@@ -20,6 +20,7 @@ import javax.inject.Inject
 
 data class SettingsUiState(
     val user: User? = null,
+    val isGuest: Boolean = false,
     val hasCalendarConnected: Boolean = false,
     val themeMode: ThemeMode = ThemeMode.LIGHT,
     val appVersion: String = "",
@@ -50,7 +51,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             // Get user from auth state
             authService.authState.collect { authState ->
-                _uiState.value = _uiState.value.copy(user = authState.user)
+                _uiState.value = _uiState.value.copy(
+                    user = authState.user,
+                    isGuest = authState.hasSkippedSignIn && !authState.isAuthenticated
+                )
             }
         }
 

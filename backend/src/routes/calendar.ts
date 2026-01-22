@@ -42,7 +42,7 @@ import {
   extractMicrosoftMeetingUrl,
   detectMicrosoftPlatformFromUrl,
 } from '../services/microsoftCalendarService.js';
-import { authenticate } from '../middleware/auth.js';
+import { authenticate, optionalAuth } from '../middleware/auth.js';
 import { asyncHandler, Errors } from '../middleware/errorHandler.js';
 import {
   CalendarConnection,
@@ -345,15 +345,13 @@ function isWebRequest(req: Request): boolean {
   return isDesktopBrowser;
 }
 
-// All authenticated routes
-router.use(authenticate);
-
 /**
  * POST /api/calendar/connect/google
  * Initiate Google OAuth flow
  */
 router.post(
   '/connect/google',
+  authenticate,
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
 
@@ -385,6 +383,7 @@ router.post(
  */
 router.post(
   '/connect/microsoft',
+  authenticate,
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
 
@@ -708,11 +707,19 @@ calendarCallbackRouter.get('/callback/microsoft', async (req: Request, res: Resp
 /**
  * GET /api/calendar/connections
  * List connected calendars for the user
+ * Allows guest access (returns empty list for unauthenticated users)
  */
 router.get(
   '/connections',
+  optionalAuth,
   asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user!.id;
+    // Return empty list for guest users (not authenticated)
+    if (!req.user) {
+      res.json({ connections: [] });
+      return;
+    }
+
+    const userId = req.user.id;
 
     const { data, error } = await supabaseAdmin
       .from('calendar_connections')
@@ -742,6 +749,7 @@ router.get(
  */
 router.delete(
   '/connections/:provider',
+  authenticate,
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
     const provider = req.params.provider;
@@ -831,6 +839,7 @@ router.delete(
  */
 router.post(
   '/sync',
+  authenticate,
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
 

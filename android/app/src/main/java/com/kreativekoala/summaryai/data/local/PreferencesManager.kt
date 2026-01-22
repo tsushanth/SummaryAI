@@ -19,6 +19,7 @@ class PreferencesManager @Inject constructor(
 ) {
     companion object {
         private val KEY_HAS_COMPLETED_ONBOARDING = booleanPreferencesKey("has_completed_onboarding")
+        private val KEY_HAS_SKIPPED_SIGN_IN = booleanPreferencesKey("has_skipped_sign_in")
         private val KEY_LAST_SYNC_TIME = stringPreferencesKey("last_sync_time")
         private val KEY_PREFERRED_LANGUAGE = stringPreferencesKey("preferred_language")
         private val KEY_AUTO_JOIN_MEETINGS = booleanPreferencesKey("auto_join_meetings")
@@ -34,6 +35,17 @@ class PreferencesManager @Inject constructor(
     suspend fun setOnboardingCompleted(completed: Boolean) {
         dataStore.edit { preferences ->
             preferences[KEY_HAS_COMPLETED_ONBOARDING] = completed
+        }
+    }
+
+    // Skipped sign-in (guest mode)
+    val hasSkippedSignIn: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[KEY_HAS_SKIPPED_SIGN_IN] ?: false
+    }
+
+    suspend fun setSkippedSignIn(skipped: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[KEY_HAS_SKIPPED_SIGN_IN] = skipped
         }
     }
 

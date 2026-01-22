@@ -52,7 +52,8 @@ class MainActivity : ComponentActivity() {
 
                     MeetingMindNavGraph(
                         isAuthenticated = authState.isAuthenticated,
-                        hasCompletedOnboarding = authState.hasCompletedOnboarding
+                        hasCompletedOnboarding = authState.hasCompletedOnboarding,
+                        hasSkippedSignIn = authState.hasSkippedSignIn
                     )
                 }
             }
