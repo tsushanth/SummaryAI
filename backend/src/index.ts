@@ -66,6 +66,11 @@ app.use(cors({
 app.use(morgan(config.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // Body parsing
+// IMPORTANT: Stripe webhooks must receive raw body for signature verification
+// This must come BEFORE express.json() middleware
+app.use('/v1/webhooks/stripe', express.raw({ type: 'application/json' }));
+app.use('/webhooks/stripe', express.raw({ type: 'application/json' }));
+
 app.use(express.json({ limit: '10mb' }));
 // Twilio webhooks send application/x-www-form-urlencoded data
 app.use(express.urlencoded({ extended: true }));
