@@ -573,4 +573,362 @@ router.post('/admin/retry-invoice', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * GET /api/subscriptions/admin/sync-check
+ * Find Stripe subscriptions that aren't properly synced to the database
+ * (customers who paid but webhook failed)
+ * Requires INTERNAL_SECRET header
+ */
+router.get('/admin/sync-check', async (req: Request, res: Response) => {
+  if (!verifyInternalRequest(req)) {
+    res.status(401).json({ error: { code: 'UNAUTHORIZED', message: 'Invalid internal secret' } });
+    return;
+  }
+
+  const stripe = getStripeClient();
+  if (!stripe) {
+    res.status(503).json({ error: { code: 'STRIPE_NOT_CONFIGURED', message: 'Stripe not configured' } });
+    return;
+  }
+
+  try {
+    // Get all active/trialing subscriptions from Stripe
+    const stripeSubscriptions = await stripe.subscriptions.list({
+      status: 'active',
+      limit: 100,
+      expand: ['data.customer'],
+    });
+
+    const trialingSubscriptions = await stripe.subscriptions.list({
+      status: 'trialing',
+      limit: 100,
+      expand: ['data.customer'],
+    });
+
+    const allStripeSubscriptions = [
+      ...stripeSubscriptions.data,
+      ...trialingSubscriptions.data,
+    ];
+
+    // Get all users with active subscriptions from our database
+    const { data: activeDbUsers } = await supabaseAdmin
+      .from('profiles')
+      .select('id, email, stripe_customer_id, stripe_subscription_id, subscription_status')
+      .in('subscription_status', ['active', 'trialing']);
+
+    const dbSubscriptionIds = new Set(
+      (activeDbUsers || []).map(u => u.stripe_subscription_id).filter(Boolean)
+    );
+
+    // Find Stripe subscriptions not in our database
+    const missingInDb = allStripeSubscriptions
+      .filter(sub => !dbSubscriptionIds.has(sub.id))
+      .map(sub => {
+        const customer = sub.customer as Stripe.Customer;
+        const price = sub.items.data[0]?.price;
+        let planType = sub.metadata?.plan_type || null;
+
+        // Infer plan type from price interval if not in metadata
+        if (!planType && price?.recurring) {
+          if (price.recurring.interval === 'week') planType = 'weekly';
+          else if (price.recurring.interval === 'month') planType = 'monthly';
+          else if (price.recurring.interval === 'year') planType = 'yearly';
+        }
+
+        return {
+          subscriptionId: sub.id,
+          customerId: customer.id,
+          customerEmail: customer.email,
+          status: sub.status,
+          planType,
+          userId: sub.metadata?.user_id || null,
+          currentPeriodEnd: new Date(sub.current_period_end * 1000).toISOString(),
+          created: new Date(sub.created * 1000).toISOString(),
+        };
+      });
+
+    res.json({
+      missingInDatabase: missingInDb,
+      summary: {
+        totalStripeActive: allStripeSubscriptions.length,
+        totalDbActive: activeDbUsers?.length || 0,
+        missingCount: missingInDb.length,
+      },
+      message: missingInDb.length > 0
+        ? 'Found subscriptions in Stripe that are not synced to database. Use POST /admin/sync-subscription to fix.'
+        : 'All Stripe subscriptions are synced to database.',
+    });
+  } catch (err) {
+    console.error('[Subscriptions] Admin sync-check error:', err);
+    res.status(500).json({ error: { code: 'SERVER_ERROR', message: 'Failed to check sync status' } });
+  }
+});
+
+/**
+ * POST /api/subscriptions/admin/sync-subscription
+ * Manually sync a Stripe subscription to the database
+ * Requires INTERNAL_SECRET header
+ */
+router.post('/admin/sync-subscription', async (req: Request, res: Response) => {
+  if (!verifyInternalRequest(req)) {
+    res.status(401).json({ error: { code: 'UNAUTHORIZED', message: 'Invalid internal secret' } });
+    return;
+  }
+
+  const { subscriptionId, userId } = req.body as { subscriptionId?: string; userId?: string };
+
+  if (!subscriptionId) {
+    res.status(400).json({ error: { code: 'INVALID_REQUEST', message: 'subscriptionId required' } });
+    return;
+  }
+
+  const stripe = getStripeClient();
+  if (!stripe) {
+    res.status(503).json({ error: { code: 'STRIPE_NOT_CONFIGURED', message: 'Stripe not configured' } });
+    return;
+  }
+
+  try {
+    // Fetch the subscription from Stripe
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+      expand: ['customer'],
+    });
+
+    const customer = subscription.customer as Stripe.Customer;
+
+    // Determine user ID: from request, from metadata, or find by email/customer_id
+    let targetUserId = userId || subscription.metadata?.user_id;
+
+    if (!targetUserId) {
+      // Try to find user by stripe_customer_id
+      const { data: profileByCustomer } = await supabaseAdmin
+        .from('profiles')
+        .select('id')
+        .eq('stripe_customer_id', customer.id)
+        .single();
+
+      if (profileByCustomer) {
+        targetUserId = profileByCustomer.id;
+      } else if (customer.email) {
+        // Try to find user by email
+        const { data: profileByEmail } = await supabaseAdmin
+          .from('profiles')
+          .select('id')
+          .eq('email', customer.email)
+          .single();
+
+        if (profileByEmail) {
+          targetUserId = profileByEmail.id;
+        }
+      }
+    }
+
+    if (!targetUserId) {
+      res.status(404).json({
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: 'Could not find user for this subscription. Provide userId parameter or ensure user exists with matching email.',
+        },
+        customerEmail: customer.email,
+        customerId: customer.id,
+      });
+      return;
+    }
+
+    // Determine plan type
+    const price = subscription.items.data[0]?.price;
+    let planType = subscription.metadata?.plan_type || null;
+    if (!planType && price?.recurring) {
+      if (price.recurring.interval === 'week') planType = 'weekly';
+      else if (price.recurring.interval === 'month') planType = 'monthly';
+      else if (price.recurring.interval === 'year') planType = 'yearly';
+    }
+
+    // Update the user's subscription in database
+    const { error: updateError } = await supabaseAdmin
+      .from('profiles')
+      .update({
+        subscription_status: subscription.status === 'trialing' ? 'trialing' : 'active',
+        subscription_provider: 'stripe',
+        subscription_plan: planType,
+        subscription_expires_at: new Date(subscription.current_period_end * 1000).toISOString(),
+        stripe_customer_id: customer.id,
+        stripe_subscription_id: subscription.id,
+        subscribed_at: new Date(subscription.created * 1000).toISOString(),
+      })
+      .eq('id', targetUserId);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    console.log(`[Subscriptions] Synced subscription ${subscriptionId} to user ${targetUserId}`);
+
+    res.json({
+      success: true,
+      message: 'Subscription synced successfully',
+      userId: targetUserId,
+      subscriptionId: subscription.id,
+      status: subscription.status,
+      planType,
+      customerEmail: customer.email,
+      expiresAt: new Date(subscription.current_period_end * 1000).toISOString(),
+    });
+  } catch (err) {
+    console.error('[Subscriptions] Admin sync-subscription error:', err);
+    res.status(500).json({ error: { code: 'SERVER_ERROR', message: 'Failed to sync subscription' } });
+  }
+});
+
+/**
+ * POST /api/subscriptions/admin/sync-all
+ * Sync all missing Stripe subscriptions to the database
+ * Requires INTERNAL_SECRET header
+ */
+router.post('/admin/sync-all', async (req: Request, res: Response) => {
+  if (!verifyInternalRequest(req)) {
+    res.status(401).json({ error: { code: 'UNAUTHORIZED', message: 'Invalid internal secret' } });
+    return;
+  }
+
+  const stripe = getStripeClient();
+  if (!stripe) {
+    res.status(503).json({ error: { code: 'STRIPE_NOT_CONFIGURED', message: 'Stripe not configured' } });
+    return;
+  }
+
+  try {
+    // Get all active/trialing subscriptions from Stripe
+    const stripeSubscriptions = await stripe.subscriptions.list({
+      status: 'active',
+      limit: 100,
+      expand: ['data.customer'],
+    });
+
+    const trialingSubscriptions = await stripe.subscriptions.list({
+      status: 'trialing',
+      limit: 100,
+      expand: ['data.customer'],
+    });
+
+    const allStripeSubscriptions = [
+      ...stripeSubscriptions.data,
+      ...trialingSubscriptions.data,
+    ];
+
+    const results: Array<{ subscriptionId: string; customerEmail: string | null; status: string; error?: string }> = [];
+
+    for (const subscription of allStripeSubscriptions) {
+      const customer = subscription.customer as Stripe.Customer;
+
+      // Check if already synced
+      const { data: existing } = await supabaseAdmin
+        .from('profiles')
+        .select('id')
+        .eq('stripe_subscription_id', subscription.id)
+        .single();
+
+      if (existing) {
+        results.push({
+          subscriptionId: subscription.id,
+          customerEmail: customer.email,
+          status: 'already_synced',
+        });
+        continue;
+      }
+
+      // Try to find user
+      let targetUserId = subscription.metadata?.user_id;
+
+      if (!targetUserId) {
+        const { data: profileByCustomer } = await supabaseAdmin
+          .from('profiles')
+          .select('id')
+          .eq('stripe_customer_id', customer.id)
+          .single();
+
+        if (profileByCustomer) {
+          targetUserId = profileByCustomer.id;
+        } else if (customer.email) {
+          const { data: profileByEmail } = await supabaseAdmin
+            .from('profiles')
+            .select('id')
+            .eq('email', customer.email)
+            .single();
+
+          if (profileByEmail) {
+            targetUserId = profileByEmail.id;
+          }
+        }
+      }
+
+      if (!targetUserId) {
+        results.push({
+          subscriptionId: subscription.id,
+          customerEmail: customer.email,
+          status: 'user_not_found',
+          error: 'No matching user in database',
+        });
+        continue;
+      }
+
+      // Sync the subscription
+      const price = subscription.items.data[0]?.price;
+      let planType = subscription.metadata?.plan_type || null;
+      if (!planType && price?.recurring) {
+        if (price.recurring.interval === 'week') planType = 'weekly';
+        else if (price.recurring.interval === 'month') planType = 'monthly';
+        else if (price.recurring.interval === 'year') planType = 'yearly';
+      }
+
+      const { error: updateError } = await supabaseAdmin
+        .from('profiles')
+        .update({
+          subscription_status: subscription.status === 'trialing' ? 'trialing' : 'active',
+          subscription_provider: 'stripe',
+          subscription_plan: planType,
+          subscription_expires_at: new Date(subscription.current_period_end * 1000).toISOString(),
+          stripe_customer_id: customer.id,
+          stripe_subscription_id: subscription.id,
+          subscribed_at: new Date(subscription.created * 1000).toISOString(),
+        })
+        .eq('id', targetUserId);
+
+      if (updateError) {
+        results.push({
+          subscriptionId: subscription.id,
+          customerEmail: customer.email,
+          status: 'error',
+          error: updateError.message,
+        });
+      } else {
+        results.push({
+          subscriptionId: subscription.id,
+          customerEmail: customer.email,
+          status: 'synced',
+        });
+      }
+    }
+
+    const synced = results.filter(r => r.status === 'synced').length;
+    const alreadySynced = results.filter(r => r.status === 'already_synced').length;
+    const notFound = results.filter(r => r.status === 'user_not_found').length;
+    const errors = results.filter(r => r.status === 'error').length;
+
+    res.json({
+      results,
+      summary: {
+        total: results.length,
+        synced,
+        alreadySynced,
+        userNotFound: notFound,
+        errors,
+      },
+    });
+  } catch (err) {
+    console.error('[Subscriptions] Admin sync-all error:', err);
+    res.status(500).json({ error: { code: 'SERVER_ERROR', message: 'Failed to sync subscriptions' } });
+  }
+});
+
 export default router;
