@@ -376,4 +376,201 @@ router.get('/prices', async (_req: Request, res: Response) => {
   });
 });
 
+// ============================================================================
+// Admin endpoints for payment management (requires INTERNAL_SECRET)
+// ============================================================================
+
+/**
+ * Verify internal admin request
+ */
+function verifyInternalRequest(req: Request): boolean {
+  const internalSecret = config.INTERNAL_SECRET;
+  if (!internalSecret) return false;
+
+  const authHeader = req.headers['x-internal-secret'] as string;
+  return authHeader === internalSecret;
+}
+
+/**
+ * GET /api/subscriptions/admin/failed-payments
+ * List all customers with failed/past_due payments
+ * Requires INTERNAL_SECRET header
+ */
+router.get('/admin/failed-payments', async (req: Request, res: Response) => {
+  if (!verifyInternalRequest(req)) {
+    res.status(401).json({ error: { code: 'UNAUTHORIZED', message: 'Invalid internal secret' } });
+    return;
+  }
+
+  const stripe = getStripeClient();
+  if (!stripe) {
+    res.status(503).json({ error: { code: 'STRIPE_NOT_CONFIGURED', message: 'Stripe not configured' } });
+    return;
+  }
+
+  try {
+    // Get users with past_due status from our database
+    const { data: pastDueUsers, error: dbError } = await supabaseAdmin
+      .from('profiles')
+      .select('id, email, stripe_customer_id, stripe_subscription_id, subscription_status, subscription_plan')
+      .eq('subscription_status', 'past_due');
+
+    if (dbError) {
+      throw dbError;
+    }
+
+    // Also fetch recent failed invoices from Stripe
+    const failedInvoices = await stripe.invoices.list({
+      status: 'open',
+      limit: 100,
+    });
+
+    const failedPayments = failedInvoices.data
+      .filter(inv => inv.attempted && !inv.paid)
+      .map(inv => ({
+        invoiceId: inv.id,
+        customerId: inv.customer,
+        customerEmail: inv.customer_email,
+        amount: inv.amount_due,
+        amountFormatted: `$${(inv.amount_due / 100).toFixed(2)}`,
+        created: new Date(inv.created * 1000).toISOString(),
+        attemptCount: inv.attempt_count,
+        nextAttempt: inv.next_payment_attempt
+          ? new Date(inv.next_payment_attempt * 1000).toISOString()
+          : null,
+        hostedInvoiceUrl: inv.hosted_invoice_url,
+        subscriptionId: inv.subscription,
+      }));
+
+    res.json({
+      pastDueUsers: pastDueUsers || [],
+      failedInvoices: failedPayments,
+      summary: {
+        totalPastDueUsers: pastDueUsers?.length || 0,
+        totalFailedInvoices: failedPayments.length,
+        totalAmountDue: failedPayments.reduce((sum, inv) => sum + inv.amount, 0),
+      },
+    });
+  } catch (err) {
+    console.error('[Subscriptions] Admin failed-payments error:', err);
+    res.status(500).json({ error: { code: 'SERVER_ERROR', message: 'Failed to fetch failed payments' } });
+  }
+});
+
+/**
+ * POST /api/subscriptions/admin/send-payment-link
+ * Send a payment update link to a customer
+ * Requires INTERNAL_SECRET header
+ */
+router.post('/admin/send-payment-link', async (req: Request, res: Response) => {
+  if (!verifyInternalRequest(req)) {
+    res.status(401).json({ error: { code: 'UNAUTHORIZED', message: 'Invalid internal secret' } });
+    return;
+  }
+
+  const { customerId, userId } = req.body as { customerId?: string; userId?: string };
+
+  if (!customerId && !userId) {
+    res.status(400).json({ error: { code: 'INVALID_REQUEST', message: 'customerId or userId required' } });
+    return;
+  }
+
+  const stripe = getStripeClient();
+  if (!stripe) {
+    res.status(503).json({ error: { code: 'STRIPE_NOT_CONFIGURED', message: 'Stripe not configured' } });
+    return;
+  }
+
+  try {
+    let stripeCustomerId = customerId;
+    let userEmail: string | null = null;
+
+    // If userId provided, look up the customer ID
+    if (userId && !stripeCustomerId) {
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('stripe_customer_id, email')
+        .eq('id', userId)
+        .single();
+
+      stripeCustomerId = profile?.stripe_customer_id;
+      userEmail = profile?.email;
+    }
+
+    if (!stripeCustomerId) {
+      res.status(404).json({ error: { code: 'NOT_FOUND', message: 'No Stripe customer found' } });
+      return;
+    }
+
+    // Create a portal session for the customer to update payment method
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: stripeCustomerId,
+      return_url: `${config.WEB_APP_URL}/settings`,
+    });
+
+    console.log(`[Subscriptions] Created payment update portal for customer ${stripeCustomerId}`);
+
+    res.json({
+      success: true,
+      portalUrl: portalSession.url,
+      customerId: stripeCustomerId,
+      userEmail,
+      message: 'Portal URL generated. Send this to the customer to update their payment method.',
+    });
+  } catch (err) {
+    console.error('[Subscriptions] Admin send-payment-link error:', err);
+    res.status(500).json({ error: { code: 'SERVER_ERROR', message: 'Failed to create payment link' } });
+  }
+});
+
+/**
+ * POST /api/subscriptions/admin/retry-invoice
+ * Retry a failed invoice payment
+ * Requires INTERNAL_SECRET header
+ */
+router.post('/admin/retry-invoice', async (req: Request, res: Response) => {
+  if (!verifyInternalRequest(req)) {
+    res.status(401).json({ error: { code: 'UNAUTHORIZED', message: 'Invalid internal secret' } });
+    return;
+  }
+
+  const { invoiceId } = req.body as { invoiceId?: string };
+
+  if (!invoiceId) {
+    res.status(400).json({ error: { code: 'INVALID_REQUEST', message: 'invoiceId required' } });
+    return;
+  }
+
+  const stripe = getStripeClient();
+  if (!stripe) {
+    res.status(503).json({ error: { code: 'STRIPE_NOT_CONFIGURED', message: 'Stripe not configured' } });
+    return;
+  }
+
+  try {
+    // Attempt to pay the invoice again
+    const invoice = await stripe.invoices.pay(invoiceId);
+
+    console.log(`[Subscriptions] Retried invoice ${invoiceId}, status: ${invoice.status}`);
+
+    res.json({
+      success: invoice.paid,
+      invoiceId: invoice.id,
+      status: invoice.status,
+      paid: invoice.paid,
+      amountPaid: invoice.amount_paid,
+    });
+  } catch (err) {
+    const stripeError = err as Stripe.errors.StripeError;
+    console.error('[Subscriptions] Admin retry-invoice error:', err);
+    res.status(400).json({
+      error: {
+        code: 'RETRY_FAILED',
+        message: stripeError.message || 'Failed to retry invoice',
+        declineCode: stripeError.decline_code,
+      },
+    });
+  }
+});
+
 export default router;
