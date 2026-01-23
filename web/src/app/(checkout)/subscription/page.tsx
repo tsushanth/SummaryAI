@@ -39,7 +39,7 @@ const plans = [
 
 export default function SubscriptionPage() {
   const { user, loading: authLoading } = useAuth();
-  const { startCheckout, isLoading: checkoutLoading } = useCheckout();
+  const { startCheckout, isLoading: checkoutLoading, error: checkoutError } = useCheckout();
 
   const handleSelect = (planId: string) => {
     startCheckout(planId as 'weekly' | 'monthly' | 'yearly');
@@ -128,6 +128,13 @@ export default function SubscriptionPage() {
           <span className="text-sm">
             {authLoading ? 'Loading...' : user ? 'Redirecting to checkout...' : 'Redirecting to sign in...'}
           </span>
+        </div>
+      )}
+
+      {/* Error message */}
+      {checkoutError && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+          <p className="text-red-700 text-sm text-center">{checkoutError}</p>
         </div>
       )}
 
