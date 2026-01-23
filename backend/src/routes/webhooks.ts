@@ -15,6 +15,7 @@ import { downloadAndStoreRecording } from '../services/recallService.js';
 import { triggerProcessing } from '../services/processingService.js';
 import { queueInsightGeneration } from '../services/liveInsightsService.js';
 import { TwilioService } from '../services/twilioService.js';
+import { alertWebhookFailure, alertPaymentFailure } from '../services/alertingService.js';
 
 const router = Router();
 
@@ -1345,11 +1346,22 @@ router.post('/stripe', async (req: Request, res: Response) => {
   let event: Stripe.Event;
 
   try {
-    // Verify webhook signature - req.body should be raw buffer
-    const rawBody = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+    // Verify webhook signature - req.body should be raw buffer from express.raw() middleware
+    // The raw middleware in index.ts must be applied BEFORE express.json() for this route
+    let rawBody: string | Buffer;
+    if (Buffer.isBuffer(req.body)) {
+      rawBody = req.body;
+    } else if (typeof req.body === 'string') {
+      rawBody = req.body;
+    } else {
+      // Fallback: body was parsed as JSON (this will likely fail signature verification)
+      console.warn('[Stripe Webhook] Body was parsed as JSON - signature verification may fail');
+      rawBody = JSON.stringify(req.body);
+    }
     event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
   } catch (err) {
     console.error('[Stripe Webhook] Signature verification failed:', err);
+    console.error('[Stripe Webhook] Body type:', typeof req.body, Buffer.isBuffer(req.body) ? '(Buffer)' : '');
     res.status(400).json({ error: 'Invalid signature' });
     return;
   }
@@ -1416,6 +1428,11 @@ router.post('/stripe', async (req: Request, res: Response) => {
     res.json({ received: true });
   } catch (error) {
     console.error('[Stripe Webhook] Error processing event:', error);
+    // Send alert for webhook processing failures
+    await alertWebhookFailure(event.type, error, {
+      eventId: event.id,
+      eventType: event.type,
+    });
     res.status(500).json({ error: 'Webhook processing failed' });
   }
 });
@@ -1628,12 +1645,19 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void
   // Find user by stripe_subscription_id
   const { data: profile } = await supabaseAdmin
     .from('profiles')
-    .select('id')
+    .select('id, email')
     .eq('stripe_subscription_id', invoice.subscription as string)
     .single();
 
   if (!profile) {
     console.error('[Stripe Webhook] No user found for failed invoice');
+    // Still send alert for orphaned payment failure
+    await alertPaymentFailure(
+      'unknown',
+      invoice.customer_email || null,
+      invoice.amount_due || 0,
+      'No user found for subscription'
+    );
     return;
   }
 
@@ -1644,6 +1668,14 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void
       subscription_status: 'past_due',
     })
     .eq('id', profile.id);
+
+  // Send alert for payment failure
+  await alertPaymentFailure(
+    profile.id,
+    profile.email || invoice.customer_email || null,
+    invoice.amount_due || 0,
+    invoice.last_finalization_error?.message || 'Payment declined'
+  );
 
   console.log(`[Stripe Webhook] Payment failed, subscription past_due for user ${profile.id}`);
 }
