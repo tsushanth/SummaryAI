@@ -130,7 +130,10 @@ router.post(
     const userId = req.user?.id;
     const { planType } = req.body as { planType?: string };
 
+    console.log(`[Subscriptions] Checkout request - userId: ${userId}, planType: ${planType}, body:`, req.body);
+
     if (!userId) {
+      console.log('[Subscriptions] Checkout failed: User not authenticated');
       res.status(401).json({
         error: {
           code: 'UNAUTHORIZED',
@@ -141,10 +144,11 @@ router.post(
     }
 
     if (!planType || !['weekly', 'monthly', 'yearly'].includes(planType)) {
+      console.log(`[Subscriptions] Checkout failed: Invalid plan type "${planType}"`);
       res.status(400).json({
         error: {
           code: 'INVALID_PLAN',
-          message: 'Invalid plan type. Must be weekly, monthly, or yearly.',
+          message: `Invalid plan type. Must be weekly, monthly, or yearly. Received: ${planType}`,
         },
       });
       return;
@@ -185,10 +189,11 @@ router.post(
         profile?.subscription_status === 'active' ||
         profile?.subscription_status === 'trialing'
       ) {
+        console.log(`[Subscriptions] Checkout failed: User ${userId} already subscribed (status: ${profile.subscription_status})`);
         res.status(400).json({
           error: {
             code: 'ALREADY_SUBSCRIBED',
-            message: 'You already have an active subscription',
+            message: `You already have an active subscription (status: ${profile.subscription_status})`,
           },
         });
         return;
