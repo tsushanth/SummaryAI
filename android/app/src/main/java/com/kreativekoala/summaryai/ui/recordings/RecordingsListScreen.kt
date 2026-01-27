@@ -1,5 +1,11 @@
 package com.kreativekoala.summaryai.ui.recordings
 
+import android.util.Log
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -10,6 +16,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -20,12 +30,15 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -35,11 +48,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.domain.model.Recording
 import com.kreativekoala.summaryai.domain.model.RecordingStatus
+import com.kreativekoala.summaryai.ui.navigation.LocalTabReselection
 import com.kreativekoala.summaryai.ui.theme.Green50
 import com.kreativekoala.summaryai.ui.theme.Orange50
 import com.kreativekoala.summaryai.ui.theme.RecordingRed
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+
+private const val TAG = "RecordingsListScreen"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,8 +66,50 @@ fun RecordingsListScreen(
     onStartRecording: () -> Unit,
     onSearchClick: () -> Unit
 ) {
+    // Log when this composable is rendered
+    LaunchedEffect(Unit) {
+        Log.i(TAG, "=== RecordingsListScreen composed ===")
+    }
+
+    // Auto-refresh when tab becomes visible (ON_RESUME)
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                Log.i(TAG, "=== ON_RESUME: Auto-refreshing recordings ===")
+                viewModel.refresh()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     val uiState by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
+    // Track if we need to scroll to top after refresh
+    var shouldScrollToTop by remember { mutableStateOf(false) }
+
+    // Scroll to top when refresh completes
+    LaunchedEffect(uiState.isRefreshing) {
+        if (!uiState.isRefreshing && shouldScrollToTop) {
+            Log.i(TAG, "Refresh completed, scrolling to top")
+            listState.animateScrollToItem(0)
+            shouldScrollToTop = false
+        }
+    }
+
+    // Handle tab re-selection - scroll to top for visual feedback
+    val tabReselection = LocalTabReselection.current
+    val reselectionCounter = tabReselection.reselectionCounter
+    LaunchedEffect(reselectionCounter) {
+        if (reselectionCounter > 0) {
+            listState.animateScrollToItem(0)
+        }
+    }
 
     // Error handling
     val snackbarHostState = remember { SnackbarHostState() }
@@ -87,6 +146,29 @@ fun RecordingsListScreen(
                     )
                 },
                 actions = {
+                    // Refresh button with spinning animation
+                    val infiniteTransition = rememberInfiniteTransition(label = "refresh")
+                    val rotation by infiniteTransition.animateFloat(
+                        initialValue = 0f,
+                        targetValue = 360f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(1000, easing = LinearEasing)
+                        ),
+                        label = "rotation"
+                    )
+
+                    IconButton(
+                        onClick = {
+                            shouldScrollToTop = true
+                            viewModel.refresh()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = "Refresh",
+                            modifier = if (uiState.isRefreshing) Modifier.rotate(rotation) else Modifier
+                        )
+                    }
                     // PRO badge
                     Surface(
                         color = Color(0xFFFF9500),
@@ -180,50 +262,55 @@ fun RecordingsListScreen(
                 }
             }
 
-            // Content
-            if (uiState.isLoading && uiState.recordings.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            } else if (uiState.recordings.isEmpty()) {
-                Box(modifier = Modifier.weight(1f)) {
-                    EmptyRecordingsContent(onStartRecording = onStartRecording)
-                }
-            } else {
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    items(
-                        items = uiState.recordings,
-                        key = { it.id }
-                    ) { recording ->
-                        RecordingCardIOS(
-                            recording = recording,
-                            onClick = { onRecordingClick(recording.id) },
-                            onToggleFavorite = { viewModel.toggleFavorite(recording) },
-                            onDelete = { viewModel.deleteRecording(recording) }
-                        )
+            // Content with pull-to-refresh
+            PullToRefreshBox(
+                isRefreshing = uiState.isRefreshing,
+                onRefresh = {
+                    shouldScrollToTop = true
+                    viewModel.refresh()
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                if (uiState.isLoading && uiState.recordings.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
+                } else if (uiState.recordings.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        EmptyRecordingsContent(onStartRecording = onStartRecording)
+                    }
+                } else {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        items(
+                            items = uiState.recordings,
+                            key = { it.id }
+                        ) { recording ->
+                            RecordingCardIOS(
+                                recording = recording,
+                                onClick = { onRecordingClick(recording.id) },
+                                onToggleFavorite = { viewModel.toggleFavorite(recording) },
+                                onDelete = { viewModel.deleteRecording(recording) }
+                            )
+                        }
 
-                    // Loading indicator at bottom
-                    if (uiState.isLoading && uiState.recordings.isNotEmpty()) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        // Loading indicator at bottom
+                        if (uiState.isLoading && uiState.recordings.isNotEmpty()) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                }
                             }
                         }
                     }

@@ -1,5 +1,6 @@
 package com.kreativekoala.summaryai.ui.recordings
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kreativekoala.summaryai.data.repository.RecordingsRepository
@@ -13,6 +14,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val TAG = "RecordingsListVM"
 
 enum class RecordingsTab {
     ALL,
@@ -47,6 +50,7 @@ class RecordingsListViewModel @Inject constructor(
     private var pollingActive = false
 
     init {
+        Log.i(TAG, "RecordingsListViewModel init - loading recordings")
         loadRecordings()
         startPolling()
     }
@@ -63,6 +67,7 @@ class RecordingsListViewModel @Inject constructor(
     }
 
     fun refresh() {
+        Log.i(TAG, "=== refresh() called ===")
         _uiState.value = _uiState.value.copy(
             isRefreshing = true,
             currentPage = 1,
@@ -153,6 +158,7 @@ class RecordingsListViewModel @Inject constructor(
 
     private fun loadRecordings(append: Boolean = false) {
         viewModelScope.launch {
+            Log.i(TAG, "loadRecordings() called - append=$append, page=${_uiState.value.currentPage}")
             if (!append) {
                 _uiState.value = _uiState.value.copy(isLoading = true)
             }
@@ -163,6 +169,10 @@ class RecordingsListViewModel @Inject constructor(
 
             result.fold(
                 onSuccess = { recordings ->
+                    Log.i(TAG, "loadRecordings SUCCESS - received ${recordings.size} recordings")
+                    recordings.take(3).forEach { rec ->
+                        Log.d(TAG, "  Recording: id=${rec.id}, title=${rec.title}, status=${rec.status}")
+                    }
                     val currentRecordings = if (append) _uiState.value.allRecordings else emptyList()
                     val allRecordings = currentRecordings + recordings
                     _uiState.value = _uiState.value.copy(
@@ -173,8 +183,10 @@ class RecordingsListViewModel @Inject constructor(
                         error = null
                     )
                     applyFilter()
+                    Log.i(TAG, "UI state updated - total recordings: ${allRecordings.size}, filtered: ${_uiState.value.filteredRecordings.size}")
                 },
                 onFailure = { error ->
+                    Log.e(TAG, "loadRecordings FAILED: ${error.message}", error)
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         isRefreshing = false,
