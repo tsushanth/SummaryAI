@@ -1,8 +1,8 @@
 # Add project specific ProGuard rules here.
 
 # Keep data classes for Gson serialization
--keepclassmembers class com.summaryai.data.api.models.** { *; }
--keepclassmembers class com.summaryai.domain.model.** { *; }
+-keepclassmembers class com.kreativekoala.summaryai.data.api.models.** { *; }
+-keepclassmembers class com.kreativekoala.summaryai.domain.model.** { *; }
 
 # Retrofit
 -keepattributes Signature

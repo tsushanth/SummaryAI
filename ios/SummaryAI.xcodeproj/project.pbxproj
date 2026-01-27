@@ -46,6 +46,7 @@
 		A1000047229E0034 /* PhoneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000048229E0035 /* PhoneView.swift */; };
 		A1000049229E0036 /* VoipService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100004A229E0037 /* VoipService.swift */; };
 		A100004E229E003B /* TwilioVoice in Frameworks */ = {isa = PBXBuildFile; productRef = A100004D229E003A /* TwilioVoice */; };
+		A1000050229E0040 /* ReviewRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000051229E0041 /* ReviewRequestManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -89,6 +90,7 @@
 		A1000046229E0033 /* PhoneViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneViewModel.swift; sourceTree = "<group>"; };
 		A1000048229E0035 /* PhoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneView.swift; sourceTree = "<group>"; };
 		A100004A229E0037 /* VoipService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoipService.swift; sourceTree = "<group>"; };
+		A1000051229E0041 /* ReviewRequestManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewRequestManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -186,6 +188,7 @@
 				A10000AC229E00AC /* Auth */,
 				A10000AD229E00AD /* Export */,
 				A100004B229E0038 /* VoIP */,
+				A1000051229E0041 /* ReviewRequestManager.swift */,
 				A1000032229E001E /* SubscriptionService.swift */,
 			);
 			path = Services;
@@ -372,6 +375,7 @@
 				A1000021229E0011 /* SearchView.swift in Sources */,
 				A1000023229E0012 /* SettingsView.swift in Sources */,
 				A1000031229E001D /* SubscriptionService.swift in Sources */,
+				A1000050229E0040 /* ReviewRequestManager.swift in Sources */,
 				A1000033229E001F /* PaywallView.swift in Sources */,
 				A1000035229E0021 /* JoinMeetingView.swift in Sources */,
 				A1000037229E0023 /* JoinMeetingViewModel.swift in Sources */,
@@ -516,7 +520,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SummaryAI/SummaryAI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_ASSET_PATHS = "\"SummaryAI/Preview Content\"";
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				ENABLE_PREVIEWS = YES;
@@ -534,7 +538,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.1;
+				MARKETING_VERSION = 1.1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.summaryai;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -550,7 +554,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SummaryAI/SummaryAI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_ASSET_PATHS = "\"SummaryAI/Preview Content\"";
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				ENABLE_PREVIEWS = YES;
@@ -568,7 +572,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.1;
+				MARKETING_VERSION = 1.1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.summaryai;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

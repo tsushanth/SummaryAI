@@ -10,12 +10,21 @@ android {
     namespace = "com.kreativekoala.summaryai"
     compileSdk = 35
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("/Users/sushanthtiruvaipati/Documents/GitHub/AndroidAppKey")
+            storePassword = "KashtePhale!9"
+            keyAlias = "androidappkey"
+            keyPassword = "KashtePhale!9"
+        }
+    }
+
     defaultConfig {
-        applicationId = "com.kreativekoala.summaryai"
+        applicationId = "com.kreativekoala.meetingmind"
         minSdk = 26
         targetSdk = 35
-        versionCode = 7
-        versionName = "1.0.6"
+        versionCode = 9
+        versionName = "1.0.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -39,6 +48,7 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

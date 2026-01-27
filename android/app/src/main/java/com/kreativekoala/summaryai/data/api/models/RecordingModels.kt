@@ -140,13 +140,13 @@ data class JobDto(
 
 data class ListRecordingsResponse(
     val recordings: List<RecordingDto>,
-    val pagination: PaginationDto
+    @SerializedName("meta") val pagination: PaginationDto
 )
 
 data class PaginationDto(
     val page: Int,
     @SerializedName("per_page") val perPage: Int,
-    val total: Int,
+    @SerializedName("total_count") val total: Int,
     @SerializedName("total_pages") val totalPages: Int
 )
 

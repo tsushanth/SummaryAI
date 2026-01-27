@@ -273,6 +273,9 @@ final class RecordingViewModel: ObservableObject {
             // Mark as completed
             state = .completed(recording)
 
+            // Track successful recording for review request
+            ReviewRequestManager.shared.recordingCompleted()
+
             print("[RecordingViewModel] Recording uploaded and processing: \(recording.id)")
 
         } catch {
