@@ -21,7 +21,7 @@ supabase = "2.6.1"
 ktor = "2.3.12"
 coil = "2.7.0"
 accompanist = "0.36.0"
-twilioVoice = "6.6.0"
+twilioVoice = "6.9.0"
 
 [libraries]
 # Core Android

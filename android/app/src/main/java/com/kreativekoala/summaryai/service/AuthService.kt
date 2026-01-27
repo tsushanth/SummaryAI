@@ -79,16 +79,43 @@ class AuthService @Inject constructor(
      * Check for existing session
      */
     private suspend fun checkExistingSession() {
+        Log.i(TAG, "=== checkExistingSession starting ===")
         _authState.value = _authState.value.copy(isLoading = true)
 
         try {
             val hasCompletedOnboarding = preferencesManager.hasCompletedOnboarding.first()
+            Log.i(TAG, "hasCompletedOnboarding: $hasCompletedOnboarding")
+            Log.i(TAG, "tokenManager.isLoggedIn: ${tokenManager.isLoggedIn}, isTokenExpired: ${tokenManager.isTokenExpired}")
 
+            // First check TokenManager - if we have valid tokens, user is authenticated
             if (tokenManager.isLoggedIn && !tokenManager.isTokenExpired) {
-                // Try to refresh the session
-                val session = supabase.auth.currentSessionOrNull()
+                Log.i(TAG, "TokenManager has valid tokens, checking Supabase session...")
+
+                // Try to get/load the Supabase session
+                var session = supabase.auth.currentSessionOrNull()
+
+                // If Supabase doesn't have the session yet, try to restore it using the refresh token
+                if (session == null && tokenManager.refreshToken != null) {
+                    Log.i(TAG, "Supabase session null, trying to refresh using stored token...")
+                    try {
+                        session = supabase.auth.refreshSession(tokenManager.refreshToken!!)
+                        Log.i(TAG, "Session refreshed successfully")
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Failed to refresh session: ${e.message}")
+                    }
+                }
+
                 if (session != null) {
+                    // Sync tokens back to TokenManager to keep them fresh
+                    tokenManager.saveTokens(
+                        accessToken = session.accessToken,
+                        refreshToken = session.refreshToken,
+                        expiresAt = session.expiresAt?.epochSeconds?.times(1000) ?: 0L,
+                        userId = session.user?.id
+                    )
+
                     val user = session.user
+                    Log.i(TAG, "=== User authenticated: ${user?.email} ===")
                     _authState.value = AuthState(
                         isAuthenticated = true,
                         isLoading = false,
@@ -107,7 +134,38 @@ class AuthService @Inject constructor(
                 }
             }
 
-            // No valid session
+            // Also check if Supabase has a session even if TokenManager doesn't
+            val supabaseSession = supabase.auth.currentSessionOrNull()
+            if (supabaseSession != null) {
+                Log.i(TAG, "Found Supabase session, syncing to TokenManager...")
+                tokenManager.saveTokens(
+                    accessToken = supabaseSession.accessToken,
+                    refreshToken = supabaseSession.refreshToken,
+                    expiresAt = supabaseSession.expiresAt?.epochSeconds?.times(1000) ?: 0L,
+                    userId = supabaseSession.user?.id
+                )
+
+                val user = supabaseSession.user
+                Log.i(TAG, "=== User authenticated from Supabase: ${user?.email} ===")
+                _authState.value = AuthState(
+                    isAuthenticated = true,
+                    isLoading = false,
+                    user = User(
+                        id = user?.id ?: "",
+                        email = user?.email ?: "",
+                        fullName = user?.userMetadata?.get("full_name")?.toString(),
+                        avatarUrl = user?.userMetadata?.get("avatar_url")?.toString(),
+                        provider = AuthProvider.GOOGLE,
+                        subscriptionStatus = SubscriptionStatus.FREE,
+                        subscriptionExpiresAt = null
+                    ),
+                    hasCompletedOnboarding = hasCompletedOnboarding
+                )
+                return
+            }
+
+            // No valid session found anywhere
+            Log.i(TAG, "=== No valid session, clearing tokens ===")
             tokenManager.clearTokens()
             _authState.value = AuthState(
                 isAuthenticated = false,

@@ -7,6 +7,7 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kreativekoala.summaryai.data.local.TokenManager
 import com.kreativekoala.summaryai.data.repository.RecordingsRepository
 import com.kreativekoala.summaryai.service.AudioRecordingService
 import com.kreativekoala.summaryai.service.RecordingState
@@ -28,11 +29,17 @@ data class RecordingUiState(
     val error: String? = null
 )
 
+private const val DEMO_MODE_MESSAGE = "Saving recordings requires signing in with Google. Please sign out and sign in with your Google account to save recordings."
+
 @HiltViewModel
 class RecordingViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val recordingsRepository: RecordingsRepository
+    private val recordingsRepository: RecordingsRepository,
+    private val tokenManager: TokenManager
 ) : ViewModel() {
+
+    private val isDemoMode: Boolean
+        get() = tokenManager.userId?.startsWith("demo-user-") == true
 
     private val _uiState = MutableStateFlow(RecordingUiState())
     val uiState: StateFlow<RecordingUiState> = _uiState.asStateFlow()
@@ -95,6 +102,12 @@ class RecordingViewModel @Inject constructor(
     }
 
     fun stopAndUpload() {
+        if (isDemoMode) {
+            recordingService?.stopRecording()
+            _uiState.value = _uiState.value.copy(error = DEMO_MODE_MESSAGE)
+            return
+        }
+
         viewModelScope.launch {
             val outputFile = recordingService?.stopRecording()
 
