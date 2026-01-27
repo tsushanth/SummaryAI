@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.domain.model.Meeting
+import com.kreativekoala.summaryai.ui.navigation.LocalTabReselection
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -33,6 +35,16 @@ fun MeetingsScreen(
     onConnectCalendarClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val listState = rememberLazyListState()
+
+    // Handle tab re-selection - scroll to top for visual feedback
+    val tabReselection = LocalTabReselection.current
+    val reselectionCounter = tabReselection.reselectionCounter
+    LaunchedEffect(reselectionCounter) {
+        if (reselectionCounter > 0) {
+            listState.animateScrollToItem(0)
+        }
+    }
 
     // Error handling
     val snackbarHostState = remember { SnackbarHostState() }
@@ -67,6 +79,7 @@ fun MeetingsScreen(
             }
         } else {
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
