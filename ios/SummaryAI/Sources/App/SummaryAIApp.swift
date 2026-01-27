@@ -156,6 +156,7 @@ struct MainTabView: View {
                 }
             }
         }
+        .reviewPrompt()
     }
 }
 

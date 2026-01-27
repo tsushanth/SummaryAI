@@ -1,5 +1,6 @@
 package com.kreativekoala.summaryai.data.repository
 
+import android.util.Log
 import com.kreativekoala.summaryai.data.api.SummaryAIApi
 import com.kreativekoala.summaryai.data.api.models.*
 import com.kreativekoala.summaryai.domain.model.Recording
@@ -20,6 +21,8 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+private const val TAG = "RecordingsRepository"
+
 /**
  * Repository for recording-related operations
  */
@@ -37,13 +40,19 @@ class RecordingsRepository @Inject constructor(
         status: RecordingStatus? = null
     ): Result<List<Recording>> = withContext(Dispatchers.IO) {
         try {
+            Log.i(TAG, "=== Fetching recordings - page: $page, perPage: $perPage ===")
             val response = api.getRecordings(
                 page = page,
                 perPage = perPage,
                 status = status?.name?.lowercase()
             )
+            Log.i(TAG, "=== Received ${response.recordings.size} recordings, total: ${response.pagination.total} ===")
+            response.recordings.forEachIndexed { index, recording ->
+                Log.d(TAG, "Recording[$index]: id=${recording.id}, title=${recording.title}, status=${recording.status}")
+            }
             Result.success(response.recordings.map { it.toDomain() })
         } catch (e: Exception) {
+            Log.e(TAG, "Failed to fetch recordings", e)
             Result.failure(e)
         }
     }
@@ -82,6 +91,7 @@ class RecordingsRepository @Inject constructor(
     ): Result<Recording> = withContext(Dispatchers.IO) {
         try {
             val fileSize = audioFile.length()
+            Log.d(TAG, "Creating recording - title: $title, duration: $durationSeconds, size: $fileSize")
 
             // Step 1: Create recording and get upload URL
             val createResponse = api.createRecording(
@@ -91,6 +101,7 @@ class RecordingsRepository @Inject constructor(
                     fileSizeBytes = fileSize
                 )
             )
+            Log.d(TAG, "Recording created: id=${createResponse.recording.id}")
 
             // Step 2: Upload file to storage
             val uploadInfo = createResponse.upload
@@ -110,10 +121,12 @@ class RecordingsRepository @Inject constructor(
             }
 
             // Step 3: Complete upload
+            Log.d(TAG, "Completing upload for recording: ${createResponse.recording.id}")
             val completeResponse = api.completeUpload(
                 id = createResponse.recording.id,
                 request = CompleteUploadRequest(fileSizeBytes = fileSize)
             )
+            Log.d(TAG, "Upload completed: id=${completeResponse.recording.id}, status=${completeResponse.recording.status}")
 
             Result.success(completeResponse.recording.toDomain())
         } catch (e: Exception) {
