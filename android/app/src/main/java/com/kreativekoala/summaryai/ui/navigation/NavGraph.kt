@@ -19,7 +19,12 @@ import androidx.compose.ui.unit.dp
 import com.kreativekoala.summaryai.R
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -31,6 +36,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+
 import com.kreativekoala.summaryai.ui.auth.AuthScreen
 import com.kreativekoala.summaryai.ui.calendar.CalendarIntegrationScreen
 import com.kreativekoala.summaryai.ui.meetings.JoinMeetingScreen
@@ -44,6 +50,18 @@ import com.kreativekoala.summaryai.ui.recordings.RecordingsListScreen
 import com.kreativekoala.summaryai.ui.search.SearchScreen
 import com.kreativekoala.summaryai.ui.settings.SettingsScreen
 import com.kreativekoala.summaryai.ui.todos.TodosScreen
+
+// CompositionLocal to communicate tab re-selection for scroll-to-top behavior
+val LocalTabReselection = compositionLocalOf { TabReselectionState() }
+
+class TabReselectionState {
+    private val _reselectionCounter = mutableIntStateOf(0)
+    val reselectionCounter: Int get() = _reselectionCounter.intValue
+
+    fun onTabReselected() {
+        _reselectionCounter.intValue++
+    }
+}
 
 // Navigation routes
 sealed class Screen(val route: String) {
@@ -116,8 +134,40 @@ fun MeetingMindNavGraph(
         else -> Screen.Recordings.route
     }
 
+    // Navigate when auth state changes - must handle transition from unauthenticated to authenticated
+    LaunchedEffect(isAuthenticated, hasCompletedOnboarding) {
+        val targetRoute = when {
+            !isAuthenticated -> Screen.Auth.route
+            !hasCompletedOnboarding -> Screen.Onboarding.route
+            else -> Screen.Recordings.route
+        }
+        val currentRoute = navController.currentDestination?.route
+
+        android.util.Log.i("NavGraph", "Auth state changed: isAuth=$isAuthenticated, hasOnboarding=$hasCompletedOnboarding, currentRoute=$currentRoute, targetRoute=$targetRoute")
+
+        // If authenticated and should be on recordings, navigate there from auth
+        if (isAuthenticated && hasCompletedOnboarding) {
+            if (currentRoute == Screen.Auth.route || currentRoute == null) {
+                android.util.Log.i("NavGraph", "Navigating from auth/null to recordings")
+                navController.navigate(Screen.Recordings.route) {
+                    popUpTo(Screen.Auth.route) { inclusive = true }
+                }
+            }
+        }
+        // If not authenticated, navigate to auth
+        else if (!isAuthenticated && currentRoute != Screen.Auth.route && currentRoute != null) {
+            android.util.Log.i("NavGraph", "Navigating to auth (not authenticated)")
+            navController.navigate(Screen.Auth.route) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
+    }
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+
+    // State for handling tab re-selection (scroll-to-top behavior)
+    val tabReselectionState = remember { TabReselectionState() }
 
     // Determine if we should show bottom nav
     val showBottomNav = isAuthenticated && hasCompletedOnboarding &&
@@ -129,46 +179,53 @@ fun MeetingMindNavGraph(
         Screen.Settings.route
     )
 
-    Scaffold(
-        bottomBar = {
-            if (showBottomNav) {
-                NavigationBar {
-                    bottomNavItems.forEach { item ->
-                        val selected = currentDestination?.hierarchy?.any {
-                            it.route == item.screen.route
-                        } == true
+    CompositionLocalProvider(LocalTabReselection provides tabReselectionState) {
+        Scaffold(
+            bottomBar = {
+                if (showBottomNav) {
+                    NavigationBar {
+                        bottomNavItems.forEach { item ->
+                            val selected = currentDestination?.hierarchy?.any {
+                                it.route == item.screen.route
+                            } == true
 
-                        NavigationBarItem(
-                            selected = selected,
-                            onClick = {
-                                navController.navigate(item.screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                            NavigationBarItem(
+                                selected = selected,
+                                onClick = {
+                                    if (selected) {
+                                        // Tab is already selected - trigger scroll-to-top
+                                        tabReselectionState.onTabReselected()
+                                    } else {
+                                        // Navigate to the new tab
+                                        navController.navigate(item.screen.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            icon = {
-                                when (val icon = item.icon) {
-                                    is NavIcon.Vector -> Icon(
-                                        imageVector = if (selected) icon.selected else icon.unselected,
-                                        contentDescription = item.title
-                                    )
-                                    is NavIcon.Resource -> Icon(
-                                        painter = painterResource(id = icon.resId),
-                                        contentDescription = item.title,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                            },
-                            label = { Text(item.title) }
-                        )
+                                },
+                                icon = {
+                                    when (val icon = item.icon) {
+                                        is NavIcon.Vector -> Icon(
+                                            imageVector = if (selected) icon.selected else icon.unselected,
+                                            contentDescription = item.title
+                                        )
+                                        is NavIcon.Resource -> Icon(
+                                            painter = painterResource(id = icon.resId),
+                                            contentDescription = item.title,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+                                },
+                                label = { Text(item.title) }
+                            )
+                        }
                     }
                 }
             }
-        }
-    ) { paddingValues ->
+        ) { paddingValues ->
         NavHost(
             navController = navController,
             startDestination = startDestination,
@@ -334,6 +391,7 @@ fun MeetingMindNavGraph(
                     onPurchaseSuccess = { navController.popBackStack() }
                 )
             }
+        }
         }
     }
 }

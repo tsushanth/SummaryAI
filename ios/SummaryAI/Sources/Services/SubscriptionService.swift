@@ -110,6 +110,10 @@ final class SubscriptionService: ObservableObject {
                 await updateSubscriptionStatus()
                 await transaction.finish()
                 print("[SubscriptionService] Purchase successful: \(product.id)")
+
+                // Request app review after successful purchase
+                ReviewRequestManager.shared.purchaseCompleted()
+
                 return true
 
             case .userCancelled:

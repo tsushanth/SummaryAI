@@ -2,6 +2,7 @@ package com.kreativekoala.summaryai.ui.calendar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kreativekoala.summaryai.data.local.TokenManager
 import com.kreativekoala.summaryai.data.repository.CalendarRepository
 import com.kreativekoala.summaryai.domain.model.CalendarConnection
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,10 +19,16 @@ data class CalendarUiState(
     val error: String? = null
 )
 
+private const val DEMO_MODE_MESSAGE = "Calendar integration requires signing in with Google. Please sign out and sign in with your Google account to use this feature."
+
 @HiltViewModel
 class CalendarViewModel @Inject constructor(
-    private val calendarRepository: CalendarRepository
+    private val calendarRepository: CalendarRepository,
+    private val tokenManager: TokenManager
 ) : ViewModel() {
+
+    private val isDemoMode: Boolean
+        get() = tokenManager.userId?.startsWith("demo-user-") == true
 
     private val _uiState = MutableStateFlow(CalendarUiState())
     val uiState: StateFlow<CalendarUiState> = _uiState.asStateFlow()
@@ -55,6 +62,11 @@ class CalendarViewModel @Inject constructor(
     }
 
     fun connectGoogle() {
+        if (isDemoMode) {
+            _uiState.value = _uiState.value.copy(error = DEMO_MODE_MESSAGE)
+            return
+        }
+
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
 
@@ -78,6 +90,11 @@ class CalendarViewModel @Inject constructor(
     }
 
     fun connectMicrosoft() {
+        if (isDemoMode) {
+            _uiState.value = _uiState.value.copy(error = DEMO_MODE_MESSAGE)
+            return
+        }
+
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
 

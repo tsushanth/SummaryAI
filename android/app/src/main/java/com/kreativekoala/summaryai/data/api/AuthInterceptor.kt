@@ -45,6 +45,10 @@ class AuthInterceptor @Inject constructor(
             return chain.proceed(originalRequest)
         }
 
+        // Log request info for debugging
+        val userId = tokenManager.userId
+        Log.d(TAG, "Request: ${originalRequest.method} ${originalRequest.url.encodedPath} | User: $userId")
+
         // Get current token, refreshing if needed
         val token = getValidToken()
 
@@ -60,6 +64,9 @@ class AuthInterceptor @Inject constructor(
         }
 
         val response = chain.proceed(request)
+
+        // Log response status
+        Log.d(TAG, "Response: ${response.code} for ${originalRequest.url.encodedPath}")
 
         // If we get a 401, try to refresh token and retry once
         if (response.code == 401 && token != null) {
@@ -99,20 +106,40 @@ class AuthInterceptor @Inject constructor(
 
     /**
      * Refresh the access token using Supabase
+     * IMPORTANT: We must set the session first to ensure we refresh the CORRECT user's session,
+     * not a cached Google OAuth session from a previous login.
      */
     private fun refreshToken(): String? {
         return runBlocking {
             try {
+                val currentAccessToken = tokenManager.accessToken
                 val refreshToken = tokenManager.refreshToken
-                if (refreshToken == null) {
+                if (refreshToken == null || currentAccessToken == null) {
                     Log.w(TAG, "No refresh token available")
                     return@runBlocking null
+                }
+
+                // First, set the current session to ensure Supabase uses the correct user
+                // This prevents Supabase from using a cached session from a different auth provider
+                try {
+                    supabase.auth.retrieveUser(currentAccessToken)
+                    supabase.auth.refreshCurrentSession()
+                } catch (e: Exception) {
+                    Log.d(TAG, "retrieveUser failed, trying direct refresh: ${e.message}")
                 }
 
                 // Use the refresh token to get a new access token
                 val session = supabase.auth.refreshSession(refreshToken)
 
-                Log.d(TAG, "Session refreshed successfully")
+                // Verify the refreshed session belongs to the same user
+                val currentUserId = tokenManager.userId
+                if (currentUserId != null && session.user?.id != currentUserId) {
+                    Log.e(TAG, "Session refresh returned different user! Expected: $currentUserId, Got: ${session.user?.id}")
+                    // Don't save the wrong session - return current token and let it fail naturally
+                    return@runBlocking currentAccessToken
+                }
+
+                Log.d(TAG, "Session refreshed successfully for user: ${session.user?.id}")
                 tokenManager.saveTokens(
                     accessToken = session.accessToken,
                     refreshToken = session.refreshToken,
