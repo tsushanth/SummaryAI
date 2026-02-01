@@ -3,6 +3,8 @@
 import { useCheckout } from '@/hooks/useSubscription';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { Check, Loader2 } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useRef, Suspense } from 'react';
 
 const plans = [
   {
@@ -37,9 +39,35 @@ const plans = [
   },
 ];
 
-export default function SubscriptionPage() {
+function SubscriptionContent() {
   const { user, loading: authLoading } = useAuth();
   const { startCheckout, isLoading: checkoutLoading, error: checkoutError } = useCheckout();
+  const searchParams = useSearchParams();
+  const autoCheckoutTriggered = useRef(false);
+
+  // Auto-trigger checkout if user is logged in and plan param is present
+  // This handles the return from auth flow
+  useEffect(() => {
+    const planParam = searchParams.get('plan');
+    const validPlans = ['weekly', 'monthly', 'yearly'];
+
+    // Only auto-checkout if:
+    // - We have a valid plan param
+    // - User is logged in
+    // - Not already loading
+    // - Haven't already triggered (prevent double checkout)
+    if (
+      planParam &&
+      validPlans.includes(planParam) &&
+      user &&
+      !authLoading &&
+      !checkoutLoading &&
+      !autoCheckoutTriggered.current
+    ) {
+      autoCheckoutTriggered.current = true;
+      startCheckout(planParam as 'weekly' | 'monthly' | 'yearly');
+    }
+  }, [user, authLoading, checkoutLoading, searchParams, startCheckout]);
 
   const handleSelect = (planId: string) => {
     startCheckout(planId as 'weekly' | 'monthly' | 'yearly');
@@ -149,5 +177,21 @@ export default function SubscriptionPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function SubscriptionLoading() {
+  return (
+    <div className="max-w-lg mx-auto px-4 py-6 flex items-center justify-center min-h-[400px]">
+      <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+    </div>
+  );
+}
+
+export default function SubscriptionPage() {
+  return (
+    <Suspense fallback={<SubscriptionLoading />}>
+      <SubscriptionContent />
+    </Suspense>
   );
 }

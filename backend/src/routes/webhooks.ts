@@ -1680,4 +1680,282 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void
   console.log(`[Stripe Webhook] Payment failed, subscription past_due for user ${profile.id}`);
 }
 
+// ============================================================================
+// RevenueCat Webhooks (Mobile Subscriptions)
+// ============================================================================
+
+/**
+ * RevenueCat webhook event types
+ */
+interface RevenueCatWebhookEvent {
+  api_version: string;
+  event: {
+    type: string;
+    id: string;
+    app_user_id: string;
+    original_app_user_id: string;
+    aliases: string[];
+    product_id: string;
+    entitlement_ids: string[];
+    entitlement_id?: string;
+    period_type: string;
+    purchased_at_ms: number;
+    expiration_at_ms: number | null;
+    store: 'APP_STORE' | 'PLAY_STORE' | 'STRIPE' | 'PROMOTIONAL';
+    environment: 'SANDBOX' | 'PRODUCTION';
+    is_trial_conversion?: boolean;
+    cancel_reason?: string;
+    // Apple Search Ads attribution
+    subscriber_attributes?: {
+      '$attConsentStatus'?: { value: string };
+      '$appleSearchAdsAttributionDetails'?: {
+        value: string; // JSON string with attribution data
+      };
+    };
+  };
+}
+
+/**
+ * Parsed Apple Search Ads attribution data
+ */
+interface AppleSearchAdsAttribution {
+  'Version4.0'?: {
+    attribution: boolean;
+    adGroupId?: number;
+    adGroupName?: string;
+    adId?: number;
+    adName?: string;
+    campaignId?: number;
+    campaignName?: string;
+    countryOrRegion?: string;
+    keywordId?: number;
+    keyword?: string;
+    orgId?: number;
+    orgName?: string;
+    clickDate?: string;
+    conversionDate?: string;
+  };
+}
+
+/**
+ * POST /webhooks/revenuecat
+ * Handle RevenueCat webhook events for mobile subscriptions (iOS & Android)
+ */
+router.post('/revenuecat', async (req: Request, res: Response) => {
+  // Verify authorization header
+  const authHeader = req.headers['authorization'];
+  const expectedAuth = config.REVENUECAT_WEBHOOK_AUTH_HEADER;
+
+  if (expectedAuth && authHeader !== expectedAuth) {
+    console.error('[RevenueCat Webhook] Invalid authorization header');
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+
+  const payload = req.body as RevenueCatWebhookEvent;
+  const event = payload.event;
+
+  console.log(`[RevenueCat Webhook] Received: ${event.type}, user: ${event.app_user_id}, product: ${event.product_id}, store: ${event.store}`);
+
+  // The app_user_id should be the Supabase user ID (set via logIn() in the app)
+  const userId = event.app_user_id;
+
+  // Skip anonymous IDs - these are users who haven't logged in yet
+  if (userId.startsWith('$RCAnonymousID:')) {
+    console.log('[RevenueCat Webhook] Skipping anonymous user');
+    res.json({ received: true, skipped: true });
+    return;
+  }
+
+  try {
+    switch (event.type) {
+      case 'INITIAL_PURCHASE':
+      case 'RENEWAL':
+      case 'PRODUCT_CHANGE':
+      case 'UNCANCELLATION':
+        await handleRevenueCatSubscriptionActive(userId, event);
+        break;
+
+      case 'CANCELLATION':
+        await handleRevenueCatCancellation(userId, event);
+        break;
+
+      case 'EXPIRATION':
+        await handleRevenueCatExpiration(userId, event);
+        break;
+
+      case 'BILLING_ISSUE':
+        await handleRevenueCatBillingIssue(userId, event);
+        break;
+
+      case 'SUBSCRIBER_ALIAS':
+        // User aliases were updated - no action needed
+        console.log(`[RevenueCat Webhook] Subscriber alias updated for ${userId}`);
+        break;
+
+      case 'TRANSFER':
+        // Subscription transferred to another user
+        console.log(`[RevenueCat Webhook] Subscription transferred from ${event.original_app_user_id} to ${userId}`);
+        break;
+
+      default:
+        console.log(`[RevenueCat Webhook] Unhandled event type: ${event.type}`);
+    }
+
+    res.json({ received: true });
+  } catch (error) {
+    console.error('[RevenueCat Webhook] Error processing event:', error);
+    res.status(500).json({ error: 'Processing failed' });
+  }
+});
+
+/**
+ * Handle subscription activation events (INITIAL_PURCHASE, RENEWAL, PRODUCT_CHANGE, UNCANCELLATION)
+ */
+async function handleRevenueCatSubscriptionActive(
+  userId: string,
+  event: RevenueCatWebhookEvent['event']
+): Promise<void> {
+  // Map product ID to plan type
+  let planType = 'monthly';
+  const productId = event.product_id.toLowerCase();
+  if (productId.includes('weekly')) {
+    planType = 'weekly';
+  } else if (productId.includes('yearly') || productId.includes('annual') || productId.includes('year')) {
+    planType = 'yearly';
+  }
+
+  // Map store to provider
+  const provider = event.store === 'APP_STORE' ? 'app_store' : 'play_store';
+
+  // Determine status - check if this is during a trial period
+  const status = event.period_type === 'TRIAL' ? 'trialing' : 'active';
+
+  await supabaseAdmin
+    .from('profiles')
+    .update({
+      subscription_status: status,
+      subscription_provider: provider,
+      subscription_plan: planType,
+      subscription_expires_at: event.expiration_at_ms
+        ? new Date(event.expiration_at_ms).toISOString()
+        : null,
+      subscribed_at: event.purchased_at_ms
+        ? new Date(event.purchased_at_ms).toISOString()
+        : new Date().toISOString(),
+    })
+    .eq('id', userId);
+
+  // Store Apple Search Ads attribution data if available
+  if (event.subscriber_attributes?.['$appleSearchAdsAttributionDetails']?.value) {
+    try {
+      const attributionJson = event.subscriber_attributes['$appleSearchAdsAttributionDetails'].value;
+      const attribution = JSON.parse(attributionJson) as AppleSearchAdsAttribution;
+      const adsData = attribution['Version4.0'];
+
+      if (adsData && adsData.attribution) {
+        await supabaseAdmin
+          .from('user_attribution')
+          .upsert({
+            user_id: userId,
+            network: 'apple_search_ads',
+            campaign: adsData.campaignName || null,
+            campaign_id: adsData.campaignId?.toString() || null,
+            ad_group: adsData.adGroupName || null,
+            ad_group_id: adsData.adGroupId?.toString() || null,
+            keyword: adsData.keyword || null,
+            keyword_id: adsData.keywordId?.toString() || null,
+            creative: adsData.adName || null,
+            creative_id: adsData.adId?.toString() || null,
+            click_date: adsData.clickDate || null,
+            conversion_date: adsData.conversionDate || null,
+            country_or_region: adsData.countryOrRegion || null,
+            updated_at: new Date().toISOString(),
+          });
+        console.log(`[RevenueCat Webhook] Stored Search Ads attribution for ${userId}: campaign=${adsData.campaignName}, keyword=${adsData.keyword}`);
+      }
+    } catch (attrError) {
+      console.error('[RevenueCat Webhook] Failed to parse attribution data:', attrError);
+    }
+  }
+
+  console.log(`[RevenueCat Webhook] Activated subscription for ${userId}, plan: ${planType}, status: ${status}, event: ${event.type}`);
+}
+
+/**
+ * Handle subscription cancellation (user cancelled but still has access until expiration)
+ */
+async function handleRevenueCatCancellation(
+  userId: string,
+  event: RevenueCatWebhookEvent['event']
+): Promise<void> {
+  // User cancelled but may still have access until expiration_at_ms
+  // Keep status as active if they still have time remaining
+  const expiresAt = event.expiration_at_ms ? new Date(event.expiration_at_ms) : new Date();
+  const hasTimeRemaining = expiresAt > new Date();
+
+  await supabaseAdmin
+    .from('profiles')
+    .update({
+      subscription_status: hasTimeRemaining ? 'active' : 'canceled',
+      subscription_expires_at: expiresAt.toISOString(),
+    })
+    .eq('id', userId);
+
+  console.log(`[RevenueCat Webhook] Subscription cancelled for ${userId}, expires: ${expiresAt.toISOString()}, reason: ${event.cancel_reason || 'unknown'}`);
+}
+
+/**
+ * Handle subscription expiration (access has ended)
+ */
+async function handleRevenueCatExpiration(
+  userId: string,
+  event: RevenueCatWebhookEvent['event']
+): Promise<void> {
+  await supabaseAdmin
+    .from('profiles')
+    .update({
+      subscription_status: 'canceled',
+      subscription_expires_at: event.expiration_at_ms
+        ? new Date(event.expiration_at_ms).toISOString()
+        : new Date().toISOString(),
+    })
+    .eq('id', userId);
+
+  console.log(`[RevenueCat Webhook] Subscription expired for ${userId}`);
+}
+
+/**
+ * Handle billing issues (payment failed but subscription not yet expired)
+ */
+async function handleRevenueCatBillingIssue(
+  userId: string,
+  event: RevenueCatWebhookEvent['event']
+): Promise<void> {
+  await supabaseAdmin
+    .from('profiles')
+    .update({
+      subscription_status: 'past_due',
+    })
+    .eq('id', userId);
+
+  // Optionally send alert for billing issues
+  const { data: profile } = await supabaseAdmin
+    .from('profiles')
+    .select('email')
+    .eq('id', userId)
+    .single();
+
+  if (profile?.email) {
+    await alertPaymentFailure(
+      userId,
+      profile.email,
+      0, // RevenueCat doesn't provide amount
+      'Mobile subscription billing issue'
+    );
+  }
+
+  console.log(`[RevenueCat Webhook] Billing issue for ${userId}`);
+}
+
 export default router;
