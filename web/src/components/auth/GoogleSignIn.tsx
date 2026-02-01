@@ -10,9 +10,12 @@ export function GoogleSignIn() {
   const returnTo = searchParams.get('returnTo');
 
   const handleSignIn = () => {
-    // Store returnTo in sessionStorage so we can redirect after callback
+    // Store returnTo in a cookie so the server-side callback can read it
+    // Using cookie instead of sessionStorage since callback is server-side
     if (returnTo) {
-      sessionStorage.setItem('authReturnTo', returnTo);
+      // Set cookie with path=/ so it's available on /auth/callback
+      // Short expiry (5 minutes) since this is just for the OAuth flow
+      document.cookie = `authReturnTo=${encodeURIComponent(returnTo)}; path=/; max-age=300; SameSite=Lax`;
     }
     signInWithGoogle();
   };
