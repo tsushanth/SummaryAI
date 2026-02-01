@@ -61,7 +61,22 @@ export async function GET(request: Request) {
       email: data.session?.user?.email,
     });
 
-    return NextResponse.redirect(`${origin}/recordings`);
+    // Check for returnTo cookie (set by GoogleSignIn component)
+    const returnToCookie = cookieStore.get('authReturnTo');
+    let redirectUrl = `${origin}/recordings`; // Default redirect
+
+    if (returnToCookie?.value) {
+      const returnTo = decodeURIComponent(returnToCookie.value);
+      // Validate that returnTo is a relative path (security: prevent open redirect)
+      if (returnTo.startsWith('/') && !returnTo.startsWith('//')) {
+        redirectUrl = `${origin}${returnTo}`;
+        console.log('[Auth Callback] Redirecting to returnTo:', returnTo);
+      }
+      // Clear the cookie
+      cookieStore.delete('authReturnTo');
+    }
+
+    return NextResponse.redirect(redirectUrl);
   }
 
   console.log('[Auth Callback] No code provided, redirecting to auth');

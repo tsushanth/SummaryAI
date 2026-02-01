@@ -10,6 +10,11 @@ struct SummaryAIApp: App {
     @StateObject private var apiClient = SummaryAIAPIClient()
     @StateObject private var subscriptionService = SubscriptionService()
 
+    init() {
+        // Configure RevenueCat for in-app purchases and attribution tracking
+        SubscriptionService.configure()
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView()
@@ -68,6 +73,20 @@ struct RootView: View {
         .animation(.easeInOut(duration: 0.3), value: authService.state.isAuthenticated)
         .animation(.easeInOut(duration: 0.3), value: hasCompletedOnboarding)
         .animation(.easeInOut(duration: 0.3), value: hasSeenPaywall)
+        .onChange(of: authService.state) { oldState, newState in
+            // Link RevenueCat user ID when user authenticates
+            if case .authenticated(let user) = newState {
+                Task {
+                    await subscriptionService.loginUser(userId: user.id)
+                }
+            }
+            // Logout from RevenueCat when user signs out
+            if case .authenticated = oldState, case .unauthenticated = newState {
+                Task {
+                    await subscriptionService.logoutUser()
+                }
+            }
+        }
     }
 }
 
