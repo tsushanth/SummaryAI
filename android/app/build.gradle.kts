@@ -137,8 +137,8 @@ dependencies {
     // Google Sign-In
     implementation(libs.play.services.auth)
 
-    // Play Billing
-    implementation(libs.billing.ktx)
+    // RevenueCat (replaces Play Billing)
+    implementation("com.revenuecat.purchases:purchases:8.10.7")
 
     // Supabase
     implementation(libs.supabase.gotrue)
