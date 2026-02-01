@@ -89,6 +89,9 @@ const envSchema = z.object({
   STRIPE_PRICE_MONTHLY: z.string().optional(), // Stripe Price ID for monthly plan
   STRIPE_PRICE_YEARLY: z.string().optional(), // Stripe Price ID for yearly plan
   WEB_APP_URL: z.string().default('https://meetingmind.org'),
+
+  // RevenueCat (Mobile Subscriptions)
+  REVENUECAT_WEBHOOK_AUTH_HEADER: z.string().optional(), // Authorization header for webhook verification
 });
 
 export type Config = z.infer<typeof envSchema>;

@@ -1,5 +1,6 @@
 package com.kreativekoala.summaryai.ui.paywall
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -37,6 +38,8 @@ fun PaywallScreen(
     onPurchaseSuccess: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val activity = context as? Activity
 
     LaunchedEffect(uiState.purchaseSuccess) {
         if (uiState.purchaseSuccess) {
@@ -51,6 +54,12 @@ fun PaywallScreen(
             viewModel.clearError()
         }
     }
+
+    // Get prices from RevenueCat offerings
+    val offering = uiState.offering
+    val yearlyPrice = offering?.annual?.product?.price?.formatted ?: "$69.99/yr"
+    val monthlyPrice = offering?.monthly?.product?.price?.formatted ?: "$14.99/mo"
+    val weeklyPrice = offering?.weekly?.product?.price?.formatted ?: "$6.99/wk"
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -121,7 +130,7 @@ fun PaywallScreen(
             // Subscription options - more compact
             CompactSubscriptionOption(
                 title = stringResource(R.string.yearly),
-                price = "$69.99/yr",
+                price = yearlyPrice,
                 badge = "Best Value",
                 trial = "7-day free trial",
                 isSelected = uiState.selectedPlan == "yearly",
@@ -132,7 +141,7 @@ fun PaywallScreen(
 
             CompactSubscriptionOption(
                 title = stringResource(R.string.monthly),
-                price = "$14.99/mo",
+                price = monthlyPrice,
                 badge = null,
                 trial = null,
                 isSelected = uiState.selectedPlan == "monthly",
@@ -143,7 +152,7 @@ fun PaywallScreen(
 
             CompactSubscriptionOption(
                 title = "Weekly",
-                price = "$6.99/wk",
+                price = weeklyPrice,
                 badge = null,
                 trial = null,
                 isSelected = uiState.selectedPlan == "weekly",
@@ -154,11 +163,11 @@ fun PaywallScreen(
 
             // Subscribe button
             Button(
-                onClick = { viewModel.purchase() },
+                onClick = { activity?.let { viewModel.purchase(it) } },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
-                enabled = !uiState.isLoading
+                enabled = !uiState.isLoading && activity != null
             ) {
                 if (uiState.isLoading) {
                     CircularProgressIndicator(

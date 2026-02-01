@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		88DA84B12F07436B0084B5E7 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 88DA84B02F07436B0084B5E7 /* GoogleSignIn */; };
 		88DA84B32F07436B0084B5E7 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 88DA84B22F07436B0084B5E7 /* GoogleSignInSwift */; };
+		A1RC0002229E0002 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = A1RC0001229E0001 /* RevenueCat */; };
 		A1000001229E0001 /* SummaryAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002229E0001 /* SummaryAIApp.swift */; };
 		A1000003229E0002 /* APIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000004229E0002 /* APIModels.swift */; };
 		A1000005229E0003 /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000006229E0003 /* APIError.swift */; };
@@ -101,6 +102,7 @@
 				88DA84B12F07436B0084B5E7 /* GoogleSignIn in Frameworks */,
 				88DA84B32F07436B0084B5E7 /* GoogleSignInSwift in Frameworks */,
 				A100004E229E003B /* TwilioVoice in Frameworks */,
+				A1RC0002229E0002 /* RevenueCat in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -294,6 +296,7 @@
 				88DA84B02F07436B0084B5E7 /* GoogleSignIn */,
 				88DA84B22F07436B0084B5E7 /* GoogleSignInSwift */,
 				A100004D229E003A /* TwilioVoice */,
+				A1RC0001229E0001 /* RevenueCat */,
 			);
 			productName = SummaryAI;
 			productReference = A1000000229E0000 /* SummaryAI.app */;
@@ -326,6 +329,7 @@
 			packageReferences = (
 				88DA84AF2F07436B0084B5E7 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				A100004C229E0039 /* XCRemoteSwiftPackageReference "twilio-voice-ios" */,
+				A1RC0000229E0000 /* XCRemoteSwiftPackageReference "purchases-ios" */,
 			);
 			productRefGroup = A10000A2229E00A2 /* Products */;
 			projectDirPath = "";
@@ -621,6 +625,14 @@
 				minimumVersion = 6.0.0;
 			};
 		};
+		A1RC0000229E0000 /* XCRemoteSwiftPackageReference "purchases-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -638,6 +650,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A100004C229E0039 /* XCRemoteSwiftPackageReference "twilio-voice-ios" */;
 			productName = TwilioVoice;
+		};
+		A1RC0001229E0001 /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1RC0000229E0000 /* XCRemoteSwiftPackageReference "purchases-ios" */;
+			productName = RevenueCat;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

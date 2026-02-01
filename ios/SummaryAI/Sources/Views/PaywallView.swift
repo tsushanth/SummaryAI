@@ -1,10 +1,10 @@
 import SwiftUI
-import StoreKit
+import RevenueCat
 
 struct PaywallView: View {
     @ObservedObject var subscriptionService: SubscriptionService
     @Binding var hasCompletedPaywall: Bool
-    @State private var selectedProduct: Product?
+    @State private var selectedPackage: Package?
     @State private var isPurchasing = false
     @State private var showError = false
     @State private var errorMessage = ""
@@ -50,43 +50,43 @@ struct PaywallView: View {
 
             // Plans
             VStack(spacing: 8) {
-                if let yearly = subscriptionService.yearlyProduct {
+                if let yearly = subscriptionService.yearlyPackage {
                     PlanRow(
                         name: "Annual",
-                        price: yearly.displayPrice,
+                        price: yearly.localizedPriceString,
                         period: "/year",
                         badge: "Best Value",
                         subtitle: "7-day free trial",
-                        isSelected: selectedProduct?.id == yearly.id
-                    ) { selectedProduct = yearly }
+                        isSelected: selectedPackage?.identifier == yearly.identifier
+                    ) { selectedPackage = yearly }
                 }
 
-                if let monthly = subscriptionService.monthlyProduct {
+                if let monthly = subscriptionService.monthlyPackage {
                     PlanRow(
                         name: "Monthly",
-                        price: monthly.displayPrice,
+                        price: monthly.localizedPriceString,
                         period: "/month",
                         badge: nil,
                         subtitle: nil,
-                        isSelected: selectedProduct?.id == monthly.id
-                    ) { selectedProduct = monthly }
+                        isSelected: selectedPackage?.identifier == monthly.identifier
+                    ) { selectedPackage = monthly }
                 }
 
-                if let weekly = subscriptionService.weeklyProduct {
+                if let weekly = subscriptionService.weeklyPackage {
                     PlanRow(
                         name: "Weekly",
-                        price: weekly.displayPrice,
+                        price: weekly.localizedPriceString,
                         period: "/week",
                         badge: nil,
                         subtitle: nil,
-                        isSelected: selectedProduct?.id == weekly.id
-                    ) { selectedProduct = weekly }
+                        isSelected: selectedPackage?.identifier == weekly.identifier
+                    ) { selectedPackage = weekly }
                 }
             }
             .padding(.horizontal)
             .onAppear {
-                if selectedProduct == nil {
-                    selectedProduct = subscriptionService.yearlyProduct
+                if selectedPackage == nil {
+                    selectedPackage = subscriptionService.yearlyPackage
                 }
             }
 
@@ -96,7 +96,7 @@ struct PaywallView: View {
             VStack(spacing: 10) {
                 // Subscribe button
                 Button {
-                    if selectedProduct != nil {
+                    if selectedPackage != nil {
                         Task { await purchase() }
                     } else {
                         hasCompletedPaywall = true
@@ -165,12 +165,12 @@ struct PaywallView: View {
     }
 
     private func purchase() async {
-        guard let product = selectedProduct else { return }
+        guard let package = selectedPackage else { return }
         isPurchasing = true
         defer { isPurchasing = false }
 
         do {
-            let success = try await subscriptionService.purchase(product)
+            let success = try await subscriptionService.purchase(package)
             if success {
                 hasCompletedPaywall = true
                 dismiss()

@@ -1,21 +1,5 @@
 import Foundation
-import StoreKit
-
-// MARK: - Subscription Product IDs
-
-enum SubscriptionProductID: String, CaseIterable {
-    case yearly = "com.summaryai.subscription.yearly1"
-    case monthly = "com.summaryai.subscription.monthly"
-    case weekly = "com.summaryai.subscription.weekly"
-
-    var displayName: String {
-        switch self {
-        case .yearly: return "Yearly"
-        case .monthly: return "Monthly"
-        case .weekly: return "Weekly"
-        }
-    }
-}
+import RevenueCat
 
 // MARK: - Subscription Status
 
@@ -46,87 +30,81 @@ final class SubscriptionService: ObservableObject {
 
     // MARK: - Published Properties
 
-    @Published var products: [Product] = []
-    @Published var purchasedProductIDs: Set<String> = []
+    @Published var offerings: Offerings?
+    @Published var customerInfo: CustomerInfo?
     @Published var subscriptionStatus: SubscriptionStatus = .unknown
     @Published var isLoading = false
     @Published var errorMessage: String?
 
-    // MARK: - Properties
+    // MARK: - Constants
 
-    private var updateListenerTask: Task<Void, Error>?
-    private let productIDs = SubscriptionProductID.allCases.map { $0.rawValue }
+    private let entitlementID = "premium"
+
+    // MARK: - Configuration
+
+    /// Configure RevenueCat - call this once at app launch
+    /// Replace YOUR_REVENUECAT_IOS_API_KEY with your actual API key from RevenueCat dashboard
+    static func configure() {
+        #if DEBUG
+        Purchases.logLevel = .debug
+        #else
+        Purchases.logLevel = .warn
+        #endif
+
+        Purchases.configure(withAPIKey: "appl_oaxBhvTWrxFWthyVWQKKcfVVoLF")
+
+        // Enable automatic Apple Search Ads attribution collection
+        Purchases.shared.attribution.enableAdServicesAttributionTokenCollection()
+
+        print("[SubscriptionService] RevenueCat configured")
+    }
 
     // MARK: - Initialization
 
     init() {
-        updateListenerTask = listenForTransactions()
         Task {
-            await loadProducts()
+            await loadOfferings()
             await updateSubscriptionStatus()
         }
     }
 
-    deinit {
-        updateListenerTask?.cancel()
-    }
+    // MARK: - Load Offerings
 
-    // MARK: - Load Products
-
-    func loadProducts() async {
+    func loadOfferings() async {
         isLoading = true
         defer { isLoading = false }
 
         do {
-            let storeProducts = try await Product.products(for: productIDs)
-            products = storeProducts.sorted { product1, product2 in
-                // Sort by duration: yearly first, then monthly, then weekly
-                let order = [SubscriptionProductID.yearly.rawValue,
-                            SubscriptionProductID.monthly.rawValue,
-                            SubscriptionProductID.weekly.rawValue]
-                let index1 = order.firstIndex(of: product1.id) ?? 0
-                let index2 = order.firstIndex(of: product2.id) ?? 0
-                return index1 < index2
-            }
-            print("[SubscriptionService] Loaded \(products.count) products")
+            offerings = try await Purchases.shared.offerings()
+            print("[SubscriptionService] Loaded offerings: \(offerings?.current?.availablePackages.count ?? 0) packages")
         } catch {
-            print("[SubscriptionService] Failed to load products: \(error)")
+            print("[SubscriptionService] Failed to load offerings: \(error)")
             errorMessage = "Failed to load subscription options"
         }
     }
 
     // MARK: - Purchase
 
-    func purchase(_ product: Product) async throws -> Bool {
+    func purchase(_ package: Package) async throws -> Bool {
         isLoading = true
         defer { isLoading = false }
 
         do {
-            let result = try await product.purchase()
+            let result = try await Purchases.shared.purchase(package: package)
+            customerInfo = result.customerInfo
 
-            switch result {
-            case .success(let verification):
-                let transaction = try checkVerified(verification)
-                await updateSubscriptionStatus()
-                await transaction.finish()
-                print("[SubscriptionService] Purchase successful: \(product.id)")
+            await updateSubscriptionStatus()
 
+            if !result.userCancelled {
+                print("[SubscriptionService] Purchase successful: \(package.storeProduct.productIdentifier)")
                 // Request app review after successful purchase
                 ReviewRequestManager.shared.purchaseCompleted()
-
                 return true
-
-            case .userCancelled:
-                print("[SubscriptionService] User cancelled purchase")
-                return false
-
-            case .pending:
-                print("[SubscriptionService] Purchase pending")
-                return false
-
-            @unknown default:
-                return false
             }
+
+            print("[SubscriptionService] User cancelled purchase")
+            return false
+
         } catch {
             print("[SubscriptionService] Purchase failed: \(error)")
             errorMessage = "Purchase failed. Please try again."
@@ -141,7 +119,7 @@ final class SubscriptionService: ObservableObject {
         defer { isLoading = false }
 
         do {
-            try await AppStore.sync()
+            customerInfo = try await Purchases.shared.restorePurchases()
             await updateSubscriptionStatus()
             print("[SubscriptionService] Purchases restored")
         } catch {
@@ -153,113 +131,96 @@ final class SubscriptionService: ObservableObject {
     // MARK: - Update Subscription Status
 
     func updateSubscriptionStatus() async {
-        var foundActiveSubscription = false
+        do {
+            customerInfo = try await Purchases.shared.customerInfo()
 
-        for await result in Transaction.currentEntitlements {
-            do {
-                let transaction = try checkVerified(result)
-
-                if transaction.productType == .autoRenewable {
-                    purchasedProductIDs.insert(transaction.productID)
-
-                    // Check if in trial period
-                    if let offerType = transaction.offerType, offerType == .introductory {
-                        subscriptionStatus = .inTrial(expirationDate: transaction.expirationDate ?? Date())
-                    } else {
-                        subscriptionStatus = .subscribed(
-                            expirationDate: transaction.expirationDate,
-                            productId: transaction.productID
-                        )
-                    }
-                    foundActiveSubscription = true
-                }
-            } catch {
-                print("[SubscriptionService] Failed to verify transaction: \(error)")
+            guard let info = customerInfo else {
+                subscriptionStatus = .unknown
+                return
             }
-        }
 
-        if !foundActiveSubscription {
-            subscriptionStatus = .notSubscribed
-            purchasedProductIDs.removeAll()
-        }
+            // Check if user has active premium entitlement
+            if let entitlement = info.entitlements[entitlementID], entitlement.isActive {
+                let expirationDate = entitlement.expirationDate
+                let productId = entitlement.productIdentifier
 
-        print("[SubscriptionService] Status updated: \(subscriptionStatus)")
-    }
-
-    // MARK: - Listen for Transactions
-
-    private func listenForTransactions() -> Task<Void, Error> {
-        return Task.detached { [weak self] in
-            for await result in Transaction.updates {
-                do {
-                    let transaction = try await self?.checkVerifiedAsync(result)
-                    if let transaction = transaction {
-                        await self?.updateSubscriptionStatus()
-                        await transaction.finish()
-                    }
-                } catch {
-                    print("[SubscriptionService] Transaction verification failed: \(error)")
+                // Check if in trial period
+                if entitlement.periodType == .trial {
+                    subscriptionStatus = .inTrial(expirationDate: expirationDate ?? Date())
+                } else {
+                    subscriptionStatus = .subscribed(
+                        expirationDate: expirationDate,
+                        productId: productId
+                    )
                 }
+            } else {
+                subscriptionStatus = .notSubscribed
             }
+
+            print("[SubscriptionService] Status updated: \(subscriptionStatus)")
+        } catch {
+            print("[SubscriptionService] Failed to get customer info: \(error)")
+            subscriptionStatus = .unknown
         }
     }
 
-    // Non-isolated version for detached tasks
-    private nonisolated func checkVerifiedAsync<T>(_ result: VerificationResult<T>) throws -> T {
-        switch result {
-        case .unverified:
-            throw StoreError.verificationFailed
-        case .verified(let safe):
-            return safe
+    // MARK: - User Identification
+
+    /// Link the RevenueCat user with your backend user ID
+    /// Call this after successful authentication
+    func loginUser(userId: String) async {
+        do {
+            let (customerInfo, _) = try await Purchases.shared.logIn(userId)
+            self.customerInfo = customerInfo
+            await updateSubscriptionStatus()
+            print("[SubscriptionService] Logged in user: \(userId)")
+        } catch {
+            print("[SubscriptionService] Failed to login user: \(error)")
         }
     }
 
-    // MARK: - Verify Transaction
-
-    private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
-        switch result {
-        case .unverified:
-            throw StoreError.verificationFailed
-        case .verified(let safe):
-            return safe
+    /// Log out the current user (resets to anonymous)
+    func logoutUser() async {
+        do {
+            customerInfo = try await Purchases.shared.logOut()
+            await updateSubscriptionStatus()
+            print("[SubscriptionService] User logged out")
+        } catch {
+            print("[SubscriptionService] Failed to logout: \(error)")
         }
     }
 
-    // MARK: - Helper Methods
+    // MARK: - Helper Properties
 
-    func product(for id: SubscriptionProductID) -> Product? {
-        products.first { $0.id == id.rawValue }
+    /// Get the current offering's packages
+    var availablePackages: [Package] {
+        offerings?.current?.availablePackages ?? []
     }
 
-    var yearlyProduct: Product? {
-        product(for: .yearly)
+    /// Get yearly package from current offering
+    var yearlyPackage: Package? {
+        offerings?.current?.annual
     }
 
-    var monthlyProduct: Product? {
-        product(for: .monthly)
+    /// Get monthly package from current offering
+    var monthlyPackage: Package? {
+        offerings?.current?.monthly
     }
 
-    var weeklyProduct: Product? {
-        product(for: .weekly)
+    /// Get weekly package from current offering
+    var weeklyPackage: Package? {
+        offerings?.current?.weekly
     }
 
     /// Calculate savings percentage for yearly vs monthly
     var yearlySavingsPercentage: Int? {
-        guard let yearly = yearlyProduct,
-              let monthly = monthlyProduct else { return nil }
+        guard let yearly = yearlyPackage?.storeProduct,
+              let monthly = monthlyPackage?.storeProduct else { return nil }
 
-        let yearlyPrice = NSDecimalNumber(decimal: yearly.price).doubleValue
-        let monthlyAnnualPrice = NSDecimalNumber(decimal: monthly.price).doubleValue * 12
+        let yearlyPrice = yearly.price as Decimal
+        let monthlyAnnualPrice = (monthly.price as Decimal) * 12
         let savings = (monthlyAnnualPrice - yearlyPrice) / monthlyAnnualPrice * 100
 
-        return Int(savings.rounded())
+        return Int(NSDecimalNumber(decimal: savings).doubleValue.rounded())
     }
-}
-
-// MARK: - Store Error
-
-enum StoreError: Error {
-    case verificationFailed
-    case purchaseFailed
-    case unknown
 }
