@@ -11,8 +11,10 @@ import com.revenuecat.purchases.PurchaseParams
 import com.revenuecat.purchases.Purchases
 import com.revenuecat.purchases.PurchasesError
 import com.revenuecat.purchases.getOfferingsWith
+import com.revenuecat.purchases.interfaces.LogInCallback
 import com.revenuecat.purchases.interfaces.ReceiveCustomerInfoCallback
 import com.revenuecat.purchases.purchaseWith
+import com.revenuecat.purchases.restorePurchasesWith
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -167,22 +169,20 @@ class PaywallViewModel @Inject constructor() : ViewModel() {
      * Call this after user authentication
      */
     fun loginUser(userId: String) {
-        viewModelScope.launch {
-            Purchases.sharedInstance.logInWith(
-                userId,
-                onError = { error ->
-                    Log.e(TAG, "RevenueCat login failed: ${error.message}")
-                },
-                onSuccess = { customerInfo, _ ->
-                    val hasEntitlement = customerInfo.entitlements[ENTITLEMENT_ID]?.isActive == true
-                    _uiState.value = _uiState.value.copy(
-                        hasActiveEntitlement = hasEntitlement,
-                        purchaseSuccess = hasEntitlement
-                    )
-                    Log.d(TAG, "RevenueCat login successful for user: $userId")
-                }
-            )
-        }
+        Purchases.sharedInstance.logIn(userId, object : LogInCallback {
+            override fun onReceived(customerInfo: CustomerInfo, created: Boolean) {
+                val hasEntitlement = customerInfo.entitlements[ENTITLEMENT_ID]?.isActive == true
+                _uiState.value = _uiState.value.copy(
+                    hasActiveEntitlement = hasEntitlement,
+                    purchaseSuccess = hasEntitlement
+                )
+                Log.d(TAG, "RevenueCat login successful for user: $userId, created: $created")
+            }
+
+            override fun onError(error: PurchasesError) {
+                Log.e(TAG, "RevenueCat login failed: ${error.message}")
+            }
+        })
     }
 
     /**
@@ -190,19 +190,18 @@ class PaywallViewModel @Inject constructor() : ViewModel() {
      * Call this when user signs out
      */
     fun logoutUser() {
-        viewModelScope.launch {
-            Purchases.sharedInstance.logOutWith(
-                onError = { error ->
-                    Log.e(TAG, "RevenueCat logout failed: ${error.message}")
-                },
-                onSuccess = { customerInfo ->
-                    _uiState.value = _uiState.value.copy(
-                        hasActiveEntitlement = false,
-                        purchaseSuccess = false
-                    )
-                    Log.d(TAG, "RevenueCat logout successful")
-                }
-            )
-        }
+        Purchases.sharedInstance.logOut(object : ReceiveCustomerInfoCallback {
+            override fun onReceived(customerInfo: CustomerInfo) {
+                _uiState.value = _uiState.value.copy(
+                    hasActiveEntitlement = false,
+                    purchaseSuccess = false
+                )
+                Log.d(TAG, "RevenueCat logout successful")
+            }
+
+            override fun onError(error: PurchasesError) {
+                Log.e(TAG, "RevenueCat logout failed: ${error.message}")
+            }
+        })
     }
 }
