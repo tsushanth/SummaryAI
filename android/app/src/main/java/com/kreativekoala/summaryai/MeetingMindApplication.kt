@@ -24,8 +24,7 @@ class MeetingMindApplication : Application() {
         // Enable debug logs in debug builds
         Purchases.logLevel = if (BuildConfig.DEBUG) LogLevel.DEBUG else LogLevel.WARN
 
-        // TODO: Replace with your RevenueCat Android API key
-        val apiKey = "YOUR_REVENUECAT_ANDROID_API_KEY"
+        val apiKey = "goog_WycDXwagKtRThrBBPbEYZWFDTmd"
 
         Purchases.configure(
             PurchasesConfiguration.Builder(this, apiKey)
