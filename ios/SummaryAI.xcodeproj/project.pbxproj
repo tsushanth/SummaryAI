@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5C8E9464F4559E83B6341B6F /* AttributionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85E10C85FDF3D980C3010ECA /* AttributionService.swift */; };
 		88DA84B12F07436B0084B5E7 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 88DA84B02F07436B0084B5E7 /* GoogleSignIn */; };
 		88DA84B32F07436B0084B5E7 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 88DA84B22F07436B0084B5E7 /* GoogleSignInSwift */; };
-		A1RC0002229E0002 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = A1RC0001229E0001 /* RevenueCat */; };
 		A1000001229E0001 /* SummaryAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002229E0001 /* SummaryAIApp.swift */; };
 		A1000003229E0002 /* APIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000004229E0002 /* APIModels.swift */; };
 		A1000005229E0003 /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000006229E0003 /* APIError.swift */; };
@@ -48,9 +48,11 @@
 		A1000049229E0036 /* VoipService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100004A229E0037 /* VoipService.swift */; };
 		A100004E229E003B /* TwilioVoice in Frameworks */ = {isa = PBXBuildFile; productRef = A100004D229E003A /* TwilioVoice */; };
 		A1000050229E0040 /* ReviewRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000051229E0041 /* ReviewRequestManager.swift */; };
+		A1RC0002229E0002 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = A1RC0001229E0001 /* RevenueCat */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		85E10C85FDF3D980C3010ECA /* AttributionService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AttributionService.swift; sourceTree = "<group>"; };
 		A1000000229E0000 /* SummaryAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SummaryAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000002229E0001 /* SummaryAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryAIApp.swift; sourceTree = "<group>"; };
 		A1000004229E0002 /* APIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIModels.swift; sourceTree = "<group>"; };
@@ -192,6 +194,7 @@
 				A100004B229E0038 /* VoIP */,
 				A1000051229E0041 /* ReviewRequestManager.swift */,
 				A1000032229E001E /* SubscriptionService.swift */,
+				85E10C85FDF3D980C3010ECA /* AttributionService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -392,6 +395,7 @@
 				A1000045229E0032 /* PhoneViewModel.swift in Sources */,
 				A1000047229E0034 /* PhoneView.swift in Sources */,
 				A1000049229E0036 /* VoipService.swift in Sources */,
+				5C8E9464F4559E83B6341B6F /* AttributionService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
