@@ -88,6 +88,7 @@ struct PaywallView: View {
                 if selectedPackage == nil {
                     selectedPackage = subscriptionService.yearlyPackage
                 }
+                AnalyticsService.shared.logPaywallViewed(source: "onboarding")
             }
 
             Spacer(minLength: 0)
@@ -169,13 +170,27 @@ struct PaywallView: View {
         isPurchasing = true
         defer { isPurchasing = false }
 
+        AnalyticsService.shared.logSubscriptionStarted(productId: package.storeProduct.productIdentifier)
+
         do {
             let success = try await subscriptionService.purchase(package)
             if success {
+                let price = (package.storeProduct.price as NSDecimalNumber).doubleValue
+                let currency = package.storeProduct.currencyCode ?? "USD"
+                AnalyticsService.shared.logSubscriptionCompleted(
+                    productId: package.storeProduct.productIdentifier,
+                    price: price,
+                    currency: currency
+                )
+                AnalyticsService.shared.setSubscriptionStatus(true)
                 hasCompletedPaywall = true
                 dismiss()
             }
         } catch {
+            AnalyticsService.shared.logSubscriptionFailed(
+                productId: package.storeProduct.productIdentifier,
+                error: error.localizedDescription
+            )
             errorMessage = "Purchase failed. Please try again."
             showError = true
         }

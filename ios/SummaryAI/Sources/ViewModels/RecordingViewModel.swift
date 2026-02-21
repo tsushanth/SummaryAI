@@ -202,6 +202,7 @@ final class RecordingViewModel: ObservableObject {
         do {
             try await recordingManager.startRecording()
             state = .recording
+            AnalyticsService.shared.logRecordingStarted()
         } catch {
             showError(error.localizedDescription)
         }
@@ -275,6 +276,9 @@ final class RecordingViewModel: ObservableObject {
 
             // Track successful recording for review request
             ReviewRequestManager.shared.recordingCompleted()
+
+            // Track analytics
+            AnalyticsService.shared.logRecordingStopped(durationSeconds: Int(result.duration))
 
             print("[RecordingViewModel] Recording uploaded and processing: \(recording.id)")
 

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		88DA84B12F07436B0084B5E7 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 88DA84B02F07436B0084B5E7 /* GoogleSignIn */; };
 		88DA84B32F07436B0084B5E7 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 88DA84B22F07436B0084B5E7 /* GoogleSignInSwift */; };
+		A1FB0002229E0002 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = A1FB0001229E0001 /* FirebaseAnalytics */; };
 		A1RC0002229E0002 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = A1RC0001229E0001 /* RevenueCat */; };
 		A1000001229E0001 /* SummaryAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002229E0001 /* SummaryAIApp.swift */; };
 		A1000003229E0002 /* APIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000004229E0002 /* APIModels.swift */; };
@@ -48,6 +49,7 @@
 		A1000049229E0036 /* VoipService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100004A229E0037 /* VoipService.swift */; };
 		A100004E229E003B /* TwilioVoice in Frameworks */ = {isa = PBXBuildFile; productRef = A100004D229E003A /* TwilioVoice */; };
 		A1000050229E0040 /* ReviewRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000051229E0041 /* ReviewRequestManager.swift */; };
+		A1000052229E0042 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000053229E0043 /* AnalyticsService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -92,6 +94,7 @@
 		A1000048229E0035 /* PhoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneView.swift; sourceTree = "<group>"; };
 		A100004A229E0037 /* VoipService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoipService.swift; sourceTree = "<group>"; };
 		A1000051229E0041 /* ReviewRequestManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewRequestManager.swift; sourceTree = "<group>"; };
+		A1000053229E0043 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,6 +105,7 @@
 				88DA84B12F07436B0084B5E7 /* GoogleSignIn in Frameworks */,
 				88DA84B32F07436B0084B5E7 /* GoogleSignInSwift in Frameworks */,
 				A100004E229E003B /* TwilioVoice in Frameworks */,
+				A1FB0002229E0002 /* FirebaseAnalytics in Frameworks */,
 				A1RC0002229E0002 /* RevenueCat in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -190,6 +194,7 @@
 				A10000AC229E00AC /* Auth */,
 				A10000AD229E00AD /* Export */,
 				A100004B229E0038 /* VoIP */,
+				A1000053229E0043 /* AnalyticsService.swift */,
 				A1000051229E0041 /* ReviewRequestManager.swift */,
 				A1000032229E001E /* SubscriptionService.swift */,
 			);
@@ -296,6 +301,7 @@
 				88DA84B02F07436B0084B5E7 /* GoogleSignIn */,
 				88DA84B22F07436B0084B5E7 /* GoogleSignInSwift */,
 				A100004D229E003A /* TwilioVoice */,
+				A1FB0001229E0001 /* FirebaseAnalytics */,
 				A1RC0001229E0001 /* RevenueCat */,
 			);
 			productName = SummaryAI;
@@ -329,6 +335,7 @@
 			packageReferences = (
 				88DA84AF2F07436B0084B5E7 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				A100004C229E0039 /* XCRemoteSwiftPackageReference "twilio-voice-ios" */,
+				A1FB0000229E0000 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				A1RC0000229E0000 /* XCRemoteSwiftPackageReference "purchases-ios" */,
 			);
 			productRefGroup = A10000A2229E00A2 /* Products */;
@@ -380,6 +387,7 @@
 				A1000023229E0012 /* SettingsView.swift in Sources */,
 				A1000031229E001D /* SubscriptionService.swift in Sources */,
 				A1000050229E0040 /* ReviewRequestManager.swift in Sources */,
+				A1000052229E0042 /* AnalyticsService.swift in Sources */,
 				A1000033229E001F /* PaywallView.swift in Sources */,
 				A1000035229E0021 /* JoinMeetingView.swift in Sources */,
 				A1000037229E0023 /* JoinMeetingViewModel.swift in Sources */,
@@ -625,6 +633,14 @@
 				minimumVersion = 6.0.0;
 			};
 		};
+		A1FB0000229E0000 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.0.0;
+			};
+		};
 		A1RC0000229E0000 /* XCRemoteSwiftPackageReference "purchases-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/RevenueCat/purchases-ios";
@@ -650,6 +666,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A100004C229E0039 /* XCRemoteSwiftPackageReference "twilio-voice-ios" */;
 			productName = TwilioVoice;
+		};
+		A1FB0001229E0001 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1FB0000229E0000 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
 		};
 		A1RC0001229E0001 /* RevenueCat */ = {
 			isa = XCSwiftPackageProductDependency;
