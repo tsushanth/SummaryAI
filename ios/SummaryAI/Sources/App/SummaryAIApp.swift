@@ -1,6 +1,7 @@
 import SwiftUI
 import UserNotifications
 import GoogleSignIn
+import FirebaseCore
 
 // MARK: - App Entry Point
 
@@ -11,6 +12,10 @@ struct SummaryAIApp: App {
     @StateObject private var subscriptionService = SubscriptionService()
 
     init() {
+        // Configure Firebase for analytics and attribution tracking
+        FirebaseApp.configure()
+        AnalyticsService.configure()
+
         // Configure RevenueCat for in-app purchases and attribution tracking
         SubscriptionService.configure()
     }
@@ -79,12 +84,18 @@ struct RootView: View {
                 Task {
                     await subscriptionService.loginUser(userId: user.id)
                 }
+                // Set analytics user ID
+                AnalyticsService.shared.setUserId(user.id)
+                AnalyticsService.shared.logSignInCompleted(method: "google")
             }
             // Logout from RevenueCat when user signs out
             if case .authenticated = oldState, case .unauthenticated = newState {
                 Task {
                     await subscriptionService.logoutUser()
                 }
+                // Clear analytics user ID
+                AnalyticsService.shared.setUserId(nil)
+                AnalyticsService.shared.logSignOut()
             }
         }
     }
@@ -300,6 +311,7 @@ struct OnboardingView: View {
                 // Skip button (only on first pages)
                 if currentPage < pages.count - 1 {
                     Button("Skip") {
+                        AnalyticsService.shared.logOnboardingSkipped(atPage: currentPage)
                         showNotificationPrompt = true
                     }
                     .foregroundColor(.secondary)
@@ -326,6 +338,7 @@ struct OnboardingView: View {
     }
 
     private func completeOnboarding() {
+        AnalyticsService.shared.logOnboardingCompleted()
         withAnimation {
             hasCompletedOnboarding = true
         }
