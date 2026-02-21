@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		88DA84B12F07436B0084B5E7 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 88DA84B02F07436B0084B5E7 /* GoogleSignIn */; };
 		88DA84B32F07436B0084B5E7 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 88DA84B22F07436B0084B5E7 /* GoogleSignInSwift */; };
+		A1FB0002229E0002 /* FacebookCore in Frameworks */ = {isa = PBXBuildFile; productRef = A1FB0001229E0001 /* FacebookCore */; };
 		A1RC0002229E0002 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = A1RC0001229E0001 /* RevenueCat */; };
 		A1000001229E0001 /* SummaryAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002229E0001 /* SummaryAIApp.swift */; };
 		A1000003229E0002 /* APIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000004229E0002 /* APIModels.swift */; };
@@ -102,6 +103,7 @@
 				88DA84B12F07436B0084B5E7 /* GoogleSignIn in Frameworks */,
 				88DA84B32F07436B0084B5E7 /* GoogleSignInSwift in Frameworks */,
 				A100004E229E003B /* TwilioVoice in Frameworks */,
+				A1FB0002229E0002 /* FacebookCore in Frameworks */,
 				A1RC0002229E0002 /* RevenueCat in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -296,6 +298,7 @@
 				88DA84B02F07436B0084B5E7 /* GoogleSignIn */,
 				88DA84B22F07436B0084B5E7 /* GoogleSignInSwift */,
 				A100004D229E003A /* TwilioVoice */,
+				A1FB0001229E0001 /* FacebookCore */,
 				A1RC0001229E0001 /* RevenueCat */,
 			);
 			productName = SummaryAI;
@@ -329,6 +332,7 @@
 			packageReferences = (
 				88DA84AF2F07436B0084B5E7 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				A100004C229E0039 /* XCRemoteSwiftPackageReference "twilio-voice-ios" */,
+				A1FB0000229E0000 /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */,
 				A1RC0000229E0000 /* XCRemoteSwiftPackageReference "purchases-ios" */,
 			);
 			productRefGroup = A10000A2229E00A2 /* Products */;
@@ -625,6 +629,14 @@
 				minimumVersion = 6.0.0;
 			};
 		};
+		A1FB0000229E0000 /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/facebook/facebook-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 17.0.0;
+			};
+		};
 		A1RC0000229E0000 /* XCRemoteSwiftPackageReference "purchases-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/RevenueCat/purchases-ios";
@@ -650,6 +662,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A100004C229E0039 /* XCRemoteSwiftPackageReference "twilio-voice-ios" */;
 			productName = TwilioVoice;
+		};
+		A1FB0001229E0001 /* FacebookCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1FB0000229E0000 /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */;
+			productName = FacebookCore;
 		};
 		A1RC0001229E0001 /* RevenueCat */ = {
 			isa = XCSwiftPackageProductDependency;
