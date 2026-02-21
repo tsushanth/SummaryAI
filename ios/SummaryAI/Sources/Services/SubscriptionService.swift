@@ -122,6 +122,10 @@ final class SubscriptionService: ObservableObject {
             customerInfo = try await Purchases.shared.restorePurchases()
             await updateSubscriptionStatus()
             print("[SubscriptionService] Purchases restored")
+            if subscriptionStatus.isActive {
+                AnalyticsService.shared.logSubscriptionRestored()
+                AnalyticsService.shared.setSubscriptionStatus(true)
+            }
         } catch {
             print("[SubscriptionService] Failed to restore purchases: \(error)")
             errorMessage = "Failed to restore purchases"
