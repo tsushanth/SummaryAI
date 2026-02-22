@@ -2,6 +2,7 @@ import SwiftUI
 import UserNotifications
 import GoogleSignIn
 import FirebaseCore
+import FacebookCore
 
 // MARK: - App Entry Point
 
@@ -21,6 +22,11 @@ struct SummaryAIApp: App {
 
         // Track Apple Search Ads attribution for ASA bid optimization
         AttributionService.shared.trackAttribution()
+        // Initialize Facebook SDK for Meta Ads attribution and CAPI
+        ApplicationDelegate.shared.application(
+            UIApplication.shared,
+            didFinishLaunchingWithOptions: nil
+        )
     }
 
     var body: some Scene {
@@ -42,6 +48,14 @@ struct SummaryAIApp: App {
                 .onOpenURL { url in
                     // Handle Google Sign-In callback
                     GIDSignIn.sharedInstance.handle(url)
+
+                    // Handle Facebook URL callback for deep linking
+                    ApplicationDelegate.shared.application(
+                        UIApplication.shared,
+                        open: url,
+                        sourceApplication: nil,
+                        annotation: UIApplication.OpenURLOptionsKey.annotation
+                    )
                 }
         }
     }
