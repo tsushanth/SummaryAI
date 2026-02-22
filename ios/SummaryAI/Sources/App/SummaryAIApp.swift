@@ -18,6 +18,9 @@ struct SummaryAIApp: App {
 
         // Configure RevenueCat for in-app purchases and attribution tracking
         SubscriptionService.configure()
+
+        // Track Apple Search Ads attribution for ASA bid optimization
+        AttributionService.shared.trackAttribution()
     }
 
     var body: some Scene {
