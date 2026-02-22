@@ -7,12 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5C8E9464F4559E83B6341B6F /* AttributionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85E10C85FDF3D980C3010ECA /* AttributionService.swift */; };
 		88DA84B12F07436B0084B5E7 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 88DA84B02F07436B0084B5E7 /* GoogleSignIn */; };
 		88DA84B32F07436B0084B5E7 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 88DA84B22F07436B0084B5E7 /* GoogleSignInSwift */; };
-		A1FB0002229E0002 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = A1FB0001229E0001 /* FirebaseAnalytics */; };
-		A1FB0002229E0002 /* FacebookCore in Frameworks */ = {isa = PBXBuildFile; productRef = A1FB0001229E0001 /* FacebookCore */; };
-		A1RC0002229E0002 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = A1RC0001229E0001 /* RevenueCat */; };
 		A1000001229E0001 /* SummaryAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002229E0001 /* SummaryAIApp.swift */; };
 		A1000003229E0002 /* APIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000004229E0002 /* APIModels.swift */; };
 		A1000005229E0003 /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000006229E0003 /* APIError.swift */; };
@@ -52,11 +48,13 @@
 		A100004E229E003B /* TwilioVoice in Frameworks */ = {isa = PBXBuildFile; productRef = A100004D229E003A /* TwilioVoice */; };
 		A1000050229E0040 /* ReviewRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000051229E0041 /* ReviewRequestManager.swift */; };
 		A1000052229E0042 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000053229E0043 /* AnalyticsService.swift */; };
+		A1FB0002229E0002 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = A1FB0001229E0001 /* FirebaseAnalytics */; };
 		A1RC0002229E0002 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = A1RC0001229E0001 /* RevenueCat */; };
+		B8692A64ADB88CDE64F07A75 /* AttributionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F12911BF39626F5F9FA9FD3 /* AttributionService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		85E10C85FDF3D980C3010ECA /* AttributionService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AttributionService.swift; sourceTree = "<group>"; };
+		3F12911BF39626F5F9FA9FD3 /* AttributionService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AttributionService.swift; sourceTree = "<group>"; };
 		A1000000229E0000 /* SummaryAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SummaryAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000002229E0001 /* SummaryAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryAIApp.swift; sourceTree = "<group>"; };
 		A1000004229E0002 /* APIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIModels.swift; sourceTree = "<group>"; };
@@ -110,7 +108,6 @@
 				88DA84B32F07436B0084B5E7 /* GoogleSignInSwift in Frameworks */,
 				A100004E229E003B /* TwilioVoice in Frameworks */,
 				A1FB0002229E0002 /* FirebaseAnalytics in Frameworks */,
-				A1FB0002229E0002 /* FacebookCore in Frameworks */,
 				A1RC0002229E0002 /* RevenueCat in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -202,7 +199,7 @@
 				A1000053229E0043 /* AnalyticsService.swift */,
 				A1000051229E0041 /* ReviewRequestManager.swift */,
 				A1000032229E001E /* SubscriptionService.swift */,
-				85E10C85FDF3D980C3010ECA /* AttributionService.swift */,
+				3F12911BF39626F5F9FA9FD3 /* AttributionService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -308,8 +305,8 @@
 				88DA84B22F07436B0084B5E7 /* GoogleSignInSwift */,
 				A100004D229E003A /* TwilioVoice */,
 				A1FB0001229E0001 /* FirebaseAnalytics */,
-				A1FB0001229E0001 /* FacebookCore */,
 				A1RC0001229E0001 /* RevenueCat */,
+				F69526AC8420CD8A528B05DC /* FacebookCore */,
 			);
 			productName = SummaryAI;
 			productReference = A1000000229E0000 /* SummaryAI.app */;
@@ -343,8 +340,8 @@
 				88DA84AF2F07436B0084B5E7 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				A100004C229E0039 /* XCRemoteSwiftPackageReference "twilio-voice-ios" */,
 				A1FB0000229E0000 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
-				A1FB0000229E0000 /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */,
 				A1RC0000229E0000 /* XCRemoteSwiftPackageReference "purchases-ios" */,
+				841143FFC0D782A41972767F /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */,
 			);
 			productRefGroup = A10000A2229E00A2 /* Products */;
 			projectDirPath = "";
@@ -408,7 +405,7 @@
 				A1000045229E0032 /* PhoneViewModel.swift in Sources */,
 				A1000047229E0034 /* PhoneView.swift in Sources */,
 				A1000049229E0036 /* VoipService.swift in Sources */,
-				5C8E9464F4559E83B6341B6F /* AttributionService.swift in Sources */,
+				B8692A64ADB88CDE64F07A75 /* AttributionService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -626,6 +623,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		841143FFC0D782A41972767F /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/facebook/facebook-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 17.0.0;
+			};
+		};
 		88DA84AF2F07436B0084B5E7 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
@@ -648,9 +653,6 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 11.0.0;
-		A1FB0000229E0000 /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */ = {
-			repositoryURL = "https://github.com/facebook/facebook-ios-sdk";
-				minimumVersion = 17.0.0;
 			};
 		};
 		A1RC0000229E0000 /* XCRemoteSwiftPackageReference "purchases-ios" */ = {
@@ -683,14 +685,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A1FB0000229E0000 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAnalytics;
-		A1FB0001229E0001 /* FacebookCore */ = {
-			package = A1FB0000229E0000 /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */;
-			productName = FacebookCore;
 		};
 		A1RC0001229E0001 /* RevenueCat */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = A1RC0000229E0000 /* XCRemoteSwiftPackageReference "purchases-ios" */;
 			productName = RevenueCat;
+		};
+		F69526AC8420CD8A528B05DC /* FacebookCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 841143FFC0D782A41972767F /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */;
+			productName = FacebookCore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
