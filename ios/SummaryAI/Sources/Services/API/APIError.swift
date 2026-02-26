@@ -17,6 +17,7 @@ enum APIError: Error, LocalizedError {
     case uploadFailed(Error)
     case noAccessToken
     case fileError(String)
+    case consentRequired
     case unknown(Error)
 
     var errorDescription: String? {
@@ -47,6 +48,8 @@ enum APIError: Error, LocalizedError {
             return "No access token available. Please log in."
         case .fileError(let message):
             return "File error: \(message)"
+        case .consentRequired:
+            return "AI data sharing consent is required. Please grant consent in Settings > Data & Privacy."
         case .unknown(let error):
             return "An unexpected error occurred: \(error.localizedDescription)"
         }

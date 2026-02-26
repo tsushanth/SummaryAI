@@ -123,6 +123,16 @@ final class SummaryAIAPIClient: NSObject, ObservableObject {
         super.init()
     }
 
+    // MARK: - Consent Check
+
+    /// Verifies the user has consented to AI data sharing before sending data to cloud services
+    private func requireAIConsent() async throws {
+        let hasConsent = await MainActor.run { AIDataConsentManager.shared.hasConsented }
+        guard hasConsent else {
+            throw APIError.consentRequired
+        }
+    }
+
     // MARK: - Recording API
 
     /// Create a new recording and get upload URL
@@ -244,6 +254,7 @@ final class SummaryAIAPIClient: NSObject, ObservableObject {
         duration: TimeInterval,
         progressHandler: ((UploadProgress) -> Void)? = nil
     ) async throws -> Recording {
+        try await requireAIConsent()
         // Get file size
         let fileAttributes = try FileManager.default.attributesOfItem(atPath: fileURL.path)
         let fileSize = fileAttributes[.size] as? Int64 ?? 0
@@ -286,6 +297,7 @@ final class SummaryAIAPIClient: NSObject, ObservableObject {
         fileURL: URL,
         progressHandler: ((UploadProgress) -> Void)? = nil
     ) async throws -> Recording {
+        try await requireAIConsent()
         // Start accessing the security-scoped resource
         guard fileURL.startAccessingSecurityScopedResource() else {
             throw APIError.fileError("Unable to access file")
@@ -527,6 +539,7 @@ final class SummaryAIAPIClient: NSObject, ObservableObject {
     /// - Parameter request: Text to parse into todos
     /// - Returns: Created todos
     func createTodosFromText(request: CreateTodosFromTextRequest) async throws -> [TodoItem] {
+        try await requireAIConsent()
         let response: TodosResponse = try await post(
             endpoint: "/api/todos/from-text",
             body: request,
