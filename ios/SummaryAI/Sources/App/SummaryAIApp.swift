@@ -27,6 +27,10 @@ struct SummaryAIApp: App {
             UIApplication.shared,
             didFinishLaunchingWithOptions: nil
         )
+
+        // Initialize TikTok Events SDK for install attribution
+        TikTokHelper.shared.initialize()
+        TikTokHelper.shared.requestTrackingPermission()
     }
 
     var body: some Scene {
@@ -67,6 +71,7 @@ struct SummaryAIApp: App {
 struct RootView: View {
     @EnvironmentObject var authService: AuthService
     @EnvironmentObject var subscriptionService: SubscriptionService
+    @StateObject private var consentManager = AIDataConsentManager.shared
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("hasSeenPaywall") private var hasSeenPaywall = false
 
@@ -79,22 +84,28 @@ struct RootView: View {
             case .unauthenticated, .authenticating:
                 if !hasCompletedOnboarding {
                     OnboardingView(hasCompletedOnboarding: $hasCompletedOnboarding)
-                } else if !hasSeenPaywall {
-                    PaywallView(
-                        subscriptionService: subscriptionService,
-                        hasCompletedPaywall: $hasSeenPaywall
-                    )
+                } else if consentManager.needsConsent {
+                    AIDataConsentView(isOnboarding: true)
                 } else {
                     SignInView()
+                        .fullScreenCover(isPresented: .constant(!hasSeenPaywall)) {
+                            RemotePaywallView(triggerSource: "onboarding")
+                                .onDisappear { hasSeenPaywall = true }
+                        }
                 }
 
             case .authenticated:
-                MainTabView()
+                if consentManager.needsConsent {
+                    AIDataConsentView(isOnboarding: true)
+                } else {
+                    MainTabView()
+                }
             }
         }
         .animation(.easeInOut(duration: 0.3), value: authService.state.isAuthenticated)
         .animation(.easeInOut(duration: 0.3), value: hasCompletedOnboarding)
         .animation(.easeInOut(duration: 0.3), value: hasSeenPaywall)
+        .animation(.easeInOut(duration: 0.3), value: consentManager.hasConsented)
         .onChange(of: authService.state) { oldState, newState in
             // Link RevenueCat user ID when user authenticates
             if case .authenticated(let user) = newState {
