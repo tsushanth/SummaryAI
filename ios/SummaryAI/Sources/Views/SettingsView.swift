@@ -14,6 +14,8 @@ struct SettingsView: View {
     @State private var deleteErrorMessage = ""
     @State private var showDisconnectConfirmation = false
     @State private var providerToDisconnect: String?
+    @State private var showingDataConsent = false
+    @ObservedObject private var consentManager = AIDataConsentManager.shared
 
     var body: some View {
         NavigationStack {
@@ -23,6 +25,9 @@ struct SettingsView: View {
 
                 // Integrations Section
                 integrationsSection
+
+                // Data & Privacy Section
+                dataPrivacySection
 
                 // Legal Section
                 legalSection
@@ -101,6 +106,38 @@ struct SettingsView: View {
         case .apple: return "Apple"
         case .google: return "Google"
         case .email: return "Email"
+        }
+    }
+
+    // MARK: - Data & Privacy Section
+
+    @ViewBuilder
+    private var dataPrivacySection: some View {
+        Section {
+            Button {
+                showingDataConsent = true
+            } label: {
+                HStack {
+                    Label("AI Data Sharing", systemImage: "shield.checkered")
+                    Spacer()
+                    Text(consentManager.hasConsented ? "Allowed" : "Not Allowed")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .foregroundColor(.primary)
+        } header: {
+            Text("Data & Privacy")
+        } footer: {
+            Text(consentManager.hasConsented
+                 ? "Your recordings are processed by cloud AI services for transcription and summarization."
+                 : "AI-powered features are disabled. Grant consent to enable transcription, summaries, and more.")
+        }
+        .sheet(isPresented: $showingDataConsent) {
+            AIDataConsentView(isOnboarding: false)
         }
     }
 
@@ -472,7 +509,7 @@ struct FAQView: View {
         ),
         FAQItem(
             question: "Are my recordings private?",
-            answer: "Yes, absolutely. Your recordings are encrypted and stored securely. Only you have access to your recordings and transcripts. We never share your data with third parties or use it to train our AI models."
+            answer: "Yes. Your recordings are encrypted and stored securely. To provide transcription and summarization, your audio and text are processed by third-party AI services (Deepgram for transcription, OpenAI for summaries). These services do not use your data for model training. You control this sharing via Settings > Data & Privacy."
         ),
         FAQItem(
             question: "How accurate are the transcriptions?",
