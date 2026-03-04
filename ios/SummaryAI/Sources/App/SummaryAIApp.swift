@@ -2,7 +2,7 @@ import SwiftUI
 import UserNotifications
 import GoogleSignIn
 import FirebaseCore
-import FacebookCore
+import AppTrackingTransparency
 
 // MARK: - App Entry Point
 
@@ -22,15 +22,9 @@ struct SummaryAIApp: App {
 
         // Track Apple Search Ads attribution for ASA bid optimization
         AttributionService.shared.trackAttribution()
-        // Initialize Facebook SDK for Meta Ads attribution and CAPI
-        ApplicationDelegate.shared.application(
-            UIApplication.shared,
-            didFinishLaunchingWithOptions: nil
-        )
 
-        // Initialize TikTok Events SDK for install attribution
-        TikTokHelper.shared.initialize()
-        TikTokHelper.shared.requestTrackingPermission()
+        // NOTE: TikTok SDK initialization is deferred until after ATT consent
+        // (see requestTrackingPermission below)
     }
 
     var body: some Scene {
@@ -49,19 +43,41 @@ struct SummaryAIApp: App {
                         try await authService.refreshSession()
                     }
                 }
+                .task {
+                    // Request ATT permission then initialize tracking SDKs
+                    await requestTrackingPermission()
+                }
                 .onOpenURL { url in
                     // Handle Google Sign-In callback
                     GIDSignIn.sharedInstance.handle(url)
-
-                    // Handle Facebook URL callback for deep linking
-                    ApplicationDelegate.shared.application(
-                        UIApplication.shared,
-                        open: url,
-                        sourceApplication: nil,
-                        annotation: UIApplication.OpenURLOptionsKey.annotation
-                    )
                 }
         }
+    }
+
+    /// Request App Tracking Transparency authorization before initializing
+    /// tracking SDKs. Apple requires this prompt to appear before any data
+    /// collection that could be used to track the user.
+    private func requestTrackingPermission() async {
+        // Small delay to ensure the UI is fully presented (Apple requirement)
+        try? await Task.sleep(for: .seconds(1))
+
+        let status = await ATTrackingManager.requestTrackingAuthorization()
+
+        switch status {
+        case .authorized:
+            print("[ATT] User authorized tracking")
+        case .denied:
+            print("[ATT] User denied tracking")
+        case .restricted:
+            print("[ATT] Tracking restricted")
+        case .notDetermined:
+            print("[ATT] Tracking not determined")
+        @unknown default:
+            print("[ATT] Unknown tracking status")
+        }
+
+        // Initialize TikTok SDK after ATT decision (regardless of outcome)
+        TikTokHelper.shared.initialize()
     }
 }
 
@@ -88,9 +104,11 @@ struct RootView: View {
                     AIDataConsentView(isOnboarding: true)
                 } else {
                     SignInView()
-                        .fullScreenCover(isPresented: .constant(!hasSeenPaywall)) {
+                        .fullScreenCover(isPresented: Binding(
+                            get: { !hasSeenPaywall },
+                            set: { if !$0 { hasSeenPaywall = true } }
+                        )) {
                             RemotePaywallView(triggerSource: "onboarding")
-                                .onDisappear { hasSeenPaywall = true }
                         }
                 }
 

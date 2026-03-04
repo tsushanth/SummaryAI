@@ -327,7 +327,6 @@
 				A100004D229E003A /* TwilioVoice */,
 				A1FB0001229E0001 /* FirebaseAnalytics */,
 				A1RC0001229E0001 /* RevenueCat */,
-				F69526AC8420CD8A528B05DC /* FacebookCore */,
 				BADB2B1870CE121AD1511C30 /* RevenueCatUI */,
 				TT0000000000000000000002 /* TikTokBusinessSDK */,
 			);
@@ -364,7 +363,6 @@
 				A100004C229E0039 /* XCRemoteSwiftPackageReference "twilio-voice-ios" */,
 				A1FB0000229E0000 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				A1RC0000229E0000 /* XCRemoteSwiftPackageReference "purchases-ios" */,
-				841143FFC0D782A41972767F /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */,
 				TT0000000000000000000003 /* XCRemoteSwiftPackageReference "tiktok-business-ios-sdk" */,
 			);
 			productRefGroup = A10000A2229E00A2 /* Products */;
@@ -567,7 +565,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SummaryAI/SummaryAI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 23;
 				DEVELOPMENT_ASSET_PATHS = "\"SummaryAI/Preview Content\"";
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				ENABLE_PREVIEWS = YES;
@@ -601,7 +599,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SummaryAI/SummaryAI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 23;
 				DEVELOPMENT_ASSET_PATHS = "\"SummaryAI/Preview Content\"";
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				ENABLE_PREVIEWS = YES;
@@ -652,14 +650,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		841143FFC0D782A41972767F /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/facebook/facebook-ios-sdk.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 17.0.0;
-			};
-		};
 		88DA84AF2F07436B0084B5E7 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
@@ -732,11 +722,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A1RC0000229E0000 /* XCRemoteSwiftPackageReference "purchases-ios" */;
 			productName = RevenueCatUI;
-		};
-		F69526AC8420CD8A528B05DC /* FacebookCore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 841143FFC0D782A41972767F /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */;
-			productName = FacebookCore;
 		};
 	TT0000000000000000000002 /* TikTokBusinessSDK */ = {
 		isa = XCSwiftPackageProductDependency;
