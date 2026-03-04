@@ -53,6 +53,8 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Meeting Mind uses this identifier to measure the effectiveness of advertising campaigns and provide you with a more personalized experience.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>CFBundleURLTypes</key>
@@ -75,38 +77,20 @@
 				<string>summaryai</string>
 			</array>
 		</dict>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLName</key>
-			<string>Facebook</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>fb2151317385689073</string>
-			</array>
-		</dict>
 	</array>
 	<key>GIDClientID</key>
 	<string>753424767416-8ed2ohh2206r0h6cu864asieagip9mmh.apps.googleusercontent.com</string>
-	<key>FacebookAppID</key>
-	<string>2151317385689073</string>
-	<key>FacebookClientToken</key>
-	<string>d50af257c9bd994081b1686067f83e24</string>
-	<key>FacebookDisplayName</key>
-	<string>Meeting Mind</string>
-	<key>FacebookAdvertiserIDCollectionEnabled</key>
-	<true/>
-	<key>FacebookAutoLogAppEventsEnabled</key>
-	<true/>
 	<key>SKAdNetworkItems</key>
 	<array>
+		<!-- TikTok / Bytedance (Non-China) -->
 		<dict>
 			<key>SKAdNetworkIdentifier</key>
-			<string>v9wttpbfk9.skadnetwork</string>
+			<string>22mmun2rn5.skadnetwork</string>
 		</dict>
+		<!-- TikTok / Bytedance (China / Pangle) -->
 		<dict>
 			<key>SKAdNetworkIdentifier</key>
-			<string>n38lu8286q.skadnetwork</string>
+			<string>238da6jt44.skadnetwork</string>
 		</dict>
 	</array>
 </dict>
