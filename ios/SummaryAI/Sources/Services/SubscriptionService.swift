@@ -56,6 +56,13 @@ final class SubscriptionService: ObservableObject {
         // Enable automatic Apple Search Ads attribution collection
         Purchases.shared.attribution.enableAdServicesAttributionTokenCollection()
 
+        // Set customer attributes for segmentation
+        Purchases.shared.attribution.setAttributes([
+            "$appVersion": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "",
+            "app_name": "MeetingMind",
+            "platform": "ios"
+        ])
+
         print("[SubscriptionService] RevenueCat configured")
     }
 

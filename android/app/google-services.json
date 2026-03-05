@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "142683278135",
+    "project_id": "meetingmind-kk",
+    "storage_bucket": "meetingmind-kk.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:142683278135:android:8a625ab253c501ae0b68b2",
+        "android_client_info": {
+          "package_name": "com.kreativekoala.meetingmind"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPfAXjaBtagGQZitRbW2-oVYttxGylnyM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -48,3 +48,8 @@
 -keep,allowobfuscation,allowshrinking interface retrofit2.Call
 -keep,allowobfuscation,allowshrinking class retrofit2.Response
 -keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
+
+# TikTok SDK
+-dontwarn com.android.installreferrer.api.InstallReferrerClient$Builder
+-dontwarn com.android.installreferrer.api.InstallReferrerClient
+-dontwarn com.android.installreferrer.api.InstallReferrerStateListener

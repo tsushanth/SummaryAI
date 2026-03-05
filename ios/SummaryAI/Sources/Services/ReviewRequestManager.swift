@@ -30,7 +30,7 @@ final class ReviewRequestManager: ObservableObject {
         static let recordingsThreshold = 1
 
         /// Feedback/contact URL for users who don't enjoy the app
-        static let feedbackURL = "https://kreativekoala.llc/contact"
+        static let feedbackEmail = "support@kreativekoala.llc"
     }
 
     // MARK: - Properties
@@ -147,9 +147,12 @@ final class ReviewRequestManager: ObservableObject {
     }
 
     private func openFeedbackPage() {
-        guard let url = URL(string: Constants.feedbackURL) else { return }
+        let appName = Bundle.main.infoDictionary?["CFBundleDisplayName"] as? String
+            ?? Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "the app"
+        let subject = "Feedback for \(appName)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        guard let url = URL(string: "mailto:\(Constants.feedbackEmail)?subject=\(subject)") else { return }
         UIApplication.shared.open(url)
-        print("[ReviewRequestManager] Opened feedback page")
+        print("[ReviewRequestManager] Opened feedback email")
     }
 
     // MARK: - Debug/Testing

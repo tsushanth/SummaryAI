@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -23,8 +24,8 @@ android {
         applicationId = "com.kreativekoala.meetingmind"
         minSdk = 26
         targetSdk = 35
-        versionCode = 10
-        versionName = "1.0.9"
+        versionCode = 16
+        versionName = "1.4.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -138,7 +139,8 @@ dependencies {
     implementation(libs.play.services.auth)
 
     // RevenueCat (replaces Play Billing)
-    implementation("com.revenuecat.purchases:purchases:8.10.7")
+    implementation("com.revenuecat.purchases:purchases:9.22.2")
+    implementation("com.revenuecat.purchases:purchases-ui:9.22.2")
 
     // Supabase
     implementation(libs.supabase.gotrue)
@@ -154,4 +156,11 @@ dependencies {
 
     // Twilio Voice SDK (VoIP calling)
     implementation(libs.twilio.voice)
+
+    // Firebase Analytics (for Google Ads conversion tracking)
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-analytics")
+
+    // TikTok Events SDK (install attribution & event tracking)
+    implementation("com.github.tiktok:tiktok-business-android-sdk:1.6.0")
 }
