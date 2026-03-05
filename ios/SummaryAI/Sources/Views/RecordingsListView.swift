@@ -161,10 +161,7 @@ struct RecordingsListContentView: View {
             }
         }
         .sheet(isPresented: $showPaywall) {
-            PaywallView(
-                subscriptionService: subscriptionService,
-                hasCompletedPaywall: .constant(true)
-            )
+            RemotePaywallView(triggerSource: "recordings_list")
         }
         .task {
             await viewModel.loadRecordings()
