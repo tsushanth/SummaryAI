@@ -4,6 +4,8 @@ import android.app.Application
 import com.revenuecat.purchases.LogLevel
 import com.revenuecat.purchases.Purchases
 import com.revenuecat.purchases.PurchasesConfiguration
+import com.kreativekoala.summaryai.service.FirebaseAnalyticsHelper
+import com.kreativekoala.summaryai.service.TikTokHelper
 import dagger.hilt.android.HiltAndroidApp
 
 /**
@@ -18,6 +20,12 @@ class MeetingMindApplication : Application() {
 
         // Initialize RevenueCat for in-app purchases
         configureRevenueCat()
+
+        // Initialize Firebase Analytics for Google Ads conversion tracking
+        FirebaseAnalyticsHelper.initialize(this)
+
+        // Initialize TikTok Events SDK for install attribution
+        TikTokHelper.initialize(this)
     }
 
     private fun configureRevenueCat() {
