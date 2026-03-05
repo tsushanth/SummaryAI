@@ -284,9 +284,9 @@ final class RecordingViewModel: ObservableObject {
 
         } catch {
             showError("Upload failed: \(error.localizedDescription)")
-
+            state = .error(error.localizedDescription)
             // Keep the local file for retry
-            print("[RecordingViewModel] Upload failed, keeping local file for retry")
+            print("[RecordingViewModel] Upload failed, keeping local file for retry: \(error)")
         }
     }
 
