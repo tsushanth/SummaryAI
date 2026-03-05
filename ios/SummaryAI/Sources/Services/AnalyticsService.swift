@@ -103,6 +103,7 @@ final class AnalyticsService {
     /// Log an analytics event
     func logEvent(_ event: AnalyticsEvent, parameters: [String: Any]? = nil) {
         Analytics.logEvent(event.rawValue, parameters: parameters)
+        TikTokHelper.shared.trackEvent(event.rawValue, properties: parameters ?? [:])
 
         #if DEBUG
         print("[AnalyticsService] Event: \(event.rawValue), params: \(parameters ?? [:])")

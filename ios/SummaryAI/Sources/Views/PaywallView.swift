@@ -1,7 +1,7 @@
 import SwiftUI
 import RevenueCat
 
-struct PaywallView: View {
+struct LegacyPaywallView: View {
     @ObservedObject var subscriptionService: SubscriptionService
     @Binding var hasCompletedPaywall: Bool
     @State private var selectedPackage: Package?
@@ -20,12 +20,15 @@ struct PaywallView: View {
                     dismiss()
                 } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .font(.title2)
-                        .foregroundColor(.secondary.opacity(0.5))
+                        .font(.system(size: 28))
+                        .foregroundColor(.secondary.opacity(0.7))
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
+                .accessibilityLabel("Close")
             }
             .padding(.horizontal)
-            .padding(.top, 8)
+            .padding(.top, 12)
 
             // Header
             VStack(spacing: 6) {
@@ -40,16 +43,23 @@ struct PaywallView: View {
             }
             .padding(.horizontal)
 
-            // Features
-            VStack(alignment: .leading, spacing: 6) {
-                FeatureRow(icon: "waveform", text: "Unlimited recordings with speaker detection")
-                FeatureRow(icon: "doc.text", text: "AI summaries and action items")
-                FeatureRow(icon: "bubble.left.and.bubble.right", text: "Ask questions about your meetings")
+            // Features — what you get with Meeting Mind PRO
+            VStack(alignment: .leading, spacing: 8) {
+                FeatureRow(icon: "waveform", text: "Unlimited meeting recordings with real-time speaker detection")
+                FeatureRow(icon: "doc.text", text: "AI-generated summaries, key takeaways, and action items")
+                FeatureRow(icon: "bubble.left.and.bubble.right", text: "Ask AI questions about any recorded meeting")
+                FeatureRow(icon: "globe", text: "Transcription in 120+ languages")
+                FeatureRow(icon: "square.and.arrow.up", text: "Export transcripts as PDF or text files")
             }
             .padding(.horizontal, 24)
 
             // Plans
             VStack(spacing: 8) {
+                if subscriptionService.availablePackages.isEmpty && subscriptionService.isLoading {
+                    ProgressView("Loading plans...")
+                        .padding()
+                }
+
                 if let yearly = subscriptionService.yearlyPackage {
                     PlanRow(
                         name: "Annual",
@@ -84,7 +94,10 @@ struct PaywallView: View {
                 }
             }
             .padding(.horizontal)
-            .onAppear {
+            .task {
+                if subscriptionService.offerings == nil {
+                    await subscriptionService.loadOfferings()
+                }
                 if selectedPackage == nil {
                     selectedPackage = subscriptionService.yearlyPackage
                 }
@@ -295,9 +308,9 @@ private struct PlanRow: View {
 // MARK: - Preview
 
 #if DEBUG
-struct PaywallView_Previews: PreviewProvider {
+struct LegacyPaywallView_Previews: PreviewProvider {
     static var previews: some View {
-        PaywallView(
+        LegacyPaywallView(
             subscriptionService: SubscriptionService(),
             hasCompletedPaywall: .constant(false)
         )

@@ -3,6 +3,8 @@ package com.kreativekoala.summaryai.ui.paywall
 import android.app.Activity
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.kreativekoala.summaryai.service.FirebaseAnalyticsHelper
+import com.kreativekoala.summaryai.service.TikTokHelper
 import androidx.lifecycle.viewModelScope
 import com.revenuecat.purchases.CustomerInfo
 import com.revenuecat.purchases.Offering
@@ -132,6 +134,12 @@ class PaywallViewModel @Inject constructor() : ViewModel() {
                     purchaseSuccess = hasEntitlement,
                     hasActiveEntitlement = hasEntitlement
                 )
+
+                // Track purchase events for ad attribution
+                val productId = packageToPurchase.product.id
+                val price = packageToPurchase.product.price.amountMicros / 1_000_000.0
+                FirebaseAnalyticsHelper.logPurchaseCompleted(productId, price)
+                TikTokHelper.trackEvent("purchase_success")
             }
         )
     }
