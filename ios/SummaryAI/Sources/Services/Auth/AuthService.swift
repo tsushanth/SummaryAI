@@ -200,9 +200,28 @@ final class AuthService: NSObject, ObservableObject {
         if let token = storedToken {
             if !isTokenValid(token) {
                 print("Token expired, attempting refresh...")
-                try? await refreshSession()
+                do {
+                    try await refreshSession()
+                } catch {
+                    print("Token refresh failed: \(error). Returning expired token for retry.")
+                    // Still return the stored token — the server may accept it
+                    // or the caller will get a 401 and can prompt re-auth.
+                    // Don't clear session here; the user is still "logged in"
+                    // and a transient network error shouldn't log them out.
+                }
             }
             return getStoredAccessToken()
+        }
+
+        // No stored token at all — try refreshing from refresh token
+        if UserDefaults.standard.string(forKey: refreshTokenKey) != nil {
+            print("No access token but refresh token exists, attempting refresh...")
+            do {
+                try await refreshSession()
+                return getStoredAccessToken()
+            } catch {
+                print("Refresh from refresh token failed: \(error)")
+            }
         }
 
         print("No access token available")
