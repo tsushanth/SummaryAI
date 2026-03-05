@@ -128,10 +128,14 @@ fun MeetingMindNavGraph(
     hasCompletedOnboarding: Boolean,
     navController: NavHostController = rememberNavController()
 ) {
-    val startDestination = when {
-        !isAuthenticated -> Screen.Auth.route
-        !hasCompletedOnboarding -> Screen.Onboarding.route
-        else -> Screen.Recordings.route
+    // Only compute startDestination once on initial composition.
+    // Subsequent state changes are handled by the LaunchedEffect below.
+    val startDestination = remember {
+        when {
+            !isAuthenticated -> Screen.Auth.route
+            !hasCompletedOnboarding -> Screen.Onboarding.route
+            else -> Screen.Recordings.route
+        }
     }
 
     // Navigate when auth state changes - must handle transition from unauthenticated to authenticated
@@ -147,8 +151,8 @@ fun MeetingMindNavGraph(
 
         // If authenticated and should be on recordings, navigate there from auth
         if (isAuthenticated && hasCompletedOnboarding) {
-            if (currentRoute == Screen.Auth.route || currentRoute == null) {
-                android.util.Log.i("NavGraph", "Navigating from auth/null to recordings")
+            if (currentRoute == Screen.Auth.route) {
+                android.util.Log.i("NavGraph", "Navigating from auth to recordings")
                 navController.navigate(Screen.Recordings.route) {
                     popUpTo(Screen.Auth.route) { inclusive = true }
                 }
@@ -248,7 +252,7 @@ fun MeetingMindNavGraph(
             composable(Screen.Onboarding.route) {
                 OnboardingScreen(
                     onComplete = {
-                        navController.navigate(Screen.Recordings.route) {
+                        navController.navigate(Screen.Paywall.route) {
                             popUpTo(Screen.Onboarding.route) { inclusive = true }
                         }
                     }
@@ -387,8 +391,21 @@ fun MeetingMindNavGraph(
             // Paywall
             composable(Screen.Paywall.route) {
                 PaywallScreen(
-                    onNavigateBack = { navController.popBackStack() },
-                    onPurchaseSuccess = { navController.popBackStack() }
+                    onNavigateBack = {
+                        // If there's nothing to pop back to (e.g. from onboarding), go to recordings
+                        if (!navController.popBackStack()) {
+                            navController.navigate(Screen.Recordings.route) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    },
+                    onPurchaseSuccess = {
+                        if (!navController.popBackStack()) {
+                            navController.navigate(Screen.Recordings.route) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    }
                 )
             }
         }
