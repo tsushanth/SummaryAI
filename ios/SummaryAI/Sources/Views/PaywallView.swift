@@ -16,6 +16,7 @@ struct LegacyPaywallView: View {
             HStack {
                 Spacer()
                 Button {
+                    PaywallCoordinator.shared.trackDismiss()
                     hasCompletedPaywall = true
                     dismiss()
                 } label: {
