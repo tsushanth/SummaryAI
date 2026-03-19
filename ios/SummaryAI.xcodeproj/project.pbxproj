@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		PMM000000000003 /* PaywallKit in Frameworks */ = {isa = PBXBuildFile; productRef = PMM000000000002 /* PaywallKit */; };
 		05B1A665ED5CEA51BFB2A973 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = BADB2B1870CE121AD1511C30 /* RevenueCatUI */; };
 		298F3D263A0697F1642A255B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = EAFF348518DDCF49FA0B746C /* GoogleService-Info.plist */; };
 		2FDFA21E83AD1DDCD13FFE40 /* RemotePaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B5F6218F5D4C3FD59BF6C57 /* RemotePaywallView.swift */; };
@@ -58,6 +59,8 @@
 		B8692A64ADB88CDE64F07A75 /* AttributionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F12911BF39626F5F9FA9FD3 /* AttributionService.swift */; };
 		TT0000000000000000000001 /* TikTokBusinessSDK in Frameworks */ = {isa = PBXBuildFile; productRef = TT0000000000000000000002 /* TikTokBusinessSDK */; };
 		TT0000000000000000000010 /* TikTokHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = TT0000000000000000000011 /* TikTokHelper.swift */; };
+		WB0000000000000000000001 /* PaywallCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = WB0000000000000000000002 /* PaywallCoordinator.swift */; };
+		WB0000000000000000000003 /* WinbackOfferView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WB0000000000000000000004 /* WinbackOfferView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -110,6 +113,8 @@
 		EAFF348518DDCF49FA0B746C /* GoogleService-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		DC00000200000001 /* AIDataConsentManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIDataConsentManager.swift; sourceTree = "<group>"; };
 		DC00000400000002 /* AIDataConsentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIDataConsentView.swift; sourceTree = "<group>"; };
+		WB0000000000000000000002 /* PaywallCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallCoordinator.swift; sourceTree = "<group>"; };
+		WB0000000000000000000004 /* WinbackOfferView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WinbackOfferView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -124,6 +129,7 @@
 				A1RC0002229E0002 /* RevenueCat in Frameworks */,
 				05B1A665ED5CEA51BFB2A973 /* RevenueCatUI in Frameworks */,
 				TT0000000000000000000001 /* TikTokBusinessSDK in Frameworks */,
+				PMM000000000003 /* PaywallKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -174,10 +180,20 @@
 				A10000A5229E00A5 /* App */,
 				A10000A6229E00A6 /* Models */,
 				A10000A7229E00A7 /* Services */,
+				WB00000000000000000000A0 /* Utilities */,
 				A10000A8229E00A8 /* ViewModels */,
 				A10000A9229E00A9 /* Views */,
 			);
 			path = Sources;
+			sourceTree = "<group>";
+		};
+		WB00000000000000000000A0 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				WB0000000000000000000002 /* PaywallCoordinator.swift */,
+				WB0000000000000000000004 /* WinbackOfferView.swift */,
+			);
+			path = Utilities;
 			sourceTree = "<group>";
 		};
 		A10000A4229E00A4 /* Preview Content */ = {
@@ -329,6 +345,7 @@
 				A1RC0001229E0001 /* RevenueCat */,
 				BADB2B1870CE121AD1511C30 /* RevenueCatUI */,
 				TT0000000000000000000002 /* TikTokBusinessSDK */,
+				PMM000000000002 /* PaywallKit */,
 			);
 			productName = SummaryAI;
 			productReference = A1000000229E0000 /* SummaryAI.app */;
@@ -364,6 +381,7 @@
 				A1FB0000229E0000 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				A1RC0000229E0000 /* XCRemoteSwiftPackageReference "purchases-ios" */,
 				TT0000000000000000000003 /* XCRemoteSwiftPackageReference "tiktok-business-ios-sdk" */,
+				PMM000000000001 /* XCLocalSwiftPackageReference "PaywallKit" */,
 			);
 			productRefGroup = A10000A2229E00A2 /* Products */;
 			projectDirPath = "";
@@ -433,6 +451,8 @@
 				2FDFA21E83AD1DDCD13FFE40 /* RemotePaywallView.swift in Sources */,
 				DC00000100000001 /* AIDataConsentManager.swift in Sources */,
 				DC00000300000002 /* AIDataConsentView.swift in Sources */,
+				WB0000000000000000000001 /* PaywallCoordinator.swift in Sources */,
+				WB0000000000000000000003 /* WinbackOfferView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -565,7 +585,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SummaryAI/SummaryAI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 24;
+				CURRENT_PROJECT_VERSION = 26;
 				DEVELOPMENT_ASSET_PATHS = "\"SummaryAI/Preview Content\"";
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				ENABLE_PREVIEWS = YES;
@@ -583,7 +603,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.0;
+				MARKETING_VERSION = 5.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.summaryai;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -599,7 +619,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SummaryAI/SummaryAI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 24;
+				CURRENT_PROJECT_VERSION = 26;
 				DEVELOPMENT_ASSET_PATHS = "\"SummaryAI/Preview Content\"";
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				ENABLE_PREVIEWS = YES;
@@ -617,7 +637,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.0;
+				MARKETING_VERSION = 5.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.summaryai;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -692,6 +712,13 @@
 	};
 /* End XCRemoteSwiftPackageReference section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		PMM000000000001 /* XCLocalSwiftPackageReference "PaywallKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../PaywallKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		88DA84B02F07436B0084B5E7 /* GoogleSignIn */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -728,6 +755,11 @@
 		package = TT0000000000000000000003 /* XCRemoteSwiftPackageReference "tiktok-business-ios-sdk" */;
 		productName = TikTokBusinessSDK;
 	};
+		PMM000000000002 /* PaywallKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = PMM000000000001 /* XCLocalSwiftPackageReference "PaywallKit" */;
+			productName = PaywallKit;
+		};
 /* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A10000C0229E00C0 /* Project object */;

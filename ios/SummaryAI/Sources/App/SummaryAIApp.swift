@@ -176,8 +176,11 @@ struct SplashView: View {
 /// Main tab-based navigation for authenticated users
 struct MainTabView: View {
     @EnvironmentObject var apiClient: SummaryAIAPIClient
+    @EnvironmentObject var subscriptionService: SubscriptionService
+    @StateObject private var paywallCoordinator = PaywallCoordinator.shared
     @State private var selectedTab: AppTab = .recordings
     @StateObject private var calendarViewModel: CalendarViewModel
+    @Environment(\.scenePhase) private var scenePhase
 
     init() {
         // Initialize with a temporary apiClient - will be replaced by environment
@@ -233,6 +236,18 @@ struct MainTabView: View {
             }
         }
         .reviewPrompt()
+        .onAppear {
+            paywallCoordinator.checkWinbackEligibility(subscriptionService: subscriptionService)
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                paywallCoordinator.checkWinbackEligibility(subscriptionService: subscriptionService)
+            }
+        }
+        .sheet(isPresented: $paywallCoordinator.showWinbackOffer) {
+            WinbackOfferView()
+                .environmentObject(subscriptionService)
+        }
     }
 }
 
