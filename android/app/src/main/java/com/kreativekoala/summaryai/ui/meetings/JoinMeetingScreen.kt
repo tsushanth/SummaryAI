@@ -51,14 +51,14 @@ fun JoinMeetingScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Join",
+                        text = stringResource(R.string.join),
                         style = MaterialTheme.typography.headlineMedium
                     )
                 },
                 navigationIcon = {
                     if (!showAsTab) {
                         IconButton(onClick = onNavigateBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                         }
                     }
                 }
@@ -94,7 +94,7 @@ fun JoinMeetingScreen(
 
             // Title
             Text(
-                text = "Join a Meeting",
+                text = stringResource(R.string.join_meeting),
                 style = MaterialTheme.typography.headlineSmall
             )
 
@@ -102,7 +102,7 @@ fun JoinMeetingScreen(
 
             // Description
             Text(
-                text = "Paste your meeting link and our bot will join to record and transcribe",
+                text = stringResource(R.string.join_meeting_desc),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -112,7 +112,7 @@ fun JoinMeetingScreen(
 
             // Meeting URL input
             Text(
-                text = "Meeting URL",
+                text = stringResource(R.string.meeting_url),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
@@ -124,7 +124,7 @@ fun JoinMeetingScreen(
                 value = uiState.meetingUrl,
                 onValueChange = viewModel::updateMeetingUrl,
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("https://zoom.us/j/123456789") },
+                placeholder = { Text(stringResource(R.string.meeting_url_placeholder)) },
                 leadingIcon = {
                     Icon(
                         Icons.Default.Link,
@@ -145,13 +145,13 @@ fun JoinMeetingScreen(
 
             // Bot Name input
             Text(
-                text = "Bot Name",
+                text = stringResource(R.string.bot_name),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth()
             )
             Text(
-                text = "(Optional)",
+                text = stringResource(R.string.optional),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 modifier = Modifier
@@ -163,7 +163,7 @@ fun JoinMeetingScreen(
                 value = uiState.botName,
                 onValueChange = viewModel::updateBotName,
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Meeting Mind") },
+                placeholder = { Text(stringResource(R.string.app_name)) },
                 leadingIcon = {
                     Icon(
                         Icons.Default.Person,
@@ -181,7 +181,7 @@ fun JoinMeetingScreen(
             )
 
             Text(
-                text = "This name will appear in the meeting participant list",
+                text = stringResource(R.string.bot_name_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 modifier = Modifier
@@ -216,7 +216,7 @@ fun JoinMeetingScreen(
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Join Meeting")
+                    Text(stringResource(R.string.join_meeting))
                 }
             }
 
@@ -224,7 +224,7 @@ fun JoinMeetingScreen(
 
             // Supported Platforms section
             Text(
-                text = "Supported Platforms",
+                text = stringResource(R.string.supported_platforms),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

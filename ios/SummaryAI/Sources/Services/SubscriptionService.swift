@@ -1,237 +1,123 @@
 import Foundation
-import RevenueCat
+import PaywallKit
 
-// MARK: - Subscription Status
+// MARK: - Product Identifiers
 
-enum SubscriptionStatus: Equatable {
-    case unknown
-    case notSubscribed
-    case subscribed(expirationDate: Date?, productId: String)
-    case inTrial(expirationDate: Date)
+/// Product identifiers for Meeting Mind in-app purchases
+enum ProductID: String, CaseIterable {
+    case weekly = "com.summaryai.subscription.weekly"
+    case monthly = "com.summaryai.subscription.monthly"
+    case yearly = "com.summaryai.subscription.yearly1"
 
-    var isActive: Bool {
-        switch self {
-        case .subscribed, .inTrial:
-            return true
-        case .unknown, .notSubscribed:
-            return false
-        }
+    static var subscriptionIDs: [String] {
+        [weekly.rawValue, monthly.rawValue, yearly.rawValue]
     }
 
-    var isPremium: Bool {
-        isActive
+    static var allIDs: [String] {
+        allCases.map(\.rawValue)
     }
 }
 
-// MARK: - Subscription Service
+// MARK: - Premium Manager
 
+/// Manager for premium feature access and subscription state via StoreKit 2
 @MainActor
-final class SubscriptionService: ObservableObject {
+@Observable
+final class PremiumManager {
 
-    // MARK: - Published Properties
+    // MARK: - Singleton
 
-    @Published var offerings: Offerings?
-    @Published var customerInfo: CustomerInfo?
-    @Published var subscriptionStatus: SubscriptionStatus = .unknown
-    @Published var isLoading = false
-    @Published var errorMessage: String?
+    static let shared = PremiumManager()
 
-    // MARK: - Constants
+    // MARK: - Properties
 
-    private let entitlementID = "premium"
+    /// Whether user has any premium access
+    private(set) var isPremium: Bool = false
 
-    // MARK: - Configuration
+    /// Whether user has lifetime access
+    private(set) var isLifetime: Bool = false
 
-    /// Configure RevenueCat - call this once at app launch
-    /// Replace YOUR_REVENUECAT_IOS_API_KEY with your actual API key from RevenueCat dashboard
-    static func configure() {
-        #if DEBUG
-        Purchases.logLevel = .debug
-        #else
-        Purchases.logLevel = .warn
-        #endif
+    /// Subscription expiration date (nil for lifetime or free)
+    private(set) var subscriptionExpirationDate: Date?
 
-        Purchases.configure(withAPIKey: "appl_oaxBhvTWrxFWthyVWQKKcfVVoLF")
+    private let store = StoreManager.shared
 
-        // Enable automatic Apple Search Ads attribution collection
-        Purchases.shared.attribution.enableAdServicesAttributionTokenCollection()
+    // MARK: - UserDefaults Keys
 
-        // Set customer attributes for segmentation
-        Purchases.shared.attribution.setAttributes([
-            "$appVersion": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "",
-            "app_name": "MeetingMind",
-            "platform": "ios"
-        ])
-
-        print("[SubscriptionService] RevenueCat configured")
+    private enum UserDefaultsKey {
+        static let isPremium = "com.meetingmind.subscription.isPremium"
+        static let subscriptionExpiration = "com.meetingmind.subscription.expiration"
+        static let lastValidationDate = "com.meetingmind.validation.date"
     }
 
     // MARK: - Initialization
 
-    init() {
-        Task {
-            await loadOfferings()
-            await updateSubscriptionStatus()
-        }
+    private init() {
+        loadPersistedState()
     }
 
-    // MARK: - Load Offerings
+    // MARK: - Public Methods
 
-    func loadOfferings() async {
-        isLoading = true
-        defer { isLoading = false }
+    /// Validate and update subscription state via StoreKit 2
+    func validateSubscriptionState() async {
+        await store.refreshSubscriptionStatus()
 
-        do {
-            offerings = try await Purchases.shared.offerings()
-            print("[SubscriptionService] Loaded offerings: \(offerings?.current?.availablePackages.count ?? 0) packages")
-        } catch {
-            print("[SubscriptionService] Failed to load offerings: \(error)")
-            errorMessage = "Failed to load subscription options"
+        if store.isLifetime {
+            isPremium = true
+            isLifetime = true
+        } else if store.isPremium {
+            isPremium = true
+            isLifetime = false
+        } else {
+            isPremium = false
+            isLifetime = false
         }
+        subscriptionExpirationDate = store.subscriptionExpirationDate
+
+        persistState()
     }
 
-    // MARK: - Purchase
+    /// Check if subscription is expiring soon (within 3 days)
+    func isSubscriptionExpiringSoon() -> Bool {
+        guard let expirationDate = subscriptionExpirationDate else { return false }
+        let threeDaysFromNow = Calendar.current.date(byAdding: .day, value: 3, to: Date()) ?? Date()
+        return expirationDate < threeDaysFromNow && expirationDate > Date()
+    }
 
-    func purchase(_ package: Package) async throws -> Bool {
-        isLoading = true
-        defer { isLoading = false }
+    /// Get remaining days of subscription
+    func remainingSubscriptionDays() -> Int? {
+        guard let expirationDate = subscriptionExpirationDate else { return nil }
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.day], from: Date(), to: expirationDate)
+        return components.day
+    }
 
-        do {
-            let result = try await Purchases.shared.purchase(package: package)
-            customerInfo = result.customerInfo
+    // MARK: - Private Methods
 
-            await updateSubscriptionStatus()
+    private func loadPersistedState() {
+        let defaults = UserDefaults.standard
+        isPremium = defaults.bool(forKey: UserDefaultsKey.isPremium)
 
-            if !result.userCancelled {
-                print("[SubscriptionService] Purchase successful: \(package.storeProduct.productIdentifier)")
-                // Request app review after successful purchase
-                ReviewRequestManager.shared.purchaseCompleted()
-                return true
+        if let expirationInterval = defaults.object(forKey: UserDefaultsKey.subscriptionExpiration) as? TimeInterval {
+            let expirationDate = Date(timeIntervalSince1970: expirationInterval)
+            if expirationDate > Date() {
+                subscriptionExpirationDate = expirationDate
+            } else if !isLifetime {
+                isPremium = false
             }
-
-            print("[SubscriptionService] User cancelled purchase")
-            return false
-
-        } catch {
-            print("[SubscriptionService] Purchase failed: \(error)")
-            errorMessage = "Purchase failed. Please try again."
-            throw error
         }
     }
 
-    // MARK: - Restore Purchases
+    private func persistState() {
+        let defaults = UserDefaults.standard
+        defaults.set(isPremium, forKey: UserDefaultsKey.isPremium)
 
-    func restorePurchases() async {
-        isLoading = true
-        defer { isLoading = false }
-
-        do {
-            customerInfo = try await Purchases.shared.restorePurchases()
-            await updateSubscriptionStatus()
-            print("[SubscriptionService] Purchases restored")
-            if subscriptionStatus.isActive {
-                AnalyticsService.shared.logSubscriptionRestored()
-                AnalyticsService.shared.setSubscriptionStatus(true)
-            }
-        } catch {
-            print("[SubscriptionService] Failed to restore purchases: \(error)")
-            errorMessage = "Failed to restore purchases"
+        if let expirationDate = subscriptionExpirationDate {
+            defaults.set(expirationDate.timeIntervalSince1970, forKey: UserDefaultsKey.subscriptionExpiration)
+        } else {
+            defaults.removeObject(forKey: UserDefaultsKey.subscriptionExpiration)
         }
-    }
 
-    // MARK: - Update Subscription Status
-
-    func updateSubscriptionStatus() async {
-        do {
-            customerInfo = try await Purchases.shared.customerInfo()
-
-            guard let info = customerInfo else {
-                subscriptionStatus = .unknown
-                return
-            }
-
-            // Check if user has active premium entitlement
-            if let entitlement = info.entitlements[entitlementID], entitlement.isActive {
-                let expirationDate = entitlement.expirationDate
-                let productId = entitlement.productIdentifier
-
-                // Check if in trial period
-                if entitlement.periodType == .trial {
-                    subscriptionStatus = .inTrial(expirationDate: expirationDate ?? Date())
-                } else {
-                    subscriptionStatus = .subscribed(
-                        expirationDate: expirationDate,
-                        productId: productId
-                    )
-                }
-            } else {
-                subscriptionStatus = .notSubscribed
-            }
-
-            print("[SubscriptionService] Status updated: \(subscriptionStatus)")
-        } catch {
-            print("[SubscriptionService] Failed to get customer info: \(error)")
-            subscriptionStatus = .unknown
-        }
-    }
-
-    // MARK: - User Identification
-
-    /// Link the RevenueCat user with your backend user ID
-    /// Call this after successful authentication
-    func loginUser(userId: String) async {
-        do {
-            let (customerInfo, _) = try await Purchases.shared.logIn(userId)
-            self.customerInfo = customerInfo
-            await updateSubscriptionStatus()
-            print("[SubscriptionService] Logged in user: \(userId)")
-        } catch {
-            print("[SubscriptionService] Failed to login user: \(error)")
-        }
-    }
-
-    /// Log out the current user (resets to anonymous)
-    func logoutUser() async {
-        do {
-            customerInfo = try await Purchases.shared.logOut()
-            await updateSubscriptionStatus()
-            print("[SubscriptionService] User logged out")
-        } catch {
-            print("[SubscriptionService] Failed to logout: \(error)")
-        }
-    }
-
-    // MARK: - Helper Properties
-
-    /// Get the current offering's packages
-    var availablePackages: [Package] {
-        offerings?.current?.availablePackages ?? []
-    }
-
-    /// Get yearly package from current offering
-    var yearlyPackage: Package? {
-        offerings?.current?.annual
-    }
-
-    /// Get monthly package from current offering
-    var monthlyPackage: Package? {
-        offerings?.current?.monthly
-    }
-
-    /// Get weekly package from current offering
-    var weeklyPackage: Package? {
-        offerings?.current?.weekly
-    }
-
-    /// Calculate savings percentage for yearly vs monthly
-    var yearlySavingsPercentage: Int? {
-        guard let yearly = yearlyPackage?.storeProduct,
-              let monthly = monthlyPackage?.storeProduct else { return nil }
-
-        let yearlyPrice = yearly.price as Decimal
-        let monthlyAnnualPrice = (monthly.price as Decimal) * 12
-        let savings = (monthlyAnnualPrice - yearlyPrice) / monthlyAnnualPrice * 100
-
-        return Int(NSDecimalNumber(decimal: savings).doubleValue.rounded())
+        defaults.set(Date().timeIntervalSince1970, forKey: UserDefaultsKey.lastValidationDate)
     }
 }

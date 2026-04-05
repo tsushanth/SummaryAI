@@ -17,3 +17,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "SummaryAI"
 include(":app")
+include(":paywallkit")
+project(":paywallkit").projectDir = file("/Users/sushanthtiruvaipati/Documents/GitHub/PaywallKit-Android/paywallkit")

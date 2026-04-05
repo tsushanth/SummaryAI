@@ -14,11 +14,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.domain.model.LiveTranscriptSegment
 
 @Composable
@@ -64,14 +66,14 @@ fun LiveTranscriptView(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "Waiting for transcript...",
+                        text = stringResource(R.string.waiting_for_transcript),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Live transcript will appear here as speech is detected",
+                        text = stringResource(R.string.live_transcript_hint),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         textAlign = TextAlign.Center
@@ -123,7 +125,7 @@ private fun LiveIndicator() {
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "LIVE",
+                text = stringResource(R.string.live_indicator),
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.error
@@ -178,7 +180,7 @@ private fun LiveTranscriptSegmentItem(
                         color = MaterialTheme.colorScheme.primaryContainer
                     ) {
                         Text(
-                            text = "Host",
+                            text = stringResource(R.string.host),
                             style = MaterialTheme.typography.labelSmall,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                             color = MaterialTheme.colorScheme.onPrimaryContainer

@@ -1,7 +1,9 @@
 package com.kreativekoala.summaryai.ui.phone
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.data.repository.PhoneRepository
 import com.kreativekoala.summaryai.domain.model.PhoneCall
 import com.kreativekoala.summaryai.domain.model.PhoneCallStatus
@@ -10,6 +12,7 @@ import com.kreativekoala.summaryai.service.CallEndReason
 import com.kreativekoala.summaryai.service.VoipCallState
 import com.kreativekoala.summaryai.service.VoipService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -94,6 +97,7 @@ data class PhoneUiState(
 
 @HiltViewModel
 class PhoneViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val phoneRepository: PhoneRepository,
     private val voipService: VoipService
 ) : ViewModel() {
@@ -188,7 +192,7 @@ class PhoneViewModel @Inject constructor(
                     )
                 },
                 onFailure = { error ->
-                    _uiState.value = _uiState.value.copy(error = "Failed to load phones: ${error.message}")
+                    _uiState.value = _uiState.value.copy(error = context.getString(R.string.error_load_phones_failed))
                 }
             )
 
@@ -205,7 +209,7 @@ class PhoneViewModel @Inject constructor(
                 onFailure = { error ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = "Failed to load calls: ${error.message}"
+                        error = context.getString(R.string.error_load_calls_failed)
                     )
                 }
             )
@@ -270,7 +274,7 @@ class PhoneViewModel @Inject constructor(
     fun sendVerificationCode() {
         val phoneNumber = _uiState.value.verificationPhoneNumber
         if (phoneNumber.isBlank()) {
-            _uiState.value = _uiState.value.copy(error = "Please enter a phone number")
+            _uiState.value = _uiState.value.copy(error = context.getString(R.string.error_enter_phone_number))
             return
         }
 
@@ -294,7 +298,7 @@ class PhoneViewModel @Inject constructor(
     fun checkVerificationCode() {
         val code = _uiState.value.verificationCode
         if (code.length != 6) {
-            _uiState.value = _uiState.value.copy(error = "Please enter a 6-digit code")
+            _uiState.value = _uiState.value.copy(error = context.getString(R.string.error_enter_six_digit_code))
             return
         }
 
@@ -318,7 +322,7 @@ class PhoneViewModel @Inject constructor(
                     } else {
                         _uiState.value = _uiState.value.copy(
                             verificationState = VerificationState.ERROR,
-                            verificationError = "Invalid verification code"
+                            verificationError = context.getString(R.string.error_invalid_verification_code)
                         )
                     }
                 },
@@ -430,13 +434,13 @@ class PhoneViewModel @Inject constructor(
     fun initiateCall() {
         val selectedPhone = _uiState.value.selectedPhone
         if (selectedPhone == null) {
-            _uiState.value = _uiState.value.copy(error = "Please verify a phone number first")
+            _uiState.value = _uiState.value.copy(error = context.getString(R.string.error_verify_phone_first))
             return
         }
 
         val dialerNumber = _uiState.value.dialerNumber
         if (dialerNumber.isBlank()) {
-            _uiState.value = _uiState.value.copy(error = "Please enter a phone number to call")
+            _uiState.value = _uiState.value.copy(error = context.getString(R.string.error_enter_number_to_call))
             return
         }
 
@@ -452,7 +456,7 @@ class PhoneViewModel @Inject constructor(
             if (tokenResult.isFailure) {
                 _uiState.value = _uiState.value.copy(
                     activeCallState = ActiveCallState.ERROR,
-                    error = "Failed to get VoIP token: ${tokenResult.exceptionOrNull()?.message}"
+                    error = context.getString(R.string.error_voip_token_failed)
                 )
                 return@launch
             }
@@ -470,7 +474,7 @@ class PhoneViewModel @Inject constructor(
             if (callResult.isFailure) {
                 _uiState.value = _uiState.value.copy(
                     activeCallState = ActiveCallState.ERROR,
-                    error = "Failed to create call: ${callResult.exceptionOrNull()?.message}"
+                    error = context.getString(R.string.error_create_call_failed)
                 )
                 return@launch
             }
@@ -493,7 +497,7 @@ class PhoneViewModel @Inject constructor(
             if (!success) {
                 _uiState.value = _uiState.value.copy(
                     activeCallState = ActiveCallState.ERROR,
-                    error = "Failed to start VoIP call"
+                    error = context.getString(R.string.error_start_voip_call)
                 )
                 return@launch
             }

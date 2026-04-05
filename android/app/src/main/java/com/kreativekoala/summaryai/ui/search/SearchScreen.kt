@@ -44,7 +44,7 @@ fun SearchScreen(
             TopAppBar(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 title = {
@@ -65,7 +65,7 @@ fun SearchScreen(
                         trailingIcon = {
                             if (uiState.query.isNotEmpty()) {
                                 IconButton(onClick = { viewModel.updateQuery("") }) {
-                                    Icon(Icons.Default.Clear, contentDescription = "Clear")
+                                    Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.clear))
                                 }
                             }
                         }
@@ -131,14 +131,14 @@ private fun EmptySearchContent() {
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Search your recordings",
+            text = stringResource(R.string.search_prompt),
             style = MaterialTheme.typography.titleMedium
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Search by title, transcript content, or topics",
+            text = stringResource(R.string.search_hint),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -155,14 +155,14 @@ private fun NoResultsContent(query: String) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "No results found",
+            text = stringResource(R.string.no_results),
             style = MaterialTheme.typography.titleMedium
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "No recordings match \"$query\"",
+            text = stringResource(R.string.no_results_for_query, query),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

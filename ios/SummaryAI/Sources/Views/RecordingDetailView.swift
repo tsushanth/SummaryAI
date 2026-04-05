@@ -1,5 +1,6 @@
 import SwiftUI
 import AVFoundation
+import PaywallKit
 
 // MARK: - Recording Detail View Wrapper
 
@@ -24,6 +25,7 @@ struct RecordingDetailContentView: View {
     @State private var showShareSheet = false
     @State private var showDeleteConfirmation = false
     @State private var showLiveTranscript = false
+    @State private var showAIPaywall = false
 
     private let apiClient: SummaryAIAPIClient
 
@@ -149,6 +151,9 @@ struct RecordingDetailContentView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("This will permanently delete this recording and all associated data. This action cannot be undone.")
+        }
+        .sheet(isPresented: $showAIPaywall) {
+            RemotePaywallView(triggerSource: "ai_feature_gate")
         }
     }
 
@@ -282,22 +287,86 @@ struct RecordingDetailContentView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 if let summary = viewModel.summary {
-                    // Action items section (with blue checkmarks)
-                    if let actionItems = summary.actionItems, !actionItems.isEmpty {
-                        actionItemsSection(actionItems)
-                    }
+                    if PremiumManager.shared.isPremium {
+                        // Premium users see full content
+                        // Action items section (with blue checkmarks)
+                        if let actionItems = summary.actionItems, !actionItems.isEmpty {
+                            actionItemsSection(actionItems)
+                        }
 
-                    // Overview section (key points as bullet list)
-                    if !summary.keyPoints.isEmpty {
-                        overviewSection(summary.keyPoints)
-                    }
+                        // Overview section (key points as bullet list)
+                        if !summary.keyPoints.isEmpty {
+                            overviewSection(summary.keyPoints)
+                        }
 
-                    // Main summary section
-                    summarySection(summary)
+                        // Main summary section
+                        summarySection(summary)
 
-                    // Topics
-                    if let topics = summary.topics, !topics.isEmpty {
-                        topicsSection(topics)
+                        // Topics
+                        if let topics = summary.topics, !topics.isEmpty {
+                            topicsSection(topics)
+                        }
+                    } else {
+                        // Free users see blurred preview with upgrade prompt
+                        VStack(spacing: 0) {
+                            // Show first key point as teaser (if available)
+                            if let firstPoint = summary.keyPoints.first {
+                                HStack(alignment: .top, spacing: 8) {
+                                    Text("\u{2022}")
+                                        .font(.body)
+                                        .foregroundColor(.secondary)
+                                    Text(firstPoint)
+                                        .font(.body)
+                                }
+                                .padding(.bottom, 12)
+                            }
+
+                            // Blurred placeholder for rest of content
+                            VStack(alignment: .leading, spacing: 8) {
+                                ForEach(0..<4, id: \.self) { _ in
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .fill(Color.gray.opacity(0.15))
+                                        .frame(height: 14)
+                                        .frame(maxWidth: .infinity)
+                                }
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(Color.gray.opacity(0.15))
+                                    .frame(height: 14)
+                                    .frame(width: 200)
+                            }
+                            .padding(.bottom, 24)
+
+                            // Upgrade prompt
+                            VStack(spacing: 12) {
+                                Image(systemName: "lock.fill")
+                                    .font(.system(size: 32))
+                                    .foregroundColor(.blue)
+
+                                Text("Unlock AI Summaries")
+                                    .font(.headline)
+
+                                Text("Upgrade to Pro to view full AI-generated summaries, action items, and key points.")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                    .multilineTextAlignment(.center)
+
+                                Button {
+                                    showAIPaywall = true
+                                } label: {
+                                    Text("Upgrade to Pro")
+                                        .font(.headline)
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 50)
+                                        .background(Color.blue)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(12)
+                                }
+                                .padding(.top, 4)
+                            }
+                            .padding()
+                            .background(Color(.secondarySystemBackground))
+                            .cornerRadius(16)
+                        }
                     }
                 } else if viewModel.isProcessing {
                     processingPlaceholder(message: "Summary will appear here once processing is complete.")
@@ -659,15 +728,51 @@ struct RecordingDetailContentView: View {
 
     private var chatTabView: some View {
         VStack(spacing: 0) {
-            // Chat content
-            if viewModel.qaHistory.isEmpty && viewModel.currentAnswer == nil {
-                chatWelcomeView
-            } else {
-                chatHistoryList
-            }
+            if PremiumManager.shared.isPremium {
+                // Premium users get full chat access
+                if viewModel.qaHistory.isEmpty && viewModel.currentAnswer == nil {
+                    chatWelcomeView
+                } else {
+                    chatHistoryList
+                }
 
-            // Chat input bar at bottom
-            chatInputBar
+                // Chat input bar at bottom
+                chatInputBar
+            } else {
+                // Free users see locked chat
+                VStack(spacing: 24) {
+                    Spacer()
+
+                    Image(systemName: "bubble.left.and.bubble.right.fill")
+                        .font(.system(size: 56))
+                        .foregroundColor(.blue.opacity(0.5))
+
+                    VStack(spacing: 8) {
+                        Text("AI Chat is a Pro Feature")
+                            .font(.title3)
+                            .fontWeight(.semibold)
+
+                        Text("Ask questions about your recordings, get action items, draft follow-up emails, and more.")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 32)
+                    }
+
+                    Button {
+                        showAIPaywall = true
+                    } label: {
+                        Text("Upgrade to Pro")
+                            .font(.headline)
+                            .frame(width: 220, height: 50)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(12)
+                    }
+
+                    Spacer()
+                }
+            }
         }
     }
 
