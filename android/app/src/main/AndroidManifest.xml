@@ -38,6 +38,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MeetingMind"
         android:usesCleartextTraffic="true"
+        android:localeConfig="@xml/locales_config"
         tools:targetApi="31">
 
         <!--

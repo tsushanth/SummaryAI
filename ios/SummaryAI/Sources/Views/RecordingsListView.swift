@@ -47,7 +47,6 @@ struct RecordingsListView: View {
 /// Main list view displaying all recordings
 struct RecordingsListContentView: View {
     let apiClient: SummaryAIAPIClient
-    @EnvironmentObject var subscriptionService: SubscriptionService
     @StateObject private var viewModel: RecordingsListViewModel
     @StateObject private var calendarViewModel: CalendarViewModel
     @StateObject private var todosViewModel: TodosViewModel
@@ -83,7 +82,7 @@ struct RecordingsListContentView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     // PRO badge - only show for free users
-                    if !subscriptionService.subscriptionStatus.isPremium {
+                    if !PremiumManager.shared.isPremium {
                         Button {
                             showPaywall = true
                         } label: {
