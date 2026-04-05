@@ -1,0 +1,438 @@
+/* Localizable.strings - English (Base)
+   MeetingMind iOS App
+   Copyright KreativeKoalaSolutions LLC */
+
+// MARK: - Common / Shared
+"OK" = "OK";
+"Cancel" = "Cancel";
+"Delete" = "Delete";
+"Save" = "Save";
+"Done" = "Done";
+"Retry" = "Retry";
+"Dismiss" = "Dismiss";
+"Error" = "Error";
+"Close" = "Close";
+"Clear" = "Clear";
+"Add" = "Add";
+"Search" = "Search";
+"Loading..." = "Loading...";
+"An error occurred" = "An error occurred";
+"Try Again" = "Try Again";
+"Continue" = "Continue";
+"PRO" = "PRO";
+
+// MARK: - Tab Bar
+"Recordings" = "Recordings";
+"Calendar" = "Calendar";
+"Record" = "Record";
+"Phone" = "Phone";
+"Settings" = "Settings";
+
+// MARK: - Splash / Auth
+"Meeting Mind" = "Meeting Mind";
+"Record, transcribe, and summarize\nyour meetings with AI" = "Record, transcribe, and summarize\nyour meetings with AI";
+"Sign in with Google" = "Sign in with Google";
+"By signing in, you agree to our" = "By signing in, you agree to our";
+"Terms of Service" = "Terms of Service";
+"and" = "and";
+"Privacy Policy" = "Privacy Policy";
+"Sign In Error" = "Sign In Error";
+"Sign In" = "Sign In";
+"Create Account" = "Create Account";
+"Full Name" = "Full Name";
+"Email" = "Email";
+"Password" = "Password";
+"Already have an account? Sign in" = "Already have an account? Sign in";
+"Don't have an account? Sign up" = "Don't have an account? Sign up";
+"Not signed in" = "Not signed in";
+
+// MARK: - Onboarding
+"Tap Record" = "Tap Record";
+"and get accurate word-for-word transcripts" = "and get accurate word-for-word transcripts";
+"Speaker identification" = "Speaker identification";
+"Timestamps for every segment" = "Timestamps for every segment";
+"120+ languages supported" = "120+ languages supported";
+"Perfect Notes" = "Perfect Notes";
+"Ready to Share" = "Ready to Share";
+"AI-powered summaries" = "AI-powered summaries";
+"Action items extracted" = "Action items extracted";
+"Ask questions about recordings" = "Ask questions about recordings";
+"Customize," = "Customize,";
+"Export, Share" = "Export, Share";
+"Export as PDF or Text" = "Export as PDF or Text";
+"Share via email or messages" = "Share via email or messages";
+"Organize with folders" = "Organize with folders";
+"Built with Data Privacy" = "Built with Data Privacy";
+"at the Core" = "at the Core";
+"Secure cloud storage" = "Secure cloud storage";
+"Your data stays private" = "Your data stays private";
+"End-to-end encryption" = "End-to-end encryption";
+"Get Started" = "Get Started";
+"Skip" = "Skip";
+"Allow Meeting Mind to send you notifications?" = "Allow Meeting Mind to send you notifications?";
+"Allow" = "Allow";
+"Don't allow" = "Don't allow";
+"Get notified when your recordings are ready to view." = "Get notified when your recordings are ready to view.";
+
+// MARK: - Recordings List
+"New Summary" = "New Summary";
+"Start your first recording" = "Start your first recording";
+"Tap the button below to record, transcribe, and summarize your first meeting" = "Tap the button below to record, transcribe, and summarize your first meeting";
+"Loading recordings..." = "Loading recordings...";
+"Something Went Wrong" = "Something Went Wrong";
+"All" = "All";
+"Meetings" = "Meetings";
+"Todos" = "Todos";
+"Favorites" = "Favorites";
+"Imported" = "Imported";
+"No %@ Found" = "No %@ Found";
+"Start recording to see your summaries here" = "Start recording to see your summaries here";
+"Recordings tagged as meetings will appear here" = "Recordings tagged as meetings will appear here";
+"Speak your todos or add them manually" = "Speak your todos or add them manually";
+"Tap the heart icon on a recording to add it to favorites" = "Tap the heart icon on a recording to add it to favorites";
+"Import audio files or PDFs to see them here" = "Import audio files or PDFs to see them here";
+"%d words" = "%d words";
+"Rename" = "Rename";
+"Add to Favorites" = "Add to Favorites";
+"Remove from Favorites" = "Remove from Favorites";
+"Rename Recording" = "Rename Recording";
+"Title" = "Title";
+"Enter a new title for this recording" = "Enter a new title for this recording";
+"Delete Recording" = "Delete Recording";
+"Are you sure you want to delete \"%@\"? This action cannot be undone." = "Are you sure you want to delete \"%@\"? This action cannot be undone.";
+
+// MARK: - New Recording Sheet
+"Record Audio" = "Record Audio";
+"Upload from files" = "Upload from files";
+"PDF and Recordings" = "PDF and Recordings";
+"To-Do List" = "To-Do List";
+"Tasks, To-Dos and Notes" = "Tasks, To-Dos and Notes";
+"Uploading... %d%%" = "Uploading... %d%%";
+"Import Error" = "Import Error";
+
+// MARK: - Recording View
+"Recording Title" = "Recording Title";
+"Enter title" = "Enter title";
+"Live Transcribe" = "Live Transcribe";
+"Translate" = "Translate";
+"Off" = "Off";
+"English" = "English";
+"Auto" = "Auto";
+"Spanish" = "Spanish";
+"French" = "French";
+"German" = "German";
+"Chinese" = "Chinese";
+"Japanese" = "Japanese";
+"Korean" = "Korean";
+"Portuguese" = "Portuguese";
+"Italian" = "Italian";
+"Listening..." = "Listening...";
+"Connection error" = "Connection error";
+"Cancel Recording?" = "Cancel Recording?";
+"Cancel Recording" = "Cancel Recording";
+"Continue Recording" = "Continue Recording";
+"Your recording will be discarded." = "Your recording will be discarded.";
+"New Recording" = "New Recording";
+
+// MARK: - Recording Detail
+"Recording" = "Recording";
+"Summary" = "Summary";
+"Transcript" = "Transcript";
+"Chat" = "Chat";
+"Move to Folder" = "Move to Folder";
+"Delete Recording?" = "Delete Recording?";
+"This will permanently delete this recording and all associated data. This action cannot be undone." = "This will permanently delete this recording and all associated data. This action cannot be undone.";
+"Loading recording..." = "Loading recording...";
+"Live Recording in Progress" = "Live Recording in Progress";
+"Processing..." = "Processing...";
+"Key Points" = "Key Points";
+"Overview" = "Overview";
+"Topics" = "Topics";
+"Summary will appear here once processing is complete." = "Summary will appear here once processing is complete.";
+"No summary available." = "No summary available.";
+"Transcript will appear here once transcription is complete." = "Transcript will appear here once transcription is complete.";
+"No transcript available." = "No transcript available.";
+"Document" = "Document";
+"Failed to Load" = "Failed to Load";
+"Live" = "Live";
+"Full" = "Full";
+"%d segments" = "%d segments";
+"Waiting for transcript..." = "Waiting for transcript...";
+"Transcript will appear here as the meeting progresses" = "Transcript will appear here as the meeting progresses";
+
+// MARK: - Chat / Q&A
+"Hello there! What can I answer about your recording?" = "Hello there! What can I answer about your recording?";
+"Key points in the meeting" = "Key points in the meeting";
+"Main action items" = "Main action items";
+"Draft a follow-up email" = "Draft a follow-up email";
+"What are the key points discussed in this meeting?" = "What are the key points discussed in this meeting?";
+"What are the main action items from this recording?" = "What are the main action items from this recording?";
+"Draft a follow-up email based on this meeting" = "Draft a follow-up email based on this meeting";
+"Ask anything about this note" = "Ask anything about this note";
+"You" = "You";
+"AI" = "AI";
+"AI Assistant" = "AI Assistant";
+"Sources:" = "Sources:";
+"High confidence" = "High confidence";
+"Medium confidence" = "Medium confidence";
+"Low confidence" = "Low confidence";
+
+// MARK: - Search
+"Search Recordings" = "Search Recordings";
+"Find specific content in your transcripts by entering keywords above." = "Find specific content in your transcripts by entering keywords above.";
+"Recent Searches" = "Recent Searches";
+"Search transcripts..." = "Search transcripts...";
+"Enter at least 2 characters to search" = "Enter at least 2 characters to search";
+"Searching..." = "Searching...";
+"No Results" = "No Results";
+"No matches found for \"%@\"" = "No matches found for \"%@\"";
+"Try different keywords or check your spelling." = "Try different keywords or check your spelling.";
+"Search Failed" = "Search Failed";
+"Show less" = "Show less";
+"Show %d more" = "Show %d more";
+
+// MARK: - Export
+"Export Format" = "Export Format";
+"Format" = "Format";
+"Content" = "Content";
+"Key Points" = "Key Points";
+"Action Items" = "Action Items";
+"Full Transcript" = "Full Transcript";
+"Recording Info" = "Recording Info";
+"Preview" = "Preview";
+"No content selected for export" = "No content selected for export";
+"Export" = "Export";
+"Export Error" = "Export Error";
+"Share Summary" = "Share Summary";
+"Export Failed" = "Export Failed";
+"Unknown error" = "Unknown error";
+
+// MARK: - Share Export
+"Share or Export" = "Share or Export";
+"Share Summary as PDF" = "Share Summary as PDF";
+"Share Summary as Text" = "Share Summary as Text";
+"Share Transcript as PDF" = "Share Transcript as PDF";
+"Share Transcript as Text" = "Share Transcript as Text";
+"Share Audio" = "Share Audio";
+"Share or export with just a tap!" = "Share or export with just a tap!";
+"Generating..." = "Generating...";
+
+// MARK: - Settings
+"Account" = "Account";
+"via %@" = "via %@";
+"AI Data Sharing" = "AI Data Sharing";
+"Allowed" = "Allowed";
+"Not Allowed" = "Not Allowed";
+"Data & Privacy" = "Data & Privacy";
+"Your recordings are processed by cloud AI services for transcription and summarization." = "Your recordings are processed by cloud AI services for transcription and summarization.";
+"AI-powered features are disabled. Grant consent to enable transcription, summaries, and more." = "AI-powered features are disabled. Grant consent to enable transcription, summaries, and more.";
+"Legal" = "Legal";
+"Integrations" = "Integrations";
+"Google Calendar" = "Google Calendar";
+"Connected" = "Connected";
+"Disconnect" = "Disconnect";
+"Microsoft Outlook" = "Microsoft Outlook";
+"Add Another Calendar" = "Add Another Calendar";
+"Add Calendar" = "Add Calendar";
+"Connect Calendar" = "Connect Calendar";
+"Calendar Integration" = "Calendar Integration";
+"Disconnect Calendar" = "Disconnect Calendar";
+"This will stop syncing meetings from this calendar. You can reconnect anytime." = "This will stop syncing meetings from this calendar. You can reconnect anytime.";
+"About" = "About";
+"Version" = "Version";
+"Build" = "Build";
+"Help & FAQ" = "Help & FAQ";
+"Contact Us" = "Contact Us";
+"Sign Out" = "Sign Out";
+"Are you sure you want to sign out?" = "Are you sure you want to sign out?";
+"Delete Account" = "Delete Account";
+"This will permanently delete your account and all recordings. This action cannot be undone." = "This will permanently delete your account and all recordings. This action cannot be undone.";
+"Open Source Licenses" = "Open Source Licenses";
+"Meeting Mind uses the following open source libraries:" = "Meeting Mind uses the following open source libraries:";
+"Storage" = "Storage";
+"Storage Used" = "Storage Used";
+"Clear Local Cache" = "Clear Local Cache";
+"Clearing the cache will remove downloaded transcripts and summaries. They will be re-downloaded when you view them." = "Clearing the cache will remove downloaded transcripts and summaries. They will be re-downloaded when you view them.";
+
+// MARK: - Paywall
+"Never Take Notes Again!" = "Never Take Notes Again!";
+"AI-powered meeting transcription & summaries" = "AI-powered meeting transcription & summaries";
+"Unlimited meeting recordings with real-time speaker detection" = "Unlimited meeting recordings with real-time speaker detection";
+"AI-generated summaries, key takeaways, and action items" = "AI-generated summaries, key takeaways, and action items";
+"Ask AI questions about any recorded meeting" = "Ask AI questions about any recorded meeting";
+"Transcription in 120+ languages" = "Transcription in 120+ languages";
+"Export transcripts as PDF or text files" = "Export transcripts as PDF or text files";
+"Loading plans..." = "Loading plans...";
+"Annual" = "Annual";
+"/year" = "/year";
+"Best Value" = "Best Value";
+"7-day free trial" = "7-day free trial";
+"Monthly" = "Monthly";
+"/month" = "/month";
+"Weekly" = "Weekly";
+"/week" = "/week";
+"Save 30% on Web" = "Save 30% on Web";
+"Cancel anytime. No commitment." = "Cancel anytime. No commitment.";
+"Terms" = "Terms";
+"Privacy" = "Privacy";
+"Restore" = "Restore";
+"Purchase failed. Please try again." = "Purchase failed. Please try again.";
+
+// MARK: - AI Data Consent
+"Meeting Mind uses cloud-based AI services to transcribe your recordings and generate summaries. Here's exactly what data is shared and with whom." = "Meeting Mind uses cloud-based AI services to transcribe your recordings and generate summaries. Here's exactly what data is shared and with whom.";
+"Audio Transcription" = "Audio Transcription";
+"Your audio recordings are sent to our backend server, which uses Deepgram for speech-to-text transcription." = "Your audio recordings are sent to our backend server, which uses Deepgram for speech-to-text transcription.";
+"Deepgram — converts speech to text with speaker identification" = "Deepgram — converts speech to text with speaker identification";
+"AI Summaries & Action Items" = "AI Summaries & Action Items";
+"Your transcribed text is sent to OpenAI to generate meeting summaries, action items, and answer questions about your recordings." = "Your transcribed text is sent to OpenAI to generate meeting summaries, action items, and answer questions about your recordings.";
+"OpenAI (GPT-4) — generates summaries, extracts action items, and powers Q&A" = "OpenAI (GPT-4) — generates summaries, extracts action items, and powers Q&A";
+"Phone Calls" = "Phone Calls";
+"When using the phone feature, call audio is routed through Twilio for recording and transcription." = "When using the phone feature, call audio is routed through Twilio for recording and transcription.";
+"Twilio — VoIP calling and call recording" = "Twilio — VoIP calling and call recording";
+"Authentication & Storage" = "Authentication & Storage";
+"Your account information and files are stored securely via Supabase." = "Your account information and files are stored securely via Supabase.";
+"Supabase — authentication, database, and file storage" = "Supabase — authentication, database, and file storage";
+"What Stays on Your Device" = "What Stays on Your Device";
+"Your app settings, preferences, and local cache remain on your device and are never shared." = "Your app settings, preferences, and local cache remain on your device and are never shared.";
+"Your data is transmitted securely via HTTPS and is not used to train AI models. You can revoke consent at any time in Settings." = "Your data is transmitted securely via HTTPS and is not used to train AI models. You can revoke consent at any time in Settings.";
+"I Understand & Agree" = "I Understand & Agree";
+"Continue Without AI Features" = "Continue Without AI Features";
+"Revoke Consent" = "Revoke Consent";
+
+// MARK: - Processing Progress
+"Processing Audio" = "Processing Audio";
+"Transcribing" = "Transcribing";
+"Identifying Speakers" = "Identifying Speakers";
+"Highlighting key points" = "Highlighting key points";
+"Wrapping up" = "Wrapping up";
+"All done!" = "All done!";
+"Your summary and transcript are ready!" = "Your summary and transcript are ready!";
+"Enjoy Summary" = "Enjoy Summary";
+"Preparing..." = "Preparing...";
+"Uploading..." = "Uploading...";
+"Analyzing..." = "Analyzing...";
+"Summarizing..." = "Summarizing...";
+"Complete!" = "Complete!";
+"Failed" = "Failed";
+"Getting ready to process" = "Getting ready to process";
+"Uploading your recording" = "Uploading your recording";
+"Processing audio file" = "Processing audio file";
+"Converting speech to text" = "Converting speech to text";
+"Identifying speakers" = "Identifying speakers";
+"Generating summary and key points" = "Generating summary and key points";
+"Your summary is ready" = "Your summary is ready";
+"Something went wrong" = "Something went wrong";
+"Processing recording..." = "Processing recording...";
+
+// MARK: - Todos
+"Loading todos..." = "Loading todos...";
+"No todos yet" = "No todos yet";
+"Tap the microphone to speak your tasks, or tap + to add manually" = "Tap the microphone to speak your tasks, or tap + to add manually";
+"Voice" = "Voice";
+"No completed todos" = "No completed todos";
+"No active todos" = "No active todos";
+"What do you need to do?" = "What do you need to do?";
+"Priority" = "Priority";
+"New Todo" = "New Todo";
+"Voice Todos" = "Voice Todos";
+"Tap the microphone and speak your todos" = "Tap the microphone and speak your todos";
+"Your spoken todos will appear here" = "Your spoken todos will appear here";
+"Tips:" = "Tips:";
+"Speak each task clearly. Separate tasks with phrases like 'next' or pause between items." = "Speak each task clearly. Separate tasks with phrases like 'next' or pause between items.";
+
+// MARK: - Meetings / Calendar
+"Get instant notes from your" = "Get instant notes from your";
+"Gmeet" = "Gmeet";
+"Teams" = "Teams";
+"Zoom" = "Zoom";
+"calls." = "calls.";
+"Connect your calendar and decide which meetings you want to record" = "Connect your calendar and decide which meetings you want to record";
+"Learn more" = "Learn more";
+"Calendar Connected" = "Calendar Connected";
+"Syncing" = "Syncing";
+"Toggle on meetings you want to auto-record. Manage calendars in Settings." = "Toggle on meetings you want to auto-record. Manage calendars in Settings.";
+"Upcoming Meetings" = "Upcoming Meetings";
+"Next 14 days" = "Next 14 days";
+"No upcoming meetings with video calls" = "No upcoming meetings with video calls";
+"Meetings with Zoom, Google Meet, or Teams links will appear here" = "Meetings with Zoom, Google Meet, or Teams links will appear here";
+"No upcoming meetings" = "No upcoming meetings";
+"Auto-record this meeting" = "Auto-record this meeting";
+"Bot will join and transcribe" = "Bot will join and transcribe";
+"Connect" = "Connect";
+
+// MARK: - Join Meeting
+"Join a Meeting" = "Join a Meeting";
+"Paste your meeting link and our bot will join to record and transcribe" = "Paste your meeting link and our bot will join to record and transcribe";
+"Meeting URL" = "Meeting URL";
+"Please enter a valid meeting URL" = "Please enter a valid meeting URL";
+"Bot Name" = "Bot Name";
+"(Optional)" = "(Optional)";
+"This name will appear in the meeting participant list" = "This name will appear in the meeting participant list";
+"%@ detected" = "%@ detected";
+"Joining..." = "Joining...";
+"Join Meeting" = "Join Meeting";
+"Supported Platforms" = "Supported Platforms";
+"Meet" = "Meet";
+"Webex" = "Webex";
+"Bot Joining" = "Bot Joining";
+"View Recording" = "View Recording";
+"The bot is joining your %@. You can track the recording progress in real-time." = "The bot is joining your %@. You can track the recording progress in real-time.";
+"The bot is joining your meeting. You can track the recording progress in real-time." = "The bot is joining your meeting. You can track the recording progress in real-time.";
+
+// MARK: - Phone
+"History" = "History";
+"Dialer" = "Dialer";
+"Calls" = "Calls";
+"Verify Your Phone" = "Verify Your Phone";
+"To make calls through the app, you need to verify your phone number first. We'll call you with a verification code." = "To make calls through the app, you need to verify your phone number first. We'll call you with a verification code.";
+"Verify Phone Number" = "Verify Phone Number";
+"No calls yet" = "No calls yet";
+"Make a call using the dialer to get started" = "Make a call using the dialer to get started";
+"Phone number" = "Phone number";
+"Contact name (optional)" = "Contact name (optional)";
+"Calling from:" = "Calling from:";
+"Enter phone number" = "Enter phone number";
+"Verify phone to make calls" = "Verify phone to make calls";
+"All calls are recorded" = "All calls are recorded";
+"Recording Notice" = "Recording Notice";
+"Start Call" = "Start Call";
+"This call will be automatically recorded for transcription.\n\nA recording notification will be played to the other party.\n\nPlease ensure recording is legal in your jurisdiction." = "This call will be automatically recorded for transcription.\n\nA recording notification will be played to the other party.\n\nPlease ensure recording is legal in your jurisdiction.";
+"Add Phone Number" = "Add Phone Number";
+"Verified Numbers" = "Verified Numbers";
+"Phone calls are placed through your verified number. Recordings are transcribed and saved to your recordings." = "Phone calls are placed through your verified number. Recordings are transcribed and saved to your recordings.";
+"We'll call you and read your verification code" = "We'll call you and read your verification code";
+"Call Me" = "Call Me";
+"Calling %@..." = "Calling %@...";
+"Answer the call to hear your code" = "Answer the call to hear your code";
+"6-digit code" = "6-digit code";
+"Verify" = "Verify";
+"Resend code" = "Resend code";
+"Phone Verified!" = "Phone Verified!";
+"Loading calls..." = "Loading calls...";
+"Recording" = "Recording";
+"Unknown" = "Unknown";
+"Connecting..." = "Connecting...";
+"Ringing..." = "Ringing...";
+"Call Ended" = "Call Ended";
+"Mute" = "Mute";
+"Unmute" = "Unmute";
+"Speaker" = "Speaker";
+
+// MARK: - FAQ
+"Common Questions or problems" = "Common Questions or problems";
+"How does Meeting Mind work?" = "How does Meeting Mind work?";
+"Is there a limit on recording time?" = "Is there a limit on recording time?";
+"Are my recordings private?" = "Are my recordings private?";
+"How accurate are the transcriptions?" = "How accurate are the transcriptions?";
+"Can I use it to record online meetings?" = "Can I use it to record online meetings?";
+"Can I use Meeting Mind while using other apps or with my screen off?" = "Can I use Meeting Mind while using other apps or with my screen off?";
+"Can I access Meeting Mind on multiple devices?" = "Can I access Meeting Mind on multiple devices?";
+"Can I record multiple languages?" = "Can I record multiple languages?";
+"How do I export my recordings?" = "How do I export my recordings?";
+"What happens if I cancel my subscription?" = "What happens if I cancel my subscription?";
+"Having issues with your subscription?" = "Having issues with your subscription?";
+"Restore Purchase" = "Restore Purchase";
+
+// MARK: - Live Transcript
+"Live Transcript" = "Live Transcript";
+"Speaker %@" = "Speaker %@";

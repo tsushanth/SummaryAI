@@ -1,0 +1,438 @@
+/* Localizable.strings - Japanese (日本語)
+   MeetingMind iOS App
+   Copyright KreativeKoalaSolutions LLC */
+
+// MARK: - Common / Shared
+"OK" = "OK";
+"Cancel" = "キャンセル";
+"Delete" = "削除";
+"Save" = "保存";
+"Done" = "完了";
+"Retry" = "再試行";
+"Dismiss" = "閉じる";
+"Error" = "エラー";
+"Close" = "閉じる";
+"Clear" = "クリア";
+"Add" = "追加";
+"Search" = "検索";
+"Loading..." = "読み込み中...";
+"An error occurred" = "エラーが発生しました";
+"Try Again" = "再試行";
+"Continue" = "続ける";
+"PRO" = "PRO";
+
+// MARK: - Tab Bar
+"Recordings" = "録音";
+"Calendar" = "カレンダー";
+"Record" = "録音";
+"Phone" = "電話";
+"Settings" = "設定";
+
+// MARK: - Splash / Auth
+"Meeting Mind" = "Meeting Mind";
+"Record, transcribe, and summarize\nyour meetings with AI" = "AIで会議を録音、文字起こし、\n要約";
+"Sign in with Google" = "Googleでサインイン";
+"By signing in, you agree to our" = "サインインすることで、以下に同意します";
+"Terms of Service" = "利用規約";
+"and" = "および";
+"Privacy Policy" = "プライバシーポリシー";
+"Sign In Error" = "サインインエラー";
+"Sign In" = "サインイン";
+"Create Account" = "アカウント作成";
+"Full Name" = "氏名";
+"Email" = "メールアドレス";
+"Password" = "パスワード";
+"Already have an account? Sign in" = "アカウントをお持ちですか？サインイン";
+"Don't have an account? Sign up" = "アカウントをお持ちでないですか？登録";
+"Not signed in" = "未サインイン";
+
+// MARK: - Onboarding
+"Tap Record" = "録音をタップ";
+"and get accurate word-for-word transcripts" = "正確な逐語書き起こしを取得";
+"Speaker identification" = "話者識別";
+"Timestamps for every segment" = "各セグメントにタイムスタンプ";
+"120+ languages supported" = "120以上の言語に対応";
+"Perfect Notes" = "完璧なノート";
+"Ready to Share" = "共有準備完了";
+"AI-powered summaries" = "AI要約";
+"Action items extracted" = "アクションアイテム抽出";
+"Ask questions about recordings" = "録音について質問";
+"Customize," = "カスタマイズ、";
+"Export, Share" = "エクスポート、共有";
+"Export as PDF or Text" = "PDFまたはテキストでエクスポート";
+"Share via email or messages" = "メールやメッセージで共有";
+"Organize with folders" = "フォルダで整理";
+"Built with Data Privacy" = "データプライバシーを";
+"at the Core" = "重視して構築";
+"Secure cloud storage" = "安全なクラウドストレージ";
+"Your data stays private" = "データはプライベートに保護";
+"End-to-end encryption" = "エンドツーエンド暗号化";
+"Get Started" = "始める";
+"Skip" = "スキップ";
+"Allow Meeting Mind to send you notifications?" = "Meeting Mindからの通知を許可しますか？";
+"Allow" = "許可";
+"Don't allow" = "許可しない";
+"Get notified when your recordings are ready to view." = "録音の準備ができたら通知を受け取ります。";
+
+// MARK: - Recordings List
+"New Summary" = "新しい要約";
+"Start your first recording" = "最初の録音を開始";
+"Tap the button below to record, transcribe, and summarize your first meeting" = "下のボタンをタップして最初の会議を録音、文字起こし、要約しましょう";
+"Loading recordings..." = "録音を読み込み中...";
+"Something Went Wrong" = "問題が発生しました";
+"All" = "すべて";
+"Meetings" = "会議";
+"Todos" = "タスク";
+"Favorites" = "お気に入り";
+"Imported" = "インポート済み";
+"No %@ Found" = "%@が見つかりません";
+"Start recording to see your summaries here" = "録音を開始して要約をここに表示";
+"Recordings tagged as meetings will appear here" = "会議としてタグ付けされた録音がここに表示されます";
+"Speak your todos or add them manually" = "タスクを話すか手動で追加";
+"Tap the heart icon on a recording to add it to favorites" = "録音のハートアイコンをタップしてお気に入りに追加";
+"Import audio files or PDFs to see them here" = "音声ファイルやPDFをインポートしてここに表示";
+"%d words" = "%d語";
+"Rename" = "名前変更";
+"Add to Favorites" = "お気に入りに追加";
+"Remove from Favorites" = "お気に入りから削除";
+"Rename Recording" = "録音の名前を変更";
+"Title" = "タイトル";
+"Enter a new title for this recording" = "この録音の新しいタイトルを入力";
+"Delete Recording" = "録音を削除";
+"Are you sure you want to delete \"%@\"? This action cannot be undone." = "\"%@\"を削除してもよろしいですか？この操作は取り消せません。";
+
+// MARK: - New Recording Sheet
+"Record Audio" = "音声録音";
+"Upload from files" = "ファイルからアップロード";
+"PDF and Recordings" = "PDFと録音";
+"To-Do List" = "タスクリスト";
+"Tasks, To-Dos and Notes" = "タスク、To-Do、メモ";
+"Uploading... %d%%" = "アップロード中... %d%%";
+"Import Error" = "インポートエラー";
+
+// MARK: - Recording View
+"Recording Title" = "録音タイトル";
+"Enter title" = "タイトルを入力";
+"Live Transcribe" = "リアルタイム文字起こし";
+"Translate" = "翻訳";
+"Off" = "オフ";
+"English" = "英語";
+"Auto" = "自動";
+"Spanish" = "スペイン語";
+"French" = "フランス語";
+"German" = "ドイツ語";
+"Chinese" = "中国語";
+"Japanese" = "日本語";
+"Korean" = "韓国語";
+"Portuguese" = "ポルトガル語";
+"Italian" = "イタリア語";
+"Listening..." = "聞き取り中...";
+"Connection error" = "接続エラー";
+"Cancel Recording?" = "録音をキャンセルしますか？";
+"Cancel Recording" = "録音をキャンセル";
+"Continue Recording" = "録音を続ける";
+"Your recording will be discarded." = "録音は破棄されます。";
+"New Recording" = "新しい録音";
+
+// MARK: - Recording Detail
+"Recording" = "録音";
+"Summary" = "要約";
+"Transcript" = "文字起こし";
+"Chat" = "チャット";
+"Move to Folder" = "フォルダに移動";
+"Delete Recording?" = "録音を削除しますか？";
+"This will permanently delete this recording and all associated data. This action cannot be undone." = "この録音と関連するすべてのデータが完全に削除されます。この操作は取り消せません。";
+"Loading recording..." = "録音を読み込み中...";
+"Live Recording in Progress" = "リアルタイム録音中";
+"Processing..." = "処理中...";
+"Key Points" = "要点";
+"Overview" = "概要";
+"Topics" = "トピック";
+"Summary will appear here once processing is complete." = "処理が完了すると要約がここに表示されます。";
+"No summary available." = "要約がありません。";
+"Transcript will appear here once transcription is complete." = "文字起こしが完了すると、ここに表示されます。";
+"No transcript available." = "文字起こしがありません。";
+"Document" = "ドキュメント";
+"Failed to Load" = "読み込み失敗";
+"Live" = "ライブ";
+"Full" = "全文";
+"%d segments" = "%dセグメント";
+"Waiting for transcript..." = "文字起こしを待機中...";
+"Transcript will appear here as the meeting progresses" = "会議の進行に合わせて文字起こしがここに表示されます";
+
+// MARK: - Chat / Q&A
+"Hello there! What can I answer about your recording?" = "こんにちは！録音について何をお答えしましょうか？";
+"Key points in the meeting" = "会議の要点";
+"Main action items" = "主なアクションアイテム";
+"Draft a follow-up email" = "フォローアップメールの下書き";
+"What are the key points discussed in this meeting?" = "この会議で議論された要点は何ですか？";
+"What are the main action items from this recording?" = "この録音の主なアクションアイテムは何ですか？";
+"Draft a follow-up email based on this meeting" = "この会議に基づくフォローアップメールを作成";
+"Ask anything about this note" = "このノートについて何でも質問";
+"You" = "あなた";
+"AI" = "AI";
+"AI Assistant" = "AIアシスタント";
+"Sources:" = "ソース：";
+"High confidence" = "高い信頼度";
+"Medium confidence" = "中程度の信頼度";
+"Low confidence" = "低い信頼度";
+
+// MARK: - Search
+"Search Recordings" = "録音を検索";
+"Find specific content in your transcripts by entering keywords above." = "上にキーワードを入力して文字起こしの特定のコンテンツを検索します。";
+"Recent Searches" = "最近の検索";
+"Search transcripts..." = "文字起こしを検索...";
+"Enter at least 2 characters to search" = "検索するには2文字以上入力してください";
+"Searching..." = "検索中...";
+"No Results" = "結果なし";
+"No matches found for \"%@\"" = "\"%@\"に一致する結果が見つかりません";
+"Try different keywords or check your spelling." = "別のキーワードを試すか、スペルを確認してください。";
+"Search Failed" = "検索失敗";
+"Show less" = "折りたたむ";
+"Show %d more" = "さらに%d件表示";
+
+// MARK: - Export
+"Export Format" = "エクスポート形式";
+"Format" = "形式";
+"Content" = "コンテンツ";
+"Key Points" = "要点";
+"Action Items" = "アクションアイテム";
+"Full Transcript" = "全文文字起こし";
+"Recording Info" = "録音情報";
+"Preview" = "プレビュー";
+"No content selected for export" = "エクスポートするコンテンツが選択されていません";
+"Export" = "エクスポート";
+"Export Error" = "エクスポートエラー";
+"Share Summary" = "要約を共有";
+"Export Failed" = "エクスポート失敗";
+"Unknown error" = "不明なエラー";
+
+// MARK: - Share Export
+"Share or Export" = "共有またはエクスポート";
+"Share Summary as PDF" = "要約をPDFで共有";
+"Share Summary as Text" = "要約をテキストで共有";
+"Share Transcript as PDF" = "文字起こしをPDFで共有";
+"Share Transcript as Text" = "文字起こしをテキストで共有";
+"Share Audio" = "音声を共有";
+"Share or export with just a tap!" = "ワンタップで共有やエクスポート！";
+"Generating..." = "生成中...";
+
+// MARK: - Settings
+"Account" = "アカウント";
+"via %@" = "%@経由";
+"AI Data Sharing" = "AIデータ共有";
+"Allowed" = "許可済み";
+"Not Allowed" = "未許可";
+"Data & Privacy" = "データとプライバシー";
+"Your recordings are processed by cloud AI services for transcription and summarization." = "録音はクラウドAIサービスにより文字起こしと要約のために処理されます。";
+"AI-powered features are disabled. Grant consent to enable transcription, summaries, and more." = "AI機能が無効です。文字起こし、要約などを有効にするには同意を付与してください。";
+"Legal" = "法的情報";
+"Integrations" = "連携";
+"Google Calendar" = "Googleカレンダー";
+"Connected" = "接続済み";
+"Disconnect" = "切断";
+"Microsoft Outlook" = "Microsoft Outlook";
+"Add Another Calendar" = "別のカレンダーを追加";
+"Add Calendar" = "カレンダーを追加";
+"Connect Calendar" = "カレンダーを接続";
+"Calendar Integration" = "カレンダー連携";
+"Disconnect Calendar" = "カレンダーを切断";
+"This will stop syncing meetings from this calendar. You can reconnect anytime." = "このカレンダーからの会議の同期が停止します。いつでも再接続できます。";
+"About" = "アプリについて";
+"Version" = "バージョン";
+"Build" = "ビルド";
+"Help & FAQ" = "ヘルプとFAQ";
+"Contact Us" = "お問い合わせ";
+"Sign Out" = "サインアウト";
+"Are you sure you want to sign out?" = "サインアウトしてもよろしいですか？";
+"Delete Account" = "アカウント削除";
+"This will permanently delete your account and all recordings. This action cannot be undone." = "アカウントとすべての録音が完全に削除されます。この操作は取り消せません。";
+"Open Source Licenses" = "オープンソースライセンス";
+"Meeting Mind uses the following open source libraries:" = "Meeting Mindは以下のオープンソースライブラリを使用しています：";
+"Storage" = "ストレージ";
+"Storage Used" = "使用中のストレージ";
+"Clear Local Cache" = "ローカルキャッシュをクリア";
+"Clearing the cache will remove downloaded transcripts and summaries. They will be re-downloaded when you view them." = "キャッシュをクリアすると、ダウンロードした文字起こしと要約が削除されます。閲覧時に再ダウンロードされます。";
+
+// MARK: - Paywall
+"Never Take Notes Again!" = "もうメモは不要！";
+"AI-powered meeting transcription & summaries" = "AI搭載の会議文字起こしと要約";
+"Unlimited meeting recordings with real-time speaker detection" = "リアルタイム話者検出付きの無制限会議録音";
+"AI-generated summaries, key takeaways, and action items" = "AI生成の要約、重要ポイント、アクションアイテム";
+"Ask AI questions about any recorded meeting" = "録音した会議についてAIに質問";
+"Transcription in 120+ languages" = "120以上の言語で文字起こし";
+"Export transcripts as PDF or text files" = "文字起こしをPDFやテキストファイルでエクスポート";
+"Loading plans..." = "プランを読み込み中...";
+"Annual" = "年額";
+"/year" = "/年";
+"Best Value" = "最もお得";
+"7-day free trial" = "7日間無料トライアル";
+"Monthly" = "月額";
+"/month" = "/月";
+"Weekly" = "週額";
+"/week" = "/週";
+"Save 30% on Web" = "Webで30%割引";
+"Cancel anytime. No commitment." = "いつでもキャンセル可能。縛りなし。";
+"Terms" = "利用規約";
+"Privacy" = "プライバシー";
+"Restore" = "復元";
+"Purchase failed. Please try again." = "購入に失敗しました。もう一度お試しください。";
+
+// MARK: - AI Data Consent
+"Meeting Mind uses cloud-based AI services to transcribe your recordings and generate summaries. Here's exactly what data is shared and with whom." = "Meeting Mindはクラウドベースのサービスを使用して録音の文字起こしと要約を生成します。共有されるデータとその共有先を正確にご説明します。";
+"Audio Transcription" = "音声文字起こし";
+"Your audio recordings are sent to our backend server, which uses Deepgram for speech-to-text transcription." = "音声録音はバックエンドサーバーに送信され、Deepgramを使用して音声からテキストへの文字起こしが行われます。";
+"Deepgram — converts speech to text with speaker identification" = "Deepgram — 話者識別付きで音声をテキストに変換";
+"AI Summaries & Action Items" = "AI要約とアクションアイテム";
+"Your transcribed text is sent to OpenAI to generate meeting summaries, action items, and answer questions about your recordings." = "文字起こしされたテキストはOpenAIに送信され、会議の要約、アクションアイテムの生成、録音に関する質問への回答が行われます。";
+"OpenAI (GPT-4) — generates summaries, extracts action items, and powers Q&A" = "OpenAI (GPT-4) — 要約の生成、アクションアイテムの抽出、Q&A機能を提供";
+"Phone Calls" = "電話通話";
+"When using the phone feature, call audio is routed through Twilio for recording and transcription." = "電話機能を使用する際、通話音声はTwilioを介して録音と文字起こしが行われます。";
+"Twilio — VoIP calling and call recording" = "Twilio — VoIP通話と通話録音";
+"Authentication & Storage" = "認証とストレージ";
+"Your account information and files are stored securely via Supabase." = "アカウント情報とファイルはSupabaseを介して安全に保存されます。";
+"Supabase — authentication, database, and file storage" = "Supabase — 認証、データベース、ファイルストレージ";
+"What Stays on Your Device" = "デバイスに残るもの";
+"Your app settings, preferences, and local cache remain on your device and are never shared." = "アプリの設定、環境設定、ローカルキャッシュはデバイス上に保持され、共有されることはありません。";
+"Your data is transmitted securely via HTTPS and is not used to train AI models. You can revoke consent at any time in Settings." = "データはHTTPSで安全に送信され、AIモデルのトレーニングには使用されません。設定でいつでも同意を取り消すことができます。";
+"I Understand & Agree" = "理解して同意する";
+"Continue Without AI Features" = "AI機能なしで続ける";
+"Revoke Consent" = "同意を取り消す";
+
+// MARK: - Processing Progress
+"Processing Audio" = "音声処理中";
+"Transcribing" = "文字起こし中";
+"Identifying Speakers" = "話者を識別中";
+"Highlighting key points" = "要点を強調中";
+"Wrapping up" = "仕上げ中";
+"All done!" = "完了！";
+"Your summary and transcript are ready!" = "要約と文字起こしの準備ができました！";
+"Enjoy Summary" = "要約を見る";
+"Preparing..." = "準備中...";
+"Uploading..." = "アップロード中...";
+"Analyzing..." = "分析中...";
+"Summarizing..." = "要約中...";
+"Complete!" = "完了！";
+"Failed" = "失敗";
+"Getting ready to process" = "処理の準備中";
+"Uploading your recording" = "録音をアップロード中";
+"Processing audio file" = "音声ファイルを処理中";
+"Converting speech to text" = "音声をテキストに変換中";
+"Identifying speakers" = "話者を識別中";
+"Generating summary and key points" = "要約と要点を生成中";
+"Your summary is ready" = "要約の準備ができました";
+"Something went wrong" = "問題が発生しました";
+"Processing recording..." = "録音を処理中...";
+
+// MARK: - Todos
+"Loading todos..." = "タスクを読み込み中...";
+"No todos yet" = "タスクはまだありません";
+"Tap the microphone to speak your tasks, or tap + to add manually" = "マイクをタップしてタスクを話すか、+をタップして手動で追加";
+"Voice" = "音声";
+"No completed todos" = "完了したタスクはありません";
+"No active todos" = "アクティブなタスクはありません";
+"What do you need to do?" = "何をする必要がありますか？";
+"Priority" = "優先度";
+"New Todo" = "新しいタスク";
+"Voice Todos" = "音声タスク";
+"Tap the microphone and speak your todos" = "マイクをタップしてタスクを話してください";
+"Your spoken todos will appear here" = "話したタスクがここに表示されます";
+"Tips:" = "ヒント：";
+"Speak each task clearly. Separate tasks with phrases like 'next' or pause between items." = "各タスクをはっきりと話してください。「次」などの言葉で区切るか、タスクの間に間を置いてください。";
+
+// MARK: - Meetings / Calendar
+"Get instant notes from your" = "あなたの";
+"Gmeet" = "Gmeet";
+"Teams" = "Teams";
+"Zoom" = "Zoom";
+"calls." = "通話からインスタントノートを取得。";
+"Connect your calendar and decide which meetings you want to record" = "カレンダーを接続して、録音する会議を選択";
+"Learn more" = "詳しく見る";
+"Calendar Connected" = "カレンダー接続済み";
+"Syncing" = "同期中";
+"Toggle on meetings you want to auto-record. Manage calendars in Settings." = "自動録音したい会議をオンにしてください。設定でカレンダーを管理。";
+"Upcoming Meetings" = "今後の会議";
+"Next 14 days" = "今後14日間";
+"No upcoming meetings with video calls" = "ビデオ通話付きの予定された会議はありません";
+"Meetings with Zoom, Google Meet, or Teams links will appear here" = "Zoom、Google Meet、Teamsのリンク付き会議がここに表示されます";
+"No upcoming meetings" = "予定された会議はありません";
+"Auto-record this meeting" = "この会議を自動録音";
+"Bot will join and transcribe" = "ボットが参加して文字起こしします";
+"Connect" = "接続";
+
+// MARK: - Join Meeting
+"Join a Meeting" = "会議に参加";
+"Paste your meeting link and our bot will join to record and transcribe" = "会議リンクを貼り付けると、ボットが参加して録音・文字起こしします";
+"Meeting URL" = "会議URL";
+"Please enter a valid meeting URL" = "有効な会議URLを入力してください";
+"Bot Name" = "ボット名";
+"(Optional)" = "（任意）";
+"This name will appear in the meeting participant list" = "この名前が会議の参加者リストに表示されます";
+"%@ detected" = "%@を検出";
+"Joining..." = "参加中...";
+"Join Meeting" = "会議に参加";
+"Supported Platforms" = "対応プラットフォーム";
+"Meet" = "Meet";
+"Webex" = "Webex";
+"Bot Joining" = "ボット参加中";
+"View Recording" = "録音を表示";
+"The bot is joining your %@. You can track the recording progress in real-time." = "ボットが%@に参加しています。録音の進捗をリアルタイムで追跡できます。";
+"The bot is joining your meeting. You can track the recording progress in real-time." = "ボットが会議に参加しています。録音の進捗をリアルタイムで追跡できます。";
+
+// MARK: - Phone
+"History" = "履歴";
+"Dialer" = "ダイヤラー";
+"Calls" = "通話";
+"Verify Your Phone" = "電話番号を確認";
+"To make calls through the app, you need to verify your phone number first. We'll call you with a verification code." = "アプリから電話をかけるには、まず電話番号を確認する必要があります。確認コードをお電話でお知らせします。";
+"Verify Phone Number" = "電話番号を確認";
+"No calls yet" = "通話履歴はまだありません";
+"Make a call using the dialer to get started" = "ダイヤラーを使って電話をかけて始めましょう";
+"Phone number" = "電話番号";
+"Contact name (optional)" = "連絡先名（任意）";
+"Calling from:" = "発信元：";
+"Enter phone number" = "電話番号を入力";
+"Verify phone to make calls" = "電話をかけるには電話番号を確認";
+"All calls are recorded" = "すべての通話は録音されます";
+"Recording Notice" = "録音通知";
+"Start Call" = "通話開始";
+"This call will be automatically recorded for transcription.\n\nA recording notification will be played to the other party.\n\nPlease ensure recording is legal in your jurisdiction." = "この通話は文字起こしのために自動的に録音されます。\n\n相手方に録音通知が再生されます。\n\nお住まいの地域で録音が合法であることをご確認ください。";
+"Add Phone Number" = "電話番号を追加";
+"Verified Numbers" = "確認済みの番号";
+"Phone calls are placed through your verified number. Recordings are transcribed and saved to your recordings." = "電話は確認済みの番号から発信されます。録音は文字起こしされ、録音に保存されます。";
+"We'll call you and read your verification code" = "お電話して確認コードをお伝えします";
+"Call Me" = "電話してください";
+"Calling %@..." = "%@に発信中...";
+"Answer the call to hear your code" = "電話に出てコードをお聞きください";
+"6-digit code" = "6桁のコード";
+"Verify" = "確認";
+"Resend code" = "コードを再送信";
+"Phone Verified!" = "電話番号確認完了！";
+"Loading calls..." = "通話を読み込み中...";
+"Recording" = "録音";
+"Unknown" = "不明";
+"Connecting..." = "接続中...";
+"Ringing..." = "呼び出し中...";
+"Call Ended" = "通話終了";
+"Mute" = "ミュート";
+"Unmute" = "ミュート解除";
+"Speaker" = "スピーカー";
+
+// MARK: - FAQ
+"Common Questions or problems" = "よくある質問と問題";
+"How does Meeting Mind work?" = "Meeting Mindはどのように動作しますか？";
+"Is there a limit on recording time?" = "録音時間に制限はありますか？";
+"Are my recordings private?" = "録音はプライベートですか？";
+"How accurate are the transcriptions?" = "文字起こしの精度はどのくらいですか？";
+"Can I use it to record online meetings?" = "オンライン会議の録音に使えますか？";
+"Can I use Meeting Mind while using other apps or with my screen off?" = "他のアプリを使用中や画面オフの状態でMeeting Mindを使えますか？";
+"Can I access Meeting Mind on multiple devices?" = "複数のデバイスでMeeting Mindにアクセスできますか？";
+"Can I record multiple languages?" = "複数の言語で録音できますか？";
+"How do I export my recordings?" = "録音をエクスポートするにはどうすればよいですか？";
+"What happens if I cancel my subscription?" = "サブスクリプションをキャンセルするとどうなりますか？";
+"Having issues with your subscription?" = "サブスクリプションに問題がありますか？";
+"Restore Purchase" = "購入を復元";
+
+// MARK: - Live Transcript
+"Live Transcript" = "リアルタイム文字起こし";
+"Speaker %@" = "話者 %@";
