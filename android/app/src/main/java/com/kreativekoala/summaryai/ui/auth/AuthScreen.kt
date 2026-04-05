@@ -89,7 +89,7 @@ fun AuthScreen(
             // App Icon
             Image(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = "Meeting Mind",
+                contentDescription = stringResource(R.string.app_name),
                 modifier = Modifier.size(120.dp)
             )
 
@@ -97,7 +97,7 @@ fun AuthScreen(
 
             // App name
             Text(
-                text = "Meeting Mind",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
@@ -106,7 +106,7 @@ fun AuthScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Record, Transcribe, Summarize",
+                text = stringResource(R.string.auth_tagline),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -151,7 +151,7 @@ fun AuthScreen(
             ) {
                 HorizontalDivider(modifier = Modifier.weight(1f))
                 Text(
-                    text = "or",
+                    text = stringResource(R.string.or_divider),
                     modifier = Modifier.padding(horizontal = 16.dp),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -165,7 +165,7 @@ fun AuthScreen(
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email") },
+                label = { Text(stringResource(R.string.email)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
@@ -184,7 +184,7 @@ fun AuthScreen(
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
+                label = { Text(stringResource(R.string.password)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -208,7 +208,7 @@ fun AuthScreen(
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
                             imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                            contentDescription = if (passwordVisible) stringResource(R.string.hide_password) else stringResource(R.string.show_password)
                         )
                     }
                 },
@@ -238,7 +238,7 @@ fun AuthScreen(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Text(if (isSignUpMode) "Create Account" else "Sign In")
+                    Text(if (isSignUpMode) stringResource(R.string.create_account) else stringResource(R.string.sign_in))
                 }
             }
 
@@ -250,7 +250,7 @@ fun AuthScreen(
                 enabled = !uiState.isLoading && !authState.isLoading
             ) {
                 Text(
-                    text = if (isSignUpMode) "Already have an account? Sign In" else "Don't have an account? Create one",
+                    text = if (isSignUpMode) stringResource(R.string.already_have_account) else stringResource(R.string.dont_have_account),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -260,7 +260,7 @@ fun AuthScreen(
 
             // Terms and Privacy
             Text(
-                text = "By continuing, you agree to our Terms of Service and Privacy Policy",
+                text = stringResource(R.string.auth_terms_notice),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

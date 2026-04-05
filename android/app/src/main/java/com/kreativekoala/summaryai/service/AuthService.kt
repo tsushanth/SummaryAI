@@ -173,10 +173,16 @@ class AuthService @Inject constructor(
                 hasCompletedOnboarding = hasCompletedOnboarding
             )
         } catch (e: Exception) {
+            val onboardingCompleted = try {
+                preferencesManager.hasCompletedOnboarding.first()
+            } catch (_: Exception) {
+                false
+            }
             _authState.value = AuthState(
                 isAuthenticated = false,
                 isLoading = false,
-                error = e.message
+                error = e.message,
+                hasCompletedOnboarding = onboardingCompleted
             )
         }
     }

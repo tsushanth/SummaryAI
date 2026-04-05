@@ -61,7 +61,7 @@ fun MeetingsScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Calendar",
+                        text = stringResource(R.string.calendar),
                         style = MaterialTheme.typography.headlineMedium
                     )
                 }
@@ -104,7 +104,7 @@ fun MeetingsScreen(
                 if (uiState.upcomingMeetings.isNotEmpty()) {
                     item {
                         Text(
-                            text = "Upcoming",
+                            text = stringResource(R.string.upcoming),
                             style = MaterialTheme.typography.titleSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
@@ -169,7 +169,7 @@ private fun CalendarConnectedBanner(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Calendar Connected",
+                    text = stringResource(R.string.calendar_connected),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFF2E7D32)
@@ -184,7 +184,7 @@ private fun CalendarConnectedBanner(
             IconButton(onClick = onRefresh) {
                 Icon(
                     Icons.Default.Refresh,
-                    contentDescription = "Refresh",
+                    contentDescription = stringResource(R.string.refresh),
                     tint = Color(0xFF388E3C)
                 )
             }
@@ -217,7 +217,7 @@ private fun ConnectCalendarCardIOS(onClick: () -> Unit) {
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "Connect Your Calendar",
+                text = stringResource(R.string.connect_calendar),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
@@ -225,7 +225,7 @@ private fun ConnectCalendarCardIOS(onClick: () -> Unit) {
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Sync your meetings and enable auto-recording",
+                text = stringResource(R.string.connect_calendar_desc),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -236,7 +236,7 @@ private fun ConnectCalendarCardIOS(onClick: () -> Unit) {
                 onClick = onClick,
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Connect Calendar")
+                Text(stringResource(R.string.connect_calendar))
             }
         }
     }
@@ -319,7 +319,7 @@ private fun MeetingCardIOS(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Auto-record",
+                    text = stringResource(R.string.auto_record),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Switch(
@@ -341,7 +341,7 @@ private fun MeetingCardIOS(
                 ) {
                     Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("View Recording")
+                    Text(stringResource(R.string.view_recording))
                 }
             }
         }
@@ -366,7 +366,7 @@ private fun EmptyMeetingsContentIOS() {
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "No Upcoming Meetings",
+            text = stringResource(R.string.no_upcoming_meetings),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold
         )
@@ -374,15 +374,16 @@ private fun EmptyMeetingsContentIOS() {
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Your calendar meetings will appear here",
+            text = stringResource(R.string.meetings_empty_hint),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
 
+@Composable
 private fun formatMeetingTime(dateString: String?): String {
-    if (dateString == null) return "Now"
+    if (dateString == null) return stringResource(R.string.now)
     return try {
         val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
         val outputFormat = SimpleDateFormat("EEE, MMM d 'at' h:mm a", Locale.US)

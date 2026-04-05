@@ -79,14 +79,14 @@ fun RecordingScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Record") },
+                title = { Text(stringResource(R.string.record)) },
                 navigationIcon = {
                     if (!showAsTab && recordingState.isRecording) {
                         IconButton(onClick = {
                             viewModel.cancel()
                             onCancel()
                         }) {
-                            Icon(Icons.Default.Close, contentDescription = "Cancel")
+                            Icon(Icons.Default.Close, contentDescription = stringResource(R.string.cancel))
                         }
                     }
                 }
@@ -163,7 +163,7 @@ private fun PermissionRequest(
 
         Text(
             text = if (shouldShowRationale) {
-                "We need microphone access to record audio. Please grant permission in settings."
+                stringResource(R.string.microphone_permission_rationale)
             } else {
                 stringResource(R.string.microphone_permission_required)
             },
@@ -175,7 +175,7 @@ private fun PermissionRequest(
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(onClick = onRequestPermission) {
-            Text("Grant Permission")
+            Text(stringResource(R.string.grant_permission))
         }
     }
 }
@@ -192,7 +192,7 @@ private fun ReadyToRecordContent(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Tap to Start Recording",
+            text = stringResource(R.string.tap_to_start_recording),
             style = MaterialTheme.typography.headlineSmall
         )
 
@@ -231,7 +231,7 @@ private fun ReadyToRecordContentIOS(
 
         // Recording Title input
         Text(
-            text = "Recording Title",
+            text = stringResource(R.string.recording_title),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.fillMaxWidth()
@@ -243,7 +243,7 @@ private fun ReadyToRecordContentIOS(
             value = title,
             onValueChange = onTitleChange,
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Enter title") },
+            placeholder = { Text(stringResource(R.string.enter_title)) },
             singleLine = true,
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
@@ -267,7 +267,7 @@ private fun ReadyToRecordContentIOS(
 
         // Ready to record text
         Text(
-            text = "Ready to record",
+            text = stringResource(R.string.ready_to_record),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -338,7 +338,7 @@ private fun RecordingContent(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = if (isPaused) "PAUSED" else "RECORDING",
+                text = if (isPaused) stringResource(R.string.recording_state_paused) else stringResource(R.string.recording_state_recording),
                 style = MaterialTheme.typography.labelLarge,
                 color = if (isPaused) Color.Gray else RecordingRed
             )
@@ -389,7 +389,7 @@ private fun RecordingContent(
             ) {
                 Icon(
                     imageVector = if (isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
-                    contentDescription = if (isPaused) "Resume" else "Pause",
+                    contentDescription = if (isPaused) stringResource(R.string.resume_recording) else stringResource(R.string.pause_recording),
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -428,7 +428,7 @@ private fun UploadingContent(progress: Float) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Uploading...",
+            text = stringResource(R.string.uploading),
             style = MaterialTheme.typography.headlineSmall
         )
 

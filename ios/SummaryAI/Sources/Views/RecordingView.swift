@@ -1,4 +1,5 @@
 import SwiftUI
+import PaywallKit
 
 // MARK: - Recording View Wrapper
 
@@ -20,11 +21,29 @@ struct RecordingContentView: View {
     @State private var liveTranscribeEnabled = false
     @State private var selectedLanguage = "Auto"
     @State private var translateEnabled = false
+    @State private var showRecordingLimitPaywall = false
 
     private let languages = ["Auto", "English", "Spanish", "French", "German", "Chinese", "Japanese", "Korean", "Portuguese", "Italian"]
 
+    /// Maximum number of recordings allowed for free users
+    private static let freeRecordingLimit = 3
+    private static let recordingCountKey = "com.meetingmind.recordingCount"
+
     init(apiClient: SummaryAIAPIClient) {
         _viewModel = StateObject(wrappedValue: RecordingViewModel(apiClient: apiClient))
+    }
+
+    /// Check if free user has exceeded the recording limit
+    private var hasReachedRecordingLimit: Bool {
+        guard !PremiumManager.shared.isPremium else { return false }
+        let count = UserDefaults.standard.integer(forKey: Self.recordingCountKey)
+        return count >= Self.freeRecordingLimit
+    }
+
+    /// Increment recording count after a successful recording start
+    private func incrementRecordingCount() {
+        let count = UserDefaults.standard.integer(forKey: Self.recordingCountKey) + 1
+        UserDefaults.standard.set(count, forKey: Self.recordingCountKey)
     }
 
     var body: some View {
@@ -105,6 +124,9 @@ struct RecordingContentView: View {
         }
         .task {
             await viewModel.requestMicrophonePermission()
+        }
+        .sheet(isPresented: $showRecordingLimitPaywall) {
+            RemotePaywallView(triggerSource: "recording_limit")
         }
     }
 
@@ -326,9 +348,14 @@ struct RecordingContentView: View {
     private var mainButton: some View {
         switch viewModel.state {
         case .idle, .error:
-            // Record button
+            // Record button (gated for free users after limit)
             Button {
-                Task { await viewModel.startRecording() }
+                if hasReachedRecordingLimit {
+                    showRecordingLimitPaywall = true
+                } else {
+                    incrementRecordingCount()
+                    Task { await viewModel.startRecording() }
+                }
             } label: {
                 ZStack {
                     Circle()
