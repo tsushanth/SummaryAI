@@ -1,0 +1,436 @@
+/* Localizable.strings - French (fr)
+   MeetingMind iOS App */
+
+// MARK: - Common / Shared
+"OK" = "OK";
+"Cancel" = "Annuler";
+"Delete" = "Supprimer";
+"Save" = "Enregistrer";
+"Done" = "Terminé";
+"Retry" = "Réessayer";
+"Dismiss" = "Ignorer";
+"Error" = "Erreur";
+"Close" = "Fermer";
+"Clear" = "Effacer";
+"Add" = "Ajouter";
+"Search" = "Rechercher";
+"Loading..." = "Chargement...";
+"An error occurred" = "Une erreur est survenue";
+"Try Again" = "Réessayer";
+"Continue" = "Continuer";
+"PRO" = "PRO";
+
+// MARK: - Tab Bar
+"Recordings" = "Enregistrements";
+"Calendar" = "Calendrier";
+"Record" = "Enregistrer";
+"Phone" = "Téléphone";
+"Settings" = "Paramètres";
+
+// MARK: - Splash / Auth
+"Meeting Mind" = "Meeting Mind";
+"Record, transcribe, and summarize\nyour meetings with AI" = "Enregistrez, transcrivez et résumez\nvos réunions avec l'IA";
+"Sign in with Google" = "Se connecter avec Google";
+"By signing in, you agree to our" = "En vous connectant, vous acceptez nos";
+"Terms of Service" = "Conditions d'utilisation";
+"and" = "et";
+"Privacy Policy" = "Politique de confidentialité";
+"Sign In Error" = "Erreur de connexion";
+"Sign In" = "Se connecter";
+"Create Account" = "Créer un compte";
+"Full Name" = "Nom complet";
+"Email" = "E-mail";
+"Password" = "Mot de passe";
+"Already have an account? Sign in" = "Vous avez déjà un compte ? Connectez-vous";
+"Don't have an account? Sign up" = "Pas de compte ? Inscrivez-vous";
+"Not signed in" = "Non connecté";
+
+// MARK: - Onboarding
+"Tap Record" = "Appuyez sur Enregistrer";
+"and get accurate word-for-word transcripts" = "et obtenez des transcriptions mot à mot précises";
+"Speaker identification" = "Identification des intervenants";
+"Timestamps for every segment" = "Horodatage pour chaque segment";
+"120+ languages supported" = "Plus de 120 langues prises en charge";
+"Perfect Notes" = "Notes parfaites";
+"Ready to Share" = "Prêtes à partager";
+"AI-powered summaries" = "Résumés générés par l'IA";
+"Action items extracted" = "Actions extraites";
+"Ask questions about recordings" = "Posez des questions sur les enregistrements";
+"Customize," = "Personnalisez,";
+"Export, Share" = "Exportez, Partagez";
+"Export as PDF or Text" = "Exportez en PDF ou texte";
+"Share via email or messages" = "Partagez par e-mail ou messages";
+"Organize with folders" = "Organisez avec des dossiers";
+"Built with Data Privacy" = "Conçu avec la confidentialité";
+"at the Core" = "au cœur";
+"Secure cloud storage" = "Stockage cloud sécurisé";
+"Your data stays private" = "Vos données restent privées";
+"End-to-end encryption" = "Chiffrement de bout en bout";
+"Get Started" = "Commencer";
+"Skip" = "Passer";
+"Allow Meeting Mind to send you notifications?" = "Autoriser Meeting Mind à vous envoyer des notifications ?";
+"Allow" = "Autoriser";
+"Don't allow" = "Ne pas autoriser";
+"Get notified when your recordings are ready to view." = "Soyez notifié quand vos enregistrements sont prêts.";
+
+// MARK: - Recordings List
+"New Summary" = "Nouveau résumé";
+"Start your first recording" = "Commencez votre premier enregistrement";
+"Tap the button below to record, transcribe, and summarize your first meeting" = "Appuyez sur le bouton pour enregistrer, transcrire et résumer votre première réunion";
+"Loading recordings..." = "Chargement des enregistrements...";
+"Something Went Wrong" = "Une erreur est survenue";
+"All" = "Tout";
+"Meetings" = "Réunions";
+"Todos" = "Tâches";
+"Favorites" = "Favoris";
+"Imported" = "Importés";
+"No %@ Found" = "Aucun %@ trouvé";
+"Start recording to see your summaries here" = "Enregistrez pour voir vos résumés ici";
+"Recordings tagged as meetings will appear here" = "Les enregistrements tagués comme réunions apparaîtront ici";
+"Speak your todos or add them manually" = "Dictez vos tâches ou ajoutez-les manuellement";
+"Tap the heart icon on a recording to add it to favorites" = "Appuyez sur l'icône cœur pour ajouter aux favoris";
+"Import audio files or PDFs to see them here" = "Importez des fichiers audio ou PDF pour les voir ici";
+"%d words" = "%d mots";
+"Rename" = "Renommer";
+"Add to Favorites" = "Ajouter aux favoris";
+"Remove from Favorites" = "Retirer des favoris";
+"Rename Recording" = "Renommer l'enregistrement";
+"Title" = "Titre";
+"Enter a new title for this recording" = "Entrez un nouveau titre pour cet enregistrement";
+"Delete Recording" = "Supprimer l'enregistrement";
+"Are you sure you want to delete \"%@\"? This action cannot be undone." = "Voulez-vous vraiment supprimer « %@ » ? Cette action est irréversible.";
+
+// MARK: - New Recording Sheet
+"Record Audio" = "Enregistrer l'audio";
+"Upload from files" = "Importer depuis les fichiers";
+"PDF and Recordings" = "PDF et enregistrements";
+"To-Do List" = "Liste de tâches";
+"Tasks, To-Dos and Notes" = "Tâches, à faire et notes";
+"Uploading... %d%%" = "Envoi... %d%%";
+"Import Error" = "Erreur d'importation";
+
+// MARK: - Recording View
+"Recording Title" = "Titre de l'enregistrement";
+"Enter title" = "Entrer le titre";
+"Live Transcribe" = "Transcription en direct";
+"Translate" = "Traduire";
+"Off" = "Désactivé";
+"English" = "Anglais";
+"Auto" = "Auto";
+"Spanish" = "Espagnol";
+"French" = "Français";
+"German" = "Allemand";
+"Chinese" = "Chinois";
+"Japanese" = "Japonais";
+"Korean" = "Coréen";
+"Portuguese" = "Portugais";
+"Italian" = "Italien";
+"Listening..." = "Écoute en cours...";
+"Connection error" = "Erreur de connexion";
+"Cancel Recording?" = "Annuler l'enregistrement ?";
+"Cancel Recording" = "Annuler l'enregistrement";
+"Continue Recording" = "Continuer l'enregistrement";
+"Your recording will be discarded." = "Votre enregistrement sera supprimé.";
+"New Recording" = "Nouvel enregistrement";
+
+// MARK: - Recording Detail
+"Recording" = "Enregistrement";
+"Summary" = "Résumé";
+"Transcript" = "Transcription";
+"Chat" = "Discussion";
+"Move to Folder" = "Déplacer vers un dossier";
+"Delete Recording?" = "Supprimer l'enregistrement ?";
+"This will permanently delete this recording and all associated data. This action cannot be undone." = "Cela supprimera définitivement cet enregistrement et toutes les données associées. Cette action est irréversible.";
+"Loading recording..." = "Chargement de l'enregistrement...";
+"Live Recording in Progress" = "Enregistrement en direct en cours";
+"Processing..." = "Traitement...";
+"Key Points" = "Points clés";
+"Overview" = "Aperçu";
+"Topics" = "Sujets";
+"Summary will appear here once processing is complete." = "Le résumé apparaîtra ici une fois le traitement terminé.";
+"No summary available." = "Aucun résumé disponible.";
+"Transcript will appear here once transcription is complete." = "La transcription apparaîtra ici une fois terminée.";
+"No transcript available." = "Aucune transcription disponible.";
+"Document" = "Document";
+"Failed to Load" = "Échec du chargement";
+"Live" = "En direct";
+"Full" = "Complète";
+"%d segments" = "%d segments";
+"Waiting for transcript..." = "En attente de la transcription...";
+"Transcript will appear here as the meeting progresses" = "La transcription apparaîtra ici au fur et à mesure de la réunion";
+
+// MARK: - Chat / Q&A
+"Hello there! What can I answer about your recording?" = "Bonjour ! Que puis-je répondre sur votre enregistrement ?";
+"Key points in the meeting" = "Points clés de la réunion";
+"Main action items" = "Principales actions à mener";
+"Draft a follow-up email" = "Rédiger un e-mail de suivi";
+"What are the key points discussed in this meeting?" = "Quels sont les points clés discutés lors de cette réunion ?";
+"What are the main action items from this recording?" = "Quelles sont les principales actions de cet enregistrement ?";
+"Draft a follow-up email based on this meeting" = "Rédigez un e-mail de suivi basé sur cette réunion";
+"Ask anything about this note" = "Posez n'importe quelle question sur cette note";
+"You" = "Vous";
+"AI" = "IA";
+"AI Assistant" = "Assistant IA";
+"Sources:" = "Sources :";
+"High confidence" = "Haute confiance";
+"Medium confidence" = "Confiance moyenne";
+"Low confidence" = "Faible confiance";
+
+// MARK: - Search
+"Search Recordings" = "Rechercher des enregistrements";
+"Find specific content in your transcripts by entering keywords above." = "Trouvez du contenu spécifique dans vos transcriptions en saisissant des mots-clés.";
+"Recent Searches" = "Recherches récentes";
+"Search transcripts..." = "Rechercher dans les transcriptions...";
+"Enter at least 2 characters to search" = "Saisissez au moins 2 caractères pour rechercher";
+"Searching..." = "Recherche...";
+"No Results" = "Aucun résultat";
+"No matches found for \"%@\"" = "Aucun résultat trouvé pour « %@ »";
+"Try different keywords or check your spelling." = "Essayez d'autres mots-clés ou vérifiez l'orthographe.";
+"Search Failed" = "Échec de la recherche";
+"Show less" = "Voir moins";
+"Show %d more" = "Voir %d de plus";
+
+// MARK: - Export
+"Export Format" = "Format d'exportation";
+"Format" = "Format";
+"Content" = "Contenu";
+"Action Items" = "Actions";
+"Full Transcript" = "Transcription complète";
+"Recording Info" = "Infos de l'enregistrement";
+"Preview" = "Aperçu";
+"No content selected for export" = "Aucun contenu sélectionné pour l'exportation";
+"Export" = "Exporter";
+"Export Error" = "Erreur d'exportation";
+"Share Summary" = "Partager le résumé";
+"Export Failed" = "Échec de l'exportation";
+"Unknown error" = "Erreur inconnue";
+
+// MARK: - Share Export
+"Share or Export" = "Partager ou exporter";
+"Share Summary as PDF" = "Partager le résumé en PDF";
+"Share Summary as Text" = "Partager le résumé en texte";
+"Share Transcript as PDF" = "Partager la transcription en PDF";
+"Share Transcript as Text" = "Partager la transcription en texte";
+"Share Audio" = "Partager l'audio";
+"Share or export with just a tap!" = "Partagez ou exportez en un seul geste !";
+"Generating..." = "Génération...";
+
+// MARK: - Settings
+"Account" = "Compte";
+"via %@" = "via %@";
+"AI Data Sharing" = "Partage de données IA";
+"Allowed" = "Autorisé";
+"Not Allowed" = "Non autorisé";
+"Data & Privacy" = "Données et confidentialité";
+"Your recordings are processed by cloud AI services for transcription and summarization." = "Vos enregistrements sont traités par des services IA cloud pour la transcription et le résumé.";
+"AI-powered features are disabled. Grant consent to enable transcription, summaries, and more." = "Les fonctionnalités IA sont désactivées. Donnez votre consentement pour activer la transcription, les résumés et plus.";
+"Legal" = "Mentions légales";
+"Integrations" = "Intégrations";
+"Google Calendar" = "Google Agenda";
+"Connected" = "Connecté";
+"Disconnect" = "Déconnecter";
+"Microsoft Outlook" = "Microsoft Outlook";
+"Add Another Calendar" = "Ajouter un autre calendrier";
+"Add Calendar" = "Ajouter un calendrier";
+"Connect Calendar" = "Connecter un calendrier";
+"Calendar Integration" = "Intégration du calendrier";
+"Disconnect Calendar" = "Déconnecter le calendrier";
+"This will stop syncing meetings from this calendar. You can reconnect anytime." = "Cela arrêtera la synchronisation des réunions de ce calendrier. Vous pouvez vous reconnecter à tout moment.";
+"About" = "À propos";
+"Version" = "Version";
+"Build" = "Build";
+"Help & FAQ" = "Aide et FAQ";
+"Contact Us" = "Nous contacter";
+"Sign Out" = "Se déconnecter";
+"Are you sure you want to sign out?" = "Voulez-vous vraiment vous déconnecter ?";
+"Delete Account" = "Supprimer le compte";
+"This will permanently delete your account and all recordings. This action cannot be undone." = "Cela supprimera définitivement votre compte et tous les enregistrements. Cette action est irréversible.";
+"Open Source Licenses" = "Licences open source";
+"Meeting Mind uses the following open source libraries:" = "Meeting Mind utilise les bibliothèques open source suivantes :";
+"Storage" = "Stockage";
+"Storage Used" = "Stockage utilisé";
+"Clear Local Cache" = "Vider le cache local";
+"Clearing the cache will remove downloaded transcripts and summaries. They will be re-downloaded when you view them." = "Vider le cache supprimera les transcriptions et résumés téléchargés. Ils seront retéléchargés lorsque vous les consulterez.";
+
+// MARK: - Paywall
+"Never Take Notes Again!" = "Ne prenez plus jamais de notes !";
+"AI-powered meeting transcription & summaries" = "Transcription et résumés de réunions par IA";
+"Unlimited meeting recordings with real-time speaker detection" = "Enregistrements illimités avec détection des intervenants en temps réel";
+"AI-generated summaries, key takeaways, and action items" = "Résumés générés par l'IA, points clés et actions à mener";
+"Ask AI questions about any recorded meeting" = "Posez des questions à l'IA sur n'importe quelle réunion enregistrée";
+"Transcription in 120+ languages" = "Transcription dans plus de 120 langues";
+"Export transcripts as PDF or text files" = "Exportez les transcriptions en PDF ou fichiers texte";
+"Loading plans..." = "Chargement des offres...";
+"Annual" = "Annuel";
+"/year" = "/an";
+"Best Value" = "Meilleure offre";
+"7-day free trial" = "Essai gratuit de 7 jours";
+"Monthly" = "Mensuel";
+"/month" = "/mois";
+"Weekly" = "Hebdomadaire";
+"/week" = "/semaine";
+"Save 30% on Web" = "Économisez 30% sur le web";
+"Cancel anytime. No commitment." = "Annulez à tout moment. Sans engagement.";
+"Terms" = "Conditions";
+"Privacy" = "Confidentialité";
+"Restore" = "Restaurer";
+"Purchase failed. Please try again." = "L'achat a échoué. Veuillez réessayer.";
+
+// MARK: - AI Data Consent
+"Meeting Mind uses cloud-based AI services to transcribe your recordings and generate summaries. Here's exactly what data is shared and with whom." = "Meeting Mind utilise des services IA cloud pour transcrire vos enregistrements et générer des résumés. Voici exactement quelles données sont partagées et avec qui.";
+"Audio Transcription" = "Transcription audio";
+"Your audio recordings are sent to our backend server, which uses Deepgram for speech-to-text transcription." = "Vos enregistrements audio sont envoyés à notre serveur, qui utilise Deepgram pour la transcription vocale.";
+"Deepgram — converts speech to text with speaker identification" = "Deepgram — convertit la parole en texte avec identification des intervenants";
+"AI Summaries & Action Items" = "Résumés et actions IA";
+"Your transcribed text is sent to OpenAI to generate meeting summaries, action items, and answer questions about your recordings." = "Votre texte transcrit est envoyé à OpenAI pour générer des résumés, des actions et répondre à vos questions.";
+"OpenAI (GPT-4) — generates summaries, extracts action items, and powers Q&A" = "OpenAI (GPT-4) — génère des résumés, extrait les actions et alimente les Q&R";
+"Phone Calls" = "Appels téléphoniques";
+"When using the phone feature, call audio is routed through Twilio for recording and transcription." = "Lors de l'utilisation du téléphone, l'audio est acheminé via Twilio pour l'enregistrement et la transcription.";
+"Twilio — VoIP calling and call recording" = "Twilio — appels VoIP et enregistrement d'appels";
+"Authentication & Storage" = "Authentification et stockage";
+"Your account information and files are stored securely via Supabase." = "Les informations de votre compte et fichiers sont stockés de manière sécurisée via Supabase.";
+"Supabase — authentication, database, and file storage" = "Supabase — authentification, base de données et stockage de fichiers";
+"What Stays on Your Device" = "Ce qui reste sur votre appareil";
+"Your app settings, preferences, and local cache remain on your device and are never shared." = "Vos paramètres, préférences et cache local restent sur votre appareil et ne sont jamais partagés.";
+"Your data is transmitted securely via HTTPS and is not used to train AI models. You can revoke consent at any time in Settings." = "Vos données sont transmises de manière sécurisée via HTTPS et ne sont pas utilisées pour entraîner des modèles IA. Vous pouvez révoquer votre consentement à tout moment dans les Paramètres.";
+"I Understand & Agree" = "Je comprends et j'accepte";
+"Continue Without AI Features" = "Continuer sans les fonctionnalités IA";
+"Revoke Consent" = "Révoquer le consentement";
+
+// MARK: - Processing Progress
+"Processing Audio" = "Traitement de l'audio";
+"Transcribing" = "Transcription";
+"Identifying Speakers" = "Identification des intervenants";
+"Highlighting key points" = "Mise en évidence des points clés";
+"Wrapping up" = "Finalisation";
+"All done!" = "Tout est prêt !";
+"Your summary and transcript are ready!" = "Votre résumé et transcription sont prêts !";
+"Enjoy Summary" = "Voir le résumé";
+"Preparing..." = "Préparation...";
+"Uploading..." = "Envoi...";
+"Analyzing..." = "Analyse...";
+"Summarizing..." = "Résumé...";
+"Complete!" = "Terminé !";
+"Failed" = "Échoué";
+"Getting ready to process" = "Préparation du traitement";
+"Uploading your recording" = "Envoi de votre enregistrement";
+"Processing audio file" = "Traitement du fichier audio";
+"Converting speech to text" = "Conversion de la parole en texte";
+"Identifying speakers" = "Identification des intervenants";
+"Generating summary and key points" = "Génération du résumé et des points clés";
+"Your summary is ready" = "Votre résumé est prêt";
+"Something went wrong" = "Une erreur est survenue";
+"Processing recording..." = "Traitement de l'enregistrement...";
+
+// MARK: - Todos
+"Loading todos..." = "Chargement des tâches...";
+"No todos yet" = "Aucune tâche pour l'instant";
+"Tap the microphone to speak your tasks, or tap + to add manually" = "Appuyez sur le micro pour dicter vos tâches ou sur + pour les ajouter manuellement";
+"Voice" = "Voix";
+"No completed todos" = "Aucune tâche terminée";
+"No active todos" = "Aucune tâche active";
+"What do you need to do?" = "Que devez-vous faire ?";
+"Priority" = "Priorité";
+"New Todo" = "Nouvelle tâche";
+"Voice Todos" = "Tâches vocales";
+"Tap the microphone and speak your todos" = "Appuyez sur le micro et dictez vos tâches";
+"Your spoken todos will appear here" = "Vos tâches dictées apparaîtront ici";
+"Tips:" = "Conseils :";
+"Speak each task clearly. Separate tasks with phrases like 'next' or pause between items." = "Énoncez chaque tâche clairement. Séparez les tâches avec des mots comme « suivant » ou faites une pause entre chaque.";
+
+// MARK: - Meetings / Calendar
+"Get instant notes from your" = "Obtenez des notes instantanées de vos";
+"Gmeet" = "Gmeet";
+"Teams" = "Teams";
+"Zoom" = "Zoom";
+"calls." = "appels.";
+"Connect your calendar and decide which meetings you want to record" = "Connectez votre calendrier et choisissez les réunions à enregistrer";
+"Learn more" = "En savoir plus";
+"Calendar Connected" = "Calendrier connecté";
+"Syncing" = "Synchronisation";
+"Toggle on meetings you want to auto-record. Manage calendars in Settings." = "Activez les réunions à enregistrer automatiquement. Gérez les calendriers dans les Paramètres.";
+"Upcoming Meetings" = "Réunions à venir";
+"Next 14 days" = "14 prochains jours";
+"No upcoming meetings with video calls" = "Aucune réunion vidéo à venir";
+"Meetings with Zoom, Google Meet, or Teams links will appear here" = "Les réunions avec liens Zoom, Google Meet ou Teams apparaîtront ici";
+"No upcoming meetings" = "Aucune réunion à venir";
+"Auto-record this meeting" = "Enregistrer automatiquement cette réunion";
+"Bot will join and transcribe" = "Le bot rejoindra et transcrira";
+"Connect" = "Connecter";
+
+// MARK: - Join Meeting
+"Join a Meeting" = "Rejoindre une réunion";
+"Paste your meeting link and our bot will join to record and transcribe" = "Collez votre lien de réunion et notre bot rejoindra pour enregistrer et transcrire";
+"Meeting URL" = "URL de la réunion";
+"Please enter a valid meeting URL" = "Veuillez entrer une URL de réunion valide";
+"Bot Name" = "Nom du bot";
+"(Optional)" = "(Optionnel)";
+"This name will appear in the meeting participant list" = "Ce nom apparaîtra dans la liste des participants";
+"%@ detected" = "%@ détecté";
+"Joining..." = "Connexion...";
+"Join Meeting" = "Rejoindre la réunion";
+"Supported Platforms" = "Plateformes supportées";
+"Meet" = "Meet";
+"Webex" = "Webex";
+"Bot Joining" = "Bot en cours de connexion";
+"View Recording" = "Voir l'enregistrement";
+"The bot is joining your %@. You can track the recording progress in real-time." = "Le bot rejoint votre %@. Vous pouvez suivre la progression de l'enregistrement en temps réel.";
+"The bot is joining your meeting. You can track the recording progress in real-time." = "Le bot rejoint votre réunion. Vous pouvez suivre la progression de l'enregistrement en temps réel.";
+
+// MARK: - Phone
+"History" = "Historique";
+"Dialer" = "Clavier";
+"Calls" = "Appels";
+"Verify Your Phone" = "Vérifiez votre téléphone";
+"To make calls through the app, you need to verify your phone number first. We'll call you with a verification code." = "Pour passer des appels via l'app, vous devez d'abord vérifier votre numéro. Nous vous appellerons avec un code de vérification.";
+"Verify Phone Number" = "Vérifier le numéro de téléphone";
+"No calls yet" = "Aucun appel pour l'instant";
+"Make a call using the dialer to get started" = "Passez un appel avec le clavier pour commencer";
+"Phone number" = "Numéro de téléphone";
+"Contact name (optional)" = "Nom du contact (optionnel)";
+"Calling from:" = "Appel depuis :";
+"Enter phone number" = "Entrer le numéro de téléphone";
+"Verify phone to make calls" = "Vérifiez votre téléphone pour passer des appels";
+"All calls are recorded" = "Tous les appels sont enregistrés";
+"Recording Notice" = "Avis d'enregistrement";
+"Start Call" = "Lancer l'appel";
+"This call will be automatically recorded for transcription.\n\nA recording notification will be played to the other party.\n\nPlease ensure recording is legal in your jurisdiction." = "Cet appel sera automatiquement enregistré pour transcription.\n\nUne notification d'enregistrement sera diffusée à l'autre partie.\n\nAssurez-vous que l'enregistrement est légal dans votre juridiction.";
+"Add Phone Number" = "Ajouter un numéro";
+"Verified Numbers" = "Numéros vérifiés";
+"Phone calls are placed through your verified number. Recordings are transcribed and saved to your recordings." = "Les appels sont passés via votre numéro vérifié. Les enregistrements sont transcrits et sauvegardés.";
+"We'll call you and read your verification code" = "Nous vous appellerons et lirons votre code de vérification";
+"Call Me" = "Appelez-moi";
+"Calling %@..." = "Appel de %@...";
+"Answer the call to hear your code" = "Répondez à l'appel pour entendre votre code";
+"6-digit code" = "Code à 6 chiffres";
+"Verify" = "Vérifier";
+"Resend code" = "Renvoyer le code";
+"Phone Verified!" = "Téléphone vérifié !";
+"Loading calls..." = "Chargement des appels...";
+"Recording" = "Enregistrement";
+"Unknown" = "Inconnu";
+"Connecting..." = "Connexion...";
+"Ringing..." = "Sonnerie...";
+"Call Ended" = "Appel terminé";
+"Mute" = "Muet";
+"Unmute" = "Activer le son";
+"Speaker" = "Haut-parleur";
+
+// MARK: - FAQ
+"Common Questions or problems" = "Questions fréquentes ou problèmes";
+"How does Meeting Mind work?" = "Comment fonctionne Meeting Mind ?";
+"Is there a limit on recording time?" = "Y a-t-il une limite de temps d'enregistrement ?";
+"Are my recordings private?" = "Mes enregistrements sont-ils privés ?";
+"How accurate are the transcriptions?" = "Quelle est la précision des transcriptions ?";
+"Can I use it to record online meetings?" = "Puis-je l'utiliser pour enregistrer des réunions en ligne ?";
+"Can I use Meeting Mind while using other apps or with my screen off?" = "Puis-je utiliser Meeting Mind en utilisant d'autres apps ou écran éteint ?";
+"Can I access Meeting Mind on multiple devices?" = "Puis-je accéder à Meeting Mind sur plusieurs appareils ?";
+"Can I record multiple languages?" = "Puis-je enregistrer en plusieurs langues ?";
+"How do I export my recordings?" = "Comment exporter mes enregistrements ?";
+"What happens if I cancel my subscription?" = "Que se passe-t-il si j'annule mon abonnement ?";
+"Having issues with your subscription?" = "Des problèmes avec votre abonnement ?";
+"Restore Purchase" = "Restaurer l'achat";
+
+// MARK: - Live Transcript
+"Live Transcript" = "Transcription en direct";
+"Speaker %@" = "Intervenant %@";
