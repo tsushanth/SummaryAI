@@ -1,0 +1,438 @@
+/* Localizable.strings - Simplified Chinese (简体中文)
+   MeetingMind iOS App
+   Copyright KreativeKoalaSolutions LLC */
+
+// MARK: - Common / Shared
+"OK" = "好的";
+"Cancel" = "取消";
+"Delete" = "删除";
+"Save" = "保存";
+"Done" = "完成";
+"Retry" = "重试";
+"Dismiss" = "关闭";
+"Error" = "错误";
+"Close" = "关闭";
+"Clear" = "清除";
+"Add" = "添加";
+"Search" = "搜索";
+"Loading..." = "加载中...";
+"An error occurred" = "发生了一个错误";
+"Try Again" = "重试";
+"Continue" = "继续";
+"PRO" = "PRO";
+
+// MARK: - Tab Bar
+"Recordings" = "录音";
+"Calendar" = "日历";
+"Record" = "录音";
+"Phone" = "电话";
+"Settings" = "设置";
+
+// MARK: - Splash / Auth
+"Meeting Mind" = "Meeting Mind";
+"Record, transcribe, and summarize\nyour meetings with AI" = "用AI录音、转录\n并总结您的会议";
+"Sign in with Google" = "使用Google登录";
+"By signing in, you agree to our" = "登录即表示您同意我们的";
+"Terms of Service" = "服务条款";
+"and" = "和";
+"Privacy Policy" = "隐私政策";
+"Sign In Error" = "登录错误";
+"Sign In" = "登录";
+"Create Account" = "创建账户";
+"Full Name" = "全名";
+"Email" = "邮箱";
+"Password" = "密码";
+"Already have an account? Sign in" = "已有账户？登录";
+"Don't have an account? Sign up" = "没有账户？注册";
+"Not signed in" = "未登录";
+
+// MARK: - Onboarding
+"Tap Record" = "点击录音";
+"and get accurate word-for-word transcripts" = "获取准确的逐字转录";
+"Speaker identification" = "说话人识别";
+"Timestamps for every segment" = "每个片段的时间戳";
+"120+ languages supported" = "支持120+种语言";
+"Perfect Notes" = "完美笔记";
+"Ready to Share" = "准备分享";
+"AI-powered summaries" = "AI驱动的摘要";
+"Action items extracted" = "提取行动项";
+"Ask questions about recordings" = "关于录音的提问";
+"Customize," = "自定义,";
+"Export, Share" = "导出, 分享";
+"Export as PDF or Text" = "导出为PDF或文本";
+"Share via email or messages" = "通过邮件或消息分享";
+"Organize with folders" = "用文件夹整理";
+"Built with Data Privacy" = "以数据隐私";
+"at the Core" = "为核心构建";
+"Secure cloud storage" = "安全的云存储";
+"Your data stays private" = "您的数据保持私密";
+"End-to-end encryption" = "端到端加密";
+"Get Started" = "开始使用";
+"Skip" = "跳过";
+"Allow Meeting Mind to send you notifications?" = "允许Meeting Mind向您发送通知？";
+"Allow" = "允许";
+"Don't allow" = "不允许";
+"Get notified when your recordings are ready to view." = "录音准备就绪时获得通知。";
+
+// MARK: - Recordings List
+"New Summary" = "新摘要";
+"Start your first recording" = "开始您的第一个录音";
+"Tap the button below to record, transcribe, and summarize your first meeting" = "点击下方按钮录音、转录并总结您的第一个会议";
+"Loading recordings..." = "加载录音中...";
+"Something Went Wrong" = "出了点问题";
+"All" = "全部";
+"Meetings" = "会议";
+"Todos" = "待办";
+"Favorites" = "收藏";
+"Imported" = "已导入";
+"No %@ Found" = "未找到%@";
+"Start recording to see your summaries here" = "开始录音以在此处查看摘要";
+"Recordings tagged as meetings will appear here" = "标记为会议的录音将显示在这里";
+"Speak your todos or add them manually" = "说出您的待办事项或手动添加";
+"Tap the heart icon on a recording to add it to favorites" = "点击录音上的心形图标添加到收藏";
+"Import audio files or PDFs to see them here" = "导入音频文件或PDF以在此查看";
+"%d words" = "%d个字";
+"Rename" = "重命名";
+"Add to Favorites" = "添加到收藏";
+"Remove from Favorites" = "从收藏移除";
+"Rename Recording" = "重命名录音";
+"Title" = "标题";
+"Enter a new title for this recording" = "为此录音输入新标题";
+"Delete Recording" = "删除录音";
+"Are you sure you want to delete \"%@\"? This action cannot be undone." = "确定要删除\"%@\"吗？此操作无法撤销。";
+
+// MARK: - New Recording Sheet
+"Record Audio" = "录音";
+"Upload from files" = "从文件上传";
+"PDF and Recordings" = "PDF和录音";
+"To-Do List" = "待办清单";
+"Tasks, To-Dos and Notes" = "任务、待办和笔记";
+"Uploading... %d%%" = "上传中... %d%%";
+"Import Error" = "导入错误";
+
+// MARK: - Recording View
+"Recording Title" = "录音标题";
+"Enter title" = "输入标题";
+"Live Transcribe" = "实时转录";
+"Translate" = "翻译";
+"Off" = "关闭";
+"English" = "英语";
+"Auto" = "自动";
+"Spanish" = "西班牙语";
+"French" = "法语";
+"German" = "德语";
+"Chinese" = "中文";
+"Japanese" = "日语";
+"Korean" = "韩语";
+"Portuguese" = "葡萄牙语";
+"Italian" = "意大利语";
+"Listening..." = "聆听中...";
+"Connection error" = "连接错误";
+"Cancel Recording?" = "取消录音？";
+"Cancel Recording" = "取消录音";
+"Continue Recording" = "继续录音";
+"Your recording will be discarded." = "您的录音将被丢弃。";
+"New Recording" = "新录音";
+
+// MARK: - Recording Detail
+"Recording" = "录音";
+"Summary" = "摘要";
+"Transcript" = "转录";
+"Chat" = "聊天";
+"Move to Folder" = "移动到文件夹";
+"Delete Recording?" = "删除录音？";
+"This will permanently delete this recording and all associated data. This action cannot be undone." = "这将永久删除此录音及所有相关数据。此操作无法撤销。";
+"Loading recording..." = "加载录音中...";
+"Live Recording in Progress" = "正在实时录音";
+"Processing..." = "处理中...";
+"Key Points" = "要点";
+"Overview" = "概述";
+"Topics" = "主题";
+"Summary will appear here once processing is complete." = "处理完成后摘要将显示在这里。";
+"No summary available." = "暂无摘要。";
+"Transcript will appear here once transcription is complete." = "转录完成后将显示在这里。";
+"No transcript available." = "暂无转录。";
+"Document" = "文档";
+"Failed to Load" = "加载失败";
+"Live" = "实时";
+"Full" = "完整";
+"%d segments" = "%d个片段";
+"Waiting for transcript..." = "等待转录...";
+"Transcript will appear here as the meeting progresses" = "随着会议进行，转录将显示在这里";
+
+// MARK: - Chat / Q&A
+"Hello there! What can I answer about your recording?" = "你好！关于您的录音，我能回答什么？";
+"Key points in the meeting" = "会议要点";
+"Main action items" = "主要行动项";
+"Draft a follow-up email" = "起草跟进邮件";
+"What are the key points discussed in this meeting?" = "这次会议讨论的要点是什么？";
+"What are the main action items from this recording?" = "这个录音的主要行动项是什么？";
+"Draft a follow-up email based on this meeting" = "根据此会议起草跟进邮件";
+"Ask anything about this note" = "关于此笔记的任何问题";
+"You" = "你";
+"AI" = "AI";
+"AI Assistant" = "AI助手";
+"Sources:" = "来源：";
+"High confidence" = "高置信度";
+"Medium confidence" = "中置信度";
+"Low confidence" = "低置信度";
+
+// MARK: - Search
+"Search Recordings" = "搜索录音";
+"Find specific content in your transcripts by entering keywords above." = "在上方输入关键词以在转录中查找特定内容。";
+"Recent Searches" = "最近搜索";
+"Search transcripts..." = "搜索转录...";
+"Enter at least 2 characters to search" = "输入至少2个字符进行搜索";
+"Searching..." = "搜索中...";
+"No Results" = "无结果";
+"No matches found for \"%@\"" = "未找到\"%@\"的匹配结果";
+"Try different keywords or check your spelling." = "尝试不同的关键词或检查拼写。";
+"Search Failed" = "搜索失败";
+"Show less" = "收起";
+"Show %d more" = "显示更多%d条";
+
+// MARK: - Export
+"Export Format" = "导出格式";
+"Format" = "格式";
+"Content" = "内容";
+"Key Points" = "要点";
+"Action Items" = "行动项";
+"Full Transcript" = "完整转录";
+"Recording Info" = "录音信息";
+"Preview" = "预览";
+"No content selected for export" = "未选择要导出的内容";
+"Export" = "导出";
+"Export Error" = "导出错误";
+"Share Summary" = "分享摘要";
+"Export Failed" = "导出失败";
+"Unknown error" = "未知错误";
+
+// MARK: - Share Export
+"Share or Export" = "分享或导出";
+"Share Summary as PDF" = "以PDF分享摘要";
+"Share Summary as Text" = "以文本分享摘要";
+"Share Transcript as PDF" = "以PDF分享转录";
+"Share Transcript as Text" = "以文本分享转录";
+"Share Audio" = "分享音频";
+"Share or export with just a tap!" = "一键分享或导出！";
+"Generating..." = "生成中...";
+
+// MARK: - Settings
+"Account" = "账户";
+"via %@" = "通过%@";
+"AI Data Sharing" = "AI数据共享";
+"Allowed" = "已允许";
+"Not Allowed" = "未允许";
+"Data & Privacy" = "数据与隐私";
+"Your recordings are processed by cloud AI services for transcription and summarization." = "您的录音由云AI服务进行转录和摘要处理。";
+"AI-powered features are disabled. Grant consent to enable transcription, summaries, and more." = "AI功能已禁用。授予同意以启用转录、摘要等功能。";
+"Legal" = "法律信息";
+"Integrations" = "集成";
+"Google Calendar" = "Google日历";
+"Connected" = "已连接";
+"Disconnect" = "断开";
+"Microsoft Outlook" = "Microsoft Outlook";
+"Add Another Calendar" = "添加其他日历";
+"Add Calendar" = "添加日历";
+"Connect Calendar" = "连接日历";
+"Calendar Integration" = "日历集成";
+"Disconnect Calendar" = "断开日历";
+"This will stop syncing meetings from this calendar. You can reconnect anytime." = "这将停止从此日历同步会议。您可以随时重新连接。";
+"About" = "关于";
+"Version" = "版本";
+"Build" = "构建";
+"Help & FAQ" = "帮助与常见问题";
+"Contact Us" = "联系我们";
+"Sign Out" = "退出登录";
+"Are you sure you want to sign out?" = "确定要退出登录吗？";
+"Delete Account" = "删除账户";
+"This will permanently delete your account and all recordings. This action cannot be undone." = "这将永久删除您的账户和所有录音。此操作无法撤销。";
+"Open Source Licenses" = "开源许可证";
+"Meeting Mind uses the following open source libraries:" = "Meeting Mind使用以下开源库：";
+"Storage" = "存储";
+"Storage Used" = "已用存储";
+"Clear Local Cache" = "清除本地缓存";
+"Clearing the cache will remove downloaded transcripts and summaries. They will be re-downloaded when you view them." = "清除缓存将删除已下载的转录和摘要。查看时会重新下载。";
+
+// MARK: - Paywall
+"Never Take Notes Again!" = "再也不用做笔记了！";
+"AI-powered meeting transcription & summaries" = "AI驱动的会议转录和摘要";
+"Unlimited meeting recordings with real-time speaker detection" = "无限会议录音，实时说话人检测";
+"AI-generated summaries, key takeaways, and action items" = "AI生成的摘要、关键要点和行动项";
+"Ask AI questions about any recorded meeting" = "向AI提问任何已录制的会议";
+"Transcription in 120+ languages" = "支持120+种语言的转录";
+"Export transcripts as PDF or text files" = "将转录导出为PDF或文本文件";
+"Loading plans..." = "加载套餐中...";
+"Annual" = "年度";
+"/year" = "/年";
+"Best Value" = "最超值";
+"7-day free trial" = "7天免费试用";
+"Monthly" = "月度";
+"/month" = "/月";
+"Weekly" = "每周";
+"/week" = "/周";
+"Save 30% on Web" = "网页端节省30%";
+"Cancel anytime. No commitment." = "随时取消，无承诺。";
+"Terms" = "条款";
+"Privacy" = "隐私";
+"Restore" = "恢复购买";
+"Purchase failed. Please try again." = "购买失败，请重试。";
+
+// MARK: - AI Data Consent
+"Meeting Mind uses cloud-based AI services to transcribe your recordings and generate summaries. Here's exactly what data is shared and with whom." = "Meeting Mind使用基于云的AI服务来转录录音和生成摘要。以下是具体共享的数据及其接收方。";
+"Audio Transcription" = "音频转录";
+"Your audio recordings are sent to our backend server, which uses Deepgram for speech-to-text transcription." = "您的音频录音将发送到我们的后端服务器，使用Deepgram进行语音转文字转录。";
+"Deepgram — converts speech to text with speaker identification" = "Deepgram — 将语音转换为文字并识别说话人";
+"AI Summaries & Action Items" = "AI摘要与行动项";
+"Your transcribed text is sent to OpenAI to generate meeting summaries, action items, and answer questions about your recordings." = "转录的文字将发送至OpenAI，用于生成会议摘要、行动项和回答关于录音的问题。";
+"OpenAI (GPT-4) — generates summaries, extracts action items, and powers Q&A" = "OpenAI (GPT-4) — 生成摘要、提取行动项并提供问答功能";
+"Phone Calls" = "电话通话";
+"When using the phone feature, call audio is routed through Twilio for recording and transcription." = "使用电话功能时，通话音频通过Twilio进行录音和转录。";
+"Twilio — VoIP calling and call recording" = "Twilio — VoIP通话和通话录音";
+"Authentication & Storage" = "认证与存储";
+"Your account information and files are stored securely via Supabase." = "您的账户信息和文件通过Supabase安全存储。";
+"Supabase — authentication, database, and file storage" = "Supabase — 认证、数据库和文件存储";
+"What Stays on Your Device" = "留在您设备上的数据";
+"Your app settings, preferences, and local cache remain on your device and are never shared." = "您的应用设置、偏好和本地缓存保留在设备上，不会被共享。";
+"Your data is transmitted securely via HTTPS and is not used to train AI models. You can revoke consent at any time in Settings." = "您的数据通过HTTPS安全传输，不会用于训练AI模型。您可以随时在设置中撤销同意。";
+"I Understand & Agree" = "我理解并同意";
+"Continue Without AI Features" = "不使用AI功能继续";
+"Revoke Consent" = "撤销同意";
+
+// MARK: - Processing Progress
+"Processing Audio" = "处理音频";
+"Transcribing" = "转录中";
+"Identifying Speakers" = "识别说话人";
+"Highlighting key points" = "标注要点";
+"Wrapping up" = "收尾中";
+"All done!" = "全部完成！";
+"Your summary and transcript are ready!" = "您的摘要和转录已准备就绪！";
+"Enjoy Summary" = "查看摘要";
+"Preparing..." = "准备中...";
+"Uploading..." = "上传中...";
+"Analyzing..." = "分析中...";
+"Summarizing..." = "摘要生成中...";
+"Complete!" = "完成！";
+"Failed" = "失败";
+"Getting ready to process" = "准备处理";
+"Uploading your recording" = "正在上传录音";
+"Processing audio file" = "正在处理音频文件";
+"Converting speech to text" = "正在将语音转换为文字";
+"Identifying speakers" = "正在识别说话人";
+"Generating summary and key points" = "正在生成摘要和要点";
+"Your summary is ready" = "您的摘要已准备就绪";
+"Something went wrong" = "出了点问题";
+"Processing recording..." = "处理录音中...";
+
+// MARK: - Todos
+"Loading todos..." = "加载待办中...";
+"No todos yet" = "暂无待办";
+"Tap the microphone to speak your tasks, or tap + to add manually" = "点击麦克风说出任务，或点击+手动添加";
+"Voice" = "语音";
+"No completed todos" = "没有已完成的待办";
+"No active todos" = "没有进行中的待办";
+"What do you need to do?" = "您需要做什么？";
+"Priority" = "优先级";
+"New Todo" = "新待办";
+"Voice Todos" = "语音待办";
+"Tap the microphone and speak your todos" = "点击麦克风说出您的待办事项";
+"Your spoken todos will appear here" = "您说出的待办将显示在这里";
+"Tips:" = "提示：";
+"Speak each task clearly. Separate tasks with phrases like 'next' or pause between items." = "清楚地说出每个任务。用\"下一个\"等词语分隔任务，或在任务之间暂停。";
+
+// MARK: - Meetings / Calendar
+"Get instant notes from your" = "从您的";
+"Gmeet" = "Gmeet";
+"Teams" = "Teams";
+"Zoom" = "Zoom";
+"calls." = "通话中获取即时笔记。";
+"Connect your calendar and decide which meetings you want to record" = "连接日历并选择要录制的会议";
+"Learn more" = "了解更多";
+"Calendar Connected" = "日历已连接";
+"Syncing" = "同步中";
+"Toggle on meetings you want to auto-record. Manage calendars in Settings." = "打开要自动录制的会议。在设置中管理日历。";
+"Upcoming Meetings" = "即将到来的会议";
+"Next 14 days" = "未来14天";
+"No upcoming meetings with video calls" = "没有即将到来的视频会议";
+"Meetings with Zoom, Google Meet, or Teams links will appear here" = "包含Zoom、Google Meet或Teams链接的会议将显示在这里";
+"No upcoming meetings" = "没有即将到来的会议";
+"Auto-record this meeting" = "自动录制此会议";
+"Bot will join and transcribe" = "机器人将加入并转录";
+"Connect" = "连接";
+
+// MARK: - Join Meeting
+"Join a Meeting" = "加入会议";
+"Paste your meeting link and our bot will join to record and transcribe" = "粘贴会议链接，我们的机器人将加入录音和转录";
+"Meeting URL" = "会议链接";
+"Please enter a valid meeting URL" = "请输入有效的会议链接";
+"Bot Name" = "机器人名称";
+"(Optional)" = "（可选）";
+"This name will appear in the meeting participant list" = "此名称将显示在会议参与者列表中";
+"%@ detected" = "检测到%@";
+"Joining..." = "加入中...";
+"Join Meeting" = "加入会议";
+"Supported Platforms" = "支持的平台";
+"Meet" = "Meet";
+"Webex" = "Webex";
+"Bot Joining" = "机器人加入中";
+"View Recording" = "查看录音";
+"The bot is joining your %@. You can track the recording progress in real-time." = "机器人正在加入您的%@。您可以实时跟踪录音进度。";
+"The bot is joining your meeting. You can track the recording progress in real-time." = "机器人正在加入您的会议。您可以实时跟踪录音进度。";
+
+// MARK: - Phone
+"History" = "历史";
+"Dialer" = "拨号键盘";
+"Calls" = "通话";
+"Verify Your Phone" = "验证您的电话";
+"To make calls through the app, you need to verify your phone number first. We'll call you with a verification code." = "要通过应用拨打电话，需要先验证您的电话号码。我们将拨打电话告知验证码。";
+"Verify Phone Number" = "验证电话号码";
+"No calls yet" = "暂无通话记录";
+"Make a call using the dialer to get started" = "使用拨号键盘拨打电话开始使用";
+"Phone number" = "电话号码";
+"Contact name (optional)" = "联系人姓名（可选）";
+"Calling from:" = "拨出号码：";
+"Enter phone number" = "输入电话号码";
+"Verify phone to make calls" = "验证电话以拨打电话";
+"All calls are recorded" = "所有通话均会录音";
+"Recording Notice" = "录音通知";
+"Start Call" = "开始通话";
+"This call will be automatically recorded for transcription.\n\nA recording notification will be played to the other party.\n\nPlease ensure recording is legal in your jurisdiction." = "此通话将自动录音用于转录。\n\n对方将收到录音通知。\n\n请确保录音在您所在地区合法。";
+"Add Phone Number" = "添加电话号码";
+"Verified Numbers" = "已验证号码";
+"Phone calls are placed through your verified number. Recordings are transcribed and saved to your recordings." = "电话通过您验证的号码拨出。录音将被转录并保存到您的录音中。";
+"We'll call you and read your verification code" = "我们将给您打电话并告知验证码";
+"Call Me" = "拨打我的电话";
+"Calling %@..." = "正在拨打%@...";
+"Answer the call to hear your code" = "接听电话以获取验证码";
+"6-digit code" = "6位验证码";
+"Verify" = "验证";
+"Resend code" = "重新发送验证码";
+"Phone Verified!" = "电话已验证！";
+"Loading calls..." = "加载通话记录中...";
+"Recording" = "录音";
+"Unknown" = "未知";
+"Connecting..." = "连接中...";
+"Ringing..." = "响铃中...";
+"Call Ended" = "通话结束";
+"Mute" = "静音";
+"Unmute" = "取消静音";
+"Speaker" = "扬声器";
+
+// MARK: - FAQ
+"Common Questions or problems" = "常见问题";
+"How does Meeting Mind work?" = "Meeting Mind是如何工作的？";
+"Is there a limit on recording time?" = "录音时间有限制吗？";
+"Are my recordings private?" = "我的录音是私密的吗？";
+"How accurate are the transcriptions?" = "转录的准确度如何？";
+"Can I use it to record online meetings?" = "我可以用它录制在线会议吗？";
+"Can I use Meeting Mind while using other apps or with my screen off?" = "在使用其他应用或锁屏时可以使用Meeting Mind吗？";
+"Can I access Meeting Mind on multiple devices?" = "我可以在多个设备上使用Meeting Mind吗？";
+"Can I record multiple languages?" = "我可以录制多种语言吗？";
+"How do I export my recordings?" = "如何导出录音？";
+"What happens if I cancel my subscription?" = "取消订阅会怎样？";
+"Having issues with your subscription?" = "订阅遇到问题？";
+"Restore Purchase" = "恢复购买";
+
+// MARK: - Live Transcript
+"Live Transcript" = "实时转录";
+"Speaker %@" = "说话人 %@";

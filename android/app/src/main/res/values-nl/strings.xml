@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Meeting Mind</string>
+
+    <!-- Auth -->
+    <string name="sign_in">Inloggen</string>
+    <string name="sign_up">Registreren</string>
+    <string name="sign_out">Uitloggen</string>
+    <string name="continue_with_google">Doorgaan met Google</string>
+    <string name="continue_with_email">Doorgaan met e-mail</string>
+    <string name="email">E-mail</string>
+    <string name="password">Wachtwoord</string>
+    <string name="forgot_password">Wachtwoord vergeten?</string>
+    <string name="auth_tagline">Opnemen, Transcriberen, Samenvatten</string>
+    <string name="or_divider">of</string>
+    <string name="hide_password">Wachtwoord verbergen</string>
+    <string name="show_password">Wachtwoord tonen</string>
+    <string name="create_account">Account aanmaken</string>
+    <string name="already_have_account">Heb je al een account? Inloggen</string>
+    <string name="dont_have_account">Geen account? Maak er een aan</string>
+    <string name="auth_terms_notice">Door verder te gaan, ga je akkoord met onze Servicevoorwaarden en Privacybeleid</string>
+
+    <!-- Navigation -->
+    <string name="recordings">Opnames</string>
+    <string name="todos">Actiepunten</string>
+    <string name="meetings">Vergaderingen</string>
+    <string name="settings">Instellingen</string>
+    <string name="search">Zoeken</string>
+    <string name="record">Opnemen</string>
+    <string name="calendar">Agenda</string>
+    <string name="phone">Telefoon</string>
+
+    <!-- Recording -->
+    <string name="start_recording">Opname starten</string>
+    <string name="stop_recording">Opname stoppen</string>
+    <string name="pause_recording">Opname pauzeren</string>
+    <string name="resume_recording">Opname hervatten</string>
+    <string name="recording_in_progress">Opname bezig</string>
+    <string name="recording_title">Opnametitel</string>
+    <string name="untitled_recording">Naamloze opname</string>
+    <string name="microphone_permission_rationale">We hebben microfoontoegang nodig om audio op te nemen. Geef toestemming in de instellingen.</string>
+    <string name="grant_permission">Toestemming verlenen</string>
+    <string name="tap_to_start_recording">Tik om opname te starten</string>
+    <string name="enter_title">Voer titel in</string>
+    <string name="ready_to_record">Klaar om op te nemen</string>
+    <string name="recording_state_paused">GEPAUZEERD</string>
+    <string name="recording_state_recording">OPNEMEN</string>
+    <string name="uploading">Uploaden…</string>
+
+    <!-- Recordings List -->
+    <string name="all">Alle</string>
+    <string name="processing">Verwerken</string>
+    <string name="completed">Voltooid</string>
+    <string name="no_recordings">Nog geen opnames</string>
+    <string name="no_recordings_subtitle">Tik op de microfoonknop om je eerste opname te starten</string>
+    <string name="favorites">Favorieten</string>
+    <string name="imported">Geïmporteerd</string>
+    <string name="new_summary">Nieuwe samenvatting</string>
+    <string name="favorite">Favoriet</string>
+    <string name="more_options">Meer opties</string>
+    <string name="add_to_favorites">Toevoegen aan favorieten</string>
+    <string name="remove_from_favorites">Verwijderen uit favorieten</string>
+    <string name="delete_recording">Opname verwijderen</string>
+    <string name="delete_recording_confirm">Weet je zeker dat je \"%s\" wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.</string>
+    <string name="failed">Mislukt</string>
+    <string name="refresh">Vernieuwen</string>
+
+    <!-- Recording Detail -->
+    <string name="transcript">Transcript</string>
+    <string name="summary">Samenvatting</string>
+    <string name="action_items">Actiepunten</string>
+    <string name="ask_a_question">Stel een vraag…</string>
+    <string name="export">Exporteren</string>
+    <string name="share">Delen</string>
+    <string name="delete">Verwijderen</string>
+    <string name="recording_fallback">Opname</string>
+    <string name="back">Terug</string>
+    <string name="more">Meer</string>
+    <string name="delete_recording_confirm_generic">Weet je zeker dat je deze opname wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.</string>
+    <string name="rewind_10s">10 seconden terugspoelen</string>
+    <string name="play">Afspelen</string>
+    <string name="pause">Pauzeren</string>
+    <string name="forward_10s">10 seconden vooruitspoelen</string>
+    <string name="chat">Chat</string>
+    <string name="overview">Overzicht</string>
+    <string name="summary_not_available">Samenvatting nog niet beschikbaar</string>
+    <string name="chat_welcome_message">Hallo! Wat kan ik beantwoorden over je opname?</string>
+    <string name="suggested_question_key_points">Belangrijkste punten in de vergadering</string>
+    <string name="suggested_question_key_points_full">Wat zijn de belangrijkste punten die in deze vergadering zijn besproken?</string>
+    <string name="suggested_question_action_items">Belangrijkste actiepunten</string>
+    <string name="suggested_question_action_items_full">Wat zijn de belangrijkste actiepunten uit deze opname?</string>
+    <string name="suggested_question_followup_email">Stel een opvolg-e-mail op</string>
+    <string name="suggested_question_followup_email_full">Stel een opvolg-e-mail op op basis van deze vergadering</string>
+    <string name="chat_sender_you">Jij</string>
+    <string name="chat_sender_ai">AI-assistent</string>
+    <string name="no_answer">Geen antwoord</string>
+    <string name="chat_placeholder">Vraag alles over deze notitie</string>
+    <string name="voice_input">Spraakinvoer</string>
+    <string name="send">Verzenden</string>
+    <string name="transcript_not_available">Transcript nog niet beschikbaar</string>
+    <string name="live_label">Live</string>
+    <string name="full_label">Volledig</string>
+
+    <!-- Todos -->
+    <string name="add_todo">Actiepunt toevoegen</string>
+    <string name="todo_title">Titel</string>
+    <string name="todo_notes">Notities</string>
+    <string name="due_date">Deadline</string>
+    <string name="priority">Prioriteit</string>
+    <string name="high">Hoog</string>
+    <string name="medium">Gemiddeld</string>
+    <string name="low">Laag</string>
+    <string name="none">Geen</string>
+    <string name="pending_items">In afwachting</string>
+    <string name="completed_items">Voltooid</string>
+    <string name="no_action_items">Nog geen actiepunten</string>
+    <string name="no_pending_items">Geen openstaande items</string>
+    <string name="no_completed_items">Geen voltooide items</string>
+    <string name="action_items_empty_hint">Actiepunten uit je opnames verschijnen hier</string>
+    <string name="view_recording">Opname bekijken</string>
+    <string name="add">Toevoegen</string>
+
+    <!-- Meetings -->
+    <string name="upcoming_meetings">Aankomende vergaderingen</string>
+    <string name="past_meetings">Eerdere vergaderingen</string>
+    <string name="join_meeting">Deelnemen aan vergadering</string>
+    <string name="meeting_url">Vergaderings-URL</string>
+    <string name="paste_meeting_link">Plak hier je vergaderingslink</string>
+    <string name="send_bot">Bot naar vergadering sturen</string>
+    <string name="auto_join">Automatisch deelnemen</string>
+    <string name="upcoming">Aankomend</string>
+    <string name="calendar_connected">Agenda gekoppeld</string>
+    <string name="connect_calendar_desc">Synchroniseer je vergaderingen en schakel automatische opname in</string>
+    <string name="auto_record">Automatisch opnemen</string>
+    <string name="no_upcoming_meetings">Geen aankomende vergaderingen</string>
+    <string name="meetings_empty_hint">Je agendavergaderingen verschijnen hier</string>
+    <string name="now">Nu</string>
+    <string name="join">Deelnemen</string>
+    <string name="join_meeting_desc">Plak je vergaderingslink en onze bot neemt deel om op te nemen en te transcriberen</string>
+    <string name="meeting_url_placeholder">https://zoom.us/j/123456789</string>
+    <string name="bot_name">Botnaam</string>
+    <string name="optional">(Optioneel)</string>
+    <string name="bot_name_hint">Deze naam verschijnt in de deelnemerslijst van de vergadering</string>
+    <string name="supported_platforms">Ondersteunde platforms</string>
+
+    <!-- Calendar -->
+    <string name="connect_calendar">Agenda koppelen</string>
+    <string name="google_calendar">Google Agenda</string>
+    <string name="microsoft_outlook">Microsoft Outlook</string>
+    <string name="disconnect">Ontkoppelen</string>
+    <string name="connected">Gekoppeld</string>
+    <string name="calendar_integration">Agenda-integratie</string>
+    <string name="calendar_integration_desc">Koppel je agenda om automatisch aankomende vergaderingen te zien en botopnames te plannen.</string>
+    <string name="disconnect_calendar_title">%s ontkoppelen</string>
+    <string name="disconnect_calendar_desc">Synchronisatie van vergaderingen uit deze agenda wordt gestopt. Je kunt op elk moment opnieuw koppelen.</string>
+    <string name="connect">Koppelen</string>
+
+    <!-- Settings -->
+    <string name="account">Account</string>
+    <string name="integrations">Integraties</string>
+    <string name="legal">Juridisch</string>
+    <string name="about">Over</string>
+    <string name="privacy_policy">Privacybeleid</string>
+    <string name="terms_of_service">Servicevoorwaarden</string>
+    <string name="version">Versie</string>
+    <string name="build">Build</string>
+    <string name="help_faq">Help &amp; FAQ</string>
+    <string name="contact_us">Neem contact op</string>
+    <string name="appearance">Uiterlijk</string>
+    <string name="calendar_sync_subtitle">Synchroniseer je vergaderingen</string>
+    <string name="sign_out_confirm">Weet je zeker dat je wilt uitloggen?</string>
+    <string name="via_provider">via %s</string>
+    <string name="theme_light">Licht</string>
+    <string name="theme_light_subtitle">Altijd licht thema gebruiken</string>
+    <string name="theme_dark">Donker</string>
+    <string name="theme_dark_subtitle">Altijd donker thema gebruiken</string>
+    <string name="theme_system">Systeem</string>
+    <string name="theme_system_subtitle">Systeeminstelling volgen</string>
+    <string name="selected">Geselecteerd</string>
+    <string name="delete_account">Account verwijderen</string>
+    <string name="delete_account_warning">Dit verwijdert je account en alle opnames permanent. Deze actie kan niet ongedaan worden gemaakt.</string>
+
+    <!-- Subscription -->
+    <string name="upgrade_to_pro">Upgraden naar Pro</string>
+    <string name="pro">PRO</string>
+    <string name="free">Gratis</string>
+    <string name="restore_purchases">Aankopen herstellen</string>
+    <string name="monthly">Maandelijks</string>
+    <string name="yearly">Jaarlijks</string>
+    <string name="per_month">/maand</string>
+    <string name="per_year">/jaar</string>
+
+    <!-- Export -->
+    <string name="export_pdf">Exporteren als PDF</string>
+    <string name="export_text">Exporteren als tekst</string>
+    <string name="export_markdown">Exporteren als Markdown</string>
+
+    <!-- Service Descriptions -->
+    <string name="service_description_recording">Neemt audio op tijdens vergaderingen en telefoongesprekken voor transcriptie</string>
+    <string name="service_description_playback">Speelt opgenomen vergaderingen en telefoongesprekken af op de achtergrond</string>
+
+    <!-- Errors -->
+    <string name="error">Fout</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Annuleren</string>
+    <string name="retry">Opnieuw proberen</string>
+    <string name="something_went_wrong">Er is iets misgegaan</string>
+    <string name="no_internet">Geen internetverbinding</string>
+    <string name="permission_required">Toestemming vereist</string>
+    <string name="microphone_permission_required">Microfoontoestemming is vereist om audio op te nemen</string>
+    <string name="notification_permission_required">Meldingstoestemming is vereist voor achtergrondopname</string>
+    <string name="demo_mode_message">Om opnames op te slaan moet je inloggen met Google. Log uit en log in met je Google-account om opnames op te slaan.</string>
+    <string name="error_recording_file_not_found">Opnamebestand niet gevonden</string>
+    <string name="error_upload_failed">Upload mislukt</string>
+    <string name="error_qa_failed">Sorry, ik kon die vraag niet beantwoorden. Probeer het opnieuw.</string>
+    <string name="error_join_meeting_failed">Deelname aan vergadering mislukt</string>
+    <string name="error_load_phones_failed">Telefoons laden mislukt</string>
+    <string name="error_load_calls_failed">Gesprekken laden mislukt</string>
+    <string name="error_enter_phone_number">Voer een telefoonnummer in</string>
+    <string name="error_enter_six_digit_code">Voer een 6-cijferige code in</string>
+    <string name="error_invalid_verification_code">Ongeldige verificatiecode</string>
+    <string name="error_verify_phone_first">Verifieer eerst een telefoonnummer</string>
+    <string name="error_enter_number_to_call">Voer een telefoonnummer in om te bellen</string>
+    <string name="error_voip_token_failed">Kan VoIP-token niet ophalen</string>
+    <string name="error_create_call_failed">Kan gesprek niet aanmaken</string>
+    <string name="error_start_voip_call">Kan VoIP-gesprek niet starten</string>
+
+    <!-- Onboarding -->
+    <string name="welcome_to_meeting_mind">Welkom bij Meeting Mind</string>
+    <string name="onboarding_recording_title">Neem alles op</string>
+    <string name="onboarding_recording_desc">Leg vergaderingen, lezingen, interviews of elk gesprek vast met kristalhelder geluid</string>
+    <string name="onboarding_transcribe_title">AI-aangedreven transcriptie</string>
+    <string name="onboarding_transcribe_desc">Krijg nauwkeurige transcripten met sprekerherkenning in meer dan 120 talen</string>
+    <string name="onboarding_summary_title">Slimme samenvattingen</string>
+    <string name="onboarding_summary_desc">AI genereert beknopte samenvattingen met hoofdpunten en actiepunten</string>
+    <string name="onboarding_qa_title">Stel vragen</string>
+    <string name="onboarding_qa_desc">Chat met je opnames om specifieke informatie direct te vinden</string>
+    <string name="get_started">Aan de slag</string>
+    <string name="next">Volgende</string>
+    <string name="skip">Overslaan</string>
+
+    <!-- Search -->
+    <string name="clear">Wissen</string>
+    <string name="search_prompt">Zoek in je opnames</string>
+    <string name="search_hint">Zoek op titel, transcriptinhoud of onderwerpen</string>
+    <string name="no_results">Geen resultaten gevonden</string>
+    <string name="no_results_for_query">Geen opnames gevonden voor \"%s\"</string>
+
+    <!-- Phone -->
+    <string name="calls">Gesprekken</string>
+    <string name="dialer">Kiezer</string>
+
+    <!-- Live Transcript -->
+    <string name="waiting_for_transcript">Wachten op transcript…</string>
+    <string name="live_transcript_hint">Live transcript verschijnt hier wanneer spraak wordt gedetecteerd</string>
+    <string name="live_indicator">LIVE</string>
+    <string name="host">Gastheer</string>
+
+    <!-- Language Picker -->
+    <string name="language">Taal</string>
+    <string name="language_picker_title">Selecteer taal</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese">中文(简体)</string>
+    <string name="language_korean">한국어</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_hindi">हिन्दी</string>
+</resources>
