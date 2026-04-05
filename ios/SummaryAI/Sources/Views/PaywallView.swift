@@ -1,14 +1,14 @@
 import SwiftUI
-import RevenueCat
+import PaywallKit
 
 struct LegacyPaywallView: View {
-    @ObservedObject var subscriptionService: SubscriptionService
     @Binding var hasCompletedPaywall: Bool
-    @State private var selectedPackage: Package?
+    @State private var selectedProductId: String?
     @State private var isPurchasing = false
     @State private var showError = false
     @State private var errorMessage = ""
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var store = StoreManager.shared
 
     var body: some View {
         VStack(spacing: 16) {
@@ -44,7 +44,7 @@ struct LegacyPaywallView: View {
             }
             .padding(.horizontal)
 
-            // Features — what you get with Meeting Mind PRO
+            // Features
             VStack(alignment: .leading, spacing: 8) {
                 FeatureRow(icon: "waveform", text: "Unlimited meeting recordings with real-time speaker detection")
                 FeatureRow(icon: "doc.text", text: "AI-generated summaries, key takeaways, and action items")
@@ -56,51 +56,30 @@ struct LegacyPaywallView: View {
 
             // Plans
             VStack(spacing: 8) {
-                if subscriptionService.availablePackages.isEmpty && subscriptionService.isLoading {
+                if store.paywallProducts.isEmpty {
                     ProgressView("Loading plans...")
                         .padding()
                 }
 
-                if let yearly = subscriptionService.yearlyPackage {
+                ForEach(store.paywallProducts, id: \.id) { product in
                     PlanRow(
-                        name: "Annual",
-                        price: yearly.localizedPriceString,
-                        period: "/year",
-                        badge: "Best Value",
-                        subtitle: "7-day free trial",
-                        isSelected: selectedPackage?.identifier == yearly.identifier
-                    ) { selectedPackage = yearly }
-                }
-
-                if let monthly = subscriptionService.monthlyPackage {
-                    PlanRow(
-                        name: "Monthly",
-                        price: monthly.localizedPriceString,
-                        period: "/month",
-                        badge: nil,
-                        subtitle: nil,
-                        isSelected: selectedPackage?.identifier == monthly.identifier
-                    ) { selectedPackage = monthly }
-                }
-
-                if let weekly = subscriptionService.weeklyPackage {
-                    PlanRow(
-                        name: "Weekly",
-                        price: weekly.localizedPriceString,
-                        period: "/week",
-                        badge: nil,
-                        subtitle: nil,
-                        isSelected: selectedPackage?.identifier == weekly.identifier
-                    ) { selectedPackage = weekly }
+                        name: product.period.rawValue.capitalized,
+                        price: product.localizedPrice,
+                        period: "/\(product.period.rawValue)",
+                        badge: product.period == .yearly ? "Best Value" : nil,
+                        subtitle: product.trialDays.map { "\($0)-day free trial" },
+                        isSelected: selectedProductId == product.id
+                    ) { selectedProductId = product.id }
                 }
             }
             .padding(.horizontal)
             .task {
-                if subscriptionService.offerings == nil {
-                    await subscriptionService.loadOfferings()
+                if store.paywallProducts.isEmpty {
+                    await store.loadProducts()
                 }
-                if selectedPackage == nil {
-                    selectedPackage = subscriptionService.yearlyPackage
+                if selectedProductId == nil {
+                    selectedProductId = store.paywallProducts.first { $0.period == .yearly }?.id
+                        ?? store.paywallProducts.first?.id
                 }
                 AnalyticsService.shared.logPaywallViewed(source: "onboarding")
             }
@@ -111,8 +90,8 @@ struct LegacyPaywallView: View {
             VStack(spacing: 10) {
                 // Subscribe button
                 Button {
-                    if selectedPackage != nil {
-                        Task { await purchase() }
+                    if let id = selectedProductId {
+                        Task { await purchase(productId: id) }
                     } else {
                         hasCompletedPaywall = true
                         dismiss()
@@ -160,8 +139,9 @@ struct LegacyPaywallView: View {
                     Link("Privacy", destination: URL(string: "https://kreativekoala.llc/privacy")!)
                     Button("Restore") {
                         Task {
-                            await subscriptionService.restorePurchases()
-                            if subscriptionService.subscriptionStatus.isActive {
+                            await store.restore()
+                            await PremiumManager.shared.validateSubscriptionState()
+                            if PremiumManager.shared.isPremium {
                                 hasCompletedPaywall = true
                             }
                         }
@@ -179,31 +159,27 @@ struct LegacyPaywallView: View {
         }
     }
 
-    private func purchase() async {
-        guard let package = selectedPackage else { return }
+    private func purchase(productId: String) async {
         isPurchasing = true
         defer { isPurchasing = false }
 
-        AnalyticsService.shared.logSubscriptionStarted(productId: package.storeProduct.productIdentifier)
+        AnalyticsService.shared.logSubscriptionStarted(productId: productId)
 
-        do {
-            let success = try await subscriptionService.purchase(package)
-            if success {
-                let price = (package.storeProduct.price as NSDecimalNumber).doubleValue
-                let currency = package.storeProduct.currencyCode ?? "USD"
-                AnalyticsService.shared.logSubscriptionCompleted(
-                    productId: package.storeProduct.productIdentifier,
-                    price: price,
-                    currency: currency
-                )
-                AnalyticsService.shared.setSubscriptionStatus(true)
-                hasCompletedPaywall = true
-                dismiss()
-            }
-        } catch {
+        let result = await store.purchase(productId: productId)
+        switch result {
+        case .purchased:
+            await PremiumManager.shared.validateSubscriptionState()
+            AnalyticsService.shared.setSubscriptionStatus(true)
+            hasCompletedPaywall = true
+            dismiss()
+        case .cancelled:
+            break
+        case .pending:
+            break
+        case .failed:
             AnalyticsService.shared.logSubscriptionFailed(
-                productId: package.storeProduct.productIdentifier,
-                error: error.localizedDescription
+                productId: productId,
+                error: "Purchase failed"
             )
             errorMessage = "Purchase failed. Please try again."
             showError = true
@@ -312,7 +288,6 @@ private struct PlanRow: View {
 struct LegacyPaywallView_Previews: PreviewProvider {
     static var previews: some View {
         LegacyPaywallView(
-            subscriptionService: SubscriptionService(),
             hasCompletedPaywall: .constant(false)
         )
     }

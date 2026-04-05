@@ -67,7 +67,7 @@ fun TodosScreen(
                         label = {
                             Text(
                                 when (filter) {
-                                    TodoFilter.ALL -> "All"
+                                    TodoFilter.ALL -> stringResource(R.string.all)
                                     TodoFilter.PENDING -> stringResource(R.string.pending_items)
                                     TodoFilter.COMPLETED -> stringResource(R.string.completed_items)
                                 }
@@ -142,15 +142,15 @@ private fun EmptyTodosContent(filter: TodoFilter) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = when (filter) {
-                    TodoFilter.ALL -> "No action items yet"
-                    TodoFilter.PENDING -> "No pending items"
-                    TodoFilter.COMPLETED -> "No completed items"
+                    TodoFilter.ALL -> stringResource(R.string.no_action_items)
+                    TodoFilter.PENDING -> stringResource(R.string.no_pending_items)
+                    TodoFilter.COMPLETED -> stringResource(R.string.no_completed_items)
                 },
                 style = MaterialTheme.typography.titleMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Action items from your recordings will appear here",
+                text = stringResource(R.string.action_items_empty_hint),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -238,7 +238,7 @@ private fun TodoItem(
                                 modifier = Modifier.size(14.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("View Recording", style = MaterialTheme.typography.labelSmall)
+                            Text(stringResource(R.string.view_recording), style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 }
@@ -246,7 +246,7 @@ private fun TodoItem(
 
             Box {
                 IconButton(onClick = { showMenu = true }) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "More")
+                    Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more))
                 }
 
                 DropdownMenu(
@@ -331,7 +331,7 @@ private fun AddTodoDialog(
                 onClick = onConfirm,
                 enabled = title.isNotBlank()
             ) {
-                Text("Add")
+                Text(stringResource(R.string.add))
             }
         },
         dismissButton = {

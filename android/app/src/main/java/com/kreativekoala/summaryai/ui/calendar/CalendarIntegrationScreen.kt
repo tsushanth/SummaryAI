@@ -48,10 +48,10 @@ fun CalendarIntegrationScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Calendar Integration") },
+                title = { Text(stringResource(R.string.calendar_integration)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -64,7 +64,7 @@ fun CalendarIntegrationScreen(
                 .padding(16.dp)
         ) {
             Text(
-                text = "Connect your calendar to automatically see your upcoming meetings and schedule bot recordings.",
+                text = stringResource(R.string.calendar_integration_desc),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -170,8 +170,8 @@ private fun ConnectedCalendarItem(
     if (showDisconnectDialog) {
         AlertDialog(
             onDismissRequest = { showDisconnectDialog = false },
-            title = { Text("Disconnect ${connection.providerDisplayName}") },
-            text = { Text("This will stop syncing meetings from this calendar. You can reconnect anytime.") },
+            title = { Text(stringResource(R.string.disconnect_calendar_title, connection.providerDisplayName)) },
+            text = { Text(stringResource(R.string.disconnect_calendar_desc)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -225,7 +225,7 @@ private fun CalendarProviderItem(
 
             Icon(
                 Icons.Default.Add,
-                contentDescription = "Connect",
+                contentDescription = stringResource(R.string.connect),
                 tint = MaterialTheme.colorScheme.primary
             )
         }
