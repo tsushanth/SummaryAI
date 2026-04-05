@@ -3,6 +3,7 @@ import UserNotifications
 import GoogleSignIn
 import FirebaseCore
 import AppTrackingTransparency
+import PaywallKit
 
 // MARK: - App Entry Point
 
@@ -10,18 +11,30 @@ import AppTrackingTransparency
 struct SummaryAIApp: App {
     @StateObject private var authService = AuthService()
     @StateObject private var apiClient = SummaryAIAPIClient()
-    @StateObject private var subscriptionService = SubscriptionService()
 
     init() {
+        // FASTLANE_SNAPSHOT: skip onboarding, paywall, and consent for screenshots
+        if ProcessInfo.processInfo.arguments.contains("-FASTLANE_SNAPSHOT") {
+            UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
+            UserDefaults.standard.set(true, forKey: "hasSeenPaywall")
+            UserDefaults.standard.set(true, forKey: "aiDataConsentGranted")
+            UserDefaults.standard.set(1, forKey: "aiDataConsentVersion")
+            UserDefaults.standard.set(999, forKey: "com.meetingmind.appOpenCount") // prevent app-open paywall
+        }
         // Configure Firebase for analytics and attribution tracking
         FirebaseApp.configure()
         AnalyticsService.configure()
 
-        // Configure RevenueCat for in-app purchases and attribution tracking
-        SubscriptionService.configure()
+        // Configure StoreKit 2 via PaywallKit (replaces RevenueCat)
+        StoreManager.shared.configure(productIds: ProductID.allIDs)
 
         // Track Apple Search Ads attribution for ASA bid optimization
         AttributionService.shared.trackAttribution()
+
+        // Validate subscription state on app launch
+        Task { @MainActor in
+            await PremiumManager.shared.validateSubscriptionState()
+        }
 
         // NOTE: TikTok SDK initialization is deferred until after ATT consent
         // (see requestTrackingPermission below)
@@ -32,7 +45,6 @@ struct SummaryAIApp: App {
             RootView()
                 .environmentObject(authService)
                 .environmentObject(apiClient)
-                .environmentObject(subscriptionService)
                 .onAppear {
                     // Connect auth service to API client
                     apiClient.accessTokenProvider = {
@@ -86,37 +98,45 @@ struct SummaryAIApp: App {
 /// Root view that handles auth state and routing
 struct RootView: View {
     @EnvironmentObject var authService: AuthService
-    @EnvironmentObject var subscriptionService: SubscriptionService
     @StateObject private var consentManager = AIDataConsentManager.shared
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("hasSeenPaywall") private var hasSeenPaywall = false
 
+    private var isFastlaneSnapshot: Bool {
+        ProcessInfo.processInfo.arguments.contains("-FASTLANE_SNAPSHOT")
+    }
+
     var body: some View {
         Group {
-            switch authService.state {
-            case .unknown:
-                SplashView()
+            if isFastlaneSnapshot {
+                // Skip auth entirely for screenshot automation
+                MainTabView()
+            } else {
+                switch authService.state {
+                case .unknown:
+                    SplashView()
 
-            case .unauthenticated, .authenticating:
-                if !hasCompletedOnboarding {
-                    OnboardingView(hasCompletedOnboarding: $hasCompletedOnboarding)
-                } else if consentManager.needsConsent {
-                    AIDataConsentView(isOnboarding: true)
-                } else {
-                    SignInView()
-                        .fullScreenCover(isPresented: Binding(
-                            get: { !hasSeenPaywall },
-                            set: { if !$0 { hasSeenPaywall = true } }
-                        )) {
-                            RemotePaywallView(triggerSource: "onboarding")
-                        }
-                }
+                case .unauthenticated, .authenticating:
+                    if !hasCompletedOnboarding {
+                        OnboardingView(hasCompletedOnboarding: $hasCompletedOnboarding)
+                    } else if consentManager.needsConsent {
+                        AIDataConsentView(isOnboarding: true)
+                    } else {
+                        SignInView()
+                            .fullScreenCover(isPresented: Binding(
+                                get: { !hasSeenPaywall },
+                                set: { if !$0 { hasSeenPaywall = true } }
+                            )) {
+                                RemotePaywallView(triggerSource: "onboarding")
+                            }
+                    }
 
-            case .authenticated:
-                if consentManager.needsConsent {
-                    AIDataConsentView(isOnboarding: true)
-                } else {
-                    MainTabView()
+                case .authenticated:
+                    if consentManager.needsConsent {
+                        AIDataConsentView(isOnboarding: true)
+                    } else {
+                        MainTabView()
+                    }
                 }
             }
         }
@@ -125,20 +145,12 @@ struct RootView: View {
         .animation(.easeInOut(duration: 0.3), value: hasSeenPaywall)
         .animation(.easeInOut(duration: 0.3), value: consentManager.hasConsented)
         .onChange(of: authService.state) { oldState, newState in
-            // Link RevenueCat user ID when user authenticates
             if case .authenticated(let user) = newState {
-                Task {
-                    await subscriptionService.loginUser(userId: user.id)
-                }
                 // Set analytics user ID
                 AnalyticsService.shared.setUserId(user.id)
                 AnalyticsService.shared.logSignInCompleted(method: "google")
             }
-            // Logout from RevenueCat when user signs out
             if case .authenticated = oldState, case .unauthenticated = newState {
-                Task {
-                    await subscriptionService.logoutUser()
-                }
                 // Clear analytics user ID
                 AnalyticsService.shared.setUserId(nil)
                 AnalyticsService.shared.logSignOut()
@@ -176,11 +188,15 @@ struct SplashView: View {
 /// Main tab-based navigation for authenticated users
 struct MainTabView: View {
     @EnvironmentObject var apiClient: SummaryAIAPIClient
-    @EnvironmentObject var subscriptionService: SubscriptionService
     @StateObject private var paywallCoordinator = PaywallCoordinator.shared
     @State private var selectedTab: AppTab = .recordings
     @StateObject private var calendarViewModel: CalendarViewModel
     @Environment(\.scenePhase) private var scenePhase
+    @State private var showAppOpenPaywall = false
+
+    // Show paywall on 1st, 2nd, 4th app open (then every 2nd after)
+    private static let paywallTriggerOpens: Set<Int> = [1, 2, 4]
+    private static let paywallRecurringInterval = 2
 
     init() {
         // Initialize with a temporary apiClient - will be replaced by environment
@@ -234,19 +250,42 @@ struct MainTabView: View {
                     await calendarViewModel.loadMeetings()
                 }
             }
+            checkAppOpenPaywall()
         }
         .reviewPrompt()
         .onAppear {
-            paywallCoordinator.checkWinbackEligibility(subscriptionService: subscriptionService)
+            paywallCoordinator.checkWinbackEligibility()
         }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
-                paywallCoordinator.checkWinbackEligibility(subscriptionService: subscriptionService)
+                paywallCoordinator.checkWinbackEligibility()
             }
         }
         .sheet(isPresented: $paywallCoordinator.showWinbackOffer) {
             WinbackOfferView()
-                .environmentObject(subscriptionService)
+        }
+        .fullScreenCover(isPresented: $showAppOpenPaywall) {
+            RemotePaywallView(triggerSource: "app_open")
+        }
+    }
+
+    private func checkAppOpenPaywall() {
+        // Don't show to premium users
+        guard !PremiumManager.shared.isPremium else { return }
+
+        let key = "com.meetingmind.appOpenCount"
+        let count = UserDefaults.standard.integer(forKey: key) + 1
+        UserDefaults.standard.set(count, forKey: key)
+
+        // Trigger on specific opens, then recurring
+        let shouldShow = Self.paywallTriggerOpens.contains(count)
+            || (count > 4 && (count - 4) % Self.paywallRecurringInterval == 0)
+
+        if shouldShow {
+            // Small delay so the app loads first
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                showAppOpenPaywall = true
+            }
         }
     }
 }

@@ -7,6 +7,7 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.data.local.TokenManager
 import com.kreativekoala.summaryai.data.repository.RecordingsRepository
 import com.kreativekoala.summaryai.service.AudioRecordingService
@@ -29,7 +30,7 @@ data class RecordingUiState(
     val error: String? = null
 )
 
-private const val DEMO_MODE_MESSAGE = "Saving recordings requires signing in with Google. Please sign out and sign in with your Google account to save recordings."
+// DEMO_MODE_MESSAGE moved to string resource R.string.demo_mode_message
 
 @HiltViewModel
 class RecordingViewModel @Inject constructor(
@@ -104,7 +105,7 @@ class RecordingViewModel @Inject constructor(
     fun stopAndUpload() {
         if (isDemoMode) {
             recordingService?.stopRecording()
-            _uiState.value = _uiState.value.copy(error = DEMO_MODE_MESSAGE)
+            _uiState.value = _uiState.value.copy(error = context.getString(R.string.demo_mode_message))
             return
         }
 
@@ -115,7 +116,7 @@ class RecordingViewModel @Inject constructor(
                 uploadRecording(outputFile)
             } else {
                 _uiState.value = _uiState.value.copy(
-                    error = "Recording file not found"
+                    error = context.getString(R.string.error_recording_file_not_found)
                 )
             }
         }
@@ -130,7 +131,7 @@ class RecordingViewModel @Inject constructor(
     private suspend fun uploadRecording(file: File) {
         _uiState.value = _uiState.value.copy(isUploading = true, uploadProgress = 0f)
 
-        val title = _uiState.value.title.ifBlank { "Untitled Recording" }
+        val title = _uiState.value.title.ifBlank { context.getString(R.string.untitled_recording) }
         val duration = _uiState.value.recordingState.durationSeconds
 
         val result = recordingsRepository.uploadRecording(
@@ -154,7 +155,7 @@ class RecordingViewModel @Inject constructor(
             onFailure = { error ->
                 _uiState.value = _uiState.value.copy(
                     isUploading = false,
-                    error = error.message ?: "Upload failed"
+                    error = error.message ?: context.getString(R.string.error_upload_failed)
                 )
             }
         )

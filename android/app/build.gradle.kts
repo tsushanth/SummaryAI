@@ -24,8 +24,8 @@ android {
         applicationId = "com.kreativekoala.meetingmind"
         minSdk = 26
         targetSdk = 35
-        versionCode = 16
-        versionName = "1.4.1"
+        versionCode = 21
+        versionName = "1.4.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -96,6 +96,7 @@ android {
 dependencies {
     // Core Android
     implementation(libs.androidx.core.ktx)
+    implementation("androidx.appcompat:appcompat:1.7.0")
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)
@@ -140,7 +141,6 @@ dependencies {
 
     // RevenueCat (replaces Play Billing)
     implementation("com.revenuecat.purchases:purchases:9.22.2")
-    implementation("com.revenuecat.purchases:purchases-ui:9.22.2")
 
     // Supabase
     implementation(libs.supabase.gotrue)
@@ -163,4 +163,7 @@ dependencies {
 
     // TikTok Events SDK (install attribution & event tracking)
     implementation("com.github.tiktok:tiktok-business-android-sdk:1.6.0")
+
+    // PaywallKit
+    implementation(project(":paywallkit"))
 }

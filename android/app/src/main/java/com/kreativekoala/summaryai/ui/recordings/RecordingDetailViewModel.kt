@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.data.repository.RecordingsRepository
 import com.kreativekoala.summaryai.domain.model.RecordingDetail
 import com.kreativekoala.summaryai.domain.model.RecordingStatus
@@ -221,7 +222,7 @@ class RecordingDetailViewModel @Inject constructor(
                     _uiState.value = _uiState.value.copy(
                         qaMessages = _uiState.value.qaMessages.map {
                             if (it.id == messageId) it.copy(
-                                answer = "Sorry, I couldn't answer that question. Please try again.",
+                                answer = context.getString(R.string.error_qa_failed),
                                 isLoading = false
                             ) else it
                         },

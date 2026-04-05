@@ -1,5 +1,6 @@
 package com.kreativekoala.summaryai.ui.navigation
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.VideoCall
 import androidx.compose.material3.Icon
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kreativekoala.summaryai.R
 import androidx.compose.material3.*
@@ -90,34 +92,34 @@ sealed class NavIcon {
 
 data class BottomNavItem(
     val screen: Screen,
-    val title: String,
+    @StringRes val titleRes: Int,
     val icon: NavIcon
 )
 
 val bottomNavItems = listOf(
     BottomNavItem(
         screen = Screen.Recordings,
-        title = "Recordings",
+        titleRes = R.string.recordings,
         icon = NavIcon.Resource(R.drawable.ic_recordings)
     ),
     BottomNavItem(
         screen = Screen.Meetings,
-        title = "Calendar",
+        titleRes = R.string.calendar,
         icon = NavIcon.Vector(Icons.Filled.CalendarMonth, Icons.Outlined.CalendarMonth)
     ),
     BottomNavItem(
         screen = Screen.Recording,
-        title = "Record",
+        titleRes = R.string.record,
         icon = NavIcon.Vector(Icons.Filled.Mic, Icons.Outlined.Mic)
     ),
     BottomNavItem(
         screen = Screen.Phone,
-        title = "Phone",
+        titleRes = R.string.phone,
         icon = NavIcon.Vector(Icons.Filled.Phone, Icons.Outlined.Phone)
     ),
     BottomNavItem(
         screen = Screen.Settings,
-        title = "Settings",
+        titleRes = R.string.settings,
         icon = NavIcon.Resource(R.drawable.ic_settings)
     )
 )
@@ -149,12 +151,17 @@ fun MeetingMindNavGraph(
 
         android.util.Log.i("NavGraph", "Auth state changed: isAuth=$isAuthenticated, hasOnboarding=$hasCompletedOnboarding, currentRoute=$currentRoute, targetRoute=$targetRoute")
 
-        // If authenticated and should be on recordings, navigate there from auth
+        // If authenticated and should be on recordings, navigate there from auth or onboarding
         if (isAuthenticated && hasCompletedOnboarding) {
             if (currentRoute == Screen.Auth.route) {
                 android.util.Log.i("NavGraph", "Navigating from auth to recordings")
                 navController.navigate(Screen.Recordings.route) {
                     popUpTo(Screen.Auth.route) { inclusive = true }
+                }
+            } else if (currentRoute == Screen.Onboarding.route) {
+                android.util.Log.i("NavGraph", "Navigating from onboarding to recordings")
+                navController.navigate(Screen.Recordings.route) {
+                    popUpTo(Screen.Onboarding.route) { inclusive = true }
                 }
             }
         }
@@ -211,19 +218,20 @@ fun MeetingMindNavGraph(
                                     }
                                 },
                                 icon = {
+                                    val title = stringResource(item.titleRes)
                                     when (val icon = item.icon) {
                                         is NavIcon.Vector -> Icon(
                                             imageVector = if (selected) icon.selected else icon.unselected,
-                                            contentDescription = item.title
+                                            contentDescription = title
                                         )
                                         is NavIcon.Resource -> Icon(
                                             painter = painterResource(id = icon.resId),
-                                            contentDescription = item.title,
+                                            contentDescription = title,
                                             modifier = Modifier.size(24.dp)
                                         )
                                     }
                                 },
-                                label = { Text(item.title) }
+                                label = { Text(stringResource(item.titleRes)) }
                             )
                         }
                     }

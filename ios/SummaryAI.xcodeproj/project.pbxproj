@@ -7,12 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		PMM000000000003 /* PaywallKit in Frameworks */ = {isa = PBXBuildFile; productRef = PMM000000000002 /* PaywallKit */; };
-		05B1A665ED5CEA51BFB2A973 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = BADB2B1870CE121AD1511C30 /* RevenueCatUI */; };
+		11767FFA1F65D778F6EBCB05 /* ScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE6D3EE0C0BAF9095E8469B1 /* ScreenshotTests.swift */; };
 		298F3D263A0697F1642A255B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = EAFF348518DDCF49FA0B746C /* GoogleService-Info.plist */; };
 		2FDFA21E83AD1DDCD13FFE40 /* RemotePaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B5F6218F5D4C3FD59BF6C57 /* RemotePaywallView.swift */; };
-		DC00000100000001 /* AIDataConsentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC00000200000001 /* AIDataConsentManager.swift */; };
-		DC00000300000002 /* AIDataConsentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC00000400000002 /* AIDataConsentView.swift */; };
+		5B28C0E4901EC791D463E569 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB74E2A6660E748E3FF2B3D4 /* SnapshotHelper.swift */; };
 		88DA84B12F07436B0084B5E7 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 88DA84B02F07436B0084B5E7 /* GoogleSignIn */; };
 		88DA84B32F07436B0084B5E7 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 88DA84B22F07436B0084B5E7 /* GoogleSignInSwift */; };
 		A1000001229E0001 /* SummaryAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002229E0001 /* SummaryAIApp.swift */; };
@@ -55,18 +53,32 @@
 		A1000050229E0040 /* ReviewRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000051229E0041 /* ReviewRequestManager.swift */; };
 		A1000052229E0042 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000053229E0043 /* AnalyticsService.swift */; };
 		A1FB0002229E0002 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = A1FB0001229E0001 /* FirebaseAnalytics */; };
-		A1RC0002229E0002 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = A1RC0001229E0001 /* RevenueCat */; };
 		B8692A64ADB88CDE64F07A75 /* AttributionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F12911BF39626F5F9FA9FD3 /* AttributionService.swift */; };
+		DC00000100000001 /* AIDataConsentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC00000200000001 /* AIDataConsentManager.swift */; };
+		DC00000300000002 /* AIDataConsentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC00000400000002 /* AIDataConsentView.swift */; };
+		E8B49783065583F877C437EC /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D768440E1374D1A3C30E9EF /* Foundation.framework */; };
+		PMM000000000003 /* PaywallKit in Frameworks */ = {isa = PBXBuildFile; productRef = PMM000000000002 /* PaywallKit */; };
 		TT0000000000000000000001 /* TikTokBusinessSDK in Frameworks */ = {isa = PBXBuildFile; productRef = TT0000000000000000000002 /* TikTokBusinessSDK */; };
 		TT0000000000000000000010 /* TikTokHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = TT0000000000000000000011 /* TikTokHelper.swift */; };
 		WB0000000000000000000001 /* PaywallCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = WB0000000000000000000002 /* PaywallCoordinator.swift */; };
 		WB0000000000000000000003 /* WinbackOfferView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WB0000000000000000000004 /* WinbackOfferView.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		CE53D36071BFD63FD8BAD7EA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A10000C0229E00C0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A10000B0229E00B0;
+			remoteInfo = SummaryAI;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		0D768440E1374D1A3C30E9EF /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		18D7B68CEE2E6E9738784E58 /* ReviewManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReviewManager.swift; sourceTree = "<group>"; };
+		23BF6DB4A9285FB48C554BDE /* SummaryAIUITests */ = {isa = PBXFileReference; includeInIndex = 0; path = SummaryAIUITests; sourceTree = BUILT_PRODUCTS_DIR; };
 		3F12911BF39626F5F9FA9FD3 /* AttributionService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AttributionService.swift; sourceTree = "<group>"; };
-		TT0000000000000000000011 /* TikTokHelper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TikTokHelper.swift; sourceTree = "<group>"; };
 		4B5F6218F5D4C3FD59BF6C57 /* RemotePaywallView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemotePaywallView.swift; sourceTree = "<group>"; };
 		A1000000229E0000 /* SummaryAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SummaryAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000002229E0001 /* SummaryAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryAIApp.swift; sourceTree = "<group>"; };
@@ -110,14 +122,25 @@
 		A100004A229E0037 /* VoipService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoipService.swift; sourceTree = "<group>"; };
 		A1000051229E0041 /* ReviewRequestManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewRequestManager.swift; sourceTree = "<group>"; };
 		A1000053229E0043 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
-		EAFF348518DDCF49FA0B746C /* GoogleService-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		CE6D3EE0C0BAF9095E8469B1 /* ScreenshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScreenshotTests.swift; sourceTree = "<group>"; };
 		DC00000200000001 /* AIDataConsentManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIDataConsentManager.swift; sourceTree = "<group>"; };
 		DC00000400000002 /* AIDataConsentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIDataConsentView.swift; sourceTree = "<group>"; };
+		EAFF348518DDCF49FA0B746C /* GoogleService-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		FB74E2A6660E748E3FF2B3D4 /* SnapshotHelper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SnapshotHelper.swift; sourceTree = "<group>"; };
+		TT0000000000000000000011 /* TikTokHelper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TikTokHelper.swift; sourceTree = "<group>"; };
 		WB0000000000000000000002 /* PaywallCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallCoordinator.swift; sourceTree = "<group>"; };
 		WB0000000000000000000004 /* WinbackOfferView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WinbackOfferView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		78653A473BDE1868B98F5E06 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8B49783065583F877C437EC /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A10000F0229E00F0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -126,8 +149,6 @@
 				88DA84B32F07436B0084B5E7 /* GoogleSignInSwift in Frameworks */,
 				A100004E229E003B /* TwilioVoice in Frameworks */,
 				A1FB0002229E0002 /* FirebaseAnalytics in Frameworks */,
-				A1RC0002229E0002 /* RevenueCat in Frameworks */,
-				05B1A665ED5CEA51BFB2A973 /* RevenueCatUI in Frameworks */,
 				TT0000000000000000000001 /* TikTokBusinessSDK in Frameworks */,
 				PMM000000000003 /* PaywallKit in Frameworks */,
 			);
@@ -136,6 +157,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4E35AB9125BAC407F9735E42 /* SummaryAIUITests */ = {
+			isa = PBXGroup;
+			children = (
+				FB74E2A6660E748E3FF2B3D4 /* SnapshotHelper.swift */,
+				CE6D3EE0C0BAF9095E8469B1 /* ScreenshotTests.swift */,
+			);
+			name = SummaryAIUITests;
+			path = SummaryAIUITests;
+			sourceTree = "<group>";
+		};
+		848B8EEB15A91B83DE0EEDB5 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C315B44122827A0D3F801B56 /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		A100004B229E0038 /* VoIP */ = {
 			isa = PBXGroup;
 			children = (
@@ -149,6 +188,8 @@
 			children = (
 				A10000A1229E00A1 /* SummaryAI */,
 				A10000A2229E00A2 /* Products */,
+				848B8EEB15A91B83DE0EEDB5 /* Frameworks */,
+				4E35AB9125BAC407F9735E42 /* SummaryAIUITests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -170,6 +211,7 @@
 			isa = PBXGroup;
 			children = (
 				A1000000229E0000 /* SummaryAI.app */,
+				23BF6DB4A9285FB48C554BDE /* SummaryAIUITests */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -185,15 +227,6 @@
 				A10000A9229E00A9 /* Views */,
 			);
 			path = Sources;
-			sourceTree = "<group>";
-		};
-		WB00000000000000000000A0 /* Utilities */ = {
-			isa = PBXGroup;
-			children = (
-				WB0000000000000000000002 /* PaywallCoordinator.swift */,
-				WB0000000000000000000004 /* WinbackOfferView.swift */,
-			);
-			path = Utilities;
 			sourceTree = "<group>";
 		};
 		A10000A4229E00A4 /* Preview Content */ = {
@@ -321,6 +354,23 @@
 			path = Components;
 			sourceTree = "<group>";
 		};
+		C315B44122827A0D3F801B56 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				0D768440E1374D1A3C30E9EF /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		WB00000000000000000000A0 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				WB0000000000000000000002 /* PaywallCoordinator.swift */,
+				WB0000000000000000000004 /* WinbackOfferView.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -342,14 +392,30 @@
 				88DA84B22F07436B0084B5E7 /* GoogleSignInSwift */,
 				A100004D229E003A /* TwilioVoice */,
 				A1FB0001229E0001 /* FirebaseAnalytics */,
-				A1RC0001229E0001 /* RevenueCat */,
-				BADB2B1870CE121AD1511C30 /* RevenueCatUI */,
 				TT0000000000000000000002 /* TikTokBusinessSDK */,
 				PMM000000000002 /* PaywallKit */,
 			);
 			productName = SummaryAI;
 			productReference = A1000000229E0000 /* SummaryAI.app */;
 			productType = "com.apple.product-type.application";
+		};
+		F527662F77F16D96E76E9A67 /* SummaryAIUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C9961801C8028A8819BBC584 /* Build configuration list for PBXNativeTarget "SummaryAIUITests" */;
+			buildPhases = (
+				A0C23CDC660E1C9BE04968D3 /* Sources */,
+				78653A473BDE1868B98F5E06 /* Frameworks */,
+				82D4E057DB4E10F3F79442BE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D5978DFF56E56095E6BAFC64 /* PBXTargetDependency */,
+			);
+			name = SummaryAIUITests;
+			productName = SummaryAIUITests;
+			productReference = 23BF6DB4A9285FB48C554BDE /* SummaryAIUITests */;
+			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
@@ -379,7 +445,6 @@
 				88DA84AF2F07436B0084B5E7 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				A100004C229E0039 /* XCRemoteSwiftPackageReference "twilio-voice-ios" */,
 				A1FB0000229E0000 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
-				A1RC0000229E0000 /* XCRemoteSwiftPackageReference "purchases-ios" */,
 				TT0000000000000000000003 /* XCRemoteSwiftPackageReference "tiktok-business-ios-sdk" */,
 				PMM000000000001 /* XCLocalSwiftPackageReference "PaywallKit" */,
 			);
@@ -388,11 +453,19 @@
 			projectRoot = "";
 			targets = (
 				A10000B0229E00B0 /* SummaryAI */,
+				F527662F77F16D96E76E9A67 /* SummaryAIUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		82D4E057DB4E10F3F79442BE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A1000100229E0100 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -406,6 +479,15 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		A0C23CDC660E1C9BE04968D3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5B28C0E4901EC791D463E569 /* SnapshotHelper.swift in Sources */,
+				11767FFA1F65D778F6EBCB05 /* ScreenshotTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A10000E0229E00E0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -458,7 +540,32 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		D5978DFF56E56095E6BAFC64 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = SummaryAI;
+			target = A10000B0229E00B0 /* SummaryAI */;
+			targetProxy = CE53D36071BFD63FD8BAD7EA /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		898A3EE8CB403960FFA8F1F8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 7RS696YC75;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.summaryai.UITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = SummaryAI;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		A10000D1229E00D1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -585,7 +692,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SummaryAI/SummaryAI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 28;
+				CURRENT_PROJECT_VERSION = 29;
 				DEVELOPMENT_ASSET_PATHS = "\"SummaryAI/Preview Content\"";
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				ENABLE_PREVIEWS = YES;
@@ -603,7 +710,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.3;
+				MARKETING_VERSION = 5.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.summaryai;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -619,7 +726,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SummaryAI/SummaryAI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 28;
+				CURRENT_PROJECT_VERSION = 29;
 				DEVELOPMENT_ASSET_PATHS = "\"SummaryAI/Preview Content\"";
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				ENABLE_PREVIEWS = YES;
@@ -637,7 +744,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.3;
+				MARKETING_VERSION = 5.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.summaryai;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -645,6 +752,21 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
+		};
+		E3E80805A2E1A5478E18FACE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 7RS696YC75;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.summaryai.UITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = SummaryAI;
+			};
+			name = Debug;
 		};
 /* End XCBuildConfiguration section */
 
@@ -667,7 +789,23 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		C9961801C8028A8819BBC584 /* Build configuration list for PBXNativeTarget "SummaryAIUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				898A3EE8CB403960FFA8F1F8 /* Release */,
+				E3E80805A2E1A5478E18FACE /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		PMM000000000001 /* XCLocalSwiftPackageReference "PaywallKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../PaywallKit;
+		};
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
 		88DA84AF2F07436B0084B5E7 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
@@ -694,30 +832,15 @@
 				minimumVersion = 11.0.0;
 			};
 		};
-		A1RC0000229E0000 /* XCRemoteSwiftPackageReference "purchases-ios" */ = {
+		TT0000000000000000000003 /* XCRemoteSwiftPackageReference "tiktok-business-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/RevenueCat/purchases-ios";
+			repositoryURL = "https://github.com/tiktok/tiktok-business-ios-sdk";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 5.0.0;
+				minimumVersion = 1.0.0;
 			};
 		};
-	TT0000000000000000000003 /* XCRemoteSwiftPackageReference "tiktok-business-ios-sdk" */ = {
-		isa = XCRemoteSwiftPackageReference;
-		repositoryURL = "https://github.com/tiktok/tiktok-business-ios-sdk";
-		requirement = {
-			kind = upToNextMajorVersion;
-			minimumVersion = 1.0.0;
-		};
-	};
 /* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCLocalSwiftPackageReference section */
-		PMM000000000001 /* XCLocalSwiftPackageReference "PaywallKit" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../PaywallKit;
-		};
-/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		88DA84B02F07436B0084B5E7 /* GoogleSignIn */ = {
@@ -740,25 +863,15 @@
 			package = A1FB0000229E0000 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAnalytics;
 		};
-		A1RC0001229E0001 /* RevenueCat */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = A1RC0000229E0000 /* XCRemoteSwiftPackageReference "purchases-ios" */;
-			productName = RevenueCat;
-		};
-		BADB2B1870CE121AD1511C30 /* RevenueCatUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = A1RC0000229E0000 /* XCRemoteSwiftPackageReference "purchases-ios" */;
-			productName = RevenueCatUI;
-		};
-	TT0000000000000000000002 /* TikTokBusinessSDK */ = {
-		isa = XCSwiftPackageProductDependency;
-		package = TT0000000000000000000003 /* XCRemoteSwiftPackageReference "tiktok-business-ios-sdk" */;
-		productName = TikTokBusinessSDK;
-	};
 		PMM000000000002 /* PaywallKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = PMM000000000001 /* XCLocalSwiftPackageReference "PaywallKit" */;
 			productName = PaywallKit;
+		};
+		TT0000000000000000000002 /* TikTokBusinessSDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = TT0000000000000000000003 /* XCRemoteSwiftPackageReference "tiktok-business-ios-sdk" */;
+			productName = TikTokBusinessSDK;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

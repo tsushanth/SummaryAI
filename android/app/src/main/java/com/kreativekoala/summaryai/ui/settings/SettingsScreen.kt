@@ -2,6 +2,7 @@ package com.kreativekoala.summaryai.ui.settings
 
 import android.content.Intent
 import android.net.Uri
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -16,10 +17,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.graphics.Color
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.data.preferences.ThemeMode
 import com.kreativekoala.summaryai.domain.model.User
+import com.kreativekoala.paywallkit.models.PaywallFeature
+import com.kreativekoala.paywallkit.models.PaywallTheme
+import com.kreativekoala.paywallkit.view.PaywallPreview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,6 +40,26 @@ fun SettingsScreen(
 
     var showSignOutDialog by remember { mutableStateOf(false) }
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
+    var tapCount by remember { mutableIntStateOf(0) }
+    var showPaywallPreview by remember { mutableStateOf(false) }
+
+    val languages = remember {
+        listOf(
+            "en" to R.string.language_english,
+            "es" to R.string.language_spanish,
+            "fr" to R.string.language_french,
+            "de" to R.string.language_german,
+            "ja" to R.string.language_japanese,
+            "zh-CN" to R.string.language_chinese,
+            "ko" to R.string.language_korean,
+            "pt-BR" to R.string.language_portuguese,
+            "it" to R.string.language_italian,
+            "hi" to R.string.language_hindi
+        )
+    }
+    val currentLocaleTag = AppCompatDelegate.getApplicationLocales().toLanguageTags().ifEmpty { "en" }
+    val currentLanguageRes = languages.firstOrNull { it.first == currentLocaleTag }?.second ?: R.string.language_english
 
     LaunchedEffect(uiState.signedOut) {
         if (uiState.signedOut) {
@@ -47,6 +73,23 @@ fun SettingsScreen(
             snackbarHostState.showSnackbar(it)
             viewModel.clearError()
         }
+    }
+
+    if (showPaywallPreview) {
+        PaywallPreview(
+            appId = "meetingmind",
+            appName = "MeetingMind",
+            features = listOf(
+                PaywallFeature("\uD83C\uDFA4", "Unlimited Recordings"),
+                PaywallFeature("\uD83D\uDCDD", "AI Summaries"),
+                PaywallFeature("\uD83D\uDD0D", "Smart Search"),
+                PaywallFeature("\uD83D\uDCE4", "Export"),
+                PaywallFeature("☁\uFE0F", "Cloud Storage")
+            ),
+            theme = PaywallTheme(accent = Color(0xFF6C63FF), accent2 = Color(0xFF9C27B0)),
+            onDone = { showPaywallPreview = false }
+        )
+        return
     }
 
     Scaffold(
@@ -71,10 +114,20 @@ fun SettingsScreen(
             }
 
             // Appearance Section
-            SettingsSection(title = "Appearance") {
+            SettingsSection(title = stringResource(R.string.appearance)) {
                 ThemeSelector(
                     currentMode = uiState.themeMode,
                     onModeSelected = viewModel::setThemeMode
+                )
+            }
+
+            // Language Section
+            SettingsSection(title = stringResource(R.string.language)) {
+                SettingsItem(
+                    icon = Icons.Default.Language,
+                    title = stringResource(R.string.language),
+                    subtitle = stringResource(currentLanguageRes),
+                    onClick = { showLanguageDialog = true }
                 )
             }
 
@@ -83,7 +136,7 @@ fun SettingsScreen(
                 SettingsItem(
                     icon = Icons.Default.CalendarMonth,
                     title = stringResource(R.string.connect_calendar),
-                    subtitle = if (uiState.hasCalendarConnected) stringResource(R.string.connected) else "Sync your meetings",
+                    subtitle = if (uiState.hasCalendarConnected) stringResource(R.string.connected) else stringResource(R.string.calendar_sync_subtitle),
                     onClick = onCalendarClick
                 )
             }
@@ -116,8 +169,19 @@ fun SettingsScreen(
                 SettingsItem(
                     icon = Icons.Default.Info,
                     title = stringResource(R.string.version),
-                    subtitle = uiState.appVersion
+                    subtitle = uiState.appVersion,
+                    onClick = { tapCount++ }
                 )
+                if (tapCount >= 5) {
+                    Button(
+                        onClick = { showPaywallPreview = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Text("Preview Paywalls")
+                    }
+                }
                 HorizontalDivider(modifier = Modifier.padding(start = 56.dp))
                 SettingsItem(
                     icon = Icons.Default.Build,
@@ -182,7 +246,7 @@ fun SettingsScreen(
             AlertDialog(
                 onDismissRequest = { showSignOutDialog = false },
                 title = { Text(stringResource(R.string.sign_out)) },
-                text = { Text("Are you sure you want to sign out?") },
+                text = { Text(stringResource(R.string.sign_out_confirm)) },
                 confirmButton = {
                     TextButton(
                         onClick = {
@@ -195,6 +259,46 @@ fun SettingsScreen(
                 },
                 dismissButton = {
                     TextButton(onClick = { showSignOutDialog = false }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            )
+        }
+
+        // Language Dialog
+        if (showLanguageDialog) {
+            AlertDialog(
+                onDismissRequest = { showLanguageDialog = false },
+                title = { Text(stringResource(R.string.language_picker_title)) },
+                text = {
+                    Column {
+                        languages.forEach { (code, nameRes) ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = currentLocaleTag == code || (currentLocaleTag == "en" && code == "en"),
+                                    onClick = {
+                                        AppCompatDelegate.setApplicationLocales(
+                                            LocaleListCompat.forLanguageTags(code)
+                                        )
+                                        showLanguageDialog = false
+                                    }
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = stringResource(nameRes),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showLanguageDialog = false }) {
                         Text(stringResource(R.string.cancel))
                     }
                 }
@@ -333,7 +437,7 @@ private fun AccountCard(user: User, onUpgradeClick: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = "via ${user.provider.displayName}",
+                text = stringResource(R.string.via_provider, user.provider.displayName),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -367,24 +471,24 @@ private fun ThemeSelector(
     Column {
         ThemeOption(
             icon = Icons.Default.LightMode,
-            title = "Light",
-            subtitle = "Always use light theme",
+            title = stringResource(R.string.theme_light),
+            subtitle = stringResource(R.string.theme_light_subtitle),
             isSelected = currentMode == ThemeMode.LIGHT,
             onClick = { onModeSelected(ThemeMode.LIGHT) }
         )
         HorizontalDivider(modifier = Modifier.padding(start = 56.dp))
         ThemeOption(
             icon = Icons.Default.DarkMode,
-            title = "Dark",
-            subtitle = "Always use dark theme",
+            title = stringResource(R.string.theme_dark),
+            subtitle = stringResource(R.string.theme_dark_subtitle),
             isSelected = currentMode == ThemeMode.DARK,
             onClick = { onModeSelected(ThemeMode.DARK) }
         )
         HorizontalDivider(modifier = Modifier.padding(start = 56.dp))
         ThemeOption(
             icon = Icons.Default.SettingsBrightness,
-            title = "System",
-            subtitle = "Follow system setting",
+            title = stringResource(R.string.theme_system),
+            subtitle = stringResource(R.string.theme_system_subtitle),
             isSelected = currentMode == ThemeMode.SYSTEM,
             onClick = { onModeSelected(ThemeMode.SYSTEM) }
         )
@@ -430,7 +534,7 @@ private fun ThemeOption(
             if (isSelected) {
                 Icon(
                     imageVector = Icons.Default.Check,
-                    contentDescription = "Selected",
+                    contentDescription = stringResource(R.string.selected),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }

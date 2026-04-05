@@ -128,7 +128,7 @@ fun OnboardingScreen(
                     },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Back")
+                    Text(stringResource(R.string.back))
                 }
             }
 
