@@ -141,7 +141,7 @@ fun RecordingsListScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Meeting Mind",
+                        text = stringResource(R.string.app_name),
                         style = MaterialTheme.typography.headlineMedium
                     )
                 },
@@ -165,7 +165,7 @@ fun RecordingsListScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Refresh,
-                            contentDescription = "Refresh",
+                            contentDescription = stringResource(R.string.refresh),
                             modifier = if (uiState.isRefreshing) Modifier.rotate(rotation) else Modifier
                         )
                     }
@@ -176,7 +176,7 @@ fun RecordingsListScreen(
                         modifier = Modifier.padding(end = 16.dp)
                     ) {
                         Text(
-                            text = "PRO",
+                            text = stringResource(R.string.pro),
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
@@ -201,27 +201,27 @@ fun RecordingsListScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 FilterChipIOS(
-                    label = "All",
+                    label = stringResource(R.string.all),
                     selected = uiState.selectedTab == RecordingsTab.ALL,
                     onClick = { viewModel.selectTab(RecordingsTab.ALL) }
                 )
                 FilterChipIOS(
-                    label = "Meetings",
+                    label = stringResource(R.string.meetings),
                     selected = uiState.selectedTab == RecordingsTab.MEETINGS,
                     onClick = { viewModel.selectTab(RecordingsTab.MEETINGS) }
                 )
                 FilterChipIOS(
-                    label = "Todos",
+                    label = stringResource(R.string.todos),
                     selected = uiState.selectedTab == RecordingsTab.TODOS,
                     onClick = { viewModel.selectTab(RecordingsTab.TODOS) }
                 )
                 FilterChipIOS(
-                    label = "Favorites",
+                    label = stringResource(R.string.favorites),
                     selected = uiState.selectedTab == RecordingsTab.FAVORITES,
                     onClick = { viewModel.selectTab(RecordingsTab.FAVORITES) }
                 )
                 FilterChipIOS(
-                    label = "Imported",
+                    label = stringResource(R.string.imported),
                     selected = uiState.selectedTab == RecordingsTab.IMPORTED,
                     onClick = { viewModel.selectTab(RecordingsTab.IMPORTED) }
                 )
@@ -249,7 +249,7 @@ fun RecordingsListScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Search",
+                        text = stringResource(R.string.search),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -330,7 +330,7 @@ fun RecordingsListScreen(
                 )
             ) {
                 Text(
-                    text = "New Summary",
+                    text = stringResource(R.string.new_summary),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -422,7 +422,7 @@ private fun RecordingCardIOS(
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(
                             imageVector = Icons.Default.Favorite,
-                            contentDescription = "Favorite",
+                            contentDescription = stringResource(R.string.favorite),
                             modifier = Modifier.size(14.dp),
                             tint = Color.Red
                         )
@@ -444,7 +444,7 @@ private fun RecordingCardIOS(
                 ) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
-                        contentDescription = "More options",
+                        contentDescription = stringResource(R.string.more_options),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                     )
                 }
@@ -455,7 +455,7 @@ private fun RecordingCardIOS(
                 ) {
                     DropdownMenuItem(
                         text = {
-                            Text(if (recording.isFavorite) "Remove from Favorites" else "Add to Favorites")
+                            Text(if (recording.isFavorite) stringResource(R.string.remove_from_favorites) else stringResource(R.string.add_to_favorites))
                         },
                         onClick = {
                             onToggleFavorite()
@@ -471,7 +471,7 @@ private fun RecordingCardIOS(
                     )
                     DropdownMenuItem(
                         text = {
-                            Text("Delete", color = RecordingRed)
+                            Text(stringResource(R.string.delete), color = RecordingRed)
                         },
                         onClick = {
                             showMenu = false
@@ -505,8 +505,8 @@ private fun RecordingCardIOS(
     if (showDeleteConfirmation) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirmation = false },
-            title = { Text("Delete Recording") },
-            text = { Text("Are you sure you want to delete \"${recording.title}\"? This action cannot be undone.") },
+            title = { Text(stringResource(R.string.delete_recording)) },
+            text = { Text(stringResource(R.string.delete_recording_confirm, recording.title)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -515,12 +515,12 @@ private fun RecordingCardIOS(
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = RecordingRed)
                 ) {
-                    Text("Delete")
+                    Text(stringResource(R.string.delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirmation = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -627,8 +627,8 @@ private fun RecordingCard(
 @Composable
 private fun StatusBadge(status: RecordingStatus) {
     val (color, text) = when (status) {
-        RecordingStatus.COMPLETED -> Green50 to "Completed"
-        RecordingStatus.FAILED -> RecordingRed to "Failed"
+        RecordingStatus.COMPLETED -> Green50 to stringResource(R.string.completed)
+        RecordingStatus.FAILED -> RecordingRed to stringResource(R.string.failed)
         else -> Orange50 to status.displayName
     }
 

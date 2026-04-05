@@ -7,7 +7,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.kreativekoala.summaryai.R
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -107,7 +109,7 @@ fun AudioPlayerControls(
                 currentPosition = newPosition
                 onSeek(newPosition)
             }) {
-                Icon(Icons.Default.Replay10, contentDescription = "Rewind 10 seconds")
+                Icon(Icons.Default.Replay10, contentDescription = stringResource(R.string.rewind_10s))
             }
 
             // Play/Pause
@@ -117,7 +119,7 @@ fun AudioPlayerControls(
             ) {
                 Icon(
                     imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                    contentDescription = if (isPlaying) "Pause" else "Play",
+                    contentDescription = if (isPlaying) stringResource(R.string.pause) else stringResource(R.string.play),
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -128,7 +130,7 @@ fun AudioPlayerControls(
                 currentPosition = newPosition
                 onSeek(newPosition)
             }) {
-                Icon(Icons.Default.Forward10, contentDescription = "Forward 10 seconds")
+                Icon(Icons.Default.Forward10, contentDescription = stringResource(R.string.forward_10s))
             }
 
             Spacer(modifier = Modifier.width(16.dp))

@@ -6,6 +6,7 @@ import com.revenuecat.purchases.Purchases
 import com.revenuecat.purchases.PurchasesConfiguration
 import com.kreativekoala.summaryai.service.FirebaseAnalyticsHelper
 import com.kreativekoala.summaryai.service.TikTokHelper
+import com.kreativekoala.paywallkit.manager.ExperimentManager
 import dagger.hilt.android.HiltAndroidApp
 
 /**
@@ -17,6 +18,9 @@ class MeetingMindApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        // Initialize PaywallKit experiment manager
+        ExperimentManager.init(this)
 
         // Initialize RevenueCat for in-app purchases
         configureRevenueCat()

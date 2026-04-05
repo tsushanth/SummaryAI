@@ -67,15 +67,15 @@ fun RecordingDetailScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text(detail?.recording?.title ?: "Recording") },
+                title = { Text(detail?.recording?.title ?: stringResource(R.string.recording_fallback)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 actions = {
                     IconButton(onClick = { showMoreMenu = true }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "More")
+                        Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more))
                     }
                     DropdownMenu(
                         expanded = showMoreMenu,
@@ -175,8 +175,8 @@ fun RecordingDetailScreen(
         if (showDeleteDialog) {
             AlertDialog(
                 onDismissRequest = { showDeleteDialog = false },
-                title = { Text("Delete Recording") },
-                text = { Text("Are you sure you want to delete this recording? This action cannot be undone.") },
+                title = { Text(stringResource(R.string.delete_recording)) },
+                text = { Text(stringResource(R.string.delete_recording_confirm_generic)) },
                 confirmButton = {
                     TextButton(
                         onClick = {
@@ -246,7 +246,7 @@ private fun AudioPlayerCard(
                         onClick = onSeekBackward,
                         enabled = audioUrl != null
                     ) {
-                        Icon(Icons.Default.Replay10, contentDescription = "Rewind 10s")
+                        Icon(Icons.Default.Replay10, contentDescription = stringResource(R.string.rewind_10s))
                     }
 
                     FilledIconButton(
@@ -256,7 +256,7 @@ private fun AudioPlayerCard(
                     ) {
                         Icon(
                             if (audioPlayerState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                            contentDescription = if (audioPlayerState.isPlaying) "Pause" else "Play"
+                            contentDescription = if (audioPlayerState.isPlaying) stringResource(R.string.pause) else stringResource(R.string.play)
                         )
                     }
 
@@ -264,7 +264,7 @@ private fun AudioPlayerCard(
                         onClick = onSeekForward,
                         enabled = audioUrl != null
                     ) {
-                        Icon(Icons.Default.Forward10, contentDescription = "Forward 10s")
+                        Icon(Icons.Default.Forward10, contentDescription = stringResource(R.string.forward_10s))
                     }
                 }
 
@@ -358,9 +358,9 @@ private fun StyledTabPicker(
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = when (tab) {
-                        DetailTab.SUMMARY -> "Summary"
-                        DetailTab.TRANSCRIPT -> "Transcript"
-                        DetailTab.CHAT -> "Chat"
+                        DetailTab.SUMMARY -> stringResource(R.string.summary)
+                        DetailTab.TRANSCRIPT -> stringResource(R.string.transcript)
+                        DetailTab.CHAT -> stringResource(R.string.chat)
                     },
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Medium,
@@ -426,7 +426,7 @@ private fun SummaryTab(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Overview",
+                        text = stringResource(R.string.overview),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -461,7 +461,7 @@ private fun SummaryTab(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Summary not available yet",
+                    text = stringResource(R.string.summary_not_available),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -556,7 +556,7 @@ private fun ChatWelcomeHeader() {
             color = MaterialTheme.colorScheme.surfaceVariant
         ) {
             Text(
-                text = "Hello there! What can I answer about your recording?",
+                text = stringResource(R.string.chat_welcome_message),
                 modifier = Modifier.padding(16.dp),
                 style = MaterialTheme.typography.bodyMedium
             )
@@ -568,18 +568,22 @@ private fun ChatWelcomeHeader() {
 private fun SuggestedQuestionsSection(
     onSuggestedQuestion: (String) -> Unit
 ) {
+    val keyPointsFull = stringResource(R.string.suggested_question_key_points_full)
+    val actionItemsFull = stringResource(R.string.suggested_question_action_items_full)
+    val followupEmailFull = stringResource(R.string.suggested_question_followup_email_full)
+
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         SuggestedQuestionCard(
-            text = "Key points in the meeting",
-            onClick = { onSuggestedQuestion("What are the key points discussed in this meeting?") }
+            text = stringResource(R.string.suggested_question_key_points),
+            onClick = { onSuggestedQuestion(keyPointsFull) }
         )
         SuggestedQuestionCard(
-            text = "Main action items",
-            onClick = { onSuggestedQuestion("What are the main action items from this recording?") }
+            text = stringResource(R.string.suggested_question_action_items),
+            onClick = { onSuggestedQuestion(actionItemsFull) }
         )
         SuggestedQuestionCard(
-            text = "Draft a follow-up email",
-            onClick = { onSuggestedQuestion("Draft a follow-up email based on this meeting") }
+            text = stringResource(R.string.suggested_question_followup_email),
+            onClick = { onSuggestedQuestion(followupEmailFull) }
         )
     }
 }
@@ -643,7 +647,7 @@ private fun ChatMessageItem(message: QAMessage) {
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "You",
+                    text = stringResource(R.string.chat_sender_you),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.SemiBold
@@ -680,7 +684,7 @@ private fun ChatMessageItem(message: QAMessage) {
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "AI Assistant",
+                    text = stringResource(R.string.chat_sender_ai),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.SemiBold
@@ -690,7 +694,7 @@ private fun ChatMessageItem(message: QAMessage) {
                     CircularProgressIndicator(modifier = Modifier.size(16.dp))
                 } else {
                     Text(
-                        text = message.answer ?: "No answer",
+                        text = message.answer ?: stringResource(R.string.no_answer),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -721,7 +725,7 @@ private fun ChatInputBar(
                 value = currentQuestion,
                 onValueChange = onQuestionChange,
                 modifier = Modifier.weight(1f),
-                placeholder = { Text("Ask anything about this note") },
+                placeholder = { Text(stringResource(R.string.chat_placeholder)) },
                 shape = RoundedCornerShape(24.dp),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
@@ -752,13 +756,13 @@ private fun ChatInputBar(
                 } else if (currentQuestion.isEmpty()) {
                     Icon(
                         Icons.Default.Mic,
-                        contentDescription = "Voice input",
+                        contentDescription = stringResource(R.string.voice_input),
                         tint = Color.White
                     )
                 } else {
                     Icon(
                         Icons.AutoMirrored.Filled.Send,
-                        contentDescription = "Send",
+                        contentDescription = stringResource(R.string.send),
                         tint = Color.White
                     )
                 }
@@ -798,7 +802,7 @@ private fun TranscriptTab(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Transcript not available yet",
+                    text = stringResource(R.string.transcript_not_available),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
@@ -857,7 +861,7 @@ private fun LiveFullToggle(
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "Live",
+                    text = stringResource(R.string.live_label),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Medium,
                     color = if (showLive) MaterialTheme.colorScheme.primary
@@ -876,7 +880,7 @@ private fun LiveFullToggle(
                     else Color.Transparent
         ) {
             Text(
-                text = "Full",
+                text = stringResource(R.string.full_label),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),

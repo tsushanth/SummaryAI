@@ -1,9 +1,12 @@
 package com.kreativekoala.summaryai.ui.meetings
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.data.repository.MeetingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,6 +24,7 @@ data class JoinMeetingUiState(
 
 @HiltViewModel
 class JoinMeetingViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val meetingsRepository: MeetingsRepository
 ) : ViewModel() {
 
@@ -61,7 +65,7 @@ class JoinMeetingViewModel @Inject constructor(
                 onFailure = { error ->
                     _uiState.value = _uiState.value.copy(
                         isJoining = false,
-                        error = error.message ?: "Failed to join meeting"
+                        error = error.message ?: context.getString(R.string.error_join_meeting_failed)
                     )
                 }
             )
