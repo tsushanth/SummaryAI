@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Meeting Mind</string>
+
+    <!-- Auth -->
+    <string name="sign_in">Log Masuk</string>
+    <string name="sign_up">Daftar</string>
+    <string name="sign_out">Log Keluar</string>
+    <string name="continue_with_google">Teruskan dengan Google</string>
+    <string name="continue_with_email">Teruskan dengan E-mel</string>
+    <string name="email">E-mel</string>
+    <string name="password">Kata Laluan</string>
+    <string name="forgot_password">Lupa Kata Laluan?</string>
+    <string name="auth_tagline">Rakam, Transkripsi, Ringkaskan</string>
+    <string name="or_divider">atau</string>
+    <string name="hide_password">Sembunyikan kata laluan</string>
+    <string name="show_password">Tunjukkan kata laluan</string>
+    <string name="create_account">Cipta Akaun</string>
+    <string name="already_have_account">Sudah ada akaun? Log Masuk</string>
+    <string name="dont_have_account">Tiada akaun? Cipta satu</string>
+    <string name="auth_terms_notice">Dengan meneruskan, anda bersetuju dengan Terma Perkhidmatan dan Dasar Privasi kami</string>
+
+    <!-- Navigation -->
+    <string name="recordings">Rakaman</string>
+    <string name="todos">Tugasan</string>
+    <string name="meetings">Mesyuarat</string>
+    <string name="settings">Tetapan</string>
+    <string name="search">Cari</string>
+    <string name="record">Rakam</string>
+    <string name="calendar">Kalendar</string>
+    <string name="phone">Telefon</string>
+
+    <!-- Recording -->
+    <string name="start_recording">Mula Merakam</string>
+    <string name="stop_recording">Henti Merakam</string>
+    <string name="pause_recording">Jeda Rakaman</string>
+    <string name="resume_recording">Sambung Rakaman</string>
+    <string name="recording_in_progress">Sedang merakam</string>
+    <string name="recording_title">Tajuk Rakaman</string>
+    <string name="untitled_recording">Rakaman Tanpa Tajuk</string>
+    <string name="microphone_permission_rationale">Kami memerlukan akses mikrofon untuk merakam audio. Sila berikan kebenaran dalam tetapan.</string>
+    <string name="grant_permission">Beri Kebenaran</string>
+    <string name="tap_to_start_recording">Ketik untuk Mula Merakam</string>
+    <string name="enter_title">Masukkan tajuk</string>
+    <string name="ready_to_record">Sedia untuk merakam</string>
+    <string name="recording_state_paused">DIJEDA</string>
+    <string name="recording_state_recording">MERAKAM</string>
+    <string name="uploading">Memuat naik…</string>
+
+    <!-- Recordings List -->
+    <string name="all">Semua</string>
+    <string name="processing">Memproses</string>
+    <string name="completed">Selesai</string>
+    <string name="no_recordings">Tiada rakaman lagi</string>
+    <string name="no_recordings_subtitle">Ketik butang mikrofon untuk memulakan rakaman pertama anda</string>
+    <string name="favorites">Kegemaran</string>
+    <string name="imported">Diimport</string>
+    <string name="new_summary">Ringkasan Baharu</string>
+    <string name="favorite">Kegemaran</string>
+    <string name="more_options">Lagi pilihan</string>
+    <string name="add_to_favorites">Tambah ke Kegemaran</string>
+    <string name="remove_from_favorites">Buang dari Kegemaran</string>
+    <string name="delete_recording">Padam Rakaman</string>
+    <string name="delete_recording_confirm">Adakah anda pasti mahu memadamkan \"%s\"? Tindakan ini tidak boleh dibuat asal.</string>
+    <string name="failed">Gagal</string>
+    <string name="refresh">Muat semula</string>
+
+    <!-- Recording Detail -->
+    <string name="transcript">Transkrip</string>
+    <string name="summary">Ringkasan</string>
+    <string name="action_items">Tugasan</string>
+    <string name="ask_a_question">Tanya soalan…</string>
+    <string name="export">Eksport</string>
+    <string name="share">Kongsi</string>
+    <string name="delete">Padam</string>
+    <string name="recording_fallback">Rakaman</string>
+    <string name="back">Kembali</string>
+    <string name="more">Lagi</string>
+    <string name="delete_recording_confirm_generic">Adakah anda pasti mahu memadamkan rakaman ini? Tindakan ini tidak boleh dibuat asal.</string>
+    <string name="rewind_10s">Undur 10 saat</string>
+    <string name="play">Main</string>
+    <string name="pause">Jeda</string>
+    <string name="forward_10s">Maju 10 saat</string>
+    <string name="chat">Sembang</string>
+    <string name="overview">Gambaran Keseluruhan</string>
+    <string name="summary_not_available">Ringkasan belum tersedia</string>
+    <string name="chat_welcome_message">Hai! Apa yang boleh saya jawab tentang rakaman anda?</string>
+    <string name="suggested_question_key_points">Perkara utama dalam mesyuarat</string>
+    <string name="suggested_question_key_points_full">Apakah perkara utama yang dibincangkan dalam mesyuarat ini?</string>
+    <string name="suggested_question_action_items">Tugasan utama</string>
+    <string name="suggested_question_action_items_full">Apakah tugasan utama dari rakaman ini?</string>
+    <string name="suggested_question_followup_email">Draf e-mel susulan</string>
+    <string name="suggested_question_followup_email_full">Draf e-mel susulan berdasarkan mesyuarat ini</string>
+    <string name="chat_sender_you">Anda</string>
+    <string name="chat_sender_ai">Pembantu AI</string>
+    <string name="no_answer">Tiada jawapan</string>
+    <string name="chat_placeholder">Tanya apa sahaja tentang nota ini</string>
+    <string name="voice_input">Input suara</string>
+    <string name="send">Hantar</string>
+    <string name="transcript_not_available">Transkrip belum tersedia</string>
+    <string name="live_label">Langsung</string>
+    <string name="full_label">Penuh</string>
+
+    <!-- Todos -->
+    <string name="add_todo">Tambah Tugasan</string>
+    <string name="todo_title">Tajuk</string>
+    <string name="todo_notes">Nota</string>
+    <string name="due_date">Tarikh Akhir</string>
+    <string name="priority">Keutamaan</string>
+    <string name="high">Tinggi</string>
+    <string name="medium">Sederhana</string>
+    <string name="low">Rendah</string>
+    <string name="none">Tiada</string>
+    <string name="pending_items">Menunggu</string>
+    <string name="completed_items">Selesai</string>
+    <string name="no_action_items">Tiada tugasan lagi</string>
+    <string name="no_pending_items">Tiada tugasan menunggu</string>
+    <string name="no_completed_items">Tiada tugasan selesai</string>
+    <string name="action_items_empty_hint">Tugasan dari rakaman anda akan muncul di sini</string>
+    <string name="view_recording">Lihat Rakaman</string>
+    <string name="add">Tambah</string>
+
+    <!-- Meetings -->
+    <string name="upcoming_meetings">Mesyuarat Akan Datang</string>
+    <string name="past_meetings">Mesyuarat Lepas</string>
+    <string name="join_meeting">Sertai Mesyuarat</string>
+    <string name="meeting_url">URL Mesyuarat</string>
+    <string name="paste_meeting_link">Tampal pautan mesyuarat anda di sini</string>
+    <string name="send_bot">Hantar Bot ke Mesyuarat</string>
+    <string name="auto_join">Sertai automatik</string>
+    <string name="upcoming">Akan Datang</string>
+    <string name="calendar_connected">Kalendar Disambung</string>
+    <string name="connect_calendar_desc">Segerakkan mesyuarat anda dan aktifkan rakaman automatik</string>
+    <string name="auto_record">Rakam automatik</string>
+    <string name="no_upcoming_meetings">Tiada Mesyuarat Akan Datang</string>
+    <string name="meetings_empty_hint">Mesyuarat kalendar anda akan muncul di sini</string>
+    <string name="now">Sekarang</string>
+    <string name="join">Sertai</string>
+    <string name="join_meeting_desc">Tampal pautan mesyuarat anda dan bot kami akan menyertai untuk merakam dan mentranskripsi</string>
+    <string name="meeting_url_placeholder">https://zoom.us/j/123456789</string>
+    <string name="bot_name">Nama Bot</string>
+    <string name="optional">(Pilihan)</string>
+    <string name="bot_name_hint">Nama ini akan muncul dalam senarai peserta mesyuarat</string>
+    <string name="supported_platforms">Platform yang Disokong</string>
+
+    <!-- Calendar -->
+    <string name="connect_calendar">Sambung Kalendar</string>
+    <string name="google_calendar">Google Calendar</string>
+    <string name="microsoft_outlook">Microsoft Outlook</string>
+    <string name="disconnect">Putuskan</string>
+    <string name="connected">Disambung</string>
+    <string name="calendar_integration">Integrasi Kalendar</string>
+    <string name="calendar_integration_desc">Sambungkan kalendar anda untuk melihat mesyuarat akan datang secara automatik dan menjadualkan rakaman bot.</string>
+    <string name="disconnect_calendar_title">Putuskan %s</string>
+    <string name="disconnect_calendar_desc">Penyegerakan mesyuarat dari kalendar ini akan dihentikan. Anda boleh menyambung semula pada bila-bila masa.</string>
+    <string name="connect">Sambung</string>
+
+    <!-- Settings -->
+    <string name="account">Akaun</string>
+    <string name="integrations">Integrasi</string>
+    <string name="legal">Undang-undang</string>
+    <string name="about">Perihal</string>
+    <string name="privacy_policy">Dasar Privasi</string>
+    <string name="terms_of_service">Terma Perkhidmatan</string>
+    <string name="version">Versi</string>
+    <string name="build">Binaan</string>
+    <string name="help_faq">Bantuan &amp; Soalan Lazim</string>
+    <string name="contact_us">Hubungi Kami</string>
+    <string name="appearance">Penampilan</string>
+    <string name="calendar_sync_subtitle">Segerakkan mesyuarat anda</string>
+    <string name="sign_out_confirm">Adakah anda pasti mahu log keluar?</string>
+    <string name="via_provider">melalui %s</string>
+    <string name="theme_light">Cerah</string>
+    <string name="theme_light_subtitle">Sentiasa gunakan tema cerah</string>
+    <string name="theme_dark">Gelap</string>
+    <string name="theme_dark_subtitle">Sentiasa gunakan tema gelap</string>
+    <string name="theme_system">Sistem</string>
+    <string name="theme_system_subtitle">Ikut tetapan sistem</string>
+    <string name="selected">Dipilih</string>
+    <string name="delete_account">Padam Akaun</string>
+    <string name="delete_account_warning">Ini akan memadamkan akaun dan semua rakaman anda secara kekal. Tindakan ini tidak boleh dibuat asal.</string>
+
+    <!-- Subscription -->
+    <string name="upgrade_to_pro">Naik taraf ke Pro</string>
+    <string name="pro">PRO</string>
+    <string name="free">Percuma</string>
+    <string name="restore_purchases">Pulihkan Pembelian</string>
+    <string name="monthly">Bulanan</string>
+    <string name="yearly">Tahunan</string>
+    <string name="per_month">/bulan</string>
+    <string name="per_year">/tahun</string>
+
+    <!-- Export -->
+    <string name="export_pdf">Eksport sebagai PDF</string>
+    <string name="export_text">Eksport sebagai Teks</string>
+    <string name="export_markdown">Eksport sebagai Markdown</string>
+
+    <!-- Service Descriptions -->
+    <string name="service_description_recording">Merakam audio semasa mesyuarat dan panggilan telefon untuk transkripsi</string>
+    <string name="service_description_playback">Memainkan semula mesyuarat dan panggilan yang dirakam di latar belakang</string>
+
+    <!-- Errors -->
+    <string name="error">Ralat</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Batal</string>
+    <string name="retry">Cuba Lagi</string>
+    <string name="something_went_wrong">Sesuatu tidak kena</string>
+    <string name="no_internet">Tiada sambungan internet</string>
+    <string name="permission_required">Kebenaran Diperlukan</string>
+    <string name="microphone_permission_required">Kebenaran mikrofon diperlukan untuk merakam audio</string>
+    <string name="notification_permission_required">Kebenaran pemberitahuan diperlukan untuk rakaman latar belakang</string>
+    <string name="demo_mode_message">Menyimpan rakaman memerlukan log masuk dengan Google. Sila log keluar dan log masuk dengan akaun Google anda untuk menyimpan rakaman.</string>
+    <string name="error_recording_file_not_found">Fail rakaman tidak dijumpai</string>
+    <string name="error_upload_failed">Muat naik gagal</string>
+    <string name="error_qa_failed">Maaf, saya tidak dapat menjawab soalan itu. Sila cuba lagi.</string>
+    <string name="error_join_meeting_failed">Gagal menyertai mesyuarat</string>
+    <string name="error_load_phones_failed">Gagal memuatkan telefon</string>
+    <string name="error_load_calls_failed">Gagal memuatkan panggilan</string>
+    <string name="error_enter_phone_number">Sila masukkan nombor telefon</string>
+    <string name="error_enter_six_digit_code">Sila masukkan kod 6 digit</string>
+    <string name="error_invalid_verification_code">Kod pengesahan tidak sah</string>
+    <string name="error_verify_phone_first">Sila sahkan nombor telefon terlebih dahulu</string>
+    <string name="error_enter_number_to_call">Sila masukkan nombor telefon untuk dipanggil</string>
+    <string name="error_voip_token_failed">Gagal mendapatkan token VoIP</string>
+    <string name="error_create_call_failed">Gagal mencipta panggilan</string>
+    <string name="error_start_voip_call">Gagal memulakan panggilan VoIP</string>
+
+    <!-- Onboarding -->
+    <string name="welcome_to_meeting_mind">Selamat Datang ke Meeting Mind</string>
+    <string name="onboarding_recording_title">Rakam Apa Sahaja</string>
+    <string name="onboarding_recording_desc">Rakam mesyuarat, kuliah, temu bual, atau sebarang perbualan dengan audio yang jernih</string>
+    <string name="onboarding_transcribe_title">Transkripsi Berkuasa AI</string>
+    <string name="onboarding_transcribe_desc">Dapatkan transkrip tepat dengan pengenalpastian penutur dalam lebih 120 bahasa</string>
+    <string name="onboarding_summary_title">Ringkasan Pintar</string>
+    <string name="onboarding_summary_desc">AI menjana ringkasan padat dengan perkara utama dan tugasan</string>
+    <string name="onboarding_qa_title">Tanya Soalan</string>
+    <string name="onboarding_qa_desc">Berbual dengan rakaman anda untuk mencari maklumat tertentu dengan segera</string>
+    <string name="get_started">Mulakan</string>
+    <string name="next">Seterusnya</string>
+    <string name="skip">Langkau</string>
+
+    <!-- Search -->
+    <string name="clear">Kosongkan</string>
+    <string name="search_prompt">Cari rakaman anda</string>
+    <string name="search_hint">Cari mengikut tajuk, kandungan transkrip, atau topik</string>
+    <string name="no_results">Tiada hasil dijumpai</string>
+    <string name="no_results_for_query">Tiada rakaman sepadan dengan \"%s\"</string>
+
+    <!-- Phone -->
+    <string name="calls">Panggilan</string>
+    <string name="dialer">Pendail</string>
+
+    <!-- Live Transcript -->
+    <string name="waiting_for_transcript">Menunggu transkrip…</string>
+    <string name="live_transcript_hint">Transkrip langsung akan muncul di sini apabila percakapan dikesan</string>
+    <string name="live_indicator">LANGSUNG</string>
+    <string name="host">Hos</string>
+
+    <!-- Language Picker -->
+    <string name="language">Bahasa</string>
+    <string name="language_picker_title">Pilih Bahasa</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese">中文(简体)</string>
+    <string name="language_korean">한국어</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_hindi">हिन्दी</string>
+</resources>
