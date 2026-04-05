@@ -1,0 +1,438 @@
+/* Localizable.strings - Hindi (हिन्दी)
+   MeetingMind iOS App
+   Copyright KreativeKoalaSolutions LLC */
+
+// MARK: - Common / Shared
+"OK" = "ठीक है";
+"Cancel" = "रद्द करें";
+"Delete" = "हटाएं";
+"Save" = "सहेजें";
+"Done" = "हो गया";
+"Retry" = "पुनः प्रयास करें";
+"Dismiss" = "खारिज करें";
+"Error" = "त्रुटि";
+"Close" = "बंद करें";
+"Clear" = "साफ़ करें";
+"Add" = "जोड़ें";
+"Search" = "खोजें";
+"Loading..." = "लोड हो रहा है...";
+"An error occurred" = "एक त्रुटि हुई";
+"Try Again" = "पुनः प्रयास करें";
+"Continue" = "जारी रखें";
+"PRO" = "PRO";
+
+// MARK: - Tab Bar
+"Recordings" = "रिकॉर्डिंग";
+"Calendar" = "कैलेंडर";
+"Record" = "रिकॉर्ड";
+"Phone" = "फ़ोन";
+"Settings" = "सेटिंग्स";
+
+// MARK: - Splash / Auth
+"Meeting Mind" = "Meeting Mind";
+"Record, transcribe, and summarize\nyour meetings with AI" = "AI से अपनी मीटिंग रिकॉर्ड करें,\nट्रांसक्राइब करें और सारांश बनाएं";
+"Sign in with Google" = "Google से साइन इन करें";
+"By signing in, you agree to our" = "साइन इन करके, आप हमारी";
+"Terms of Service" = "सेवा की शर्तें";
+"and" = "और";
+"Privacy Policy" = "गोपनीयता नीति";
+"Sign In Error" = "साइन इन त्रुटि";
+"Sign In" = "साइन इन";
+"Create Account" = "खाता बनाएं";
+"Full Name" = "पूरा नाम";
+"Email" = "ईमेल";
+"Password" = "पासवर्ड";
+"Already have an account? Sign in" = "पहले से खाता है? साइन इन करें";
+"Don't have an account? Sign up" = "खाता नहीं है? साइन अप करें";
+"Not signed in" = "साइन इन नहीं किया";
+
+// MARK: - Onboarding
+"Tap Record" = "रिकॉर्ड टैप करें";
+"and get accurate word-for-word transcripts" = "और सटीक शब्द-दर-शब्द ट्रांसक्रिप्ट प्राप्त करें";
+"Speaker identification" = "वक्ता पहचान";
+"Timestamps for every segment" = "हर खंड के लिए टाइमस्टैम्प";
+"120+ languages supported" = "120+ भाषाएं समर्थित";
+"Perfect Notes" = "सही नोट्स";
+"Ready to Share" = "शेयर करने के लिए तैयार";
+"AI-powered summaries" = "AI-संचालित सारांश";
+"Action items extracted" = "कार्य आइटम निकाले गए";
+"Ask questions about recordings" = "रिकॉर्डिंग के बारे में प्रश्न पूछें";
+"Customize," = "कस्टमाइज़ करें,";
+"Export, Share" = "एक्सपोर्ट करें, शेयर करें";
+"Export as PDF or Text" = "PDF या टेक्स्ट के रूप में एक्सपोर्ट करें";
+"Share via email or messages" = "ईमेल या मैसेज से शेयर करें";
+"Organize with folders" = "फ़ोल्डर से व्यवस्थित करें";
+"Built with Data Privacy" = "डेटा गोपनीयता को";
+"at the Core" = "केंद्र में रखकर बनाया गया";
+"Secure cloud storage" = "सुरक्षित क्लाउड स्टोरेज";
+"Your data stays private" = "आपका डेटा निजी रहता है";
+"End-to-end encryption" = "एंड-टू-एंड एन्क्रिप्शन";
+"Get Started" = "शुरू करें";
+"Skip" = "छोड़ें";
+"Allow Meeting Mind to send you notifications?" = "क्या Meeting Mind को नोटिफिकेशन भेजने की अनुमति दें?";
+"Allow" = "अनुमति दें";
+"Don't allow" = "अनुमति न दें";
+"Get notified when your recordings are ready to view." = "जब आपकी रिकॉर्डिंग तैयार हो जाए तो नोटिफिकेशन प्राप्त करें।";
+
+// MARK: - Recordings List
+"New Summary" = "नया सारांश";
+"Start your first recording" = "अपनी पहली रिकॉर्डिंग शुरू करें";
+"Tap the button below to record, transcribe, and summarize your first meeting" = "अपनी पहली मीटिंग रिकॉर्ड, ट्रांसक्राइब और सारांश करने के लिए नीचे बटन टैप करें";
+"Loading recordings..." = "रिकॉर्डिंग लोड हो रही हैं...";
+"Something Went Wrong" = "कुछ गलत हो गया";
+"All" = "सभी";
+"Meetings" = "मीटिंग्स";
+"Todos" = "कार्य";
+"Favorites" = "पसंदीदा";
+"Imported" = "आयातित";
+"No %@ Found" = "कोई %@ नहीं मिला";
+"Start recording to see your summaries here" = "अपने सारांश यहां देखने के लिए रिकॉर्डिंग शुरू करें";
+"Recordings tagged as meetings will appear here" = "मीटिंग के रूप में टैग की गई रिकॉर्डिंग यहां दिखाई देंगी";
+"Speak your todos or add them manually" = "अपने कार्य बोलें या मैन्युअल रूप से जोड़ें";
+"Tap the heart icon on a recording to add it to favorites" = "पसंदीदा में जोड़ने के लिए रिकॉर्डिंग पर हार्ट आइकन टैप करें";
+"Import audio files or PDFs to see them here" = "ऑडियो फाइलें या PDF आयात करें यहां देखने के लिए";
+"%d words" = "%d शब्द";
+"Rename" = "नाम बदलें";
+"Add to Favorites" = "पसंदीदा में जोड़ें";
+"Remove from Favorites" = "पसंदीदा से हटाएं";
+"Rename Recording" = "रिकॉर्डिंग का नाम बदलें";
+"Title" = "शीर्षक";
+"Enter a new title for this recording" = "इस रिकॉर्डिंग के लिए नया शीर्षक दर्ज करें";
+"Delete Recording" = "रिकॉर्डिंग हटाएं";
+"Are you sure you want to delete \"%@\"? This action cannot be undone." = "क्या आप वाकई \"%@\" हटाना चाहते हैं? यह क्रिया पूर्ववत नहीं की जा सकती।";
+
+// MARK: - New Recording Sheet
+"Record Audio" = "ऑडियो रिकॉर्ड करें";
+"Upload from files" = "फाइलों से अपलोड करें";
+"PDF and Recordings" = "PDF और रिकॉर्डिंग";
+"To-Do List" = "कार्य सूची";
+"Tasks, To-Dos and Notes" = "कार्य, To-Do और नोट्स";
+"Uploading... %d%%" = "अपलोड हो रहा है... %d%%";
+"Import Error" = "आयात त्रुटि";
+
+// MARK: - Recording View
+"Recording Title" = "रिकॉर्डिंग शीर्षक";
+"Enter title" = "शीर्षक दर्ज करें";
+"Live Transcribe" = "लाइव ट्रांसक्राइब";
+"Translate" = "अनुवाद करें";
+"Off" = "बंद";
+"English" = "अंग्रेज़ी";
+"Auto" = "ऑटो";
+"Spanish" = "स्पेनिश";
+"French" = "फ्रेंच";
+"German" = "जर्मन";
+"Chinese" = "चीनी";
+"Japanese" = "जापानी";
+"Korean" = "कोरियाई";
+"Portuguese" = "पुर्तगाली";
+"Italian" = "इतालवी";
+"Listening..." = "सुन रहा है...";
+"Connection error" = "कनेक्शन त्रुटि";
+"Cancel Recording?" = "रिकॉर्डिंग रद्द करें?";
+"Cancel Recording" = "रिकॉर्डिंग रद्द करें";
+"Continue Recording" = "रिकॉर्डिंग जारी रखें";
+"Your recording will be discarded." = "आपकी रिकॉर्डिंग हटा दी जाएगी।";
+"New Recording" = "नई रिकॉर्डिंग";
+
+// MARK: - Recording Detail
+"Recording" = "रिकॉर्डिंग";
+"Summary" = "सारांश";
+"Transcript" = "ट्रांसक्रिप्ट";
+"Chat" = "चैट";
+"Move to Folder" = "फ़ोल्डर में ले जाएं";
+"Delete Recording?" = "रिकॉर्डिंग हटाएं?";
+"This will permanently delete this recording and all associated data. This action cannot be undone." = "यह इस रिकॉर्डिंग और सभी संबंधित डेटा को स्थायी रूप से हटा देगा। यह क्रिया पूर्ववत नहीं की जा सकती।";
+"Loading recording..." = "रिकॉर्डिंग लोड हो रही है...";
+"Live Recording in Progress" = "लाइव रिकॉर्डिंग जारी";
+"Processing..." = "प्रोसेसिंग...";
+"Key Points" = "मुख्य बिंदु";
+"Overview" = "अवलोकन";
+"Topics" = "विषय";
+"Summary will appear here once processing is complete." = "प्रोसेसिंग पूरी होने पर सारांश यहां दिखाई देगा।";
+"No summary available." = "कोई सारांश उपलब्ध नहीं।";
+"Transcript will appear here once transcription is complete." = "ट्रांसक्रिप्शन पूरा होने पर ट्रांसक्रिप्ट यहां दिखाई देगा।";
+"No transcript available." = "कोई ट्रांसक्रिप्ट उपलब्ध नहीं।";
+"Document" = "दस्तावेज़";
+"Failed to Load" = "लोड करने में विफल";
+"Live" = "लाइव";
+"Full" = "पूर्ण";
+"%d segments" = "%d खंड";
+"Waiting for transcript..." = "ट्रांसक्रिप्ट की प्रतीक्षा...";
+"Transcript will appear here as the meeting progresses" = "जैसे-जैसे मीटिंग आगे बढ़ेगी, ट्रांसक्रिप्ट यहां दिखाई देगा";
+
+// MARK: - Chat / Q&A
+"Hello there! What can I answer about your recording?" = "नमस्ते! आपकी रिकॉर्डिंग के बारे में क्या बता सकता हूं?";
+"Key points in the meeting" = "मीटिंग के मुख्य बिंदु";
+"Main action items" = "मुख्य कार्य आइटम";
+"Draft a follow-up email" = "फॉलो-अप ईमेल का ड्राफ्ट बनाएं";
+"What are the key points discussed in this meeting?" = "इस मीटिंग में चर्चा किए गए मुख्य बिंदु क्या हैं?";
+"What are the main action items from this recording?" = "इस रिकॉर्डिंग से मुख्य कार्य आइटम क्या हैं?";
+"Draft a follow-up email based on this meeting" = "इस मीटिंग के आधार पर फॉलो-अप ईमेल तैयार करें";
+"Ask anything about this note" = "इस नोट के बारे में कुछ भी पूछें";
+"You" = "आप";
+"AI" = "AI";
+"AI Assistant" = "AI सहायक";
+"Sources:" = "स्रोत:";
+"High confidence" = "उच्च विश्वसनीयता";
+"Medium confidence" = "मध्यम विश्वसनीयता";
+"Low confidence" = "कम विश्वसनीयता";
+
+// MARK: - Search
+"Search Recordings" = "रिकॉर्डिंग खोजें";
+"Find specific content in your transcripts by entering keywords above." = "ऊपर कीवर्ड दर्ज करके अपने ट्रांसक्रिप्ट में विशिष्ट सामग्री खोजें।";
+"Recent Searches" = "हाल की खोजें";
+"Search transcripts..." = "ट्रांसक्रिप्ट खोजें...";
+"Enter at least 2 characters to search" = "खोजने के लिए कम से कम 2 अक्षर दर्ज करें";
+"Searching..." = "खोज रहा है...";
+"No Results" = "कोई परिणाम नहीं";
+"No matches found for \"%@\"" = "\"%@\" के लिए कोई मिलान नहीं मिला";
+"Try different keywords or check your spelling." = "अलग कीवर्ड आज़माएं या अपनी वर्तनी जांचें।";
+"Search Failed" = "खोज विफल";
+"Show less" = "कम दिखाएं";
+"Show %d more" = "%d और दिखाएं";
+
+// MARK: - Export
+"Export Format" = "एक्सपोर्ट प्रारूप";
+"Format" = "प्रारूप";
+"Content" = "सामग्री";
+"Key Points" = "मुख्य बिंदु";
+"Action Items" = "कार्य आइटम";
+"Full Transcript" = "पूर्ण ट्रांसक्रिप्ट";
+"Recording Info" = "रिकॉर्डिंग जानकारी";
+"Preview" = "पूर्वावलोकन";
+"No content selected for export" = "एक्सपोर्ट के लिए कोई सामग्री चयनित नहीं";
+"Export" = "एक्सपोर्ट";
+"Export Error" = "एक्सपोर्ट त्रुटि";
+"Share Summary" = "सारांश शेयर करें";
+"Export Failed" = "एक्सपोर्ट विफल";
+"Unknown error" = "अज्ञात त्रुटि";
+
+// MARK: - Share Export
+"Share or Export" = "शेयर या एक्सपोर्ट करें";
+"Share Summary as PDF" = "सारांश PDF के रूप में शेयर करें";
+"Share Summary as Text" = "सारांश टेक्स्ट के रूप में शेयर करें";
+"Share Transcript as PDF" = "ट्रांसक्रिप्ट PDF के रूप में शेयर करें";
+"Share Transcript as Text" = "ट्रांसक्रिप्ट टेक्स्ट के रूप में शेयर करें";
+"Share Audio" = "ऑडियो शेयर करें";
+"Share or export with just a tap!" = "बस एक टैप से शेयर या एक्सपोर्ट करें!";
+"Generating..." = "जनरेट हो रहा है...";
+
+// MARK: - Settings
+"Account" = "खाता";
+"via %@" = "%@ के माध्यम से";
+"AI Data Sharing" = "AI डेटा शेयरिंग";
+"Allowed" = "अनुमत";
+"Not Allowed" = "अनुमत नहीं";
+"Data & Privacy" = "डेटा और गोपनीयता";
+"Your recordings are processed by cloud AI services for transcription and summarization." = "आपकी रिकॉर्डिंग क्लाउड AI सेवाओं द्वारा ट्रांसक्रिप्शन और सारांश के लिए प्रोसेस की जाती हैं।";
+"AI-powered features are disabled. Grant consent to enable transcription, summaries, and more." = "AI-संचालित सुविधाएं अक्षम हैं। ट्रांसक्रिप्शन, सारांश और अधिक सक्षम करने के लिए सहमति दें।";
+"Legal" = "कानूनी";
+"Integrations" = "एकीकरण";
+"Google Calendar" = "Google कैलेंडर";
+"Connected" = "कनेक्टेड";
+"Disconnect" = "डिस्कनेक्ट";
+"Microsoft Outlook" = "Microsoft Outlook";
+"Add Another Calendar" = "एक और कैलेंडर जोड़ें";
+"Add Calendar" = "कैलेंडर जोड़ें";
+"Connect Calendar" = "कैलेंडर कनेक्ट करें";
+"Calendar Integration" = "कैलेंडर एकीकरण";
+"Disconnect Calendar" = "कैलेंडर डिस्कनेक्ट करें";
+"This will stop syncing meetings from this calendar. You can reconnect anytime." = "यह इस कैलेंडर से मीटिंग सिंक करना बंद कर देगा। आप कभी भी फिर से कनेक्ट कर सकते हैं।";
+"About" = "के बारे में";
+"Version" = "संस्करण";
+"Build" = "बिल्ड";
+"Help & FAQ" = "मदद और FAQ";
+"Contact Us" = "हमसे संपर्क करें";
+"Sign Out" = "साइन आउट";
+"Are you sure you want to sign out?" = "क्या आप वाकई साइन आउट करना चाहते हैं?";
+"Delete Account" = "खाता हटाएं";
+"This will permanently delete your account and all recordings. This action cannot be undone." = "यह आपका खाता और सभी रिकॉर्डिंग स्थायी रूप से हटा देगा। यह क्रिया पूर्ववत नहीं की जा सकती।";
+"Open Source Licenses" = "ओपन सोर्स लाइसेंस";
+"Meeting Mind uses the following open source libraries:" = "Meeting Mind निम्नलिखित ओपन सोर्स लाइब्रेरीज़ का उपयोग करता है:";
+"Storage" = "स्टोरेज";
+"Storage Used" = "उपयोग किया गया स्टोरेज";
+"Clear Local Cache" = "लोकल कैश साफ़ करें";
+"Clearing the cache will remove downloaded transcripts and summaries. They will be re-downloaded when you view them." = "कैश साफ़ करने से डाउनलोड किए गए ट्रांसक्रिप्ट और सारांश हटा दिए जाएंगे। जब आप उन्हें देखेंगे तो वे फिर से डाउनलोड होंगे।";
+
+// MARK: - Paywall
+"Never Take Notes Again!" = "फिर कभी नोट्स न लें!";
+"AI-powered meeting transcription & summaries" = "AI-संचालित मीटिंग ट्रांसक्रिप्शन और सारांश";
+"Unlimited meeting recordings with real-time speaker detection" = "रीयल-टाइम वक्ता पहचान के साथ असीमित मीटिंग रिकॉर्डिंग";
+"AI-generated summaries, key takeaways, and action items" = "AI-जनित सारांश, मुख्य निष्कर्ष और कार्य आइटम";
+"Ask AI questions about any recorded meeting" = "किसी भी रिकॉर्ड की गई मीटिंग के बारे में AI से प्रश्न पूछें";
+"Transcription in 120+ languages" = "120+ भाषाओं में ट्रांसक्रिप्शन";
+"Export transcripts as PDF or text files" = "ट्रांसक्रिप्ट को PDF या टेक्स्ट फाइल के रूप में एक्सपोर्ट करें";
+"Loading plans..." = "प्लान लोड हो रहे हैं...";
+"Annual" = "वार्षिक";
+"/year" = "/वर्ष";
+"Best Value" = "सबसे अच्छा मूल्य";
+"7-day free trial" = "7-दिन का नि:शुल्क परीक्षण";
+"Monthly" = "मासिक";
+"/month" = "/महीना";
+"Weekly" = "साप्ताहिक";
+"/week" = "/सप्ताह";
+"Save 30% on Web" = "वेब पर 30% बचाएं";
+"Cancel anytime. No commitment." = "कभी भी रद्द करें। कोई बाध्यता नहीं।";
+"Terms" = "शर्तें";
+"Privacy" = "गोपनीयता";
+"Restore" = "पुनर्स्थापित करें";
+"Purchase failed. Please try again." = "खरीदारी विफल। कृपया पुनः प्रयास करें।";
+
+// MARK: - AI Data Consent
+"Meeting Mind uses cloud-based AI services to transcribe your recordings and generate summaries. Here's exactly what data is shared and with whom." = "Meeting Mind आपकी रिकॉर्डिंग को ट्रांसक्राइब करने और सारांश बनाने के लिए क्लाउड-आधारित AI सेवाओं का उपयोग करता है। यहां बताया गया है कि कौन सा डेटा किसके साथ साझा किया जाता है।";
+"Audio Transcription" = "ऑडियो ट्रांसक्रिप्शन";
+"Your audio recordings are sent to our backend server, which uses Deepgram for speech-to-text transcription." = "आपकी ऑडियो रिकॉर्डिंग हमारे बैकएंड सर्वर पर भेजी जाती हैं, जो स्पीच-टू-टेक्स्ट ट्रांसक्रिप्शन के लिए Deepgram का उपयोग करता है।";
+"Deepgram — converts speech to text with speaker identification" = "Deepgram — वक्ता पहचान के साथ भाषण को टेक्स्ट में बदलता है";
+"AI Summaries & Action Items" = "AI सारांश और कार्य आइटम";
+"Your transcribed text is sent to OpenAI to generate meeting summaries, action items, and answer questions about your recordings." = "आपका ट्रांसक्राइब किया गया टेक्स्ट मीटिंग सारांश, कार्य आइटम बनाने और आपकी रिकॉर्डिंग के बारे में प्रश्नों का उत्तर देने के लिए OpenAI को भेजा जाता है।";
+"OpenAI (GPT-4) — generates summaries, extracts action items, and powers Q&A" = "OpenAI (GPT-4) — सारांश बनाता है, कार्य आइटम निकालता है और Q&A संचालित करता है";
+"Phone Calls" = "फ़ोन कॉल";
+"When using the phone feature, call audio is routed through Twilio for recording and transcription." = "फ़ोन सुविधा का उपयोग करते समय, कॉल ऑडियो रिकॉर्डिंग और ट्रांसक्रिप्शन के लिए Twilio के माध्यम से रूट किया जाता है।";
+"Twilio — VoIP calling and call recording" = "Twilio — VoIP कॉलिंग और कॉल रिकॉर्डिंग";
+"Authentication & Storage" = "प्रमाणीकरण और स्टोरेज";
+"Your account information and files are stored securely via Supabase." = "आपकी खाता जानकारी और फाइलें Supabase के माध्यम से सुरक्षित रूप से संग्रहीत हैं।";
+"Supabase — authentication, database, and file storage" = "Supabase — प्रमाणीकरण, डेटाबेस और फाइल स्टोरेज";
+"What Stays on Your Device" = "आपके डिवाइस पर क्या रहता है";
+"Your app settings, preferences, and local cache remain on your device and are never shared." = "आपकी ऐप सेटिंग्स, प्राथमिकताएं और लोकल कैश आपके डिवाइस पर रहते हैं और कभी साझा नहीं किए जाते।";
+"Your data is transmitted securely via HTTPS and is not used to train AI models. You can revoke consent at any time in Settings." = "आपका डेटा HTTPS के माध्यम से सुरक्षित रूप से प्रेषित किया जाता है और AI मॉडल को प्रशिक्षित करने के लिए उपयोग नहीं किया जाता। आप सेटिंग्स में कभी भी सहमति रद्द कर सकते हैं।";
+"I Understand & Agree" = "मैं समझता/समझती हूं और सहमत हूं";
+"Continue Without AI Features" = "AI सुविधाओं के बिना जारी रखें";
+"Revoke Consent" = "सहमति रद्द करें";
+
+// MARK: - Processing Progress
+"Processing Audio" = "ऑडियो प्रोसेस हो रहा है";
+"Transcribing" = "ट्रांसक्राइब हो रहा है";
+"Identifying Speakers" = "वक्ता पहचाने जा रहे हैं";
+"Highlighting key points" = "मुख्य बिंदु हाइलाइट हो रहे हैं";
+"Wrapping up" = "समापन हो रहा है";
+"All done!" = "सब हो गया!";
+"Your summary and transcript are ready!" = "आपका सारांश और ट्रांसक्रिप्ट तैयार है!";
+"Enjoy Summary" = "सारांश देखें";
+"Preparing..." = "तैयारी हो रही है...";
+"Uploading..." = "अपलोड हो रहा है...";
+"Analyzing..." = "विश्लेषण हो रहा है...";
+"Summarizing..." = "सारांश बन रहा है...";
+"Complete!" = "पूर्ण!";
+"Failed" = "विफल";
+"Getting ready to process" = "प्रोसेसिंग की तैयारी";
+"Uploading your recording" = "आपकी रिकॉर्डिंग अपलोड हो रही है";
+"Processing audio file" = "ऑडियो फाइल प्रोसेस हो रही है";
+"Converting speech to text" = "भाषण को टेक्स्ट में बदला जा रहा है";
+"Identifying speakers" = "वक्ता पहचाने जा रहे हैं";
+"Generating summary and key points" = "सारांश और मुख्य बिंदु बनाए जा रहे हैं";
+"Your summary is ready" = "आपका सारांश तैयार है";
+"Something went wrong" = "कुछ गलत हो गया";
+"Processing recording..." = "रिकॉर्डिंग प्रोसेस हो रही है...";
+
+// MARK: - Todos
+"Loading todos..." = "कार्य लोड हो रहे हैं...";
+"No todos yet" = "अभी तक कोई कार्य नहीं";
+"Tap the microphone to speak your tasks, or tap + to add manually" = "अपने कार्य बोलने के लिए माइक्रोफ़ोन टैप करें, या + टैप करके मैन्युअल रूप से जोड़ें";
+"Voice" = "आवाज़";
+"No completed todos" = "कोई पूर्ण कार्य नहीं";
+"No active todos" = "कोई सक्रिय कार्य नहीं";
+"What do you need to do?" = "आपको क्या करना है?";
+"Priority" = "प्राथमिकता";
+"New Todo" = "नया कार्य";
+"Voice Todos" = "आवाज़ कार्य";
+"Tap the microphone and speak your todos" = "माइक्रोफ़ोन टैप करें और अपने कार्य बोलें";
+"Your spoken todos will appear here" = "आपके बोले गए कार्य यहां दिखाई देंगे";
+"Tips:" = "सुझाव:";
+"Speak each task clearly. Separate tasks with phrases like 'next' or pause between items." = "प्रत्येक कार्य स्पष्ट रूप से बोलें। 'अगला' जैसे शब्दों से कार्यों को अलग करें या आइटम के बीच रुकें।";
+
+// MARK: - Meetings / Calendar
+"Get instant notes from your" = "अपने";
+"Gmeet" = "Gmeet";
+"Teams" = "Teams";
+"Zoom" = "Zoom";
+"calls." = "कॉल से तुरंत नोट्स प्राप्त करें।";
+"Connect your calendar and decide which meetings you want to record" = "अपना कैलेंडर कनेक्ट करें और तय करें कि कौन सी मीटिंग रिकॉर्ड करनी हैं";
+"Learn more" = "और जानें";
+"Calendar Connected" = "कैलेंडर कनेक्टेड";
+"Syncing" = "सिंक हो रहा है";
+"Toggle on meetings you want to auto-record. Manage calendars in Settings." = "जिन मीटिंग को ऑटो-रिकॉर्ड करना चाहते हैं उन्हें चालू करें। सेटिंग्स में कैलेंडर प्रबंधित करें।";
+"Upcoming Meetings" = "आगामी मीटिंग्स";
+"Next 14 days" = "अगले 14 दिन";
+"No upcoming meetings with video calls" = "वीडियो कॉल वाली कोई आगामी मीटिंग नहीं";
+"Meetings with Zoom, Google Meet, or Teams links will appear here" = "Zoom, Google Meet या Teams लिंक वाली मीटिंग यहां दिखाई देंगी";
+"No upcoming meetings" = "कोई आगामी मीटिंग नहीं";
+"Auto-record this meeting" = "इस मीटिंग को ऑटो-रिकॉर्ड करें";
+"Bot will join and transcribe" = "बॉट जॉइन करेगा और ट्रांसक्राइब करेगा";
+"Connect" = "कनेक्ट करें";
+
+// MARK: - Join Meeting
+"Join a Meeting" = "मीटिंग में शामिल हों";
+"Paste your meeting link and our bot will join to record and transcribe" = "अपना मीटिंग लिंक पेस्ट करें और हमारा बॉट रिकॉर्ड और ट्रांसक्राइब करने के लिए जॉइन करेगा";
+"Meeting URL" = "मीटिंग URL";
+"Please enter a valid meeting URL" = "कृपया एक वैध मीटिंग URL दर्ज करें";
+"Bot Name" = "बॉट का नाम";
+"(Optional)" = "(वैकल्पिक)";
+"This name will appear in the meeting participant list" = "यह नाम मीटिंग प्रतिभागी सूची में दिखाई देगा";
+"%@ detected" = "%@ पहचाना गया";
+"Joining..." = "जॉइन हो रहा है...";
+"Join Meeting" = "मीटिंग में शामिल हों";
+"Supported Platforms" = "समर्थित प्लेटफॉर्म";
+"Meet" = "Meet";
+"Webex" = "Webex";
+"Bot Joining" = "बॉट जॉइन हो रहा है";
+"View Recording" = "रिकॉर्डिंग देखें";
+"The bot is joining your %@. You can track the recording progress in real-time." = "बॉट आपके %@ में जॉइन हो रहा है। आप रीयल-टाइम में रिकॉर्डिंग प्रगति ट्रैक कर सकते हैं।";
+"The bot is joining your meeting. You can track the recording progress in real-time." = "बॉट आपकी मीटिंग में जॉइन हो रहा है। आप रीयल-टाइम में रिकॉर्डिंग प्रगति ट्रैक कर सकते हैं।";
+
+// MARK: - Phone
+"History" = "इतिहास";
+"Dialer" = "डायलर";
+"Calls" = "कॉल";
+"Verify Your Phone" = "अपना फ़ोन सत्यापित करें";
+"To make calls through the app, you need to verify your phone number first. We'll call you with a verification code." = "ऐप के माध्यम से कॉल करने के लिए, आपको पहले अपना फ़ोन नंबर सत्यापित करना होगा। हम आपको सत्यापन कोड के साथ कॉल करेंगे।";
+"Verify Phone Number" = "फ़ोन नंबर सत्यापित करें";
+"No calls yet" = "अभी तक कोई कॉल नहीं";
+"Make a call using the dialer to get started" = "शुरू करने के लिए डायलर से कॉल करें";
+"Phone number" = "फ़ोन नंबर";
+"Contact name (optional)" = "संपर्क नाम (वैकल्पिक)";
+"Calling from:" = "कॉल कर रहे हैं:";
+"Enter phone number" = "फ़ोन नंबर दर्ज करें";
+"Verify phone to make calls" = "कॉल करने के लिए फ़ोन सत्यापित करें";
+"All calls are recorded" = "सभी कॉल रिकॉर्ड की जाती हैं";
+"Recording Notice" = "रिकॉर्डिंग सूचना";
+"Start Call" = "कॉल शुरू करें";
+"This call will be automatically recorded for transcription.\n\nA recording notification will be played to the other party.\n\nPlease ensure recording is legal in your jurisdiction." = "यह कॉल ट्रांसक्रिप्शन के लिए स्वचालित रूप से रिकॉर्ड की जाएगी।\n\nदूसरे पक्ष को रिकॉर्डिंग सूचना दी जाएगी।\n\nकृपया सुनिश्चित करें कि आपके क्षेत्र में रिकॉर्डिंग कानूनी है।";
+"Add Phone Number" = "फ़ोन नंबर जोड़ें";
+"Verified Numbers" = "सत्यापित नंबर";
+"Phone calls are placed through your verified number. Recordings are transcribed and saved to your recordings." = "फ़ोन कॉल आपके सत्यापित नंबर से की जाती हैं। रिकॉर्डिंग ट्रांसक्राइब की जाती हैं और आपकी रिकॉर्डिंग में सहेजी जाती हैं।";
+"We'll call you and read your verification code" = "हम आपको कॉल करेंगे और आपका सत्यापन कोड बताएंगे";
+"Call Me" = "मुझे कॉल करें";
+"Calling %@..." = "%@ को कॉल कर रहे हैं...";
+"Answer the call to hear your code" = "अपना कोड सुनने के लिए कॉल उठाएं";
+"6-digit code" = "6-अंकीय कोड";
+"Verify" = "सत्यापित करें";
+"Resend code" = "कोड पुनः भेजें";
+"Phone Verified!" = "फ़ोन सत्यापित!";
+"Loading calls..." = "कॉल लोड हो रहे हैं...";
+"Recording" = "रिकॉर्डिंग";
+"Unknown" = "अज्ञात";
+"Connecting..." = "कनेक्ट हो रहा है...";
+"Ringing..." = "रिंग हो रहा है...";
+"Call Ended" = "कॉल समाप्त";
+"Mute" = "म्यूट";
+"Unmute" = "अनम्यूट";
+"Speaker" = "स्पीकर";
+
+// MARK: - FAQ
+"Common Questions or problems" = "सामान्य प्रश्न या समस्याएं";
+"How does Meeting Mind work?" = "Meeting Mind कैसे काम करता है?";
+"Is there a limit on recording time?" = "क्या रिकॉर्डिंग समय की सीमा है?";
+"Are my recordings private?" = "क्या मेरी रिकॉर्डिंग निजी हैं?";
+"How accurate are the transcriptions?" = "ट्रांसक्रिप्शन कितने सटीक हैं?";
+"Can I use it to record online meetings?" = "क्या मैं इसका उपयोग ऑनलाइन मीटिंग रिकॉर्ड करने के लिए कर सकता हूं?";
+"Can I use Meeting Mind while using other apps or with my screen off?" = "क्या मैं अन्य ऐप्स का उपयोग करते हुए या स्क्रीन बंद होने पर Meeting Mind का उपयोग कर सकता हूं?";
+"Can I access Meeting Mind on multiple devices?" = "क्या मैं कई डिवाइस पर Meeting Mind एक्सेस कर सकता हूं?";
+"Can I record multiple languages?" = "क्या मैं कई भाषाओं में रिकॉर्ड कर सकता हूं?";
+"How do I export my recordings?" = "मैं अपनी रिकॉर्डिंग कैसे एक्सपोर्ट करूं?";
+"What happens if I cancel my subscription?" = "अगर मैं अपनी सदस्यता रद्द कर दूं तो क्या होगा?";
+"Having issues with your subscription?" = "अपनी सदस्यता में समस्या है?";
+"Restore Purchase" = "खरीदारी पुनर्स्थापित करें";
+
+// MARK: - Live Transcript
+"Live Transcript" = "लाइव ट्रांसक्रिप्ट";
+"Speaker %@" = "वक्ता %@";

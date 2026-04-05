@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Meeting Mind</string>
+
+    <!-- Auth -->
+    <string name="sign_in">Đăng nhập</string>
+    <string name="sign_up">Đăng ký</string>
+    <string name="sign_out">Đăng xuất</string>
+    <string name="continue_with_google">Tiếp tục với Google</string>
+    <string name="continue_with_email">Tiếp tục với Email</string>
+    <string name="email">Email</string>
+    <string name="password">Mật khẩu</string>
+    <string name="forgot_password">Quên mật khẩu?</string>
+    <string name="auth_tagline">Ghi âm, Phiên âm, Tóm tắt</string>
+    <string name="or_divider">hoặc</string>
+    <string name="hide_password">Ẩn mật khẩu</string>
+    <string name="show_password">Hiển thị mật khẩu</string>
+    <string name="create_account">Tạo tài khoản</string>
+    <string name="already_have_account">Đã có tài khoản? Đăng nhập</string>
+    <string name="dont_have_account">Chưa có tài khoản? Tạo tài khoản</string>
+    <string name="auth_terms_notice">Bằng cách tiếp tục, bạn đồng ý với Điều khoản dịch vụ và Chính sách bảo mật của chúng tôi</string>
+
+    <!-- Navigation -->
+    <string name="recordings">Bản ghi</string>
+    <string name="todos">Công việc</string>
+    <string name="meetings">Cuộc họp</string>
+    <string name="settings">Cài đặt</string>
+    <string name="search">Tìm kiếm</string>
+    <string name="record">Ghi âm</string>
+    <string name="calendar">Lịch</string>
+    <string name="phone">Điện thoại</string>
+
+    <!-- Recording -->
+    <string name="start_recording">Bắt đầu ghi âm</string>
+    <string name="stop_recording">Dừng ghi âm</string>
+    <string name="pause_recording">Tạm dừng ghi âm</string>
+    <string name="resume_recording">Tiếp tục ghi âm</string>
+    <string name="recording_in_progress">Đang ghi âm</string>
+    <string name="recording_title">Tiêu đề bản ghi</string>
+    <string name="untitled_recording">Bản ghi chưa đặt tên</string>
+    <string name="microphone_permission_rationale">Chúng tôi cần quyền truy cập micrô để ghi âm. Vui lòng cấp quyền trong cài đặt.</string>
+    <string name="grant_permission">Cấp quyền</string>
+    <string name="tap_to_start_recording">Nhấn để bắt đầu ghi âm</string>
+    <string name="enter_title">Nhập tiêu đề</string>
+    <string name="ready_to_record">Sẵn sàng ghi âm</string>
+    <string name="recording_state_paused">TẠM DỪNG</string>
+    <string name="recording_state_recording">ĐANG GHI</string>
+    <string name="uploading">Đang tải lên…</string>
+
+    <!-- Recordings List -->
+    <string name="all">Tất cả</string>
+    <string name="processing">Đang xử lý</string>
+    <string name="completed">Hoàn thành</string>
+    <string name="no_recordings">Chưa có bản ghi nào</string>
+    <string name="no_recordings_subtitle">Nhấn nút micrô để bắt đầu bản ghi đầu tiên</string>
+    <string name="favorites">Yêu thích</string>
+    <string name="imported">Đã nhập</string>
+    <string name="new_summary">Tóm tắt mới</string>
+    <string name="favorite">Yêu thích</string>
+    <string name="more_options">Thêm tùy chọn</string>
+    <string name="add_to_favorites">Thêm vào yêu thích</string>
+    <string name="remove_from_favorites">Xóa khỏi yêu thích</string>
+    <string name="delete_recording">Xóa bản ghi</string>
+    <string name="delete_recording_confirm">Bạn có chắc muốn xóa \"%s\" không? Hành động này không thể hoàn tác.</string>
+    <string name="failed">Thất bại</string>
+    <string name="refresh">Làm mới</string>
+
+    <!-- Recording Detail -->
+    <string name="transcript">Bản phiên âm</string>
+    <string name="summary">Tóm tắt</string>
+    <string name="action_items">Công việc</string>
+    <string name="ask_a_question">Đặt câu hỏi…</string>
+    <string name="export">Xuất</string>
+    <string name="share">Chia sẻ</string>
+    <string name="delete">Xóa</string>
+    <string name="recording_fallback">Bản ghi</string>
+    <string name="back">Quay lại</string>
+    <string name="more">Thêm</string>
+    <string name="delete_recording_confirm_generic">Bạn có chắc muốn xóa bản ghi này không? Hành động này không thể hoàn tác.</string>
+    <string name="rewind_10s">Tua lại 10 giây</string>
+    <string name="play">Phát</string>
+    <string name="pause">Tạm dừng</string>
+    <string name="forward_10s">Tua tới 10 giây</string>
+    <string name="chat">Trò chuyện</string>
+    <string name="overview">Tổng quan</string>
+    <string name="summary_not_available">Tóm tắt chưa có sẵn</string>
+    <string name="chat_welcome_message">Xin chào! Tôi có thể trả lời gì về bản ghi của bạn?</string>
+    <string name="suggested_question_key_points">Điểm chính trong cuộc họp</string>
+    <string name="suggested_question_key_points_full">Các điểm chính được thảo luận trong cuộc họp này là gì?</string>
+    <string name="suggested_question_action_items">Công việc chính</string>
+    <string name="suggested_question_action_items_full">Các công việc chính từ bản ghi này là gì?</string>
+    <string name="suggested_question_followup_email">Soạn email theo dõi</string>
+    <string name="suggested_question_followup_email_full">Soạn email theo dõi dựa trên cuộc họp này</string>
+    <string name="chat_sender_you">Bạn</string>
+    <string name="chat_sender_ai">Trợ lý AI</string>
+    <string name="no_answer">Không có câu trả lời</string>
+    <string name="chat_placeholder">Hỏi bất cứ điều gì về ghi chú này</string>
+    <string name="voice_input">Nhập bằng giọng nói</string>
+    <string name="send">Gửi</string>
+    <string name="transcript_not_available">Bản phiên âm chưa có sẵn</string>
+    <string name="live_label">Trực tiếp</string>
+    <string name="full_label">Đầy đủ</string>
+
+    <!-- Todos -->
+    <string name="add_todo">Thêm công việc</string>
+    <string name="todo_title">Tiêu đề</string>
+    <string name="todo_notes">Ghi chú</string>
+    <string name="due_date">Ngày đến hạn</string>
+    <string name="priority">Ưu tiên</string>
+    <string name="high">Cao</string>
+    <string name="medium">Trung bình</string>
+    <string name="low">Thấp</string>
+    <string name="none">Không có</string>
+    <string name="pending_items">Đang chờ</string>
+    <string name="completed_items">Đã hoàn thành</string>
+    <string name="no_action_items">Chưa có công việc nào</string>
+    <string name="no_pending_items">Không có công việc đang chờ</string>
+    <string name="no_completed_items">Không có công việc đã hoàn thành</string>
+    <string name="action_items_empty_hint">Công việc từ bản ghi của bạn sẽ xuất hiện ở đây</string>
+    <string name="view_recording">Xem bản ghi</string>
+    <string name="add">Thêm</string>
+
+    <!-- Meetings -->
+    <string name="upcoming_meetings">Cuộc họp sắp tới</string>
+    <string name="past_meetings">Cuộc họp đã qua</string>
+    <string name="join_meeting">Tham gia cuộc họp</string>
+    <string name="meeting_url">URL cuộc họp</string>
+    <string name="paste_meeting_link">Dán liên kết cuộc họp của bạn ở đây</string>
+    <string name="send_bot">Gửi bot vào cuộc họp</string>
+    <string name="auto_join">Tự động tham gia</string>
+    <string name="upcoming">Sắp tới</string>
+    <string name="calendar_connected">Đã kết nối lịch</string>
+    <string name="connect_calendar_desc">Đồng bộ cuộc họp và bật ghi âm tự động</string>
+    <string name="auto_record">Ghi âm tự động</string>
+    <string name="no_upcoming_meetings">Không có cuộc họp sắp tới</string>
+    <string name="meetings_empty_hint">Các cuộc họp từ lịch của bạn sẽ xuất hiện ở đây</string>
+    <string name="now">Bây giờ</string>
+    <string name="join">Tham gia</string>
+    <string name="join_meeting_desc">Dán liên kết cuộc họp và bot của chúng tôi sẽ tham gia để ghi âm và phiên âm</string>
+    <string name="meeting_url_placeholder">https://zoom.us/j/123456789</string>
+    <string name="bot_name">Tên bot</string>
+    <string name="optional">(Tùy chọn)</string>
+    <string name="bot_name_hint">Tên này sẽ xuất hiện trong danh sách người tham gia cuộc họp</string>
+    <string name="supported_platforms">Nền tảng được hỗ trợ</string>
+
+    <!-- Calendar -->
+    <string name="connect_calendar">Kết nối lịch</string>
+    <string name="google_calendar">Google Calendar</string>
+    <string name="microsoft_outlook">Microsoft Outlook</string>
+    <string name="disconnect">Ngắt kết nối</string>
+    <string name="connected">Đã kết nối</string>
+    <string name="calendar_integration">Tích hợp lịch</string>
+    <string name="calendar_integration_desc">Kết nối lịch của bạn để tự động xem các cuộc họp sắp tới và lên lịch ghi âm bằng bot.</string>
+    <string name="disconnect_calendar_title">Ngắt kết nối %s</string>
+    <string name="disconnect_calendar_desc">Sẽ ngừng đồng bộ cuộc họp từ lịch này. Bạn có thể kết nối lại bất cứ lúc nào.</string>
+    <string name="connect">Kết nối</string>
+
+    <!-- Settings -->
+    <string name="account">Tài khoản</string>
+    <string name="integrations">Tích hợp</string>
+    <string name="legal">Pháp lý</string>
+    <string name="about">Giới thiệu</string>
+    <string name="privacy_policy">Chính sách bảo mật</string>
+    <string name="terms_of_service">Điều khoản dịch vụ</string>
+    <string name="version">Phiên bản</string>
+    <string name="build">Bản dựng</string>
+    <string name="help_faq">Trợ giúp &amp; Câu hỏi thường gặp</string>
+    <string name="contact_us">Liên hệ</string>
+    <string name="appearance">Giao diện</string>
+    <string name="calendar_sync_subtitle">Đồng bộ cuộc họp của bạn</string>
+    <string name="sign_out_confirm">Bạn có chắc muốn đăng xuất không?</string>
+    <string name="via_provider">qua %s</string>
+    <string name="theme_light">Sáng</string>
+    <string name="theme_light_subtitle">Luôn dùng giao diện sáng</string>
+    <string name="theme_dark">Tối</string>
+    <string name="theme_dark_subtitle">Luôn dùng giao diện tối</string>
+    <string name="theme_system">Hệ thống</string>
+    <string name="theme_system_subtitle">Theo cài đặt hệ thống</string>
+    <string name="selected">Đã chọn</string>
+    <string name="delete_account">Xóa tài khoản</string>
+    <string name="delete_account_warning">Tài khoản và tất cả bản ghi của bạn sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác.</string>
+
+    <!-- Subscription -->
+    <string name="upgrade_to_pro">Nâng cấp lên Pro</string>
+    <string name="pro">PRO</string>
+    <string name="free">Miễn phí</string>
+    <string name="restore_purchases">Khôi phục giao dịch mua</string>
+    <string name="monthly">Hàng tháng</string>
+    <string name="yearly">Hàng năm</string>
+    <string name="per_month">/tháng</string>
+    <string name="per_year">/năm</string>
+
+    <!-- Export -->
+    <string name="export_pdf">Xuất dạng PDF</string>
+    <string name="export_text">Xuất dạng văn bản</string>
+    <string name="export_markdown">Xuất dạng Markdown</string>
+
+    <!-- Service Descriptions -->
+    <string name="service_description_recording">Ghi âm trong cuộc họp và cuộc gọi điện thoại để phiên âm</string>
+    <string name="service_description_playback">Phát lại các cuộc họp và cuộc gọi đã ghi trong nền</string>
+
+    <!-- Errors -->
+    <string name="error">Lỗi</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Hủy</string>
+    <string name="retry">Thử lại</string>
+    <string name="something_went_wrong">Đã xảy ra lỗi</string>
+    <string name="no_internet">Không có kết nối internet</string>
+    <string name="permission_required">Cần cấp quyền</string>
+    <string name="microphone_permission_required">Cần quyền micrô để ghi âm</string>
+    <string name="notification_permission_required">Cần quyền thông báo để ghi âm nền</string>
+    <string name="demo_mode_message">Lưu bản ghi cần đăng nhập bằng Google. Vui lòng đăng xuất và đăng nhập bằng tài khoản Google để lưu bản ghi.</string>
+    <string name="error_recording_file_not_found">Không tìm thấy tệp bản ghi</string>
+    <string name="error_upload_failed">Tải lên thất bại</string>
+    <string name="error_qa_failed">Xin lỗi, tôi không thể trả lời câu hỏi đó. Vui lòng thử lại.</string>
+    <string name="error_join_meeting_failed">Không thể tham gia cuộc họp</string>
+    <string name="error_load_phones_failed">Không thể tải điện thoại</string>
+    <string name="error_load_calls_failed">Không thể tải cuộc gọi</string>
+    <string name="error_enter_phone_number">Vui lòng nhập số điện thoại</string>
+    <string name="error_enter_six_digit_code">Vui lòng nhập mã 6 chữ số</string>
+    <string name="error_invalid_verification_code">Mã xác minh không hợp lệ</string>
+    <string name="error_verify_phone_first">Vui lòng xác minh số điện thoại trước</string>
+    <string name="error_enter_number_to_call">Vui lòng nhập số điện thoại để gọi</string>
+    <string name="error_voip_token_failed">Không thể lấy token VoIP</string>
+    <string name="error_create_call_failed">Không thể tạo cuộc gọi</string>
+    <string name="error_start_voip_call">Không thể bắt đầu cuộc gọi VoIP</string>
+
+    <!-- Onboarding -->
+    <string name="welcome_to_meeting_mind">Chào mừng đến với Meeting Mind</string>
+    <string name="onboarding_recording_title">Ghi âm mọi thứ</string>
+    <string name="onboarding_recording_desc">Ghi lại cuộc họp, bài giảng, phỏng vấn hoặc bất kỳ cuộc trò chuyện nào với âm thanh trong trẻo</string>
+    <string name="onboarding_transcribe_title">Phiên âm bằng AI</string>
+    <string name="onboarding_transcribe_desc">Nhận bản phiên âm chính xác với nhận diện người nói bằng hơn 120 ngôn ngữ</string>
+    <string name="onboarding_summary_title">Tóm tắt thông minh</string>
+    <string name="onboarding_summary_desc">AI tạo bản tóm tắt ngắn gọn với các điểm chính và công việc cần làm</string>
+    <string name="onboarding_qa_title">Đặt câu hỏi</string>
+    <string name="onboarding_qa_desc">Trò chuyện với bản ghi để tìm thông tin cụ thể ngay lập tức</string>
+    <string name="get_started">Bắt đầu</string>
+    <string name="next">Tiếp theo</string>
+    <string name="skip">Bỏ qua</string>
+
+    <!-- Search -->
+    <string name="clear">Xóa</string>
+    <string name="search_prompt">Tìm kiếm bản ghi của bạn</string>
+    <string name="search_hint">Tìm theo tiêu đề, nội dung phiên âm hoặc chủ đề</string>
+    <string name="no_results">Không tìm thấy kết quả</string>
+    <string name="no_results_for_query">Không có bản ghi nào khớp với \"%s\"</string>
+
+    <!-- Phone -->
+    <string name="calls">Cuộc gọi</string>
+    <string name="dialer">Bàn phím</string>
+
+    <!-- Live Transcript -->
+    <string name="waiting_for_transcript">Đang chờ bản phiên âm…</string>
+    <string name="live_transcript_hint">Bản phiên âm trực tiếp sẽ xuất hiện ở đây khi phát hiện giọng nói</string>
+    <string name="live_indicator">TRỰC TIẾP</string>
+    <string name="host">Chủ trì</string>
+
+    <!-- Language Picker -->
+    <string name="language">Ngôn ngữ</string>
+    <string name="language_picker_title">Chọn ngôn ngữ</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese">中文(简体)</string>
+    <string name="language_korean">한국어</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_hindi">हिन्दी</string>
+</resources>

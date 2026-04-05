@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Meeting Mind</string>
+
+    <!-- Auth -->
+    <string name="sign_in">เข้าสู่ระบบ</string>
+    <string name="sign_up">สมัครสมาชิก</string>
+    <string name="sign_out">ออกจากระบบ</string>
+    <string name="continue_with_google">ดำเนินการต่อด้วย Google</string>
+    <string name="continue_with_email">ดำเนินการต่อด้วยอีเมล</string>
+    <string name="email">อีเมล</string>
+    <string name="password">รหัสผ่าน</string>
+    <string name="forgot_password">ลืมรหัสผ่าน?</string>
+    <string name="auth_tagline">บันทึก, ถอดเสียง, สรุป</string>
+    <string name="or_divider">หรือ</string>
+    <string name="hide_password">ซ่อนรหัสผ่าน</string>
+    <string name="show_password">แสดงรหัสผ่าน</string>
+    <string name="create_account">สร้างบัญชี</string>
+    <string name="already_have_account">มีบัญชีแล้ว? เข้าสู่ระบบ</string>
+    <string name="dont_have_account">ยังไม่มีบัญชี? สร้างบัญชี</string>
+    <string name="auth_terms_notice">เมื่อดำเนินการต่อ คุณยอมรับข้อกำหนดการให้บริการและนโยบายความเป็นส่วนตัวของเรา</string>
+
+    <!-- Navigation -->
+    <string name="recordings">การบันทึก</string>
+    <string name="todos">รายการสิ่งที่ต้องทำ</string>
+    <string name="meetings">การประชุม</string>
+    <string name="settings">การตั้งค่า</string>
+    <string name="search">ค้นหา</string>
+    <string name="record">บันทึก</string>
+    <string name="calendar">ปฏิทิน</string>
+    <string name="phone">โทรศัพท์</string>
+
+    <!-- Recording -->
+    <string name="start_recording">เริ่มบันทึก</string>
+    <string name="stop_recording">หยุดบันทึก</string>
+    <string name="pause_recording">หยุดชั่วคราว</string>
+    <string name="resume_recording">บันทึกต่อ</string>
+    <string name="recording_in_progress">กำลังบันทึก</string>
+    <string name="recording_title">ชื่อการบันทึก</string>
+    <string name="untitled_recording">การบันทึกไม่มีชื่อ</string>
+    <string name="microphone_permission_rationale">เราต้องการสิทธิ์เข้าถึงไมโครโฟนเพื่อบันทึกเสียง กรุณาให้สิทธิ์ในการตั้งค่า</string>
+    <string name="grant_permission">ให้สิทธิ์</string>
+    <string name="tap_to_start_recording">แตะเพื่อเริ่มบันทึก</string>
+    <string name="enter_title">ป้อนชื่อ</string>
+    <string name="ready_to_record">พร้อมบันทึก</string>
+    <string name="recording_state_paused">หยุดชั่วคราว</string>
+    <string name="recording_state_recording">กำลังบันทึก</string>
+    <string name="uploading">กำลังอัปโหลด…</string>
+
+    <!-- Recordings List -->
+    <string name="all">ทั้งหมด</string>
+    <string name="processing">กำลังประมวลผล</string>
+    <string name="completed">เสร็จสิ้น</string>
+    <string name="no_recordings">ยังไม่มีการบันทึก</string>
+    <string name="no_recordings_subtitle">แตะปุ่มไมโครโฟนเพื่อเริ่มการบันทึกแรกของคุณ</string>
+    <string name="favorites">รายการโปรด</string>
+    <string name="imported">นำเข้าแล้ว</string>
+    <string name="new_summary">สรุปใหม่</string>
+    <string name="favorite">รายการโปรด</string>
+    <string name="more_options">ตัวเลือกเพิ่มเติม</string>
+    <string name="add_to_favorites">เพิ่มในรายการโปรด</string>
+    <string name="remove_from_favorites">ลบออกจากรายการโปรด</string>
+    <string name="delete_recording">ลบการบันทึก</string>
+    <string name="delete_recording_confirm">คุณแน่ใจหรือไม่ว่าต้องการลบ \"%s\"? การดำเนินการนี้ไม่สามารถยกเลิกได้</string>
+    <string name="failed">ล้มเหลว</string>
+    <string name="refresh">รีเฟรช</string>
+
+    <!-- Recording Detail -->
+    <string name="transcript">บทถอดเสียง</string>
+    <string name="summary">สรุป</string>
+    <string name="action_items">รายการสิ่งที่ต้องทำ</string>
+    <string name="ask_a_question">ถามคำถาม…</string>
+    <string name="export">ส่งออก</string>
+    <string name="share">แชร์</string>
+    <string name="delete">ลบ</string>
+    <string name="recording_fallback">การบันทึก</string>
+    <string name="back">กลับ</string>
+    <string name="more">เพิ่มเติม</string>
+    <string name="delete_recording_confirm_generic">คุณแน่ใจหรือไม่ว่าต้องการลบการบันทึกนี้? การดำเนินการนี้ไม่สามารถยกเลิกได้</string>
+    <string name="rewind_10s">ย้อนกลับ 10 วินาที</string>
+    <string name="play">เล่น</string>
+    <string name="pause">หยุดชั่วคราว</string>
+    <string name="forward_10s">เดินหน้า 10 วินาที</string>
+    <string name="chat">แชท</string>
+    <string name="overview">ภาพรวม</string>
+    <string name="summary_not_available">ยังไม่มีสรุป</string>
+    <string name="chat_welcome_message">สวัสดี! มีอะไรที่ฉันสามารถตอบเกี่ยวกับการบันทึกของคุณ?</string>
+    <string name="suggested_question_key_points">ประเด็นสำคัญในการประชุม</string>
+    <string name="suggested_question_key_points_full">ประเด็นสำคัญที่หารือในการประชุมนี้มีอะไรบ้าง?</string>
+    <string name="suggested_question_action_items">รายการสิ่งที่ต้องทำหลัก</string>
+    <string name="suggested_question_action_items_full">รายการสิ่งที่ต้องทำหลักจากการบันทึกนี้มีอะไรบ้าง?</string>
+    <string name="suggested_question_followup_email">ร่างอีเมลติดตาม</string>
+    <string name="suggested_question_followup_email_full">ร่างอีเมลติดตามจากการประชุมนี้</string>
+    <string name="chat_sender_you">คุณ</string>
+    <string name="chat_sender_ai">ผู้ช่วย AI</string>
+    <string name="no_answer">ไม่มีคำตอบ</string>
+    <string name="chat_placeholder">ถามอะไรก็ได้เกี่ยวกับบันทึกนี้</string>
+    <string name="voice_input">ป้อนข้อมูลด้วยเสียง</string>
+    <string name="send">ส่ง</string>
+    <string name="transcript_not_available">ยังไม่มีบทถอดเสียง</string>
+    <string name="live_label">สด</string>
+    <string name="full_label">เต็ม</string>
+
+    <!-- Todos -->
+    <string name="add_todo">เพิ่มรายการ</string>
+    <string name="todo_title">ชื่อ</string>
+    <string name="todo_notes">บันทึก</string>
+    <string name="due_date">วันครบกำหนด</string>
+    <string name="priority">ลำดับความสำคัญ</string>
+    <string name="high">สูง</string>
+    <string name="medium">ปานกลาง</string>
+    <string name="low">ต่ำ</string>
+    <string name="none">ไม่มี</string>
+    <string name="pending_items">รอดำเนินการ</string>
+    <string name="completed_items">เสร็จสิ้นแล้ว</string>
+    <string name="no_action_items">ยังไม่มีรายการ</string>
+    <string name="no_pending_items">ไม่มีรายการรอดำเนินการ</string>
+    <string name="no_completed_items">ไม่มีรายการที่เสร็จสิ้น</string>
+    <string name="action_items_empty_hint">รายการสิ่งที่ต้องทำจากการบันทึกของคุณจะปรากฏที่นี่</string>
+    <string name="view_recording">ดูการบันทึก</string>
+    <string name="add">เพิ่ม</string>
+
+    <!-- Meetings -->
+    <string name="upcoming_meetings">การประชุมที่จะมาถึง</string>
+    <string name="past_meetings">การประชุมที่ผ่านมา</string>
+    <string name="join_meeting">เข้าร่วมการประชุม</string>
+    <string name="meeting_url">URL การประชุม</string>
+    <string name="paste_meeting_link">วางลิงก์การประชุมของคุณที่นี่</string>
+    <string name="send_bot">ส่งบอทเข้าร่วมการประชุม</string>
+    <string name="auto_join">เข้าร่วมอัตโนมัติ</string>
+    <string name="upcoming">ที่จะมาถึง</string>
+    <string name="calendar_connected">เชื่อมต่อปฏิทินแล้ว</string>
+    <string name="connect_calendar_desc">ซิงค์การประชุมของคุณและเปิดใช้งานการบันทึกอัตโนมัติ</string>
+    <string name="auto_record">บันทึกอัตโนมัติ</string>
+    <string name="no_upcoming_meetings">ไม่มีการประชุมที่จะมาถึง</string>
+    <string name="meetings_empty_hint">การประชุมจากปฏิทินของคุณจะปรากฏที่นี่</string>
+    <string name="now">ตอนนี้</string>
+    <string name="join">เข้าร่วม</string>
+    <string name="join_meeting_desc">วางลิงก์การประชุมของคุณ แล้วบอทของเราจะเข้าร่วมเพื่อบันทึกและถอดเสียง</string>
+    <string name="meeting_url_placeholder">https://zoom.us/j/123456789</string>
+    <string name="bot_name">ชื่อบอท</string>
+    <string name="optional">(ไม่บังคับ)</string>
+    <string name="bot_name_hint">ชื่อนี้จะปรากฏในรายชื่อผู้เข้าร่วมประชุม</string>
+    <string name="supported_platforms">แพลตฟอร์มที่รองรับ</string>
+
+    <!-- Calendar -->
+    <string name="connect_calendar">เชื่อมต่อปฏิทิน</string>
+    <string name="google_calendar">Google Calendar</string>
+    <string name="microsoft_outlook">Microsoft Outlook</string>
+    <string name="disconnect">ยกเลิกการเชื่อมต่อ</string>
+    <string name="connected">เชื่อมต่อแล้ว</string>
+    <string name="calendar_integration">การเชื่อมต่อปฏิทิน</string>
+    <string name="calendar_integration_desc">เชื่อมต่อปฏิทินของคุณเพื่อดูการประชุมที่จะมาถึงโดยอัตโนมัติและกำหนดการบันทึกของบอท</string>
+    <string name="disconnect_calendar_title">ยกเลิกการเชื่อมต่อ %s</string>
+    <string name="disconnect_calendar_desc">จะหยุดซิงค์การประชุมจากปฏิทินนี้ คุณสามารถเชื่อมต่อใหม่ได้ทุกเมื่อ</string>
+    <string name="connect">เชื่อมต่อ</string>
+
+    <!-- Settings -->
+    <string name="account">บัญชี</string>
+    <string name="integrations">การเชื่อมต่อ</string>
+    <string name="legal">กฎหมาย</string>
+    <string name="about">เกี่ยวกับ</string>
+    <string name="privacy_policy">นโยบายความเป็นส่วนตัว</string>
+    <string name="terms_of_service">ข้อกำหนดการให้บริการ</string>
+    <string name="version">เวอร์ชัน</string>
+    <string name="build">บิลด์</string>
+    <string name="help_faq">ช่วยเหลือ &amp; คำถามที่พบบ่อย</string>
+    <string name="contact_us">ติดต่อเรา</string>
+    <string name="appearance">ลักษณะที่ปรากฏ</string>
+    <string name="calendar_sync_subtitle">ซิงค์การประชุมของคุณ</string>
+    <string name="sign_out_confirm">คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?</string>
+    <string name="via_provider">ผ่าน %s</string>
+    <string name="theme_light">สว่าง</string>
+    <string name="theme_light_subtitle">ใช้ธีมสว่างเสมอ</string>
+    <string name="theme_dark">มืด</string>
+    <string name="theme_dark_subtitle">ใช้ธีมมืดเสมอ</string>
+    <string name="theme_system">ระบบ</string>
+    <string name="theme_system_subtitle">ตามการตั้งค่าระบบ</string>
+    <string name="selected">เลือกแล้ว</string>
+    <string name="delete_account">ลบบัญชี</string>
+    <string name="delete_account_warning">จะลบบัญชีและการบันทึกทั้งหมดของคุณอย่างถาวร การดำเนินการนี้ไม่สามารถยกเลิกได้</string>
+
+    <!-- Subscription -->
+    <string name="upgrade_to_pro">อัปเกรดเป็น Pro</string>
+    <string name="pro">PRO</string>
+    <string name="free">ฟรี</string>
+    <string name="restore_purchases">กู้คืนการซื้อ</string>
+    <string name="monthly">รายเดือน</string>
+    <string name="yearly">รายปี</string>
+    <string name="per_month">/เดือน</string>
+    <string name="per_year">/ปี</string>
+
+    <!-- Export -->
+    <string name="export_pdf">ส่งออกเป็น PDF</string>
+    <string name="export_text">ส่งออกเป็นข้อความ</string>
+    <string name="export_markdown">ส่งออกเป็น Markdown</string>
+
+    <!-- Service Descriptions -->
+    <string name="service_description_recording">บันทึกเสียงระหว่างการประชุมและการโทรเพื่อถอดเสียง</string>
+    <string name="service_description_playback">เล่นการประชุมและการโทรที่บันทึกไว้ในพื้นหลัง</string>
+
+    <!-- Errors -->
+    <string name="error">ข้อผิดพลาด</string>
+    <string name="ok">ตกลง</string>
+    <string name="cancel">ยกเลิก</string>
+    <string name="retry">ลองอีกครั้ง</string>
+    <string name="something_went_wrong">เกิดข้อผิดพลาด</string>
+    <string name="no_internet">ไม่มีการเชื่อมต่ออินเทอร์เน็ต</string>
+    <string name="permission_required">ต้องการสิทธิ์</string>
+    <string name="microphone_permission_required">ต้องการสิทธิ์ไมโครโฟนเพื่อบันทึกเสียง</string>
+    <string name="notification_permission_required">ต้องการสิทธิ์การแจ้งเตือนสำหรับการบันทึกในพื้นหลัง</string>
+    <string name="demo_mode_message">การบันทึกต้องลงชื่อเข้าใช้ด้วย Google กรุณาออกจากระบบและลงชื่อเข้าใช้ด้วยบัญชี Google เพื่อบันทึก</string>
+    <string name="error_recording_file_not_found">ไม่พบไฟล์การบันทึก</string>
+    <string name="error_upload_failed">อัปโหลดล้มเหลว</string>
+    <string name="error_qa_failed">ขอโทษ ฉันไม่สามารถตอบคำถามนั้นได้ กรุณาลองอีกครั้ง</string>
+    <string name="error_join_meeting_failed">เข้าร่วมการประชุมล้มเหลว</string>
+    <string name="error_load_phones_failed">โหลดโทรศัพท์ล้มเหลว</string>
+    <string name="error_load_calls_failed">โหลดการโทรล้มเหลว</string>
+    <string name="error_enter_phone_number">กรุณาป้อนหมายเลขโทรศัพท์</string>
+    <string name="error_enter_six_digit_code">กรุณาป้อนรหัส 6 หลัก</string>
+    <string name="error_invalid_verification_code">รหัสยืนยันไม่ถูกต้อง</string>
+    <string name="error_verify_phone_first">กรุณายืนยันหมายเลขโทรศัพท์ก่อน</string>
+    <string name="error_enter_number_to_call">กรุณาป้อนหมายเลขโทรศัพท์ที่ต้องการโทร</string>
+    <string name="error_voip_token_failed">ไม่สามารถรับโทเค็น VoIP</string>
+    <string name="error_create_call_failed">ไม่สามารถสร้างการโทร</string>
+    <string name="error_start_voip_call">ไม่สามารถเริ่มการโทร VoIP</string>
+
+    <!-- Onboarding -->
+    <string name="welcome_to_meeting_mind">ยินดีต้อนรับสู่ Meeting Mind</string>
+    <string name="onboarding_recording_title">บันทึกทุกอย่าง</string>
+    <string name="onboarding_recording_desc">บันทึกการประชุม บรรยาย สัมภาษณ์ หรือบทสนทนาใดๆ ด้วยเสียงที่คมชัด</string>
+    <string name="onboarding_transcribe_title">การถอดเสียงด้วย AI</string>
+    <string name="onboarding_transcribe_desc">รับบทถอดเสียงที่แม่นยำพร้อมระบุผู้พูดในกว่า 120 ภาษา</string>
+    <string name="onboarding_summary_title">สรุปอัจฉริยะ</string>
+    <string name="onboarding_summary_desc">AI สร้างสรุปที่กระชับพร้อมประเด็นสำคัญและรายการสิ่งที่ต้องทำ</string>
+    <string name="onboarding_qa_title">ถามคำถาม</string>
+    <string name="onboarding_qa_desc">สนทนากับการบันทึกของคุณเพื่อค้นหาข้อมูลเฉพาะได้ทันที</string>
+    <string name="get_started">เริ่มต้นใช้งาน</string>
+    <string name="next">ถัดไป</string>
+    <string name="skip">ข้าม</string>
+
+    <!-- Search -->
+    <string name="clear">ล้าง</string>
+    <string name="search_prompt">ค้นหาการบันทึกของคุณ</string>
+    <string name="search_hint">ค้นหาตามชื่อ เนื้อหาบทถอดเสียง หรือหัวข้อ</string>
+    <string name="no_results">ไม่พบผลลัพธ์</string>
+    <string name="no_results_for_query">ไม่มีการบันทึกที่ตรงกับ \"%s\"</string>
+
+    <!-- Phone -->
+    <string name="calls">การโทร</string>
+    <string name="dialer">แป้นโทร</string>
+
+    <!-- Live Transcript -->
+    <string name="waiting_for_transcript">กำลังรอบทถอดเสียง…</string>
+    <string name="live_transcript_hint">บทถอดเสียงสดจะปรากฏที่นี่เมื่อตรวจพบเสียงพูด</string>
+    <string name="live_indicator">สด</string>
+    <string name="host">ผู้จัด</string>
+
+    <!-- Language Picker -->
+    <string name="language">ภาษา</string>
+    <string name="language_picker_title">เลือกภาษา</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese">中文(简体)</string>
+    <string name="language_korean">한국어</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_hindi">हिन्दी</string>
+</resources>
