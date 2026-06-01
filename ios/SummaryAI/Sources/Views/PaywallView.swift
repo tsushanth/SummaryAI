@@ -130,9 +130,19 @@ struct LegacyPaywallView: View {
 
             // Footer
             VStack(spacing: 8) {
-                Text("Cancel anytime. No commitment.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                // Auto-renewal disclosure (required by App Store Review Guidelines)
+                let selectedProduct = store.paywallProducts.first { $0.id == selectedProductId }
+                if let product = selectedProduct, let trialDays = product.trialDays {
+                    Text("After your \(trialDays)-day free trial, you will automatically be charged \(product.localizedPrice)/\(product.period.rawValue). Subscription auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in App Store Settings.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                } else {
+                    Text("Subscription auto-renews at the end of each period unless cancelled at least 24 hours before. Manage or cancel anytime in App Store Settings.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
 
                 HStack(spacing: 16) {
                     Link("Terms", destination: URL(string: "https://kreativekoala.llc/terms")!)
@@ -165,11 +175,22 @@ struct LegacyPaywallView: View {
 
         AnalyticsService.shared.logSubscriptionStarted(productId: productId)
 
+        // Look up actual price from loaded products
+        let product = store.paywallProducts.first { $0.id == productId }
+        let price = Double(truncating: (product?.price ?? 0) as NSDecimalNumber)
+        let currency = product?.currencyCode ?? "USD"
+
         let result = await store.purchase(productId: productId)
         switch result {
         case .purchased:
             await PremiumManager.shared.validateSubscriptionState()
             AnalyticsService.shared.setSubscriptionStatus(true)
+            AnalyticsService.shared.logSubscriptionCompleted(productId: productId, price: price, currency: currency)
+            FacebookSDKHelper.shared.logSubscription(price: price, currency: currency, productId: productId)
+            // Log trial start if this product has a free trial
+            if product?.trialDays != nil {
+                FacebookSDKHelper.shared.logTrialStarted(productId: productId)
+            }
             hasCompletedPaywall = true
             dismiss()
         case .cancelled:
@@ -251,24 +272,26 @@ private struct PlanRow: View {
                         }
                     }
 
-                    if let subtitle = subtitle {
-                        Text(subtitle)
-                            .font(.caption)
-                            .foregroundColor(.green)
-                    }
                 }
 
                 Spacer()
 
-                // Price
-                HStack(spacing: 2) {
-                    Text(price)
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-                    Text(period)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                // Price — billed amount must be most prominent
+                VStack(alignment: .trailing, spacing: 2) {
+                    HStack(spacing: 2) {
+                        Text(price)
+                            .font(.body)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                        Text(period)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    if let subtitle = subtitle {
+                        Text(subtitle)
+                            .font(.caption2)
+                            .foregroundColor(.green)
+                    }
                 }
             }
             .padding(.horizontal, 14)
