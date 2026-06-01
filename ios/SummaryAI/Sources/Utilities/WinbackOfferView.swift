@@ -113,13 +113,12 @@ struct WinbackOfferView: View {
                                     .tint(.white)
                             } else {
                                 VStack(spacing: 2) {
-                                    Text("Start Free Trial")
-                                        .font(.system(size: 18, weight: .bold))
                                     if let yearly = yearlyProduct {
-                                        Text("then \(yearly.localizedPrice)/year")
-                                            .font(.system(size: 13))
-                                            .opacity(0.85)
+                                        Text("\(yearly.localizedPrice)/year")
+                                            .font(.system(size: 18, weight: .bold))
                                     }
+                                    Text("Start with Free Trial")
+                                        .font(.system(size: 13))
                                 }
                             }
                         }
@@ -147,7 +146,18 @@ struct WinbackOfferView: View {
                             .font(.system(size: 15, weight: .medium))
                             .foregroundColor(.secondary)
                     }
-                    .padding(.bottom, 40)
+                    .padding(.bottom, 8)
+
+                    // Auto-renewal disclosure (required by App Store Review Guidelines)
+                    if let yearly = yearlyProduct {
+                        let trialText = yearly.trialDays.map { "After your \(/bin/zsh)-day free trial, " } ?? ""
+                        Text("\(trialText)you will automatically be charged \(yearly.localizedPrice)/year. Subscription auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in App Store Settings.")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 24)
+                            .padding(.bottom, 24)
+                    }
                 }
             }
         }
@@ -175,10 +185,15 @@ struct WinbackOfferView: View {
         isPurchasing = true
         defer { isPurchasing = false }
 
+        let price = Double(truncating: yearly.price as NSDecimalNumber)
+        let currency = yearly.currencyCode
+
         let result = await store.purchase(productId: yearly.id)
         switch result {
         case .purchased:
             await PremiumManager.shared.validateSubscriptionState()
+            AnalyticsService.shared.logSubscriptionCompleted(productId: yearly.id, price: price, currency: currency)
+            FacebookSDKHelper.shared.logSubscription(price: price, currency: currency, productId: yearly.id)
             dismiss()
         case .cancelled:
             break
