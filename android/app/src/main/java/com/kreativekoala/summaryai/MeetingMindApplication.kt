@@ -1,17 +1,17 @@
 package com.kreativekoala.summaryai
 
 import android.app.Application
-import com.revenuecat.purchases.LogLevel
-import com.revenuecat.purchases.Purchases
-import com.revenuecat.purchases.PurchasesConfiguration
+import com.kreativekoala.summaryai.service.FacebookSDKHelper
 import com.kreativekoala.summaryai.service.FirebaseAnalyticsHelper
 import com.kreativekoala.summaryai.service.TikTokHelper
 import com.kreativekoala.paywallkit.manager.ExperimentManager
+import com.kreativekoala.paywallkit.manager.PaywallManager
+import com.kreativekoala.paywallkit.manager.PromoCodeManager
+import com.kreativekoala.ratingkit.RatingKit
 import dagger.hilt.android.HiltAndroidApp
 
 /**
  * Main Application class for Meeting Mind
- * Annotated with @HiltAndroidApp to trigger Hilt's code generation
  */
 @HiltAndroidApp
 class MeetingMindApplication : Application() {
@@ -21,28 +21,20 @@ class MeetingMindApplication : Application() {
 
         // Initialize PaywallKit experiment manager
         ExperimentManager.init(this)
-
-        // Initialize RevenueCat for in-app purchases
-        configureRevenueCat()
+        PromoCodeManager.init(this)
+        // Restore captured user email so subsequent paywall events auto-attach it.
+        PaywallManager.restoreUserEmail(this)
 
         // Initialize Firebase Analytics for Google Ads conversion tracking
         FirebaseAnalyticsHelper.initialize(this)
 
         // Initialize TikTok Events SDK for install attribution
         TikTokHelper.initialize(this)
-    }
 
-    private fun configureRevenueCat() {
-        // Enable debug logs in debug builds
-        Purchases.logLevel = if (BuildConfig.DEBUG) LogLevel.DEBUG else LogLevel.WARN
+        // Initialize Facebook SDK for Meta Ads attribution
+        FacebookSDKHelper.initialize(this)
 
-        val apiKey = "goog_WycDXwagKtRThrBBPbEYZWFDTmd"
-
-        Purchases.configure(
-            PurchasesConfiguration.Builder(this, apiKey)
-                .build()
-        )
-
-        android.util.Log.d("MeetingMindApp", "RevenueCat configured")
+        // Initialize RatingKit (Play In-App Review)
+        RatingKit.init(this, appId = "meetingmind")
     }
 }

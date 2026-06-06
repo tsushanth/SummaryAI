@@ -444,6 +444,12 @@ class PhoneViewModel @Inject constructor(
             return
         }
 
+        val digitCount = dialerNumber.filter { it.isDigit() }.length
+        if (digitCount < 10) {
+            _uiState.value = _uiState.value.copy(error = "Please enter a complete 10-digit phone number")
+            return
+        }
+
         viewModelScope.launch {
             // Dismiss consent dialog and set call state to initiating
             _uiState.value = _uiState.value.copy(

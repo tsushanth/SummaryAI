@@ -1,215 +1,43 @@
 package com.kreativekoala.summaryai.ui.paywall
 
 import android.app.Activity
-import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.kreativekoala.summaryai.service.FirebaseAnalyticsHelper
-import com.kreativekoala.summaryai.service.TikTokHelper
 import androidx.lifecycle.viewModelScope
-import com.revenuecat.purchases.CustomerInfo
-import com.revenuecat.purchases.Offering
-import com.revenuecat.purchases.Package
-import com.revenuecat.purchases.PurchaseParams
-import com.revenuecat.purchases.Purchases
-import com.revenuecat.purchases.PurchasesError
-import com.revenuecat.purchases.getOfferingsWith
-import com.revenuecat.purchases.interfaces.LogInCallback
-import com.revenuecat.purchases.interfaces.ReceiveCustomerInfoCallback
-import com.revenuecat.purchases.purchaseWith
-import com.revenuecat.purchases.restorePurchasesWith
+import com.kreativekoala.summaryai.service.BillingManager
+import com.kreativekoala.summaryai.service.BillingProduct
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class PaywallUiState(
-    val selectedPlan: String = "yearly",
-    val isLoading: Boolean = false,
-    val purchaseSuccess: Boolean = false,
-    val error: String? = null,
-    val offering: Offering? = null,
-    val hasActiveEntitlement: Boolean = false
-)
-
 @HiltViewModel
-class PaywallViewModel @Inject constructor() : ViewModel() {
+class PaywallViewModel @Inject constructor(
+    private val billingManager: BillingManager
+) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(PaywallUiState())
-    val uiState: StateFlow<PaywallUiState> = _uiState.asStateFlow()
+    val products = billingManager.products
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    companion object {
-        private const val TAG = "PaywallViewModel"
-        private const val ENTITLEMENT_ID = "premium"
-    }
+    val isSubscribed = billingManager.isSubscribed
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
-    init {
-        loadOfferings()
-        checkEntitlements()
-    }
+    val isLoading = billingManager.isLoading
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
-    private fun loadOfferings() {
-        _uiState.value = _uiState.value.copy(isLoading = true)
-
-        Purchases.sharedInstance.getOfferingsWith(
-            onError = { error ->
-                Log.e(TAG, "Failed to load offerings: ${error.message}")
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = error.message
-                )
-            },
-            onSuccess = { offerings ->
-                Log.d(TAG, "Loaded offerings: ${offerings.current?.availablePackages?.size ?: 0} packages")
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    offering = offerings.current
-                )
-            }
-        )
-    }
-
-    private fun checkEntitlements() {
-        Purchases.sharedInstance.getCustomerInfo(object : ReceiveCustomerInfoCallback {
-            override fun onReceived(customerInfo: CustomerInfo) {
-                val hasEntitlement = customerInfo.entitlements[ENTITLEMENT_ID]?.isActive == true
-                _uiState.value = _uiState.value.copy(
-                    hasActiveEntitlement = hasEntitlement,
-                    purchaseSuccess = hasEntitlement
-                )
-                Log.d(TAG, "Customer has premium entitlement: $hasEntitlement")
-            }
-
-            override fun onError(error: PurchasesError) {
-                Log.e(TAG, "Failed to get customer info: ${error.message}")
-            }
-        })
-    }
-
-    fun selectPlan(plan: String) {
-        _uiState.value = _uiState.value.copy(selectedPlan = plan)
-    }
-
-    fun purchase(activity: Activity) {
-        val offering = _uiState.value.offering ?: run {
-            _uiState.value = _uiState.value.copy(error = "No offerings available")
-            return
-        }
-
-        val packageToPurchase = getSelectedPackage(offering) ?: run {
-            _uiState.value = _uiState.value.copy(error = "Selected plan not found")
-            return
-        }
-
-        launchPurchaseFlow(activity, packageToPurchase)
-    }
-
-    private fun getSelectedPackage(offering: Offering): Package? {
-        return when (_uiState.value.selectedPlan) {
-            "yearly" -> offering.annual
-            "monthly" -> offering.monthly
-            "weekly" -> offering.weekly
-            else -> offering.annual
-        }
-    }
-
-    private fun launchPurchaseFlow(activity: Activity, packageToPurchase: Package) {
-        _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-
-        Purchases.sharedInstance.purchaseWith(
-            PurchaseParams.Builder(activity, packageToPurchase).build(),
-            onError = { error, userCancelled ->
-                Log.e(TAG, "Purchase failed: ${error.message}, userCancelled: $userCancelled")
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = if (!userCancelled) error.message else null
-                )
-            },
-            onSuccess = { _, customerInfo ->
-                val hasEntitlement = customerInfo.entitlements[ENTITLEMENT_ID]?.isActive == true
-                Log.d(TAG, "Purchase successful, has entitlement: $hasEntitlement")
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    purchaseSuccess = hasEntitlement,
-                    hasActiveEntitlement = hasEntitlement
-                )
-
-                // Track purchase events for ad attribution
-                val productId = packageToPurchase.product.id
-                val price = packageToPurchase.product.price.amountMicros / 1_000_000.0
-                FirebaseAnalyticsHelper.logPurchaseCompleted(productId, price)
-                TikTokHelper.trackEvent("purchase_success")
-            }
-        )
+    fun purchase(activity: Activity, product: BillingProduct) {
+        billingManager.launchBillingFlow(activity, product)
     }
 
     fun restorePurchases() {
-        _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-
-        Purchases.sharedInstance.restorePurchasesWith(
-            onError = { error ->
-                Log.e(TAG, "Restore failed: ${error.message}")
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = error.message
-                )
-            },
-            onSuccess = { customerInfo ->
-                val hasEntitlement = customerInfo.entitlements[ENTITLEMENT_ID]?.isActive == true
-                Log.d(TAG, "Restore successful, has entitlement: $hasEntitlement")
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    purchaseSuccess = hasEntitlement,
-                    hasActiveEntitlement = hasEntitlement,
-                    error = if (!hasEntitlement) "No active subscription found" else null
-                )
-            }
-        )
+        billingManager.restorePurchases()
     }
 
-    fun clearError() {
-        _uiState.value = _uiState.value.copy(error = null)
+    fun redeemPromoCode(activity: Activity) {
+        billingManager.redeemPromoCode(activity)
     }
 
-    /**
-     * Login to RevenueCat with the user's Supabase ID
-     * Call this after user authentication
-     */
-    fun loginUser(userId: String) {
-        Purchases.sharedInstance.logIn(userId, object : LogInCallback {
-            override fun onReceived(customerInfo: CustomerInfo, created: Boolean) {
-                val hasEntitlement = customerInfo.entitlements[ENTITLEMENT_ID]?.isActive == true
-                _uiState.value = _uiState.value.copy(
-                    hasActiveEntitlement = hasEntitlement,
-                    purchaseSuccess = hasEntitlement
-                )
-                Log.d(TAG, "RevenueCat login successful for user: $userId, created: $created")
-            }
-
-            override fun onError(error: PurchasesError) {
-                Log.e(TAG, "RevenueCat login failed: ${error.message}")
-            }
-        })
-    }
-
-    /**
-     * Logout from RevenueCat (resets to anonymous user)
-     * Call this when user signs out
-     */
-    fun logoutUser() {
-        Purchases.sharedInstance.logOut(object : ReceiveCustomerInfoCallback {
-            override fun onReceived(customerInfo: CustomerInfo) {
-                _uiState.value = _uiState.value.copy(
-                    hasActiveEntitlement = false,
-                    purchaseSuccess = false
-                )
-                Log.d(TAG, "RevenueCat logout successful")
-            }
-
-            override fun onError(error: PurchasesError) {
-                Log.e(TAG, "RevenueCat logout failed: ${error.message}")
-            }
-        })
+    fun refreshSubscriptionStatus() {
+        viewModelScope.launch { billingManager.queryExistingPurchases() }
     }
 }
