@@ -24,8 +24,8 @@ android {
         applicationId = "com.kreativekoala.meetingmind"
         minSdk = 26
         targetSdk = 35
-        versionCode = 21
-        versionName = "1.4.5"
+        versionCode = 38
+        versionName = "1.5.15"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -35,7 +35,7 @@ android {
         // Build config fields
         buildConfigField("String", "SUPABASE_URL", "\"https://mlofjzlmncgnhxbiuemf.supabase.co\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sb2ZqemxtbmNnbmh4Yml1ZW1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyOTU1NjAsImV4cCI6MjA4Mjg3MTU2MH0.fUxgMcu1BNrsYneN5vSMFWxsv-rWIygCx-xn-Vmr0Ec\"")
-        buildConfigField("String", "API_BASE_URL", "\"https://summary-ai-backend-917362189743.us-central1.run.app\"")
+        buildConfigField("String", "API_BASE_URL", "\"https://summary-ai-backend.fly.dev\"")
         // Google OAuth Web Client ID (from Google Cloud Console)
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"753424767416-54viqmpd45g10oohm7vug13o8tdhb8qp.apps.googleusercontent.com\"")
     }
@@ -47,8 +47,8 @@ android {
             // buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8080\"")
         }
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            isMinifyEnabled = false
+            isShrinkResources = false
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -139,8 +139,8 @@ dependencies {
     // Google Sign-In
     implementation(libs.play.services.auth)
 
-    // RevenueCat (replaces Play Billing)
-    implementation("com.revenuecat.purchases:purchases:9.22.2")
+    // Play Billing
+    implementation("com.android.billingclient:billing-ktx:7.1.1")
 
     // Supabase
     implementation(libs.supabase.gotrue)
@@ -164,6 +164,12 @@ dependencies {
     // TikTok Events SDK (install attribution & event tracking)
     implementation("com.github.tiktok:tiktok-business-android-sdk:1.6.0")
 
+    // Facebook SDK
+    implementation("com.facebook.android:facebook-android-sdk:17.0.2")
+
     // PaywallKit
     implementation(project(":paywallkit"))
+
+    // RatingKit (Play In-App Review wrapper)
+    implementation(project(":ratingkit"))
 }

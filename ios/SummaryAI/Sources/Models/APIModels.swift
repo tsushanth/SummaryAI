@@ -168,6 +168,7 @@ struct CreateRecordingRequest: Codable {
     let fileSizeBytes: Int64
     let contentType: String
     let recordingType: String?
+    let outputLanguage: String?
 
     enum CodingKeys: String, CodingKey {
         case title
@@ -175,14 +176,16 @@ struct CreateRecordingRequest: Codable {
         case fileSizeBytes = "file_size_bytes"
         case contentType = "content_type"
         case recordingType = "recording_type"
+        case outputLanguage = "output_language"
     }
 
-    init(title: String, durationSeconds: Int? = nil, fileSizeBytes: Int64, contentType: String = "audio/mp4", recordingType: String? = nil) {
+    init(title: String, durationSeconds: Int? = nil, fileSizeBytes: Int64, contentType: String = "audio/mp4", recordingType: String? = nil, outputLanguage: String? = nil) {
         self.title = title
         self.durationSeconds = durationSeconds
         self.fileSizeBytes = fileSizeBytes
         self.contentType = contentType
         self.recordingType = recordingType
+        self.outputLanguage = outputLanguage
     }
 }
 

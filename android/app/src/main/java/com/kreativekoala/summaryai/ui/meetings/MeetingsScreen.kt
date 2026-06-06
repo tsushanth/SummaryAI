@@ -100,6 +100,13 @@ fun MeetingsScreen(
                     }
                 }
 
+                // Manual join card — paste a Zoom/Meet/Teams link to send the
+                // bot to a meeting that isn't on the connected calendar. Matches
+                // the iOS MeetingsView "Join a Meeting" card.
+                item {
+                    JoinMeetingCard(onClick = onJoinMeetingClick)
+                }
+
                 // Upcoming meetings section
                 if (uiState.upcomingMeetings.isNotEmpty()) {
                     item {
@@ -401,5 +408,60 @@ private fun getPlatformColor(platform: String): Color {
         "teams", "microsoft_teams" -> Color(0xFF5059C9)
         "webex" -> Color(0xFF00BCF2)
         else -> Color(0xFF666666)
+    }
+}
+
+@Composable
+private fun JoinMeetingCard(onClick: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        ),
+        shape = RoundedCornerShape(12.dp),
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.VideoCall,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.join_meeting),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = stringResource(R.string.join_meeting_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Icon(
+                Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }

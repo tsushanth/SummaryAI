@@ -5,10 +5,15 @@ import SwiftUI
 /// Main view for the Meetings tab showing calendar connections and upcoming meetings
 struct MeetingsView: View {
     @ObservedObject var viewModel: CalendarViewModel
+    @EnvironmentObject var apiClient: SummaryAIAPIClient
+    @State private var showJoinMeeting = false
 
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
+                // Quick action: Join meeting by URL
+                joinMeetingButton
+
                 // Connected calendars info banner - show when calendars are connected
                 if viewModel.hasConnectedCalendars {
                     connectedCalendarsInfoBanner
@@ -39,6 +44,16 @@ struct MeetingsView: View {
             }
             .padding(.top, 24)
         }
+        .sheet(isPresented: $showJoinMeeting) {
+            NavigationView {
+                JoinMeetingView(viewModel: JoinMeetingViewModel(apiClient: apiClient))
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Cancel") { showJoinMeeting = false }
+                        }
+                    }
+            }
+        }
         .refreshable {
             await viewModel.refreshAll()
         }
@@ -49,6 +64,40 @@ struct MeetingsView: View {
         } message: {
             Text(viewModel.errorMessage ?? "An error occurred")
         }
+    }
+
+    // MARK: - Join Meeting Button
+
+    private var joinMeetingButton: some View {
+        Button(action: { showJoinMeeting = true }) {
+            HStack(spacing: 12) {
+                Image(systemName: "video.badge.plus")
+                    .font(.system(size: 22))
+                    .foregroundColor(.white)
+                    .frame(width: 44, height: 44)
+                    .background(Color.blue)
+                    .clipShape(Circle())
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Join a Meeting")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    Text("Paste a Zoom, Meet, or Teams link")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.secondary)
+            }
+            .padding()
+            .background(Color(.secondarySystemBackground))
+            .cornerRadius(12)
+            .padding(.horizontal)
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Connected Calendars Info Banner
@@ -285,6 +334,27 @@ struct MeetingCard: View {
                 .fontWeight(.medium)
                 .lineLimit(2)
 
+            // Join meeting button
+            if let joinUrl = meeting.joinUrl, let url = URL(string: joinUrl) {
+                Button(action: {
+                    UIApplication.shared.open(url)
+                }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "video.fill")
+                            .font(.caption)
+                        Text("Join Meeting")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                }
+                .padding(.top, 2)
+            }
+
             // Auto-join toggle
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
@@ -355,6 +425,7 @@ struct Meeting: Identifiable, Codable {
     let autoJoin: Bool
     let status: String
     let recordingId: String?
+    let joinUrl: String?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -366,6 +437,7 @@ struct Meeting: Identifiable, Codable {
         case autoJoin = "auto_join"
         case status
         case recordingId = "recording_id"
+        case joinUrl = "join_url"
     }
 }
 
