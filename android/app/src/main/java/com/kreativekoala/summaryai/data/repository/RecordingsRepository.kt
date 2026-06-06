@@ -1,8 +1,10 @@
 package com.kreativekoala.summaryai.data.repository
 
 import android.util.Log
+import com.kreativekoala.summaryai.data.api.ProgressRequestBody
 import com.kreativekoala.summaryai.data.api.SummaryAIApi
 import com.kreativekoala.summaryai.data.api.models.*
+import com.kreativekoala.summaryai.di.UploadClient
 import com.kreativekoala.summaryai.domain.model.Recording
 import com.kreativekoala.summaryai.domain.model.RecordingDetail
 import com.kreativekoala.summaryai.domain.model.Summary
@@ -29,7 +31,7 @@ private const val TAG = "RecordingsRepository"
 @Singleton
 class RecordingsRepository @Inject constructor(
     private val api: SummaryAIApi,
-    private val okHttpClient: OkHttpClient
+    @UploadClient private val uploadClient: OkHttpClient
 ) {
     /**
      * Get paginated list of recordings
@@ -105,6 +107,10 @@ class RecordingsRepository @Inject constructor(
 
             // Step 2: Upload file to storage
             val uploadInfo = createResponse.upload
+            val body = ProgressRequestBody(
+                delegate = audioFile.asRequestBody("audio/mp4".toMediaType()),
+                onProgress = onProgress
+            )
             val request = Request.Builder()
                 .url(uploadInfo.url)
                 .apply {
@@ -112,10 +118,10 @@ class RecordingsRepository @Inject constructor(
                         addHeader(key, value)
                     }
                 }
-                .put(audioFile.asRequestBody("audio/mp4".toMediaType()))
+                .put(body)
                 .build()
 
-            val uploadResponse = okHttpClient.newCall(request).execute()
+            val uploadResponse = uploadClient.newCall(request).execute()
             if (!uploadResponse.isSuccessful) {
                 throw Exception("Upload failed: ${uploadResponse.code}")
             }

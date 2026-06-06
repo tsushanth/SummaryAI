@@ -9,16 +9,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.data.local.TokenManager
-import com.kreativekoala.summaryai.data.repository.RecordingsRepository
 import com.kreativekoala.summaryai.service.AudioRecordingService
+import com.kreativekoala.summaryai.service.LiveSpeechRecognizer
 import com.kreativekoala.summaryai.service.RecordingState
+import com.kreativekoala.summaryai.service.UploadState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
 
 data class RecordingUiState(
@@ -27,16 +28,17 @@ data class RecordingUiState(
     val isUploading: Boolean = false,
     val uploadProgress: Float = 0f,
     val uploadedRecordingId: String? = null,
-    val error: String? = null
+    val error: String? = null,
+    val liveTranscribeEnabled: Boolean = false,
+    val liveTranscript: String = "",
+    val liveTranscribeError: String? = null
 )
-
-// DEMO_MODE_MESSAGE moved to string resource R.string.demo_mode_message
 
 @HiltViewModel
 class RecordingViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val recordingsRepository: RecordingsRepository,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val liveSpeech: LiveSpeechRecognizer
 ) : ViewModel() {
 
     private val isDemoMode: Boolean
@@ -47,6 +49,8 @@ class RecordingViewModel @Inject constructor(
 
     private var recordingService: AudioRecordingService? = null
     private var isBound = false
+    private var recordingObserverJob: Job? = null
+    private var uploadObserverJob: Job? = null
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -54,11 +58,17 @@ class RecordingViewModel @Inject constructor(
             recordingService = binder.getService()
             isBound = true
 
-            // Observe recording state
-            viewModelScope.launch {
+            recordingObserverJob?.cancel()
+            recordingObserverJob = viewModelScope.launch {
                 recordingService?.recordingState?.collect { state ->
                     _uiState.value = _uiState.value.copy(recordingState = state)
+                    syncLiveTranscribe()
                 }
+            }
+
+            uploadObserverJob?.cancel()
+            uploadObserverJob = viewModelScope.launch {
+                recordingService?.uploadState?.collect { state -> applyUploadState(state) }
             }
         }
 
@@ -70,6 +80,33 @@ class RecordingViewModel @Inject constructor(
 
     init {
         bindService()
+        // Mirror live-speech state into the UI.
+        viewModelScope.launch {
+            liveSpeech.transcript.collect { text ->
+                _uiState.value = _uiState.value.copy(liveTranscript = text)
+            }
+        }
+        viewModelScope.launch {
+            liveSpeech.errorMessage.collect { err ->
+                _uiState.value = _uiState.value.copy(liveTranscribeError = err)
+            }
+        }
+    }
+
+    /** Toggle live transcription. Starts recognizer if recording is active. */
+    fun setLiveTranscribeEnabled(enabled: Boolean) {
+        _uiState.value = _uiState.value.copy(liveTranscribeEnabled = enabled)
+        syncLiveTranscribe()
+    }
+
+    private fun syncLiveTranscribe() {
+        val state = _uiState.value
+        val shouldRun = state.liveTranscribeEnabled && state.recordingState.isRecording && !state.recordingState.isPaused
+        if (shouldRun && !liveSpeech.isRunning.value) {
+            liveSpeech.start(languageTag = null)
+        } else if (!shouldRun && liveSpeech.isRunning.value) {
+            liveSpeech.stop()
+        }
     }
 
     private fun bindService() {
@@ -104,65 +141,49 @@ class RecordingViewModel @Inject constructor(
 
     fun stopAndUpload() {
         if (isDemoMode) {
-            recordingService?.stopRecording()
+            recordingService?.discardRecording()
             _uiState.value = _uiState.value.copy(error = context.getString(R.string.demo_mode_message))
             return
         }
 
-        viewModelScope.launch {
-            val outputFile = recordingService?.stopRecording()
-
-            if (outputFile != null && outputFile.exists()) {
-                uploadRecording(outputFile)
-            } else {
-                _uiState.value = _uiState.value.copy(
-                    error = context.getString(R.string.error_recording_file_not_found)
-                )
-            }
+        val service = recordingService
+        if (service == null) {
+            _uiState.value = _uiState.value.copy(
+                error = context.getString(R.string.error_recording_file_not_found)
+            )
+            return
         }
-    }
-
-    fun cancel() {
-        recordingService?.stopRecording()
-        // Delete the file if it exists
-        _uiState.value.recordingState.outputFile?.delete()
-    }
-
-    private suspend fun uploadRecording(file: File) {
-        _uiState.value = _uiState.value.copy(isUploading = true, uploadProgress = 0f)
 
         val title = _uiState.value.title.ifBlank { context.getString(R.string.untitled_recording) }
         val duration = _uiState.value.recordingState.durationSeconds
 
-        val result = recordingsRepository.uploadRecording(
-            title = title,
-            audioFile = file,
-            durationSeconds = duration,
-            onProgress = { progress ->
-                _uiState.value = _uiState.value.copy(uploadProgress = progress)
-            }
-        )
+        val outputFile = service.stopRecording()
+        if (outputFile != null && outputFile.exists()) {
+            // Hand off to the service so the upload survives Activity death.
+            service.startUpload(outputFile, title, duration)
+        } else {
+            service.discardRecording()
+            _uiState.value = _uiState.value.copy(
+                error = context.getString(R.string.error_recording_file_not_found)
+            )
+        }
+    }
 
-        result.fold(
-            onSuccess = { recording ->
-                _uiState.value = _uiState.value.copy(
-                    isUploading = false,
-                    uploadedRecordingId = recording.id
-                )
-                // Clean up temp file
-                file.delete()
-            },
-            onFailure = { error ->
-                _uiState.value = _uiState.value.copy(
-                    isUploading = false,
-                    error = error.message ?: context.getString(R.string.error_upload_failed)
-                )
-            }
-        )
+    fun cancel() {
+        recordingService?.discardRecording()
     }
 
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
+    }
+
+    private fun applyUploadState(state: UploadState) {
+        _uiState.value = _uiState.value.copy(
+            isUploading = state.isUploading,
+            uploadProgress = state.progress,
+            uploadedRecordingId = state.uploadedRecordingId ?: _uiState.value.uploadedRecordingId,
+            error = state.error ?: _uiState.value.error
+        )
     }
 
     override fun onCleared() {
@@ -171,5 +192,6 @@ class RecordingViewModel @Inject constructor(
             context.unbindService(serviceConnection)
             isBound = false
         }
+        liveSpeech.stop()
     }
 }

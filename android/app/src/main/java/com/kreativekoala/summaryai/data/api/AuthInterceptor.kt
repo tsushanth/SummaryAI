@@ -2,6 +2,7 @@ package com.kreativekoala.summaryai.data.api
 
 import android.util.Log
 import com.kreativekoala.summaryai.BuildConfig
+import com.kreativekoala.summaryai.data.local.SubscriptionStatus
 import com.kreativekoala.summaryai.data.local.TokenManager
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
@@ -21,7 +22,8 @@ private const val TAG = "AuthInterceptor"
  */
 @Singleton
 class AuthInterceptor @Inject constructor(
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val subscriptionStatus: SubscriptionStatus
 ) : Interceptor {
 
     // Supabase client for token refresh
@@ -52,16 +54,10 @@ class AuthInterceptor @Inject constructor(
         // Get current token, refreshing if needed
         val token = getValidToken()
 
-        val request = if (token != null) {
-            originalRequest.newBuilder()
-                .header("Authorization", "Bearer $token")
-                .header("Accept", "application/json")
-                .build()
-        } else {
-            originalRequest.newBuilder()
-                .header("Accept", "application/json")
-                .build()
-        }
+        val builder = originalRequest.newBuilder().header("Accept", "application/json")
+        if (token != null) builder.header("Authorization", "Bearer $token")
+        if (subscriptionStatus.isActive) builder.header("x-subscription-active", "true")
+        val request = builder.build()
 
         val response = chain.proceed(request)
 
@@ -76,11 +72,13 @@ class AuthInterceptor @Inject constructor(
             val refreshedToken = refreshToken()
             if (refreshedToken != null) {
                 Log.d(TAG, "Token refreshed successfully, retrying request")
-                val newRequest = originalRequest.newBuilder()
+                val newBuilder = originalRequest.newBuilder()
                     .header("Authorization", "Bearer $refreshedToken")
                     .header("Accept", "application/json")
-                    .build()
-                return chain.proceed(newRequest)
+                if (subscriptionStatus.isActive) {
+                    newBuilder.header("x-subscription-active", "true")
+                }
+                return chain.proceed(newBuilder.build())
             } else {
                 Log.w(TAG, "Token refresh failed")
             }

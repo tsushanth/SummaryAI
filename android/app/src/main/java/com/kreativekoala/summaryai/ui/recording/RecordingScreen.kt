@@ -6,6 +6,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Mic
@@ -20,7 +21,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -31,6 +34,17 @@ import com.google.accompanist.permissions.shouldShowRationale
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.ui.components.LiveWaveform
 import com.kreativekoala.summaryai.ui.theme.RecordingRed
+import com.kreativekoala.ratingkit.RatingKit
+import androidx.compose.ui.platform.LocalContext
+import android.app.Activity
+
+/**
+ * Live Transcribe is hidden on Android for now: Android's audio system
+ * grants MediaRecorder exclusive mic access, so SpeechRecognizer can't
+ * receive audio simultaneously with file recording. Re-enable once we
+ * refactor to AudioRecord+MediaCodec or switch to a streaming backend.
+ */
+private const val LIVE_TRANSCRIBE_ENABLED = false
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -47,8 +61,11 @@ fun RecordingScreen(
     val microphonePermission = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
 
     // Handle upload completion
+    val activity = LocalContext.current as? Activity
     LaunchedEffect(uiState.uploadedRecordingId) {
         uiState.uploadedRecordingId?.let { recordingId ->
+            // Success peak — a recording made it all the way to the backend.
+            RatingKit.trackAction(activity)
             onRecordingComplete(recordingId)
         }
     }
@@ -122,6 +139,10 @@ fun RecordingScreen(
                     amplitudes = recordingState.amplitudes,
                     title = uiState.title,
                     pulseScale = if (!recordingState.isPaused) pulseScale else 1f,
+                    liveTranscribeEnabled = uiState.liveTranscribeEnabled,
+                    liveTranscript = uiState.liveTranscript,
+                    liveTranscribeError = uiState.liveTranscribeError,
+                    onLiveTranscribeToggle = viewModel::setLiveTranscribeEnabled,
                     onTitleChange = viewModel::updateTitle,
                     onPause = viewModel::pauseRecording,
                     onResume = viewModel::resumeRecording,
@@ -313,6 +334,10 @@ private fun RecordingContent(
     amplitudes: List<Float>,
     title: String,
     pulseScale: Float,
+    liveTranscribeEnabled: Boolean,
+    liveTranscript: String,
+    liveTranscribeError: String?,
+    onLiveTranscribeToggle: (Boolean) -> Unit,
     onTitleChange: (String) -> Unit,
     onPause: () -> Unit,
     onResume: () -> Unit,
@@ -324,6 +349,25 @@ private fun RecordingContent(
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Live Transcribe toggle — hidden on Android (see LIVE_TRANSCRIBE_ENABLED).
+        if (LIVE_TRANSCRIBE_ENABLED) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.live_transcribe),
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.weight(1f)
+                )
+                Switch(
+                    checked = liveTranscribeEnabled,
+                    onCheckedChange = onLiveTranscribeToggle
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
         // Recording indicator
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -412,6 +456,38 @@ private fun RecordingContent(
 
             // Placeholder for symmetry
             Spacer(modifier = Modifier.size(64.dp))
+        }
+
+        // Live transcript preview — gated by both the runtime toggle AND the
+        // platform feature flag so Android hides it cleanly for this release.
+        if (LIVE_TRANSCRIBE_ENABLED && liveTranscribeEnabled) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                val displayText = when {
+                    liveTranscribeError != null -> liveTranscribeError
+                    liveTranscript.isBlank() -> stringResource(R.string.live_transcribe_listening)
+                    else -> liveTranscript
+                }
+                Text(
+                    text = displayText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 4,
+                    overflow = TextOverflow.Ellipsis,
+                    color = when {
+                        liveTranscribeError != null -> MaterialTheme.colorScheme.error
+                        liveTranscript.isBlank() -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                    fontStyle = if (liveTranscript.isBlank() && liveTranscribeError == null) FontStyle.Italic else FontStyle.Normal,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(32.dp))

@@ -8,6 +8,7 @@
 
 import SwiftUI
 import Combine
+import PaywallKit
 
 @MainActor
 final class PaywallCoordinator: ObservableObject {
@@ -70,6 +71,12 @@ final class PaywallCoordinator: ObservableObject {
     func checkWinbackEligibility() {
         // Already subscribed -- skip
         if PremiumManager.shared.isPremium { return }
+
+        // Server kill-switch (defaults to false; flip via paywall_placements.experiment.showWinback)
+        guard ExperimentManager.shared.showWinback() else {
+            print("[PaywallCoordinator] Winback disabled by server")
+            return
+        }
 
         // Not enough dismissals
         guard paywallDismissCount >= dismissThreshold else { return }

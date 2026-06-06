@@ -1,5 +1,6 @@
 import SwiftUI
 import PaywallKit
+import RatingKit
 
 /// PaywallKit-powered paywall with StoreKit 2 purchases.
 struct RemotePaywallView: View {
@@ -8,9 +9,14 @@ struct RemotePaywallView: View {
     @State private var didPurchaseOrRestore = false
     @ObservedObject private var store = StoreManager.shared
 
+    private var placement: String {
+        PromoCodeManager.shared.activeCode != nil ? "promo_code_onboarding" : "app_open"
+    }
+
     var body: some View {
         PaywallKit.PaywallView(
             appId: "meetingmind",
+            placement: placement,
             appName: "Meeting Mind Pro",
             features: [
                 PaywallFeature(icon: "\u{1F399}", title: "Meeting Recording", description: "Record any meeting"),
@@ -21,13 +27,24 @@ struct RemotePaywallView: View {
             ],
             products: store.paywallProducts,
             theme: PaywallTheme(accent: Color(red: 0.0, green: 0.48, blue: 1.0), accent2: Color(red: 0.5, green: 0.3, blue: 0.9)),
-            showWinback: true,
+            showWinback: false,
             onPurchase: { productId in
                 let result = await store.purchase(productId: productId)
                 if case .purchased = result {
                     didPurchaseOrRestore = true
                     await PremiumManager.shared.validateSubscriptionState()
-                    await MainActor.run { dismiss() }
+                    // Log purchase to Facebook with actual price
+                    let product = store.paywallProducts.first { $0.id == productId }
+                    let price = Double(truncating: (product?.price ?? 0) as NSDecimalNumber)
+                    let currency = product?.currencyCode ?? "USD"
+                    FacebookSDKHelper.shared.logSubscription(price: price, currency: currency, productId: productId)
+                    if product?.trialDays != nil {
+                        FacebookSDKHelper.shared.logTrialStarted(productId: productId)
+                    }
+                    await MainActor.run {
+                        RatingKit.shared.trackPurchase()
+                        dismiss()
+                    }
                     return true
                 }
                 return false

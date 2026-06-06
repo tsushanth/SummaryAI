@@ -18,14 +18,100 @@
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.753424767416-8ed2ohh2206r0h6cu864asieagip9mmh</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>OAuth Callback</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>summaryai</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
-	<string>27</string>
+	<string>50</string>
+	<key>FacebookAppID</key>
+	<string>2151317385689073</string>
+	<key>FacebookClientToken</key>
+	<string>d50af257c9bd994081b1686067f83e24</string>
+	<key>FacebookDisplayName</key>
+	<string>Meeting Mind</string>
+	<key>GIDClientID</key>
+	<string>753424767416-8ed2ohh2206r0h6cu864asieagip9mmh.apps.googleusercontent.com</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Meeting Mind needs access to your microphone to record meetings and conversations for transcription.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Meeting Mind uses speech recognition to convert your voice to text for creating todos and notes.</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Meeting Mind uses this identifier to measure the effectiveness of advertising campaigns and provide you with a more personalized experience.</string>
+	<key>SKAdNetworkItems</key>
+	<array>
+		<!-- Apple Search Ads — REQUIRED for ASA install attribution. Was missing,
+		     producing the SmartSpace-style 0-install-attribution failure mode in
+		     the May 2026 ASA portfolio. Add first, never remove. -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>cstr6suwn9.skadnetwork</string>
+		</dict>
+		<!-- Meta / Facebook -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>v9wttpbfk9.skadnetwork</string>
+		</dict>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>n38lu8286q.skadnetwork</string>
+		</dict>
+		<!-- Google / AdMob -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>4fzdc2evr5.skadnetwork</string>
+		</dict>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>4pfyvq9l8r.skadnetwork</string>
+		</dict>
+		<!-- TikTok -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>22mmun2rn5.skadnetwork</string>
+		</dict>
+		<!-- Snap -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>238da6jt44.skadnetwork</string>
+		</dict>
+		<!-- Reddit -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>m8dbw4d6y7.skadnetwork</string>
+		</dict>
+		<!-- Microsoft / Xandr -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>kbd757ywx3.skadnetwork</string>
+		</dict>
+		<!-- Twitter / X -->
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>4468km3ulz.skadnetwork</string>
+		</dict>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -52,46 +138,6 @@
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>Meeting Mind uses this identifier to measure the effectiveness of advertising campaigns and provide you with a more personalized experience.</string>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.googleusercontent.apps.753424767416-8ed2ohh2206r0h6cu864asieagip9mmh</string>
-			</array>
-		</dict>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLName</key>
-			<string>OAuth Callback</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>summaryai</string>
-			</array>
-		</dict>
-	</array>
-	<key>GIDClientID</key>
-	<string>753424767416-8ed2ohh2206r0h6cu864asieagip9mmh.apps.googleusercontent.com</string>
-	<key>SKAdNetworkItems</key>
-	<array>
-		<!-- TikTok / Bytedance (Non-China) -->
-		<dict>
-			<key>SKAdNetworkIdentifier</key>
-			<string>22mmun2rn5.skadnetwork</string>
-		</dict>
-		<!-- TikTok / Bytedance (China / Pangle) -->
-		<dict>
-			<key>SKAdNetworkIdentifier</key>
-			<string>238da6jt44.skadnetwork</string>
-		</dict>
 	</array>
 </dict>
 </plist>

@@ -1,0 +1,5 @@
+• Fixes a bug where long recordings could fail to upload.
+• Uploads now continue in the background even if you close the app.
+• Failed uploads stay on your device with a Retry button — no more lost meetings.
+
+Thanks for the feedback.

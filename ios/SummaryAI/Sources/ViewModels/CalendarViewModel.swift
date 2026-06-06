@@ -259,7 +259,8 @@ final class CalendarViewModel: NSObject, ObservableObject {
                     scheduledEnd: updatedMeeting.scheduledEnd,
                     autoJoin: enabled,
                     status: updatedMeeting.status,
-                    recordingId: updatedMeeting.recordingId
+                    recordingId: updatedMeeting.recordingId,
+                    joinUrl: updatedMeeting.joinUrl
                 )
             }
 
