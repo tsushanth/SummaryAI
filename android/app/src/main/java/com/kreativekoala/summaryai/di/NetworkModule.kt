@@ -3,6 +3,7 @@ package com.kreativekoala.summaryai.di
 import com.kreativekoala.summaryai.BuildConfig
 import com.kreativekoala.summaryai.data.api.AuthInterceptor
 import com.kreativekoala.summaryai.data.api.SummaryAIApi
+import com.kreativekoala.summaryai.data.local.SubscriptionStatus
 import com.kreativekoala.summaryai.data.local.TokenManager
 import dagger.Module
 import dagger.Provides
@@ -25,8 +26,9 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideAuthInterceptor(
-        tokenManager: TokenManager
-    ): AuthInterceptor = AuthInterceptor(tokenManager)
+        tokenManager: TokenManager,
+        subscriptionStatus: SubscriptionStatus
+    ): AuthInterceptor = AuthInterceptor(tokenManager, subscriptionStatus)
 
     @Provides
     @Singleton
@@ -52,6 +54,24 @@ object NetworkModule {
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    @UploadClient
+    fun provideUploadOkHttpClient(
+        loggingInterceptor: HttpLoggingInterceptor
+    ): OkHttpClient {
+        // Separate client for direct-to-storage audio uploads. The signed URL already
+        // carries auth, so no AuthInterceptor. Timeouts are sized for long uploads —
+        // a 1-hour M4A at 128kbps is ~57MB and can take several minutes on cellular.
+        return OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .connectTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(0, TimeUnit.MILLISECONDS) // no overall write timeout
+            .callTimeout(0, TimeUnit.MILLISECONDS)
             .build()
     }
 

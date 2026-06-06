@@ -87,6 +87,7 @@ fun RecordingsListScreen(
     }
 
     val uiState by viewModel.uiState.collectAsState()
+    val pendingUploads by viewModel.pendingUploads.collectAsState()
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
@@ -260,6 +261,16 @@ fun RecordingsListScreen(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            }
+
+            // Pending uploads banner — surfaces recordings that finished but failed
+            // to upload, so the user can retry instead of losing them.
+            if (pendingUploads.isNotEmpty()) {
+                PendingUploadsBanner(
+                    pending = pendingUploads,
+                    onRetry = { viewModel.retryPendingUpload(it) },
+                    onDiscard = { viewModel.discardPendingUpload(it) }
+                )
             }
 
             // Content with pull-to-refresh
@@ -665,4 +676,77 @@ private fun formatDateIOS(dateString: String): String {
     } catch (e: Exception) {
         dateString
     }
+}
+
+@Composable
+private fun PendingUploadsBanner(
+    pending: List<PendingUpload>,
+    onRetry: (PendingUpload) -> Unit,
+    onDiscard: (PendingUpload) -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.errorContainer,
+        tonalElevation = 2.dp
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(
+                text = if (pending.size == 1) {
+                    "1 recording didn't upload"
+                } else {
+                    "${pending.size} recordings didn't upload"
+                },
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onErrorContainer
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Tap retry to upload — they're saved on your device.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onErrorContainer
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            pending.forEach { item ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = item.title,
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                        Text(
+                            text = "${formatPendingDuration(item.durationSeconds)} • ${item.file.length() / 1024 / 1024} MB",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                    TextButton(onClick = { onDiscard(item) }) {
+                        Text("Discard")
+                    }
+                    TextButton(onClick = { onRetry(item) }) {
+                        Text("Retry")
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun formatPendingDuration(seconds: Int): String {
+    if (seconds <= 0) return "—"
+    val h = seconds / 3600
+    val m = (seconds % 3600) / 60
+    val s = seconds % 60
+    return if (h > 0) "${h}h ${m}m" else if (m > 0) "${m}m ${s}s" else "${s}s"
 }

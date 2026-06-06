@@ -1,0 +1,1 @@
+Bug fixes and performance improvements: fixed an issue where recordings, phone calls, and the recordings list could fail to load. Added the ability to manually paste a Zoom, Google Meet, or Microsoft Teams link from the Calendar tab.

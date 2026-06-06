@@ -66,6 +66,11 @@ class VoipService @Inject constructor(
         context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     }
 
+    // Saved to restore on call end. Without this, the device gets left in
+    // MODE_IN_COMMUNICATION after the call which mutes media streams.
+    private var savedAudioMode: Int = AudioManager.MODE_NORMAL
+    private var savedSpeakerphoneOn: Boolean = false
+
     /**
      * Set the access token for VoIP calls
      */
@@ -94,6 +99,18 @@ class VoipService @Inject constructor(
 
         try {
             _callState.value = VoipCallState.Connecting
+
+            // Audio routing must be configured BEFORE Voice.connect — Twilio's
+            // audio stack snapshots the AudioManager state on connect. Setting
+            // these after onConnected leaves the device in MODE_NORMAL routing
+            // to the earpiece at a low level, which is why callers reported
+            // "I can't hear the other end".
+            savedAudioMode = audioManager.mode
+            savedSpeakerphoneOn = audioManager.isSpeakerphoneOn
+            audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
+            audioManager.isSpeakerphoneOn = true
+            _isSpeakerOn.value = true
+            Log.d(TAG, "Audio prepared: mode=IN_COMMUNICATION, speaker=true (was mode=$savedAudioMode, speaker=$savedSpeakerphoneOn)")
 
             // Build connect options with call_id parameter
             // This will be passed to our TwiML App webhook
@@ -156,7 +173,11 @@ class VoipService @Inject constructor(
     private fun resetAudio() {
         _isMuted.value = false
         _isSpeakerOn.value = false
-        audioManager.isSpeakerphoneOn = false
+        // Restore the audio state we snapshotted before the call so the device
+        // doesn't get stuck in MODE_IN_COMMUNICATION (which mutes the MEDIA
+        // stream and breaks subsequent music/TTS playback).
+        audioManager.isSpeakerphoneOn = savedSpeakerphoneOn
+        audioManager.mode = savedAudioMode
     }
 
     /**
@@ -178,8 +199,8 @@ class VoipService @Inject constructor(
         override fun onConnected(call: Call) {
             Log.d(TAG, "Call connected")
             _callState.value = VoipCallState.Connected
-            // Enable audio routing
-            audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
+            // Audio mode + speaker were configured BEFORE Voice.connect in
+            // makeCall(). Touching them here would fight Twilio's audio stack.
         }
 
         override fun onReconnecting(call: Call, callException: CallException) {
@@ -199,8 +220,10 @@ class VoipService @Inject constructor(
             val reason = parseDisconnectReason(callException)
             _callState.value = VoipCallState.Disconnected(reason, callException?.message)
 
+            // resetAudio() already restores mode + speakerphone via the
+            // savedAudioMode / savedSpeakerphoneOn snapshot. Don't force
+            // MODE_NORMAL here — that overwrites whatever was running before.
             resetAudio()
-            audioManager.mode = AudioManager.MODE_NORMAL
         }
     }
 
