@@ -1,5 +1,9 @@
 import SwiftUI
+import Combine
 import PaywallKit
+#if canImport(Translation)
+import Translation
+#endif
 
 // MARK: - Recording View Wrapper
 
@@ -17,13 +21,20 @@ struct RecordingView: View {
 /// Main recording view that allows users to record audio
 struct RecordingContentView: View {
     @StateObject private var viewModel: RecordingViewModel
+    @StateObject private var liveSpeech = LiveSpeechRecognizer()
     @State private var showCancelConfirmation = false
     @State private var liveTranscribeEnabled = false
-    @State private var selectedLanguage = "Auto"
     @State private var translateEnabled = false
     @State private var showRecordingLimitPaywall = false
+    @State private var speechAuthorized = false
+    @State private var translatedText: String = ""
+    // Mirror of liveSpeech.transcript so the View body recomputes on update.
+    // Some @MainActor-isolated @Published properties don't propagate cleanly
+    // through SwiftUI's dependency tracking; subscribing via .onReceive avoids
+    // that fragility.
+    @State private var liveTranscript: String = ""
 
-    private let languages = ["Auto", "English", "Spanish", "French", "German", "Chinese", "Japanese", "Korean", "Portuguese", "Italian"]
+    private var languages: [String] { RecordingViewModel.languageOptions }
 
     /// Maximum number of recordings allowed for free users
     private static let freeRecordingLimit = 3
@@ -44,6 +55,30 @@ struct RecordingContentView: View {
     private func incrementRecordingCount() {
         let count = UserDefaults.standard.integer(forKey: Self.recordingCountKey) + 1
         UserDefaults.standard.set(count, forKey: Self.recordingCountKey)
+    }
+
+    /// Start or stop the on-device speech recognizer based on the toggle +
+    /// recording state. Uses the language code the user picked for summary;
+    /// if recognition isn't available for that locale we just stay silent.
+    private func syncLiveSpeech(enabled: Bool) async {
+        guard speechAuthorized else {
+            print("[LiveTranscribe] syncLiveSpeech ignored — speech recognition NOT authorized")
+            return
+        }
+        if enabled {
+            let code = viewModel.selectedLanguageCode ?? Locale.current.language.languageCode?.identifier ?? "en"
+            let locale = Locale(identifier: code)
+            print("[LiveTranscribe] Starting live speech recognizer for locale=\(locale.identifier)")
+            do {
+                try await liveSpeech.start(locale: locale)
+                print("[LiveTranscribe] Recognizer started; isRunning=\(liveSpeech.isRunning)")
+            } catch {
+                print("[LiveTranscribe] Recognizer FAILED to start: \(error.localizedDescription)")
+            }
+        } else {
+            print("[LiveTranscribe] Stopping recognizer")
+            liveSpeech.stop()
+        }
     }
 
     var body: some View {
@@ -69,11 +104,6 @@ struct RecordingContentView: View {
                     audioLevelIndicator
                 }
 
-                // Live transcript preview (when enabled)
-                if viewModel.state.isRecording && liveTranscribeEnabled {
-                    liveTranscriptPreview
-                }
-
                 // Upload progress
                 if viewModel.state.isUploading {
                     uploadProgressSection
@@ -90,7 +120,14 @@ struct RecordingContentView: View {
                 // Control buttons
                 controlButtons
 
-                Spacer()
+                // Live transcript preview — sits in place of the bottom
+                // Spacer when active, so it gets real estate instead of
+                // being squeezed by a fully-expanded Spacer below it.
+                if viewModel.state.isRecording && liveTranscribeEnabled {
+                    liveTranscriptPreview
+                } else {
+                    Spacer()
+                }
             }
             .padding()
         }
@@ -124,10 +161,31 @@ struct RecordingContentView: View {
         }
         .task {
             await viewModel.requestMicrophonePermission()
+            let status = await LiveSpeechRecognizer.requestAuthorization()
+            speechAuthorized = (status == .authorized)
+            print("[LiveTranscribe] Speech recognition auth status: \(status), authorized=\(speechAuthorized)")
         }
-        .sheet(isPresented: $showRecordingLimitPaywall) {
-            RemotePaywallView(triggerSource: "recording_limit")
+        // Start/stop on-device live transcription based on the toggle + recording state.
+        .onChange(of: liveTranscribeEnabled) { enabled in
+            Task { await syncLiveSpeech(enabled: enabled) }
         }
+        .onChange(of: viewModel.state.isRecording) { isRecording in
+            Task { await syncLiveSpeech(enabled: liveTranscribeEnabled && isRecording) }
+        }
+        .onChange(of: viewModel.selectedLanguageDisplay) { _ in
+            // Locale changed mid-session — restart the recognizer.
+            Task {
+                if liveSpeech.isRunning {
+                    await syncLiveSpeech(enabled: false)
+                    await syncLiveSpeech(enabled: liveTranscribeEnabled && viewModel.state.isRecording)
+                }
+            }
+        }
+        // Paywall used to surface here on free-tier limit, but it interrupted
+        // the recording flow and caused users to lose context. We now show a
+        // non-blocking error in the recording view-model instead; users can
+        // subscribe via Settings / Recordings PRO badge and we'll retry
+        // orphan recordings from disk in a future pass.
     }
 
     // MARK: - Live Transcribe Header
@@ -150,24 +208,19 @@ struct RecordingContentView: View {
             // Options row (when enabled)
             if liveTranscribeEnabled {
                 HStack(spacing: 12) {
-                    // Language picker
+                    // Language picker — bound to view model so the choice is persisted.
+                    // Picker-inside-Menu is the SwiftUI-native pattern; it gets correct
+                    // checkmarks + tap highlighting automatically.
                     Menu {
-                        ForEach(languages, id: \.self) { language in
-                            Button {
-                                selectedLanguage = language
-                            } label: {
-                                HStack {
-                                    Text(language)
-                                    if selectedLanguage == language {
-                                        Image(systemName: "checkmark")
-                                    }
-                                }
+                        Picker("Language", selection: $viewModel.selectedLanguageDisplay) {
+                            ForEach(languages, id: \.self) { language in
+                                Text(language).tag(language)
                             }
                         }
                     } label: {
                         HStack(spacing: 4) {
                             Image(systemName: "globe")
-                            Text(selectedLanguage)
+                            Text(viewModel.selectedLanguageDisplay)
                             Image(systemName: "chevron.down")
                                 .font(.caption)
                         }
@@ -178,13 +231,15 @@ struct RecordingContentView: View {
                         .cornerRadius(8)
                     }
 
-                    // Translate option
+                    // Translate option — pill label now reflects the current selection.
                     Menu {
-                        Button("Off") { translateEnabled = false }
-                        Button("English") { translateEnabled = true }
+                        Picker("Translate", selection: $translateEnabled) {
+                            Text("Off").tag(false)
+                            Text("English").tag(true)
+                        }
                     } label: {
                         HStack(spacing: 4) {
-                            Text("Translate")
+                            Text(translateEnabled ? "English" : "Translate")
                             Image(systemName: "chevron.down")
                                 .font(.caption)
                         }
@@ -196,19 +251,6 @@ struct RecordingContentView: View {
                     }
 
                     Spacer()
-
-                    // Font size button
-                    Button {
-                        // Toggle font size
-                    } label: {
-                        Text("Aa")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(Color(.secondarySystemBackground))
-                            .cornerRadius(8)
-                    }
                 }
                 .padding(.horizontal)
             }
@@ -222,35 +264,48 @@ struct RecordingContentView: View {
     // MARK: - Live Transcript Preview
 
     private var liveTranscriptPreview: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Simulated live transcript
-            Text("Listening...")
-                .font(.caption)
-                .foregroundColor(.blue)
-                .italic()
+        // Read both the @StateObject-backed property AND the @State mirror.
+        // SwiftUI dependency tracking has been inconsistent here — one of
+        // the two reads will reliably trigger a body re-render.
+        let liveText = !liveSpeech.transcript.isEmpty ? liveSpeech.transcript : liveTranscript
+        let showTranslation = translateEnabled && !translatedText.isEmpty
+        let displayedText = showTranslation ? translatedText : liveText
 
-            // Connection status (placeholder)
-            if !viewModel.state.isRecording {
-                HStack {
-                    Text("Connection error")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-
-                    Spacer()
-
-                    Button("Retry") {
-                        // Retry connection
-                    }
-                    .font(.subheadline)
+        return Group {
+            if let err = liveSpeech.errorMessage {
+                Text(err)
+                    .font(.caption)
+                    .foregroundColor(.red)
+            } else if displayedText.isEmpty {
+                Text("Listening…")
+                    .font(.caption)
                     .foregroundColor(.blue)
-                }
-                .padding()
-                .background(Color(.secondarySystemBackground))
-                .cornerRadius(8)
+                    .italic()
+            } else {
+                // Plain Text view, no scrolling — replaces in place as the
+                // recognizer streams partials. Truncates from the head so
+                // the most recent words are always visible.
+                Text(displayedText)
+                    .font(.callout)
+                    .lineLimit(4)
+                    .truncationMode(.head)
+                    .multilineTextAlignment(.leading)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(8)
         .padding(.horizontal)
+        .onReceive(liveSpeech.$transcript.receive(on: DispatchQueue.main)) { newValue in
+            liveTranscript = newValue
+        }
+        .modifier(LiveTranslationModifier(
+            enabled: translateEnabled,
+            sourceCode: viewModel.selectedLanguageCode,    // nil = Auto (auto-detect)
+            transcript: liveTranscript,
+            translatedText: $translatedText
+        ))
     }
 
     // MARK: - Title Section
@@ -264,6 +319,39 @@ struct RecordingContentView: View {
             TextField("Enter title", text: $viewModel.recordingTitle)
                 .textFieldStyle(.roundedBorder)
                 .disabled(!viewModel.state.canStartRecording)
+
+            HStack {
+                Text("Summary Language")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Spacer()
+                Menu {
+                    ForEach(languages, id: \.self) { language in
+                        Button {
+                            viewModel.selectedLanguageDisplay = language
+                        } label: {
+                            HStack {
+                                Text(language)
+                                if viewModel.selectedLanguageDisplay == language {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "globe")
+                        Text(viewModel.selectedLanguageDisplay)
+                        Image(systemName: "chevron.down").font(.caption2)
+                    }
+                    .font(.subheadline)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(8)
+                }
+            }
+            .padding(.top, 4)
         }
         .padding(.horizontal)
     }
@@ -348,14 +436,11 @@ struct RecordingContentView: View {
     private var mainButton: some View {
         switch viewModel.state {
         case .idle, .error:
-            // Record button (gated for free users after limit)
+            // Record button — no client-side paywall gate; backend enforces
+            // the subscription rule when the user attempts to upload.
             Button {
-                if hasReachedRecordingLimit {
-                    showRecordingLimitPaywall = true
-                } else {
-                    incrementRecordingCount()
-                    Task { await viewModel.startRecording() }
-                }
+                incrementRecordingCount()
+                Task { await viewModel.startRecording() }
             } label: {
                 ZStack {
                     Circle()
@@ -423,6 +508,73 @@ private struct PulsingModifier: ViewModifier {
             .onAppear {
                 isPulsing = true
             }
+    }
+}
+
+// MARK: - Live Translation
+
+/// Driver for live English translation of the recognized transcript.
+/// iOS 17.4+ uses Apple's on-device Translation framework; older iOS is
+/// a no-op so the view falls back to the source text.
+private struct LiveTranslationModifier: ViewModifier {
+    let enabled: Bool
+    let sourceCode: String?    // nil = auto-detect
+    let transcript: String
+    @Binding var translatedText: String
+
+    func body(content: Content) -> some View {
+        if #available(iOS 18.0, *), enabled {
+            content.modifier(TranslationActiveModifier(
+                sourceCode: sourceCode,
+                transcript: transcript,
+                translatedText: $translatedText
+            ))
+        } else {
+            content
+        }
+    }
+}
+
+@available(iOS 18.0, *)
+private struct TranslationActiveModifier: ViewModifier {
+    let sourceCode: String?
+    let transcript: String
+    @Binding var translatedText: String
+
+    @State private var configuration: TranslationSession.Configuration?
+    @StateObject private var translator = LiveTranslator()
+
+    func body(content: Content) -> some View {
+        content
+            .translationTask(configuration) { session in
+                translator.bind(session: session)
+                // The session lives for the lifetime of this task. Park here
+                // until SwiftUI cancels us (configuration change or unmount).
+                for await _ in AsyncStream<Never> { _ in } { }
+            }
+            .onAppear { rebuildConfig() }
+            .onChange(of: sourceCode) { _ in
+                translator.reset()
+                rebuildConfig()
+            }
+            .onChange(of: transcript) { newValue in
+                translator.submit(newValue)
+            }
+            .onChange(of: translator.translatedText) { newValue in
+                translatedText = newValue
+            }
+            .onDisappear {
+                translator.reset()
+                translatedText = ""
+            }
+    }
+
+    private func rebuildConfig() {
+        let source: Locale.Language? = sourceCode.map { Locale.Language(identifier: $0) }
+        configuration = TranslationSession.Configuration(
+            source: source,
+            target: Locale.Language(identifier: "en")
+        )
     }
 }
 

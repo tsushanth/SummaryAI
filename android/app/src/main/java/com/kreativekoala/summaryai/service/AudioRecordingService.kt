@@ -7,17 +7,22 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.media.MediaRecorder
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
 import com.kreativekoala.summaryai.MainActivity
 import com.kreativekoala.summaryai.R
+import com.kreativekoala.summaryai.data.repository.RecordingsRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +33,8 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
+
+private const val TAG = "AudioRecordingService"
 
 /**
  * Recording state
@@ -42,7 +49,23 @@ data class RecordingState(
 )
 
 /**
- * Foreground service for audio recording
+ * Upload state, exposed independently so the recording screen can show progress
+ * even though the upload now runs in the service (surviving Activity destruction).
+ */
+data class UploadState(
+    val isUploading: Boolean = false,
+    val progress: Float = 0f,
+    val file: File? = null,
+    val uploadedRecordingId: String? = null,
+    val error: String? = null
+)
+
+/**
+ * Foreground service for audio recording and upload.
+ *
+ * The same service handles the upload phase so it survives Activity destruction
+ * (screen off, app backgrounded, ViewModel cleared). The foreground type
+ * transitions from MICROPHONE → DATA_SYNC after recording stops.
  */
 @AndroidEntryPoint
 class AudioRecordingService : Service() {
@@ -54,17 +77,49 @@ class AudioRecordingService : Service() {
         const val ACTION_STOP = "com.kreativekoala.summaryai.action.STOP_RECORDING"
         const val ACTION_PAUSE = "com.kreativekoala.summaryai.action.PAUSE_RECORDING"
         const val ACTION_RESUME = "com.kreativekoala.summaryai.action.RESUME_RECORDING"
+        const val ACTION_UPLOAD = "com.kreativekoala.summaryai.action.UPLOAD_RECORDING"
+        const val EXTRA_FILE_PATH = "extra_file_path"
+        const val EXTRA_TITLE = "extra_title"
+        const val EXTRA_DURATION = "extra_duration"
+
         private const val MAX_AMPLITUDES = 50
+
+        /**
+         * Persistent location for in-progress and pending-retry recordings.
+         * Lives in filesDir (not cacheDir) so Android won't purge it under
+         * storage pressure.
+         */
+        fun recordingsDir(context: Context): File {
+            val dir = File(context.filesDir, "recordings")
+            if (!dir.exists()) dir.mkdirs()
+            return dir
+        }
+
+        /** Returns audio files that finished recording but haven't been uploaded. */
+        fun listPendingUploads(context: Context): List<File> {
+            return recordingsDir(context)
+                .listFiles { f -> f.isFile && f.name.endsWith(".m4a") }
+                ?.sortedByDescending { it.lastModified() }
+                ?: emptyList()
+        }
     }
+
+    @Inject lateinit var recordingsRepository: RecordingsRepository
 
     private val binder = RecordingBinder()
     private var mediaRecorder: MediaRecorder? = null
     private var timerJob: Job? = null
     private var amplitudeJob: Job? = null
-    private val scope = CoroutineScope(Dispatchers.Main + Job())
+    private var uploadJob: Job? = null
+
+    // SupervisorJob so a failed upload doesn't take down the timer scope
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     private val _recordingState = MutableStateFlow(RecordingState())
     val recordingState: StateFlow<RecordingState> = _recordingState.asStateFlow()
+
+    private val _uploadState = MutableStateFlow(UploadState())
+    val uploadState: StateFlow<UploadState> = _uploadState.asStateFlow()
 
     inner class RecordingBinder : Binder() {
         fun getService(): AudioRecordingService = this@AudioRecordingService
@@ -83,6 +138,14 @@ class AudioRecordingService : Service() {
             ACTION_STOP -> stopRecording()
             ACTION_PAUSE -> pauseRecording()
             ACTION_RESUME -> resumeRecording()
+            ACTION_UPLOAD -> {
+                val path = intent.getStringExtra(EXTRA_FILE_PATH)
+                val title = intent.getStringExtra(EXTRA_TITLE) ?: "Recording"
+                val duration = intent.getIntExtra(EXTRA_DURATION, 0)
+                if (path != null) {
+                    startUpload(File(path), title, duration)
+                }
+            }
         }
         return START_NOT_STICKY
     }
@@ -94,7 +157,7 @@ class AudioRecordingService : Service() {
                 "Recording",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Shows when recording is in progress"
+                description = "Shows when recording or uploading is in progress"
                 setShowBadge(false)
             }
             val notificationManager = getSystemService(NotificationManager::class.java)
@@ -102,7 +165,7 @@ class AudioRecordingService : Service() {
         }
     }
 
-    private fun createNotification(): Notification {
+    private fun createRecordingNotification(): Notification {
         val state = _recordingState.value
         val duration = formatDuration(state.durationSeconds)
 
@@ -134,7 +197,7 @@ class AudioRecordingService : Service() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(if (state.isPaused) "Recording Paused" else "Recording")
             .setContentText(duration)
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // Use proper icon
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .addAction(
@@ -143,6 +206,23 @@ class AudioRecordingService : Service() {
                 pauseResumeIntent
             )
             .addAction(R.drawable.ic_launcher_foreground, "Stop", stopIntent)
+            .build()
+    }
+
+    private fun createUploadNotification(progressPercent: Int): Notification {
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            Intent(this, MainActivity::class.java),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("Uploading recording")
+            .setContentText("$progressPercent% — keep the app open until upload finishes")
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentIntent(pendingIntent)
+            .setOngoing(true)
+            .setProgress(100, progressPercent, progressPercent == 0)
             .build()
     }
 
@@ -174,7 +254,7 @@ class AudioRecordingService : Service() {
                 outputFile = outputFile
             )
 
-            startForeground(NOTIFICATION_ID, createNotification())
+            startForegroundAs(ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE, createRecordingNotification())
             startTimer()
             startAmplitudeMonitor()
         } catch (e: Exception) {
@@ -192,7 +272,7 @@ class AudioRecordingService : Service() {
                 _recordingState.value = _recordingState.value.copy(isPaused = true)
                 timerJob?.cancel()
                 amplitudeJob?.cancel()
-                updateNotification()
+                updateNotification(createRecordingNotification())
             } catch (e: Exception) {
                 _recordingState.value = _recordingState.value.copy(
                     error = "Failed to pause: ${e.message}"
@@ -208,7 +288,7 @@ class AudioRecordingService : Service() {
                 _recordingState.value = _recordingState.value.copy(isPaused = false)
                 startTimer()
                 startAmplitudeMonitor()
-                updateNotification()
+                updateNotification(createRecordingNotification())
             } catch (e: Exception) {
                 _recordingState.value = _recordingState.value.copy(
                     error = "Failed to resume: ${e.message}"
@@ -217,6 +297,11 @@ class AudioRecordingService : Service() {
         }
     }
 
+    /**
+     * Stops the recording and returns the output file. Does NOT stop the service —
+     * the caller must follow up with [startUpload] or [discardRecording] so the
+     * foreground service stays alive across the upload phase.
+     */
     fun stopRecording(): File? {
         timerJob?.cancel()
         amplitudeJob?.cancel()
@@ -230,15 +315,100 @@ class AudioRecordingService : Service() {
             }
         } catch (e: Exception) {
             // Recording might have been too short
+            Log.w(TAG, "Error stopping MediaRecorder", e)
         }
 
         mediaRecorder = null
-
         _recordingState.value = RecordingState()
-        stopForeground(STOP_FOREGROUND_REMOVE)
-        stopSelf()
-
+        // Note: foreground state is intentionally kept so caller can start upload.
+        // If neither startUpload nor discardRecording is called, the service will
+        // be killed by Android due to type-mismatch (microphone declared but no
+        // mic active). Callers must follow up.
         return outputFile
+    }
+
+    /** Drops the in-progress recording entirely and stops the service. */
+    fun discardRecording() {
+        val file = _recordingState.value.outputFile
+        try {
+            mediaRecorder?.apply {
+                runCatching { stop() }
+                release()
+            }
+        } catch (_: Exception) { /* ignore */ }
+        mediaRecorder = null
+        file?.delete()
+        metaFileFor(file)?.delete()
+        _recordingState.value = RecordingState()
+        _uploadState.value = UploadState()
+        ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        stopSelf()
+    }
+
+    /**
+     * Uploads the given recording file. Persists title+duration to a sidecar
+     * meta file so the upload can be retried after a crash. Switches the
+     * foreground service type to DATA_SYNC for the duration of the upload.
+     */
+    fun startUpload(file: File, title: String, durationSeconds: Int) {
+        if (!file.exists()) {
+            _uploadState.value = UploadState(error = "Recording file not found")
+            ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+            stopSelf()
+            return
+        }
+
+        writeMetaFile(file, title, durationSeconds)
+
+        _uploadState.value = UploadState(isUploading = true, progress = 0f, file = file)
+        startForegroundAs(ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC, createUploadNotification(0))
+
+        uploadJob?.cancel()
+        uploadJob = scope.launch(Dispatchers.IO) {
+            var lastPct = -1
+            val result = runCatching {
+                recordingsRepository.uploadRecording(
+                    title = title,
+                    audioFile = file,
+                    durationSeconds = durationSeconds,
+                    onProgress = { progress ->
+                        val pct = (progress * 100).toInt().coerceIn(0, 100)
+                        if (pct != lastPct) {
+                            lastPct = pct
+                            _uploadState.value = _uploadState.value.copy(progress = progress)
+                            updateNotification(createUploadNotification(pct))
+                        }
+                    }
+                )
+            }.getOrElse { Result.failure(it) }
+
+            result.fold(
+                onSuccess = { recording ->
+                    _uploadState.value = UploadState(
+                        isUploading = false,
+                        progress = 1f,
+                        uploadedRecordingId = recording.id
+                    )
+                    file.delete()
+                    metaFileFor(file)?.delete()
+                },
+                onFailure = { error ->
+                    Log.e(TAG, "Upload failed, file retained for retry: ${file.absolutePath}", error)
+                    _uploadState.value = UploadState(
+                        isUploading = false,
+                        file = file,
+                        error = error.message ?: "Upload failed"
+                    )
+                    // Intentionally keep the file + meta sidecar for retry
+                }
+            )
+            ServiceCompat.stopForeground(this@AudioRecordingService, ServiceCompat.STOP_FOREGROUND_REMOVE)
+            stopSelf()
+        }
+    }
+
+    fun clearUploadState() {
+        _uploadState.value = UploadState()
     }
 
     private fun startTimer() {
@@ -248,7 +418,7 @@ class AudioRecordingService : Service() {
                 _recordingState.value = _recordingState.value.copy(
                     durationSeconds = _recordingState.value.durationSeconds + 1
                 )
-                updateNotification()
+                updateNotification(createRecordingNotification())
             }
         }
     }
@@ -277,19 +447,32 @@ class AudioRecordingService : Service() {
         }
     }
 
-    private fun updateNotification() {
+    private fun startForegroundAs(type: Int, notification: Notification) {
+        ServiceCompat.startForeground(this, NOTIFICATION_ID, notification, type)
+    }
+
+    private fun updateNotification(notification: Notification) {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(NOTIFICATION_ID, createNotification())
+        notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
     private fun createOutputFile(): File {
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
         val fileName = "recording_$timestamp.m4a"
-        val directory = File(cacheDir, "recordings")
-        if (!directory.exists()) {
-            directory.mkdirs()
+        return File(recordingsDir(this), fileName)
+    }
+
+    private fun writeMetaFile(audio: File, title: String, durationSeconds: Int) {
+        runCatching {
+            metaFileFor(audio)?.writeText(
+                "title=$title\nduration=$durationSeconds\n"
+            )
         }
-        return File(directory, fileName)
+    }
+
+    private fun metaFileFor(audio: File?): File? {
+        if (audio == null) return null
+        return File(audio.parentFile, audio.nameWithoutExtension + ".meta")
     }
 
     private fun formatDuration(seconds: Int): String {
@@ -310,5 +493,7 @@ class AudioRecordingService : Service() {
         amplitudeJob?.cancel()
         mediaRecorder?.release()
         mediaRecorder = null
+        // Note: don't cancel uploadJob here — onDestroy can fire briefly when the
+        // last bind is removed. The upload coroutine completes stopSelf() itself.
     }
 }

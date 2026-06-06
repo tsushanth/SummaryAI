@@ -1,6 +1,9 @@
 package com.kreativekoala.summaryai.ui.paywall
 
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
@@ -10,32 +13,38 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.kreativekoala.paywallkit.manager.ExperimentManager
+import com.kreativekoala.paywallkit.manager.PromoCodeManager
 import com.kreativekoala.paywallkit.models.PaywallFeature
 import com.kreativekoala.paywallkit.models.PaywallProduct
 import com.kreativekoala.paywallkit.models.PaywallTheme
 import com.kreativekoala.paywallkit.view.PaywallView
+import com.kreativekoala.summaryai.service.BillingProduct
 
-/**
- * Paywall screen - uses PaywallKit with native templates.
- */
 @Composable
 fun PaywallScreen(
     onNavigateBack: () -> Unit,
     onPurchaseSuccess: () -> Unit,
+    forceHardGate: Boolean = false,
     viewModel: PaywallViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val products by viewModel.products.collectAsState()
+    val isSubscribed by viewModel.isSubscribed.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
     val activity = LocalContext.current as? Activity
 
-    // If already subscribed, navigate back
-    LaunchedEffect(uiState.purchaseSuccess) {
-        if (uiState.purchaseSuccess) {
-            onPurchaseSuccess()
-        }
+    // Hard gate overrides the server-side ExperimentManager. Used when the
+    // user attempts a gated action (start recording, join meeting, place call)
+    // after exhausting their free opens — they must convert or background.
+    val dismissible = if (forceHardGate) false else ExperimentManager.isDismissible()
+
+    BackHandler(enabled = !dismissible) { /* swallow back */ }
+
+    LaunchedEffect(isSubscribed) {
+        if (isSubscribed) onPurchaseSuccess()
     }
 
-    val offering = uiState.offering
-    if (offering == null || uiState.isLoading) {
+    if (products.isEmpty() || isLoading) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -47,18 +56,17 @@ fun PaywallScreen(
         return
     }
 
-    val paywallProducts = offering.availablePackages.map { pkg ->
+    val paywallProducts = products.map { product ->
         PaywallProduct(
-            id = pkg.product.id,
-            localizedPrice = pkg.product.price.formatted,
-            price = pkg.product.price.amountMicros / 1_000_000.0,
-            currencyCode = pkg.product.price.currencyCode,
-            trialDays = 3,
-            period = when {
-                pkg.packageType.name.contains("WEEKLY", ignoreCase = true) -> PaywallProduct.Period.WEEKLY
-                pkg.packageType.name.contains("MONTHLY", ignoreCase = true) -> PaywallProduct.Period.MONTHLY
-                pkg.packageType.name.contains("ANNUAL", ignoreCase = true) -> PaywallProduct.Period.YEARLY
-                else -> PaywallProduct.Period.MONTHLY
+            id = product.productId,
+            localizedPrice = product.localizedPrice,
+            price = product.price,
+            currencyCode = product.currencyCode,
+            trialDays = product.trialDays,
+            period = when (product.period) {
+                BillingProduct.Period.WEEKLY -> PaywallProduct.Period.WEEKLY
+                BillingProduct.Period.MONTHLY -> PaywallProduct.Period.MONTHLY
+                BillingProduct.Period.YEARLY -> PaywallProduct.Period.YEARLY
             }
         )
     }
@@ -73,6 +81,7 @@ fun PaywallScreen(
 
     PaywallView(
         appId = "meetingmind",
+        placement = if (PromoCodeManager.activeCode != null) "promo_code_onboarding" else "onboarding",
         appName = "MeetingMind",
         features = features,
         products = paywallProducts,
@@ -81,24 +90,19 @@ fun PaywallScreen(
             accent2 = Color(0xFF9C27B0)
         ),
         showWinback = true,
-        isDismissible = true,
+        isDismissible = dismissible,
         onPurchase = { productId ->
-            if (activity != null) {
-                val pkg = offering.availablePackages.firstOrNull { it.product.id == productId }
-                if (pkg != null) {
-                    viewModel.selectPlan(
-                        when {
-                            pkg.packageType.name.contains("WEEKLY", ignoreCase = true) -> "weekly"
-                            pkg.packageType.name.contains("MONTHLY", ignoreCase = true) -> "monthly"
-                            pkg.packageType.name.contains("ANNUAL", ignoreCase = true) -> "yearly"
-                            else -> "yearly"
-                        }
-                    )
-                    viewModel.purchase(activity)
-                }
+            val product = products.firstOrNull { it.productId == productId }
+            if (product != null && activity != null) {
+                viewModel.purchase(activity, product)
             }
         },
         onRestore = { viewModel.restorePurchases() },
+        onRedeemCode = {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/redeem?code=mm2024promo"))
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            try { activity?.startActivity(intent) } catch (_: Exception) {}
+        },
         onDismiss = { onNavigateBack() }
     )
 }

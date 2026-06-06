@@ -12,4 +12,19 @@ platform :android do
       release_status: "completed"
     )
   end
+
+  # Push only the en-US phone screenshots (and any other listing assets in
+  # fastlane/metadata/android/<locale>/images/) without touching the AAB.
+  # Use this lane for screenshot-only updates — no app version bump needed.
+  lane :screenshots do
+    upload_to_play_store(
+      track: "production",
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      skip_upload_metadata: true,
+      skip_upload_changelogs: true,
+      skip_upload_images: false,
+      skip_upload_screenshots: false
+    )
+  end
 end

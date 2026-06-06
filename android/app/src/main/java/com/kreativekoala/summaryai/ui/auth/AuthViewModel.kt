@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kreativekoala.summaryai.domain.model.AuthState
 import com.kreativekoala.summaryai.service.AuthService
+import com.kreativekoala.summaryai.service.FacebookSDKHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,6 +40,9 @@ class AuthViewModel @Inject constructor(
                 isLoading = false,
                 error = result.exceptionOrNull()?.message
             )
+            // Helper dedupes — safe to call on every successful sign-in; only the
+            // first time per install actually fires CompleteRegistration to Meta.
+            if (result.isSuccess) FacebookSDKHelper.logSignUp("google")
         }
     }
 
@@ -55,6 +59,7 @@ class AuthViewModel @Inject constructor(
                 isLoading = false,
                 error = result.exceptionOrNull()?.message
             )
+            if (result.isSuccess) FacebookSDKHelper.logSignUp("email")
         }
     }
 
@@ -66,6 +71,7 @@ class AuthViewModel @Inject constructor(
                 isLoading = false,
                 error = result.exceptionOrNull()?.message
             )
+            if (result.isSuccess) FacebookSDKHelper.logSignUp("email")
         }
     }
 

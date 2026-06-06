@@ -4,11 +4,40 @@ import GoogleSignIn
 import FirebaseCore
 import AppTrackingTransparency
 import PaywallKit
+import RatingKit
+import FacebookCore
+
+// MARK: - Facebook SDK AppDelegate (ensures SDK initializes at the correct lifecycle point)
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        ApplicationDelegate.shared.application(application, didFinishLaunchingWithOptions: launchOptions)
+        return true
+    }
+
+    func application(_ app: UIApplication, open url: URL,
+                     options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+        ApplicationDelegate.shared.application(app, open: url, options: options)
+    }
+
+    /// Called when iOS wakes the app to deliver completion events for a
+    /// background URLSession (matches BackgroundUploadManager's identifier).
+    /// We stash the handler so the manager can call it after processing.
+    func application(_ application: UIApplication,
+                     handleEventsForBackgroundURLSession identifier: String,
+                     completionHandler: @escaping () -> Void) {
+        Task { @MainActor in
+            BackgroundUploadManager.shared.backgroundCompletionHandler = completionHandler
+        }
+    }
+}
 
 // MARK: - App Entry Point
 
 @main
 struct SummaryAIApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var authService = AuthService()
     @StateObject private var apiClient = SummaryAIAPIClient()
 
@@ -28,6 +57,16 @@ struct SummaryAIApp: App {
         // Configure StoreKit 2 via PaywallKit (replaces RevenueCat)
         StoreManager.shared.configure(productIds: ProductID.allIDs)
 
+        // Configure PaywallKit SDK (offer-after-dismiss, promo codes)
+        PaywallKitSDK.shared.configure(
+            appId: "MeetingMind",
+            appName: "Meeting Mind",
+            productIds: ProductID.allIDs
+        )
+
+        // Check server for template override
+        ExperimentManager.shared.checkServerOverride(appId: "meetingmind")
+
         // Track Apple Search Ads attribution for ASA bid optimization
         AttributionService.shared.trackAttribution()
 
@@ -36,13 +75,21 @@ struct SummaryAIApp: App {
             await PremiumManager.shared.validateSubscriptionState()
         }
 
+        // Facebook SDK is initialized via @UIApplicationDelegateAdaptor (AppDelegate above)
+        // This ensures proper lifecycle timing — init() may be too early for UIApplication.shared
+
         // NOTE: TikTok SDK initialization is deferred until after ATT consent
         // (see requestTrackingPermission below)
+
+        // Server-driven rating prompts (variant testing + analytics).
+        RatingKit.configure(appId: "meetingmind", apiUrl: "https://paywallkit-api.fly.dev")
+        RatingKit.shared.trackAppOpen()
     }
 
     var body: some Scene {
         WindowGroup {
             RootView()
+                .ratingPrompt()
                 .environmentObject(authService)
                 .environmentObject(apiClient)
                 .onAppear {
@@ -54,6 +101,12 @@ struct SummaryAIApp: App {
                     apiClient.tokenRefreshHandler = {
                         try await authService.refreshSession()
                     }
+                    // Wire background upload manager so it can call complete-upload
+                    // even when resumed from the background URLSession delegate.
+                    BackgroundUploadManager.shared.completeUploadHandler = { [weak apiClient] recordingId, fileSize in
+                        _ = try await apiClient?.completeUpload(recordingId: recordingId, fileSize: fileSize)
+                    }
+                    BackgroundUploadManager.shared.resume()
                 }
                 .task {
                     // Request ATT permission then initialize tracking SDKs
@@ -62,6 +115,7 @@ struct SummaryAIApp: App {
                 .onOpenURL { url in
                     // Handle Google Sign-In callback
                     GIDSignIn.sharedInstance.handle(url)
+                    PromoCodeManager.shared.handleURL(url)
                 }
         }
     }
@@ -74,6 +128,9 @@ struct SummaryAIApp: App {
         try? await Task.sleep(for: .seconds(1))
 
         let status = await ATTrackingManager.requestTrackingAuthorization()
+
+        // Forward ATT result to Facebook SDK for proper attribution
+        FacebookSDKHelper.shared.setAdvertiserTracking(enabled: status == .authorized)
 
         switch status {
         case .authorized:
@@ -194,9 +251,9 @@ struct MainTabView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var showAppOpenPaywall = false
 
-    // Show paywall on 1st, 2nd, 4th app open (then every 2nd after)
-    private static let paywallTriggerOpens: Set<Int> = [1, 2, 4]
-    private static let paywallRecurringInterval = 2
+    // Show paywall on 1st and 3rd app open only (then every 14th after)
+    private static let paywallTriggerOpens: Set<Int> = [1, 3]
+    private static let paywallRecurringInterval = 14
 
     init() {
         // Initialize with a temporary apiClient - will be replaced by environment
@@ -252,8 +309,8 @@ struct MainTabView: View {
             }
             checkAppOpenPaywall()
         }
-        .reviewPrompt()
         .onAppear {
+            Task { await PromoCodeManager.shared.checkClipboard() }
             paywallCoordinator.checkWinbackEligibility()
         }
         .onChange(of: scenePhase) { _, newPhase in

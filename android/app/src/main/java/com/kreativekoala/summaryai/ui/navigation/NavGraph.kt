@@ -82,6 +82,7 @@ sealed class Screen(val route: String) {
     object Phone : Screen("phone")
     object Settings : Screen("settings")
     object Paywall : Screen("paywall")
+    object HardPaywall : Screen("paywall/hard")
 }
 
 // Bottom navigation items
@@ -128,8 +129,21 @@ val bottomNavItems = listOf(
 fun MeetingMindNavGraph(
     isAuthenticated: Boolean,
     hasCompletedOnboarding: Boolean,
+    showPaywall: Boolean = false,
+    // Live check — called at every gated action (start recording, join meeting,
+    // place call) so the gate is re-evaluated, not captured at composition.
+    shouldHardGate: () -> Boolean = { false },
     navController: NavHostController = rememberNavController()
 ) {
+    // Helper for routing gated actions. Mutating navController inline reads
+    // cleaner at call sites and keeps the hard-gate logic centralized.
+    val navigateGated: (String) -> Unit = { targetRoute ->
+        if (shouldHardGate()) {
+            navController.navigate(Screen.HardPaywall.route)
+        } else {
+            navController.navigate(targetRoute)
+        }
+    }
     // Only compute startDestination once on initial composition.
     // Subsequent state changes are handled by the LaunchedEffect below.
     val startDestination = remember {
@@ -137,6 +151,15 @@ fun MeetingMindNavGraph(
             !isAuthenticated -> Screen.Auth.route
             !hasCompletedOnboarding -> Screen.Onboarding.route
             else -> Screen.Recordings.route
+        }
+    }
+
+    // Navigate to paywall when triggered from MainActivity (open count gate)
+    LaunchedEffect(showPaywall, isAuthenticated, hasCompletedOnboarding) {
+        if (showPaywall && isAuthenticated && hasCompletedOnboarding) {
+            navController.navigate(Screen.Paywall.route) {
+                launchSingleTop = true
+            }
         }
     }
 
@@ -207,13 +230,23 @@ fun MeetingMindNavGraph(
                                         // Tab is already selected - trigger scroll-to-top
                                         tabReselectionState.onTabReselected()
                                     } else {
-                                        // Navigate to the new tab
-                                        navController.navigate(item.screen.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
+                                        // Gate Recording + Phone tabs at the action level —
+                                        // if the user has exhausted free opens AND is not
+                                        // subscribed, route them to the hard paywall instead.
+                                        val isGatedAction = item.screen.route == Screen.Recording.route ||
+                                                item.screen.route == Screen.Phone.route
+                                        if (isGatedAction && shouldHardGate()) {
+                                            navController.navigate(Screen.HardPaywall.route) {
+                                                launchSingleTop = true
                                             }
-                                            launchSingleTop = true
-                                            restoreState = true
+                                        } else {
+                                            navController.navigate(item.screen.route) {
+                                                popUpTo(navController.graph.findStartDestination().id) {
+                                                    saveState = true
+                                                }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
                                         }
                                     }
                                 },
@@ -273,9 +306,7 @@ fun MeetingMindNavGraph(
                     onRecordingClick = { recordingId ->
                         navController.navigate(Screen.RecordingDetail.createRoute(recordingId))
                     },
-                    onStartRecording = {
-                        navController.navigate(Screen.Recording.route)
-                    },
+                    onStartRecording = { navigateGated(Screen.Recording.route) },
                     onSearchClick = {
                         navController.navigate(Screen.Search.route)
                     }
@@ -322,9 +353,7 @@ fun MeetingMindNavGraph(
             // Meetings
             composable(Screen.Meetings.route) {
                 MeetingsScreen(
-                    onJoinMeetingClick = {
-                        navController.navigate(Screen.JoinMeeting.route)
-                    },
+                    onJoinMeetingClick = { navigateGated(Screen.JoinMeeting.route) },
                     onRecordingClick = { recordingId ->
                         navController.navigate(Screen.RecordingDetail.createRoute(recordingId))
                     },
@@ -396,7 +425,7 @@ fun MeetingMindNavGraph(
                 )
             }
 
-            // Paywall
+            // Paywall (soft — onboarding + manual upgrade)
             composable(Screen.Paywall.route) {
                 PaywallScreen(
                     onNavigateBack = {
@@ -414,6 +443,26 @@ fun MeetingMindNavGraph(
                             }
                         }
                     }
+                )
+            }
+
+            // HardPaywall — entered when user attempts a gated action past the
+            // free limit. Non-dismissable, swallows back.
+            composable(Screen.HardPaywall.route) {
+                PaywallScreen(
+                    onNavigateBack = {
+                        // No-op fallback. The PaywallScreen swallows back internally
+                        // when forceHardGate=true, but onDismiss can still be invoked
+                        // by PaywallView's close button if isDismissible were true.
+                    },
+                    onPurchaseSuccess = {
+                        if (!navController.popBackStack()) {
+                            navController.navigate(Screen.Recordings.route) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    },
+                    forceHardGate = true
                 )
             }
         }

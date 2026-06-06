@@ -73,7 +73,7 @@ final class AttributionService {
 
     private func sendAttributionToBackend(token: String) async throws {
         // Build the API request
-        guard let url = URL(string: "https://summary-ai-backend-917362189743.us-central1.run.app/v1/api/attribution/apple-search-ads") else {
+        guard let url = URL(string: "https://summary-ai-backend.fly.dev/v1/api/attribution/apple-search-ads") else {
             throw AttributionError.invalidURL
         }
 

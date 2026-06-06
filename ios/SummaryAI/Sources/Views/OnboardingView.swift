@@ -1,4 +1,5 @@
 import SwiftUI
+import PaywallKit
 
 // MARK: - Onboarding View
 
@@ -6,6 +7,7 @@ import SwiftUI
 struct OnboardingView: View {
     @Binding var hasCompletedOnboarding: Bool
     @State private var currentPage = 0
+    @State private var showEmailCapture = false
     @State private var showNotificationPrompt = false
 
     private let pages: [OnboardingPage] = [
@@ -86,7 +88,7 @@ struct OnboardingView: View {
                             currentPage += 1
                         }
                     } else {
-                        showNotificationPrompt = true
+                        showEmailCapture = true
                     }
                 } label: {
                     HStack {
@@ -111,13 +113,21 @@ struct OnboardingView: View {
                 // Skip button (only on first pages)
                 if currentPage < pages.count - 1 {
                     Button("Skip") {
-                        showNotificationPrompt = true
+                        showEmailCapture = true
                     }
                     .foregroundColor(.secondary)
                     .font(.subheadline)
                 }
             }
             .padding(.bottom, 40)
+        }
+        .fullScreenCover(isPresented: $showEmailCapture) {
+            EmailCaptureView(
+                onContinue: {
+                    showEmailCapture = false
+                    showNotificationPrompt = true
+                }
+            )
         }
         .alert("Allow Meeting Mind to send you notifications?", isPresented: $showNotificationPrompt) {
             Button("Allow") {

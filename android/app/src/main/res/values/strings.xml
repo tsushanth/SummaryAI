@@ -46,6 +46,8 @@
     <string name="recording_state_paused">PAUSED</string>
     <string name="recording_state_recording">RECORDING</string>
     <string name="uploading">Uploading…</string>
+    <string name="live_transcribe">Live Transcribe</string>
+    <string name="live_transcribe_listening">Listening…</string>
 
     <!-- Recordings List -->
     <string name="all">All</string>
@@ -269,4 +271,8 @@
     <string name="language_portuguese">Português</string>
     <string name="language_italian">Italiano</string>
     <string name="language_hindi">हिन्दी</string>
+
+    <!-- Facebook SDK -->
+    <string name="facebook_app_id">2151317385689073</string>
+    <string name="facebook_client_token">d50af257c9bd994081b1686067f83e24</string>
 </resources>

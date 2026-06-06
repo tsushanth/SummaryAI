@@ -150,13 +150,18 @@ struct WinbackOfferView: View {
 
                     // Auto-renewal disclosure (required by App Store Review Guidelines)
                     if let yearly = yearlyProduct {
-                        let trialText = yearly.trialDays.map { "After your \(/bin/zsh)-day free trial, " } ?? ""
-                        Text("\(trialText)you will automatically be charged \(yearly.localizedPrice)/year. Subscription auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in App Store Settings.")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 24)
-                            .padding(.bottom, 24)
+                        Group {
+                            if let trialDays = yearly.trialDays {
+                                Text("After your " + String(trialDays) + "-day free trial, you will automatically be charged " + yearly.localizedPrice + "/year. Subscription auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in App Store Settings.")
+                            } else {
+                                Text("You will automatically be charged " + yearly.localizedPrice + "/year. Subscription auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in App Store Settings.")
+                            }
+                        }
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 24)
                     }
                 }
             }

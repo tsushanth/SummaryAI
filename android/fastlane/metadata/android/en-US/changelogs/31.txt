@@ -1,0 +1,2 @@
+• Fixes Google Sign-In failing on Play Store installs (BadAuthentication)
+• Stability + reliability improvements

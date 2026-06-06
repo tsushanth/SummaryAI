@@ -1,0 +1,2 @@
+• Stronger free-tier limit enforcement when starting a recording or joining a meeting
+• Performance polish and bug fixes
