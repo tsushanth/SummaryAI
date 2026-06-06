@@ -18,6 +18,8 @@ enum APIError: Error, LocalizedError {
     case noAccessToken
     case fileError(String)
     case consentRequired
+    case subscriptionRequired
+    case freeTierLimitReached
     case unknown(Error)
 
     var errorDescription: String? {
@@ -50,6 +52,8 @@ enum APIError: Error, LocalizedError {
             return "File error: \(message)"
         case .consentRequired:
             return "AI data sharing consent is required. Please grant consent in Settings > Data & Privacy."
+        case .subscriptionRequired, .freeTierLimitReached:
+            return "You've reached the free recording limit. Upgrade to Pro for unlimited recordings."
         case .unknown(let error):
             return "An unexpected error occurred: \(error.localizedDescription)"
         }

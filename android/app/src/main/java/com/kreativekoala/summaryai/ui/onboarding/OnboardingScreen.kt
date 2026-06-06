@@ -7,17 +7,26 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.kreativekoala.paywallkit.manager.PaywallManager
 import com.kreativekoala.summaryai.R
 import kotlinx.coroutines.launch
 
@@ -58,6 +67,17 @@ fun OnboardingScreen(
 
     val pagerState = rememberPagerState(pageCount = { pages.size })
     val scope = rememberCoroutineScope()
+    var showEmailCapture by remember { mutableStateOf(false) }
+
+    if (showEmailCapture) {
+        EmailCaptureScreen(
+            onContinue = {
+                viewModel.completeOnboarding()
+                onComplete()
+            }
+        )
+        return
+    }
 
     Column(
         modifier = Modifier
@@ -70,10 +90,7 @@ fun OnboardingScreen(
             horizontalArrangement = Arrangement.End
         ) {
             TextButton(
-                onClick = {
-                    viewModel.completeOnboarding()
-                    onComplete()
-                }
+                onClick = { showEmailCapture = true }
             ) {
                 Text(stringResource(R.string.skip))
             }
@@ -136,8 +153,7 @@ fun OnboardingScreen(
             Button(
                 onClick = {
                     if (pagerState.currentPage == pages.size - 1) {
-                        viewModel.completeOnboarding()
-                        onComplete()
+                        showEmailCapture = true
                     } else {
                         scope.launch {
                             pagerState.animateScrollToPage(pagerState.currentPage + 1)

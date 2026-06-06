@@ -217,13 +217,23 @@ extension VoipService: CallDelegate {
         print("[VoipService] Call connected")
         Task { @MainActor in
             self.callState = .connected
-            // Configure audio session for voice call
+            // NOTE: do NOT call AVAudioSession.setCategory here. Twilio's
+            // DefaultAudioDevice (set in init via TwilioVoiceSDK.audioDevice =
+            // DefaultAudioDevice()) owns the audio session for the duration
+            // of the call. Re-setting the category mid-call breaks the audio
+            // bridge — symptom: recipient cannot hear caller even though
+            // Twilio's recording captures both legs (because each leg's audio
+            // reaches Twilio's recorders independently but isn't relayed
+            // through to the other party). Same bug ScribeAI iOS hit; same
+            // fix.
+            //
+            // To put audio on speaker, use overrideOutputAudioPort only —
+            // that route the SDK supports.
             do {
-                let audioSession = AVAudioSession.sharedInstance()
-                try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetooth, .defaultToSpeaker])
-                try audioSession.setActive(true)
+                try AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
+                self.isSpeakerOn = true
             } catch {
-                print("[VoipService] Failed to configure audio session: \(error)")
+                print("[VoipService] Failed to default to speaker: \(error)")
             }
         }
     }

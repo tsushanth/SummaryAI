@@ -68,6 +68,18 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 
+# Android — Gradle build output + caches (root and per-module)
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+**/.gradle/
+
+# Next.js
+.next/
+out/
+web/.next/
+
 # Secrets (never commit these)
 *.p12
 *.p8

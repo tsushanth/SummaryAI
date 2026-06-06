@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import RatingKit
 
 // MARK: - Recording View State
 
@@ -82,9 +83,24 @@ final class RecordingViewModel: ObservableObject {
     /// Whether microphone permission has been granted
     @Published private(set) var hasMicrophonePermission: Bool = false
 
+    /// User-selected output language for the summary, persisted across launches.
+    /// Display name as shown in the picker ("Auto", "English", "Spanish", ...).
+    /// Pass nil/Auto to let the model default to English.
+    @Published var selectedLanguageDisplay: String = UserDefaults.standard.string(forKey: RecordingViewModel.languagePrefKey) ?? "Auto" {
+        didSet { UserDefaults.standard.set(selectedLanguageDisplay, forKey: RecordingViewModel.languagePrefKey) }
+    }
+
+    static let languagePrefKey = "com.meetingmind.outputLanguage"
+
+    /// BCP-47 code for the selected language ("en", "es", ...). nil for "Auto".
+    var selectedLanguageCode: String? {
+        Self.languageCode(forDisplay: selectedLanguageDisplay)
+    }
+
     /// Error message to display in alert
     @Published var errorMessage: String?
     @Published var showError: Bool = false
+    @Published var showSubscriptionRequired: Bool = false
 
     // MARK: - Dependencies
 
@@ -95,6 +111,13 @@ final class RecordingViewModel: ObservableObject {
     // MARK: - Private Properties
 
     private var currentRecordingResult: RecordingResult?
+    /// Set when a background upload starts. Used to filter
+    /// BackgroundUploadManager notifications and to drive retries.
+    private var currentRecordingId: String?
+    /// The Recording returned by createRecording, stashed so the notification
+    /// handler can transition .processing → .completed once the background
+    /// upload finalizes.
+    private var pendingRecording: Recording?
 
     // MARK: - Initialization
 
@@ -122,15 +145,55 @@ final class RecordingViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .assign(to: &$audioLevel)
 
-        // Bind upload progress from API client
-        apiClient.$uploadProgress
-            .compactMap { $0?.fractionCompleted }
+        // Subscribe to background upload events so the UI can show progress
+        // and react to completion / failure even though the actual PUT runs
+        // outside this view-model's lifetime.
+        NotificationCenter.default.publisher(for: BackgroundUploadManager.progressNotification)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] progress in
-                if case .uploading = self?.state {
-                    self?.uploadProgress = progress
-                    self?.state = .uploading(progress: progress)
+            .sink { [weak self] notification in
+                guard let self = self,
+                      let recordingId = notification.userInfo?["recordingId"] as? String,
+                      recordingId == self.currentRecordingId,
+                      let progress = notification.userInfo?["progress"] as? Double else { return }
+                if case .uploading = self.state {
+                    self.uploadProgress = progress
+                    self.state = .uploading(progress: progress)
                 }
+            }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: BackgroundUploadManager.didCompleteNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] notification in
+                guard let self = self,
+                      let recordingId = notification.object as? String,
+                      recordingId == self.currentRecordingId else { return }
+                // Old flow transitioned .processing → .completed in immediate
+                // succession; the view interprets .completed as "show success
+                // checkmark + New Recording button". Without this the screen
+                // sits on the spinner even though the recording is finished.
+                if let recording = self.pendingRecording {
+                    self.state = .completed(recording)
+                } else {
+                    self.state = .processing
+                }
+                self.currentRecordingResult = nil
+                self.pendingRecording = nil
+                RatingKit.shared.trackAction()
+                print("[RecordingViewModel] Background upload finalized: \(recordingId)")
+            }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: BackgroundUploadManager.didFailNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] notification in
+                guard let self = self,
+                      let recordingId = notification.userInfo?["recordingId"] as? String,
+                      recordingId == self.currentRecordingId else { return }
+                let msg = (notification.userInfo?["error"] as? String) ?? "Upload failed"
+                self.showError("Upload failed: \(msg)")
+                self.state = .error(msg)
+                print("[RecordingViewModel] Background upload failed, file retained for retry: \(recordingId)")
             }
             .store(in: &cancellables)
 
@@ -247,7 +310,10 @@ final class RecordingViewModel: ObservableObject {
 
     // MARK: - Upload
 
-    /// Upload the recording to the server
+    /// Hands the recording off to BackgroundUploadManager. The actual PUT
+    /// happens in a background URLSession and survives backgrounding /
+    /// suspension / app termination — we listen for progress + completion
+    /// notifications and update view state accordingly.
     private func uploadRecording(result: RecordingResult) async {
         state = .uploading(progress: 0)
         uploadProgress = 0
@@ -257,54 +323,74 @@ final class RecordingViewModel: ObservableObject {
                 title: recordingTitle,
                 fileURL: result.fileURL,
                 duration: result.duration,
-                progressHandler: { [weak self] progress in
-                    Task { @MainActor in
-                        self?.uploadProgress = progress.fractionCompleted
-                        self?.state = .uploading(progress: progress.fractionCompleted)
-                    }
-                }
+                outputLanguage: selectedLanguageCode,
+                progressHandler: nil    // progress now comes from BackgroundUploadManager
             )
 
-            // Upload complete, now processing on server
-            state = .processing
-
-            // Clean up local file after successful upload
-            try? FileManager.default.removeItem(at: result.fileURL)
-
-            // Mark as completed
-            state = .completed(recording)
-
-            // Track successful recording for review request
-            ReviewRequestManager.shared.recordingCompleted()
-
-            // Track analytics
+            currentRecordingId = recording.id
+            pendingRecording = recording
             AnalyticsService.shared.logRecordingStopped(durationSeconds: Int(result.duration))
+            print("[RecordingViewModel] Background upload kicked off for \(recording.id)")
+            // The screen stays in .uploading until BackgroundUploadManager
+            // posts didCompleteNotification (transitions to .processing) or
+            // didFailNotification (transitions to .error).
 
-            print("[RecordingViewModel] Recording uploaded and processing: \(recording.id)")
-
+        } catch APIError.subscriptionRequired, APIError.freeTierLimitReached {
+            // Don't surface a paywall here — it interrupts the recording flow
+            // and the user loses the in-memory context. The audio file is
+            // retained on disk (we don't delete on this path), so a future
+            // "pending uploads" scan or post-purchase retry can recover it.
+            print("[RecordingViewModel] Subscription required — file retained at \(result.fileURL.path)")
+            state = .error("You've reached the free tier limit. Subscribe to keep recording.")
         } catch {
             showError("Upload failed: \(error.localizedDescription)")
             state = .error(error.localizedDescription)
-            // Keep the local file for retry
-            print("[RecordingViewModel] Upload failed, keeping local file for retry: \(error)")
+            print("[RecordingViewModel] createRecording failed, file retained: \(error)")
         }
     }
 
-    /// Retry upload for the last recording
+    /// Called by the view when the recording-limit paywall sheet dismisses.
+    /// If the user actually bought a subscription, automatically retry the
+    /// upload that was blocked — otherwise the local file would sit on disk
+    /// with no UI path back, which was a real reported bug.
+    func handlePaywallDismissed() async {
+        await PremiumManager.shared.validateSubscriptionState()
+        guard PremiumManager.shared.isPremium else { return }
+        guard case .error = state else { return }
+        guard let result = currentRecordingResult,
+              FileManager.default.fileExists(atPath: result.fileURL.path) else { return }
+        print("[RecordingViewModel] User became premium after paywall — retrying upload")
+        clearError()
+        await uploadRecording(result: result)
+    }
+
+    /// Retry upload for the current recording on this screen.
     func retryUpload() async {
+        // Two cases: we have an in-memory recordingId (failed in this session,
+        // user still on screen), or we don't (user navigated away and came
+        // back). For the in-memory case ask BackgroundUploadManager to retry;
+        // otherwise the global pending-uploads list on RecordingsListView
+        // is the path back.
+        if let recordingId = currentRecordingId,
+           let pending = BackgroundUploadManager.shared.pendingUploads.first(where: { $0.id == recordingId }) {
+            clearError()
+            state = .uploading(progress: 0)
+            uploadProgress = 0
+            BackgroundUploadManager.shared.retry(pending)
+            return
+        }
+
+        // Fallback: re-issue createRecording from the local audio file.
         guard let result = currentRecordingResult else {
             showError("No recording to upload")
             return
         }
-
-        // Verify file still exists
         guard FileManager.default.fileExists(atPath: result.fileURL.path) else {
             showError("Recording file not found. Please record again.")
             currentRecordingResult = nil
             resetState()
             return
         }
-
         clearError()
         await uploadRecording(result: result)
     }
@@ -361,6 +447,31 @@ final class RecordingViewModel: ObservableObject {
     /// Format upload progress for display
     var formattedUploadProgress: String {
         "\(Int(uploadProgress * 100))%"
+    }
+
+    // MARK: - Language Picker Options
+
+    /// Display names shown in the language picker.
+    static let languageOptions: [String] = [
+        "Auto", "English", "Spanish", "French", "German",
+        "Portuguese", "Italian", "Hindi", "Chinese", "Japanese", "Korean",
+    ]
+
+    /// Map a picker display name to a BCP-47 code. "Auto" returns nil.
+    static func languageCode(forDisplay display: String) -> String? {
+        switch display {
+        case "English": return "en"
+        case "Spanish": return "es"
+        case "French": return "fr"
+        case "German": return "de"
+        case "Portuguese": return "pt"
+        case "Italian": return "it"
+        case "Hindi": return "hi"
+        case "Chinese": return "zh"
+        case "Japanese": return "ja"
+        case "Korean": return "ko"
+        default: return nil
+        }
     }
 
     /// Status text for current state

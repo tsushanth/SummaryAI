@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -61,6 +62,21 @@
             android:name="android.app.PROPERTY_FOREGROUND_SERVICE_PHONE_CALL_DECLARATION"
             android:value="Meeting Mind uses VoIP calling to make phone calls through the app. This enables automatic recording and transcription of phone conversations." />
 
+        <!-- Data sync foreground service: Used to finish uploading recordings
+             after the user stops recording, even if the app is backgrounded
+             or the screen locks. Without this, long recordings could be lost. -->
+        <property
+            android:name="android.app.PROPERTY_FOREGROUND_SERVICE_DATA_SYNC_DECLARATION"
+            android:value="Meeting Mind uses data sync to finish uploading meeting recordings to our server after the user has stopped recording. This lets the upload continue if the user backgrounds the app or locks the screen so that long recordings are not lost." />
+
+        <!-- Facebook SDK -->
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+        <meta-data
+            android:name="com.facebook.sdk.ClientToken"
+            android:value="@string/facebook_client_token" />
+
         <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
@@ -97,11 +113,13 @@
             </intent-filter>
         </activity>
 
-        <!-- Audio Recording Foreground Service -->
+        <!-- Audio Recording Foreground Service. Uses microphone during recording
+             and switches to dataSync for the upload phase so the service can
+             stay alive even after the mic is released. -->
         <service
             android:name=".service.AudioRecordingService"
             android:exported="false"
-            android:foregroundServiceType="microphone"
+            android:foregroundServiceType="microphone|dataSync"
             android:description="@string/service_description_recording" />
 
         <!-- Media Session Service for audio playback -->

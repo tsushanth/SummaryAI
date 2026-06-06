@@ -1,0 +1,7 @@
+Fixes a bug where long recordings could fail to upload. Recordings now:
+
+• Have no upload time limit
+• Continue uploading in the background, even if you close the app
+• Stay on your device with a Retry button if an upload ever fails — no more lost meetings
+
+Thanks for the feedback.

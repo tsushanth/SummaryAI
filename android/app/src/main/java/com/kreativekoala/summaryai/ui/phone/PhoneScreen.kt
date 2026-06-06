@@ -1,5 +1,6 @@
 package com.kreativekoala.summaryai.ui.phone
 
+import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -26,13 +27,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.kreativekoala.summaryai.domain.model.PhoneCall
 import com.kreativekoala.summaryai.domain.model.PhoneCallStatus
 import com.kreativekoala.summaryai.domain.model.VerifiedPhone
 import java.text.SimpleDateFormat
 import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun PhoneScreen(
     viewModel: PhoneViewModel = hiltViewModel(),
@@ -40,6 +44,15 @@ fun PhoneScreen(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
+
+    // Microphone permission required by Twilio Voice SDK
+    var pendingCallAfterPermission by remember { mutableStateOf(false) }
+    val micPermission = rememberPermissionState(Manifest.permission.RECORD_AUDIO) { granted ->
+        if (granted && pendingCallAfterPermission) {
+            pendingCallAfterPermission = false
+            viewModel.initiateCall()
+        }
+    }
 
     // Error handling
     val snackbarHostState = remember { SnackbarHostState() }
@@ -133,15 +146,18 @@ fun PhoneScreen(
                 PhoneTab.DIALER, PhoneTab.SETTINGS -> NativeDialerContent(
                     dialerNumber = uiState.dialerNumber,
                     hasVerifiedPhone = uiState.hasVerifiedPhones,
-                    // Only show consent dialog when there's no active call
-                    showConsentDialog = uiState.showRecordingConsentDialog && !uiState.hasActiveCall,
                     onNumberChange = { viewModel.updateDialerNumber(it) },
                     onDigitClick = { viewModel.appendDialerDigit(it) },
                     onDeleteClick = { viewModel.deleteDialerDigit() },
                     onCallClick = { makeNativeCall(uiState.dialerNumber) },
-                    onShowConsentDialog = { viewModel.showConsentDialog() },
-                    onDismissConsentDialog = { viewModel.dismissConsentDialog() },
-                    onConfirmConsentAndCall = { viewModel.acceptConsentAndCall() },
+                    onStartCall = {
+                        if (micPermission.status.isGranted) {
+                            viewModel.initiateCall()
+                        } else {
+                            pendingCallAfterPermission = true
+                            micPermission.launchPermissionRequest()
+                        }
+                    },
                     onVerifyPhoneClick = { showVerificationSheet = true }
                 )
             }
@@ -613,14 +629,11 @@ private fun DialPadButton(
 private fun NativeDialerContent(
     dialerNumber: String,
     hasVerifiedPhone: Boolean,
-    showConsentDialog: Boolean,
     onNumberChange: (String) -> Unit,
     onDigitClick: (String) -> Unit,
     onDeleteClick: () -> Unit,
     onCallClick: () -> Unit,
-    onShowConsentDialog: () -> Unit,
-    onDismissConsentDialog: () -> Unit,
-    onConfirmConsentAndCall: () -> Unit,
+    onStartCall: () -> Unit,
     onVerifyPhoneClick: () -> Unit
 ) {
 
@@ -670,7 +683,7 @@ private fun NativeDialerContent(
             FloatingActionButton(
                 onClick = {
                     if (hasVerifiedPhone) {
-                        onShowConsentDialog()
+                        onStartCall()
                     } else {
                         onVerifyPhoneClick()
                     }
@@ -701,64 +714,6 @@ private fun NativeDialerContent(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-    }
-
-    // Consent Dialog - updated for auto-recording
-    if (showConsentDialog) {
-        AlertDialog(
-            onDismissRequest = onDismissConsentDialog,
-            icon = {
-                Icon(
-                    Icons.Default.FiberManualRecord,
-                    contentDescription = null,
-                    tint = Color.Red,
-                    modifier = Modifier.size(48.dp)
-                )
-            },
-            title = {
-                Text(
-                    "Call Will Be Recorded",
-                    textAlign = TextAlign.Center
-                )
-            },
-            text = {
-                Column {
-                    Text(
-                        "This call will be automatically recorded. The recipient will hear a recording notification when they answer.",
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        "A transcript and summary will be generated after the call.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        "Recording without consent may be illegal in your jurisdiction.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error,
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = onConfirmConsentAndCall,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
-                ) {
-                    Text("Start Call")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismissConsentDialog) {
-                    Text("Cancel")
-                }
-            }
-        )
     }
 }
 

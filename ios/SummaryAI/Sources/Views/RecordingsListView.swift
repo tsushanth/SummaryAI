@@ -68,6 +68,11 @@ struct RecordingsListContentView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                // Pending uploads banner — recordings that finished but
+                // failed to upload. Shows above the filter tabs so the user
+                // sees it before scrolling.
+                PendingUploadsBanner()
+
                 // Filter tabs
                 filterTabsView
 
@@ -921,3 +926,66 @@ struct NewRecordingSheet_Previews: PreviewProvider {
     }
 }
 #endif
+
+// MARK: - Pending Uploads Banner
+
+/// Banner that surfaces recordings whose upload failed. Driven by
+/// BackgroundUploadManager so it picks up failures across app launches.
+private struct PendingUploadsBanner: View {
+    @StateObject private var manager = BackgroundUploadManager.shared
+
+    var body: some View {
+        let failed = manager.pendingUploads.filter { $0.status == .failed }
+        if !failed.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(failed.count == 1
+                     ? "1 recording didn't upload"
+                     : "\(failed.count) recordings didn't upload")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(.white)
+                Text("Tap retry — they're saved on your device.")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.9))
+                ForEach(failed) { pending in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(pending.title)
+                                .font(.callout)
+                                .foregroundColor(.white)
+                                .lineLimit(1)
+                            Text("\(formatDuration(pending.durationSeconds)) • \(pending.fileSize / 1024 / 1024) MB")
+                                .font(.caption2)
+                                .foregroundColor(.white.opacity(0.85))
+                        }
+                        Spacer()
+                        Button("Discard") { manager.discard(pending) }
+                            .font(.caption.weight(.semibold))
+                            .foregroundColor(.white.opacity(0.9))
+                        Button("Retry") { manager.retry(pending) }
+                            .font(.caption.weight(.semibold))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(Color.white.opacity(0.25))
+                            .cornerRadius(8)
+                            .foregroundColor(.white)
+                    }
+                }
+            }
+            .padding(12)
+            .background(Color.red.opacity(0.9))
+            .cornerRadius(12)
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+        }
+    }
+
+    private func formatDuration(_ seconds: Int) -> String {
+        if seconds <= 0 { return "—" }
+        let h = seconds / 3600
+        let m = (seconds % 3600) / 60
+        let s = seconds % 60
+        if h > 0 { return "\(h)h \(m)m" }
+        if m > 0 { return "\(m)m \(s)s" }
+        return "\(s)s"
+    }
+}

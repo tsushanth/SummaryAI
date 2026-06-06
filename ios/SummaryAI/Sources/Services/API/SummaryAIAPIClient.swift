@@ -1,4 +1,5 @@
 import Foundation
+import PaywallKit
 
 // MARK: - API Configuration
 
@@ -12,12 +13,12 @@ struct APIConfiguration {
     }
 
     static let production = APIConfiguration(
-        baseURL: URL(string: "https://summary-ai-backend-917362189743.us-central1.run.app")!,
+        baseURL: URL(string: "https://summary-ai-backend.fly.dev")!,
         apiVersion: "v1"
     )
 
     static let staging = APIConfiguration(
-        baseURL: URL(string: "https://summary-ai-backend-917362189743.us-central1.run.app")!,
+        baseURL: URL(string: "https://summary-ai-backend.fly.dev")!,
         apiVersion: "v1"
     )
 
@@ -144,13 +145,15 @@ final class SummaryAIAPIClient: NSObject, ObservableObject {
     func createRecording(
         title: String,
         duration: Int,
-        fileSize: Int64
+        fileSize: Int64,
+        outputLanguage: String? = nil
     ) async throws -> CreateRecordingResponse {
         let request = CreateRecordingRequest(
             title: title,
             durationSeconds: duration,
             fileSizeBytes: fileSize,
-            contentType: "audio/mp4"
+            contentType: "audio/mp4",
+            outputLanguage: outputLanguage
         )
 
         return try await post(
@@ -241,51 +244,48 @@ final class SummaryAIAPIClient: NSObject, ObservableObject {
         )
     }
 
-    /// Full upload flow: create → upload → complete
-    /// - Parameters:
-    ///   - title: Recording title
-    ///   - fileURL: Local audio file URL
-    ///   - duration: Recording duration in seconds
-    ///   - progressHandler: Optional progress callback
-    /// - Returns: The completed recording
+    /// Kick off a background upload. Returns the createRecording response so
+    /// the caller knows the recordingId immediately, but the audio PUT happens
+    /// in a background URLSession and completes asynchronously — observe
+    /// `BackgroundUploadManager` notifications for completion.
+    ///
+    /// This replaced the prior synchronous flow because long uploads were
+    /// being killed when the app got suspended.
     func uploadRecording(
         title: String,
         fileURL: URL,
         duration: TimeInterval,
+        outputLanguage: String? = nil,
         progressHandler: ((UploadProgress) -> Void)? = nil
     ) async throws -> Recording {
         try await requireAIConsent()
-        // Get file size
-        let fileAttributes = try FileManager.default.attributesOfItem(atPath: fileURL.path)
-        let fileSize = fileAttributes[.size] as? Int64 ?? 0
+        let fileSize = (try FileManager.default.attributesOfItem(atPath: fileURL.path)[.size] as? Int64) ?? 0
 
         print("[APIClient] Starting upload flow for '\(title)' (\(fileSize) bytes)")
-
-        // Step 1: Create recording and get upload URL
         let createResponse = try await createRecording(
             title: title,
             duration: Int(duration),
-            fileSize: fileSize
+            fileSize: fileSize,
+            outputLanguage: outputLanguage
         )
+        print("[APIClient] Recording created: \(createResponse.recording.id) — handing off to background uploader")
 
-        print("[APIClient] Recording created: \(createResponse.recording.id)")
+        try await MainActor.run {
+            try BackgroundUploadManager.shared.startUpload(
+                recordingId: createResponse.recording.id,
+                title: title,
+                durationSeconds: Int(duration),
+                fileURL: fileURL,
+                uploadURL: createResponse.upload.url,
+                uploadMethod: createResponse.upload.method,
+                uploadHeaders: createResponse.upload.headers
+            )
+        }
 
-        // Step 2: Upload file to storage
-        try await uploadAudioFile(
-            fileURL: fileURL,
-            uploadInfo: createResponse.upload,
-            progressHandler: progressHandler
-        )
-
-        // Step 3: Signal upload complete
-        let completeResponse = try await completeUpload(
-            recordingId: createResponse.recording.id,
-            fileSize: fileSize
-        )
-
-        print("[APIClient] Upload complete. Job ID: \(completeResponse.job.id)")
-
-        return completeResponse.recording
+        // Return the recording immediately. UI should treat this as "uploading"
+        // and listen for BackgroundUploadManager.didCompleteNotification to
+        // flip into "processing".
+        return createResponse.recording
     }
 
     /// Import a file (audio or PDF)
@@ -683,6 +683,11 @@ final class SummaryAIAPIClient: NSObject, ObservableObject {
         // Add common headers
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
+        // Send subscription status so server can skip free-tier limits for subscribed users
+        if StoreManager.shared.isPremium {
+            request.setValue("true", forHTTPHeaderField: "x-subscription-active")
+        }
+
         do {
             print("[APIClient] Sending request...")
             let (data, response) = try await session.data(for: request)
@@ -720,6 +725,13 @@ final class SummaryAIAPIClient: NSObject, ObservableObject {
                     throw APIError.unauthorized
                 }
             case 403:
+                let body = String(data: data, encoding: .utf8) ?? "no body"
+                print("[APIClient] ❌ 403 Forbidden - URL: \(request.url?.absoluteString ?? "?") Body: \(body)")
+                // Check if subscription required
+                if let errorResponse = try? decoder.decode(APIErrorResponse.self, from: data),
+                   errorResponse.error.code == "SUBSCRIPTION_REQUIRED" {
+                    throw APIError.subscriptionRequired
+                }
                 throw APIError.forbidden
             case 404:
                 throw APIError.notFound
