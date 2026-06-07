@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0BAEC06355B57B758F68BE86 /* AdServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B01A2C6D6E41FC5A3D9A00E0 /* AdServices.framework */; };
 		11767FFA1F65D778F6EBCB05 /* ScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE6D3EE0C0BAF9095E8469B1 /* ScreenshotTests.swift */; };
 		298F3D263A0697F1642A255B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = EAFF348518DDCF49FA0B746C /* GoogleService-Info.plist */; };
 		2FDFA21E83AD1DDCD13FFE40 /* RemotePaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B5F6218F5D4C3FD59BF6C57 /* RemotePaywallView.swift */; };
@@ -129,6 +130,7 @@
 		A1000048229E0035 /* PhoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneView.swift; sourceTree = "<group>"; };
 		A100004A229E0037 /* VoipService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoipService.swift; sourceTree = "<group>"; };
 		A1000053229E0043 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
+		B01A2C6D6E41FC5A3D9A00E0 /* AdServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AdServices.framework; path = System/Library/Frameworks/AdServices.framework; sourceTree = SDKROOT; };
 		CA92F0CC6EF4A815CF4C1096 /* BackgroundUploadManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BackgroundUploadManager.swift; sourceTree = "<group>"; };
 		CE6D3EE0C0BAF9095E8469B1 /* ScreenshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScreenshotTests.swift; sourceTree = "<group>"; };
 		CPB00000000000002 /* CrossPromoBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossPromoBanner.swift; sourceTree = "<group>"; };
@@ -163,6 +165,7 @@
 				PMM000000000003 /* PaywallKit in Frameworks */,
 				B6CAC8D513DB9237A5AF47DF /* RatingKit in Frameworks */,
 				FB0000000000000000000001 /* FacebookCore in Frameworks */,
+				0BAEC06355B57B758F68BE86 /* AdServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -183,6 +186,7 @@
 			isa = PBXGroup;
 			children = (
 				C315B44122827A0D3F801B56 /* iOS */,
+				B01A2C6D6E41FC5A3D9A00E0 /* AdServices.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
