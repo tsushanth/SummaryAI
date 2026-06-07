@@ -58,6 +58,10 @@ final class AttributionService {
             // Send to backend for ASA bid optimization
             try await sendAttributionToBackend(token: token)
 
+            // Also POST raw token directly to Apple so ASA dashboard registers the conversion.
+            // Wrapped in try? so a failed Apple POST never blocks our backend success path.
+            try? await Self.postToApple(token: token)
+
             // Mark as sent so we don't send again
             markAttributionAsSent()
             print("[AttributionService] Attribution data sent successfully")
@@ -103,6 +107,22 @@ final class AttributionService {
         guard (200...299).contains(httpResponse.statusCode) || httpResponse.statusCode == 409 else {
             throw AttributionError.serverError(statusCode: httpResponse.statusCode)
         }
+    }
+
+    /// POST the raw attribution token to Apple's adservices endpoint.
+    /// Apple uses this round-trip to register the conversion in the ASA dashboard.
+    /// Without this call, ASA may show 0 attributed installs even when our backend
+    /// successfully receives the token.
+    private static func postToApple(token: String) async throws {
+        guard let url = URL(string: "https://api-adservices.apple.com/api/v1/") else {
+            return
+        }
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("text/plain", forHTTPHeaderField: "Content-Type")
+        req.httpBody = token.data(using: .utf8)
+        _ = try await URLSession.shared.data(for: req)
+        print("[AttributionService] Posted token directly to Apple adservices")
     }
 }
 
