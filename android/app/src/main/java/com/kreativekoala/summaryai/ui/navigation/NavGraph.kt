@@ -47,6 +47,7 @@ import com.kreativekoala.summaryai.ui.onboarding.OnboardingScreen
 import com.kreativekoala.summaryai.ui.paywall.PaywallScreen
 import com.kreativekoala.summaryai.ui.phone.PhoneScreen
 import com.kreativekoala.summaryai.ui.recording.RecordingScreen
+import com.kreativekoala.summaryai.ui.livecaption.LiveCaptionScreen
 import com.kreativekoala.summaryai.ui.recordings.RecordingDetailScreen
 import com.kreativekoala.summaryai.ui.recordings.RecordingsListScreen
 import com.kreativekoala.summaryai.ui.search.SearchScreen
@@ -74,6 +75,7 @@ sealed class Screen(val route: String) {
         fun createRoute(recordingId: String) = "recordings/$recordingId"
     }
     object Recording : Screen("recording")
+    object LiveCaption : Screen("live_caption")
     object Todos : Screen("todos")
     object Meetings : Screen("meetings")
     object JoinMeeting : Screen("meetings/join")
@@ -309,7 +311,10 @@ fun MeetingMindNavGraph(
                     onStartRecording = { navigateGated(Screen.Recording.route) },
                     onSearchClick = {
                         navController.navigate(Screen.Search.route)
-                    }
+                    },
+                    onLiveCaptionClick = {
+                        navController.navigate(Screen.LiveCaption.route)
+                    },
                 )
             }
 
@@ -338,6 +343,13 @@ fun MeetingMindNavGraph(
                     },
                     onCancel = { navController.navigate(Screen.Recordings.route) },
                     showAsTab = true
+                )
+            }
+
+            // Live Caption — deaf / HoH streaming transcript
+            composable(Screen.LiveCaption.route) {
+                LiveCaptionScreen(
+                    onNavigateBack = { navController.popBackStack() },
                 )
             }
 
