@@ -38,6 +38,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -64,7 +66,8 @@ fun RecordingsListScreen(
     viewModel: RecordingsListViewModel = hiltViewModel(),
     onRecordingClick: (String) -> Unit,
     onStartRecording: () -> Unit,
-    onSearchClick: () -> Unit
+    onSearchClick: () -> Unit,
+    onLiveCaptionClick: () -> Unit = {},
 ) {
     // Log when this composable is rendered
     LaunchedEffect(Unit) {
@@ -147,6 +150,18 @@ fun RecordingsListScreen(
                     )
                 },
                 actions = {
+                    // Live Caption — deaf / HoH streaming transcript entry point
+                    IconButton(
+                        onClick = onLiveCaptionClick,
+                        modifier = Modifier.semantics {
+                            contentDescription = "Live Caption — turn speech around you into on-screen text"
+                        },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Mic,
+                            contentDescription = null, // semantic above
+                        )
+                    }
                     // Refresh button with spinning animation
                     val infiniteTransition = rememberInfiniteTransition(label = "refresh")
                     val rotation by infiniteTransition.animateFloat(
