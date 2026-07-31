@@ -3,7 +3,7 @@
  * Generates AI-powered insights from live meeting transcripts
  */
 
-import OpenAI from 'openai';
+import Anthropic from '@anthropic-ai/sdk';
 import { config } from '../config/index.js';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { LiveInsight, LiveInsightType, VerificationStatus } from '../types/meetings.js';
@@ -41,8 +41,8 @@ export async function queueInsightGeneration(meetingId: string, userId: string):
  * Generate insights for a meeting based on recent transcript segments
  */
 async function generateInsightsForMeeting(meetingId: string, userId: string): Promise<void> {
-  if (!config.OPENAI_API_KEY) {
-    console.log('[LiveInsights] OpenAI API key not configured, skipping insight generation');
+  if (!config.ANTHROPIC_API_KEY) {
+    console.log('[LiveInsights] Anthropic API key not configured, skipping insight generation');
     return;
   }
 
@@ -68,13 +68,13 @@ async function generateInsightsForMeeting(meetingId: string, userId: string): Pr
 
   console.log(`[LiveInsights] Generating insights for ${segments.length} segments in meeting ${meetingId}`);
 
-  const openai = new OpenAI({ apiKey: config.OPENAI_API_KEY });
+  const anthropic = new Anthropic({ apiKey: config.ANTHROPIC_API_KEY });
 
   // Generate insights in parallel
   const [keyPoints, questions, factChecks] = await Promise.all([
-    generateKeyPoints(openai, context),
-    generateQuestions(openai, context),
-    generateFactChecks(openai, context),
+    generateKeyPoints(anthropic, context),
+    generateQuestions(anthropic, context),
+    generateFactChecks(anthropic, context),
   ]);
 
   // Calculate approximate timestamp (use the last segment's end time)
@@ -153,15 +153,12 @@ async function generateInsightsForMeeting(meetingId: string, userId: string): Pr
 /**
  * Generate key points from transcript context
  */
-async function generateKeyPoints(openai: OpenAI, context: string): Promise<string[]> {
+async function generateKeyPoints(anthropic: Anthropic, context: string): Promise<string[]> {
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+    const response = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 500,
-      messages: [
-        {
-          role: 'system',
-          content: `Extract 1-3 key points from this meeting segment. Focus on:
+      system: `Extract 1-3 key points from this meeting segment. Focus on:
 - Decisions made
 - Important announcements
 - Action items or commitments
@@ -169,7 +166,7 @@ async function generateKeyPoints(openai: OpenAI, context: string): Promise<strin
 
 Return ONLY a JSON array of strings, no explanation. Example: ["Key point 1", "Key point 2"]
 If no key points, return: []`,
-        },
+      messages: [
         {
           role: 'user',
           content: context,
@@ -177,7 +174,7 @@ If no key points, return: []`,
       ],
     });
 
-    const content = response.choices[0]?.message?.content || '[]';
+    const content = response.content[0]?.type === 'text' ? response.content[0].text : '[]';
     return JSON.parse(content);
   } catch (error) {
     console.error('[LiveInsights] Error generating key points:', error);
@@ -188,15 +185,12 @@ If no key points, return: []`,
 /**
  * Generate follow-up questions from transcript context
  */
-async function generateQuestions(openai: OpenAI, context: string): Promise<string[]> {
+async function generateQuestions(anthropic: Anthropic, context: string): Promise<string[]> {
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+    const response = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 500,
-      messages: [
-        {
-          role: 'system',
-          content: `Based on this meeting discussion, suggest 1-2 insightful follow-up questions that could:
+      system: `Based on this meeting discussion, suggest 1-2 insightful follow-up questions that could:
 - Clarify ambiguous points
 - Dig deeper into important topics
 - Address potential concerns
@@ -204,7 +198,7 @@ async function generateQuestions(openai: OpenAI, context: string): Promise<strin
 
 Return ONLY a JSON array of strings, no explanation. Example: ["Question 1?", "Question 2?"]
 If no good questions, return: []`,
-        },
+      messages: [
         {
           role: 'user',
           content: context,
@@ -212,7 +206,7 @@ If no good questions, return: []`,
       ],
     });
 
-    const content = response.choices[0]?.message?.content || '[]';
+    const content = response.content[0]?.type === 'text' ? response.content[0].text : '[]';
     return JSON.parse(content);
   } catch (error) {
     console.error('[LiveInsights] Error generating questions:', error);
@@ -230,15 +224,12 @@ interface FactCheckResult {
 /**
  * Fact-check claims in the transcript
  */
-async function generateFactChecks(openai: OpenAI, context: string): Promise<FactCheckResult[]> {
+async function generateFactChecks(anthropic: Anthropic, context: string): Promise<FactCheckResult[]> {
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+    const response = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 800,
-      messages: [
-        {
-          role: 'system',
-          content: `Analyze this meeting segment for factual claims that can be verified. For each verifiable claim:
+      system: `Analyze this meeting segment for factual claims that can be verified. For each verifiable claim:
 1. Identify the claim
 2. Assess its accuracy (verified, disputed, false, or unknown)
 3. Provide brief explanation if disputed or false
@@ -253,7 +244,7 @@ Only flag claims about:
 Return ONLY a JSON array, no explanation. Example:
 [{"claim": "The claim text", "status": "verified", "confidence": 0.9}]
 If no verifiable claims, return: []`,
-        },
+      messages: [
         {
           role: 'user',
           content: context,
@@ -261,7 +252,7 @@ If no verifiable claims, return: []`,
       ],
     });
 
-    const content = response.choices[0]?.message?.content || '[]';
+    const content = response.content[0]?.type === 'text' ? response.content[0].text : '[]';
     return JSON.parse(content);
   } catch (error) {
     console.error('[LiveInsights] Error generating fact checks:', error);
@@ -278,7 +269,7 @@ async function findCrossMeetingContradictions(
   currentContext: string,
   timestampSeconds: number
 ): Promise<void> {
-  if (!config.OPENAI_API_KEY) return;
+  if (!config.ANTHROPIC_API_KEY) return;
 
   // Get past transcripts for comparison (from completed recordings)
   const { data: pastTranscripts, error: transcriptsError } = await supabaseAdmin
@@ -320,16 +311,13 @@ async function findCrossMeetingContradictions(
 
   if (!pastContext) return;
 
-  const openai = new OpenAI({ apiKey: config.OPENAI_API_KEY });
+  const anthropic = new Anthropic({ apiKey: config.ANTHROPIC_API_KEY });
 
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+    const response = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 600,
-      messages: [
-        {
-          role: 'system',
-          content: `Compare the current meeting discussion with past meetings to find:
+      system: `Compare the current meeting discussion with past meetings to find:
 1. Contradictions (different statements about the same topic)
 2. Changed positions or decisions
 3. Follow-ups on previous commitments
@@ -337,7 +325,7 @@ async function findCrossMeetingContradictions(
 Return ONLY a JSON array of findings. Example:
 [{"type": "contradiction", "current": "current statement", "previous": "previous statement", "explanation": "brief explanation"}]
 If nothing notable, return: []`,
-        },
+      messages: [
         {
           role: 'user',
           content: `CURRENT MEETING:\n${currentContext}\n\nPAST MEETINGS:\n${pastContext}`,
@@ -345,7 +333,7 @@ If nothing notable, return: []`,
       ],
     });
 
-    const content = response.choices[0]?.message?.content || '[]';
+    const content = response.content[0]?.type === 'text' ? response.content[0].text : '[]';
     const findings = JSON.parse(content);
 
     // Insert contradiction insights

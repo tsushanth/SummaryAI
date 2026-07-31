@@ -8,7 +8,7 @@ GCLOUD_PATH=/opt/homebrew/bin/gcloud
 SUPABASE_PATH=/opt/homebrew/bin/supabase
 
 # Deployment
-BACKEND_SERVICE_URL=https://summary-ai-backend-917362189743.us-central1.run.app
+BACKEND_SERVICE_URL=https://summary-ai-backend.fly.dev
 GCP_PROJECT=summarizerproxy
 GCP_REGION=us-central1
 

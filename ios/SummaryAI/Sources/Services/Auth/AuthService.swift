@@ -108,6 +108,27 @@ final class AuthService: NSObject, ObservableObject {
     private let refreshTokenKey = "supabase_refresh_token"
     private let userKey = "supabase_user"
 
+    // MARK: - Refresh serialization
+    //
+    // Supabase rotates refresh tokens on every use — two concurrent refresh calls
+    // race the same token and the second one fails with invalid_grant, after
+    // which getAccessToken() returns a stale expired access token and the
+    // backend 401s. This actor serializes all refresh attempts and lets
+    // concurrent callers piggyback on the same in-flight refresh.
+    private actor RefreshCoordinator {
+        private var inFlight: Task<Void, Error>?
+        func refresh(_ body: @escaping () async throws -> Void) async throws {
+            if let existing = inFlight {
+                return try await existing.value
+            }
+            let task = Task<Void, Error> { try await body() }
+            inFlight = task
+            defer { inFlight = nil }
+            try await task.value
+        }
+    }
+    private let refreshCoordinator = RefreshCoordinator()
+
     // MARK: - Initialization
 
     // Default configuration values
@@ -162,14 +183,28 @@ final class AuthService: NSObject, ObservableObject {
         state = .unauthenticated
     }
 
-    /// Refresh the current session
+    /// Refresh the current session. Serialized via RefreshCoordinator so that
+    /// concurrent callers piggyback on a single in-flight refresh (preventing
+    /// the Supabase refresh-token rotation race that bricks the session).
     func refreshSession() async throws {
+        try await refreshCoordinator.refresh { [weak self] in
+            try await self?.performRefresh()
+        }
+    }
+
+    private func performRefresh() async throws {
+        // Re-read the refresh token at execution time — a piggybacking caller
+        // shouldn't proceed if the prior refresh already rotated the token.
         guard let refreshToken = UserDefaults.standard.string(forKey: refreshTokenKey) else {
             throw AuthError.invalidCredentials
         }
 
-        // Call Supabase refresh endpoint
-        // This is a simplified implementation - use Supabase SDK in production
+        // Short-circuit: if the stored access token is already valid, the
+        // queued caller doesn't need to refresh again.
+        if let stored = getStoredAccessToken(), isTokenValid(stored) {
+            return
+        }
+
         let url = URL(string: "\(supabaseURL)/auth/v1/token?grant_type=refresh_token")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -181,12 +216,25 @@ final class AuthService: NSObject, ObservableObject {
 
         let (data, response) = try await URLSession.shared.data(for: request)
 
-        guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
-            throw AuthError.serverError("Failed to refresh session")
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw AuthError.serverError("Failed to refresh session: no response")
         }
 
-        // Parse and store new tokens
+        // Refresh token is no longer valid — clear stored session so UI prompts re-auth
+        // instead of looping with an expired access token.
+        if httpResponse.statusCode == 400 || httpResponse.statusCode == 401 {
+            print("[Auth] Refresh rejected (\(httpResponse.statusCode)) — clearing session, user must sign in again")
+            await MainActor.run {
+                self.clearSession()
+                self.state = .unauthenticated
+            }
+            throw AuthError.serverError("Session expired — please sign in again")
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            throw AuthError.serverError("Failed to refresh session (HTTP \(httpResponse.statusCode))")
+        }
+
         let tokenResponse = try JSONDecoder().decode(TokenResponse.self, from: data)
         storeSession(accessToken: tokenResponse.accessToken, refreshToken: tokenResponse.refreshToken)
     }
