@@ -14,6 +14,14 @@ struct JoinMeetingView: View {
     @FocusState private var focusedField: FocusedField?
     @Environment(\.dismiss) private var dismiss
 
+    // MARK: - Coaching state
+
+    @State private var coachingEnabled = false
+    @State private var coachingPersona: CoachingPersonaKey = .salesDiscovery
+    @State private var coachingCredits = 0
+    @State private var loadingCredits = false
+    @State private var coachingError: String?
+
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
@@ -31,6 +39,17 @@ struct JoinMeetingView: View {
                     platformBadge(platform: platform)
                 }
 
+                // AI Coach toggle
+                CoachingToggleCard(
+                    isEnabled: $coachingEnabled,
+                    persona: $coachingPersona,
+                    creditBalance: coachingCredits,
+                    isLoadingBalance: loadingCredits,
+                    onGetMoreCredits: { Task { await debugGrantCredits() } },
+                    onClaimFreeTier: { await claimFreeCoachingTier() }
+                )
+                .padding(.horizontal)
+
                 // Join Button
                 joinButton
 
@@ -41,6 +60,20 @@ struct JoinMeetingView: View {
             }
             .padding(.top, 24)
         }
+        .onChange(of: viewModel.showSuccess) { _, isShowing in
+            // When join succeeds (alert appears), start coaching if requested.
+            if isShowing,
+               let meeting = viewModel.joinedMeeting,
+               let recordingId = viewModel.joinedRecordingId ?? viewModel.joinedMeeting?.recordingId {
+                Task { await startCoachingIfRequested(meetingId: meeting.id, recordingId: recordingId) }
+            }
+        }
+        .alert("AI Coach", isPresented: Binding(
+            get: { coachingError != nil },
+            set: { if !$0 { coachingError = nil } }
+        )) {
+            Button("OK", role: .cancel) { coachingError = nil }
+        } message: { Text(coachingError ?? "") }
         .alert("Join Meeting", isPresented: $viewModel.showError) {
             Button("OK", role: .cancel) {
                 viewModel.showError = false
@@ -306,6 +339,55 @@ struct JoinMeetingView: View {
             Text(name)
                 .font(.caption2)
                 .foregroundColor(.secondary)
+        }
+    }
+
+    // MARK: - Coaching helpers
+
+    private func claimFreeCoachingTier() async {
+        loadingCredits = true
+        defer { loadingCredits = false }
+        do {
+            _ = try? await CoachingClient.shared.claimFreeCredits()
+            let credits = try await CoachingClient.shared.getCredits()
+            coachingCredits = credits.balance
+        } catch {
+            // Silent — user hasn't asked for coaching yet, no need to bug them.
+            print("[Coaching] claim/getCredits failed: \(error)")
+        }
+    }
+
+    private func debugGrantCredits() async {
+        #if DEBUG
+        loadingCredits = true
+        defer { loadingCredits = false }
+        do {
+            let resp = try await CoachingClient.shared.debugGrantCredits()
+            coachingCredits = resp.balance
+        } catch {
+            coachingError = "Debug grant failed: \((error as? LocalizedError)?.errorDescription ?? error.localizedDescription)"
+        }
+        #else
+        coachingError = "Credit purchases are coming soon — check back next release."
+        #endif
+    }
+
+    /// Called when a meeting was successfully joined and coaching was requested.
+    /// Starts a server-side coaching session bound to the recording the bot
+    /// will produce, and stashes the session in `ActiveCoachingSession` so the
+    /// live meeting view can subscribe to its SSE stream.
+    func startCoachingIfRequested(meetingId: String, recordingId: String) async {
+        guard coachingEnabled else { return }
+        do {
+            let session = try await CoachingClient.shared.startSession(
+                recordingId: recordingId,
+                persona: coachingPersona
+            )
+            ActiveCoachingSession.shared.start(meetingId: meetingId, sessionId: session.sessionId)
+            print("[Coaching] Started session \(session.sessionId) for meeting \(meetingId)")
+        } catch {
+            coachingError = (error as? LocalizedError)?.errorDescription ?? "Could not start AI Coach."
+            print("[Coaching] startSession failed: \(error)")
         }
     }
 }

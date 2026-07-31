@@ -619,6 +619,25 @@ struct LiveTranscriptResponse: Codable {
     }
 }
 
+/// Stitched live transcript view (shareable plaintext + structured segments).
+struct StitchedLiveTranscript: Codable {
+    let fullText: String
+    let segments: [TranscriptSegment]
+    let wordCount: Int
+    let speakerCount: Int
+    let durationSeconds: Int
+    let source: String
+
+    enum CodingKeys: String, CodingKey {
+        case fullText = "full_text"
+        case segments
+        case wordCount = "word_count"
+        case speakerCount = "speaker_count"
+        case durationSeconds = "duration_seconds"
+        case source
+    }
+}
+
 // MARK: - Phone Call Models
 
 /// Status for a phone call

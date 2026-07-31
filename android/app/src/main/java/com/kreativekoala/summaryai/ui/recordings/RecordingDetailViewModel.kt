@@ -234,6 +234,25 @@ class RecordingDetailViewModel @Inject constructor(
         }
     }
 
+    fun updateSpeakerNames(names: Map<String, String>) {
+        viewModelScope.launch {
+            val result = recordingsRepository.updateSpeakerNames(recordingId, names)
+            result.fold(
+                onSuccess = { updatedTranscript ->
+                    val detail = _uiState.value.recordingDetail
+                    if (detail != null) {
+                        _uiState.value = _uiState.value.copy(
+                            recordingDetail = detail.copy(transcript = updatedTranscript)
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    _uiState.value = _uiState.value.copy(error = error.message)
+                }
+            )
+        }
+    }
+
     fun deleteRecording() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isDeleting = true)
