@@ -12,6 +12,8 @@ import { UploadDropzone } from '@/components/audio/UploadDropzone';
 import { ProgressBar } from '@/components/audio/ProgressBar';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { createRecording, uploadAudio, completeUpload } from '@/lib/api/recordings';
+import { ApiError } from '@/lib/api/client';
+import { PaywallModal } from '@/components/subscription/PaywallModal';
 import { cn } from '@/lib/utils/cn';
 
 type InputMode = 'record' | 'upload';
@@ -24,6 +26,7 @@ export default function NewRecordingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const recorder = useAudioRecorder();
 
@@ -81,7 +84,11 @@ export default function NewRecordingPage() {
       router.push(`/recordings/${recording.id}`);
     } catch (error) {
       console.error('Error creating recording:', error);
-      setSubmitError(error instanceof Error ? error.message : 'Failed to create recording');
+      if (error instanceof ApiError && error.status === 403) {
+        setShowPaywall(true);
+      } else {
+        setSubmitError(error instanceof Error ? error.message : 'Failed to create recording');
+      }
       setIsSubmitting(false);
     }
   };
@@ -94,6 +101,7 @@ export default function NewRecordingPage() {
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
+      {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} />}
       <div className="mb-6">
         <Link
           href="/recordings"

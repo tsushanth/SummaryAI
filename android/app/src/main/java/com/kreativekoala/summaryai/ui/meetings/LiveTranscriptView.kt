@@ -22,6 +22,18 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.domain.model.LiveTranscriptSegment
+import com.kreativekoala.summaryai.ui.coaching.ActiveCoachingSession
+import com.kreativekoala.summaryai.ui.coaching.CoachingLivePanel
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface ActiveCoachingSessionEntryPoint {
+    fun activeCoachingSession(): ActiveCoachingSession
+}
 
 @Composable
 fun LiveTranscriptView(
@@ -32,16 +44,28 @@ fun LiveTranscriptView(
     val uiState by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val coaching = remember {
+        EntryPointAccessors.fromApplication(context, ActiveCoachingSessionEntryPoint::class.java)
+            .activeCoachingSession()
+    }
+    val coachingInsights by coaching.insights.collectAsState()
+    val coachingActive by coaching.isActive.collectAsState()
+    val hasCoachingSession = coaching.sessionId(meetingId) != null
+
     // Update meeting ID and start polling
     LaunchedEffect(meetingId) {
         viewModel.updateMeetingId(meetingId)
         viewModel.startPolling()
     }
 
-    // Stop polling when composable leaves
+    // Stop polling + end coaching when composable leaves
     DisposableEffect(Unit) {
         onDispose {
             viewModel.stopPolling()
+            if (coaching.sessionId(meetingId) != null) {
+                coaching.endActive()
+            }
         }
     }
 
@@ -53,6 +77,15 @@ fun LiveTranscriptView(
     }
 
     Column(modifier = modifier.fillMaxSize()) {
+        // AI Coach live panel — only when a session is active for this meeting.
+        if (hasCoachingSession) {
+            CoachingLivePanel(
+                insights = coachingInsights,
+                isActive = coachingActive,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+        }
+
         // Live indicator
         LiveIndicator()
 

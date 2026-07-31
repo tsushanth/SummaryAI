@@ -105,3 +105,22 @@ data class LiveTranscriptResponse(
     val segments: List<LiveTranscriptSegmentDto>,
     @SerializedName("has_more") val hasMore: Boolean
 )
+
+data class StitchedTranscriptSegmentDto(
+    val id: String,
+    @SerializedName("speaker_label") val speakerLabel: String,
+    @SerializedName("speaker_index") val speakerIndex: Int,
+    val text: String,
+    @SerializedName("start_time") val startTime: Double,
+    @SerializedName("end_time") val endTime: Double,
+    val confidence: Double
+)
+
+data class StitchedLiveTranscriptResponse(
+    @SerializedName("full_text") val fullText: String,
+    val segments: List<StitchedTranscriptSegmentDto>,
+    @SerializedName("word_count") val wordCount: Int,
+    @SerializedName("speaker_count") val speakerCount: Int,
+    @SerializedName("duration_seconds") val durationSeconds: Int,
+    val source: String
+)

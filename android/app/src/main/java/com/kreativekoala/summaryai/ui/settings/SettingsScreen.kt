@@ -23,6 +23,8 @@ import androidx.compose.ui.graphics.Color
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.data.preferences.ThemeMode
 import com.kreativekoala.summaryai.domain.model.User
+import com.kreativekoala.crosspromokit.models.AppId
+import com.kreativekoala.crosspromokit.view.CrossPromoSection
 import com.kreativekoala.paywallkit.models.PaywallFeature
 import com.kreativekoala.paywallkit.models.PaywallTheme
 import com.kreativekoala.paywallkit.view.PaywallPreview
@@ -237,6 +239,8 @@ fun SettingsScreen(
                     )
                 }
             }
+
+            CrossPromoSection(currentApp = AppId.MEETINGMIND)
 
             Spacer(modifier = Modifier.height(32.dp))
         }

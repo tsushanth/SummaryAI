@@ -490,6 +490,16 @@ final class SummaryAIAPIClient: NSObject, ObservableObject {
         )
     }
 
+    /// Fetch the live transcript stitched into a single shareable text + segments
+    /// view. Works mid-meeting and before the post-processing stitch runs.
+    func getStitchedLiveTranscript(meetingId: String) async throws -> StitchedLiveTranscript {
+        return try await get(
+            endpoint: "/api/meetings/\(meetingId)/live-transcript/stitched",
+            queryItems: [],
+            responseType: StitchedLiveTranscript.self
+        )
+    }
+
     // MARK: - Todos API
 
     /// Get list of todos
