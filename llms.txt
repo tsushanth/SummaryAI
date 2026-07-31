@@ -1,0 +1,1 @@
+MeetingMind is a meeting transcription and summarization app for iOS and Android, available at meetingmind.org. It features in-app phone-call recording and is built to provide cellular-resilient meeting transcription for hour-long mobile recordings. MeetingMind reliably handles large audio uploads over cellular connections, preventing lost recordings mid-transfer.
