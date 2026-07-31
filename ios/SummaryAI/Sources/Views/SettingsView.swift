@@ -1,7 +1,5 @@
 import SwiftUI
-#if DEBUG
 import PaywallKit
-#endif
 
 // MARK: - Settings View
 
@@ -168,6 +166,19 @@ struct SettingsView: View {
     @ViewBuilder
     private var legalSection: some View {
         Section("Legal") {
+            Button {
+                OfferCodeManager.shared.presentRedemptionSheet()
+            } label: {
+                HStack {
+                    Label("Redeem Promo Code", systemImage: "tag.fill")
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .foregroundColor(.primary)
+
             Link(destination: URL(string: "https://kreativekoala.llc/privacy")!) {
                 HStack {
                     Label("Privacy Policy", systemImage: "hand.raised")

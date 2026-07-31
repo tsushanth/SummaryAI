@@ -14,7 +14,7 @@ final class LiveTranscriptViewModel: ObservableObject {
 
     // MARK: - Properties
 
-    private var meetingId: String
+    private(set) var meetingId: String
     private let apiClient: SummaryAIAPIClient
     private var pollingTask: Task<Void, Never>?
     private var lastFetchTime: Date?

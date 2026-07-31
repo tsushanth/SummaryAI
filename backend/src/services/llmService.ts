@@ -1,9 +1,9 @@
 /**
  * LLM Service
- * Handles interactions with the OpenAI API for Q&A and summarization
+ * Handles interactions with the Anthropic API for Q&A and summarization
  */
 
-import OpenAI from 'openai';
+import Anthropic from '@anthropic-ai/sdk';
 import { config } from '../config/index.js';
 import type { TranscriptSegment } from '../types/database.js';
 import type { Citation } from '../types/api.js';
@@ -32,20 +32,20 @@ export interface RelevantSegment {
 // LLM Client
 // ============================================================================
 
-let openaiClient: OpenAI | null = null;
+let anthropicClient: Anthropic | null = null;
 
-function getOpenAIClient(): OpenAI {
-  if (!config.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY is not configured');
+function getAnthropicClient(): Anthropic {
+  if (!config.ANTHROPIC_API_KEY) {
+    throw new Error('ANTHROPIC_API_KEY is not configured');
   }
 
-  if (!openaiClient) {
-    openaiClient = new OpenAI({
-      apiKey: config.OPENAI_API_KEY,
+  if (!anthropicClient) {
+    anthropicClient = new Anthropic({
+      apiKey: config.ANTHROPIC_API_KEY,
     });
   }
 
-  return openaiClient;
+  return anthropicClient;
 }
 
 // ============================================================================
@@ -93,7 +93,7 @@ function buildQAPrompt(
   // Add response format instructions
   prompt += `## Instructions
 
-Answer the question based on the transcript excerpts above. Your response must be valid JSON with this structure:
+Answer the question based on the transcript excerpts above. Respond with ONLY valid JSON with this structure:
 
 \`\`\`json
 {
@@ -277,7 +277,7 @@ export async function answerQuestion(
     maxTokens?: number;
   } = {}
 ): Promise<QAResult> {
-  const client = getOpenAIClient();
+  const client = getAnthropicClient();
 
   // Find relevant segments
   let relevantSegments = findRelevantSegments(segments, question);
@@ -299,14 +299,11 @@ export async function answerQuestion(
   const userPrompt = buildQAPrompt(question, relevantSegments, options.previousQA);
 
   // Call the LLM
-  const response = await client.chat.completions.create({
-    model: config.OPENAI_MODEL,
-    max_tokens: config.OPENAI_MAX_TOKENS,
+  const response = await client.messages.create({
+    model: config.ANTHROPIC_MODEL,
+    max_tokens: config.ANTHROPIC_MAX_TOKENS,
+    system: QA_SYSTEM_PROMPT,
     messages: [
-      {
-        role: 'system',
-        content: QA_SYSTEM_PROMPT,
-      },
       {
         role: 'user',
         content: userPrompt,
@@ -315,15 +312,15 @@ export async function answerQuestion(
   });
 
   // Parse the response
-  const responseText = response.choices[0]?.message?.content || '';
+  const responseText = response.content[0]?.type === 'text' ? response.content[0].text : '';
 
   const parsedResult = parseQAResponse(responseText, relevantSegments);
 
   return {
     ...parsedResult,
     usage: {
-      input_tokens: response.usage?.prompt_tokens || 0,
-      output_tokens: response.usage?.completion_tokens || 0,
+      input_tokens: response.usage?.input_tokens || 0,
+      output_tokens: response.usage?.output_tokens || 0,
     },
   };
 }

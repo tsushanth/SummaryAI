@@ -14,6 +14,7 @@ import { RecallWebhookPayload, BotRun, Meeting, RecallTranscriptWebhookPayload }
 import { downloadAndStoreRecording } from '../services/recallService.js';
 import { triggerProcessing } from '../services/processingService.js';
 import { queueInsightGeneration } from '../services/liveInsightsService.js';
+import { grantCredits } from '../services/coachingService.js';
 import { TwilioService } from '../services/twilioService.js';
 import { alertWebhookFailure, alertPaymentFailure } from '../services/alertingService.js';
 
@@ -917,7 +918,8 @@ router.post('/twilio/voip-outbound', async (req: Request, res: Response) => {
     }
 
     const conferenceName = phoneCall.conference_name;
-    const recipientNumber = targetNumber || phoneCall.to_number;
+    // Use DB to_number (already E.164) as primary — iOS SDK passes raw user input without country code
+    const recipientNumber = phoneCall.to_number || TwilioService.formatPhoneNumber(targetNumber);
     // Use the user's verified phone number as caller ID so it shows their number
     const callerIdNumber = phoneCall.from_number;
 
@@ -1768,12 +1770,23 @@ router.post('/revenuecat', async (req: Request, res: Response) => {
   }
 
   try {
+    // Coaching IAPs (consumable packs + capped subscription) — handled
+    // separately from the subscription_status profile updates so the two
+    // monetization paths don't entangle. Self-filters by product_id.
+    await handleCoachingIapEvent(userId, event);
+
     switch (event.type) {
       case 'INITIAL_PURCHASE':
       case 'RENEWAL':
       case 'PRODUCT_CHANGE':
       case 'UNCANCELLATION':
         await handleRevenueCatSubscriptionActive(userId, event);
+        break;
+
+      case 'NON_RENEWING_PURCHASE':
+        // Consumable purchase — no subscription state change, only credit
+        // grant which is already handled by handleCoachingIapEvent above.
+        console.log(`[RevenueCat Webhook] Non-renewing purchase: ${event.product_id} for ${userId}`);
         break;
 
       case 'CANCELLATION':
@@ -1923,6 +1936,56 @@ async function handleRevenueCatExpiration(
     .eq('id', userId);
 
   console.log(`[RevenueCat Webhook] Subscription expired for ${userId}`);
+}
+
+// ----- Realtime coaching IAP credit grants -----
+
+/** Credit amounts granted per coaching IAP product. */
+const COACHING_PACKS: Record<string, number> = {
+  mm_coach_pack_5:   5,
+  mm_coach_pack_25:  25,
+  mm_coach_pack_100: 100,
+};
+const COACHING_SUBSCRIPTION_PRODUCTS = new Set<string>([
+  'mm_coach_unlimited_monthly',
+]);
+/** Credits granted per subscription period (the 50/mo soft cap). */
+const COACHING_SUBSCRIPTION_MONTHLY_CREDITS = 50;
+
+/**
+ * Grant coaching credits when the RevenueCat event corresponds to a coaching
+ * IAP. Self-filters by product_id and event type so it's safe to call for
+ * every RC event. Idempotent via the transaction id (source_event_id).
+ */
+async function handleCoachingIapEvent(
+  userId: string,
+  event: RevenueCatWebhookEvent['event']
+): Promise<void> {
+  const productId = event.product_id;
+
+  // Consumable pack — granted on NON_RENEWING_PURCHASE
+  if (COACHING_PACKS[productId] && event.type === 'NON_RENEWING_PURCHASE') {
+    const amount = COACHING_PACKS[productId];
+    await grantCredits(userId, amount, 'iap', {
+      productId,
+      sourceEventId: event.id,
+    });
+    console.log(`[Coaching] Granted ${amount} credits to ${userId} from consumable ${productId}`);
+    return;
+  }
+
+  // Subscription — granted on every INITIAL_PURCHASE + RENEWAL, expires when
+  // the period does (so unused credits don't roll over indefinitely).
+  if (COACHING_SUBSCRIPTION_PRODUCTS.has(productId) &&
+      (event.type === 'INITIAL_PURCHASE' || event.type === 'RENEWAL' || event.type === 'UNCANCELLATION')) {
+    const expiresAt = event.expiration_at_ms ? new Date(event.expiration_at_ms) : undefined;
+    await grantCredits(userId, COACHING_SUBSCRIPTION_MONTHLY_CREDITS, 'subscription', {
+      productId,
+      sourceEventId: event.id,
+      expiresAt,
+    });
+    console.log(`[Coaching] Granted ${COACHING_SUBSCRIPTION_MONTHLY_CREDITS} credits to ${userId} for sub renewal ${productId}, expires ${expiresAt?.toISOString() || 'never'}`);
+  }
 }
 
 /**

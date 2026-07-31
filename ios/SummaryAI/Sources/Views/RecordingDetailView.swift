@@ -25,6 +25,7 @@ struct RecordingDetailContentView: View {
     @State private var showShareSheet = false
     @State private var showDeleteConfirmation = false
     @State private var showLiveTranscript = false
+    @State private var showSpeakerEditor = false
     @State private var showAIPaywall = false
 
     private let apiClient: SummaryAIAPIClient
@@ -78,6 +79,13 @@ struct RecordingDetailContentView: View {
                         }
 
                         Button {
+                            showSpeakerEditor = true
+                        } label: {
+                            Label("Rename Speakers", systemImage: "person.text.rectangle")
+                        }
+                        .disabled(viewModel.transcript == nil)
+
+                        Button {
                             // Move to folder
                         } label: {
                             Label("Move to Folder", systemImage: "folder")
@@ -127,11 +135,25 @@ struct RecordingDetailContentView: View {
                 ShareExportView(
                     recording: recording,
                     summary: viewModel.summary,
-                    transcript: viewModel.transcript
+                    transcript: viewModel.transcript,
+                    audioURL: viewModel.audioURL
                 ) {
                     showShareSheet = false
                 }
-                .presentationDetents([.medium])
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+            }
+        }
+        .sheet(isPresented: $showSpeakerEditor) {
+            if let transcript = viewModel.transcript {
+                EditSpeakerNamesView(
+                    transcript: transcript,
+                    onSave: { names in
+                        await viewModel.updateSpeakerNames(names)
+                    },
+                    onDismiss: { showSpeakerEditor = false }
+                )
+                .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
             }
         }
@@ -413,18 +435,20 @@ struct RecordingDetailContentView: View {
     }
 
     private func summarySection(_ summary: RecordingSummary) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        let names = viewModel.transcript?.speakerNames
+        return VStack(alignment: .leading, spacing: 8) {
             Text("Summary")
                 .font(.headline)
 
-            Text(summary.summary)
+            Text(summary.summary.applyingSpeakerNames(names))
                 .font(.body)
                 .foregroundColor(.primary)
         }
     }
 
     private func keyPointsSection(_ keyPoints: [String]) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        let names = viewModel.transcript?.speakerNames
+        return VStack(alignment: .leading, spacing: 12) {
             Text("Key Points")
                 .font(.headline)
 
@@ -435,7 +459,7 @@ struct RecordingDetailContentView: View {
                             .foregroundColor(.green)
                             .font(.subheadline)
 
-                        Text(point)
+                        Text(point.applyingSpeakerNames(names))
                             .font(.body)
                     }
                 }
@@ -444,7 +468,8 @@ struct RecordingDetailContentView: View {
     }
 
     private func overviewSection(_ keyPoints: [String]) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        let names = viewModel.transcript?.speakerNames
+        return VStack(alignment: .leading, spacing: 12) {
             // Header with sparkle icon
             HStack(spacing: 8) {
                 Image(systemName: "sparkles")
@@ -460,7 +485,7 @@ struct RecordingDetailContentView: View {
                             .font(.body)
                             .foregroundColor(.secondary)
 
-                        Text(point)
+                        Text(point.applyingSpeakerNames(names))
                             .font(.body)
                     }
                 }
@@ -469,7 +494,8 @@ struct RecordingDetailContentView: View {
     }
 
     private func actionItemsSection(_ actionItems: [ActionItem]) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        let names = viewModel.transcript?.speakerNames
+        return VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(actionItems) { item in
                     HStack(alignment: .top, spacing: 12) {
@@ -485,14 +511,14 @@ struct RecordingDetailContentView: View {
                         }
 
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(item.task)
+                            Text(item.task.applyingSpeakerNames(names))
                                 .font(.body)
 
                             if let assignee = item.assignee {
                                 HStack(spacing: 4) {
                                     Image(systemName: "person.fill")
                                         .font(.caption2)
-                                    Text(assignee)
+                                    Text(assignee.applyingSpeakerNames(names))
                                 }
                                 .font(.caption)
                                 .foregroundColor(.secondary)
@@ -699,7 +725,8 @@ struct RecordingDetailContentView: View {
                             TranscriptSegmentRow(
                                 segment: segment,
                                 isSelected: viewModel.selectedSegment?.id == segment.id,
-                                formatTimestamp: viewModel.formatTimestamp
+                                formatTimestamp: viewModel.formatTimestamp,
+                                speakerNames: transcript.speakerNames
                             )
                             .id(segment.id)
                             .onTapGesture {
@@ -1067,6 +1094,7 @@ struct TranscriptSegmentRow: View {
     let segment: TranscriptSegment
     let isSelected: Bool
     let formatTimestamp: (Double) -> String
+    let speakerNames: [String: String]?
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -1080,13 +1108,13 @@ struct TranscriptSegmentRow: View {
             // Speaker and text
             VStack(alignment: .leading, spacing: 4) {
                 if let speaker = segment.speaker {
-                    Text(speaker)
+                    Text(speaker.applyingSpeakerNames(speakerNames))
                         .font(.caption)
                         .fontWeight(.semibold)
                         .foregroundColor(.secondary)
                 }
 
-                Text(segment.text)
+                Text(segment.text.applyingSpeakerNames(speakerNames))
                     .font(.body)
             }
         }
@@ -1373,122 +1401,6 @@ struct FlowLayout: Layout {
             }
 
             self.size = CGSize(width: maxWidth, height: currentY + lineHeight)
-        }
-    }
-}
-
-// MARK: - Share Export View
-
-/// Bottom sheet for sharing/exporting recording content
-struct ShareExportView: View {
-    let recording: Recording
-    let summary: RecordingSummary?
-    let transcript: Transcript?
-    let onDismiss: () -> Void
-
-    var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            HStack {
-                Text("Share or Export")
-                    .font(.headline)
-
-                Spacer()
-
-                Button {
-                    onDismiss()
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.title2)
-                        .foregroundColor(.secondary)
-                }
-            }
-            .padding()
-
-            Divider()
-
-            // Export options
-            ScrollView {
-                VStack(spacing: 12) {
-                    ShareOptionRow(icon: "doc.fill", title: "Share Summary as PDF") {
-                        // Export summary as PDF
-                        onDismiss()
-                    }
-                    .disabled(summary == nil)
-                    .opacity(summary == nil ? 0.5 : 1)
-
-                    ShareOptionRow(icon: "doc.text.fill", title: "Share Summary as Text") {
-                        // Export summary as text
-                        onDismiss()
-                    }
-                    .disabled(summary == nil)
-                    .opacity(summary == nil ? 0.5 : 1)
-
-                    ShareOptionRow(icon: "doc.fill", title: "Share Transcript as PDF") {
-                        // Export transcript as PDF
-                        onDismiss()
-                    }
-                    .disabled(transcript == nil)
-                    .opacity(transcript == nil ? 0.5 : 1)
-
-                    ShareOptionRow(icon: "doc.text.fill", title: "Share Transcript as Text") {
-                        // Export transcript as text
-                        onDismiss()
-                    }
-                    .disabled(transcript == nil)
-                    .opacity(transcript == nil ? 0.5 : 1)
-
-                    ShareOptionRow(icon: "waveform", title: "Share Audio") {
-                        // Share audio file
-                        onDismiss()
-                    }
-                }
-                .padding()
-            }
-
-            // Tip
-            HStack(spacing: 8) {
-                Image(systemName: "lightbulb.fill")
-                    .foregroundColor(.yellow)
-
-                Text("Share or export with just a tap!")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            .padding()
-        }
-    }
-}
-
-// MARK: - Share Option Row
-
-struct ShareOptionRow: View {
-    let icon: String
-    let title: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 16) {
-                ZStack {
-                    Circle()
-                        .fill(Color.gray.opacity(0.1))
-                        .frame(width: 44, height: 44)
-
-                    Image(systemName: icon)
-                        .font(.system(size: 18))
-                        .foregroundColor(.primary)
-                }
-
-                Text(title)
-                    .font(.body)
-                    .foregroundColor(.primary)
-
-                Spacer()
-            }
-            .padding()
-            .background(Color(.secondarySystemBackground))
-            .cornerRadius(12)
         }
     }
 }
