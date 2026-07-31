@@ -113,6 +113,18 @@ class MeetingsRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
+    /**
+     * Stitched view of the realtime transcript so far — works mid-meeting and
+     * before post-processing finishes. Used by the share sheet so users can
+     * export what's been said even when the full transcript isn't ready.
+     */
+    suspend fun getStitchedLiveTranscript(
+        meetingId: String
+    ): Result<com.kreativekoala.summaryai.data.api.models.StitchedLiveTranscriptResponse> = withContext(Dispatchers.IO) {
+        try { Result.success(api.getStitchedLiveTranscript(meetingId)) }
+        catch (e: Exception) { Result.failure(e) }
+    }
 }
 
 // Extension functions

@@ -129,6 +129,15 @@ async function startServer(): Promise<void> {
   app.listen(config.PORT, () => {
     console.log(`✅ Server running on port ${config.PORT}`);
     console.log(`📍 API available at http://localhost:${config.PORT}/${config.API_VERSION}`);
+    // Re-attach tickers for any coaching sessions that were in flight when this
+    // process last died (e.g. previous deploy / Fly machine restart).
+    import('./services/coachingService.js').then(m => m.recoverActiveSessions())
+      .catch(e => console.error('[Coaching] recovery failed:', e));
+    // Backstop for the Recall bot.status_change webhook subscription gap:
+    // auto-stitches live_transcripts into the transcripts table for any
+    // recording stuck in `pending` for >10 min.
+    import('./services/stuckMeetingRecovery.js').then(m => m.startStuckMeetingRecoveryLoop())
+      .catch(e => console.error('[StuckRecovery] init failed:', e));
   });
 }
 

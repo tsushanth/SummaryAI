@@ -39,6 +39,7 @@ const createRecordingSchema = z.object({
   file_size_bytes: z.number().int().positive().max(config.MAX_AUDIO_FILE_SIZE_MB * 1024 * 1024),
   content_type: z.string().optional().default('audio/mp4'),
   recording_type: z.enum(['general', 'meeting', 'lecture', 'interview', 'voice_memo', 'imported']).optional().default('general'),
+  output_language: z.string().min(2).max(16).optional(),
 });
 
 const completeUploadSchema = z.object({
@@ -59,6 +60,8 @@ const listQuerySchema = z.object({
 // Create a new recording and get upload URL
 // ============================================================================
 
+const FREE_TIER_RECORDING_LIMIT = 3;
+
 router.post(
   '/',
   authenticate,
@@ -67,6 +70,62 @@ router.post(
 
     // Validate request body
     const body = createRecordingSchema.parse(req.body) as CreateRecordingRequest;
+
+    // Enforce free tier recording limit
+    // Check multiple sources for subscription status:
+    // 1. profiles table (legacy)
+    // 2. subscriptions table (server-side purchase tracking)
+    // 3. Client-provided header (StoreKit verified on device)
+    let isSubscribed = false;
+
+    // Check profiles table
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('subscription_status')
+      .eq('id', userId)
+      .single();
+
+    if (profile?.subscription_status === 'active' || profile?.subscription_status === 'trialing') {
+      isSubscribed = true;
+    }
+
+    // Check subscriptions table
+    if (!isSubscribed) {
+      const { data: sub } = await supabaseAdmin
+        .from('subscriptions')
+        .select('status')
+        .eq('user_id', userId)
+        .in('status', ['active', 'trialing'])
+        .limit(1)
+        .maybeSingle();
+
+      if (sub) isSubscribed = true;
+    }
+
+    // Trust client-provided subscription status (StoreKit verified on device)
+    if (!isSubscribed && req.headers['x-subscription-active'] === 'true') {
+      console.log(`[Recordings] Trusting client subscription header for ${userId}`);
+      isSubscribed = true;
+    }
+
+    console.log(`[Recordings] Subscription check for ${userId}: ${isSubscribed}`);
+
+    if (!isSubscribed) {
+      const { count } = await supabaseAdmin
+        .from('recordings')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId);
+
+      if ((count ?? 0) >= FREE_TIER_RECORDING_LIMIT) {
+        res.status(403).json({
+          error: {
+            code: 'SUBSCRIPTION_REQUIRED',
+            message: `Free tier is limited to ${FREE_TIER_RECORDING_LIMIT} recordings. Upgrade to Pro for unlimited recordings.`,
+          },
+        });
+        return;
+      }
+    }
 
     // Generate recording ID and file path based on content type
     const recordingId = uuidv4();
@@ -95,6 +154,7 @@ router.post(
         processed_at: null,
         recording_type: body.recording_type || (isPdf ? 'imported' : 'general'),
         content_type: body.content_type || 'audio/mp4',
+        output_language: body.output_language || null,
       })
       .select()
       .single();
@@ -357,8 +417,13 @@ router.get(
       }
     }
 
-    // Generate signed audio URL if recording is processed
-    if (['uploaded', 'transcribing', 'transcribed', 'summarizing', 'completed'].includes(recording.status)) {
+    // Generate signed audio URL if recording is processed AND has an audio file
+    // (recordings stitched from live_transcripts have no file_path; createSignedUrl
+    // would throw TypeError on .replace() against null).
+    if (
+      recording.file_path &&
+      ['uploaded', 'transcribing', 'transcribed', 'summarizing', 'completed'].includes(recording.status)
+    ) {
       const { data: signedUrlData } = await supabaseAdmin.storage
         .from(config.STORAGE_BUCKET_AUDIO)
         .createSignedUrl(recording.file_path, 3600); // 1 hour expiry
@@ -489,6 +554,84 @@ router.patch(
     }
 
     res.status(200).json({ transcript });
+  })
+);
+
+// ============================================================================
+// POST /api/recordings/:id/reprocess
+// Re-run transcription and summarization for a recording
+// ============================================================================
+
+router.post(
+  '/:id/reprocess',
+  authenticate,
+  asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+    const recordingId = req.params.id;
+
+    const { data: recording } = await supabaseAdmin
+      .from('recordings')
+      .select('id, status, file_path')
+      .eq('id', recordingId)
+      .eq('user_id', userId)
+      .single();
+
+    if (!recording) {
+      throw Errors.notFound('Recording');
+    }
+
+    // Delete old transcript and summary so processing creates fresh ones
+    await supabaseAdmin.from('transcripts').delete().eq('recording_id', recordingId);
+    await supabaseAdmin.from('summaries').delete().eq('recording_id', recordingId);
+
+    // Reset status and trigger processing
+    await supabaseAdmin
+      .from('recordings')
+      .update({ status: 'uploaded', error_message: null, updated_at: new Date().toISOString() })
+      .eq('id', recordingId);
+
+    const job = await triggerProcessing(recordingId, userId);
+
+    res.json({ success: true, data: { jobId: job.id, message: 'Reprocessing started' } });
+  })
+);
+
+// ============================================================================
+// POST /api/recordings/:id/reprocess-internal
+// Internal: re-run processing (requires cron secret)
+// ============================================================================
+
+router.post(
+  '/:id/reprocess-internal',
+  asyncHandler(async (req: Request, res: Response) => {
+    const cronSecret = req.headers['x-cron-secret'] as string;
+    if (!process.env.CRON_SECRET_TOKEN || cronSecret !== process.env.CRON_SECRET_TOKEN) {
+      res.status(401).json({ error: { code: 'UNAUTHORIZED', message: 'Invalid cron secret' } });
+      return;
+    }
+
+    const recordingId = req.params.id;
+
+    const { data: recording } = await supabaseAdmin
+      .from('recordings')
+      .select('id, user_id, file_path')
+      .eq('id', recordingId)
+      .single();
+
+    if (!recording) {
+      throw Errors.notFound('Recording');
+    }
+
+    await supabaseAdmin.from('transcripts').delete().eq('recording_id', recordingId);
+    await supabaseAdmin.from('summaries').delete().eq('recording_id', recordingId);
+    await supabaseAdmin
+      .from('recordings')
+      .update({ status: 'uploaded', error_message: null, updated_at: new Date().toISOString() })
+      .eq('id', recordingId);
+
+    const job = await triggerProcessing(recordingId, recording.user_id);
+
+    res.json({ success: true, data: { jobId: job.id, message: 'Reprocessing started' } });
   })
 );
 

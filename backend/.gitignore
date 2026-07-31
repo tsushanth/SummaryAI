@@ -32,3 +32,4 @@ coverage/
 # Temp files
 tmp/
 *.tmp
+.fly-secrets.sh
