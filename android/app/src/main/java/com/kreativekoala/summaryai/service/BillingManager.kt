@@ -39,15 +39,25 @@ class BillingManager @Inject constructor(
 
     companion object {
         private const val TAG = "BillingManager"
+        const val COACHING_SUB_PRODUCT_ID = "mm_coach_unlimited_monthly"
+        // MM Pro subscription IDs only. Coaching is queried separately so a
+        // misconfigured coaching IAP can never break the main paywall.
         private val PRODUCT_IDS = listOf(
             "meetingmindproweekly",
             "monthly",
             "yearly",
             "com.summaryai.subscription.weekly",
             "com.summaryai.subscription.monthly",
-            "com.summaryai.subscription.yearly1"
+            "com.summaryai.subscription.yearly1",
         )
     }
+
+    /** Coaching subscription product. Populated in a separate, fault-tolerant query. */
+    private val _coachingProduct = MutableStateFlow<BillingProduct?>(null)
+    val coachingProduct: StateFlow<BillingProduct?> = _coachingProduct
+
+    /** Callback for coaching subscription purchases — owner posts the token to backend for verification + credit grant. */
+    var onCoachingSubscriptionPurchased: ((productId: String, purchaseToken: String) -> Unit)? = null
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -74,6 +84,10 @@ class BillingManager @Inject constructor(
                     Log.d(TAG, "Billing client connected")
                     scope.launch {
                         queryProducts()
+                        // Coaching query is isolated: its failure (e.g. product still propagating
+                        // in Play Console) must NOT block the main paywall from rendering.
+                        runCatching { queryCoachingProduct() }
+                            .onFailure { Log.w(TAG, "queryCoachingProduct failed (non-fatal): ${it.message}") }
                         queryExistingPurchases()
                     }
                 } else {
@@ -151,14 +165,53 @@ class BillingManager @Inject constructor(
         }
     }
 
+    /** Isolated coaching subscription query. Errors here must not affect _products. */
+    private suspend fun queryCoachingProduct() {
+        val params = QueryProductDetailsParams.newBuilder()
+            .setProductList(
+                listOf(
+                    QueryProductDetailsParams.Product.newBuilder()
+                        .setProductId(COACHING_SUB_PRODUCT_ID)
+                        .setProductType(BillingClient.ProductType.SUBS)
+                        .build()
+                )
+            )
+            .build()
+        val result = billingClient.queryProductDetails(params)
+        if (result.billingResult.responseCode != BillingClient.BillingResponseCode.OK) {
+            Log.w(TAG, "queryCoachingProduct: ${result.billingResult.debugMessage} (code=${result.billingResult.responseCode})")
+            return
+        }
+        val details = result.productDetailsList?.firstOrNull() ?: run {
+            Log.w(TAG, "queryCoachingProduct: product not available yet (Play Console may still be propagating)")
+            return
+        }
+        val subOffer = details.subscriptionOfferDetails?.firstOrNull() ?: return
+        val paidPhase = subOffer.pricingPhases.pricingPhaseList.firstOrNull { it.priceAmountMicros > 0 } ?: return
+        _coachingProduct.value = BillingProduct(
+            productId = details.productId,
+            title = details.title,
+            localizedPrice = paidPhase.formattedPrice,
+            price = paidPhase.priceAmountMicros / 1_000_000.0,
+            currencyCode = paidPhase.priceCurrencyCode,
+            period = BillingProduct.Period.MONTHLY,
+            trialDays = null,
+            productDetails = details,
+            offerToken = subOffer.offerToken,
+        )
+        Log.d(TAG, "Loaded coaching product: ${details.productId} @ ${paidPhase.formattedPrice}")
+    }
+
     suspend fun queryExistingPurchases() {
         val result = billingClient.queryPurchasesAsync(
             QueryPurchasesParams.newBuilder()
                 .setProductType(BillingClient.ProductType.SUBS)
                 .build()
         )
+        // Coaching subscription is separate from MM Pro — don't let it flip the Pro gate.
         val hasActive = result.purchasesList.any { purchase ->
-            purchase.purchaseState == Purchase.PurchaseState.PURCHASED
+            purchase.purchaseState == Purchase.PurchaseState.PURCHASED &&
+                purchase.products.none { it == COACHING_SUB_PRODUCT_ID }
         }
         _isSubscribed.value = hasActive
         subscriptionStatus.setActive(hasActive)
@@ -170,6 +223,23 @@ class BillingManager @Inject constructor(
                 acknowledgePurchase(purchase)
             }
         }
+    }
+
+    /** Find the coaching subscription product if Play returned it during queryCoachingProduct. */
+    fun findCoachingSubscription(): BillingProduct? = _coachingProduct.value
+
+    /**
+     * Launch Play's billing flow for the coaching subscription. Returns true if
+     * the flow could be launched; false if the product isn't loaded (IAP not
+     * created in Play Console yet, or queryProducts hasn't completed).
+     */
+    fun purchaseCoachingSubscription(activity: Activity): Boolean {
+        val product = findCoachingSubscription() ?: run {
+            Log.w(TAG, "Coaching subscription product not loaded; cannot launch flow.")
+            return false
+        }
+        launchBillingFlow(activity, product)
+        return true
     }
 
     fun launchBillingFlow(activity: Activity, product: BillingProduct) {
@@ -261,11 +331,20 @@ class BillingManager @Inject constructor(
             BillingClient.BillingResponseCode.OK -> {
                 purchases?.forEach { purchase ->
                     if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
+                        val productId = purchase.products.firstOrNull() ?: ""
+                        // Coaching subscription has its own credit pipeline — do NOT mark
+                        // the user as MM Pro. Fire callback to the owner so the token gets
+                        // shipped to the backend for verification + credit grant.
+                        if (productId == COACHING_SUB_PRODUCT_ID) {
+                            if (!purchase.isAcknowledged) acknowledgePurchase(purchase)
+                            onCoachingSubscriptionPurchased?.invoke(productId, purchase.purchaseToken)
+                            Log.d(TAG, "Coaching subscription purchased: $productId")
+                            return@forEach
+                        }
                         _isSubscribed.value = true
                         subscriptionStatus.setActive(true)
                         PromoCodeManager.clearAfterConversion()
                         if (!purchase.isAcknowledged) acknowledgePurchase(purchase)
-                        val productId = purchase.products.firstOrNull() ?: ""
                         // Pull real price + currency from our loaded BillingProduct so
                         // Meta sees actual revenue values (was hardcoded 0/USD before).
                         val billingProduct = _products.value.firstOrNull { it.productId == productId }

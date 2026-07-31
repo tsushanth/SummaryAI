@@ -32,6 +32,10 @@ import com.kreativekoala.summaryai.domain.model.Transcript
 import com.kreativekoala.summaryai.domain.model.TranscriptSegment
 import com.kreativekoala.summaryai.ui.components.StaticWaveform
 import com.kreativekoala.summaryai.ui.meetings.LiveTranscriptView
+import com.kreativekoala.summaryai.ui.recordings.share.EditSpeakerNamesSheet
+import com.kreativekoala.summaryai.ui.recordings.share.ShareExportSheet
+import com.kreativekoala.summaryai.ui.recordings.share.applyingSpeakerNames
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,6 +50,8 @@ fun RecordingDetailScreen(
 
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showMoreMenu by remember { mutableStateOf(false) }
+    var showShareSheet by remember { mutableStateOf(false) }
+    var showSpeakerEditor by remember { mutableStateOf(false) }
 
     // Handle deletion
     LaunchedEffect(uiState.deleted) {
@@ -56,6 +62,7 @@ fun RecordingDetailScreen(
 
     // Error handling
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
             snackbarHostState.showSnackbar(it)
@@ -85,9 +92,18 @@ fun RecordingDetailScreen(
                             text = { Text(stringResource(R.string.export)) },
                             onClick = {
                                 showMoreMenu = false
-                                // TODO: Implement export
+                                showShareSheet = true
                             },
                             leadingIcon = { Icon(Icons.Default.Share, contentDescription = null) }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Rename Speakers") },
+                            onClick = {
+                                showMoreMenu = false
+                                showSpeakerEditor = true
+                            },
+                            enabled = detail?.transcript != null,
+                            leadingIcon = { Icon(Icons.Default.PersonOutline, contentDescription = null) }
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.delete)) },
@@ -147,7 +163,8 @@ fun RecordingDetailScreen(
                 // Tab content
                 when (uiState.selectedTab) {
                     DetailTab.SUMMARY -> SummaryTab(
-                        summary = detail.summary
+                        summary = detail.summary,
+                        speakerNames = detail.transcript?.speakerNames
                     )
                     DetailTab.TRANSCRIPT -> TranscriptTab(
                         transcript = detail.transcript,
@@ -193,6 +210,32 @@ fun RecordingDetailScreen(
                         Text(stringResource(R.string.cancel))
                     }
                 }
+            )
+        }
+
+        // Share / Export bottom sheet
+        if (showShareSheet && detail != null) {
+            ShareExportSheet(
+                recording = detail.recording,
+                summary = detail.summary,
+                transcript = detail.transcript,
+                onDismiss = { showShareSheet = false },
+                onError = { msg ->
+                    showShareSheet = false
+                    scope.launch { snackbarHostState.showSnackbar(msg) }
+                }
+            )
+        }
+
+        // Rename Speakers bottom sheet
+        if (showSpeakerEditor && detail?.transcript != null) {
+            EditSpeakerNamesSheet(
+                transcript = detail.transcript,
+                onSave = { names ->
+                    viewModel.updateSpeakerNames(names)
+                    showSpeakerEditor = false
+                },
+                onDismiss = { showSpeakerEditor = false }
             )
         }
     }
@@ -374,7 +417,8 @@ private fun StyledTabPicker(
 
 @Composable
 private fun SummaryTab(
-    summary: Summary?
+    summary: Summary?,
+    speakerNames: Map<String, String>? = null
 ) {
     Column(
         modifier = Modifier
@@ -407,7 +451,7 @@ private fun SummaryTab(
                         }
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = item,
+                            text = item.applyingSpeakerNames(speakerNames),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -442,7 +486,10 @@ private fun SummaryTab(
                             modifier = Modifier.padding(end = 8.dp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Text(point, style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            text = point.applyingSpeakerNames(speakerNames),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -450,8 +497,9 @@ private fun SummaryTab(
 
             // Detailed summary
             if (!summary.shortSummary.isNullOrEmpty() || !summary.detailedSummary.isNullOrEmpty()) {
+                val text = (summary.detailedSummary ?: summary.shortSummary).applyingSpeakerNames(speakerNames)
                 Text(
-                    text = summary.detailedSummary ?: summary.shortSummary,
+                    text = text,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -815,7 +863,7 @@ private fun TranscriptTab(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(transcript.segments) { segment ->
-                    TranscriptSegmentItem(segment = segment)
+                    TranscriptSegmentItem(segment = segment, speakerNames = transcript.speakerNames)
                 }
             }
         }
@@ -895,7 +943,10 @@ private fun LiveFullToggle(
 }
 
 @Composable
-private fun TranscriptSegmentItem(segment: TranscriptSegment) {
+private fun TranscriptSegmentItem(
+    segment: TranscriptSegment,
+    speakerNames: Map<String, String>? = null
+) {
     Row(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = segment.formattedStartTime,
@@ -907,13 +958,13 @@ private fun TranscriptSegmentItem(segment: TranscriptSegment) {
         Column(modifier = Modifier.weight(1f)) {
             segment.speaker?.let { speaker ->
                 Text(
-                    text = speaker,
+                    text = speaker.applyingSpeakerNames(speakerNames),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Text(
-                text = segment.text,
+                text = segment.text.applyingSpeakerNames(speakerNames),
                 style = MaterialTheme.typography.bodyMedium
             )
         }
