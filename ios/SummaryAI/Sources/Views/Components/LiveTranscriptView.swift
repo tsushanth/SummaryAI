@@ -19,45 +19,61 @@ struct LiveTranscriptView: View {
         .red
     ]
 
+    @ObservedObject private var coachingSession = ActiveCoachingSession.shared
+
     var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            HStack {
-                Image(systemName: "waveform")
-                    .foregroundColor(.blue)
-                Text("Live Transcript")
-                    .font(.headline)
+        VStack(spacing: 12) {
+            // AI Coach live panel — only rendered when a coaching session is
+            // active for this meeting. Subscribed in `.task` below.
+            if coachingSession.sessionId(for: viewModel.meetingId) != nil {
+                CoachingLivePanel(stream: coachingSession.liveStream)
+            }
 
-                Spacer()
+            VStack(spacing: 0) {
+                // Header
+                HStack {
+                    Image(systemName: "waveform")
+                        .foregroundColor(.blue)
+                    Text("Live Transcript")
+                        .font(.headline)
 
-                // Auto-scroll toggle
-                Button {
-                    autoScroll.toggle()
-                } label: {
-                    Image(systemName: autoScroll ? "arrow.down.circle.fill" : "arrow.down.circle")
-                        .foregroundColor(autoScroll ? .blue : .gray)
+                    Spacer()
+
+                    // Auto-scroll toggle
+                    Button {
+                        autoScroll.toggle()
+                    } label: {
+                        Image(systemName: autoScroll ? "arrow.down.circle.fill" : "arrow.down.circle")
+                            .foregroundColor(autoScroll ? .blue : .gray)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 12)
+                .padding(.horizontal)
+                .padding(.vertical, 12)
 
-            Divider()
+                Divider()
 
-            // Transcript content
-            if viewModel.segments.isEmpty {
-                emptyStateView
-            } else {
-                transcriptScrollView
+                // Transcript content
+                if viewModel.segments.isEmpty {
+                    emptyStateView
+                } else {
+                    transcriptScrollView
+                }
             }
+            .background(Color(.systemGroupedBackground))
+            .cornerRadius(12)
         }
-        .background(Color(.systemGroupedBackground))
-        .cornerRadius(12)
         .onAppear {
             viewModel.startPolling()
         }
         .onDisappear {
             viewModel.stopPolling()
+            // End any active coaching session tied to this meeting when the
+            // user navigates away. The backend auto-refunds if too few
+            // insights were emitted.
+            if coachingSession.sessionId(for: viewModel.meetingId) != nil {
+                Task { await coachingSession.endActive() }
+            }
         }
     }
 

@@ -11,10 +11,15 @@
 		11767FFA1F65D778F6EBCB05 /* ScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE6D3EE0C0BAF9095E8469B1 /* ScreenshotTests.swift */; };
 		298F3D263A0697F1642A255B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = EAFF348518DDCF49FA0B746C /* GoogleService-Info.plist */; };
 		2FDFA21E83AD1DDCD13FFE40 /* RemotePaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B5F6218F5D4C3FD59BF6C57 /* RemotePaywallView.swift */; };
+		330E3BE2CB18F09D9734AB55 /* ActiveCoachingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8716B78A73B6F6F764EE8945 /* ActiveCoachingSession.swift */; };
 		34436CCD6D19BA560226849A /* LiveSpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43305E01278F1D281C70A255 /* LiveSpeechRecognizer.swift */; };
+		5752310E9C1CD8E295E20C9D /* CoachingModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5618A3177CC989D477C0C31 /* CoachingModels.swift */; };
 		5B28C0E4901EC791D463E569 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB74E2A6660E748E3FF2B3D4 /* SnapshotHelper.swift */; };
+		6ED85703E18DEECCC7C24219 /* EditSpeakerNamesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AED1853F314D8A69C7427857 /* EditSpeakerNamesView.swift */; };
+		7FFD8B4E4E5334196EB8BBCA /* String+SpeakerNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ED68DC2E4C1F57D2B6FFA8F /* String+SpeakerNames.swift */; };
 		88DA84B12F07436B0084B5E7 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 88DA84B02F07436B0084B5E7 /* GoogleSignIn */; };
 		88DA84B32F07436B0084B5E7 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 88DA84B22F07436B0084B5E7 /* GoogleSignInSwift */; };
+		8B8D7E814B4F7E2D718E1DEC /* CoachingLivePanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4191951297A488958F2F9AE9 /* CoachingLivePanel.swift */; };
 		A1000001229E0001 /* SummaryAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002229E0001 /* SummaryAIApp.swift */; };
 		A1000003229E0002 /* APIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000004229E0002 /* APIModels.swift */; };
 		A1000005229E0003 /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000006229E0003 /* APIError.swift */; };
@@ -54,13 +59,17 @@
 		A100004E229E003B /* TwilioVoice in Frameworks */ = {isa = PBXBuildFile; productRef = A100004D229E003A /* TwilioVoice */; };
 		A1000052229E0042 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000053229E0043 /* AnalyticsService.swift */; };
 		A1FB0002229E0002 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = A1FB0001229E0001 /* FirebaseAnalytics */; };
+		A26A0639F1F3D0ADA59DA5AF /* CoachingClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29D5BD0305D577F4B5C41313 /* CoachingClient.swift */; };
 		B6CAC8D513DB9237A5AF47DF /* RatingKit in Frameworks */ = {isa = PBXBuildFile; productRef = F2DA3150D85364BFBF400F45 /* RatingKit */; };
+		B79BEAFA7E40AAC753AAA512 /* PromoOfferKit in Frameworks */ = {isa = PBXBuildFile; productRef = E58614B305EB63F14D8415B3 /* PromoOfferKit */; };
 		B8692A64ADB88CDE64F07A75 /* AttributionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F12911BF39626F5F9FA9FD3 /* AttributionService.swift */; };
 		CPB00000000000001 /* CrossPromoBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = CPB00000000000002 /* CrossPromoBanner.swift */; };
+		DBE8609BADC5788C134BF95C /* CoachingToggleCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81AA984F638718738E0E0302 /* CoachingToggleCard.swift */; };
 		DC00000100000001 /* AIDataConsentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC00000200000001 /* AIDataConsentManager.swift */; };
 		DC00000300000002 /* AIDataConsentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC00000400000002 /* AIDataConsentView.swift */; };
 		E3DA248ABBF2D4850460500B /* BackgroundUploadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA92F0CC6EF4A815CF4C1096 /* BackgroundUploadManager.swift */; };
 		E8B49783065583F877C437EC /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D768440E1374D1A3C30E9EF /* Foundation.framework */; };
+		F0DE85653A5A7AD7C8FB62BD /* ShareExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97956BA855CE9672C894C646 /* ShareExportView.swift */; };
 		F4EAFCE51A5909AE14A54446 /* LiveTranslator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96D8891E21D06D772D149D89 /* LiveTranslator.swift */; };
 		FB0000000000000000000001 /* FacebookCore in Frameworks */ = {isa = PBXBuildFile; productRef = FB0000000000000000000002 /* FacebookCore */; };
 		FB0000000000000000000010 /* FacebookSDKHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0000000000000000000011 /* FacebookSDKHelper.swift */; };
@@ -84,11 +93,17 @@
 /* Begin PBXFileReference section */
 		0D768440E1374D1A3C30E9EF /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.2.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		18D7B68CEE2E6E9738784E58 /* ReviewManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReviewManager.swift; sourceTree = "<group>"; };
+		1ED68DC2E4C1F57D2B6FFA8F /* String+SpeakerNames.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "String+SpeakerNames.swift"; sourceTree = "<group>"; };
 		23BF6DB4A9285FB48C554BDE /* SummaryAIUITests */ = {isa = PBXFileReference; includeInIndex = 0; path = SummaryAIUITests; sourceTree = BUILT_PRODUCTS_DIR; };
+		29D5BD0305D577F4B5C41313 /* CoachingClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoachingClient.swift; sourceTree = "<group>"; };
 		3F12911BF39626F5F9FA9FD3 /* AttributionService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AttributionService.swift; sourceTree = "<group>"; };
+		4191951297A488958F2F9AE9 /* CoachingLivePanel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoachingLivePanel.swift; sourceTree = "<group>"; };
 		43305E01278F1D281C70A255 /* LiveSpeechRecognizer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveSpeechRecognizer.swift; sourceTree = "<group>"; };
 		4B5F6218F5D4C3FD59BF6C57 /* RemotePaywallView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemotePaywallView.swift; sourceTree = "<group>"; };
+		81AA984F638718738E0E0302 /* CoachingToggleCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoachingToggleCard.swift; sourceTree = "<group>"; };
+		8716B78A73B6F6F764EE8945 /* ActiveCoachingSession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ActiveCoachingSession.swift; sourceTree = "<group>"; };
 		96D8891E21D06D772D149D89 /* LiveTranslator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveTranslator.swift; sourceTree = "<group>"; };
+		97956BA855CE9672C894C646 /* ShareExportView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareExportView.swift; sourceTree = "<group>"; };
 		A1000000229E0000 /* SummaryAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SummaryAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000002229E0001 /* SummaryAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryAIApp.swift; sourceTree = "<group>"; };
 		A1000004229E0002 /* APIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIModels.swift; sourceTree = "<group>"; };
@@ -130,7 +145,9 @@
 		A1000048229E0035 /* PhoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneView.swift; sourceTree = "<group>"; };
 		A100004A229E0037 /* VoipService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoipService.swift; sourceTree = "<group>"; };
 		A1000053229E0043 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
+		AED1853F314D8A69C7427857 /* EditSpeakerNamesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EditSpeakerNamesView.swift; sourceTree = "<group>"; };
 		B01A2C6D6E41FC5A3D9A00E0 /* AdServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AdServices.framework; path = System/Library/Frameworks/AdServices.framework; sourceTree = SDKROOT; };
+		C5618A3177CC989D477C0C31 /* CoachingModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoachingModels.swift; sourceTree = "<group>"; };
 		CA92F0CC6EF4A815CF4C1096 /* BackgroundUploadManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BackgroundUploadManager.swift; sourceTree = "<group>"; };
 		CE6D3EE0C0BAF9095E8469B1 /* ScreenshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScreenshotTests.swift; sourceTree = "<group>"; };
 		CPB00000000000002 /* CrossPromoBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossPromoBanner.swift; sourceTree = "<group>"; };
@@ -166,6 +183,7 @@
 				B6CAC8D513DB9237A5AF47DF /* RatingKit in Frameworks */,
 				FB0000000000000000000001 /* FacebookCore in Frameworks */,
 				0BAEC06355B57B758F68BE86 /* AdServices.framework in Frameworks */,
+				B79BEAFA7E40AAC753AAA512 /* PromoOfferKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -180,6 +198,16 @@
 			);
 			name = SummaryAIUITests;
 			path = SummaryAIUITests;
+			sourceTree = "<group>";
+		};
+		5EF3FA9F12BB6BB7EC71CF78 /* Recording */ = {
+			isa = PBXGroup;
+			children = (
+				81AA984F638718738E0E0302 /* CoachingToggleCard.swift */,
+				4191951297A488958F2F9AE9 /* CoachingLivePanel.swift */,
+			);
+			name = Recording;
+			path = Recording;
 			sourceTree = "<group>";
 		};
 		848B8EEB15A91B83DE0EEDB5 /* Frameworks */ = {
@@ -265,6 +293,8 @@
 			isa = PBXGroup;
 			children = (
 				A1000004229E0002 /* APIModels.swift */,
+				1ED68DC2E4C1F57D2B6FFA8F /* String+SpeakerNames.swift */,
+				C5618A3177CC989D477C0C31 /* CoachingModels.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -324,6 +354,9 @@
 				A1000022229E0011 /* SearchView.swift */,
 				A1000024229E0012 /* SettingsView.swift */,
 				A100003C229E0028 /* TodosView.swift */,
+				97956BA855CE9672C894C646 /* ShareExportView.swift */,
+				AED1853F314D8A69C7427857 /* EditSpeakerNamesView.swift */,
+				5EF3FA9F12BB6BB7EC71CF78 /* Recording */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -334,6 +367,8 @@
 				A1000006229E0003 /* APIError.swift */,
 				A1000008229E0004 /* SummaryAIAPIClient.swift */,
 				CA92F0CC6EF4A815CF4C1096 /* BackgroundUploadManager.swift */,
+				29D5BD0305D577F4B5C41313 /* CoachingClient.swift */,
+				8716B78A73B6F6F764EE8945 /* ActiveCoachingSession.swift */,
 			);
 			path = API;
 			sourceTree = "<group>";
@@ -416,6 +451,7 @@
 				PMM000000000002 /* PaywallKit */,
 				F2DA3150D85364BFBF400F45 /* RatingKit */,
 				FB0000000000000000000002 /* FacebookCore */,
+				E58614B305EB63F14D8415B3 /* PromoOfferKit */,
 			);
 			productName = SummaryAI;
 			productReference = A1000000229E0000 /* SummaryAI.app */;
@@ -471,6 +507,7 @@
 				FB0000000000000000000003 /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */,
 				PMM000000000001 /* XCLocalSwiftPackageReference "PaywallKit" */,
 				36074D5314D3BE89E207BB24 /* XCRemoteSwiftPackageReference "RatingKit" */,
+				11C9EEAAAA66E5E430779334 /* XCRemoteSwiftPackageReference "PromoOfferKit" */,
 			);
 			productRefGroup = A10000A2229E00A2 /* Products */;
 			projectDirPath = "";
@@ -563,6 +600,14 @@
 				E3DA248ABBF2D4850460500B /* BackgroundUploadManager.swift in Sources */,
 				34436CCD6D19BA560226849A /* LiveSpeechRecognizer.swift in Sources */,
 				F4EAFCE51A5909AE14A54446 /* LiveTranslator.swift in Sources */,
+				F0DE85653A5A7AD7C8FB62BD /* ShareExportView.swift in Sources */,
+				7FFD8B4E4E5334196EB8BBCA /* String+SpeakerNames.swift in Sources */,
+				6ED85703E18DEECCC7C24219 /* EditSpeakerNamesView.swift in Sources */,
+				5752310E9C1CD8E295E20C9D /* CoachingModels.swift in Sources */,
+				A26A0639F1F3D0ADA59DA5AF /* CoachingClient.swift in Sources */,
+				DBE8609BADC5788C134BF95C /* CoachingToggleCard.swift in Sources */,
+				8B8D7E814B4F7E2D718E1DEC /* CoachingLivePanel.swift in Sources */,
+				330E3BE2CB18F09D9734AB55 /* ActiveCoachingSession.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -720,7 +765,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SummaryAI/SummaryAI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 51;
+				CURRENT_PROJECT_VERSION = 61;
 				DEVELOPMENT_ASSET_PATHS = "\"SummaryAI/Preview Content\"";
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				ENABLE_PREVIEWS = YES;
@@ -738,7 +783,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 6.1.3;
+				MARKETING_VERSION = 6.1.9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.summaryai;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -754,7 +799,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SummaryAI/SummaryAI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 51;
+				CURRENT_PROJECT_VERSION = 61;
 				DEVELOPMENT_ASSET_PATHS = "\"SummaryAI/Preview Content\"";
 				DEVELOPMENT_TEAM = 7RS696YC75;
 				ENABLE_PREVIEWS = YES;
@@ -772,7 +817,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 6.1.3;
+				MARKETING_VERSION = 6.1.9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kreativekoala.summaryai;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -836,6 +881,14 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		11C9EEAAAA66E5E430779334 /* XCRemoteSwiftPackageReference "PromoOfferKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tsushanth/PromoOfferKit.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.0.0;
+			};
+		};
 		36074D5314D3BE89E207BB24 /* XCRemoteSwiftPackageReference "RatingKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/tsushanth/RatingKit.git";
@@ -906,6 +959,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A1FB0000229E0000 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAnalytics;
+		};
+		E58614B305EB63F14D8415B3 /* PromoOfferKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 11C9EEAAAA66E5E430779334 /* XCRemoteSwiftPackageReference "PromoOfferKit" */;
+			productName = PromoOfferKit;
 		};
 		F2DA3150D85364BFBF400F45 /* RatingKit */ = {
 			isa = XCSwiftPackageProductDependency;

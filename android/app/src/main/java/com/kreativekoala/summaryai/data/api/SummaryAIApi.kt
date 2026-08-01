@@ -132,6 +132,11 @@ interface SummaryAIApi {
         @Query("since") since: String? = null
     ): LiveTranscriptResponse
 
+    @GET("api/meetings/{id}/live-transcript/stitched")
+    suspend fun getStitchedLiveTranscript(
+        @Path("id") meetingId: String
+    ): StitchedLiveTranscriptResponse
+
     // MARK: - Calendar
 
     @GET("api/calendar/connections")

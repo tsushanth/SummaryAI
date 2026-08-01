@@ -10,11 +10,13 @@ import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.*
+import android.app.Activity
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -30,6 +32,10 @@ fun JoinMeetingScreen(
     showAsTab: Boolean = false
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadCoachingState()
+    }
 
     LaunchedEffect(uiState.meetingJoined) {
         if (uiState.meetingJoined) {
@@ -187,6 +193,27 @@ fun JoinMeetingScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 4.dp)
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // AI Coach toggle
+            val activity = LocalContext.current as? Activity
+            com.kreativekoala.summaryai.ui.coaching.CoachingToggleCard(
+                enabled = uiState.coachingEnabled,
+                onEnabledChange = viewModel::setCoachingEnabled,
+                persona = uiState.coachingPersona,
+                onPersonaChange = viewModel::setCoachingPersona,
+                creditBalance = uiState.coachingCredits,
+                isLoadingBalance = uiState.isLoadingCoachingCredits,
+                onGetMoreCredits = {
+                    val launched = activity?.let { viewModel.purchaseCoachingSubscription(it) } ?: false
+                    // DEBUG fallback: if purchase couldn't launch (e.g. IAP not yet provisioned),
+                    // grant 5 credits so developers can keep iterating without Play setup.
+                    if (!launched && com.kreativekoala.summaryai.BuildConfig.DEBUG) {
+                        viewModel.debugGrantCoachingCredits()
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
