@@ -33,10 +33,10 @@ const envSchema = z.object({
   // Deepgram (Speech-to-Text)
   DEEPGRAM_API_KEY: z.string().optional(),
 
-  // OpenAI (LLM for Q&A and summarization)
-  OPENAI_API_KEY: z.string().optional(),
-  OPENAI_MODEL: z.string().default('gpt-4o'),
-  OPENAI_MAX_TOKENS: z.string().transform(Number).default('2048'),
+  // Anthropic (LLM for Q&A and summarization)
+  ANTHROPIC_API_KEY: z.string().optional(),
+  ANTHROPIC_MODEL: z.string().default('claude-sonnet-4-6'),
+  ANTHROPIC_MAX_TOKENS: z.string().transform(Number).default('2048'),
 
   // Q&A Configuration
   QA_MAX_CONTEXT_TOKENS: z.string().transform(Number).default('50000'),
@@ -92,6 +92,11 @@ const envSchema = z.object({
 
   // RevenueCat (Mobile Subscriptions)
   REVENUECAT_WEBHOOK_AUTH_HEADER: z.string().optional(), // Authorization header for webhook verification
+
+  // Ad Optimizer service
+  AD_OPTIMIZER_URL: z.string().optional(),
+  AD_OPTIMIZER_PRODUCT_ID: z.string().optional(),
+  AD_OPTIMIZER_API_KEY: z.string().optional(),
 });
 
 export type Config = z.infer<typeof envSchema>;

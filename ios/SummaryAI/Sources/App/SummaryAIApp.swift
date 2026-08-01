@@ -5,6 +5,7 @@ import FirebaseCore
 import AppTrackingTransparency
 import PaywallKit
 import RatingKit
+import PromoOfferKit
 import FacebookCore
 
 // MARK: - Facebook SDK AppDelegate (ensures SDK initializes at the correct lifecycle point)
@@ -84,17 +85,36 @@ struct SummaryAIApp: App {
         // Server-driven rating prompts (variant testing + analytics).
         RatingKit.configure(appId: "meetingmind", apiUrl: "https://paywallkit-api.fly.dev")
         RatingKit.shared.trackAppOpen()
+
+        // Cancel-flow retention: present Apple Promotional Offer to lapsed subscribers
+        PromoOfferKit.configure(
+            bundleId: "com.kreativekoala.summaryai",
+            apiBaseUrl: URL(string: "https://paywallkit-api.fly.dev")!,
+            productIdToOfferCode: [
+                "com.summaryai.subscription.yearly1": "half_1yr",
+                "com.summaryai.subscription.monthly": "half_3mo",
+                "com.summaryai.subscription.weekly":  "half_4wk",
+            ],
+            isSubscribedProvider: { PremiumManager.shared.isPremium },
+            onPurchased: { Task { await PremiumManager.shared.validateSubscriptionState() } },
+            headline: "Come back at half price"
+        )
     }
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .ratingPrompt()
+                .promoOffer()
                 .environmentObject(authService)
                 .environmentObject(apiClient)
                 .onAppear {
                     // Connect auth service to API client
                     apiClient.accessTokenProvider = {
+                        await authService.getAccessToken()
+                    }
+                    // Share the same auth token with the coaching client.
+                    CoachingClient.shared.accessTokenProvider = {
                         await authService.getAccessToken()
                     }
                     // Set up token refresh handler for automatic retry on 401

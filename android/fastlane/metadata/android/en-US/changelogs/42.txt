@@ -1,0 +1,1 @@
+Hotfix: paywall now loads reliably even while new subscription products are still propagating from Play Console. AI Coach purchase remains available where eligible.
