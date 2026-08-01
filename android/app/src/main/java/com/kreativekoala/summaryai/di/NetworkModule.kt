@@ -92,4 +92,11 @@ object NetworkModule {
     fun provideSummaryAIApi(
         retrofit: Retrofit
     ): SummaryAIApi = retrofit.create(SummaryAIApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideCoachingApi(
+        retrofit: Retrofit
+    ): com.kreativekoala.summaryai.data.api.coaching.CoachingApi =
+        retrofit.create(com.kreativekoala.summaryai.data.api.coaching.CoachingApi::class.java)
 }

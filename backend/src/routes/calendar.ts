@@ -23,7 +23,7 @@
  *    - This content is user-generated during the meeting, NOT from Google APIs
  *
  * This ensures Google User Data obtained via Google Calendar API is never sent to
- * or used by the AI services (OpenAI, Deepgram).
+ * or used by the AI services (Anthropic, Deepgram).
  */
 
 import { Router, Request, Response } from 'express';

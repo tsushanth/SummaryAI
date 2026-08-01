@@ -40,7 +40,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>50</string>
+	<string>61</string>
 	<key>FacebookAppID</key>
 	<string>2151317385689073</string>
 	<key>FacebookClientToken</key>
@@ -61,14 +61,10 @@
 	<string>Meeting Mind uses this identifier to measure the effectiveness of advertising campaigns and provide you with a more personalized experience.</string>
 	<key>SKAdNetworkItems</key>
 	<array>
-		<!-- Apple Search Ads — REQUIRED for ASA install attribution. Was missing,
-		     producing the SmartSpace-style 0-install-attribution failure mode in
-		     the May 2026 ASA portfolio. Add first, never remove. -->
 		<dict>
 			<key>SKAdNetworkIdentifier</key>
 			<string>cstr6suwn9.skadnetwork</string>
 		</dict>
-		<!-- Meta / Facebook -->
 		<dict>
 			<key>SKAdNetworkIdentifier</key>
 			<string>v9wttpbfk9.skadnetwork</string>
@@ -77,7 +73,6 @@
 			<key>SKAdNetworkIdentifier</key>
 			<string>n38lu8286q.skadnetwork</string>
 		</dict>
-		<!-- Google / AdMob -->
 		<dict>
 			<key>SKAdNetworkIdentifier</key>
 			<string>4fzdc2evr5.skadnetwork</string>
@@ -86,27 +81,22 @@
 			<key>SKAdNetworkIdentifier</key>
 			<string>4pfyvq9l8r.skadnetwork</string>
 		</dict>
-		<!-- TikTok -->
 		<dict>
 			<key>SKAdNetworkIdentifier</key>
 			<string>22mmun2rn5.skadnetwork</string>
 		</dict>
-		<!-- Snap -->
 		<dict>
 			<key>SKAdNetworkIdentifier</key>
 			<string>238da6jt44.skadnetwork</string>
 		</dict>
-		<!-- Reddit -->
 		<dict>
 			<key>SKAdNetworkIdentifier</key>
 			<string>m8dbw4d6y7.skadnetwork</string>
 		</dict>
-		<!-- Microsoft / Xandr -->
 		<dict>
 			<key>SKAdNetworkIdentifier</key>
 			<string>kbd757ywx3.skadnetwork</string>
 		</dict>
-		<!-- Twitter / X -->
 		<dict>
 			<key>SKAdNetworkIdentifier</key>
 			<string>4468km3ulz.skadnetwork</string>

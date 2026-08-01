@@ -63,7 +63,7 @@ router.get(
     let query = supabaseAdmin
       .from('meetings')
       .select(
-        'id, title, platform, source, scheduled_start, scheduled_end, auto_join, status, recording_id',
+        'id, title, platform, source, scheduled_start, scheduled_end, auto_join, status, recording_id, join_url',
         { count: 'exact' }
       )
       .eq('user_id', userId);
@@ -587,6 +587,43 @@ router.get(
     };
 
     res.json(response);
+  })
+);
+
+/**
+ * GET /api/meetings/:id/live-transcript/stitched
+ *
+ * Returns a single stitched plaintext + structured segments view of the live
+ * transcript so far — shareable mid-meeting or before the post-processing
+ * stitch runs. Same logic the StuckRecovery loop uses to write to `transcripts`.
+ */
+router.get(
+  '/:id/live-transcript/stitched',
+  authenticate,
+  asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+    const meetingId = req.params.id;
+
+    const { data: meeting, error: meetingError } = await supabaseAdmin
+      .from('meetings')
+      .select('id')
+      .eq('id', meetingId)
+      .eq('user_id', userId)
+      .single();
+    if (meetingError || !meeting) throw Errors.notFound('Meeting');
+
+    const { fetchAllFinalizedSegments, stitchSegments } = await import('../services/stuckMeetingRecovery.js');
+    const rows = await fetchAllFinalizedSegments(meetingId);
+    const stitched = stitchSegments(rows);
+
+    res.json({
+      full_text: stitched.fullText,
+      segments: stitched.segments,
+      word_count: stitched.wordCount,
+      speaker_count: stitched.speakerCount,
+      duration_seconds: stitched.durationSec,
+      source: 'recall_realtime',
+    });
   })
 );
 

@@ -6,7 +6,7 @@
 import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
 import { v4 as uuidv4 } from 'uuid';
-import OpenAI from 'openai';
+import Anthropic from '@anthropic-ai/sdk';
 
 export interface ProcessingJob {
   id: string;
@@ -142,13 +142,13 @@ async function processRecordingAsync(
     await updateStatus(recordingId, 'summarizing');
     console.log(`[Processing] ${jobId}: Status -> summarizing`);
 
-    // Step 7: Generate summary with OpenAI (or mock if no API key)
+    // Step 7: Generate summary with Anthropic (or mock if no API key)
     let summary: { summary: string; keyPoints: string[]; actionItems: any[]; topics: string[] };
 
-    if (config.OPENAI_API_KEY) {
-      summary = await generateSummaryWithOpenAI(transcript.fullText, transcript.segments);
+    if (config.ANTHROPIC_API_KEY) {
+      summary = await generateSummaryWithAnthropic(transcript.fullText, transcript.segments, recording.output_language);
     } else {
-      console.warn(`[Processing] ${jobId}: No OpenAI API key, using mock summary`);
+      console.warn(`[Processing] ${jobId}: No Anthropic API key, using mock summary`);
       summary = createMockSummary(transcript.fullText);
     }
 
@@ -164,8 +164,8 @@ async function processRecordingAsync(
         key_points: summary.keyPoints,
         action_items: summary.actionItems,
         topics: summary.topics,
-        llm_provider: config.OPENAI_API_KEY ? 'openai' : 'mock',
-        llm_model: config.OPENAI_API_KEY ? config.OPENAI_MODEL : 'mock',
+        llm_provider: config.ANTHROPIC_API_KEY ? 'anthropic' : 'mock',
+        llm_model: config.ANTHROPIC_API_KEY ? config.ANTHROPIC_MODEL : 'mock',
       });
 
     if (summaryError) {
@@ -268,7 +268,7 @@ async function transcribeWithDeepgram(
 }
 
 /**
- * Extract text from PDF using pdf-parse or OpenAI Vision
+ * Extract text from PDF using pdf-parse or Anthropic Claude
  */
 async function extractTextFromPdf(
   pdfData: Blob
@@ -277,7 +277,7 @@ async function extractTextFromPdf(
     const arrayBuffer = await pdfData.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Try to use pdf-parse if available, otherwise use OpenAI Vision
+    // Try to use pdf-parse if available, otherwise use Anthropic Claude
     let fullText = '';
 
     try {
@@ -288,38 +288,40 @@ async function extractTextFromPdf(
       const data = await pdfParse(buffer);
       fullText = data.text || '';
     } catch {
-      // Fallback: Use OpenAI to extract text from PDF
-      if (config.OPENAI_API_KEY) {
-        const openai = new OpenAI({ apiKey: config.OPENAI_API_KEY });
+      // Fallback: Use Anthropic to extract text from PDF
+      if (config.ANTHROPIC_API_KEY) {
+        const anthropic = new Anthropic({ apiKey: config.ANTHROPIC_API_KEY });
 
         // Convert PDF to base64
         const base64 = buffer.toString('base64');
 
-        const response = await openai.chat.completions.create({
-          model: 'gpt-4o',
+        const response = await anthropic.messages.create({
+          model: 'claude-sonnet-4-6',
           max_tokens: 4096,
           messages: [
             {
               role: 'user',
               content: [
                 {
-                  type: 'text',
-                  text: 'Extract and return all the text content from this PDF document. Return only the extracted text, no additional commentary.',
+                  type: 'document',
+                  source: {
+                    type: 'base64',
+                    media_type: 'application/pdf',
+                    data: base64,
+                  },
                 },
                 {
-                  type: 'image_url',
-                  image_url: {
-                    url: `data:application/pdf;base64,${base64}`,
-                  },
+                  type: 'text',
+                  text: 'Extract and return all the text content from this PDF document. Return only the extracted text, no additional commentary.',
                 },
               ],
             },
           ],
         });
 
-        fullText = response.choices[0]?.message?.content || '';
+        fullText = response.content[0]?.type === 'text' ? response.content[0].text : '';
       } else {
-        fullText = 'PDF text extraction failed - no pdf-parse library or OpenAI API key available.';
+        fullText = 'PDF text extraction failed - no pdf-parse library or Anthropic API key available.';
       }
     }
 
@@ -380,13 +382,43 @@ function formatTimestamp(seconds: number): string {
 }
 
 /**
- * Generate summary using OpenAI API
+ * Map a BCP-47 language code (or display name) to a human-readable language name
+ * for prompting. Returns null for unrecognized / "auto" / empty values.
  */
-async function generateSummaryWithOpenAI(
+function languageNameForCode(code: string | null | undefined): string | null {
+  if (!code) return null;
+  const normalized = code.trim().toLowerCase();
+  if (!normalized || normalized === 'auto') return null;
+  const base = normalized.split(/[-_]/)[0];
+  const map: Record<string, string> = {
+    en: 'English',
+    es: 'Spanish',
+    fr: 'French',
+    de: 'German',
+    pt: 'Portuguese',
+    it: 'Italian',
+    ja: 'Japanese',
+    ko: 'Korean',
+    zh: 'Chinese',
+    hi: 'Hindi',
+    ar: 'Arabic',
+    ru: 'Russian',
+    nl: 'Dutch',
+    pl: 'Polish',
+    tr: 'Turkish',
+  };
+  return base ? (map[base] ?? null) : null;
+}
+
+/**
+ * Generate summary using Anthropic API
+ */
+async function generateSummaryWithAnthropic(
   fullText: string,
-  segments: TranscriptSegment[]
+  segments: TranscriptSegment[],
+  outputLanguage?: string | null
 ): Promise<{ summary: string; keyPoints: string[]; actionItems: any[]; topics: string[] }> {
-  const openai = new OpenAI({ apiKey: config.OPENAI_API_KEY });
+  const anthropic = new Anthropic({ apiKey: config.ANTHROPIC_API_KEY });
 
   // Format transcript with speaker labels for better context
   const speakerFormattedText = formatTranscriptWithSpeakers(segments);
@@ -402,6 +434,11 @@ async function generateSummaryWithOpenAI(
     ? `Participants: ${uniqueSpeakers.join(', ')}\n\n`
     : '';
 
+  const languageName = languageNameForCode(outputLanguage);
+  const languageInstruction = languageName
+    ? `\n\nWrite the entire summary, key_points, action_items, and topics in ${languageName}. JSON keys remain in English; only the values are translated.`
+    : '';
+
   const prompt = `Analyze this meeting transcript and provide:
 1. A concise summary (2-3 paragraphs) - attribute key statements to speakers (e.g., "John mentioned...", "Sarah proposed...")
 2. Key points (3-7 bullet points) - include speaker attribution where relevant
@@ -411,9 +448,9 @@ async function generateSummaryWithOpenAI(
 ${speakerList}Transcript:
 ${truncatedText}
 
-Important: When summarizing, reference speakers by name to show who said what. For action items, use the speaker's name as the assignee when they committed to do something.
+Important: When summarizing, reference speakers by name to show who said what. For action items, use the speaker's name as the assignee when they committed to do something.${languageInstruction}
 
-Respond in valid JSON format:
+Respond with ONLY valid JSON in this format:
 {
   "summary": "Your summary here with speaker attribution",
   "key_points": ["point 1 (mentioned by Speaker 1)", "point 2", ...],
@@ -421,14 +458,15 @@ Respond in valid JSON format:
   "topics": ["topic1", "topic2", ...]
 }`;
 
-  const response = await openai.chat.completions.create({
-    model: config.OPENAI_MODEL,
+  const systemPrompt = languageName
+    ? `You are a helpful assistant that summarizes meeting transcripts. Write all natural-language values in ${languageName}; keep JSON keys in English. Always respond with ONLY valid JSON, no additional text.`
+    : 'You are a helpful assistant that summarizes meeting transcripts. Always respond with ONLY valid JSON, no additional text.';
+
+  const response = await anthropic.messages.create({
+    model: config.ANTHROPIC_MODEL,
     max_tokens: 2048,
+    system: systemPrompt,
     messages: [
-      {
-        role: 'system',
-        content: 'You are a helpful assistant that summarizes meeting transcripts. Always respond with valid JSON.',
-      },
       {
         role: 'user',
         content: prompt,
@@ -436,7 +474,7 @@ Respond in valid JSON format:
     ],
   });
 
-  const responseText = response.choices[0]?.message?.content || '';
+  const responseText = response.content[0]?.type === 'text' ? response.content[0].text : '';
 
   // Parse JSON response
   try {
@@ -509,7 +547,7 @@ function createMockTranscript(durationSeconds: number): TranscriptionResult {
 }
 
 /**
- * Create mock summary for testing without OpenAI
+ * Create mock summary for testing without Anthropic
  */
 function createMockSummary(fullText: string): { summary: string; keyPoints: string[]; actionItems: any[]; topics: string[] } {
   return {

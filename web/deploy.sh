@@ -15,7 +15,7 @@ REPO_NAME="meeting-mind"
 NEXT_PUBLIC_SUPABASE_URL="https://mlofjzlmncgnhxbiuemf.supabase.co"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sb2ZqemxtbmNnbmh4Yml1ZW1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyOTU1NjAsImV4cCI6MjA4Mjg3MTU2MH0.fUxgMcu1BNrsYneN5vSMFWxsv-rWIygCx-xn-Vmr0Ec"
 NEXT_PUBLIC_GOOGLE_CLIENT_ID="753424767416-54viqmpd45g10oohm7vug13o8tdhb8qp.apps.googleusercontent.com"
-NEXT_PUBLIC_API_URL="https://summary-ai-backend-917362189743.us-central1.run.app/v1"
+NEXT_PUBLIC_API_URL="https://summary-ai-backend.fly.dev/v1"
 
 # Colors for output
 RED='\033[0;31m'
