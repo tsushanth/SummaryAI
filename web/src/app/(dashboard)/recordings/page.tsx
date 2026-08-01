@@ -1,24 +1,47 @@
 'use client';
 
+import { useState } from 'react';
 import { useRecordings } from '@/hooks/useRecordings';
+import { useSubscription } from '@/hooks/useSubscription';
 import { RecordingCard } from '@/components/recordings/RecordingCard';
+import { PaywallModal } from '@/components/subscription/PaywallModal';
 import { Button } from '@/components/ui/button';
 import { Plus, Mic, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
+const FREE_TIER_LIMIT = 3;
+
 export default function RecordingsPage() {
   const { recordings, isLoading, error } = useRecordings();
+  const { isSubscribed, isLoading: subLoading } = useSubscription();
+  const [showPaywall, setShowPaywall] = useState(false);
+
+  const atFreeLimit = !subLoading && !isSubscribed && recordings.length >= FREE_TIER_LIMIT;
+
+  const handleNewRecording = (e: React.MouseEvent) => {
+    if (atFreeLimit) {
+      e.preventDefault();
+      setShowPaywall(true);
+    }
+  };
 
   return (
     <div className="p-6">
+      {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} />}
+
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Recordings</h1>
           <p className="text-gray-500">
             {recordings.length} recording{recordings.length !== 1 ? 's' : ''}
+            {!subLoading && !isSubscribed && (
+              <span className="ml-2 text-xs text-amber-600 font-medium">
+                {recordings.length}/{FREE_TIER_LIMIT} free used
+              </span>
+            )}
           </p>
         </div>
-        <Link href="/recordings/new">
+        <Link href="/recordings/new" onClick={handleNewRecording}>
           <Button>
             <Plus className="w-4 h-4 mr-2" />
             New Recording
