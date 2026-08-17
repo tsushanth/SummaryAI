@@ -1,0 +1,40 @@
+# Meeting Mind
+
+> Meeting Mind is an AI meeting-intelligence app that records, transcribes, and summarizes meetings, phone calls, and lectures, then lets you ask questions about your recordings and get AI-powered answers with citations.
+
+## What it does
+
+- Background audio recording (works with the screen locked)
+- Automatic speech-to-text transcription in 36+ languages, with speaker identification and timestamps
+- AI-generated summaries: key points, decisions, and action items
+- Q&A chat over your own recordings, with citations
+- Phone call recording and transcription
+- Meeting bot that auto-joins and records Zoom, Microsoft Teams, and Google Meet calls from your calendar
+- Cross-device sync (iOS, web, and in-progress Android/macOS/Windows clients)
+
+## Who it's for
+
+Professionals who attend recurring meetings, calls, or lectures and want an automatic record and summary instead of manual note-taking.
+
+## Key pages
+
+- https://meetingmind.org/ — product overview and pricing
+- https://meetingmind.org/auth — sign in / sign up
+- https://meetingmind.org/subscription — subscribe (web checkout via Stripe)
+- https://meetingmind.org/privacy — privacy policy
+- https://meetingmind.org/terms — terms of service
+
+## Platforms
+
+- iOS (iOS 17+): https://apps.apple.com/us/app/meeting-mind/id6757317991
+- Android (Android 10+): coming soon on Google Play
+- Web app: https://meetingmind.org/auth
+- macOS and Windows desktop clients: https://github.com/tsushanth/SummaryAI/releases
+
+## Pricing
+
+Subscriptions are available weekly, monthly, or yearly, purchasable through the web app at a discount versus in-app purchase pricing on the App Store. A 7-day free trial is offered on the annual plan. Exact current prices are shown at https://meetingmind.org/#pricing and https://meetingmind.org/subscription.
+
+## Company
+
+Meeting Mind is made by Kreative Koala LLC.
