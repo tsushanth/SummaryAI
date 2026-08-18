@@ -19,9 +19,14 @@ const INSIGHT_BATCH_DELAY_MS = 30000; // Wait 30 seconds to batch transcripts
 export async function queueInsightGeneration(meetingId: string, userId: string): Promise<void> {
   const key = meetingId;
 
-  // Clear existing timeout to reset the batch window
+  // IMPORTANT: this must be a throttle, not a debounce. During an active
+  // meeting, final transcript segments arrive continuously (well under the
+  // batch delay apart), so resetting the timer on every call means it would
+  // never fire until the meeting goes quiet for a full INSIGHT_BATCH_DELAY_MS
+  // — which for a live call essentially never happens. If a timer is already
+  // pending for this meeting, let it run to completion instead of resetting it.
   if (pendingInsightGenerations.has(key)) {
-    clearTimeout(pendingInsightGenerations.get(key)!);
+    return;
   }
 
   // Set a new timeout to generate insights after the batch delay
