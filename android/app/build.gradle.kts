@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.kreativekoala.summaryai"
-    compileSdk = 35
+    compileSdk = 36
 
     signingConfigs {
         create("release") {
@@ -23,9 +23,9 @@ android {
     defaultConfig {
         applicationId = "com.kreativekoala.meetingmind"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 45
-        versionName = "1.6.1"
+        targetSdk = 36
+        versionCode = 46
+        versionName = "1.6.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
