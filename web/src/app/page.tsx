@@ -1,562 +1,368 @@
 import Link from 'next/link';
 import {
   Mic,
-  FileText,
-  Brain,
-  Phone,
-  Calendar,
-  CheckCircle,
-  ArrowRight,
+  ArrowUpRight,
   Apple,
   Play,
+  Laptop,
   Monitor,
-  Smartphone,
+  Globe,
+  Check,
 } from 'lucide-react';
+
+const PIPELINE = [
+  {
+    title: 'Capture',
+    body: 'Record a standup, a sales call, a lecture, or a phone call in the background — screen locked or not.',
+  },
+  {
+    title: 'Transcribe',
+    body: 'Get a speaker-labeled transcript in 36+ languages, detected automatically as people talk.',
+  },
+  {
+    title: 'Summarize',
+    body: 'Key points, decisions, and who owns what get pulled out, so you can skim instead of relisten.',
+  },
+  {
+    title: 'Act',
+    body: 'Ask the recording a question, export the notes, or hand the action items to your team.',
+  },
+];
+
+const ALSO_INCLUDED = [
+  'Meeting bot that joins Zoom, Teams, and Google Meet from your calendar',
+  'Search across every recording you’ve ever made',
+  'Chat with a transcript and get answers with citations',
+  'Speaker renaming, so "Speaker 2" becomes a name',
+];
+
+const PLATFORMS = [
+  {
+    name: 'iPhone & iPad',
+    caption: 'iOS 17+',
+    href: 'https://apps.apple.com/us/app/meeting-mind/id6757317991',
+    icon: Apple,
+  },
+  {
+    name: 'Android',
+    caption: 'Android 10+ · on Google Play',
+    href: 'https://play.google.com/store/apps/details?id=com.kreativekoala.meetingmind',
+    icon: Play,
+  },
+  {
+    name: 'Mac',
+    caption: 'Apple Silicon',
+    href: 'https://github.com/tsushanth/SummaryAI/releases',
+    icon: Laptop,
+  },
+  {
+    name: 'Windows',
+    caption: 'Windows 10+',
+    href: 'https://github.com/tsushanth/SummaryAI/releases',
+    icon: Monitor,
+  },
+  {
+    name: 'Browser',
+    caption: 'No install',
+    href: '/auth',
+    icon: Globe,
+  },
+];
+
+const PLANS = [
+  {
+    name: 'Weekly',
+    cadence: '/week',
+    was: '$6.99',
+    price: '$4.89',
+    features: ['Unlimited recording', 'Transcripts & summaries', '36+ languages'],
+  },
+  {
+    name: 'Monthly',
+    cadence: '/month',
+    was: '$14.99',
+    price: '$10.49',
+    features: [
+      'Unlimited recording',
+      'Transcripts & summaries',
+      'Ask questions, get cited answers',
+      'Meeting bot for Zoom, Teams, Meet',
+      'Phone call recording',
+    ],
+  },
+  {
+    name: 'Yearly',
+    cadence: '/year',
+    was: '$69.99',
+    price: '$48.99',
+    note: 'Works out to $4.08/month',
+    highlight: true,
+    features: [
+      '7-day free trial',
+      'Unlimited recording',
+      'Transcripts & summaries',
+      'Ask questions, get cited answers',
+      'Meeting bot for Zoom, Teams, Meet',
+      'Phone call recording',
+    ],
+  },
+];
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen bg-paper text-ink">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center">
-                <Mic className="w-5 h-5 text-white" />
-              </div>
-              <span className="font-bold text-xl">Meeting Mind</span>
-            </div>
-            <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-gray-600 hover:text-gray-900 text-sm font-medium">
-                Features
-              </a>
-              <a href="#platforms" className="text-gray-600 hover:text-gray-900 text-sm font-medium">
-                Download
-              </a>
-              <a href="#pricing" className="text-gray-600 hover:text-gray-900 text-sm font-medium">
-                Pricing
-              </a>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link
-                href="/auth"
-                className="text-gray-600 hover:text-gray-900 text-sm font-medium"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/auth"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-              >
-                Get Started Free
-              </Link>
-            </div>
+      <nav className="sticky top-0 z-50 border-b border-ink/10 bg-paper/90 backdrop-blur-sm">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+          <div className="flex items-center gap-2">
+            <Mic className="h-5 w-5 text-brand-indigo" strokeWidth={2.25} />
+            <span className="font-serif text-lg font-medium tracking-tight">Meeting Mind</span>
+          </div>
+          <div className="hidden items-center gap-8 text-[15px] text-slate md:flex">
+            <a href="#pipeline" className="hover:text-ink">How it works</a>
+            <a href="#platforms" className="hover:text-ink">Download</a>
+            <a href="#pricing" className="hover:text-ink">Pricing</a>
+          </div>
+          <div className="flex items-center gap-5">
+            <Link href="/auth" className="hidden text-[15px] text-slate hover:text-ink sm:block">
+              Sign in
+            </Link>
+            <Link
+              href="/auth"
+              className="rounded-full bg-ink px-5 py-2.5 text-[15px] font-medium text-paper transition-colors hover:bg-brand-indigo"
+            >
+              Start free
+            </Link>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-              </span>
-              AI-Powered Meeting Intelligence
-            </div>
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 tracking-tight mb-6">
-              Never miss a detail in your{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-                meetings
-              </span>
+      {/* Hero */}
+      <section className="mx-auto max-w-6xl px-6 pb-20 pt-16 sm:pt-24">
+        <div className="grid gap-14 lg:grid-cols-[1.05fr_1fr] lg:items-center">
+          <div>
+            <h1 className="font-serif text-[2.75rem] font-medium leading-[1.08] tracking-tight sm:text-6xl">
+              Meetings you can skim instead of relive.
             </h1>
-            <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
-              Meeting Mind automatically records, transcribes, and summarizes your meetings,
-              phone calls, and lectures. Get AI-powered insights and never take notes again.
+            <p className="mt-6 max-w-md text-lg leading-relaxed text-slate">
+              Meeting Mind listens in the background, then turns the recording into a
+              transcript, a summary, and a list of who owes what.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="mt-9 flex flex-wrap items-center gap-4">
               <Link
                 href="/auth"
-                className="w-full sm:w-auto bg-blue-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                className="rounded-full bg-brand-indigo px-7 py-3.5 text-[15px] font-medium text-white transition-colors hover:bg-ink"
               >
-                Start Free Trial
-                <ArrowRight className="w-5 h-5" />
+                Start free
               </Link>
               <a
-                href="#platforms"
-                className="w-full sm:w-auto bg-gray-100 text-gray-900 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                href="#pipeline"
+                className="text-[15px] font-medium text-ink underline decoration-ink/25 underline-offset-4 hover:decoration-ink"
               >
-                Download App
+                See how it works
               </a>
             </div>
-            <p className="text-sm text-gray-500 mt-4">
-              No credit card required. 7-day free trial.
+            <p className="mt-5 text-sm text-slate">No credit card. 7-day free trial.</p>
+          </div>
+
+          {/* The mechanism: a real utterance, distilled */}
+          <div className="rounded-2xl border border-ink/10 bg-white/60 p-6 sm:p-8">
+            <p className="text-sm text-slate">What gets recorded</p>
+            <div className="mt-3 space-y-2 border-l-2 border-ink/10 pl-4 font-serif text-[1.05rem] italic leading-relaxed text-ink/80">
+              <p>
+                <span className="not-italic text-slate">Priya, 14:02 —</span> so testing
+                pushed the launch to Q2, and marketing still needs new assets by Friday.
+              </p>
+              <p>
+                <span className="not-italic text-slate">Dev, 14:03 —</span> and can we get
+                the new hire set up before Monday?
+              </p>
+            </div>
+
+            <p className="mt-8 text-sm text-slate">What you get back</p>
+            <ul className="mt-3 space-y-3">
+              <li className="flex items-start gap-3">
+                <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brand-signal" />
+                <span className="text-[15px] leading-snug">
+                  Launch delayed to Q2, pending test results
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brand-signal" />
+                <span className="text-[15px] leading-snug">
+                  Marketing: deliver assets — due Friday
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brand-signal" />
+                <span className="text-[15px] leading-snug">
+                  Dev: onboard new hire — due Monday
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* Pipeline */}
+      <section id="pipeline" className="border-t border-ink/10 bg-white/50">
+        <div className="mx-auto max-w-6xl px-6 py-20">
+          <div className="max-w-xl">
+            <h2 className="font-serif text-3xl font-medium tracking-tight sm:text-4xl">
+              Four steps, no notepad.
+            </h2>
+            <p className="mt-4 text-lg text-slate">
+              The same pipeline runs for a standup, a sales call, or a two-hour lecture.
             </p>
           </div>
 
-          {/* Hero Image/Mockup */}
-          <div className="mt-16 relative">
-            <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent z-10 pointer-events-none"></div>
-            <div className="bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl p-8 shadow-2xl">
-              <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                <div className="bg-gray-100 px-4 py-3 flex items-center gap-2">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                    <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                    <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                  </div>
-                  <div className="flex-1 text-center text-sm text-gray-500">Meeting Mind</div>
+          <ol className="mt-14 grid gap-x-10 gap-y-12 sm:grid-cols-2">
+            {PIPELINE.map((step, i) => (
+              <li key={step.title} className="flex gap-5">
+                <span className="font-serif text-3xl font-medium text-ink/20">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <div>
+                  <h3 className="text-lg font-semibold">{step.title}</h3>
+                  <p className="mt-1.5 text-[15px] leading-relaxed text-slate">{step.body}</p>
                 </div>
-                <div className="p-6 space-y-4">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Mic className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-900">Weekly Team Standup</div>
-                      <div className="text-sm text-gray-500">45 min recorded</div>
-                      <div className="mt-2 bg-green-50 text-green-700 text-sm px-3 py-1 rounded-full inline-block">
-                        Transcribed & Summarized
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="text-sm font-medium text-gray-700 mb-2">Key Points</div>
-                    <ul className="text-sm text-gray-600 space-y-1">
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        Product launch delayed to Q2 due to testing requirements
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        Marketing team needs updated assets by Friday
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        New hire onboarding starts next Monday
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
+              </li>
+            ))}
+          </ol>
+
+          <div className="mt-16 border-t border-ink/10 pt-10">
+            <p className="text-sm font-medium text-slate">Also included</p>
+            <ul className="mt-4 grid gap-x-10 gap-y-3 sm:grid-cols-2">
+              {ALSO_INCLUDED.map((item) => (
+                <li key={item} className="flex gap-3 text-[15px] leading-relaxed">
+                  <span className="text-ink/30">—</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Everything you need to capture meetings
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Powerful features designed to help you focus on the conversation, not on taking notes.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8">
-              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mb-6">
-                <Mic className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Background Recording
-              </h3>
-              <p className="text-gray-600">
-                Record meetings, lectures, and conversations in the background. Works even with your screen locked.
-              </p>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8">
-              <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center mb-6">
-                <FileText className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Instant Transcription
-              </h3>
-              <p className="text-gray-600">
-                Get accurate transcripts in 36+ languages with automatic language detection, speaker identification, and timestamps.
-              </p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8">
-              <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center mb-6">
-                <Brain className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                AI Summaries
-              </h3>
-              <p className="text-gray-600">
-                Automatically extract key points, action items, and decisions from every meeting.
-              </p>
-            </div>
-
-            {/* Feature 4 */}
-            <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-8">
-              <div className="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center mb-6">
-                <Phone className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Phone Call Recording
-              </h3>
-              <p className="text-gray-600">
-                Record and transcribe phone calls automatically. Never miss important details from client calls.
-              </p>
-            </div>
-
-            {/* Feature 5 */}
-            <div className="bg-gradient-to-br from-cyan-50 to-sky-50 rounded-2xl p-8">
-              <div className="w-12 h-12 bg-cyan-600 rounded-xl flex items-center justify-center mb-6">
-                <Calendar className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Meeting Bot
-              </h3>
-              <p className="text-gray-600">
-                Auto-join and record Zoom, Teams, and Google Meet calls from your calendar.
-              </p>
-            </div>
-
-            {/* Feature 6 */}
-            <div className="bg-gradient-to-br from-rose-50 to-red-50 rounded-2xl p-8">
-              <div className="w-12 h-12 bg-rose-600 rounded-xl flex items-center justify-center mb-6">
-                <Brain className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Ask Questions
-              </h3>
-              <p className="text-gray-600">
-                Chat with your recordings. Ask questions and get instant answers with citations.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Download Platforms Section */}
-      <section id="platforms" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Available on all your devices
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Download Meeting Mind on your phone, tablet, or desktop. Your recordings sync across all devices.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* iOS */}
-            <a
-              href="https://apps.apple.com/us/app/meeting-mind/id6757317991"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col items-center text-center"
-            >
-              <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mb-4">
-                <Apple className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-1">iPhone & iPad</h3>
-              <p className="text-sm text-gray-500 mb-4">iOS 17+</p>
-              <span className="text-blue-600 font-medium text-sm flex items-center gap-1">
-                Download on App Store
-                <ArrowRight className="w-4 h-4" />
-              </span>
-            </a>
-
-            {/* Android */}
-            <a
-              href="https://play.google.com/store/apps/details?id=com.kreativekoala.summaryai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col items-center text-center relative"
-            >
-              <div className="absolute -top-2 -right-2 bg-amber-400 text-amber-900 text-xs font-bold px-2 py-0.5 rounded-full">
-                Coming Soon
-              </div>
-              <div className="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center mb-4">
-                <Play className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-1">Android</h3>
-              <p className="text-sm text-gray-500 mb-4">Android 10+</p>
-              <span className="text-blue-600 font-medium text-sm flex items-center gap-1">
-                Get on Google Play
-                <ArrowRight className="w-4 h-4" />
-              </span>
-            </a>
-
-            {/* macOS */}
-            <a
-              href="https://github.com/tsushanth/SummaryAI/releases"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col items-center text-center"
-            >
-              <div className="w-16 h-16 bg-gray-700 rounded-2xl flex items-center justify-center mb-4">
-                <Apple className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-1">macOS</h3>
-              <p className="text-sm text-gray-500 mb-4">Apple Silicon</p>
-              <span className="text-blue-600 font-medium text-sm flex items-center gap-1">
-                Download for Mac
-                <ArrowRight className="w-4 h-4" />
-              </span>
-            </a>
-
-            {/* Windows */}
-            <a
-              href="https://github.com/tsushanth/SummaryAI/releases"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col items-center text-center"
-            >
-              <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-4">
-                <Monitor className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-1">Windows</h3>
-              <p className="text-sm text-gray-500 mb-4">Windows 10+</p>
-              <span className="text-blue-600 font-medium text-sm flex items-center gap-1">
-                Download for Windows
-                <ArrowRight className="w-4 h-4" />
-              </span>
-            </a>
-          </div>
-
-          {/* Web App CTA */}
-          <div className="mt-12 text-center">
-            <p className="text-gray-600 mb-4">Or use Meeting Mind directly in your browser</p>
-            <Link
-              href="/auth"
-              className="inline-flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors"
-            >
-              <Smartphone className="w-5 h-5" />
-              Open Web App
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
-              Save 30% vs App Store
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Simple, transparent pricing
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Subscribe on web and save 30% compared to App Store prices. Cancel anytime.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Weekly Plan */}
-            <div className="bg-white rounded-2xl p-8 border border-gray-200 relative">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Weekly</h3>
-              <div className="text-sm text-gray-500 mb-1">
-                <span className="line-through">$6.99</span>
-                <span className="text-green-600 ml-2">Save 30%</span>
-              </div>
-              <div className="mb-6">
-                <span className="text-4xl font-bold text-gray-900">$4.89</span>
-                <span className="text-gray-500">/week</span>
-              </div>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-start gap-2 text-gray-600">
-                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  Unlimited recording
-                </li>
-                <li className="flex items-start gap-2 text-gray-600">
-                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  AI transcription & summaries
-                </li>
-                <li className="flex items-start gap-2 text-gray-600">
-                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  36+ language support
-                </li>
-              </ul>
-              <Link
-                href="/subscription"
-                className="block w-full text-center bg-gray-100 text-gray-900 px-6 py-3 rounded-xl font-medium hover:bg-gray-200 transition-colors"
-              >
-                Subscribe Now
-              </Link>
-            </div>
-
-            {/* Monthly Plan */}
-            <div className="bg-white rounded-2xl p-8 border border-gray-200 relative">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Monthly</h3>
-              <div className="text-sm text-gray-500 mb-1">
-                <span className="line-through">$14.99</span>
-                <span className="text-green-600 ml-2">Save 30%</span>
-              </div>
-              <div className="mb-6">
-                <span className="text-4xl font-bold text-gray-900">$10.49</span>
-                <span className="text-gray-500">/month</span>
-              </div>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-start gap-2 text-gray-600">
-                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  Unlimited recording
-                </li>
-                <li className="flex items-start gap-2 text-gray-600">
-                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  AI transcription & summaries
-                </li>
-                <li className="flex items-start gap-2 text-gray-600">
-                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  Q&A with your recordings
-                </li>
-                <li className="flex items-start gap-2 text-gray-600">
-                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  Meeting bot for Zoom/Teams/Meet
-                </li>
-                <li className="flex items-start gap-2 text-gray-600">
-                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  Phone call recording
-                </li>
-              </ul>
-              <Link
-                href="/subscription"
-                className="block w-full text-center bg-gray-100 text-gray-900 px-6 py-3 rounded-xl font-medium hover:bg-gray-200 transition-colors"
-              >
-                Subscribe Now
-              </Link>
-            </div>
-
-            {/* Annual Plan */}
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl p-8 text-white relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1 rounded-full">
-                BEST VALUE
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Yearly</h3>
-              <div className="text-sm text-blue-200 mb-1">
-                <span className="line-through">$69.99</span>
-                <span className="text-green-300 ml-2">Save 30%</span>
-              </div>
-              <div className="mb-2">
-                <span className="text-4xl font-bold">$48.99</span>
-                <span className="text-blue-200">/year</span>
-              </div>
-              <div className="text-sm text-blue-200 mb-6">
-                Just $4.08/month
-              </div>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-blue-200 mt-0.5 flex-shrink-0" />
-                  7-day free trial
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-blue-200 mt-0.5 flex-shrink-0" />
-                  Unlimited recording
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-blue-200 mt-0.5 flex-shrink-0" />
-                  AI transcription & summaries
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-blue-200 mt-0.5 flex-shrink-0" />
-                  Q&A with your recordings
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-blue-200 mt-0.5 flex-shrink-0" />
-                  Meeting bot for Zoom/Teams/Meet
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-blue-200 mt-0.5 flex-shrink-0" />
-                  Phone call recording
-                </li>
-              </ul>
-              <Link
-                href="/subscription"
-                className="block w-full text-center bg-white text-blue-600 px-6 py-3 rounded-xl font-medium hover:bg-blue-50 transition-colors"
-              >
-                Start Free Trial
-              </Link>
-            </div>
-          </div>
-
-          {/* Language Support Note */}
-          <div className="mt-12 text-center">
-            <p className="text-gray-500 text-sm">
-              🌍 Supports 36+ languages including English, Spanish, French, German, Japanese, Korean, Chinese, Hindi, and more with automatic detection
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-600 to-indigo-700">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-            Ready to transform how you capture meetings?
+      {/* Platforms */}
+      <section id="platforms" className="border-t border-ink/10">
+        <div className="mx-auto max-w-6xl px-6 py-20">
+          <h2 className="font-serif text-3xl font-medium tracking-tight sm:text-4xl">
+            Wherever you take meetings.
           </h2>
-          <p className="text-xl text-blue-100 mb-10">
-            Join thousands of professionals who never miss a detail.
+          <p className="mt-4 max-w-xl text-lg text-slate">
+            Your recordings sync across every device you sign in on.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="/auth"
-              className="w-full sm:w-auto bg-white text-blue-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
-            >
-              Get Started Free
-              <ArrowRight className="w-5 h-5" />
-            </Link>
+
+          <div className="mt-10 divide-y divide-ink/10 border-y border-ink/10">
+            {PLATFORMS.map(({ name, caption, href, icon: Icon }) => (
+              <a
+                key={name}
+                href={href}
+                target={href.startsWith('http') ? '_blank' : undefined}
+                rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                className="group flex items-center justify-between py-5 transition-colors hover:bg-white/60"
+              >
+                <span className="flex items-center gap-4">
+                  <Icon className="h-5 w-5 text-ink/60" strokeWidth={1.75} />
+                  <span className="text-[15px] font-medium">{name}</span>
+                  <span className="text-sm text-slate">{caption}</span>
+                </span>
+                <ArrowUpRight className="h-4 w-4 text-ink/30 transition-colors group-hover:text-brand-indigo" />
+              </a>
+            ))}
           </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="border-t border-ink/10 bg-white/50">
+        <div className="mx-auto max-w-6xl px-6 py-20">
+          <h2 className="font-serif text-3xl font-medium tracking-tight sm:text-4xl">
+            One price, wherever you subscribe.
+          </h2>
+          <p className="mt-4 max-w-xl text-lg text-slate">
+            Subscribing here instead of through the app saves you 30%. Cancel anytime.
+          </p>
+
+          <div className="mt-12 grid divide-y divide-ink/10 border-y border-ink/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            {PLANS.map((plan) => (
+              <div
+                key={plan.name}
+                className={`px-2 py-8 sm:px-8 ${plan.highlight ? 'bg-brand-indigo/5' : ''}`}
+              >
+                <div className="flex items-baseline justify-between">
+                  <h3 className="text-lg font-semibold">{plan.name}</h3>
+                  {plan.highlight && (
+                    <span className="text-xs font-medium text-brand-indigo">Most popular</span>
+                  )}
+                </div>
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span className="text-3xl font-semibold tracking-tight">{plan.price}</span>
+                  <span className="text-sm text-slate">{plan.cadence}</span>
+                </div>
+                <p className="mt-1 text-sm text-slate">
+                  <span className="line-through">{plan.was}</span> · save 30%
+                </p>
+                {plan.note && <p className="mt-1 text-sm text-slate">{plan.note}</p>}
+                <ul className="mt-6 space-y-2.5">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex gap-2.5 text-[14px] leading-relaxed text-ink/80">
+                      <Check className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-brand-signal" strokeWidth={2.5} />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/subscription"
+                  className={`mt-8 block rounded-full py-3 text-center text-[15px] font-medium transition-colors ${
+                    plan.highlight
+                      ? 'bg-brand-indigo text-white hover:bg-ink'
+                      : 'bg-ink/5 text-ink hover:bg-ink/10'
+                  }`}
+                >
+                  {plan.highlight ? 'Start free trial' : 'Subscribe'}
+                </Link>
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-8 text-sm text-slate">
+            Supports 36+ languages, including Spanish, French, German, Japanese, Korean,
+            Mandarin, and Hindi, detected automatically.
+          </p>
+        </div>
+      </section>
+
+      {/* Closing CTA */}
+      <section className="border-t border-ink/10 bg-ink">
+        <div className="mx-auto max-w-6xl px-6 py-20 text-center">
+          <h2 className="font-serif text-3xl font-medium tracking-tight text-paper sm:text-4xl">
+            Stop writing down what people say.
+          </h2>
+          <Link
+            href="/auth"
+            className="mt-8 inline-block rounded-full bg-brand-lavender px-8 py-3.5 text-[15px] font-medium text-ink transition-colors hover:bg-white"
+          >
+            Start free
+          </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-12">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center">
-                  <Mic className="w-5 h-5 text-white" />
-                </div>
-                <span className="font-bold text-xl text-white">Meeting Mind</span>
-              </div>
-              <p className="text-sm">
-                AI-powered meeting transcription and summarization for professionals.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-white mb-4">Product</h4>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
-                <li><a href="#platforms" className="hover:text-white transition-colors">Download</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-white mb-4">Company</h4>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-white mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-              </ul>
-            </div>
+      <footer className="bg-ink text-paper/60">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-6 py-10 text-sm sm:flex-row sm:justify-between">
+          <div className="flex items-center gap-2 text-paper">
+            <Mic className="h-4 w-4" />
+            <span className="font-serif">Meeting Mind</span>
           </div>
-          <div className="border-t border-gray-800 pt-8 text-sm text-center">
-            <p>&copy; {new Date().getFullYear()} Meeting Mind. All rights reserved.</p>
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+            <a href="#pipeline" className="hover:text-paper">How it works</a>
+            <a href="#pricing" className="hover:text-paper">Pricing</a>
+            <Link href="/privacy" className="hover:text-paper">Privacy</Link>
+            <Link href="/terms" className="hover:text-paper">Terms</Link>
           </div>
+          <p>&copy; {new Date().getFullYear()} Meeting Mind</p>
         </div>
       </footer>
     </div>
