@@ -1,0 +1,4 @@
+Search now finds your recordings.
+A fresh indigo look with more room on every screen.
+Fixed the login logo, quotation marks around your name, and the message for recordings with no speech.
+Filters with no matches now say so, and a recording that fails to load offers Retry.

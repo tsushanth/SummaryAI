@@ -55,6 +55,8 @@
     <string name="completed">Completed</string>
     <string name="no_recordings">No recordings yet</string>
     <string name="no_recordings_subtitle">Tap the microphone button to start your first recording</string>
+    <string name="no_recordings_in_filter">Nothing in this filter</string>
+    <string name="no_recordings_in_filter_subtitle">No recordings match it yet. Select All to see everything.</string>
     <string name="favorites">Favorites</string>
     <string name="imported">Imported</string>
     <string name="new_summary">New Summary</string>
@@ -86,6 +88,7 @@
     <string name="chat">Chat</string>
     <string name="overview">Overview</string>
     <string name="summary_not_available">Summary not available yet</string>
+    <string name="summary_no_speech">No speech was detected in this recording, so there is nothing to summarize.</string>
     <string name="chat_welcome_message">Hello there! What can I answer about your recording?</string>
     <string name="suggested_question_key_points">Key points in the meeting</string>
     <string name="suggested_question_key_points_full">What are the key points discussed in this meeting?</string>
@@ -206,6 +209,7 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="retry">Retry</string>
+    <string name="error_load_recording_failed">Couldn\'t load this recording. Check your connection and try again.</string>
     <string name="something_went_wrong">Something went wrong</string>
     <string name="no_internet">No internet connection</string>
     <string name="permission_required">Permission Required</string>

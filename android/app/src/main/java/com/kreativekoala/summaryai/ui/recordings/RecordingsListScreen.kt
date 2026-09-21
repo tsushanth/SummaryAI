@@ -306,7 +306,11 @@ fun RecordingsListScreen(
                     }
                 } else if (uiState.recordings.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize()) {
-                        EmptyRecordingsContent(onStartRecording = onStartRecording)
+                        EmptyRecordingsContent(
+                            onStartRecording = onStartRecording,
+                            // Recordings exist but the selected filter matches none
+                            isFilteredEmpty = uiState.allRecordings.isNotEmpty()
+                        )
                     }
                 } else {
                     LazyColumn(
@@ -554,7 +558,7 @@ private fun RecordingCardIOS(
 }
 
 @Composable
-private fun EmptyRecordingsContent(onStartRecording: () -> Unit) {
+private fun EmptyRecordingsContent(onStartRecording: () -> Unit, isFilteredEmpty: Boolean = false) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -572,24 +576,26 @@ private fun EmptyRecordingsContent(onStartRecording: () -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = stringResource(R.string.no_recordings),
+            text = stringResource(if (isFilteredEmpty) R.string.no_recordings_in_filter else R.string.no_recordings),
             style = MaterialTheme.typography.titleMedium
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = stringResource(R.string.no_recordings_subtitle),
+            text = stringResource(if (isFilteredEmpty) R.string.no_recordings_in_filter_subtitle else R.string.no_recordings_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        if (!isFilteredEmpty) {
+            Spacer(modifier = Modifier.height(24.dp))
 
-        Button(onClick = onStartRecording) {
-            Icon(Icons.Default.Add, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(stringResource(R.string.start_recording))
+            Button(onClick = onStartRecording) {
+                Icon(Icons.Default.Add, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(stringResource(R.string.start_recording))
+            }
         }
     }
 }

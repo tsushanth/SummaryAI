@@ -24,6 +24,9 @@ import io.github.jan.supabase.gotrue.providers.Google
 import io.github.jan.supabase.gotrue.providers.builtin.Email
 import io.github.jan.supabase.gotrue.providers.builtin.IDToken
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -122,8 +125,8 @@ class AuthService @Inject constructor(
                         user = User(
                             id = user?.id ?: "",
                             email = user?.email ?: "",
-                            fullName = user?.userMetadata?.get("full_name")?.toString(),
-                            avatarUrl = user?.userMetadata?.get("avatar_url")?.toString(),
+                            fullName = user?.userMetadata.metaString("full_name"),
+                            avatarUrl = user?.userMetadata.metaString("avatar_url"),
                             provider = AuthProvider.GOOGLE,
                             subscriptionStatus = SubscriptionStatus.FREE,
                             subscriptionExpiresAt = null
@@ -153,8 +156,8 @@ class AuthService @Inject constructor(
                     user = User(
                         id = user?.id ?: "",
                         email = user?.email ?: "",
-                        fullName = user?.userMetadata?.get("full_name")?.toString(),
-                        avatarUrl = user?.userMetadata?.get("avatar_url")?.toString(),
+                        fullName = user?.userMetadata.metaString("full_name"),
+                        avatarUrl = user?.userMetadata.metaString("avatar_url"),
                         provider = AuthProvider.GOOGLE,
                         subscriptionStatus = SubscriptionStatus.FREE,
                         subscriptionExpiresAt = null
@@ -236,9 +239,9 @@ class AuthService @Inject constructor(
                 user = User(
                     id = user?.id ?: "",
                     email = user?.email ?: "",
-                    fullName = user?.userMetadata?.get("full_name")?.toString()
+                    fullName = user?.userMetadata.metaString("full_name")
                         ?: account.displayName,
-                    avatarUrl = user?.userMetadata?.get("avatar_url")?.toString()
+                    avatarUrl = user?.userMetadata.metaString("avatar_url")
                         ?: account.photoUrl?.toString(),
                     provider = AuthProvider.GOOGLE,
                     subscriptionStatus = SubscriptionStatus.FREE,
@@ -371,8 +374,8 @@ class AuthService @Inject constructor(
                 user = User(
                     id = user?.id ?: "",
                     email = user?.email ?: "",
-                    fullName = user?.userMetadata?.get("full_name")?.toString(),
-                    avatarUrl = user?.userMetadata?.get("avatar_url")?.toString(),
+                    fullName = user?.userMetadata.metaString("full_name"),
+                    avatarUrl = user?.userMetadata.metaString("avatar_url"),
                     provider = AuthProvider.EMAIL,
                     subscriptionStatus = SubscriptionStatus.FREE,
                     subscriptionExpiresAt = null
@@ -425,8 +428,8 @@ class AuthService @Inject constructor(
                 user = User(
                     id = user?.id ?: "",
                     email = user?.email ?: "",
-                    fullName = user?.userMetadata?.get("full_name")?.toString(),
-                    avatarUrl = user?.userMetadata?.get("avatar_url")?.toString(),
+                    fullName = user?.userMetadata.metaString("full_name"),
+                    avatarUrl = user?.userMetadata.metaString("avatar_url"),
                     provider = AuthProvider.EMAIL,
                     subscriptionStatus = SubscriptionStatus.FREE,
                     subscriptionExpiresAt = null
@@ -480,3 +483,7 @@ class AuthService @Inject constructor(
         )
     }
 }
+
+/** Plain string value of a user-metadata field; JsonElement.toString() would keep the JSON quotes. */
+private fun JsonObject?.metaString(key: String): String? =
+    (this?.get(key) as? JsonPrimitive)?.contentOrNull
