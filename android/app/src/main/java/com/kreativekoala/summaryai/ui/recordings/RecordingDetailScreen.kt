@@ -181,8 +181,7 @@ fun RecordingDetailScreen(
                     onTabSelected = { viewModel.selectTab(it) }
                 )
 
-                val hasNoSpeech = detail.transcript
-                    ?.let { t -> t.wordCount == 0 && t.fullText.isBlank() } == true
+                val hasNoSpeech = detail.transcript?.hasNoSpeech == true
 
                 // Tab content
                 when (uiState.selectedTab) {
@@ -243,7 +242,7 @@ fun RecordingDetailScreen(
         if (showShareSheet && detail != null) {
             ShareExportSheet(
                 recording = detail.recording,
-                summary = detail.summary,
+                summary = detail.summary.takeUnless { detail.transcript?.hasNoSpeech == true },
                 transcript = detail.transcript,
                 onDismiss = { showShareSheet = false },
                 onError = { msg ->

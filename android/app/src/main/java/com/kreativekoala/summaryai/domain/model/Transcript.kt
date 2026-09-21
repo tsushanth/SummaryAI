@@ -12,6 +12,9 @@ data class Transcript(
     /** Maps speaker_index (as string) to custom speaker name */
     val speakerNames: Map<String, String>? = null
 ) {
+    /** True when speech-to-text found nothing; the model's summary of an empty transcript is noise. */
+    val hasNoSpeech: Boolean get() = wordCount == 0 && fullText.isBlank()
+
     /**
      * Get display name for a speaker index
      */
