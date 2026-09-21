@@ -410,29 +410,24 @@ private fun RecordingCardIOS(
                 .padding(vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Green checkmark circle for completed recordings
+            // Status circle: the tint over a low-alpha wash of itself reads correctly in light and dark
+            val statusColor = when (recording.status) {
+                RecordingStatus.COMPLETED -> Color(0xFF4CAF50)
+                RecordingStatus.FAILED -> RecordingRed
+                else -> Orange50
+            }
             Box(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(
-                        when (recording.status) {
-                            RecordingStatus.COMPLETED -> Color(0xFFE8F5E9)
-                            RecordingStatus.FAILED -> Color(0xFFFFEBEE)
-                            else -> Color(0xFFFFF3E0)
-                        }
-                    ),
+                    .background(statusColor.copy(alpha = 0.16f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
-                    tint = when (recording.status) {
-                        RecordingStatus.COMPLETED -> Color(0xFF4CAF50)
-                        RecordingStatus.FAILED -> RecordingRed
-                        else -> Orange50
-                    }
+                    tint = statusColor
                 )
             }
 
