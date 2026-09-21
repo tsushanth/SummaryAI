@@ -91,7 +91,8 @@ fun StaticWaveform(
     barSpacing: Dp = 1.dp,
     maxBarHeight: Dp = 48.dp,
     activeColor: Color = MaterialTheme.colorScheme.primary,
-    inactiveColor: Color = MaterialTheme.colorScheme.surfaceVariant,
+    // surfaceVariant is the same color as the player card behind it, so the bars were invisible
+    inactiveColor: Color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
     waveformData: List<Float>? = null
 ) {
     Canvas(
