@@ -275,7 +275,7 @@ class RecordingsListViewModel @Inject constructor(
     private suspend fun refreshSilently() {
         val result = recordingsRepository.getRecordings(
             page = 1,
-            perPage = _uiState.value.allRecordings.size.coerceAtLeast(20)
+            perPage = _uiState.value.allRecordings.size.coerceIn(20, 50) // backend caps per_page at 50
         )
 
         result.onSuccess { recordings ->

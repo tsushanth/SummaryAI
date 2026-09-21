@@ -4,6 +4,9 @@ import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -87,11 +90,20 @@ fun AuthScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // App Icon
-            Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = stringResource(R.string.app_name),
-                modifier = Modifier.size(120.dp)
-            )
+            // The launcher glyph is white, so it needs a colored tile to be visible in light theme
+            Box(
+                modifier = Modifier
+                    .size(104.dp)
+                    .clip(RoundedCornerShape(30.dp))
+                    .background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                    contentDescription = stringResource(R.string.app_name),
+                    modifier = Modifier.size(104.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 

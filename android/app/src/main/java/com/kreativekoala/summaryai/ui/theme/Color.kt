@@ -109,3 +109,15 @@ val RecordingRed = Color(0xFFFF3B30)
 // Pro badge gradient
 val ProGradientStart = Color(0xFFFFD700)
 val ProGradientEnd = Color(0xFFFFB700)
+
+// Brand palette (indigo/lavender), matched to the Summary AI look
+val BrandLavender = Color(0xFFC4C6F5)
+val BrandLavenderDeep = Color(0xFF2B2E7A)
+val BrandIndigo = Color(0xFF4A4DCB)
+val BrandIndigoContainer = Color(0xFFE2E2FF)
+val InkDark = Color(0xFF0E0E13)
+val InkDarkRaised = Color(0xFF181820)
+val InkDarkHigh = Color(0xFF22222C)
+val PaperLight = Color(0xFFFAF9FE)
+val PaperLightRaised = Color(0xFFF1F0F8)
+val PaperLightHigh = Color(0xFFE8E7F1)

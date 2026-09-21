@@ -133,7 +133,28 @@ fun RecordingDetailScreen(
             ) {
                 CircularProgressIndicator()
             }
-        } else if (detail != null) {
+        } else if (detail == null) {
+            // Load failed (e.g. backend timeout): without this the screen was blank with no way out
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.error_load_recording_failed),
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = viewModel::refresh) {
+                    Text(stringResource(R.string.retry))
+                }
+            }
+        } else {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -160,10 +181,15 @@ fun RecordingDetailScreen(
                     onTabSelected = { viewModel.selectTab(it) }
                 )
 
+                val hasNoSpeech = detail.transcript
+                    ?.let { t -> t.wordCount == 0 && t.fullText.isBlank() } == true
+
                 // Tab content
                 when (uiState.selectedTab) {
                     DetailTab.SUMMARY -> SummaryTab(
-                        summary = detail.summary,
+                        // An empty transcript makes the model reply with "please resubmit"; hide that
+                        summary = detail.summary.takeUnless { hasNoSpeech },
+                        hasNoSpeech = hasNoSpeech,
                         speakerNames = detail.transcript?.speakerNames
                     )
                     DetailTab.TRANSCRIPT -> TranscriptTab(
@@ -418,6 +444,7 @@ private fun StyledTabPicker(
 @Composable
 private fun SummaryTab(
     summary: Summary?,
+    hasNoSpeech: Boolean = false,
     speakerNames: Map<String, String>? = null
 ) {
     Column(
@@ -509,7 +536,7 @@ private fun SummaryTab(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = stringResource(R.string.summary_not_available),
+                    text = stringResource(if (hasNoSpeech) R.string.summary_no_speech else R.string.summary_not_available),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

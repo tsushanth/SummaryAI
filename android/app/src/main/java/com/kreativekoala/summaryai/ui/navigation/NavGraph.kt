@@ -1,8 +1,11 @@
 package com.kreativekoala.summaryai.ui.navigation
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Mic
@@ -217,6 +220,7 @@ fun MeetingMindNavGraph(
 
     CompositionLocalProvider(LocalTabReselection provides tabReselectionState) {
         Scaffold(
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
             bottomBar = {
                 if (showBottomNav) {
                     NavigationBar {
@@ -273,10 +277,21 @@ fun MeetingMindNavGraph(
                 }
             }
         ) { paddingValues ->
+        // Screens with their own TopAppBar already inset for the status bar; padding it here
+        // as well doubled the gap above every title. Only screens without a top bar need it.
+        val needsStatusBarPadding = currentDestination?.route in setOf(
+            Screen.Auth.route,
+            Screen.Onboarding.route,
+            Screen.Paywall.route,
+            Screen.HardPaywall.route
+        )
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier
+                .padding(paddingValues)
+                .consumeWindowInsets(paddingValues)
+                .then(if (needsStatusBarPadding) Modifier.statusBarsPadding() else Modifier)
         ) {
             // Auth
             composable(Screen.Auth.route) {
