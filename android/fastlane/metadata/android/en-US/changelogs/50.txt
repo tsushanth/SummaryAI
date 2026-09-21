@@ -1,0 +1,2 @@
+Dark mode polish: clearer recording status icons, a visible waveform, and softer accent colors.
+Recordings with no speech no longer export a confusing summary.
