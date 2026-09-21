@@ -23,6 +23,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kreativekoala.paywallkit.manager.PaywallManager
+import com.kreativekoala.summaryai.ui.theme.BrandIndigo
+import com.kreativekoala.summaryai.ui.theme.Indigo60
 import kotlinx.coroutines.delay
 
 /**
@@ -60,7 +62,8 @@ fun EmailCaptureScreen(
             .padding(24.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            // imePadding keeps the field, Continue and Skip above the keyboard
+            modifier = Modifier.fillMaxSize().imePadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.weight(1f))
@@ -72,7 +75,7 @@ fun EmailCaptureScreen(
                     .clip(CircleShape)
                     .background(
                         Brush.linearGradient(
-                            colors = listOf(Color(0xFF2196F3), Color(0xFF00BCD4))
+                            colors = listOf(BrandIndigo, Indigo60)
                         )
                     ),
                 contentAlignment = Alignment.Center

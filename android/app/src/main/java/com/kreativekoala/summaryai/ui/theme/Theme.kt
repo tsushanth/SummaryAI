@@ -11,6 +11,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
@@ -18,51 +19,39 @@ import androidx.core.view.WindowCompat
  * Light color scheme for Meeting Mind
  */
 private val LightColorScheme = lightColorScheme(
-    // Primary
-    primary = Blue40,
+    primary = BrandIndigo,
     onPrimary = Neutral100,
-    primaryContainer = Blue90,
-    onPrimaryContainer = Blue10,
-
-    // Secondary
+    primaryContainer = BrandIndigoContainer,
+    onPrimaryContainer = Indigo10,
     secondary = Indigo40,
     onSecondary = Neutral100,
-    secondaryContainer = Indigo90,
+    secondaryContainer = BrandIndigoContainer,
     onSecondaryContainer = Indigo10,
-
-    // Tertiary
     tertiary = Teal40,
     onTertiary = Neutral100,
     tertiaryContainer = Teal90,
     onTertiaryContainer = Teal10,
-
-    // Error
     error = Red40,
     onError = Neutral100,
     errorContainer = Red90,
     onErrorContainer = Red10,
-
-    // Background & Surface
-    background = Neutral99,
+    background = PaperLight,
     onBackground = Neutral10,
-    surface = Neutral99,
+    surface = PaperLight,
     onSurface = Neutral10,
-    surfaceVariant = NeutralVariant90,
+    surfaceVariant = PaperLightHigh,
     onSurfaceVariant = NeutralVariant30,
-
-    // Outline
+    surfaceContainerLowest = Neutral100,
+    surfaceContainerLow = PaperLight,
+    surfaceContainer = PaperLightRaised,
+    surfaceContainerHigh = PaperLightHigh,
+    surfaceContainerHighest = PaperLightHigh,
     outline = NeutralVariant50,
     outlineVariant = NeutralVariant80,
-
-    // Inverse
     inverseSurface = Neutral20,
     inverseOnSurface = Neutral95,
-    inversePrimary = Blue80,
-
-    // Surface tint
-    surfaceTint = Blue40,
-
-    // Scrim
+    inversePrimary = BrandLavender,
+    surfaceTint = BrandIndigo,
     scrim = Neutral0
 )
 
@@ -70,51 +59,39 @@ private val LightColorScheme = lightColorScheme(
  * Dark color scheme for Meeting Mind
  */
 private val DarkColorScheme = darkColorScheme(
-    // Primary
-    primary = Blue80,
-    onPrimary = Blue20,
-    primaryContainer = Blue30,
-    onPrimaryContainer = Blue90,
-
-    // Secondary
+    primary = BrandLavender,
+    onPrimary = BrandLavenderDeep,
+    primaryContainer = Color(0xFF3A3D99),
+    onPrimaryContainer = BrandIndigoContainer,
     secondary = Indigo80,
     onSecondary = Indigo20,
     secondaryContainer = Indigo30,
     onSecondaryContainer = Indigo90,
-
-    // Tertiary
     tertiary = Teal80,
     onTertiary = Teal20,
     tertiaryContainer = Teal30,
     onTertiaryContainer = Teal90,
-
-    // Error
     error = Red80,
     onError = Red20,
     errorContainer = Red30,
     onErrorContainer = Red90,
-
-    // Background & Surface
-    background = Neutral10,
-    onBackground = Neutral90,
-    surface = Neutral10,
-    onSurface = Neutral90,
-    surfaceVariant = NeutralVariant30,
+    background = InkDark,
+    onBackground = Color(0xFFE4E3EA),
+    surface = InkDark,
+    onSurface = Color(0xFFE4E3EA),
+    surfaceVariant = InkDarkHigh,
     onSurfaceVariant = NeutralVariant80,
-
-    // Outline
+    surfaceContainerLowest = Color(0xFF09090D),
+    surfaceContainerLow = InkDark,
+    surfaceContainer = InkDarkRaised,
+    surfaceContainerHigh = InkDarkHigh,
+    surfaceContainerHighest = Color(0xFF2B2B36),
     outline = NeutralVariant60,
-    outlineVariant = NeutralVariant30,
-
-    // Inverse
+    outlineVariant = Color(0xFF34343F),
     inverseSurface = Neutral90,
     inverseOnSurface = Neutral20,
-    inversePrimary = Blue40,
-
-    // Surface tint
-    surfaceTint = Blue80,
-
-    // Scrim
+    inversePrimary = BrandIndigo,
+    surfaceTint = BrandLavender,
     scrim = Neutral0
 )
 

@@ -31,30 +31,38 @@ class SearchViewModel @Inject constructor(
 
     private var searchJob: Job? = null
 
+    private companion object {
+        const val PAGE_SIZE = 50
+        const val MAX_PAGES = 6
+    }
+
     init {
         loadAllRecordings()
     }
 
-    private fun loadAllRecordings() {
-        viewModelScope.launch {
+    private fun loadAllRecordings(): Job {
+        return viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
 
-            val result = recordingsRepository.getRecordings(perPage = 100)
-
-            result.fold(
-                onSuccess = { recordings ->
-                    _uiState.value = _uiState.value.copy(
-                        allRecordings = recordings,
-                        isLoading = false
-                    )
-                },
-                onFailure = { error ->
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = error.message
-                    )
+            // Backend caps per_page at 50 (a request for 100 returns HTTP 400), so page through
+            val all = mutableListOf<Recording>()
+            var failure: Throwable? = null
+            for (page in 1..MAX_PAGES) {
+                val result = recordingsRepository.getRecordings(page = page, perPage = PAGE_SIZE)
+                if (result.isFailure) {
+                    failure = result.exceptionOrNull()
+                    break
                 }
-            )
+                val batch = result.getOrThrow()
+                all += batch
+                if (batch.size < PAGE_SIZE) break
+            }
+
+            _uiState.value = if (failure == null || all.isNotEmpty()) {
+                _uiState.value.copy(allRecordings = all, isLoading = false)
+            } else {
+                _uiState.value.copy(isLoading = false, error = failure?.message)
+            }
         }
     }
 
@@ -65,6 +73,11 @@ class SearchViewModel @Inject constructor(
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             delay(300)
+            // The initial load can fail (e.g. backend timeout); without a retry every search
+            // then reports "No results found" for the rest of the session.
+            if (query.isNotBlank() && _uiState.value.allRecordings.isEmpty()) {
+                loadAllRecordings().join()
+            }
             performSearch(query)
         }
     }
