@@ -267,6 +267,7 @@ export interface CreateMeetingRequest {
 
 export interface CreateMeetingResponse {
   meeting: Meeting;
+  warning?: string;
 }
 
 export interface UpdateMeetingRequest {
