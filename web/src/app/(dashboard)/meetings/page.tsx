@@ -21,6 +21,7 @@ import type { CreateMeetingRequest } from '@/types/api';
 export default function MeetingsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSyncingAfterConnect, setIsSyncingAfterConnect] = useState(false);
+  const [banner, setBanner] = useState<string | null>(null);
   const prevConnectionCount = useRef<number>(0);
 
   // Calendar hooks
@@ -58,11 +59,19 @@ export default function MeetingsPage() {
   }, [connections.length, isLoadingConnections, refreshMeetings]);
 
   const handleAddMeeting = async (data: CreateMeetingRequest) => {
-    await create(data);
+    const result = await create(data);
+    if (result?.warning) {
+      setBanner(result.warning);
+    }
+    return result;
   };
 
   const handleToggleAutoJoin = async (id: string, autoJoin: boolean) => {
-    await update(id, { auto_join: autoJoin });
+    try {
+      await update(id, { auto_join: autoJoin });
+    } catch {
+      setBanner('Could not update auto-record for this meeting. Please try again in a moment.');
+    }
   };
 
   const handleDisconnect = async (provider: 'google' | 'microsoft') => {
@@ -92,6 +101,15 @@ export default function MeetingsPage() {
           Join via Link
         </Button>
       </div>
+
+      {banner && (
+        <div className="mb-6 flex items-start justify-between gap-4 rounded-md bg-yellow-50 border border-yellow-200 px-4 py-3 text-sm text-yellow-800">
+          <span>{banner}</span>
+          <button onClick={() => setBanner(null)} className="shrink-0 text-yellow-800 hover:text-yellow-900">
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Calendar Connections Section */}
       <div className="mb-8">

@@ -1,18 +1,31 @@
 /**
  * Bot Scheduler Service
- * Schedules bot joins using Cloud Tasks or fallback to setTimeout
+ *
+ * Schedules bot joins with an in-process setTimeout for low latency, backed
+ * by a `bot_scheduler_jobs` row as the durable source of truth. The Fly.io
+ * machine this runs on can restart between a scheduling call and the join
+ * time (deploys, crashes), which would silently drop an in-memory timer —
+ * so `startBotJoinReconcilerLoop` (called from index.ts) periodically claims
+ * any `scheduled` job whose time has passed and triggers it, the same way
+ * the other reconcilers in stuckMeetingRecovery.ts backstop missed webhooks.
+ *
+ * This used to dispatch through Google Cloud Tasks when GCP_PROJECT_ID was
+ * set (Cloud Run deployment). That path was removed when the backend moved
+ * to Fly.io — Fly keeps at least one machine running continuously
+ * (fly.toml min_machines_running=1), so there's no scale-to-zero reason to
+ * need an external scheduler, and the leftover GCP project this pointed at
+ * had billing disabled, which made every auto-record toggle silently fail.
  */
 
 import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
 
-// Track in-memory timers for fallback scheduling
+// Track in-memory timers so we can cancel/replace them; the DB row is what
+// actually survives a restart.
 const scheduledTimers: Map<string, NodeJS.Timeout> = new Map();
 
 /**
  * Schedule a bot to join a meeting
- *
- * Uses Cloud Tasks in production, setTimeout in development
  */
 export async function scheduleBotJoin(
   meetingId: string,
@@ -39,69 +52,12 @@ export async function scheduleBotJoin(
     `[Scheduler] Scheduling bot for meeting ${meetingId} at ${joinTime.toISOString()} (in ${Math.round(delayMs / 1000 / 60)} minutes)`
   );
 
-  // Use Cloud Tasks in production, setTimeout as fallback
-  if (config.GCP_PROJECT_ID && config.NODE_ENV === 'production') {
-    return scheduleWithCloudTasks(meetingId, userId, joinTime);
-  } else {
-    return scheduleWithTimeout(meetingId, userId, delayMs);
-  }
+  return scheduleWithTimeout(meetingId, userId, delayMs);
 }
 
 /**
- * Schedule using Google Cloud Tasks
- */
-async function scheduleWithCloudTasks(
-  meetingId: string,
-  userId: string,
-  joinTime: Date
-): Promise<string> {
-  // Dynamic import to avoid requiring the package in development
-  const { CloudTasksClient } = await import('@google-cloud/tasks');
-  const tasksClient = new CloudTasksClient();
-
-  const parent = tasksClient.queuePath(
-    config.GCP_PROJECT_ID!,
-    config.GCP_LOCATION || 'us-central1',
-    config.BOT_SCHEDULER_QUEUE || 'bot-scheduler'
-  );
-
-  const task = {
-    httpRequest: {
-      httpMethod: 'POST' as const,
-      url: `${config.SERVICE_URL}/internal/worker/bot-join`,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(config.INTERNAL_SECRET ? { 'X-Internal-Secret': config.INTERNAL_SECRET } : {}),
-      },
-      body: Buffer.from(
-        JSON.stringify({
-          meetingId,
-          userId,
-        })
-      ).toString('base64'),
-    },
-    scheduleTime: {
-      seconds: Math.floor(joinTime.getTime() / 1000),
-    },
-  };
-
-  const [response] = await tasksClient.createTask({ parent, task });
-  const taskName = response.name!;
-
-  // Store task reference for cancellation
-  await supabaseAdmin.from('bot_scheduler_jobs').insert({
-    meeting_id: meetingId,
-    cloud_task_name: taskName,
-    scheduled_for: joinTime.toISOString(),
-    status: 'scheduled',
-  });
-
-  console.log(`[Scheduler] Created Cloud Task: ${taskName}`);
-  return taskName;
-}
-
-/**
- * Schedule using setTimeout (for development/testing)
+ * Schedule using setTimeout, with a `bot_scheduler_jobs` row as the durable
+ * fallback in case this process restarts before the timer fires.
  */
 async function scheduleWithTimeout(
   meetingId: string,
@@ -159,23 +115,6 @@ export async function cancelScheduledBot(meetingId: string): Promise<void> {
   }
 
   for (const job of jobs) {
-    // Cancel Cloud Task if it's a real task name
-    if (
-      job.cloud_task_name &&
-      !job.cloud_task_name.startsWith('timeout-') &&
-      config.GCP_PROJECT_ID
-    ) {
-      try {
-        const { CloudTasksClient } = await import('@google-cloud/tasks');
-        const tasksClient = new CloudTasksClient();
-        await tasksClient.deleteTask({ name: job.cloud_task_name });
-        console.log(`[Scheduler] Deleted Cloud Task: ${job.cloud_task_name}`);
-      } catch (err) {
-        // Task may have already executed or been deleted
-        console.warn(`[Scheduler] Failed to delete task ${job.cloud_task_name}:`, err);
-      }
-    }
-
     // Mark job as cancelled
     await supabaseAdmin
       .from('bot_scheduler_jobs')
@@ -255,4 +194,71 @@ export async function markJobFailed(
     })
     .eq('meeting_id', meetingId)
     .eq('status', 'scheduled');
+}
+
+const RECONCILER_INTERVAL_MS = 60 * 1000; // 1 min
+const RECONCILER_TAG = '[BotJoinReconciler]';
+let reconcilerTimer: NodeJS.Timeout | null = null;
+
+/**
+ * Backstop for `scheduleWithTimeout`'s in-memory timer getting dropped by a
+ * Fly.io machine restart (deploy, crash) between scheduling and join time.
+ * Polls for any `bot_scheduler_jobs` row that's due and still `scheduled`,
+ * and triggers the join directly — same pattern as the reconcilers in
+ * stuckMeetingRecovery.ts.
+ */
+export async function reconcileDueBotJoins(): Promise<void> {
+  const { data: dueJobs, error } = await supabaseAdmin
+    .from('bot_scheduler_jobs')
+    .select('id, meeting_id, scheduled_for')
+    .eq('status', 'scheduled')
+    .lte('scheduled_for', new Date().toISOString())
+    .limit(50);
+
+  if (error) {
+    console.error(`${RECONCILER_TAG} scan failed:`, error);
+    return;
+  }
+  if (!dueJobs || dueJobs.length === 0) return;
+
+  console.log(`${RECONCILER_TAG} found ${dueJobs.length} due job(s)`);
+
+  for (const job of dueJobs) {
+    // Claim the job first (scheduled -> executed) so a concurrent instance
+    // or an in-memory timer that fires around the same time can't also
+    // trigger this meeting's bot twice.
+    const { data: claimed } = await supabaseAdmin
+      .from('bot_scheduler_jobs')
+      .update({ status: 'executed', executed_at: new Date().toISOString() })
+      .eq('id', job.id)
+      .eq('status', 'scheduled')
+      .select('id')
+      .single();
+
+    if (!claimed) continue; // lost the race, someone else already claimed it
+
+    const { data: meeting } = await supabaseAdmin
+      .from('meetings')
+      .select('id, user_id, status')
+      .eq('id', job.meeting_id)
+      .single();
+
+    if (!meeting) continue;
+    if (meeting.status !== 'bot_queued' && meeting.status !== 'scheduled') {
+      // Already joined, cancelled, or otherwise moved on since this job was scheduled
+      console.log(`${RECONCILER_TAG} skipping meeting ${meeting.id}, status is ${meeting.status}`);
+      continue;
+    }
+
+    console.log(`${RECONCILER_TAG} recovering missed timer for meeting ${meeting.id}`);
+    await triggerBotJoin(meeting.id, meeting.user_id);
+  }
+}
+
+export function startBotJoinReconcilerLoop(): void {
+  if (reconcilerTimer) return;
+  reconcilerTimer = setInterval(() => {
+    reconcileDueBotJoins().catch((e) => console.error(`${RECONCILER_TAG} loop error:`, e));
+  }, RECONCILER_INTERVAL_MS);
+  console.log(`${RECONCILER_TAG} started (interval ${RECONCILER_INTERVAL_MS / 1000}s)`);
 }

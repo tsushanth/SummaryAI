@@ -157,12 +157,18 @@ router.post(
     }
 
     // Schedule bot if auto_join is enabled
+    let scheduleWarning: string | undefined;
     if (auto_join) {
       try {
         await scheduleBotJoin(meeting.id, userId, scheduled_start, join_offset_minutes);
       } catch (scheduleError) {
         console.error('[Meetings] Failed to schedule bot:', scheduleError);
-        // Revert status if scheduling fails
+        // Revert status if scheduling fails, but tell the caller instead of
+        // silently leaving them with a toggle that looks off for no reason
+        meeting.status = 'scheduled';
+        meeting.auto_join = false;
+        scheduleWarning =
+          'Could not schedule auto-recording for this meeting. Auto-record has been turned off — please try enabling it again or contact support if this keeps happening.';
         await supabaseAdmin
           .from('meetings')
           .update({ status: 'scheduled', auto_join: false })
@@ -172,7 +178,7 @@ router.post(
 
     console.log(`[Meetings] Created meeting ${meeting.id} for user ${userId}`);
 
-    res.status(201).json({ meeting });
+    res.status(201).json({ meeting, warning: scheduleWarning });
   })
 );
 

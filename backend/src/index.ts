@@ -145,6 +145,10 @@ async function startServer(): Promise<void> {
     // would have.
     import('./services/stuckMeetingRecovery.js').then(m => m.startBotRecordingReconcilerLoop())
       .catch(e => console.error('[BotRecordingReconciler] init failed:', e));
+    // Backstop for scheduleBotJoin's in-memory setTimeout getting dropped by
+    // a Fly.io machine restart between scheduling and join time.
+    import('./services/botSchedulerService.js').then(m => m.startBotJoinReconcilerLoop())
+      .catch(e => console.error('[BotJoinReconciler] init failed:', e));
   });
 }
 

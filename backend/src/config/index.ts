@@ -61,12 +61,6 @@ const envSchema = z.object({
   // Encryption (for storing OAuth tokens)
   ENCRYPTION_KEY: z.string().optional(),
 
-  // GCP Configuration (for Cloud Tasks in production)
-  GCP_PROJECT_ID: z.string().optional(),
-  GCP_LOCATION: z.string().default('us-central1'),
-  BOT_SCHEDULER_QUEUE: z.string().default('bot-scheduler'),
-  CLOUD_TASKS_QUEUE: z.string().optional(),
-
   // Service URL (for internal worker callbacks)
   SERVICE_URL: z.string().optional(),
   INTERNAL_SECRET: z.string().optional(),

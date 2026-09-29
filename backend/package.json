@@ -20,7 +20,6 @@
   "license": "MIT",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",
-    "@google-cloud/tasks": "^6.2.1",
     "@supabase/supabase-js": "^2.39.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",

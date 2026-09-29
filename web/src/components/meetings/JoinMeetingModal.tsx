@@ -9,7 +9,7 @@ import type { CreateMeetingRequest } from '@/types/api';
 interface JoinMeetingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateMeetingRequest) => Promise<void>;
+  onSubmit: (data: CreateMeetingRequest) => Promise<{ warning?: string } | void>;
   isSubmitting: boolean;
 }
 
