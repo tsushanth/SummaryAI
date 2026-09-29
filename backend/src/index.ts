@@ -138,6 +138,13 @@ async function startServer(): Promise<void> {
     // recording stuck in `pending` for >10 min.
     import('./services/stuckMeetingRecovery.js').then(m => m.startStuckMeetingRecoveryLoop())
       .catch(e => console.error('[StuckRecovery] init failed:', e));
+    // Backstop for the Recall `recording.done` / `audio_mixed.done` webhook
+    // being dropped or never subscribed: polls Recall directly for any
+    // bot_run stuck in `processing` whose recording never advanced past
+    // `uploading`/file_path=null, and finalizes it the same way the webhook
+    // would have.
+    import('./services/stuckMeetingRecovery.js').then(m => m.startBotRecordingReconcilerLoop())
+      .catch(e => console.error('[BotRecordingReconciler] init failed:', e));
   });
 }
 

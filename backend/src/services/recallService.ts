@@ -7,9 +7,12 @@ import {
   RecallBotCreateRequest,
   RecallBotResponse,
   MeetingPlatform,
+  BotRun,
+  Meeting,
 } from '../types/meetings.js';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
+import { triggerProcessing } from './processingService.js';
 
 // Get region from config or default to us-west-2
 const RECALL_REGION = config.RECALL_REGION || 'us-west-2';
@@ -355,6 +358,156 @@ export async function downloadAndStoreRecording(
     storagePath,
     durationSeconds: estimatedDuration,
   };
+}
+
+/**
+ * Fetch a bot's recording media URL from Recall.ai's bot details response,
+ * preferring video_mixed > audio_mixed > audio > top-level video_url.
+ */
+export async function fetchRecallMediaUrl(recallBotId: string): Promise<string | null> {
+  const recallApiKey = config.RECALL_API_KEY;
+  const recallRegion = config.RECALL_REGION || 'us-west-2';
+  const baseUrl = `https://${recallRegion}.recall.ai/api/v1`;
+
+  const response = await fetch(`${baseUrl}/bot/${recallBotId}`, {
+    headers: {
+      Authorization: `Token ${recallApiKey}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch bot details: ${response.status}`);
+  }
+
+  const botDetails = (await response.json()) as {
+    video_url?: string;
+    recordings?: Array<{
+      media_shortcuts?: {
+        video_mixed?: { data?: { download_url?: string } };
+        audio?: { data?: { download_url?: string } };
+        audio_mixed?: { data?: { download_url?: string } };
+        transcript?: { data?: { download_url?: string } };
+      };
+    }>;
+  };
+
+  let mediaUrl = botDetails.video_url;
+
+  if (botDetails.recordings && botDetails.recordings.length > 0) {
+    const recording = botDetails.recordings[0];
+    const shortcuts = recording?.media_shortcuts;
+
+    if (shortcuts?.video_mixed?.data?.download_url) {
+      mediaUrl = shortcuts.video_mixed.data.download_url;
+    } else if (shortcuts?.audio_mixed?.data?.download_url) {
+      mediaUrl = shortcuts.audio_mixed.data.download_url;
+    } else if (shortcuts?.audio?.data?.download_url) {
+      mediaUrl = shortcuts.audio.data.download_url;
+    }
+  }
+
+  return mediaUrl || null;
+}
+
+export type FinalizeBotRecordingResult =
+  | { outcome: 'finalized'; recordingId: string }
+  | { outcome: 'no_media' };
+
+/**
+ * Finalize a bot-sourced recording: fetch the media URL from Recall, download
+ * and store it, then advance the recording/meeting/bot_run rows and kick off
+ * transcription. Shared by the `recording.done`/`audio_mixed.done` webhook
+ * handler and by the polling reconciler that catches cases where that
+ * webhook never arrives.
+ *
+ * Throws on transient failures (network/API/storage errors) so callers can
+ * retry later; returns `{ outcome: 'no_media' }` when Recall has finished
+ * processing but produced no downloadable media (a real, non-retryable
+ * failure the caller should surface as an error).
+ */
+export async function finalizeBotRecording(
+  botRun: BotRun,
+  meeting: Meeting,
+  durationSecondsHint?: number | null
+): Promise<FinalizeBotRecordingResult> {
+  console.log(`[Recall] Finalizing recording for bot ${botRun.id}`);
+
+  const mediaUrl = await fetchRecallMediaUrl(botRun.recall_bot_id);
+
+  if (!mediaUrl) {
+    console.error(`[Recall] No media URL found for bot ${botRun.id}`);
+    return { outcome: 'no_media' };
+  }
+
+  const { storagePath, durationSeconds } = await downloadAndStoreRecording(
+    mediaUrl,
+    meeting.user_id,
+    meeting.id
+  );
+
+  const finalDuration = durationSecondsHint || durationSeconds;
+
+  let recording: { id: string };
+
+  if (meeting.recording_id) {
+    const { data: existingRecording, error: updateError } = await supabaseAdmin
+      .from('recordings')
+      .update({
+        file_path: storagePath,
+        duration_seconds: finalDuration,
+        status: 'uploaded',
+      })
+      .eq('id', meeting.recording_id)
+      .select()
+      .single();
+
+    if (updateError) {
+      throw new Error(`Failed to update recording: ${updateError.message}`);
+    }
+    recording = existingRecording;
+    console.log(`[Recall] Updated existing recording ${recording.id} for meeting ${meeting.id}`);
+  } else {
+    const { data: newRecording, error: recordingError } = await supabaseAdmin
+      .from('recordings')
+      .insert({
+        user_id: meeting.user_id,
+        title: meeting.title,
+        file_path: storagePath,
+        duration_seconds: finalDuration,
+        status: 'uploaded',
+        source: 'meeting_bot',
+      })
+      .select()
+      .single();
+
+    if (recordingError || !newRecording) {
+      throw new Error(`Failed to create recording: ${recordingError?.message}`);
+    }
+    recording = newRecording;
+    console.log(`[Recall] Created new recording ${recording.id} for meeting ${meeting.id}`);
+  }
+
+  await supabaseAdmin
+    .from('bot_runs')
+    .update({
+      status: 'completed',
+      recording_url: mediaUrl,
+      duration_seconds: finalDuration,
+    })
+    .eq('id', botRun.id);
+
+  await supabaseAdmin
+    .from('meetings')
+    .update({
+      status: 'completed',
+      recording_id: recording.id,
+    })
+    .eq('id', meeting.id);
+
+  await triggerProcessing(recording.id, meeting.user_id);
+  console.log(`[Recall] Triggered processing for recording ${recording.id}`);
+
+  return { outcome: 'finalized', recordingId: recording.id };
 }
 
 /**
