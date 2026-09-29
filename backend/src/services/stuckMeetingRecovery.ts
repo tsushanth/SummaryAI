@@ -13,11 +13,20 @@
 
 import { randomUUID } from 'node:crypto';
 import { supabaseAdmin } from '../lib/supabase.js';
+import { finalizeBotRecording } from './recallService.js';
+import type { BotRun, Meeting } from '../types/meetings.js';
 
 const SCAN_INTERVAL_MS = 5 * 60 * 1000;        // 5 min
 const MIN_AGE_MS       = 10 * 60 * 1000;       // only touch recordings >10 min old
 const PAGE_SIZE        = 500;
 const TAG              = '[StuckRecovery]';
+
+// --- bot_runs stuck at `processing` (call_ended/done fired, but the
+// `recording.done` / `audio_mixed.done` webhook that finalizes the
+// recording never arrived) --------------------------------------------
+const BOT_RUN_SCAN_INTERVAL_MS = 3 * 60 * 1000;  // 3 min
+const BOT_RUN_MIN_AGE_MS       = 3 * 60 * 1000;  // only touch runs >3 min stale
+const BOT_RUN_TAG              = '[BotRecordingReconciler]';
 
 interface LiveSegmentRow {
   segment_text: string | null;
@@ -206,4 +215,128 @@ export function startStuckMeetingRecoveryLoop(): void {
     scanAndRecover().catch(e => console.error(`${TAG} scan threw:`, e));
   }, SCAN_INTERVAL_MS);
   console.log(`${TAG} loop started (interval=${SCAN_INTERVAL_MS / 1000}s, min_age=${MIN_AGE_MS / 1000}s)`);
+}
+
+/**
+ * Mark a bot run + meeting + its pending recording as failed. Mirrors
+ * webhooks.ts's markBotFailed so a reconciled failure is just as visible
+ * (error_message populated, not silently stuck) as a webhook-driven one.
+ */
+async function markBotRunFailed(
+  botRun: BotRun,
+  meeting: Meeting,
+  errorMessage: string
+): Promise<void> {
+  await supabaseAdmin
+    .from('bot_runs')
+    .update({ status: 'failed', error_message: errorMessage })
+    .eq('id', botRun.id);
+
+  await supabaseAdmin
+    .from('meetings')
+    .update({ status: 'failed', error_message: errorMessage })
+    .eq('id', meeting.id);
+
+  if (meeting.recording_id) {
+    await supabaseAdmin
+      .from('recordings')
+      .update({ status: 'failed', error_message: errorMessage })
+      .eq('id', meeting.recording_id);
+  }
+}
+
+/**
+ * Find bot_runs that reached a terminal Recall state (`call_ended`/`done` —
+ * i.e. `status: 'processing'`) more than BOT_RUN_MIN_AGE_MS ago, whose
+ * linked recording is still `uploading` with no file_path. This is the
+ * actual root-cause backstop: today, the ONLY thing that ever advances a
+ * bot recording out of `uploading` is the inbound `recording.done` /
+ * `audio_mixed.done` webhook from Recall. If that specific event is dropped
+ * or never subscribed (distinct from the `bot.*` lifecycle events, which
+ * can arrive fine — see the meetings.status='bot_left' update), the
+ * recording is stuck forever with no error ever recorded. Recall's
+ * `GET /bot/:id` reliably has the finished media at this point (verified:
+ * `status_changes` includes `recording_done` and `done`, and
+ * `media_shortcuts` already has a `download_url`), so we just poll for it
+ * directly instead of waiting on a webhook that may never come.
+ */
+export async function reconcileStuckBotRecordings(): Promise<void> {
+  const cutoffIso = new Date(Date.now() - BOT_RUN_MIN_AGE_MS).toISOString();
+
+  const { data: stuckRuns, error } = await supabaseAdmin
+    .from('bot_runs')
+    .select('*')
+    .eq('status', 'processing')
+    .lt('updated_at', cutoffIso)
+    .limit(50);
+
+  if (error) {
+    console.error(`${BOT_RUN_TAG} scan failed:`, error.message);
+    return;
+  }
+  if (!stuckRuns?.length) return;
+
+  console.log(`${BOT_RUN_TAG} scanning ${stuckRuns.length} bot run(s) stuck in 'processing'`);
+
+  for (const botRun of stuckRuns as BotRun[]) {
+    try {
+      const { data: meeting, error: meetingError } = await supabaseAdmin
+        .from('meetings')
+        .select('*')
+        .eq('id', botRun.meeting_id)
+        .single();
+
+      if (meetingError || !meeting) {
+        console.error(`${BOT_RUN_TAG} meeting not found for bot run ${botRun.id}`);
+        continue;
+      }
+
+      const typedMeeting = meeting as Meeting;
+
+      if (!typedMeeting.recording_id) {
+        continue;
+      }
+
+      const { data: recording, error: recordingError } = await supabaseAdmin
+        .from('recordings')
+        .select('id, status, file_path')
+        .eq('id', typedMeeting.recording_id)
+        .single();
+
+      if (recordingError || !recording) {
+        continue;
+      }
+
+      // Already finalized (webhook arrived late, or a previous reconcile
+      // pass already handled it) or not the failure mode we handle here.
+      if (recording.status !== 'uploading' || recording.file_path) {
+        continue;
+      }
+
+      console.log(`${BOT_RUN_TAG} recovering bot_run=${botRun.id.slice(0, 8)} recording=${recording.id.slice(0, 8)} (recording.done webhook never arrived)`);
+
+      const result = await finalizeBotRecording(botRun, typedMeeting);
+
+      if (result.outcome === 'no_media') {
+        await markBotRunFailed(botRun, typedMeeting, 'No recording URL available (reconciled after missing webhook)');
+        console.error(`${BOT_RUN_TAG} no media available for bot_run=${botRun.id.slice(0, 8)}`);
+      } else {
+        console.log(`${BOT_RUN_TAG} recovered recording=${result.recordingId} for bot_run=${botRun.id.slice(0, 8)}`);
+      }
+    } catch (e: any) {
+      console.error(`${BOT_RUN_TAG} recover failed for bot_run=${botRun.id.slice(0, 8)}: ${e?.message || e}`);
+      // Leave status as 'processing' so the next scan retries; bot_runs has
+      // no separate retry counter here, so we log loudly instead of
+      // marking it failed on a single transient error (network blip, S3
+      // hiccup, etc).
+    }
+  }
+}
+
+export function startBotRecordingReconcilerLoop(): void {
+  reconcileStuckBotRecordings().catch(e => console.error(`${BOT_RUN_TAG} initial scan threw:`, e));
+  setInterval(() => {
+    reconcileStuckBotRecordings().catch(e => console.error(`${BOT_RUN_TAG} scan threw:`, e));
+  }, BOT_RUN_SCAN_INTERVAL_MS);
+  console.log(`${BOT_RUN_TAG} loop started (interval=${BOT_RUN_SCAN_INTERVAL_MS / 1000}s, min_age=${BOT_RUN_MIN_AGE_MS / 1000}s)`);
 }

@@ -11,7 +11,7 @@ import Stripe from 'stripe';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
 import { RecallWebhookPayload, BotRun, Meeting, RecallTranscriptWebhookPayload } from '../types/meetings.js';
-import { downloadAndStoreRecording } from '../services/recallService.js';
+import { finalizeBotRecording } from '../services/recallService.js';
 import { triggerProcessing } from '../services/processingService.js';
 import { queueInsightGeneration } from '../services/liveInsightsService.js';
 import { grantCredits } from '../services/coachingService.js';
@@ -447,146 +447,14 @@ async function handleRecordingDone(
   console.log(`[Webhook] Recording done for bot ${botRun.id}, fetching media URL...`);
 
   try {
-    // Fetch the bot details from Recall.ai to get the recording URL
-    const recallApiKey = config.RECALL_API_KEY;
-    const recallRegion = config.RECALL_REGION || 'us-west-2';
-    const baseUrl = `https://${recallRegion}.recall.ai/api/v1`;
+    const result = await finalizeBotRecording(botRun, meeting, data.duration_seconds);
 
-    const response = await fetch(`${baseUrl}/bot/${botRun.recall_bot_id}`, {
-      headers: {
-        'Authorization': `Token ${recallApiKey}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch bot details: ${response.status}`);
-    }
-
-    const botDetails = await response.json() as {
-      video_url?: string;
-      recordings?: Array<{
-        media_shortcuts?: {
-          video_mixed?: { data?: { download_url?: string } };
-          audio?: { data?: { download_url?: string } };
-          audio_mixed?: { data?: { download_url?: string } };
-          transcript?: { data?: { download_url?: string } };
-        };
-      }>;
-    };
-
-    // Log the bot details for debugging
-    console.log(`[Webhook] Bot details - video_url: ${!!botDetails.video_url}, recordings: ${botDetails.recordings?.length || 0}`);
-
-    // Try to get media URL from various sources
-    let mediaUrl = botDetails.video_url;
-
-    if (botDetails.recordings && botDetails.recordings.length > 0) {
-      const recording = botDetails.recordings[0];
-      const shortcuts = recording?.media_shortcuts;
-
-      // Try different media sources in order of preference
-      if (shortcuts?.video_mixed?.data?.download_url) {
-        mediaUrl = shortcuts.video_mixed.data.download_url;
-        console.log('[Webhook] Using video_mixed URL');
-      } else if (shortcuts?.audio_mixed?.data?.download_url) {
-        mediaUrl = shortcuts.audio_mixed.data.download_url;
-        console.log('[Webhook] Using audio_mixed URL');
-      } else if (shortcuts?.audio?.data?.download_url) {
-        mediaUrl = shortcuts.audio.data.download_url;
-        console.log('[Webhook] Using audio URL');
-      }
-
-      // Log available shortcuts for debugging
-      console.log(`[Webhook] Available shortcuts: ${Object.keys(shortcuts || {}).join(', ')}`);
-    }
-
-    if (!mediaUrl) {
-      console.error('[Webhook] No media URL found in bot details. Bot response structure:', JSON.stringify(botDetails).substring(0, 500));
+    if (result.outcome === 'no_media') {
       await markBotFailed(botRun, meeting, 'No recording URL available');
       return;
     }
 
-    console.log(`[Webhook] Got media URL for bot ${botRun.id}`);
-
-    // Download recording from Recall and upload to Supabase Storage
-    const { storagePath, durationSeconds } = await downloadAndStoreRecording(
-      mediaUrl,
-      meeting.user_id,
-      meeting.id
-    );
-
-    // Use duration from webhook if available
-    const finalDuration = data.duration_seconds || durationSeconds;
-
-    let recording;
-
-    // Check if meeting already has a pending recording (created when user joined)
-    if (meeting.recording_id) {
-      // Update the existing pending recording
-      const { data: existingRecording, error: updateError } = await supabaseAdmin
-        .from('recordings')
-        .update({
-          file_path: storagePath,
-          duration_seconds: finalDuration,
-          status: 'uploaded',
-        })
-        .eq('id', meeting.recording_id)
-        .select()
-        .single();
-
-      if (updateError) {
-        console.error('[Webhook] Failed to update existing recording:', updateError);
-        throw new Error(`Failed to update recording: ${updateError.message}`);
-      }
-
-      recording = existingRecording;
-      console.log(`[Webhook] Updated existing recording ${recording.id} for meeting ${meeting.id}`);
-    } else {
-      // Create new recording record (fallback for meetings without pending recording)
-      const { data: newRecording, error: recordingError } = await supabaseAdmin
-        .from('recordings')
-        .insert({
-          user_id: meeting.user_id,
-          title: meeting.title,
-          file_path: storagePath,
-          duration_seconds: finalDuration,
-          status: 'uploaded',
-          source: 'meeting_bot',
-        })
-        .select()
-        .single();
-
-      if (recordingError || !newRecording) {
-        throw new Error(`Failed to create recording: ${recordingError?.message}`);
-      }
-
-      recording = newRecording;
-      console.log(`[Webhook] Created new recording ${recording.id} for meeting ${meeting.id}`);
-    }
-
-    // Update bot run with recording info
-    await supabaseAdmin
-      .from('bot_runs')
-      .update({
-        status: 'completed',
-        recording_url: mediaUrl,
-        duration_seconds: finalDuration,
-      })
-      .eq('id', botRun.id);
-
-    // Update meeting with recording link
-    await supabaseAdmin
-      .from('meetings')
-      .update({
-        status: 'completed',
-        recording_id: recording.id,
-      })
-      .eq('id', meeting.id);
-
-    // Trigger transcription and summarization pipeline
-    await triggerProcessing(recording.id, meeting.user_id);
-
-    console.log(`[Webhook] Triggered processing for recording ${recording.id}`);
+    console.log(`[Webhook] Finalized recording ${result.recordingId} for meeting ${meeting.id}`);
   } catch (error) {
     console.error('[Webhook] Error processing recording:', error);
     await markBotFailed(
