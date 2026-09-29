@@ -15,7 +15,14 @@ primary_region = "iad"
 [[vm]]
   cpu_kind = "shared"
   cpus = 1
-  memory_mb = 512
+  # Bumped from 512 -> 2048: the bot-recording finalize path (finalizeBotRecording
+  # in recallService.ts) downloads the full recording into memory before
+  # uploading to Supabase Storage. 512MB was getting OOM-killed every ~3 minutes
+  # while processing a single large (~100MB) recording, which also meant the
+  # new stuck-recording reconciler (stuckMeetingRecovery.ts) never got past the
+  # first item in its queue. See also: that download/upload path should really
+  # stream instead of buffering the whole file, independent of this bump.
+  memory_mb = 2048
 
 [deploy]
   strategy = "rolling"
