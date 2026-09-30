@@ -24,7 +24,7 @@ const envSchema = z.object({
   STORAGE_BUCKET_EXPORTS: z.string().default('exports'),
 
   // File limits
-  MAX_AUDIO_FILE_SIZE_MB: z.string().transform(Number).default('200'),
+  MAX_AUDIO_FILE_SIZE_MB: z.string().transform(Number).default('2048'),
   MAX_RECORDING_DURATION_SECONDS: z.string().transform(Number).default('14400'),
 
   // Upload URL expiry (in seconds)
