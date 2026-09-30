@@ -246,6 +246,16 @@ async function markBotRunFailed(
 }
 
 /**
+ * Errors from `finalizeBotRecording` that will fail identically on every
+ * retry, because they're about the recording's fixed content, not a
+ * transient network/service blip. Retrying these forever just re-downloads
+ * the whole recording from Recall each scan for no benefit.
+ */
+function isPermanentUploadError(message: string): boolean {
+  return /exceeded the maximum allowed size/i.test(message);
+}
+
+/**
  * Find bot_runs that reached a terminal Recall state (`call_ended`/`done` —
  * i.e. `status: 'processing'`) more than BOT_RUN_MIN_AGE_MS ago, whose
  * linked recording is still `uploading` with no file_path. This is the
@@ -324,11 +334,27 @@ export async function reconcileStuckBotRecordings(): Promise<void> {
         console.log(`${BOT_RUN_TAG} recovered recording=${result.recordingId} for bot_run=${botRun.id.slice(0, 8)}`);
       }
     } catch (e: any) {
-      console.error(`${BOT_RUN_TAG} recover failed for bot_run=${botRun.id.slice(0, 8)}: ${e?.message || e}`);
-      // Leave status as 'processing' so the next scan retries; bot_runs has
-      // no separate retry counter here, so we log loudly instead of
-      // marking it failed on a single transient error (network blip, S3
-      // hiccup, etc).
+      const message = e?.message || String(e);
+      console.error(`${BOT_RUN_TAG} recover failed for bot_run=${botRun.id.slice(0, 8)}: ${message}`);
+
+      if (isPermanentUploadError(message)) {
+        // Retrying this would just re-download the whole recording from
+        // Recall and hit the same rejection every scan forever, so stop
+        // digging instead of leaving status as 'processing' and (per below)
+        // treating it as transient.
+        const meetingForFailure = (await supabaseAdmin
+          .from('meetings')
+          .select('*')
+          .eq('id', botRun.meeting_id)
+          .single()).data as Meeting | null;
+        if (meetingForFailure) {
+          await markBotRunFailed(botRun, meetingForFailure, `Recording could not be stored: ${message}`);
+        }
+      }
+      // Otherwise leave status as 'processing' so the next scan retries;
+      // bot_runs has no separate retry counter here, so we log loudly
+      // instead of marking it failed on a single transient error (network
+      // blip, S3 hiccup, etc).
     }
   }
 }
