@@ -6,6 +6,7 @@ import { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
 import type { ErrorResponse } from '../types/api.js';
 import { config } from '../config/index.js';
+import { reportBackendError } from '../lib/failureReporter.js';
 
 /**
  * Custom application error class
@@ -85,6 +86,7 @@ export function errorHandler(
 
   // Handle AppError
   if (err instanceof AppError) {
+    reportBackendError(req, err, err.statusCode);
     res.status(err.statusCode).json({
       error: {
         code: err.code,
@@ -120,6 +122,7 @@ export function errorHandler(
 
   // Log unexpected errors
   console.error('Unexpected error:', err);
+  reportBackendError(req, err, 500);
 
   // Generic error response
   res.status(500).json({
