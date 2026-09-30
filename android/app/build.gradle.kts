@@ -24,8 +24,8 @@ android {
         applicationId = "com.kreativekoala.meetingmind"
         minSdk = 26
         targetSdk = 36
-        versionCode = 50
-        versionName = "1.6.6"
+        versionCode = 51
+        versionName = "1.6.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
