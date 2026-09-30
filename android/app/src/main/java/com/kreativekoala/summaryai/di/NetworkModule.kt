@@ -51,6 +51,7 @@ object NetworkModule {
         return OkHttpClient.Builder()
             .addInterceptor(authInterceptor)
             .addInterceptor(loggingInterceptor)
+            .addInterceptor(com.kreativekoala.summaryai.FailureReporterInterceptor())
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
@@ -68,6 +69,7 @@ object NetworkModule {
         // a 1-hour M4A at 128kbps is ~57MB and can take several minutes on cellular.
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
+            .addInterceptor(com.kreativekoala.summaryai.FailureReporterInterceptor())
             .connectTimeout(60, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(0, TimeUnit.MILLISECONDS) // no overall write timeout

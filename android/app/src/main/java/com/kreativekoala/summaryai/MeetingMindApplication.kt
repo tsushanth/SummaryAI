@@ -18,6 +18,7 @@ class MeetingMindApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        FailureReporter.init(this, "meetingmind", "afr_a60112f598c3f7206a8ecb8866dc22c3", BuildConfig.VERSION_NAME)
 
         // Initialize PaywallKit experiment manager
         ExperimentManager.init(this)

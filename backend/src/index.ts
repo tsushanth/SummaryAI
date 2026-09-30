@@ -10,6 +10,7 @@ import morgan from 'morgan';
 
 import { config, logConfig } from './config/index.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { reportFailure, reportCrash } from './lib/failureReporter.js';
 import { testConnection } from './lib/supabase.js';
 import routes from './routes/index.js';
 
@@ -155,11 +156,12 @@ async function startServer(): Promise<void> {
 // Handle uncaught errors
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  reportFailure('unhandledRejection', reason);
 });
 
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
-  process.exit(1);
+  reportCrash('uncaughtException', error).finally(() => process.exit(1));
 });
 
 // Graceful shutdown
