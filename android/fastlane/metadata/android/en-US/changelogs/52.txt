@@ -1,0 +1,2 @@
+Fixed an error that could appear when opening your recordings list.
+General stability improvements.
