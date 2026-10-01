@@ -337,7 +337,27 @@ router.get(
       dbQuery = dbQuery.eq('status', query.status);
     }
 
-    const { data: recordings, error, count } = await dbQuery;
+    let { data: recordings, error, count } = await dbQuery;
+
+    // PGRST103: page offset is past the last row (e.g. page 2 when the user has
+    // <= per_page rows). That is an empty page, not a server error.
+    if (error?.code === 'PGRST103') {
+      let countQuery = supabaseAdmin
+        .from('recordings')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId);
+      if (query.status) {
+        countQuery = countQuery.eq('status', query.status);
+      }
+      const countResult = await countQuery;
+      if (countResult.error) {
+        console.error('Failed to count recordings:', countResult.error);
+        throw Errors.internal('Failed to fetch recordings');
+      }
+      recordings = [];
+      count = countResult.count;
+      error = null;
+    }
 
     if (error) {
       console.error('Failed to fetch recordings:', error);
