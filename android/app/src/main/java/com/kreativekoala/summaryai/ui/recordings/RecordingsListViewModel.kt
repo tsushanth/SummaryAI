@@ -137,7 +137,10 @@ class RecordingsListViewModel @Inject constructor(
     }
 
     fun loadMore() {
-        if (_uiState.value.isLoading || !_uiState.value.hasMore) return
+        val state = _uiState.value
+        // hasMore starts true and an empty list always looks "near the end", so without these
+        // guards loadMore() fires page 2 while page 1 is still loading (or came back empty).
+        if (state.isLoading || state.isRefreshing || !state.hasMore || state.allRecordings.isEmpty()) return
 
         val nextPage = _uiState.value.currentPage + 1
         _uiState.value = _uiState.value.copy(currentPage = nextPage)
