@@ -16,7 +16,8 @@ const th: React.CSSProperties = { textAlign: 'left', padding: '6px 8px', opacity
 const td: React.CSSProperties = { padding: '6px 8px', borderTop: '1px solid #8883', verticalAlign: 'top' };
 const h2: React.CSSProperties = { fontSize: 13, textTransform: 'uppercase', letterSpacing: '.05em', opacity: 0.6, margin: '24px 0 8px' };
 
-export default function AdminDashboard() {
+// token: for sites whose session is a bearer token held in the browser (sent as Authorization). Cookie-session sites omit it.
+export default function AdminDashboard({ token }: { token?: string | null } = {}) {
   const [hours, setHours] = useState(24);
   const [d, setD] = useState<Overview | null>(null);
   const [err, setErr] = useState('');
@@ -24,13 +25,16 @@ export default function AdminDashboard() {
   const load = useCallback(async () => {
     setErr('');
     try {
-      const r = await fetch(`/api/admin/overview?hours=${hours}`, { cache: 'no-store' });
+      const r = await fetch(`/api/admin/overview?hours=${hours}`, {
+        cache: 'no-store',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       setD(await r.json());
     } catch (e: any) {
       setErr(e.message || 'failed to load');
     }
-  }, [hours]);
+  }, [hours, token]);
 
   useEffect(() => { load(); }, [load]);
 
