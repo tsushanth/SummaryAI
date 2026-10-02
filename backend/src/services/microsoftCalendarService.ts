@@ -85,6 +85,11 @@ export interface MicrosoftCalendarEvent {
  * Microsoft Calendar Service
  */
 export class MicrosoftCalendarService {
+  /** True when the OAuth app credentials needed to connect and sync are all set. */
+  static isConfigured(): boolean {
+    return !!(config.MICROSOFT_CLIENT_ID && config.MICROSOFT_CLIENT_SECRET && config.MICROSOFT_REDIRECT_URI);
+  }
+
   /**
    * Generate OAuth authorization URL
    */

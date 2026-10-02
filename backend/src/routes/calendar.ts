@@ -43,7 +43,7 @@ import {
   detectMicrosoftPlatformFromUrl,
 } from '../services/microsoftCalendarService.js';
 import { authenticate, optionalAuth } from '../middleware/auth.js';
-import { asyncHandler, Errors } from '../middleware/errorHandler.js';
+import { asyncHandler, Errors, AppError } from '../middleware/errorHandler.js';
 import {
   CalendarConnection,
   CalendarConnectionResponse,
@@ -385,6 +385,12 @@ router.post(
   '/connect/microsoft',
   authenticate,
   asyncHandler(async (req: Request, res: Response) => {
+    // Without Azure app credentials this can never succeed. Answer with a handled 4xx instead of
+    // letting getAuthUrl throw (a 500 that alerts on every tap and tells the user nothing).
+    if (!MicrosoftCalendarService.isConfigured()) {
+      throw new AppError(422, 'PROVIDER_NOT_CONFIGURED', 'Outlook calendar is not available yet.');
+    }
+
     const userId = req.user!.id;
 
     // Generate state token for CSRF protection
