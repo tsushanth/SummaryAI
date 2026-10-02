@@ -5,6 +5,7 @@
 
 import express, { Request, Response } from 'express';
 import cors from 'cors';
+import { makeCorsOrigin } from './lib/corsOrigin.js';
 import helmet from 'helmet';
 import morgan from 'morgan';
 
@@ -34,27 +35,7 @@ const allowedOrigins = [
   'https://www.meetingmind.org',
 ];
 
-// Allow Cloud Run URLs in production
-const corsOrigin = config.NODE_ENV === 'production'
-  ? (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-      // Allow requests with no origin (mobile apps, curl, etc.)
-      if (!origin) {
-        callback(null, true);
-        return;
-      }
-      // Allow listed origins
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-        return;
-      }
-      // Allow Cloud Run URLs
-      if (origin.endsWith('.run.app')) {
-        callback(null, true);
-        return;
-      }
-      callback(new Error('Not allowed by CORS'));
-    }
-  : '*';
+const corsOrigin = config.NODE_ENV === 'production' ? makeCorsOrigin(allowedOrigins) : '*';
 
 app.use(cors({
   origin: corsOrigin,
