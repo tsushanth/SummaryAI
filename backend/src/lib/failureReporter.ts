@@ -10,23 +10,25 @@ const DISABLED = process.env.FAILURE_REPORTER_DISABLED === '1' || process.env.NO
 
 type Kind = 'crash' | 'failure' | 'backend_error';
 
-async function post(kind: Kind, flow: string, err: unknown, context: Record<string, string>, timeoutMs: number): Promise<void> {
+async function post(kind: Kind, flow: string, err: unknown, context: Record<string, string>, timeoutMs: number, userRef?: string): Promise<void> {
   if (DISABLED) return;
   try {
     const e = err instanceof Error ? err : new Error(String(err));
     await fetch(ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Report-Key': KEY },
-      body: JSON.stringify({ kind, platform: 'backend', version: APP_VERSION, flow, message: e.message || e.name, stack: e.stack ?? '', context }),
+      body: JSON.stringify({ kind, platform: 'backend', version: APP_VERSION, flow, message: e.message || e.name, stack: e.stack ?? '', context, ...(userRef ? { user: { ref: userRef } } : {}) }),
       signal: AbortSignal.timeout(timeoutMs),
     });
   } catch { /* reporting must never cause a failure of its own */ }
 }
 
 /** A handled server error (5xx). Path only: never log query strings, they can carry tokens. */
-export function reportBackendError(req: { method: string; path?: string }, err: unknown, statusCode: number): void {
+export function reportBackendError(req: { method: string; path?: string; user?: { id?: string } }, err: unknown, statusCode: number): void {
   if (statusCode < 500) return;
-  void post('backend_error', `${req.method} ${req.path ?? ''}`, err, { status: String(statusCode) }, 5000);
+  // The affected user's account id (opaque, never the email) so the owner can find and contact them. Absent when the
+  // request failed before authentication.
+  void post('backend_error', `${req.method} ${req.path ?? ''}`, err, { status: String(statusCode) }, 5000, req.user?.id);
 }
 
 /** A background job or flow failed (worker, queue, cron). */

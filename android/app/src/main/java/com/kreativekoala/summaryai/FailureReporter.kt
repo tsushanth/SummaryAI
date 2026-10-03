@@ -30,6 +30,7 @@ object FailureReporter {
     @Volatile private var app = ""
     @Volatile private var key = ""
     @Volatile private var version = ""
+    @Volatile private var userRef: String? = null
 
     fun init(context: Context, appName: String, ingestKey: String, versionName: String) {
         appCtx = context.applicationContext
@@ -47,6 +48,14 @@ object FailureReporter {
                 previous?.uncaughtException(thread, t)
             }
         }
+    }
+
+    /**
+     * Opaque account id of the signed-in user (never an email), attached to reports so the owner can contact the people a
+     * failure hit. Pass null on sign-out. Ids that do not look like an id are ignored (the Worker rejects them anyway).
+     */
+    fun setUser(ref: String?) {
+        userRef = ref?.takeIf { Regex("^[A-Za-z0-9._-]{8,64}$").matches(it) }
     }
 
     /** A handled failure: a user-facing flow broke but the app did not crash. */
@@ -74,10 +83,11 @@ object FailureReporter {
 
     private fun build(kind: String, flow: String, message: String, stack: String, ctx: Map<String, String>): String {
         val c = JSONObject(ctx + mapOf("device" to "${Build.MANUFACTURER} ${Build.MODEL}", "android" to Build.VERSION.RELEASE))
-        return JSONObject()
+        val json = JSONObject()
             .put("kind", kind).put("platform", "android").put("version", version)
             .put("flow", flow).put("message", message).put("stack", stack).put("context", c)
-            .toString()
+        userRef?.let { json.put("user", JSONObject().put("ref", it)) }
+        return json.toString()
     }
 
     private fun post(body: String, timeoutMs: Int): Boolean {

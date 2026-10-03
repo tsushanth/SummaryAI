@@ -1,5 +1,6 @@
 package com.kreativekoala.summaryai.data.local
 
+import com.kreativekoala.summaryai.FailureReporter
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
@@ -34,6 +35,11 @@ class TokenManager @Inject constructor(
         private const val KEY_USER_ID = "user_id"
     }
 
+    init {
+        // A report sent before the user signs in again (e.g. a startup crash) should still say who it affected.
+        FailureReporter.setUser(encryptedPrefs.getString(KEY_USER_ID, null))
+    }
+
     var accessToken: String?
         get() = encryptedPrefs.getString(KEY_ACCESS_TOKEN, null)
         set(value) {
@@ -56,6 +62,7 @@ class TokenManager @Inject constructor(
         get() = encryptedPrefs.getString(KEY_USER_ID, null)
         set(value) {
             encryptedPrefs.edit().putString(KEY_USER_ID, value).apply()
+            FailureReporter.setUser(value)
         }
 
     val isLoggedIn: Boolean
@@ -78,5 +85,6 @@ class TokenManager @Inject constructor(
             .remove(KEY_TOKEN_EXPIRY)
             .remove(KEY_USER_ID)
             .apply()
+        FailureReporter.setUser(null)
     }
 }
