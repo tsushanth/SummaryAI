@@ -85,3 +85,12 @@ web/.next/
 *.p8
 *.mobileprovision
 GoogleService-Info.plist
+
+# secrets / local env - never commit
+.env
+.env.*
+!.env.example
+!.env.sample
+.fly-secrets*
+serviceAccountKey*.json
+.next/
