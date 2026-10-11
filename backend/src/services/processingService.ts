@@ -7,6 +7,7 @@ import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
 import { v4 as uuidv4 } from 'uuid';
 import Anthropic from '@anthropic-ai/sdk';
+import { instrumentAnthropic, withFeature } from '../lib/llm.js';
 
 export interface ProcessingJob {
   id: string;
@@ -290,12 +291,12 @@ async function extractTextFromPdf(
     } catch {
       // Fallback: Use Anthropic to extract text from PDF
       if (config.ANTHROPIC_API_KEY) {
-        const anthropic = new Anthropic({ apiKey: config.ANTHROPIC_API_KEY });
+        const anthropic = instrumentAnthropic(new Anthropic({ apiKey: config.ANTHROPIC_API_KEY }));
 
         // Convert PDF to base64
         const base64 = buffer.toString('base64');
 
-        const response = await anthropic.messages.create({
+        const response = await withFeature('pdf_extract', () => anthropic.messages.create({
           model: 'claude-sonnet-4-6',
           max_tokens: 4096,
           messages: [
@@ -317,7 +318,7 @@ async function extractTextFromPdf(
               ],
             },
           ],
-        });
+        }));
 
         fullText = response.content[0]?.type === 'text' ? response.content[0].text : '';
       } else {
@@ -418,7 +419,7 @@ async function generateSummaryWithAnthropic(
   segments: TranscriptSegment[],
   outputLanguage?: string | null
 ): Promise<{ summary: string; keyPoints: string[]; actionItems: any[]; topics: string[] }> {
-  const anthropic = new Anthropic({ apiKey: config.ANTHROPIC_API_KEY });
+  const anthropic = instrumentAnthropic(new Anthropic({ apiKey: config.ANTHROPIC_API_KEY }));
 
   // Format transcript with speaker labels for better context
   const speakerFormattedText = formatTranscriptWithSpeakers(segments);
@@ -462,7 +463,7 @@ Respond with ONLY valid JSON in this format:
     ? `You are a helpful assistant that summarizes meeting transcripts. Write all natural-language values in ${languageName}; keep JSON keys in English. Always respond with ONLY valid JSON, no additional text.`
     : 'You are a helpful assistant that summarizes meeting transcripts. Always respond with ONLY valid JSON, no additional text.';
 
-  const response = await anthropic.messages.create({
+  const response = await withFeature('summary', () => anthropic.messages.create({
     model: config.ANTHROPIC_MODEL,
     max_tokens: 2048,
     system: systemPrompt,
@@ -472,7 +473,7 @@ Respond with ONLY valid JSON in this format:
         content: prompt,
       },
     ],
-  });
+  }));
 
   const responseText = response.content[0]?.type === 'text' ? response.content[0].text : '';
 
