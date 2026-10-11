@@ -13,6 +13,7 @@ import { config, logConfig } from './config/index.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { reportFailure, reportCrash } from './lib/failureReporter.js';
 import { testConnection } from './lib/supabase.js';
+import { flushLlmUsage } from './lib/llm.js';
 import routes from './routes/index.js';
 
 // Create Express app
@@ -148,7 +149,8 @@ process.on('uncaughtException', (error) => {
 // Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('SIGTERM received. Shutting down gracefully...');
-  process.exit(0);
+  // Send pending Claude usage rows first (capped at 2.5 s), then exit exactly as before.
+  void flushLlmUsage(2500).finally(() => process.exit(0));
 });
 
 // Start the server

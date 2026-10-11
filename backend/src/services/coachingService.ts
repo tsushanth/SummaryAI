@@ -12,6 +12,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { instrumentAnthropic, withFeature } from '../lib/llm.js';
 import { config } from '../config/index.js';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { getPersona, CoachingPersona } from './coachingPersonas.js';
@@ -268,8 +269,8 @@ async function tick(sessionId: string, persona: CoachingPersona): Promise<void> 
     .limit(15);
   const priorBlock = (priorInsights ?? []).map(p => `- ${p.text}`).join('\n') || '(none yet)';
 
-  const anthropic = new Anthropic({ apiKey: config.ANTHROPIC_API_KEY });
-  const resp = await anthropic.messages.create({
+  const anthropic = instrumentAnthropic(new Anthropic({ apiKey: config.ANTHROPIC_API_KEY }));
+  const resp = await withFeature('coaching', () => anthropic.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 1024,
     system: [{
@@ -281,7 +282,7 @@ async function tick(sessionId: string, persona: CoachingPersona): Promise<void> 
       role: 'user',
       content: `Transcript (most recent ~${persona.windowMinutes} min):\n${transcriptTail}\n\nAlready suggested earlier in this session:\n${priorBlock}\n\nReturn JSON only.`,
     }],
-  });
+  }));
 
   const text = (resp.content[0] as any)?.text ?? '';
   console.log(`[Coaching] Claude raw: ${text.substring(0, 200)}`);

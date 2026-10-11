@@ -4,6 +4,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { instrumentAnthropic, withFeature } from '../lib/llm.js';
 import { config } from '../config/index.js';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { LiveInsight, LiveInsightType, VerificationStatus } from '../types/meetings.js';
@@ -73,7 +74,7 @@ async function generateInsightsForMeeting(meetingId: string, userId: string): Pr
 
   console.log(`[LiveInsights] Generating insights for ${segments.length} segments in meeting ${meetingId}`);
 
-  const anthropic = new Anthropic({ apiKey: config.ANTHROPIC_API_KEY });
+  const anthropic = instrumentAnthropic(new Anthropic({ apiKey: config.ANTHROPIC_API_KEY }));
 
   // Generate insights in parallel
   const [keyPoints, questions, factChecks] = await Promise.all([
@@ -160,7 +161,7 @@ async function generateInsightsForMeeting(meetingId: string, userId: string): Pr
  */
 async function generateKeyPoints(anthropic: Anthropic, context: string): Promise<string[]> {
   try {
-    const response = await anthropic.messages.create({
+    const response = await withFeature('live_insights', () => anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 500,
       system: `Extract 1-3 key points from this meeting segment. Focus on:
@@ -177,7 +178,7 @@ If no key points, return: []`,
           content: context,
         },
       ],
-    });
+    }));
 
     const content = response.content[0]?.type === 'text' ? response.content[0].text : '[]';
     return JSON.parse(content);
@@ -192,7 +193,7 @@ If no key points, return: []`,
  */
 async function generateQuestions(anthropic: Anthropic, context: string): Promise<string[]> {
   try {
-    const response = await anthropic.messages.create({
+    const response = await withFeature('live_insights', () => anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 500,
       system: `Based on this meeting discussion, suggest 1-2 insightful follow-up questions that could:
@@ -209,7 +210,7 @@ If no good questions, return: []`,
           content: context,
         },
       ],
-    });
+    }));
 
     const content = response.content[0]?.type === 'text' ? response.content[0].text : '[]';
     return JSON.parse(content);
@@ -231,7 +232,7 @@ interface FactCheckResult {
  */
 async function generateFactChecks(anthropic: Anthropic, context: string): Promise<FactCheckResult[]> {
   try {
-    const response = await anthropic.messages.create({
+    const response = await withFeature('live_insights', () => anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 800,
       system: `Analyze this meeting segment for factual claims that can be verified. For each verifiable claim:
@@ -255,7 +256,7 @@ If no verifiable claims, return: []`,
           content: context,
         },
       ],
-    });
+    }));
 
     const content = response.content[0]?.type === 'text' ? response.content[0].text : '[]';
     return JSON.parse(content);
@@ -316,10 +317,10 @@ async function findCrossMeetingContradictions(
 
   if (!pastContext) return;
 
-  const anthropic = new Anthropic({ apiKey: config.ANTHROPIC_API_KEY });
+  const anthropic = instrumentAnthropic(new Anthropic({ apiKey: config.ANTHROPIC_API_KEY }));
 
   try {
-    const response = await anthropic.messages.create({
+    const response = await withFeature('live_insights', () => anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 600,
       system: `Compare the current meeting discussion with past meetings to find:
@@ -336,7 +337,7 @@ If nothing notable, return: []`,
           content: `CURRENT MEETING:\n${currentContext}\n\nPAST MEETINGS:\n${pastContext}`,
         },
       ],
-    });
+    }));
 
     const content = response.content[0]?.type === 'text' ? response.content[0].text : '[]';
     const findings = JSON.parse(content);

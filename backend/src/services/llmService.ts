@@ -4,6 +4,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { instrumentAnthropic, withFeature } from '../lib/llm.js';
 import { config } from '../config/index.js';
 import type { TranscriptSegment } from '../types/database.js';
 import type { Citation } from '../types/api.js';
@@ -40,9 +41,9 @@ function getAnthropicClient(): Anthropic {
   }
 
   if (!anthropicClient) {
-    anthropicClient = new Anthropic({
+    anthropicClient = instrumentAnthropic(new Anthropic({
       apiKey: config.ANTHROPIC_API_KEY,
-    });
+    }));
   }
 
   return anthropicClient;
@@ -299,7 +300,7 @@ export async function answerQuestion(
   const userPrompt = buildQAPrompt(question, relevantSegments, options.previousQA);
 
   // Call the LLM
-  const response = await client.messages.create({
+  const response = await withFeature('qa', () => client.messages.create({
     model: config.ANTHROPIC_MODEL,
     max_tokens: config.ANTHROPIC_MAX_TOKENS,
     system: QA_SYSTEM_PROMPT,
@@ -309,7 +310,7 @@ export async function answerQuestion(
         content: userPrompt,
       },
     ],
-  });
+  }));
 
   // Parse the response
   const responseText = response.content[0]?.type === 'text' ? response.content[0].text : '';
