@@ -149,6 +149,10 @@ describe('source guard', () => {
     expect([...seen].sort()).toEqual(Object.keys(expected).sort());
   });
 
+  it('the shared instance is registered as app "meetingmind" (the app is not in the payload, so check the source)', () => {
+    expect(fs.readFileSync(path.join(root, 'lib/llm.ts'), 'utf8')).toMatch(/createLlmUsage\(\{\s*app: 'meetingmind'/);
+  });
+
   it('shutdown flushes usage before exit, and the build ships llmUsage.js', () => {
     const idx = fs.readFileSync(path.join(root, 'index.ts'), 'utf8');
     expect(idx).toMatch(/flushLlmUsage\(2500\)\.finally\(\(\) => process\.exit\(0\)\)/);
