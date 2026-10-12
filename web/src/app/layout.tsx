@@ -11,6 +11,7 @@ const serif = Newsreader({
   axes: ['opsz'],
   style: ['normal', 'italic'],
   variable: '--font-serif',
+  adjustFontFallback: false,
   display: 'swap',
 });
 

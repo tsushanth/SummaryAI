@@ -220,11 +220,11 @@ export default function LandingPage() {
               <div>
                 <h2 className="text-sm font-semibold text-muted-foreground">What was said</h2>
                 <div className="minute mt-3 space-y-3 text-foreground/85">
-                  <p className="grid grid-cols-[4.5rem_1fr] gap-3">
+                  <p className="grid grid-cols-[6rem_1fr] gap-3">
                     <span className="font-sans text-sm leading-[2] tabular text-muted-foreground">Priya 14:02</span>
                     <span>So testing pushed the launch to Q2, and marketing still needs new assets by Friday.</span>
                   </p>
-                  <p className="grid grid-cols-[4.5rem_1fr] gap-3">
+                  <p className="grid grid-cols-[6rem_1fr] gap-3">
                     <span className="font-sans text-sm leading-[2] tabular text-muted-foreground">Dev 14:03</span>
                     <span>And can we get the new hire set up before Monday?</span>
                   </p>

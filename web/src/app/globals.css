@@ -67,13 +67,12 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: 'ss01' 1;
   }
   h1, h2, h3 {
     text-wrap: balance;
   }
   .tabular {
-    font-variant-numeric: tabular-nums;
+    font-variant-numeric: lining-nums; /* Schibsted tabular figures are slab-like, so keep proportional lining */
   }
 }
 

@@ -18,7 +18,7 @@ export function RecordingCard({ recording }: { recording: Recording }) {
         <VoiceSwatches count={recording.speaker_count} className="mt-1 w-8 flex-shrink-0 flex-wrap" />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="truncate text-base font-semibold tracking-tight">{recording.title}</h3>
+            <h3 className="line-clamp-2 break-words text-base font-semibold tracking-tight">{recording.title}</h3>
             {recording.is_favorite && (
               <Star className="h-4 w-4 flex-shrink-0 fill-warning text-warning" role="img" aria-label="Favorite" />
             )}

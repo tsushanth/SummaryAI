@@ -36,12 +36,12 @@ Named palette. HSL channels live in `globals.css`; Tailwind names are unchanged 
 
 Voice colors (shared with Android, `lib/utils/speakers.ts`): `#4A4DCB #0B7A75 #B4501A #8E3A9E #2B6CB0 #A33A5B #4D7C0F #6B5B95`. They appear only where a person speaks: ribbons, transcript avatars, talk-time.
 
-Contrast (measured): ink/paper 14.8 and 15.7; quiet/paper 6.8 and 7.6; white on signal 7.1; dark paper on dark signal 9.0; ink on mark 13.4 and 8.3; destructive 6.0 / 6.7; success 5.9 / 8.3. Input borders 3:1 or better.
+Contrast (computed from the hex values, WCAG formula; input border light #7C8A9D-ish ~3:1): ink/paper 14.8 and 15.7; quiet/paper 6.8 and 7.6; white on signal 7.1; dark paper on dark signal 9.0; ink on mark 13.4 and 8.3; destructive 6.0 / 6.7; success 5.9 / 8.3. Input borders 3:1 or better.
 
 Type. Two families, clearly different:
 - **Schibsted Grotesk** (UI, headings, numbers): 600 for headings, tight tracking at display sizes.
 - **Newsreader** (the record: summary text, transcript text, landing minute mock): optical sizing on, 17px / 1.75, measure capped at 68ch.
-Scale: 12 / 14 / 16 / 18 / 24 / 32 / 44-56 (landing hero only). Timestamps and stats use `tabular-nums` of the grotesk; no monospace.
+Scale: 12 / 14 / 16 / 18 / 24 / 32 / 44-56 (landing hero only). Numbers use the grotesk's proportional lining figures (its tabular figures look slab-like in testing); no monospace.
 
 Shape and depth: 8px radius, 1px borders, no shadows, no gradients. Surfaces separate by value (paper vs surface), not by lift.
 
@@ -67,7 +67,7 @@ Recordings                                   [Search] [New recording]
  16:10  Customer call: Acme                       18 min  1,020 words
         [==========Dee==========][===Eli===]      Completed
 ```
-Each row is one link; the left column is the date group's gutter on wide screens (margin note), stacked on mobile. The ribbon is the row's signature; rows without speaker data show a plain quiet rule.
+Each row is one link; the left column is the date group's gutter on wide screens (margin note), stacked on mobile. Built differently from this sketch: the list API returns only `speaker_count`, not segments, so a row shows one voice swatch per speaker (who was in the room) rather than an invented per-second ribbon. The real speaker timeline lives on the detail page, built from transcript segments.
 
 Recording detail (the minute):
 

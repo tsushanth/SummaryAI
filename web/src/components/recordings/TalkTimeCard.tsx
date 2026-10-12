@@ -28,7 +28,7 @@ export function TalkTimeCard({ analytics }: { analytics: MeetingAnalytics }) {
           {analytics.speakers.map((s) => (
             <div
               key={s.speaker_index}
-              style={{ width: `${Math.max(0, s.talk_share * 100)}%`, backgroundColor: speakerColor(s.name) }}
+              style={{ width: `${Math.max(0, s.talk_share * 100)}%`, backgroundColor: speakerColor(String(s.speaker_index)) }}
             />
           ))}
         </div>
@@ -39,7 +39,7 @@ export function TalkTimeCard({ analytics }: { analytics: MeetingAnalytics }) {
                 <span className="flex items-center gap-2">
                   <span
                     className="inline-block h-2.5 w-2.5 rounded-[2px]"
-                    style={{ backgroundColor: speakerColor(s.name) }}
+                    style={{ backgroundColor: speakerColor(String(s.speaker_index)) }}
                     aria-hidden="true"
                   />
                   {s.name}
