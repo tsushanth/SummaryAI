@@ -50,6 +50,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.domain.model.Recording
 import com.kreativekoala.summaryai.domain.model.RecordingStatus
+import com.kreativekoala.summaryai.ui.components.MmEmptyState
+import com.kreativekoala.summaryai.ui.components.SkeletonCardList
 import com.kreativekoala.summaryai.ui.navigation.LocalTabReselection
 import com.kreativekoala.summaryai.ui.theme.Green50
 import com.kreativekoala.summaryai.ui.theme.Orange50
@@ -298,12 +300,7 @@ fun RecordingsListScreen(
                 modifier = Modifier.weight(1f)
             ) {
                 if (uiState.isLoading && uiState.recordings.isEmpty()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
+                    SkeletonCardList(loadingDescription = stringResource(R.string.ui_loading))
                 } else if (uiState.recordings.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         EmptyRecordingsContent(
@@ -554,44 +551,14 @@ private fun RecordingCardIOS(
 
 @Composable
 private fun EmptyRecordingsContent(onStartRecording: () -> Unit, isFilteredEmpty: Boolean = false) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            imageVector = Icons.Default.Mic,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        MmEmptyState(
+            icon = Icons.Default.Mic,
+            title = stringResource(if (isFilteredEmpty) R.string.no_recordings_in_filter else R.string.no_recordings),
+            message = stringResource(if (isFilteredEmpty) R.string.no_recordings_in_filter_subtitle else R.string.no_recordings_subtitle),
+            actionLabel = if (isFilteredEmpty) null else stringResource(R.string.start_recording),
+            onAction = if (isFilteredEmpty) null else onStartRecording
         )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = stringResource(if (isFilteredEmpty) R.string.no_recordings_in_filter else R.string.no_recordings),
-            style = MaterialTheme.typography.titleMedium
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = stringResource(if (isFilteredEmpty) R.string.no_recordings_in_filter_subtitle else R.string.no_recordings_subtitle),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        if (!isFilteredEmpty) {
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Button(onClick = onStartRecording) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.start_recording))
-            }
-        }
     }
 }
 
