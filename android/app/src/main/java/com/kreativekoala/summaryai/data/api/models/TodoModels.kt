@@ -16,7 +16,7 @@ data class TodoDto(
     @SerializedName("user_id") val userId: String,
     @SerializedName("recording_id") val recordingId: String?,
     val title: String,
-    val notes: String?,
+    @SerializedName(value = "notes", alternate = ["description"]) val notes: String?,
     @SerializedName("is_completed") val isCompleted: Boolean,
     val priority: TodoPriority,
     @SerializedName("due_date") val dueDate: String?,
@@ -47,7 +47,7 @@ data class UpdateTodoRequest(
 
 data class ListTodosResponse(
     val todos: List<TodoDto>,
-    val pagination: PaginationDto
+    @SerializedName(value = "pagination", alternate = ["meta"]) val pagination: PaginationDto
 )
 
 data class TodoResponse(

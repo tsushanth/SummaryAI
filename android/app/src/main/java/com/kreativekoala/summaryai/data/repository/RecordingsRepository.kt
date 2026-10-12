@@ -282,9 +282,9 @@ private fun TranscriptSegmentDto.toDomain() = TranscriptSegment(
 
 private fun SummaryDto.toDomain() = Summary(
     id = id ?: "",
-    shortSummary = shortSummary ?: "",
+    shortSummary = shortSummary ?: summary ?: "",
     detailedSummary = detailedSummary,
     keyPoints = keyPoints ?: emptyList(),
-    actionItems = actionItems?.mapNotNull { it.title } ?: emptyList(),
+    actionItems = actionItems?.mapNotNull { it.title ?: it.task } ?: emptyList(),
     topics = topics ?: emptyList()
 )
