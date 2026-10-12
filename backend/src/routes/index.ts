@@ -19,6 +19,7 @@ import { foldersRouter, tagsRouter } from './folders.js';
 import { recordingSharesRouter, publicSharesRouter } from './shares.js';
 import searchRoutes from './search.js';
 import integrationsRoutes from './integrations.js';
+import statsRoutes from './stats.js';
 
 const router = Router();
 
@@ -55,5 +56,6 @@ router.use('/api/phone', phoneRoutes);
 router.use('/api/subscriptions', subscriptionsRoutes);
 router.use('/api/coaching', coachingRoutes);
 router.use('/api/integrations', integrationsRoutes);
+router.use('/api/stats', statsRoutes);
 
 export default router;
