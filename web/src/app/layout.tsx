@@ -27,7 +27,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Follow the OS color scheme before first paint (dashboard tokens switch on .dark) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(window.matchMedia('(prefers-color-scheme: dark)').matches){document.documentElement.classList.add('dark')}}catch(e){}",
+          }}
+        />
+      </head>
       <body className={`${inter.variable} ${fraunces.variable} font-sans`}>
         <WebFailureReporter />
         <AuthProvider>{children}</AuthProvider>
