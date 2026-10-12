@@ -21,6 +21,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -33,6 +35,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.ui.components.LiveWaveform
+import com.kreativekoala.summaryai.ui.components.MmEmptyState
 import com.kreativekoala.summaryai.ui.theme.RecordingRed
 import com.kreativekoala.ratingkit.RatingKit
 import androidx.compose.ui.platform.LocalContext
@@ -158,46 +161,21 @@ private fun PermissionRequest(
     shouldShowRationale: Boolean,
     onRequestPermission: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
-        Icon(
-            imageVector = Icons.Default.Mic,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = stringResource(R.string.permission_required),
-            style = MaterialTheme.typography.headlineSmall,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = if (shouldShowRationale) {
+        MmEmptyState(
+            icon = Icons.Default.Mic,
+            title = stringResource(R.string.permission_required),
+            message = if (shouldShowRationale) {
                 stringResource(R.string.microphone_permission_rationale)
             } else {
                 stringResource(R.string.microphone_permission_required)
             },
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
+            actionLabel = stringResource(R.string.grant_permission),
+            onAction = onRequestPermission
         )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(onClick = onRequestPermission) {
-            Text(stringResource(R.string.grant_permission))
-        }
     }
 }
 
@@ -266,6 +244,7 @@ private fun ReadyToRecordContentIOS(
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text(stringResource(R.string.enter_title)) },
             singleLine = true,
+            shape = MaterialTheme.shapes.medium,
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                 focusedBorderColor = MaterialTheme.colorScheme.primary
@@ -296,9 +275,12 @@ private fun ReadyToRecordContentIOS(
         Spacer(modifier = Modifier.height(24.dp))
 
         // Large red circular record button
+        val startDescription = stringResource(R.string.start_recording)
         Surface(
             onClick = onStartRecording,
-            modifier = Modifier.size(80.dp),
+            modifier = Modifier
+                .size(80.dp)
+                .semantics { contentDescription = startDescription },
             shape = CircleShape,
             color = RecordingRed,
             shadowElevation = 4.dp
@@ -378,13 +360,13 @@ private fun RecordingContent(
                     .size(12.dp)
                     .scale(pulseScale)
                     .clip(CircleShape)
-                    .background(if (isPaused) Color.Gray else RecordingRed)
+                    .background(if (isPaused) MaterialTheme.colorScheme.onSurfaceVariant else RecordingRed)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = if (isPaused) stringResource(R.string.recording_state_paused) else stringResource(R.string.recording_state_recording),
                 style = MaterialTheme.typography.labelLarge,
-                color = if (isPaused) Color.Gray else RecordingRed
+                color = if (isPaused) MaterialTheme.colorScheme.onSurfaceVariant else RecordingRed
             )
         }
 
@@ -405,6 +387,7 @@ private fun RecordingContent(
             modifier = Modifier.fillMaxWidth(),
             label = { Text(stringResource(R.string.recording_title)) },
             placeholder = { Text(stringResource(R.string.untitled_recording)) },
+            shape = MaterialTheme.shapes.medium,
             singleLine = true
         )
 
@@ -465,7 +448,7 @@ private fun RecordingContent(
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(8.dp)
+                shape = MaterialTheme.shapes.small
             ) {
                 val displayText = when {
                     liveTranscribeError != null -> liveTranscribeError
