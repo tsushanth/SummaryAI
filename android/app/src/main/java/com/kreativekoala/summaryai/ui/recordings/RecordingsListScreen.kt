@@ -50,7 +50,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.domain.model.Recording
 import com.kreativekoala.summaryai.domain.model.RecordingStatus
+import com.kreativekoala.summaryai.ui.components.MmCard
+import com.kreativekoala.summaryai.ui.components.MmChip
 import com.kreativekoala.summaryai.ui.components.MmEmptyState
+import com.kreativekoala.summaryai.ui.components.MmStatusPill
 import com.kreativekoala.summaryai.ui.components.SkeletonCardList
 import com.kreativekoala.summaryai.ui.navigation.LocalTabReselection
 import com.kreativekoala.summaryai.ui.theme.Green50
@@ -188,19 +191,10 @@ fun RecordingsListScreen(
                         )
                     }
                     // PRO badge
-                    Surface(
-                        color = Color(0xFFFF9500),
-                        shape = RoundedCornerShape(12.dp),
+                    MmStatusPill(
+                        text = stringResource(R.string.pro),
                         modifier = Modifier.padding(end = 16.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.pro),
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    }
+                    )
                 }
             )
         }
@@ -251,12 +245,13 @@ fun RecordingsListScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
                     .clickable { onSearchClick() },
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(12.dp)
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                shape = MaterialTheme.shapes.medium
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .defaultMinSize(minHeight = 48.dp)
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -351,7 +346,7 @@ fun RecordingsListScreen(
                     .fillMaxWidth()
                     .padding(16.dp)
                     .height(52.dp),
-                shape = RoundedCornerShape(26.dp),
+                shape = MaterialTheme.shapes.extraLarge,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 )
@@ -372,19 +367,7 @@ private fun FilterChipIOS(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    Surface(
-        onClick = onClick,
-        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-        shape = RoundedCornerShape(20.dp)
-    ) {
-        Text(
-            text = label,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-            color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
+    MmChip(label = label, selected = selected, onClick = onClick)
 }
 
 @Composable
@@ -397,14 +380,14 @@ private fun RecordingCardIOS(
     var showMenu by remember { mutableStateOf(false) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
 
-    Surface(
+    MmCard(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.padding(vertical = 4.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 12.dp),
+                .padding(start = 12.dp, top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Status circle: the tint over a low-alpha wash of itself reads correctly in light and dark
@@ -446,7 +429,7 @@ private fun RecordingCardIOS(
                             imageVector = Icons.Default.Favorite,
                             contentDescription = stringResource(R.string.favorite),
                             modifier = Modifier.size(14.dp),
-                            tint = Color.Red
+                            tint = MaterialTheme.colorScheme.error
                         )
                     }
                 }
@@ -462,12 +445,12 @@ private fun RecordingCardIOS(
             Box {
                 IconButton(
                     onClick = { showMenu = true },
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(48.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = stringResource(R.string.more_options),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
@@ -487,7 +470,7 @@ private fun RecordingCardIOS(
                             Icon(
                                 imageVector = if (recording.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                 contentDescription = null,
-                                tint = if (recording.isFavorite) Color.Red else MaterialTheme.colorScheme.onSurface
+                                tint = if (recording.isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
                             )
                         }
                     )
@@ -510,18 +493,9 @@ private fun RecordingCardIOS(
                 }
             }
 
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-            )
+            Spacer(modifier = Modifier.width(8.dp))
         }
     }
-
-    HorizontalDivider(
-        modifier = Modifier.padding(start = 56.dp),
-        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-    )
 
     // Delete confirmation dialog
     if (showDeleteConfirmation) {
@@ -671,9 +645,8 @@ private fun PendingUploadsBanner(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.errorContainer,
-        tonalElevation = 2.dp
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.errorContainer
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(
