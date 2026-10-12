@@ -143,33 +143,45 @@ router.post(
     }
     const parsed = parseSummaryResponse(text);
 
-    const { data: summary, error } = await supabaseAdmin
+    const fields = {
+      summary: parsed.summary,
+      detailed_summary: parsed.detailedSummary,
+      key_points: parsed.keyPoints,
+      action_items: parsed.actionItems,
+      topics: parsed.topics,
+    };
+    // If migration 021 is not applied yet, retry without the new column instead of failing.
+    const dropDetailed = ({ detailed_summary: _omit, ...rest }: typeof fields) => rest;
+    let { data: summary, error } = await supabaseAdmin
       .from('summaries')
-      .update({
-        summary: parsed.summary,
-        key_points: parsed.keyPoints,
-        action_items: parsed.actionItems,
-        topics: parsed.topics,
-      })
+      .update(fields)
       .eq('recording_id', recordingId)
       .select()
       .maybeSingle();
+    if (error && /detailed_summary/.test(error.message)) {
+      ({ data: summary, error } = await supabaseAdmin
+        .from('summaries')
+        .update(dropDetailed(fields))
+        .eq('recording_id', recordingId)
+        .select()
+        .maybeSingle());
+    }
     if (error) throw Errors.internal('Failed to store summary');
 
     let stored = summary;
     if (!stored) {
-      const ins = await supabaseAdmin
+      let ins = await supabaseAdmin
         .from('summaries')
-        .insert({
-          id: uuidv4(),
-          recording_id: recordingId,
-          summary: parsed.summary,
-          key_points: parsed.keyPoints,
-          action_items: parsed.actionItems,
-          topics: parsed.topics,
-        })
+        .insert({ id: uuidv4(), recording_id: recordingId, ...fields })
         .select()
         .single();
+      if (ins.error && /detailed_summary/.test(ins.error.message)) {
+        ins = await supabaseAdmin
+          .from('summaries')
+          .insert({ id: uuidv4(), recording_id: recordingId, ...dropDetailed(fields) })
+          .select()
+          .single();
+      }
       if (ins.error || !ins.data) throw Errors.internal('Failed to store summary');
       stored = ins.data;
     }

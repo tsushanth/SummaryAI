@@ -9,4 +9,5 @@
     <string name="ui_no_recordings_title">録音はまだありません</string>
     <string name="ui_no_results_title">一致する録音がありません</string>
     <string name="ui_clear_search">検索をクリア</string>
+    <string name="ui_detailed_summary">詳細な要約</string>
 </resources>

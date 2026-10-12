@@ -9,4 +9,5 @@
     <string name="ui_no_recordings_title">아직 녹음이 없습니다</string>
     <string name="ui_no_results_title">일치하는 녹음이 없습니다</string>
     <string name="ui_clear_search">검색 지우기</string>
+    <string name="ui_detailed_summary">상세 요약</string>
 </resources>

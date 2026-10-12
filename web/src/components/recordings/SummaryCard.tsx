@@ -28,6 +28,20 @@ export function SummaryCard({ summary, actionItemsFooter }: SummaryCardProps) {
         <p className="minute text-foreground/90">{summary.summary}</p>
       </section>
 
+      {summary.detailed_summary?.trim() && (
+        <section>
+          <h3 className="mb-2 text-xl font-semibold tracking-tight">Detailed summary</h3>
+          <div className="minute space-y-3 text-foreground/90">
+            {summary.detailed_summary
+              .trim()
+              .split(/\n{2,}/)
+              .map((para, index) => (
+                <p key={index}>{para}</p>
+              ))}
+          </div>
+        </section>
+      )}
+
       {summary.key_points && summary.key_points.length > 0 && (
         <section>
           <h3 className="mb-3 text-xl font-semibold tracking-tight">Key points</h3>

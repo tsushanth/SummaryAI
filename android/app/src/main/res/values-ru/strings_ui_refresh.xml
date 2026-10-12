@@ -9,4 +9,5 @@
     <string name="ui_no_recordings_title">Записей пока нет</string>
     <string name="ui_no_results_title">Подходящих записей нет</string>
     <string name="ui_clear_search">Очистить поиск</string>
+    <string name="ui_detailed_summary">Подробное резюме</string>
 </resources>

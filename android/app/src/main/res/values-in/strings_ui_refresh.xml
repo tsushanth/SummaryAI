@@ -9,4 +9,5 @@
     <string name="ui_no_recordings_title">Belum ada rekaman</string>
     <string name="ui_no_results_title">Tidak ada rekaman yang cocok</string>
     <string name="ui_clear_search">Hapus pencarian</string>
+    <string name="ui_detailed_summary">Ringkasan terperinci</string>
 </resources>

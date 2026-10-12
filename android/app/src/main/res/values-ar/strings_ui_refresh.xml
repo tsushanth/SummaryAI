@@ -9,4 +9,5 @@
     <string name="ui_no_recordings_title">لا توجد تسجيلات بعد</string>
     <string name="ui_no_results_title">لا توجد تسجيلات مطابقة</string>
     <string name="ui_clear_search">مسح البحث</string>
+    <string name="ui_detailed_summary">ملخص تفصيلي</string>
 </resources>

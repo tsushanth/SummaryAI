@@ -9,4 +9,5 @@
     <string name="ui_no_recordings_title">अभी कोई रिकॉर्डिंग नहीं है</string>
     <string name="ui_no_results_title">कोई मिलती-जुलती रिकॉर्डिंग नहीं</string>
     <string name="ui_clear_search">खोज साफ़ करें</string>
+    <string name="ui_detailed_summary">विस्तृत सारांश</string>
 </resources>

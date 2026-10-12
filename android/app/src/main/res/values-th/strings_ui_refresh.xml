@@ -9,4 +9,5 @@
     <string name="ui_no_recordings_title">ยังไม่มีการบันทึก</string>
     <string name="ui_no_results_title">ไม่มีการบันทึกที่ตรงกัน</string>
     <string name="ui_clear_search">ล้างการค้นหา</string>
+    <string name="ui_detailed_summary">สรุปแบบละเอียด</string>
 </resources>

@@ -9,4 +9,5 @@
     <string name="ui_no_recordings_title">Wala pang mga recording</string>
     <string name="ui_no_results_title">Walang tumutugmang recording</string>
     <string name="ui_clear_search">I-clear ang paghahanap</string>
+    <string name="ui_detailed_summary">Detalyadong buod</string>
 </resources>

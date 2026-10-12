@@ -9,4 +9,5 @@
     <string name="ui_no_recordings_title">还没有录音</string>
     <string name="ui_no_results_title">没有匹配的录音</string>
     <string name="ui_clear_search">清除搜索</string>
+    <string name="ui_detailed_summary">详细摘要</string>
 </resources>

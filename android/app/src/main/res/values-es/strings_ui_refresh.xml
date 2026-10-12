@@ -9,4 +9,5 @@
     <string name="ui_no_recordings_title">Aún no hay grabaciones</string>
     <string name="ui_no_results_title">Ninguna grabación coincide</string>
     <string name="ui_clear_search">Borrar búsqueda</string>
+    <string name="ui_detailed_summary">Resumen detallado</string>
 </resources>

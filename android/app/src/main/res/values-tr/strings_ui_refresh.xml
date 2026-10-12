@@ -9,4 +9,5 @@
     <string name="ui_no_recordings_title">Henüz kayıt yok</string>
     <string name="ui_no_results_title">Eşleşen kayıt yok</string>
     <string name="ui_clear_search">Aramayı temizle</string>
+    <string name="ui_detailed_summary">Ayrıntılı özet</string>
 </resources>

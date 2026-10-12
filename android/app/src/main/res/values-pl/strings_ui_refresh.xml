@@ -9,4 +9,5 @@
     <string name="ui_no_recordings_title">Brak nagrań</string>
     <string name="ui_no_results_title">Brak pasujących nagrań</string>
     <string name="ui_clear_search">Wyczyść wyszukiwanie</string>
+    <string name="ui_detailed_summary">Szczegółowe podsumowanie</string>
 </resources>

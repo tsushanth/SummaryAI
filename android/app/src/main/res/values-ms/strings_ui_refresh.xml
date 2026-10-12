@@ -9,4 +9,5 @@
     <string name="ui_no_recordings_title">Belum ada rakaman</string>
     <string name="ui_no_results_title">Tiada rakaman yang sepadan</string>
     <string name="ui_clear_search">Kosongkan carian</string>
+    <string name="ui_detailed_summary">Ringkasan terperinci</string>
 </resources>

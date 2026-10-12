@@ -173,18 +173,23 @@ async function processRecordingAsync(
     console.log(`[Processing] ${jobId}: Summary generated`);
 
     // Step 8: Store summary in database
-    const { error: summaryError } = await supabaseAdmin
-      .from('summaries')
-      .insert({
-        id: uuidv4(),
-        recording_id: recordingId,
-        summary: summary.summary,
-        key_points: summary.keyPoints,
-        action_items: summary.actionItems,
-        topics: summary.topics,
-        llm_provider: config.ANTHROPIC_API_KEY ? 'anthropic' : 'mock',
-        llm_model: config.ANTHROPIC_API_KEY ? config.ANTHROPIC_MODEL : 'mock',
-      });
+    const summaryRow = {
+      id: uuidv4(),
+      recording_id: recordingId,
+      summary: summary.summary,
+      detailed_summary: summary.detailedSummary,
+      key_points: summary.keyPoints,
+      action_items: summary.actionItems,
+      topics: summary.topics,
+      llm_provider: config.ANTHROPIC_API_KEY ? 'anthropic' : 'mock',
+      llm_model: config.ANTHROPIC_API_KEY ? config.ANTHROPIC_MODEL : 'mock',
+    };
+    let { error: summaryError } = await supabaseAdmin.from('summaries').insert(summaryRow);
+    if (summaryError && /detailed_summary/.test(summaryError.message)) {
+      // Migration 021 not applied yet: store everything else rather than fail the whole recording.
+      const { detailed_summary: _omit, ...withoutDetailed } = summaryRow;
+      ({ error: summaryError } = await supabaseAdmin.from('summaries').insert(withoutDetailed));
+    }
 
     if (summaryError) {
       throw new Error(`Failed to store summary: ${summaryError.message}`);
@@ -461,7 +466,7 @@ async function generateSummaryWithAnthropic(
 
   const response = await withFeature('summary', () => anthropic.messages.create({
     model: config.ANTHROPIC_MODEL,
-    max_tokens: 2048,
+    max_tokens: 4096,
     system,
     messages: [{ role: 'user', content: user }],
   }));
@@ -522,6 +527,7 @@ function createMockTranscript(durationSeconds: number): TranscriptionResult {
 function createMockSummary(fullText: string): ParsedSummary {
   return {
     summary: 'This is a mock summary of the recording. The participants discussed various topics and made progress on key items. Several action items were identified for follow-up.',
+    detailedSummary: null,
     keyPoints: [
       'Team discussed quarterly progress and targets',
       'Key metrics are trending positively',

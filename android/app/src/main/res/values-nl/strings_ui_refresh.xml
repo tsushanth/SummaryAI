@@ -9,4 +9,5 @@
     <string name="ui_no_recordings_title">Nog geen opnames</string>
     <string name="ui_no_results_title">Geen overeenkomende opnames</string>
     <string name="ui_clear_search">Zoekopdracht wissen</string>
+    <string name="ui_detailed_summary">Gedetailleerde samenvatting</string>
 </resources>

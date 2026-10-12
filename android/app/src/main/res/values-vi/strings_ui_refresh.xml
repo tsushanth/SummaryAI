@@ -9,4 +9,5 @@
     <string name="ui_no_recordings_title">Chưa có bản ghi nào</string>
     <string name="ui_no_results_title">Không có bản ghi phù hợp</string>
     <string name="ui_clear_search">Xóa tìm kiếm</string>
+    <string name="ui_detailed_summary">Tóm tắt chi tiết</string>
 </resources>

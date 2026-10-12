@@ -32,7 +32,7 @@ describe('parseSummaryResponse', () => {
 
   it('falls back to plain text on invalid JSON', () => {
     const r = parseSummaryResponse('not json');
-    expect(r).toEqual({ summary: 'not json', keyPoints: [], actionItems: [], topics: [] });
+    expect(r).toEqual({ summary: 'not json', detailedSummary: null, keyPoints: [], actionItems: [], topics: [] });
   });
 
   it('ignores non-string key points', () => {
@@ -62,3 +62,28 @@ describe('resolveSummaryTemplate', () => {
     expect(resolveSummaryTemplate({ recordingTemplate: 'bogus', recordingType: 'meeting' })).toBe('general');
   });
 });
+
+describe('detailed summary', () => {
+  it('parses detailed_summary and trims it', () => {
+    const r = parseSummaryResponse('{"summary":"Short.","detailed_summary":"  Para one.\\n\\nPara two.  ","key_points":[]}');
+    expect(r.summary).toBe('Short.');
+    expect(r.detailedSummary).toBe('Para one.\n\nPara two.');
+  });
+
+  it('is null when missing, blank or not a string', () => {
+    expect(parseSummaryResponse('{"summary":"S"}').detailedSummary).toBeNull();
+    expect(parseSummaryResponse('{"summary":"S","detailed_summary":"   "}').detailedSummary).toBeNull();
+    expect(parseSummaryResponse('{"summary":"S","detailed_summary":{"a":1}}').detailedSummary).toBeNull();
+  });
+
+  it('is null on the plain-text fallback', () => {
+    expect(parseSummaryResponse('not json').detailedSummary).toBeNull();
+  });
+
+  it('asks the model for detailed_summary, in the output language when set', () => {
+    const p = buildSummaryPrompts({ transcriptText: 'hi', speakers: [], languageName: 'Hindi' });
+    expect(p.user).toContain('"detailed_summary"');
+    expect(p.user).toContain('summary, detailed_summary, key_points');
+  });
+});
+

@@ -9,4 +9,5 @@
     <string name="ui_no_recordings_title">Aucun enregistrement pour l\'instant</string>
     <string name="ui_no_results_title">Aucun enregistrement correspondant</string>
     <string name="ui_clear_search">Effacer la recherche</string>
+    <string name="ui_detailed_summary">Résumé détaillé</string>
 </resources>

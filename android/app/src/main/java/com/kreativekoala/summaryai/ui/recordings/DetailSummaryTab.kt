@@ -124,12 +124,27 @@ internal fun SummaryTab(
             }
         }
 
-        if (!summary.shortSummary.isNullOrEmpty() || !summary.detailedSummary.isNullOrEmpty()) {
-            val text = (summary.detailedSummary ?: summary.shortSummary).applyingSpeakerNames(speakerNames)
+        val shortText = summary.shortSummary?.takeIf { it.isNotBlank() }
+        val detailedText = summary.detailedSummary?.takeIf { it.isNotBlank() }
+        if (shortText != null || detailedText != null) {
+            val text = (shortText ?: detailedText!!).applyingSpeakerNames(speakerNames)
             MmCard {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     MmSectionHeader(title = stringResource(R.string.ui_notes), icon = Icons.AutoMirrored.Filled.Notes)
                     Text(text = text, style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+        }
+        if (shortText != null && detailedText != null && detailedText != shortText) {
+            MmCard {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    MmSectionHeader(
+                        title = stringResource(R.string.ui_detailed_summary),
+                        icon = Icons.Default.AutoAwesome
+                    )
+                    detailedText.applyingSpeakerNames(speakerNames).split(Regex("\n{2,}")).forEach { para ->
+                        Text(text = para.trim(), style = MaterialTheme.typography.bodyMedium)
+                    }
                 }
             }
         }

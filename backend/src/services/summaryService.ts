@@ -18,6 +18,8 @@ export interface ActionItem {
 
 export interface ParsedSummary {
   summary: string;
+  /** Fuller multi-paragraph write-up; null when the model did not return one. */
+  detailedSummary: string | null;
   keyPoints: string[];
   actionItems: ActionItem[];
   topics: string[];
@@ -71,6 +73,8 @@ export function parseSummaryResponse(responseText: string): ParsedSummary {
     const parsed = JSON.parse(jsonString);
     return {
       summary: typeof parsed.summary === 'string' && parsed.summary.trim() ? parsed.summary : 'No summary available.',
+      detailedSummary:
+        typeof parsed.detailed_summary === 'string' && parsed.detailed_summary.trim() ? parsed.detailed_summary.trim() : null,
       keyPoints: stringArray(parsed.key_points),
       actionItems: normalizeActionItems(parsed.action_items),
       topics: stringArray(parsed.topics),
@@ -78,6 +82,7 @@ export function parseSummaryResponse(responseText: string): ParsedSummary {
   } catch {
     return {
       summary: responseText.trim() || 'Summary generation failed.',
+      detailedSummary: null,
       keyPoints: [],
       actionItems: [],
       topics: [],
@@ -102,7 +107,7 @@ export function buildSummaryPrompts(input: SummaryPromptInput): SummaryPrompts {
   const template = getSummaryTemplate(input.templateId);
   const speakerList = input.speakers.length > 1 ? `Participants: ${input.speakers.join(', ')}\n\n` : '';
   const languageInstruction = input.languageName
-    ? `\n\nWrite the entire summary, key_points, action_items, and topics in ${input.languageName}. JSON keys remain in English; only the values are translated.`
+    ? `\n\nWrite the entire summary, detailed_summary, key_points, action_items, and topics in ${input.languageName}. JSON keys remain in English; only the values are translated.`
     : '';
 
   const user = `Analyze this transcript and produce a "${template.name}" summary.
@@ -118,7 +123,8 @@ Important: reference speakers by name to show who said what. For action items, u
 
 Respond with ONLY valid JSON in this format:
 {
-  "summary": "Plain-text summary laid out as the template instructions describe (no markdown)",
+  "summary": "Plain-text summary laid out as the template instructions describe (no markdown). Keep it short enough to read in under a minute.",
+  "detailed_summary": "A fuller plain-text write-up in 3 to 6 short paragraphs separated by blank lines: the context, what was discussed topic by topic (who said what), decisions made, and open questions. No markdown, no bullet characters. Do not repeat the summary word for word.",
   "key_points": ["point 1", "point 2"],
   "action_items": [{"task": "description", "assignee": "Speaker name or null", "priority": "high/medium/low", "due_date": "stated deadline or null"}],
   "topics": ["topic1", "topic2"]

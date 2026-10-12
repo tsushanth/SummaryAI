@@ -9,4 +9,5 @@
     <string name="ui_no_recordings_title">Ancora nessuna registrazione</string>
     <string name="ui_no_results_title">Nessuna registrazione corrispondente</string>
     <string name="ui_clear_search">Cancella ricerca</string>
+    <string name="ui_detailed_summary">Riepilogo dettagliato</string>
 </resources>
