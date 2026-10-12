@@ -204,7 +204,7 @@ export default function RecordingDetailPage() {
             <RecordingOrganizer recording={recording} onChanged={refresh} />
           </div>
           <div className="flex items-center gap-2">
-            <ExportMenu recording={recording} summary={summary} transcript={transcript} />
+            <ExportMenu recording={recording} summary={summary} transcript={transcript} audioUrl={audioUrl} />
             <ShareLinkPanel recordingId={recording.id} />
           </div>
         </div>
