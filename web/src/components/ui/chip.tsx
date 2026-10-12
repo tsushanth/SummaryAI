@@ -13,11 +13,11 @@ export const Chip = React.forwardRef<HTMLButtonElement, ChipProps>(
       type={type}
       aria-pressed={selected}
       className={cn(
-        'inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-4 text-sm font-medium transition-colors',
+        'inline-flex min-h-[44px] items-center gap-1.5 rounded-md px-3.5 text-sm font-medium transition-colors',
         'ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         selected
           ? 'bg-primary text-primary-foreground'
-          : 'bg-secondary text-secondary-foreground hover:bg-accent',
+          : 'border border-border bg-card text-secondary-foreground hover:bg-accent',
         className
       )}
       {...props}
@@ -38,7 +38,7 @@ export function StatusPill({
     neutral: 'bg-secondary text-secondary-foreground',
     primary: 'bg-accent text-accent-foreground',
     success: 'bg-success/15 text-success',
-    warning: 'bg-amber-500/15 text-amber-800 dark:text-amber-300',
+    warning: 'bg-mark text-mark-foreground',
     danger: 'bg-destructive/15 text-destructive',
   } as const;
   return (

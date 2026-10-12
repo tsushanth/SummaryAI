@@ -29,7 +29,7 @@ function Highlight({ text, query }: { text: string; query: string }) {
     }
     if (idx > i) parts.push(text.slice(i, idx));
     parts.push(
-      <mark key={key++} className="bg-amber-500/30 text-foreground rounded px-0.5">
+      <mark key={key++} className="rounded-sm bg-mark px-0.5 text-mark-foreground">
         {text.slice(idx, idx + needle.length)}
       </mark>
     );
@@ -71,16 +71,17 @@ export default function SearchPage() {
   }, [query]);
 
   return (
-    <div className="p-6 max-w-3xl">
-      <h1 className="text-2xl font-bold mb-4">Search</h1>
+    <div className="mx-auto max-w-3xl px-4 py-6 sm:px-8 sm:py-8">
+      <h1 className="mb-4 text-3xl font-semibold tracking-tight">Search</h1>
       <div className="relative mb-6">
-        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
         <input
           autoFocus
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search titles, summaries and transcripts"
-          className="w-full border rounded-lg pl-9 pr-3 py-2 bg-card"
+          aria-label="Search recordings"
+          className="h-12 w-full rounded-md border border-input bg-card pl-9 pr-3 text-base"
         />
       </div>
 
@@ -90,24 +91,24 @@ export default function SearchPage() {
         <p className="text-muted-foreground">No results for &ldquo;{query.trim()}&rdquo;</p>
       )}
       {results && results.length > 0 && (
-        <ul className="space-y-3">
+        <ul className="space-y-2">
           {results.map((r) => (
             <li key={r.recording.id}>
               <Link
                 href={`/recordings/${r.recording.id}`}
-                className="block bg-card border rounded-lg p-4 hover:shadow-md transition-shadow"
+                className="block rounded-md border border-border bg-card p-4 transition-colors hover:bg-accent"
               >
                 <div className="flex items-center justify-between gap-3">
                   <span className="font-medium truncate">
                     <Highlight text={r.recording.title} query={query} />
                   </span>
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  <span className="whitespace-nowrap text-sm text-muted-foreground">
                     {formatRelativeDate(r.recording.created_at)}
                   </span>
                 </div>
-                <div className="text-xs text-muted-foreground mt-1">{MATCH_LABEL[r.match]} match</div>
+                <div className="mt-1 text-sm text-muted-foreground">{MATCH_LABEL[r.match]} match</div>
                 {r.match !== 'title' && (
-                  <p className="text-sm text-foreground/80 mt-1">
+                  <p className="minute mt-1 text-base text-foreground/80">
                     <Highlight text={r.snippet} query={query} />
                   </p>
                 )}

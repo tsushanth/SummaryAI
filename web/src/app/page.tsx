@@ -1,14 +1,14 @@
 import Link from 'next/link';
+import { RibbonMark } from '@/components/ui/ribbon-mark';
 import {
-  Mic,
   ArrowUpRight,
+  Sparkles,
   Apple,
   Play,
   Laptop,
   Monitor,
   Globe,
   Check,
-  Sparkles,
   ListChecks,
   MessageSquareText,
   AudioLines,
@@ -71,7 +71,7 @@ const PLATFORMS = [
   },
   {
     name: 'Android',
-    caption: 'Android 10+ · on Google Play',
+    caption: 'Android 10+, on Google Play',
     href: 'https://play.google.com/store/apps/details?id=com.kreativekoala.meetingmind',
     icon: Play,
   },
@@ -136,37 +136,40 @@ const PLANS = [
 
 const DEMO_RESULTS = [
   'Launch delayed to Q2, pending test results',
-  'Marketing: deliver assets — due Friday',
-  'Dev: onboard new hire — due Monday',
+  'Marketing to deliver assets by Friday',
+  'Dev to onboard the new hire by Monday',
+];
+
+// Illustrative speaker timeline for the hero: [speaker color, width %]
+const HERO_RIBBON: [string, number][] = [
+  ['#4A4DCB', 22], ['#0B7A75', 9], ['#4A4DCB', 14], ['#A33A5B', 12], ['#0B7A75', 18], ['#B4501A', 7], ['#4A4DCB', 18],
 ];
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-sm">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-2 rounded-md">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Mic className="h-4 w-4" strokeWidth={2.25} aria-hidden="true" />
-            </span>
-            <span className="font-serif text-lg font-medium tracking-tight">Meeting Mind</span>
+      <nav aria-label="Primary" className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+          <Link href="/" className="flex items-center gap-2.5 rounded-md">
+            <RibbonMark className="h-7 w-7" />
+            <span className="text-lg font-semibold tracking-tight">MeetingMind</span>
           </Link>
           <div className="hidden items-center gap-8 text-[15px] text-muted-foreground md:flex">
             <a href="#features" className="rounded-sm hover:text-foreground">Features</a>
             <a href="#platforms" className="rounded-sm hover:text-foreground">Download</a>
             <a href="#pricing" className="rounded-sm hover:text-foreground">Pricing</a>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Link
               href="/auth"
-              className="hidden rounded-sm text-[15px] text-muted-foreground hover:text-foreground sm:block"
+              className="hidden min-h-[44px] items-center rounded-sm text-[15px] text-muted-foreground hover:text-foreground sm:flex"
             >
               Sign in
             </Link>
             <Link
               href="/auth"
-              className="inline-flex h-11 items-center rounded-full bg-primary px-5 text-[15px] font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              className="inline-flex h-11 items-center rounded-md bg-primary px-5 text-[15px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
             >
               Start free
             </Link>
@@ -174,76 +177,83 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-gradient-to-b from-accent to-transparent"
-        />
-        <div className="relative mx-auto max-w-6xl px-6 pb-20 pt-16 sm:pt-24">
-          <div className="grid gap-14 lg:grid-cols-[1.05fr_1fr] lg:items-center">
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-sm text-muted-foreground">
-                <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-                AI notes for every meeting and call
-              </span>
-              <h1 className="mt-6 font-serif text-[2.75rem] font-medium leading-[1.08] tracking-tight sm:text-6xl">
-                Meetings you can skim instead of relive.
-              </h1>
-              <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted-foreground">
-                Meeting Mind listens in the background, then turns the recording into a
-                transcript, a summary, and a list of who owes what.
-              </p>
-              <div className="mt-9 flex flex-wrap items-center gap-4">
-                <Link
-                  href="/auth"
-                  className="inline-flex h-12 items-center rounded-full bg-primary px-7 text-[15px] font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                >
-                  Start free
-                </Link>
-                <a
-                  href="#features"
-                  className="inline-flex h-12 items-center rounded-full border border-input px-6 text-[15px] font-medium text-foreground transition-colors hover:bg-accent"
-                >
-                  See what it does
-                </a>
-              </div>
-              <p className="mt-5 text-sm text-muted-foreground">No credit card. 7-day free trial.</p>
-            </div>
-
-            {/* The mechanism: a real utterance, distilled */}
-            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
-              <p className="text-sm text-muted-foreground">What gets recorded</p>
-              <div className="mt-3 space-y-2 border-l-2 border-border pl-4 font-serif text-[1.05rem] italic leading-relaxed text-card-foreground/80">
-                <p>
-                  <span className="not-italic text-muted-foreground">Priya, 14:02 —</span> so testing
-                  pushed the launch to Q2, and marketing still needs new assets by Friday.
-                </p>
-                <p>
-                  <span className="not-italic text-muted-foreground">Dev, 14:03 —</span> and can we get
-                  the new hire set up before Monday?
-                </p>
-              </div>
-
-              <p className="mt-8 text-sm text-muted-foreground">What you get back</p>
-              <ul className="mt-3 space-y-3">
-                {DEMO_RESULTS.map((line) => (
-                  <li key={line} className="flex items-start gap-3">
-                    <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-success" />
-                    <span className="text-[15px] leading-snug">{line}</span>
-                  </li>
-                ))}
-              </ul>
+      {/* Hero: the one bold place. A speaker ribbon draws in over a short set of minutes. */}
+      <section>
+        <div className="mx-auto max-w-6xl px-4 pb-16 pt-12 sm:px-6 sm:pb-24 sm:pt-20">
+          <div className="max-w-3xl">
+            <h1 className="text-[2.5rem] font-semibold leading-[1.05] tracking-tight sm:text-6xl">
+              Meetings you can skim instead of relive.
+            </h1>
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
+              MeetingMind listens in the background, then turns the recording into a
+              transcript, a summary, and a list of who owes what.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
+              <Link
+                href="/auth"
+                className="inline-flex h-12 items-center rounded-md bg-primary px-7 text-[15px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                Start free
+              </Link>
+              <a
+                href="#features"
+                className="inline-flex min-h-[44px] items-center rounded-sm text-[15px] font-semibold text-foreground underline decoration-2 underline-offset-4 hover:text-primary"
+              >
+                See what it does
+              </a>
+              <p className="text-sm text-muted-foreground">No credit card. 7-day free trial.</p>
             </div>
           </div>
+
+          {/* Illustrative minutes */}
+          <figure className="mt-14 rounded-lg border border-border bg-card p-5 sm:p-8">
+            <div className="ribbon-draw ribbon h-5 sm:h-6" aria-hidden="true">
+              {HERO_RIBBON.map(([color, w], i) => (
+                <span key={i} style={{ width: `${w}%`, backgroundColor: color }} />
+              ))}
+            </div>
+            <figcaption className="mt-2 text-sm text-muted-foreground">
+              A 40-minute product sync, colored by who was speaking (illustrative).
+            </figcaption>
+
+            <div className="mt-8 grid gap-8 lg:grid-cols-2">
+              <div>
+                <h2 className="text-sm font-semibold text-muted-foreground">What was said</h2>
+                <div className="minute mt-3 space-y-3 text-foreground/85">
+                  <p className="grid grid-cols-[4.5rem_1fr] gap-3">
+                    <span className="font-sans text-sm leading-[2] tabular text-muted-foreground">Priya 14:02</span>
+                    <span>So testing pushed the launch to Q2, and marketing still needs new assets by Friday.</span>
+                  </p>
+                  <p className="grid grid-cols-[4.5rem_1fr] gap-3">
+                    <span className="font-sans text-sm leading-[2] tabular text-muted-foreground">Dev 14:03</span>
+                    <span>And can we get the new hire set up before Monday?</span>
+                  </p>
+                </div>
+              </div>
+              <div>
+                <h2 className="text-sm font-semibold text-muted-foreground">What you get back</h2>
+                <ul className="minute mt-3 space-y-2 text-foreground">
+                  {DEMO_RESULTS.map((line, i) => (
+                    <li key={line} className="relative rounded-sm py-0.5 pl-4">
+                      <span
+                        aria-hidden="true"
+                        className="absolute inset-y-1.5 left-0 w-1 rounded-full bg-primary"
+                      />
+                      {i === 0 ? <mark className="rounded-sm bg-mark px-1 text-mark-foreground">{line}</mark> : line}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </figure>
         </div>
       </section>
 
-      {/* Features */}
-      <section id="features" className="border-t border-border bg-muted/40">
-        <div className="mx-auto max-w-6xl px-6 py-20">
+      {/* Features: how it runs, before / during / after */}
+      <section id="features" className="border-t border-border bg-card">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
           <div className="max-w-xl">
-            <h2 className="font-serif text-3xl font-medium tracking-tight sm:text-4xl">
+            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
               Everything after &ldquo;let&rsquo;s hop on a call.&rdquo;
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
@@ -251,16 +261,13 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {FEATURES.map(({ title, body, icon: Icon }) => (
-              <li
-                key={title}
-                className="rounded-2xl border border-border bg-card p-6 transition-colors hover:border-primary/40"
-              >
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-foreground">
-                  <Icon className="h-5 w-5" aria-hidden="true" />
-                </span>
-                <h3 className="mt-4 text-base font-semibold">{title}</h3>
+          <ul className="mt-12 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
+            {FEATURES.map(({ title, body, icon: Icon }, i) => (
+              <li key={title} className="border-l-[3px] pl-4" style={{ borderLeftColor: SPEAKER_BARS[i % SPEAKER_BARS.length] }}>
+                <h3 className="flex items-center gap-2 text-base font-semibold">
+                  <Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                  {title}
+                </h3>
                 <p className="mt-1.5 text-[15px] leading-relaxed text-muted-foreground">{body}</p>
               </li>
             ))}
@@ -270,8 +277,8 @@ export default function LandingPage() {
 
       {/* Platforms */}
       <section id="platforms" className="border-t border-border">
-        <div className="mx-auto max-w-6xl px-6 py-20">
-          <h2 className="font-serif text-3xl font-medium tracking-tight sm:text-4xl">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
             Wherever you take meetings.
           </h2>
           <p className="mt-4 max-w-xl text-lg text-muted-foreground">
@@ -285,15 +292,15 @@ export default function LandingPage() {
                 href={href}
                 target={href.startsWith('http') ? '_blank' : undefined}
                 rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                className="group flex min-h-14 items-center justify-between px-2 py-4 transition-colors hover:bg-accent/50"
+                className="group flex min-h-14 items-center justify-between gap-3 px-2 py-4 transition-colors hover:bg-accent/50"
               >
-                <span className="flex items-center gap-4">
+                <span className="flex flex-wrap items-center gap-x-4 gap-y-0.5">
                   <Icon className="h-5 w-5 text-muted-foreground" strokeWidth={1.75} aria-hidden="true" />
-                  <span className="text-[15px] font-medium">{name}</span>
+                  <span className="text-[15px] font-semibold">{name}</span>
                   <span className="text-sm text-muted-foreground">{caption}</span>
                 </span>
                 <ArrowUpRight
-                  className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary"
+                  className="h-4 w-4 flex-shrink-0 text-muted-foreground transition-colors group-hover:text-primary"
                   aria-hidden="true"
                 />
               </a>
@@ -303,9 +310,9 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="border-t border-border bg-muted/40">
-        <div className="mx-auto max-w-6xl px-6 py-20">
-          <h2 className="font-serif text-3xl font-medium tracking-tight sm:text-4xl">
+      <section id="pricing" className="border-t border-border bg-card">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
             One price, wherever you subscribe.
           </h2>
           <p className="mt-4 max-w-xl text-lg text-muted-foreground">
@@ -316,31 +323,31 @@ export default function LandingPage() {
             {PLANS.map((plan) => (
               <div
                 key={plan.name}
-                className={`rounded-2xl border p-7 ${
-                  plan.highlight ? 'border-primary bg-card ring-1 ring-primary' : 'border-border bg-card'
+                className={`rounded-lg border p-6 sm:p-7 ${
+                  plan.highlight ? 'border-primary bg-background ring-1 ring-primary' : 'border-border bg-background'
                 }`}
               >
                 <div className="flex items-baseline justify-between">
                   <h3 className="text-lg font-semibold">{plan.name}</h3>
                   {plan.highlight && (
-                    <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-accent-foreground">
+                    <span className="rounded-sm bg-mark px-2 py-0.5 text-xs font-semibold text-mark-foreground">
                       Most popular
                     </span>
                   )}
                 </div>
                 <div className="mt-4 flex items-baseline gap-2">
-                  <span className="text-3xl font-semibold tracking-tight">{plan.price}</span>
+                  <span className="text-4xl font-semibold tracking-tight tabular">{plan.price}</span>
                   <span className="text-sm text-muted-foreground">{plan.cadence}</span>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  <span className="line-through">{plan.was}</span> · save 30%
+                  <span className="line-through">{plan.was}</span> before the 30% web saving
                 </p>
                 {plan.note && <p className="mt-1 text-sm text-muted-foreground">{plan.note}</p>}
                 <ul className="mt-6 space-y-2.5">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex gap-2.5 text-[14px] leading-relaxed text-card-foreground/90">
+                    <li key={f} className="flex gap-2.5 text-[15px] leading-relaxed text-foreground/90">
                       <Check
-                        className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-success"
+                        className="mt-1 h-3.5 w-3.5 flex-shrink-0 text-success"
                         strokeWidth={2.5}
                         aria-hidden="true"
                       />
@@ -350,10 +357,10 @@ export default function LandingPage() {
                 </ul>
                 <Link
                   href="/subscription"
-                  className={`mt-8 flex h-11 items-center justify-center rounded-full text-[15px] font-medium transition-colors ${
+                  className={`mt-8 flex h-11 items-center justify-center rounded-md text-[15px] font-semibold transition-colors ${
                     plan.highlight
                       ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                      : 'border border-input bg-card text-foreground hover:bg-accent'
                   }`}
                 >
                   {plan.highlight ? 'Start free trial' : 'Subscribe'}
@@ -371,13 +378,13 @@ export default function LandingPage() {
 
       {/* Closing CTA */}
       <section className="border-t border-border">
-        <div className="mx-auto max-w-6xl px-6 py-20 text-center">
-          <h2 className="font-serif text-3xl font-medium tracking-tight sm:text-4xl">
+        <div className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6 sm:py-20">
+          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
             Stop writing down what people say.
           </h2>
           <Link
             href="/auth"
-            className="mt-8 inline-flex h-12 items-center rounded-full bg-primary px-8 text-[15px] font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="mt-8 inline-flex h-12 items-center rounded-md bg-primary px-8 text-[15px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Start free
           </Link>
@@ -386,10 +393,10 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-border text-muted-foreground">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-6 py-10 text-sm sm:flex-row sm:justify-between">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-4 py-10 text-sm sm:flex-row sm:justify-between sm:px-6">
           <div className="flex items-center gap-2 text-foreground">
-            <Mic className="h-4 w-4" aria-hidden="true" />
-            <span className="font-serif">Meeting Mind</span>
+            <RibbonMark className="h-5 w-5" />
+            <span className="font-semibold">MeetingMind</span>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
             <a href="#features" className="rounded-sm hover:text-foreground">Features</a>
@@ -397,9 +404,11 @@ export default function LandingPage() {
             <Link href="/privacy" className="rounded-sm hover:text-foreground">Privacy</Link>
             <Link href="/terms" className="rounded-sm hover:text-foreground">Terms</Link>
           </div>
-          <p>&copy; {new Date().getFullYear()} Meeting Mind</p>
+          <p>&copy; {new Date().getFullYear()} MeetingMind</p>
         </div>
       </footer>
     </div>
   );
 }
+
+const SPEAKER_BARS = ['#4A4DCB', '#0B7A75', '#B4501A', '#A33A5B'];

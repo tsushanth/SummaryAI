@@ -136,7 +136,7 @@ export function ShareLinkPanel({ recordingId }: { recordingId: string }) {
           )}
           {active.length > 0 && (
             <div>
-              <div className="text-xs font-semibold uppercase text-muted-foreground mb-1">Active links ({active.length})</div>
+              <div className="text-sm font-semibold text-muted-foreground mb-1">Active links ({active.length})</div>
               <ul className="space-y-1">
                 {active.map((s) => (
                   <li key={s.id} className="flex items-center justify-between gap-2 text-xs">

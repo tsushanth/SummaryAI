@@ -53,10 +53,10 @@ export function SummaryTemplatePanel({ recordingId, currentTemplate, onRegenerat
   };
 
   return (
-    <Card className="mb-6">
+    <Card className="mb-8 bg-secondary/50">
       <CardContent className="space-y-3 pt-6">
         <div className="flex items-center gap-2 font-semibold">
-          <Sparkles className="h-5 w-5 text-primary" aria-hidden="true" />
+          <Sparkles className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
           Summary style
         </div>
         <p className="text-sm text-muted-foreground">
@@ -72,7 +72,7 @@ export function SummaryTemplatePanel({ recordingId, currentTemplate, onRegenerat
             value={selected}
             onChange={(e) => setPicked(e.target.value)}
             disabled={templates.length === 0 || busy}
-            className="h-11 min-w-[12rem] rounded-lg border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="h-11 min-w-[12rem] rounded-md border border-input bg-card px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {templates.map((t) => (
               <option key={t.id} value={t.id}>

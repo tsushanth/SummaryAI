@@ -49,26 +49,26 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b border-border bg-card p-6">
-        <h1 className="text-2xl font-bold text-foreground">Ask your meetings</h1>
-        <p className="text-muted-foreground">
+      <div className="border-b border-border bg-card px-4 py-5 sm:px-8">
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground">Ask your meetings</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Answers come from your summaries and transcripts, with links to the meetings they came from.
         </p>
       </div>
 
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-1 overflow-auto px-4 py-6 sm:px-8">
         <div className="mx-auto max-w-3xl space-y-6">
           {messages.length === 0 && (
             <EmptyState
               icon={<MessageSquare />}
               title="Ask across all your meetings"
-              message="For example: What did we decide about pricing?"
+              message="Try: What did we decide about pricing? Who owes me a reply? What came up in last week's calls with Acme?"
             />
           )}
           {messages.map((m) => (
             <div key={m.id} className="space-y-2">
-              <p className="text-sm font-semibold text-primary">{m.question}</p>
-              <Card>
+              <p className="text-base font-semibold text-foreground">{m.question}</p>
+              <Card className="border-l-[3px] border-l-primary">
                 <CardContent className="pt-4">
                   {m.failed ? (
                     <p role="alert" className="text-sm text-destructive">
@@ -80,7 +80,7 @@ export default function ChatPage() {
                       Searching your meetings...
                     </p>
                   ) : (
-                    <p className="whitespace-pre-wrap text-foreground/90">{m.answer}</p>
+                    <p className="minute whitespace-pre-wrap text-foreground/90">{m.answer}</p>
                   )}
                 </CardContent>
               </Card>
@@ -92,7 +92,7 @@ export default function ChatPage() {
                       <li key={`${c.recording_id}-${i}`}>
                         <Link
                           href={`/recordings/${c.recording_id}`}
-                          className="block rounded-lg border border-border/60 bg-card p-3 hover:bg-accent"
+                          className="block rounded-md border border-border bg-card p-3 hover:bg-accent"
                         >
                           <span className="block truncate text-sm font-medium">{c.title || 'Recording'}</span>
                           {c.snippet && (
@@ -112,7 +112,7 @@ export default function ChatPage() {
         </div>
       </div>
 
-      <form onSubmit={ask} className="border-t border-border bg-card p-4">
+      <form onSubmit={ask} className="border-t border-border bg-card p-3 sm:p-4">
         <div className="mx-auto flex max-w-3xl gap-2">
           <Input
             value={input}
