@@ -6,17 +6,22 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { RecordingCard } from '@/components/recordings/RecordingCard';
 import { PaywallModal } from '@/components/subscription/PaywallModal';
 import { Button } from '@/components/ui/button';
-import { Plus, Mic, Loader2 } from 'lucide-react';
+import { RecordingFilters, filtersToParams, type RecordingFilterState } from '@/components/recordings/RecordingFilters';
+import { groupRecordingsByDate } from '@/lib/recordingGroups';
+import { Plus, Mic, Loader2, Search } from 'lucide-react';
 import Link from 'next/link';
 
 const FREE_TIER_LIMIT = 3;
 
 export default function RecordingsPage() {
-  const { recordings, isLoading, error } = useRecordings();
+  const [filters, setFilters] = useState<RecordingFilterState>({});
+  const params = filtersToParams(filters);
+  const isFiltered = Object.keys(params).length > 0;
+  const { recordings, isLoading, error } = useRecordings({ per_page: 50, ...params });
   const { isSubscribed, isLoading: subLoading } = useSubscription();
   const [showPaywall, setShowPaywall] = useState(false);
 
-  const atFreeLimit = !subLoading && !isSubscribed && recordings.length >= FREE_TIER_LIMIT;
+  const atFreeLimit = !subLoading && !isSubscribed && !isFiltered && recordings.length >= FREE_TIER_LIMIT;
 
   const handleNewRecording = (e: React.MouseEvent) => {
     if (atFreeLimit) {
@@ -34,20 +39,30 @@ export default function RecordingsPage() {
           <h1 className="text-2xl font-bold">Recordings</h1>
           <p className="text-gray-500">
             {recordings.length} recording{recordings.length !== 1 ? 's' : ''}
-            {!subLoading && !isSubscribed && (
+            {!subLoading && !isSubscribed && !isFiltered && (
               <span className="ml-2 text-xs text-amber-600 font-medium">
                 {recordings.length}/{FREE_TIER_LIMIT} free used
               </span>
             )}
           </p>
         </div>
-        <Link href="/recordings/new" onClick={handleNewRecording}>
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            New Recording
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/search">
+            <Button variant="outline">
+              <Search className="w-4 h-4 mr-2" />
+              Search
+            </Button>
+          </Link>
+          <Link href="/recordings/new" onClick={handleNewRecording}>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              New Recording
+            </Button>
+          </Link>
+        </div>
       </div>
+
+      <RecordingFilters value={filters} onChange={setFilters} />
 
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
@@ -58,6 +73,13 @@ export default function RecordingsPage() {
           <p className="text-red-500 mb-4">Failed to load recordings</p>
           <Button variant="outline" onClick={() => window.location.reload()}>
             Retry
+          </Button>
+        </div>
+      ) : recordings.length === 0 && isFiltered ? (
+        <div className="text-center py-20 text-gray-500">
+          <p className="mb-4">No recordings match these filters</p>
+          <Button variant="outline" onClick={() => setFilters({})}>
+            Clear filters
           </Button>
         </div>
       ) : recordings.length === 0 ? (
@@ -77,9 +99,18 @@ export default function RecordingsPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {recordings.map((recording) => (
-            <RecordingCard key={recording.id} recording={recording} />
+        <div className="space-y-8">
+          {groupRecordingsByDate(recordings).map((group) => (
+            <section key={group.label}>
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-3">
+                {group.label}
+              </h2>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {group.recordings.map((recording) => (
+                  <RecordingCard key={recording.id} recording={recording} />
+                ))}
+              </div>
+            </section>
           ))}
         </div>
       )}

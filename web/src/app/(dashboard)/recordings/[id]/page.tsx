@@ -7,6 +7,9 @@ import { StatusBadge } from '@/components/recordings/StatusBadge';
 import { TranscriptViewer } from '@/components/recordings/TranscriptViewer';
 import { SummaryCard } from '@/components/recordings/SummaryCard';
 import { QAChat } from '@/components/recordings/QAChat';
+import { ExportMenu } from '@/components/recordings/ExportMenu';
+import { ShareLinkPanel } from '@/components/recordings/ShareLinkPanel';
+import { RecordingOrganizer } from '@/components/recordings/RecordingOrganizer';
 import { AudioPlayer } from '@/components/audio/AudioPlayer';
 import { formatDuration, formatDate } from '@/lib/utils/audio';
 import {
@@ -178,6 +181,11 @@ export default function RecordingDetailPage() {
                 </span>
               )}
             </div>
+            <RecordingOrganizer recording={recording} onChanged={refresh} />
+          </div>
+          <div className="flex items-center gap-2">
+            <ExportMenu recording={recording} summary={summary} transcript={transcript} />
+            <ShareLinkPanel recordingId={recording.id} />
           </div>
         </div>
 

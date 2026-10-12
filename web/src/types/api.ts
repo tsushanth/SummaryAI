@@ -31,6 +31,7 @@ export interface Recording {
   language: string | null;
   tags: string[];
   is_favorite: boolean;
+  folder_id?: string | null;
   recording_type: RecordingType;
   created_at: string;
   updated_at: string;

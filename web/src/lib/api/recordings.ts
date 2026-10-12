@@ -63,11 +63,21 @@ export async function getRecordings(params?: {
   page?: number;
   per_page?: number;
   status?: string;
+  folder_id?: string;
+  tag?: string;
+  favorite?: boolean;
+  from?: string;
+  to?: string;
 }): Promise<ListRecordingsResponse> {
   const searchParams = new URLSearchParams();
   if (params?.page) searchParams.set('page', params.page.toString());
   if (params?.per_page) searchParams.set('per_page', params.per_page.toString());
   if (params?.status) searchParams.set('status', params.status);
+  if (params?.folder_id) searchParams.set('folder_id', params.folder_id);
+  if (params?.tag) searchParams.set('tag', params.tag);
+  if (params?.favorite !== undefined) searchParams.set('favorite', String(params.favorite));
+  if (params?.from) searchParams.set('from', params.from);
+  if (params?.to) searchParams.set('to', params.to);
 
   const query = searchParams.toString();
   return apiClient<ListRecordingsResponse>(

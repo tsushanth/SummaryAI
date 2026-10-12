@@ -7,6 +7,11 @@ export function useRecordings(params?: {
   page?: number;
   per_page?: number;
   status?: string;
+  folder_id?: string;
+  tag?: string;
+  favorite?: boolean;
+  from?: string;
+  to?: string;
 }) {
   const { data, error, isLoading, mutate } = useSWR(
     ['recordings', params],
