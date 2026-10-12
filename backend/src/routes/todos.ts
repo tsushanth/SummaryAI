@@ -14,6 +14,18 @@ import type { ErrorResponse } from '../types/api.js';
 
 const router = Router();
 
+// 'none' = no priority (the Android client sends it; allowed by migration 016).
+const PRIORITY_VALUES = ['none', 'low', 'medium', 'high'] as const;
+type Priority = (typeof PRIORITY_VALUES)[number];
+
+/**
+ * Clients (Android) name the free-text field `notes`; the column is `description`.
+ * Emit both so either client works.
+ */
+function present<T extends { description: string | null }>(todo: T): T & { notes: string | null } {
+  return { ...todo, notes: todo.description };
+}
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -25,7 +37,7 @@ interface Todo {
   title: string;
   description: string | null;
   is_completed: boolean;
-  priority: 'low' | 'medium' | 'high';
+  priority: Priority;
   due_date: string | null;
   completed_at: string | null;
   created_at: string;
@@ -35,16 +47,18 @@ interface Todo {
 interface CreateTodoRequest {
   title: string;
   description?: string;
-  priority?: 'low' | 'medium' | 'high';
+  notes?: string;
+  priority?: Priority;
   due_date?: string;
   recording_id?: string;
 }
 
 interface UpdateTodoRequest {
   title?: string;
-  description?: string;
+  description?: string | null;
+  notes?: string | null;
   is_completed?: boolean;
-  priority?: 'low' | 'medium' | 'high';
+  priority?: Priority;
   due_date?: string | null;
 }
 
@@ -70,7 +84,8 @@ interface CreateTodosFromTextRequest {
 const createTodoSchema = z.object({
   title: z.string().min(1).max(500),
   description: z.string().max(2000).optional(),
-  priority: z.enum(['low', 'medium', 'high']).optional().default('medium'),
+  notes: z.string().max(2000).optional(),
+  priority: z.enum(PRIORITY_VALUES).optional().default('medium'),
   due_date: z.string().datetime().optional(),
   recording_id: z.string().uuid().optional(),
 });
@@ -78,8 +93,9 @@ const createTodoSchema = z.object({
 const updateTodoSchema = z.object({
   title: z.string().min(1).max(500).optional(),
   description: z.string().max(2000).optional().nullable(),
+  notes: z.string().max(2000).optional().nullable(),
   is_completed: z.boolean().optional(),
-  priority: z.enum(['low', 'medium', 'high']).optional(),
+  priority: z.enum(PRIORITY_VALUES).optional(),
   due_date: z.string().datetime().optional().nullable(),
 });
 
@@ -157,7 +173,7 @@ router.get(
     const totalPages = Math.ceil(totalCount / query.per_page);
 
     res.json({
-      todos: todos || [],
+      todos: (todos || []).map(present),
       meta: {
         page: query.page,
         per_page: query.per_page,
@@ -185,7 +201,7 @@ router.post(
         id: uuidv4(),
         user_id: userId,
         title: body.title,
-        description: body.description || null,
+        description: body.description || body.notes || null,
         priority: body.priority || 'medium',
         due_date: body.due_date || null,
         recording_id: body.recording_id || null,
@@ -199,7 +215,7 @@ router.post(
       throw Errors.internal('Failed to create todo');
     }
 
-    res.status(201).json({ todo });
+    res.status(201).json({ todo: present(todo) });
   })
 );
 
@@ -265,7 +281,7 @@ router.post(
       throw Errors.internal('Failed to create todos');
     }
 
-    res.status(201).json({ todos });
+    res.status(201).json({ todos: todos.map(present) });
   })
 );
 
@@ -291,7 +307,7 @@ router.get(
       throw Errors.notFound('Todo not found');
     }
 
-    res.json({ todo });
+    res.json({ todo: present(todo) });
   })
 );
 
@@ -310,7 +326,8 @@ router.patch(
     // Build update object
     const updates: Record<string, unknown> = {};
     if (body.title !== undefined) updates.title = body.title;
-    if (body.description !== undefined) updates.description = body.description;
+    const newNotes = body.description !== undefined ? body.description : body.notes;
+    if (newNotes !== undefined) updates.description = newNotes;
     if (body.priority !== undefined) updates.priority = body.priority;
     if (body.due_date !== undefined) updates.due_date = body.due_date;
     if (body.is_completed !== undefined) {
@@ -334,7 +351,7 @@ router.patch(
       throw Errors.notFound('Todo not found');
     }
 
-    res.json({ todo });
+    res.json({ todo: present(todo) });
   })
 );
 
@@ -404,7 +421,7 @@ router.post(
       throw Errors.internal('Failed to toggle todo');
     }
 
-    res.json({ todo });
+    res.json({ todo: present(todo) });
   })
 );
 

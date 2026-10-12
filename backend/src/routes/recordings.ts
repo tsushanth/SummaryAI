@@ -11,6 +11,8 @@ import { asyncHandler, Errors } from '../middleware/errorHandler.js';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
 import { triggerProcessing } from '../services/processingService.js';
+import { SUMMARY_TEMPLATE_IDS } from '../services/summaryTemplates.js';
+import { normalizeActionItems } from '../services/summaryService.js';
 import questionsRouter from './questions.js';
 
 import type {
@@ -40,6 +42,7 @@ const createRecordingSchema = z.object({
   content_type: z.string().optional().default('audio/mp4'),
   recording_type: z.enum(['general', 'meeting', 'lecture', 'interview', 'voice_memo', 'imported']).optional().default('general'),
   output_language: z.string().min(2).max(16).optional(),
+  summary_template: z.enum(SUMMARY_TEMPLATE_IDS).optional(),
 });
 
 const completeUploadSchema = z.object({
@@ -155,6 +158,8 @@ router.post(
         recording_type: body.recording_type || (isPdf ? 'imported' : 'general'),
         content_type: body.content_type || 'audio/mp4',
         output_language: body.output_language || null,
+        // Only sent when chosen, so inserts keep working before migration 016 is applied.
+        ...(body.summary_template ? { summary_template: body.summary_template } : {}),
       })
       .select()
       .single();
@@ -433,7 +438,8 @@ router.get(
         .single();
 
       if (summary) {
-        response.summary = summary;
+        // Older rows stored action items with only `task`; clients read `title` or `task`.
+        response.summary = { ...summary, action_items: normalizeActionItems(summary.action_items) };
       }
     }
 
