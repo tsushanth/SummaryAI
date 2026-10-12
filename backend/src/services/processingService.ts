@@ -8,6 +8,8 @@ import { config } from '../config/index.js';
 import { v4 as uuidv4 } from 'uuid';
 import Anthropic from '@anthropic-ai/sdk';
 import { instrumentAnthropic, withFeature } from '../lib/llm.js';
+import { buildSummaryPrompts, parseSummaryResponse, normalizeActionItems, type ParsedSummary } from './summaryService.js';
+import { resolveSummaryTemplate } from './summaryTemplates.js';
 
 export interface ProcessingJob {
   id: string;
@@ -144,10 +146,24 @@ async function processRecordingAsync(
     console.log(`[Processing] ${jobId}: Status -> summarizing`);
 
     // Step 7: Generate summary with Anthropic (or mock if no API key)
-    let summary: { summary: string; keyPoints: string[]; actionItems: any[]; topics: string[] };
+    let summary: ParsedSummary;
 
     if (config.ANTHROPIC_API_KEY) {
-      summary = await generateSummaryWithAnthropic(transcript.fullText, transcript.segments, recording.output_language);
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('preferences')
+        .eq('id', userId)
+        .maybeSingle();
+      summary = await generateSummaryWithAnthropic(
+        transcript.fullText,
+        transcript.segments,
+        recording.output_language,
+        resolveSummaryTemplate({
+          recordingTemplate: recording.summary_template,
+          userDefault: profile?.preferences?.default_summary_template,
+          recordingType: recording.recording_type,
+        })
+      );
     } else {
       console.warn(`[Processing] ${jobId}: No Anthropic API key, using mock summary`);
       summary = createMockSummary(transcript.fullText);
@@ -417,8 +433,9 @@ function languageNameForCode(code: string | null | undefined): string | null {
 async function generateSummaryWithAnthropic(
   fullText: string,
   segments: TranscriptSegment[],
-  outputLanguage?: string | null
-): Promise<{ summary: string; keyPoints: string[]; actionItems: any[]; topics: string[] }> {
+  outputLanguage?: string | null,
+  templateId?: string | null
+): Promise<ParsedSummary> {
   const anthropic = instrumentAnthropic(new Anthropic({ apiKey: config.ANTHROPIC_API_KEY }));
 
   // Format transcript with speaker labels for better context
@@ -431,74 +448,22 @@ async function generateSummaryWithAnthropic(
 
   // Get unique speakers for the prompt
   const uniqueSpeakers = [...new Set(segments.map(s => s.speaker_label))];
-  const speakerList = uniqueSpeakers.length > 1
-    ? `Participants: ${uniqueSpeakers.join(', ')}\n\n`
-    : '';
-
-  const languageName = languageNameForCode(outputLanguage);
-  const languageInstruction = languageName
-    ? `\n\nWrite the entire summary, key_points, action_items, and topics in ${languageName}. JSON keys remain in English; only the values are translated.`
-    : '';
-
-  const prompt = `Analyze this meeting transcript and provide:
-1. A concise summary (2-3 paragraphs) - attribute key statements to speakers (e.g., "John mentioned...", "Sarah proposed...")
-2. Key points (3-7 bullet points) - include speaker attribution where relevant
-3. Action items (if any) - include who committed to each action as the assignee
-4. Main topics discussed
-
-${speakerList}Transcript:
-${truncatedText}
-
-Important: When summarizing, reference speakers by name to show who said what. For action items, use the speaker's name as the assignee when they committed to do something.${languageInstruction}
-
-Respond with ONLY valid JSON in this format:
-{
-  "summary": "Your summary here with speaker attribution",
-  "key_points": ["point 1 (mentioned by Speaker 1)", "point 2", ...],
-  "action_items": [{"task": "description", "assignee": "Speaker name or null", "priority": "high/medium/low"}],
-  "topics": ["topic1", "topic2", ...]
-}`;
-
-  const systemPrompt = languageName
-    ? `You are a helpful assistant that summarizes meeting transcripts. Write all natural-language values in ${languageName}; keep JSON keys in English. Always respond with ONLY valid JSON, no additional text.`
-    : 'You are a helpful assistant that summarizes meeting transcripts. Always respond with ONLY valid JSON, no additional text.';
+  const { system, user } = buildSummaryPrompts({
+    templateId,
+    transcriptText: truncatedText,
+    speakers: uniqueSpeakers,
+    languageName: languageNameForCode(outputLanguage),
+  });
 
   const response = await withFeature('summary', () => anthropic.messages.create({
     model: config.ANTHROPIC_MODEL,
     max_tokens: 2048,
-    system: systemPrompt,
-    messages: [
-      {
-        role: 'user',
-        content: prompt,
-      },
-    ],
+    system,
+    messages: [{ role: 'user', content: user }],
   }));
 
   const responseText = response.content[0]?.type === 'text' ? response.content[0].text : '';
-
-  // Parse JSON response
-  try {
-    // Try to extract JSON from code blocks or raw response
-    const jsonMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)```/) || responseText.match(/\{[\s\S]*\}/);
-    const jsonString = jsonMatch?.[1] || jsonMatch?.[0] || responseText;
-    const parsed = JSON.parse(jsonString);
-
-    return {
-      summary: parsed.summary || 'No summary available.',
-      keyPoints: parsed.key_points || [],
-      actionItems: parsed.action_items || [],
-      topics: parsed.topics || [],
-    };
-  } catch {
-    // Fallback if JSON parsing fails
-    return {
-      summary: responseText.trim() || 'Summary generation failed.',
-      keyPoints: [],
-      actionItems: [],
-      topics: [],
-    };
-  }
+  return parseSummaryResponse(responseText);
 }
 
 /**
@@ -550,7 +515,7 @@ function createMockTranscript(durationSeconds: number): TranscriptionResult {
 /**
  * Create mock summary for testing without Anthropic
  */
-function createMockSummary(fullText: string): { summary: string; keyPoints: string[]; actionItems: any[]; topics: string[] } {
+function createMockSummary(fullText: string): ParsedSummary {
   return {
     summary: 'This is a mock summary of the recording. The participants discussed various topics and made progress on key items. Several action items were identified for follow-up.',
     keyPoints: [
@@ -559,10 +524,10 @@ function createMockSummary(fullText: string): { summary: string; keyPoints: stri
       'Action items were identified for improvement areas',
       'Follow-up meeting scheduled',
     ],
-    actionItems: [
+    actionItems: normalizeActionItems([
       { task: 'Review quarterly metrics report', assignee: null, priority: 'high' },
       { task: 'Schedule follow-up meeting', assignee: null, priority: 'medium' },
-    ],
+    ]),
     topics: ['Quarterly Review', 'Metrics', 'Action Items'],
   };
 }

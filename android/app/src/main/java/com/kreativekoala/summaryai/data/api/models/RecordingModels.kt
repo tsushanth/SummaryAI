@@ -67,6 +67,8 @@ data class TranscriptSegmentDto(
 data class SummaryDto(
     val id: String? = null,
     @SerializedName("recording_id") val recordingId: String? = null,
+    // Backend stores a single `summary` text; short/detailed kept for older payloads.
+    val summary: String? = null,
     @SerializedName("short_summary") val shortSummary: String? = null,
     @SerializedName("detailed_summary") val detailedSummary: String? = null,
     @SerializedName("key_points") val keyPoints: List<String>? = null,
@@ -79,6 +81,8 @@ data class SummaryDto(
 data class ActionItemDto(
     val title: String? = null,
     val description: String? = null,
+    // Backend (summaryService) emits `task` and `title`; older rows have only `task`.
+    val task: String? = null,
     val assignee: String? = null,
     @SerializedName("due_date") val dueDate: String? = null,
     val priority: String? = null

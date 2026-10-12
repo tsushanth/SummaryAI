@@ -18,6 +18,7 @@ export interface CreateRecordingRequest {
   content_type?: string;
   recording_type?: string;
   output_language?: string;
+  summary_template?: string;
 }
 
 /**
