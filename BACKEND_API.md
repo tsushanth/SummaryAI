@@ -1553,3 +1553,11 @@ All routes except `GET /api/public/shares/:token` require `Authorization: Bearer
 | GET | `/api/recordings/:id/shares` | share metadata (no tokens) |
 | DELETE | `/api/recordings/:id/shares/:shareId` | revoke; immediate |
 | GET | `/api/public/shares/:token` | no auth, 60 req/min/IP; unknown/revoked/expired/malformed all return the same 404 |
+
+### Public share path: security notes
+
+- Tokens are 256-bit random, only the SHA-256 hash is stored; lookup is an equality match on the hash. Unknown, malformed, revoked, expired and orphaned links all return the same 404. Responses (including 404/429) carry `Cache-Control: no-store` and `X-Robots-Tag: noindex, nofollow`.
+- Tokens are redacted from backend access logs (morgan) and failure-report emails.
+- Rate limiting is **per process, in memory**: 60 req/min per client IP plus 300 req/min per token. With N Fly machines the effective cap is N times that, and counters reset on deploy. The 256-bit token space, not the limiter, is what prevents enumeration. A shared store (Supabase/Redis) is not implemented.
+- The web page fetches this API server-side, so by default every web viewer shares the web machine's IP bucket. To bucket by real viewer IP, set the same random `SHARE_PROXY_SECRET` on both `meeting-mind-web` and `summary-ai-backend`; the page then forwards `X-Share-Client-IP` and `X-Share-Proxy-Secret`, and the API honors them only when the secret matches. Without it behavior is unchanged.
+- A recording can have at most 50 unrevoked links. Deleting a recording cascades and removes its links.

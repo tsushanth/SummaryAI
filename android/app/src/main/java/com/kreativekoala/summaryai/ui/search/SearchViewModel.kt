@@ -90,15 +90,13 @@ class SearchViewModel @Inject constructor(
             return
         }
 
-        val lowerQuery = query.lowercase()
         val all = _uiState.value.allRecordings
-        val titleMatches = all.filter { recording -> recording.title.lowercase().contains(lowerQuery) }
-        // Server-side search also matches summary and transcript text (needs >= 2 chars).
-        val remoteIds = if (query.trim().length >= 2) {
-            organizeRepository.search(query.trim()).getOrNull()?.map { it.recording.id }?.toSet().orEmpty()
-        } else emptySet()
-        val titleIds = titleMatches.map { it.id }.toSet()
-        val results = titleMatches + all.filter { it.id in remoteIds && it.id !in titleIds }
+        // Server-side search also matches summary and transcript text (needs >= 2 chars) and covers
+        // recordings beyond the pages loaded locally.
+        val hits = if (query.trim().length >= 2) {
+            organizeRepository.search(query.trim()).getOrNull().orEmpty()
+        } else emptyList()
+        val results = mergeSearchResults(query, all, hits)
 
         _uiState.value = _uiState.value.copy(results = results)
     }

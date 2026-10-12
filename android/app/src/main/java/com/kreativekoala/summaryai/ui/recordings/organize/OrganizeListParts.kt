@@ -1,5 +1,7 @@
 package com.kreativekoala.summaryai.ui.recordings.organize
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -28,8 +30,16 @@ fun FolderTagFilterRow(
     selectedTag: String?,
     onFolder: (String?) -> Unit,
     onTag: (String?) -> Unit,
+    /** When set, a trailing "Manage" chip is shown (even with no folders yet) and opens folder management. */
+    onManageFolders: (() -> Unit)? = null,
+    /** Long-press on a folder chip. */
+    onFolderLongPress: ((FolderDto) -> Unit)? = null,
+    /** When set, a date-range chip is shown first. */
+    dateRangeLabel: String? = null,
+    onPickDateRange: (() -> Unit)? = null,
+    onClearDateRange: (() -> Unit)? = null,
 ) {
-    if (folders.isEmpty() && tags.isEmpty()) return
+    if (folders.isEmpty() && tags.isEmpty() && onManageFolders == null && onPickDateRange == null) return
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -37,27 +47,42 @@ fun FolderTagFilterRow(
             .padding(horizontal = 16.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        if (onPickDateRange != null) {
+            val active = dateRangeLabel != null
+            OrganizeChip(label = dateRangeLabel ?: "Any date", selected = active) {
+                if (active && onClearDateRange != null) onClearDateRange() else onPickDateRange()
+            }
+        }
         folders.forEach { f ->
             val selected = f.id == selectedFolderId
-            OrganizeChip(label = f.name, selected = selected) { onFolder(if (selected) null else f.id) }
+            OrganizeChip(
+                label = f.name,
+                selected = selected,
+                onLongClick = onFolderLongPress?.let { lp -> { lp(f) } },
+            ) { onFolder(if (selected) null else f.id) }
         }
         tags.forEach { t ->
             val selected = selectedTag?.equals(t, ignoreCase = true) == true
             OrganizeChip(label = "#$t", selected = selected) { onTag(if (selected) null else t) }
         }
+        if (onManageFolders != null) {
+            OrganizeChip(label = "Manage folders", selected = false) { onManageFolders() }
+        }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun OrganizeChip(label: String, selected: Boolean, onClick: () -> Unit) {
+private fun OrganizeChip(label: String, selected: Boolean, onLongClick: (() -> Unit)? = null, onClick: () -> Unit) {
     Surface(
-        onClick = onClick,
         color = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
         shape = RoundedCornerShape(16.dp),
     ) {
         Text(
             text = label,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            modifier = Modifier
+                .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+                .padding(horizontal = 12.dp, vertical = 6.dp),
             style = MaterialTheme.typography.bodySmall,
             fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
         )

@@ -8,6 +8,11 @@ interface CookieToSet {
 }
 
 export async function middleware(request: NextRequest) {
+  // Public share pages never need a session: skip the Supabase round trip (and its failure modes) entirely.
+  if (request.nextUrl.pathname.startsWith('/share/')) {
+    return NextResponse.next();
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,

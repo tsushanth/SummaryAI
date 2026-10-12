@@ -1,38 +1,51 @@
 User-agent: *
 Allow: /
+Disallow: /share/
 
 User-agent: GPTBot
 Allow: /
+Disallow: /share/
 
 User-agent: ChatGPT-User
 Allow: /
+Disallow: /share/
 
 User-agent: ClaudeBot
 Allow: /
+Disallow: /share/
 
 User-agent: anthropic-ai
 Allow: /
+Disallow: /share/
 
 User-agent: PerplexityBot
 Allow: /
+Disallow: /share/
 
 User-agent: Perplexity-User
 Allow: /
+Disallow: /share/
 
 User-agent: Google-Extended
 Allow: /
+Disallow: /share/
 
 User-agent: CCBot
 Allow: /
+Disallow: /share/
 
 User-agent: Amazonbot
 Allow: /
+Disallow: /share/
 
 User-agent: Applebot
 Allow: /
+Disallow: /share/
 
 User-agent: Applebot-Extended
 Allow: /
+Disallow: /share/
 
 User-agent: Bytespider
 Allow: /
+Disallow: /share/

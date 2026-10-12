@@ -23,6 +23,7 @@ import {
   generateShareToken,
   hashShareToken,
   createRateLimiter,
+  tokenKey,
 } from '../lib/shareToken.js';
 
 export const recordingSharesRouter = Router({ mergeParams: true });
@@ -61,6 +62,16 @@ recordingSharesRouter.post(
     const recordingId = req.params.id;
     const body = createShareSchema.parse(req.body || {});
     await requireOwnedRecording(userId, recordingId);
+
+    const { count: active } = await supabaseAdmin
+      .from('recording_shares')
+      .select('id', { count: 'exact', head: true })
+      .eq('recording_id', recordingId)
+      .eq('user_id', userId)
+      .is('revoked_at', null);
+    if ((active ?? 0) >= MAX_ACTIVE_SHARES_PER_RECORDING) {
+      throw Errors.badRequest(`A recording can have at most ${MAX_ACTIVE_SHARES_PER_RECORDING} active share links. Revoke some first.`);
+    }
 
     const token = generateShareToken();
     const expiresAt = body.expires_in_days
@@ -137,11 +148,17 @@ recordingSharesRouter.delete(
 // Public route
 // ----------------------------------------------------------------------------
 
-// 60 requests/minute per client IP.
+// 60 requests/minute per client IP, plus 300/minute per token so one viral link cannot be turned into a DB-load lever.
+// Both are per-process in-memory counters (see lib/shareToken.ts); with N machines the effective cap is N x these.
 const publicLimiter = createRateLimiter({ windowMs: 60_000, max: 60 });
+const tokenLimiter = createRateLimiter({ windowMs: 60_000, max: 300, keyFn: tokenKey });
+
+/** Max live (unrevoked) links per recording, so an owner/script cannot grow recording_shares without bound. */
+const MAX_ACTIVE_SHARES_PER_RECORDING = 50;
 
 function notFound(res: Response): void {
   res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
   res.status(404).json({ error: { code: 'NOT_FOUND', message: 'This link is invalid or no longer available' } });
 }
 
@@ -152,7 +169,14 @@ function actionItemText(item: any): string | null {
 
 publicSharesRouter.get(
   '/:token',
+  (_req, res, next) => {
+    // Set before the limiter so 429s are never cached or indexed either.
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+    next();
+  },
   publicLimiter,
+  tokenLimiter,
   asyncHandler(async (req: Request, res: Response) => {
     const token = req.params.token;
     if (!SHARE_TOKEN_REGEX.test(token)) return notFound(res);

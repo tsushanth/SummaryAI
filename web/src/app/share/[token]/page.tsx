@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 
 // Public, unauthenticated, read-only view of a shared recording.
 // Always rendered on the server at request time so revocation is immediate.
@@ -31,8 +32,22 @@ const TOKEN_RE = /^[A-Za-z0-9_-]{43}$/;
 async function load(token: string): Promise<SharedPayload | null> {
   if (!TOKEN_RE.test(token)) return null;
   try {
+    // The API rate-limits per client IP. Server-side, every viewer would otherwise look like this web machine, so
+    // forward the viewer IP, authenticated with an optional shared secret (the API ignores it unless it has the same
+    // SHARE_PROXY_SECRET set).
+    const fwd: Record<string, string> = {};
+    const secret = process.env.SHARE_PROXY_SECRET;
+    if (secret) {
+      const h = headers();
+      const ip = h.get('fly-client-ip') || h.get('x-forwarded-for')?.split(',')[0]?.trim();
+      if (ip) {
+        fwd['x-share-client-ip'] = ip.slice(0, 64);
+        fwd['x-share-proxy-secret'] = secret;
+      }
+    }
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/public/shares/${token}`, {
       cache: 'no-store',
+      headers: fwd,
     });
     if (!res.ok) return null;
     return (await res.json()) as SharedPayload;

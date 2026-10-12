@@ -6,6 +6,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { makeCorsOrigin } from './lib/corsOrigin.js';
+import { redactShareToken } from './lib/shareToken.js';
 import helmet from 'helmet';
 import morgan from 'morgan';
 
@@ -46,6 +47,8 @@ app.use(cors({
 }));
 
 // Request logging
+// Public share tokens live in the URL path; never write them to access logs.
+morgan.token('url', (req) => redactShareToken((req as Request).originalUrl || req.url || ''));
 app.use(morgan(config.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // Body parsing

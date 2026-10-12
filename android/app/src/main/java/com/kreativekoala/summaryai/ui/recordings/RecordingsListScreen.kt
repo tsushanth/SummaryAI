@@ -57,6 +57,8 @@ import com.kreativekoala.summaryai.ui.components.MmEmptyState
 import com.kreativekoala.summaryai.ui.components.MmStatusPill
 import com.kreativekoala.summaryai.ui.components.SkeletonCardList
 import com.kreativekoala.summaryai.ui.navigation.LocalTabReselection
+import com.kreativekoala.summaryai.ui.recordings.organize.DateRangePickerDialog
+import com.kreativekoala.summaryai.ui.recordings.organize.FolderManageSheet
 import com.kreativekoala.summaryai.ui.recordings.organize.FolderTagFilterRow
 import com.kreativekoala.summaryai.ui.recordings.organize.OrganizeSheet
 import com.kreativekoala.summaryai.ui.recordings.organize.groupedRecordingItems
@@ -103,6 +105,9 @@ fun RecordingsListScreen(
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     var organizeTarget by remember { mutableStateOf<Recording?>(null) }
+    var showFolderManager by remember { mutableStateOf(false) }
+    var folderManagerFocusId by remember { mutableStateOf<String?>(null) }
+    var showDatePicker by remember { mutableStateOf(false) }
 
     // Track if we need to scroll to top after refresh
     var shouldScrollToTop by remember { mutableStateOf(false) }
@@ -154,6 +159,24 @@ fun RecordingsListScreen(
             recording = target,
             onDismiss = { organizeTarget = null },
             onChanged = { viewModel.refresh() }
+        )
+    }
+
+    if (showFolderManager) {
+        FolderManageSheet(
+            folders = uiState.folders,
+            initialFolderId = folderManagerFocusId,
+            onDismiss = { showFolderManager = false; folderManagerFocusId = null },
+            onCreate = viewModel::createFolder,
+            onRename = viewModel::renameFolder,
+            onDelete = viewModel::deleteFolder,
+        )
+    }
+    if (showDatePicker) {
+        DateRangePickerDialog(
+            initial = uiState.dateRange,
+            onDismiss = { showDatePicker = false },
+            onConfirm = { viewModel.selectDateRange(it); showDatePicker = false },
         )
     }
 
@@ -259,6 +282,11 @@ fun RecordingsListScreen(
                 selectedTag = uiState.selectedTag,
                 onFolder = viewModel::selectFolder,
                 onTag = viewModel::selectTag,
+                onManageFolders = { folderManagerFocusId = null; showFolderManager = true },
+                onFolderLongPress = { folderManagerFocusId = it.id; showFolderManager = true },
+                dateRangeLabel = uiState.dateRange?.label(),
+                onPickDateRange = { showDatePicker = true },
+                onClearDateRange = { viewModel.selectDateRange(null) },
             )
 
             // Search bar - iOS style
@@ -323,7 +351,7 @@ fun RecordingsListScreen(
                         EmptyRecordingsContent(
                             onStartRecording = onStartRecording,
                             // Recordings exist but the selected filter matches none
-                            isFilteredEmpty = uiState.allRecordings.isNotEmpty()
+                            isFilteredEmpty = uiState.allRecordings.isNotEmpty() || uiState.hasActiveFilter || uiState.selectedTab != RecordingsTab.ALL
                         )
                     }
                 } else {

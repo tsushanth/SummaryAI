@@ -48,6 +48,15 @@ data class SearchHitDto(
     val snippet: String
 )
 
-data class SearchRecordingDto(val id: String, val title: String? = null)
+data class SearchRecordingDto(
+    val id: String,
+    val title: String? = null,
+    @SerializedName("created_at") val createdAt: String? = null,
+    @SerializedName("duration_seconds") val durationSeconds: Int? = null,
+    val status: String? = null,
+    @SerializedName("is_favorite") val isFavorite: Boolean? = null,
+    val tags: List<String>? = null,
+    @SerializedName("folder_id") val folderId: String? = null
+)
 
 data class SearchResponse(val results: List<SearchHitDto>)

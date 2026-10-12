@@ -39,14 +39,20 @@ class RecordingsRepository @Inject constructor(
     suspend fun getRecordings(
         page: Int = 1,
         perPage: Int = 20,
-        status: RecordingStatus? = null
+        status: RecordingStatus? = null,
+        filter: RecordingsFilter = RecordingsFilter()
     ): Result<List<Recording>> = withContext(Dispatchers.IO) {
         try {
             Log.i(TAG, "=== Fetching recordings - page: $page, perPage: $perPage ===")
             val response = api.getRecordings(
                 page = page,
                 perPage = perPage,
-                status = status?.name?.lowercase()
+                status = status?.name?.lowercase(),
+                folderId = filter.folderId,
+                tag = filter.tag,
+                favorite = filter.favorite,
+                from = filter.from,
+                to = filter.to
             )
             Log.i(TAG, "=== Received ${response.recordings.size} recordings, total: ${response.pagination.total} ===")
             response.recordings.forEachIndexed { index, recording ->

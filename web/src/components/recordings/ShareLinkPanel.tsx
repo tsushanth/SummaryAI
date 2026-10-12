@@ -16,10 +16,13 @@ export function ShareLinkPanel({ recordingId }: { recordingId: string }) {
   const [newUrl, setNewUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const load = useCallback(async () => {
     try {
       setShares(await listShares(recordingId));
+      setLoaded(true);
     } catch {
       setError('Could not load share links');
     }
@@ -47,6 +50,7 @@ export function ShareLinkPanel({ recordingId }: { recordingId: string }) {
   };
 
   const revoke = async (id: string) => {
+    if (!window.confirm('Revoke this link? Anyone using it will lose access immediately.')) return;
     setBusy(true);
     try {
       await revokeShare(recordingId, id);
@@ -109,23 +113,36 @@ export function ShareLinkPanel({ recordingId }: { recordingId: string }) {
             <div className="p-2 bg-green-50 border border-green-200 rounded space-y-1">
               <div className="break-all text-xs">{newUrl}</div>
               <button
-                onClick={() => navigator.clipboard.writeText(newUrl).catch(() => setError('Copy failed'))}
+                onClick={() =>
+                  navigator.clipboard
+                    .writeText(newUrl)
+                    .then(() => {
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    })
+                    .catch(() => setError('Copy failed'))
+                }
                 className="text-xs text-primary hover:underline"
               >
-                Copy (shown once)
+                {copied ? 'Copied' : 'Copy (shown once)'}
               </button>
             </div>
           )}
 
+          {loaded && active.length === 0 && (
+            <p className="text-xs text-gray-500">
+              No active links yet. Links are private until you create one, and you can revoke them at any time.
+            </p>
+          )}
           {active.length > 0 && (
             <div>
-              <div className="text-xs font-semibold uppercase text-muted-foreground mb-1">Active links</div>
+              <div className="text-xs font-semibold uppercase text-muted-foreground mb-1">Active links ({active.length})</div>
               <ul className="space-y-1">
                 {active.map((s) => (
                   <li key={s.id} className="flex items-center justify-between gap-2 text-xs">
                     <span>
                       {new Date(s.created_at).toLocaleDateString()}
-                      {s.include_transcript ? ' · transcript' : ''} · {s.view_count} views
+                      {s.include_transcript ? ' · transcript' : ''} · {s.view_count} {s.view_count === 1 ? 'view' : 'views'}
                       {s.expires_at ? ` · expires ${new Date(s.expires_at).toLocaleDateString()}` : ''}
                     </span>
                     <button
