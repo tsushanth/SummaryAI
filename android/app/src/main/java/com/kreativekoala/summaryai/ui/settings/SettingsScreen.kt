@@ -34,6 +34,7 @@ import com.kreativekoala.paywallkit.view.PaywallPreview
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     onCalendarClick: () -> Unit,
+    onIntegrationsClick: () -> Unit = {},
     onUpgradeClick: () -> Unit,
     onSignOut: () -> Unit
 ) {
@@ -140,6 +141,13 @@ fun SettingsScreen(
                     title = stringResource(R.string.connect_calendar),
                     subtitle = if (uiState.hasCalendarConnected) stringResource(R.string.connected) else stringResource(R.string.calendar_sync_subtitle),
                     onClick = onCalendarClick
+                )
+                HorizontalDivider(modifier = Modifier.padding(start = 56.dp))
+                SettingsItem(
+                    icon = Icons.Default.Share,
+                    title = stringResource(R.string.integrations_title),
+                    subtitle = stringResource(R.string.settings_integrations_subtitle),
+                    onClick = onIntegrationsClick
                 )
             }
 

@@ -232,16 +232,21 @@ export async function upsertIntegration(
   kind: IntegrationKind,
   input: { url?: string; secret?: string; database_id?: string; enabled?: boolean }
 ): Promise<IntegrationRow> {
-  validateIntegrationInput(kind, input);
+  // Omitted url/secret mean "keep the stored value" (secrets are write-only on the client).
+  const existing = (await listIntegrations(userId)).find((r) => r.kind === kind);
+  const url = input.url ?? (existing?.url_encrypted ? decryptToken(existing.url_encrypted) : undefined);
+  const secret = input.secret ?? (existing?.secret_encrypted ? decryptToken(existing.secret_encrypted) : undefined);
+  const database_id = input.database_id ?? existing?.config?.database_id;
+  validateIntegrationInput(kind, { url, secret, database_id });
   const config: Record<string, any> = {};
-  if (input.url) config.display_host = new URL(input.url).hostname;
-  if (input.database_id) config.database_id = input.database_id;
+  if (url) config.display_host = new URL(url).hostname;
+  if (database_id) config.database_id = database_id;
   const row = {
     user_id: userId,
     kind,
-    enabled: input.enabled ?? true,
-    url_encrypted: input.url ? encryptToken(input.url) : null,
-    secret_encrypted: input.secret ? encryptToken(input.secret) : null,
+    enabled: input.enabled ?? existing?.enabled ?? true,
+    url_encrypted: url ? encryptToken(url) : null,
+    secret_encrypted: secret ? encryptToken(secret) : null,
     config,
     updated_at: new Date().toISOString(),
   };

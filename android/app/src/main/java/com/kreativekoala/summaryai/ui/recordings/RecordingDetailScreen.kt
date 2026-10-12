@@ -189,7 +189,8 @@ fun RecordingDetailScreen(
                         // An empty transcript makes the model reply with "please resubmit"; hide that
                         summary = detail.summary.takeUnless { hasNoSpeech },
                         hasNoSpeech = hasNoSpeech,
-                        speakerNames = detail.transcript?.speakerNames
+                        speakerNames = detail.transcript?.speakerNames,
+                        analytics = uiState.analytics
                     )
                     DetailTab.TRANSCRIPT -> TranscriptTab(
                         transcript = detail.transcript,
@@ -444,7 +445,8 @@ private fun StyledTabPicker(
 private fun SummaryTab(
     summary: Summary?,
     hasNoSpeech: Boolean = false,
-    speakerNames: Map<String, String>? = null
+    speakerNames: Map<String, String>? = null,
+    analytics: com.kreativekoala.summaryai.data.api.models.MeetingAnalyticsDto? = null
 ) {
     Column(
         modifier = Modifier
@@ -452,6 +454,10 @@ private fun SummaryTab(
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
+        if (analytics != null && !hasNoSpeech) {
+            TalkTimeCard(analytics)
+            Spacer(modifier = Modifier.height(16.dp))
+        }
         if (summary != null) {
             // Action items with blue checkmarks
             if (summary.hasActionItems) {

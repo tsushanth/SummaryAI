@@ -41,6 +41,18 @@ class MainActivity : AppCompatActivity() {
     @Inject lateinit var billingManager: BillingManager
 
     private var showPaywall by mutableStateOf(false)
+    private var startRecordingRequested by mutableStateOf(false)
+
+    companion object {
+        /** Sent by the quick-settings tile and the home-screen widget. */
+        const val ACTION_START_RECORDING = "com.kreativekoala.summaryai.action.START_RECORDING"
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent.action == ACTION_START_RECORDING) startRecordingRequested = true
+    }
 
     override fun onResume() {
         super.onResume()
@@ -51,6 +63,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         PromoCodeManager.handleIntent(intent)
+        if (intent?.action == ACTION_START_RECORDING) startRecordingRequested = true
         enableEdgeToEdge()
 
         val openCount = appOpenTracker.incrementAndGetCount()
@@ -114,6 +127,8 @@ class MainActivity : AppCompatActivity() {
                             isAuthenticated = authState.isAuthenticated,
                             hasCompletedOnboarding = authState.hasCompletedOnboarding,
                             showPaywall = showPaywall && !isSubscribed,
+                            startRecordingRequested = startRecordingRequested,
+                            onStartRecordingHandled = { startRecordingRequested = false },
                             // Live check: re-evaluated at every gated action call site.
                             // Reads SharedPreferences (open count) + StateFlow (subscription).
                             shouldHardGate = {
