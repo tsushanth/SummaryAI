@@ -1,5 +1,8 @@
 package com.kreativekoala.summaryai.ui.recordings.organize
 
+import com.kreativekoala.summaryai.data.repository.UNFILED_FOLDER_ID
+import com.kreativekoala.summaryai.ui.recordings.RecordingsTab
+import com.kreativekoala.summaryai.ui.recordings.recordingTypeForTab
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -47,6 +50,24 @@ class ListFilterTest {
         assertEquals("2026-10-01T00:00:00Z", f.from)
         assertEquals("2026-10-01T23:59:59.999Z", f.to)
         assertTrue(f.isActive)
+    }
+
+    @Test
+    fun tabsMapToServerRecordingType() {
+        assertEquals("meeting", recordingTypeForTab(RecordingsTab.MEETINGS))
+        assertEquals("imported", recordingTypeForTab(RecordingsTab.IMPORTED))
+        assertNull(recordingTypeForTab(RecordingsTab.ALL))
+        assertNull(recordingTypeForTab(RecordingsTab.FAVORITES))
+        assertNull(recordingTypeForTab(RecordingsTab.TODOS))
+        val f = buildRecordingsFilter(false, null, null, null, recordingType = "meeting")
+        assertEquals("meeting", f.recordingType)
+        assertTrue(f.isActive)
+    }
+
+    @Test
+    fun unfiledFolderSentinelMatchesServerValue() {
+        assertEquals("none", UNFILED_FOLDER_ID)
+        assertEquals("none", buildRecordingsFilter(false, UNFILED_FOLDER_ID, null, null).folderId)
     }
 
     @Test

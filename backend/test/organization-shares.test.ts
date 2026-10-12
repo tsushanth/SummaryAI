@@ -202,6 +202,26 @@ describe('recordings organization', () => {
     expect(calls[0].ops.some((o) => o[0] === 'is' && o[1] === 'folder_id' && o[2] === null)).toBe(true);
   });
 
+  it('recording_type filters by type and stays user-scoped', async () => {
+    queue('recordings', { data: [], error: null, count: 0 });
+    const { status } = await request('GET', '/api/recordings?recording_type=meeting');
+    expect(status).toBe(200);
+    expect(hasEq(calls[0], 'user_id', 'user-1')).toBe(true);
+    expect(hasEq(calls[0], 'recording_type', 'meeting')).toBe(true);
+  });
+
+  it('no recording_type param adds no type filter', async () => {
+    queue('recordings', { data: [], error: null, count: 0 });
+    await request('GET', '/api/recordings');
+    expect(calls[0].ops.some((o) => o[0] === 'eq' && o[1] === 'recording_type')).toBe(false);
+  });
+
+  it('invalid recording_type is rejected with 400 and never queries', async () => {
+    const { status } = await request('GET', '/api/recordings?recording_type=bogus');
+    expect(status).toBe(400);
+    expect(calls.length).toBe(0);
+  });
+
   it('PATCH folder_id rejects a folder the caller does not own', async () => {
     queue('recordings', { data: { id: UUID }, error: null }); // ownership check
     queue('folders', { data: null, error: null }); // folder not owned

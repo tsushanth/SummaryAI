@@ -37,12 +37,14 @@ router.use('/:id/questions', authenticate, questionsRouter);
 // Validation Schemas
 // ============================================================================
 
+const RECORDING_TYPES = ['general', 'meeting', 'lecture', 'interview', 'voice_memo', 'imported'] as const;
+
 const createRecordingSchema = z.object({
   title: z.string().min(1).max(255),
   duration_seconds: z.number().int().nonnegative().max(config.MAX_RECORDING_DURATION_SECONDS).optional(),
   file_size_bytes: z.number().int().positive().max(config.MAX_AUDIO_FILE_SIZE_MB * 1024 * 1024),
   content_type: z.string().optional().default('audio/mp4'),
-  recording_type: z.enum(['general', 'meeting', 'lecture', 'interview', 'voice_memo', 'imported']).optional().default('general'),
+  recording_type: z.enum(RECORDING_TYPES).optional().default('general'),
   output_language: z.string().min(2).max(16).optional(),
   summary_template: z.enum(SUMMARY_TEMPLATE_IDS).optional(),
 });
@@ -61,15 +63,17 @@ const listQuerySchema = z.object({
   // Organization filters. folder_id=none returns unfiled recordings.
   folder_id: z.union([z.literal('none'), z.string().uuid()]).optional(),
   tag: z.string().trim().min(1).max(40).optional(),
+  recording_type: z.enum(RECORDING_TYPES).optional(),
   favorite: z.enum(['true', 'false']).optional(),
   from: z.string().datetime({ offset: true }).optional(),
   to: z.string().datetime({ offset: true }).optional(),
 });
 
-function applyOrganizationFilters(q: any, query: { folder_id?: string; tag?: string; favorite?: string; from?: string; to?: string }) {
+function applyOrganizationFilters(q: any, query: { folder_id?: string; tag?: string; recording_type?: string; favorite?: string; from?: string; to?: string }) {
   if (query.folder_id === 'none') q = q.is('folder_id', null);
   else if (query.folder_id) q = q.eq('folder_id', query.folder_id);
   if (query.tag) q = q.contains('tags', [query.tag]);
+  if (query.recording_type) q = q.eq('recording_type', query.recording_type);
   if (query.favorite) q = q.eq('is_favorite', query.favorite === 'true');
   if (query.from) q = q.gte('created_at', query.from);
   if (query.to) q = q.lte('created_at', query.to);

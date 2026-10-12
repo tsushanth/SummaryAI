@@ -32,6 +32,7 @@ interface SummaryAIApi {
         @Query("order") order: String = "desc",
         @Query("folder_id") folderId: String? = null,
         @Query("tag") tag: String? = null,
+        @Query("recording_type") recordingType: String? = null,
         @Query("favorite") favorite: Boolean? = null,
         @Query("from") from: String? = null,
         @Query("to") to: String? = null
