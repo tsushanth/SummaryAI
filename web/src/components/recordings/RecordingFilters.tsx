@@ -39,7 +39,7 @@ export function filtersToParams(f: RecordingFilterState) {
 const chip = (active: boolean) =>
   cn(
     'inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm border transition-colors',
-    active ? 'bg-primary text-white border-primary' : 'bg-white text-gray-700 hover:bg-gray-50'
+    active ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-foreground/80 hover:bg-accent'
   );
 
 export function RecordingFilters({
@@ -124,11 +124,11 @@ export function RecordingFilters({
         </button>
         {selected && (
           <>
-            <button className="p-1.5 rounded hover:bg-gray-100" title="Rename folder" onClick={onRename}>
-              <Pencil className="w-4 h-4 text-gray-500" />
+            <button className="p-1.5 rounded hover:bg-accent" title="Rename folder" onClick={onRename}>
+              <Pencil className="w-4 h-4 text-muted-foreground" />
             </button>
-            <button className="p-1.5 rounded hover:bg-gray-100" title="Delete folder" onClick={onDelete}>
-              <Trash2 className="w-4 h-4 text-red-500" />
+            <button className="p-1.5 rounded hover:bg-accent" title="Delete folder" onClick={onDelete}>
+              <Trash2 className="w-4 h-4 text-destructive" />
             </button>
           </>
         )}
@@ -140,7 +140,7 @@ export function RecordingFilters({
           onChange={(e) =>
             onChange({ ...value, range: (e.target.value || undefined) as RecordingFilterState['range'] })
           }
-          className="border rounded-md px-2 py-1 text-sm bg-white"
+          className="border rounded-md px-2 py-1 text-sm bg-card"
           aria-label="Date range"
         >
           <option value="">Any date</option>
@@ -160,7 +160,7 @@ export function RecordingFilters({
           </button>
         ))}
       </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   );
 }

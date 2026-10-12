@@ -61,7 +61,7 @@ export function PaywallModal({ onClose, reason = 'recording_limit' }: PaywallMod
         {/* Pricing options */}
         <div className="px-6 pb-6 space-y-3">
           <Button
-            className="w-full bg-primary hover:bg-primary/90 text-white h-12 text-base font-semibold"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-12 text-base font-semibold"
             onClick={() => startCheckout('yearly')}
             disabled={isLoading}
           >

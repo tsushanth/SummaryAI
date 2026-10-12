@@ -8,32 +8,58 @@ import {
   Monitor,
   Globe,
   Check,
+  Sparkles,
+  ListChecks,
+  MessageSquareText,
+  AudioLines,
+  CalendarCheck,
+  PhoneCall,
+  Plug,
+  Languages,
+  type LucideIcon,
 } from 'lucide-react';
 
-const PIPELINE = [
+const FEATURES: { title: string; body: string; icon: LucideIcon }[] = [
   {
-    title: 'Capture',
-    body: 'Record a standup, a sales call, a lecture, or a phone call in the background — screen locked or not.',
+    title: 'AI summaries',
+    body: 'Key points and decisions pulled out of every meeting, so you skim instead of relisten.',
+    icon: Sparkles,
   },
   {
-    title: 'Transcribe',
-    body: 'Get a speaker-labeled transcript in 36+ languages, detected automatically as people talk.',
+    title: 'Action items',
+    body: 'Who owes what, and by when, collected into one list you can check off.',
+    icon: ListChecks,
   },
   {
-    title: 'Summarize',
-    body: 'Key points, decisions, and who owns what get pulled out, so you can skim instead of relisten.',
+    title: 'Ask across meetings',
+    body: 'Ask a question of one recording or all of them and get answers with citations.',
+    icon: MessageSquareText,
   },
   {
-    title: 'Act',
-    body: 'Ask the recording a question, export the notes, or hand the action items to your team.',
+    title: 'Live transcript',
+    body: 'Follow along with a speaker-labeled transcript while the meeting is still happening.',
+    icon: AudioLines,
   },
-];
-
-const ALSO_INCLUDED = [
-  'Meeting bot that joins Zoom, Teams, and Google Meet from your calendar',
-  'Search across every recording you’ve ever made',
-  'Chat with a transcript and get answers with citations',
-  'Speaker renaming, so "Speaker 2" becomes a name',
+  {
+    title: 'Calendar auto-join',
+    body: 'Connect Google or Outlook and the bot joins your Zoom, Teams, and Meet calls for you.',
+    icon: CalendarCheck,
+  },
+  {
+    title: 'Phone call recording',
+    body: 'Place calls from the app and get the same transcript and summary afterwards.',
+    icon: PhoneCall,
+  },
+  {
+    title: 'Integrations',
+    body: 'Export notes and action items to the tools your team already uses.',
+    icon: Plug,
+  },
+  {
+    title: '36+ languages',
+    body: 'Detected automatically as people talk, with speaker renaming built in.',
+    icon: Languages,
+  },
 ];
 
 const PLATFORMS = [
@@ -108,28 +134,39 @@ const PLANS = [
   },
 ];
 
+const DEMO_RESULTS = [
+  'Launch delayed to Q2, pending test results',
+  'Marketing: deliver assets — due Friday',
+  'Dev: onboard new hire — due Monday',
+];
+
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-paper text-ink">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 border-b border-ink/10 bg-paper/90 backdrop-blur-sm">
+      <nav className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <div className="flex items-center gap-2">
-            <Mic className="h-5 w-5 text-brand-indigo" strokeWidth={2.25} />
+          <Link href="/" className="flex items-center gap-2 rounded-md">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <Mic className="h-4 w-4" strokeWidth={2.25} aria-hidden="true" />
+            </span>
             <span className="font-serif text-lg font-medium tracking-tight">Meeting Mind</span>
+          </Link>
+          <div className="hidden items-center gap-8 text-[15px] text-muted-foreground md:flex">
+            <a href="#features" className="rounded-sm hover:text-foreground">Features</a>
+            <a href="#platforms" className="rounded-sm hover:text-foreground">Download</a>
+            <a href="#pricing" className="rounded-sm hover:text-foreground">Pricing</a>
           </div>
-          <div className="hidden items-center gap-8 text-[15px] text-slate md:flex">
-            <a href="#pipeline" className="hover:text-ink">How it works</a>
-            <a href="#platforms" className="hover:text-ink">Download</a>
-            <a href="#pricing" className="hover:text-ink">Pricing</a>
-          </div>
-          <div className="flex items-center gap-5">
-            <Link href="/auth" className="hidden text-[15px] text-slate hover:text-ink sm:block">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/auth"
+              className="hidden rounded-sm text-[15px] text-muted-foreground hover:text-foreground sm:block"
+            >
               Sign in
             </Link>
             <Link
               href="/auth"
-              className="rounded-full bg-ink px-5 py-2.5 text-[15px] font-medium text-paper transition-colors hover:bg-brand-indigo"
+              className="inline-flex h-11 items-center rounded-full bg-primary px-5 text-[15px] font-medium text-primary-foreground transition-colors hover:bg-primary/90"
             >
               Start free
             </Link>
@@ -138,137 +175,127 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section className="mx-auto max-w-6xl px-6 pb-20 pt-16 sm:pt-24">
-        <div className="grid gap-14 lg:grid-cols-[1.05fr_1fr] lg:items-center">
-          <div>
-            <h1 className="font-serif text-[2.75rem] font-medium leading-[1.08] tracking-tight sm:text-6xl">
-              Meetings you can skim instead of relive.
-            </h1>
-            <p className="mt-6 max-w-md text-lg leading-relaxed text-slate">
-              Meeting Mind listens in the background, then turns the recording into a
-              transcript, a summary, and a list of who owes what.
-            </p>
-            <div className="mt-9 flex flex-wrap items-center gap-4">
-              <Link
-                href="/auth"
-                className="rounded-full bg-brand-indigo px-7 py-3.5 text-[15px] font-medium text-white transition-colors hover:bg-ink"
-              >
-                Start free
-              </Link>
-              <a
-                href="#pipeline"
-                className="text-[15px] font-medium text-ink underline decoration-ink/25 underline-offset-4 hover:decoration-ink"
-              >
-                See how it works
-              </a>
-            </div>
-            <p className="mt-5 text-sm text-slate">No credit card. 7-day free trial.</p>
-          </div>
-
-          {/* The mechanism: a real utterance, distilled */}
-          <div className="rounded-2xl border border-ink/10 bg-white/60 p-6 sm:p-8">
-            <p className="text-sm text-slate">What gets recorded</p>
-            <div className="mt-3 space-y-2 border-l-2 border-ink/10 pl-4 font-serif text-[1.05rem] italic leading-relaxed text-ink/80">
-              <p>
-                <span className="not-italic text-slate">Priya, 14:02 —</span> so testing
-                pushed the launch to Q2, and marketing still needs new assets by Friday.
+      <section className="relative overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-gradient-to-b from-accent to-transparent"
+        />
+        <div className="relative mx-auto max-w-6xl px-6 pb-20 pt-16 sm:pt-24">
+          <div className="grid gap-14 lg:grid-cols-[1.05fr_1fr] lg:items-center">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-sm text-muted-foreground">
+                <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                AI notes for every meeting and call
+              </span>
+              <h1 className="mt-6 font-serif text-[2.75rem] font-medium leading-[1.08] tracking-tight sm:text-6xl">
+                Meetings you can skim instead of relive.
+              </h1>
+              <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted-foreground">
+                Meeting Mind listens in the background, then turns the recording into a
+                transcript, a summary, and a list of who owes what.
               </p>
-              <p>
-                <span className="not-italic text-slate">Dev, 14:03 —</span> and can we get
-                the new hire set up before Monday?
-              </p>
+              <div className="mt-9 flex flex-wrap items-center gap-4">
+                <Link
+                  href="/auth"
+                  className="inline-flex h-12 items-center rounded-full bg-primary px-7 text-[15px] font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                >
+                  Start free
+                </Link>
+                <a
+                  href="#features"
+                  className="inline-flex h-12 items-center rounded-full border border-input px-6 text-[15px] font-medium text-foreground transition-colors hover:bg-accent"
+                >
+                  See what it does
+                </a>
+              </div>
+              <p className="mt-5 text-sm text-muted-foreground">No credit card. 7-day free trial.</p>
             </div>
 
-            <p className="mt-8 text-sm text-slate">What you get back</p>
-            <ul className="mt-3 space-y-3">
-              <li className="flex items-start gap-3">
-                <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brand-signal" />
-                <span className="text-[15px] leading-snug">
-                  Launch delayed to Q2, pending test results
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brand-signal" />
-                <span className="text-[15px] leading-snug">
-                  Marketing: deliver assets — due Friday
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brand-signal" />
-                <span className="text-[15px] leading-snug">
-                  Dev: onboard new hire — due Monday
-                </span>
-              </li>
-            </ul>
+            {/* The mechanism: a real utterance, distilled */}
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
+              <p className="text-sm text-muted-foreground">What gets recorded</p>
+              <div className="mt-3 space-y-2 border-l-2 border-border pl-4 font-serif text-[1.05rem] italic leading-relaxed text-card-foreground/80">
+                <p>
+                  <span className="not-italic text-muted-foreground">Priya, 14:02 —</span> so testing
+                  pushed the launch to Q2, and marketing still needs new assets by Friday.
+                </p>
+                <p>
+                  <span className="not-italic text-muted-foreground">Dev, 14:03 —</span> and can we get
+                  the new hire set up before Monday?
+                </p>
+              </div>
+
+              <p className="mt-8 text-sm text-muted-foreground">What you get back</p>
+              <ul className="mt-3 space-y-3">
+                {DEMO_RESULTS.map((line) => (
+                  <li key={line} className="flex items-start gap-3">
+                    <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-success" />
+                    <span className="text-[15px] leading-snug">{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Pipeline */}
-      <section id="pipeline" className="border-t border-ink/10 bg-white/50">
+      {/* Features */}
+      <section id="features" className="border-t border-border bg-muted/40">
         <div className="mx-auto max-w-6xl px-6 py-20">
           <div className="max-w-xl">
             <h2 className="font-serif text-3xl font-medium tracking-tight sm:text-4xl">
-              Four steps, no notepad.
+              Everything after &ldquo;let&rsquo;s hop on a call.&rdquo;
             </h2>
-            <p className="mt-4 text-lg text-slate">
+            <p className="mt-4 text-lg text-muted-foreground">
               The same pipeline runs for a standup, a sales call, or a two-hour lecture.
             </p>
           </div>
 
-          <ol className="mt-14 grid gap-x-10 gap-y-12 sm:grid-cols-2">
-            {PIPELINE.map((step, i) => (
-              <li key={step.title} className="flex gap-5">
-                <span className="font-serif text-3xl font-medium text-ink/20">
-                  {String(i + 1).padStart(2, '0')}
+          <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {FEATURES.map(({ title, body, icon: Icon }) => (
+              <li
+                key={title}
+                className="rounded-2xl border border-border bg-card p-6 transition-colors hover:border-primary/40"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-foreground">
+                  <Icon className="h-5 w-5" aria-hidden="true" />
                 </span>
-                <div>
-                  <h3 className="text-lg font-semibold">{step.title}</h3>
-                  <p className="mt-1.5 text-[15px] leading-relaxed text-slate">{step.body}</p>
-                </div>
+                <h3 className="mt-4 text-base font-semibold">{title}</h3>
+                <p className="mt-1.5 text-[15px] leading-relaxed text-muted-foreground">{body}</p>
               </li>
             ))}
-          </ol>
-
-          <div className="mt-16 border-t border-ink/10 pt-10">
-            <p className="text-sm font-medium text-slate">Also included</p>
-            <ul className="mt-4 grid gap-x-10 gap-y-3 sm:grid-cols-2">
-              {ALSO_INCLUDED.map((item) => (
-                <li key={item} className="flex gap-3 text-[15px] leading-relaxed">
-                  <span className="text-ink/30">—</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          </ul>
         </div>
       </section>
 
       {/* Platforms */}
-      <section id="platforms" className="border-t border-ink/10">
+      <section id="platforms" className="border-t border-border">
         <div className="mx-auto max-w-6xl px-6 py-20">
           <h2 className="font-serif text-3xl font-medium tracking-tight sm:text-4xl">
             Wherever you take meetings.
           </h2>
-          <p className="mt-4 max-w-xl text-lg text-slate">
+          <p className="mt-4 max-w-xl text-lg text-muted-foreground">
             Your recordings sync across every device you sign in on.
           </p>
 
-          <div className="mt-10 divide-y divide-ink/10 border-y border-ink/10">
+          <div className="mt-10 divide-y divide-border border-y border-border">
             {PLATFORMS.map(({ name, caption, href, icon: Icon }) => (
               <a
                 key={name}
                 href={href}
                 target={href.startsWith('http') ? '_blank' : undefined}
                 rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                className="group flex items-center justify-between py-5 transition-colors hover:bg-white/60"
+                className="group flex min-h-14 items-center justify-between px-2 py-4 transition-colors hover:bg-accent/50"
               >
                 <span className="flex items-center gap-4">
-                  <Icon className="h-5 w-5 text-ink/60" strokeWidth={1.75} />
+                  <Icon className="h-5 w-5 text-muted-foreground" strokeWidth={1.75} aria-hidden="true" />
                   <span className="text-[15px] font-medium">{name}</span>
-                  <span className="text-sm text-slate">{caption}</span>
+                  <span className="text-sm text-muted-foreground">{caption}</span>
                 </span>
-                <ArrowUpRight className="h-4 w-4 text-ink/30 transition-colors group-hover:text-brand-indigo" />
+                <ArrowUpRight
+                  className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary"
+                  aria-hidden="true"
+                />
               </a>
             ))}
           </div>
@@ -276,49 +303,57 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="border-t border-ink/10 bg-white/50">
+      <section id="pricing" className="border-t border-border bg-muted/40">
         <div className="mx-auto max-w-6xl px-6 py-20">
           <h2 className="font-serif text-3xl font-medium tracking-tight sm:text-4xl">
             One price, wherever you subscribe.
           </h2>
-          <p className="mt-4 max-w-xl text-lg text-slate">
+          <p className="mt-4 max-w-xl text-lg text-muted-foreground">
             Subscribing here instead of through the app saves you 30%. Cancel anytime.
           </p>
 
-          <div className="mt-12 grid divide-y divide-ink/10 border-y border-ink/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          <div className="mt-12 grid gap-4 sm:grid-cols-3">
             {PLANS.map((plan) => (
               <div
                 key={plan.name}
-                className={`px-2 py-8 sm:px-8 ${plan.highlight ? 'bg-brand-indigo/5' : ''}`}
+                className={`rounded-2xl border p-7 ${
+                  plan.highlight ? 'border-primary bg-card ring-1 ring-primary' : 'border-border bg-card'
+                }`}
               >
                 <div className="flex items-baseline justify-between">
                   <h3 className="text-lg font-semibold">{plan.name}</h3>
                   {plan.highlight && (
-                    <span className="text-xs font-medium text-brand-indigo">Most popular</span>
+                    <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-accent-foreground">
+                      Most popular
+                    </span>
                   )}
                 </div>
                 <div className="mt-4 flex items-baseline gap-2">
                   <span className="text-3xl font-semibold tracking-tight">{plan.price}</span>
-                  <span className="text-sm text-slate">{plan.cadence}</span>
+                  <span className="text-sm text-muted-foreground">{plan.cadence}</span>
                 </div>
-                <p className="mt-1 text-sm text-slate">
+                <p className="mt-1 text-sm text-muted-foreground">
                   <span className="line-through">{plan.was}</span> · save 30%
                 </p>
-                {plan.note && <p className="mt-1 text-sm text-slate">{plan.note}</p>}
+                {plan.note && <p className="mt-1 text-sm text-muted-foreground">{plan.note}</p>}
                 <ul className="mt-6 space-y-2.5">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex gap-2.5 text-[14px] leading-relaxed text-ink/80">
-                      <Check className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-brand-signal" strokeWidth={2.5} />
+                    <li key={f} className="flex gap-2.5 text-[14px] leading-relaxed text-card-foreground/90">
+                      <Check
+                        className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-success"
+                        strokeWidth={2.5}
+                        aria-hidden="true"
+                      />
                       <span>{f}</span>
                     </li>
                   ))}
                 </ul>
                 <Link
                   href="/subscription"
-                  className={`mt-8 block rounded-full py-3 text-center text-[15px] font-medium transition-colors ${
+                  className={`mt-8 flex h-11 items-center justify-center rounded-full text-[15px] font-medium transition-colors ${
                     plan.highlight
-                      ? 'bg-brand-indigo text-white hover:bg-ink'
-                      : 'bg-ink/5 text-ink hover:bg-ink/10'
+                      ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
                   }`}
                 >
                   {plan.highlight ? 'Start free trial' : 'Subscribe'}
@@ -327,7 +362,7 @@ export default function LandingPage() {
             ))}
           </div>
 
-          <p className="mt-8 text-sm text-slate">
+          <p className="mt-8 text-sm text-muted-foreground">
             Supports 36+ languages, including Spanish, French, German, Japanese, Korean,
             Mandarin, and Hindi, detected automatically.
           </p>
@@ -335,14 +370,14 @@ export default function LandingPage() {
       </section>
 
       {/* Closing CTA */}
-      <section className="border-t border-ink/10 bg-ink">
+      <section className="border-t border-border">
         <div className="mx-auto max-w-6xl px-6 py-20 text-center">
-          <h2 className="font-serif text-3xl font-medium tracking-tight text-paper sm:text-4xl">
+          <h2 className="font-serif text-3xl font-medium tracking-tight sm:text-4xl">
             Stop writing down what people say.
           </h2>
           <Link
             href="/auth"
-            className="mt-8 inline-block rounded-full bg-brand-lavender px-8 py-3.5 text-[15px] font-medium text-ink transition-colors hover:bg-white"
+            className="mt-8 inline-flex h-12 items-center rounded-full bg-primary px-8 text-[15px] font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Start free
           </Link>
@@ -350,17 +385,17 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-ink text-paper/60">
+      <footer className="border-t border-border text-muted-foreground">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-6 py-10 text-sm sm:flex-row sm:justify-between">
-          <div className="flex items-center gap-2 text-paper">
-            <Mic className="h-4 w-4" />
+          <div className="flex items-center gap-2 text-foreground">
+            <Mic className="h-4 w-4" aria-hidden="true" />
             <span className="font-serif">Meeting Mind</span>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
-            <a href="#pipeline" className="hover:text-paper">How it works</a>
-            <a href="#pricing" className="hover:text-paper">Pricing</a>
-            <Link href="/privacy" className="hover:text-paper">Privacy</Link>
-            <Link href="/terms" className="hover:text-paper">Terms</Link>
+            <a href="#features" className="rounded-sm hover:text-foreground">Features</a>
+            <a href="#pricing" className="rounded-sm hover:text-foreground">Pricing</a>
+            <Link href="/privacy" className="rounded-sm hover:text-foreground">Privacy</Link>
+            <Link href="/terms" className="rounded-sm hover:text-foreground">Terms</Link>
           </div>
           <p>&copy; {new Date().getFullYear()} Meeting Mind</p>
         </div>

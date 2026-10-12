@@ -66,14 +66,14 @@ export function ShareLinkPanel({ recordingId }: { recordingId: string }) {
     <div className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-md hover:bg-gray-50"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-md hover:bg-accent"
       >
         <Link2 className="w-4 h-4" />
         Share link
       </button>
       {open && (
-        <div className="absolute right-0 z-20 mt-1 w-80 bg-white border rounded-lg shadow-lg p-4 text-sm space-y-3">
-          <p className="text-gray-600">
+        <div className="absolute right-0 z-20 mt-1 w-80 bg-card border rounded-lg shadow-lg p-4 text-sm space-y-3">
+          <p className="text-muted-foreground">
             Anyone with the link can view the summary{includeTranscript ? ' and transcript' : ''}. Revoke at any time.
           </p>
           <label className="flex items-center gap-2">
@@ -100,7 +100,7 @@ export function ShareLinkPanel({ recordingId }: { recordingId: string }) {
           <button
             onClick={create}
             disabled={busy}
-            className="w-full px-3 py-1.5 bg-primary text-white rounded-md disabled:opacity-50"
+            className="w-full px-3 py-1.5 bg-primary text-primary-foreground rounded-md disabled:opacity-50"
           >
             Create link
           </button>
@@ -110,7 +110,7 @@ export function ShareLinkPanel({ recordingId }: { recordingId: string }) {
               <div className="break-all text-xs">{newUrl}</div>
               <button
                 onClick={() => navigator.clipboard.writeText(newUrl).catch(() => setError('Copy failed'))}
-                className="text-xs text-blue-600 hover:underline"
+                className="text-xs text-primary hover:underline"
               >
                 Copy (shown once)
               </button>
@@ -119,7 +119,7 @@ export function ShareLinkPanel({ recordingId }: { recordingId: string }) {
 
           {active.length > 0 && (
             <div>
-              <div className="text-xs font-semibold uppercase text-gray-400 mb-1">Active links</div>
+              <div className="text-xs font-semibold uppercase text-muted-foreground mb-1">Active links</div>
               <ul className="space-y-1">
                 {active.map((s) => (
                   <li key={s.id} className="flex items-center justify-between gap-2 text-xs">
@@ -132,7 +132,7 @@ export function ShareLinkPanel({ recordingId }: { recordingId: string }) {
                       onClick={() => revoke(s.id)}
                       disabled={busy}
                       title="Revoke"
-                      className="p-1 text-red-600 hover:bg-red-50 rounded"
+                      className="p-1 text-destructive hover:bg-destructive/10 rounded"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -141,7 +141,7 @@ export function ShareLinkPanel({ recordingId }: { recordingId: string }) {
               </ul>
             </div>
           )}
-          {error && <p className="text-red-600 text-xs">{error}</p>}
+          {error && <p className="text-destructive text-xs">{error}</p>}
         </div>
       )}
     </div>

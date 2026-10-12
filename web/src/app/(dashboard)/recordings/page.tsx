@@ -108,7 +108,7 @@ export default function RecordingsPage() {
         <div className="space-y-8">
           {groupRecordingsByDate(recordings).map((group) => (
             <section key={group.label}>
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-3">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-3">
                 {group.label}
               </h2>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

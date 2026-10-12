@@ -7,6 +7,12 @@ interface WaveformVisualizerProps {
   isPaused: boolean;
 }
 
+/** Resolve a design-token HSL triplet (e.g. --primary) so the canvas follows light/dark mode. */
+function themeColor(name: string, alpha = 1): string {
+  const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return raw ? `hsl(${raw} / ${alpha})` : 'currentColor';
+}
+
 export function WaveformVisualizer({ isRecording, isPaused }: WaveformVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
@@ -23,12 +29,12 @@ export function WaveformVisualizer({ isRecording, isPaused }: WaveformVisualizer
       if (canvas) {
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          ctx.fillStyle = '#f3f4f6';
+          ctx.fillStyle = themeColor('--muted');
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           ctx.beginPath();
           ctx.moveTo(0, canvas.height / 2);
           ctx.lineTo(canvas.width, canvas.height / 2);
-          ctx.strokeStyle = '#d1d5db';
+          ctx.strokeStyle = themeColor('--border');
           ctx.lineWidth = 2;
           ctx.stroke();
         }
@@ -62,9 +68,11 @@ export function WaveformVisualizer({ isRecording, isPaused }: WaveformVisualizer
 
           analyser.getByteFrequencyData(dataArray);
 
-          ctx.fillStyle = '#f3f4f6';
+          ctx.fillStyle = themeColor('--muted');
           ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+          const barTop = themeColor('--primary', 0.6);
+          const barBottom = themeColor('--primary');
           const barWidth = (canvas.width / bufferLength) * 2.5;
           let x = 0;
 
@@ -72,8 +80,8 @@ export function WaveformVisualizer({ isRecording, isPaused }: WaveformVisualizer
             const barHeight = (dataArray[i] / 255) * canvas.height * 0.8;
 
             const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
-            gradient.addColorStop(0, '#3b82f6');
-            gradient.addColorStop(1, '#60a5fa');
+            gradient.addColorStop(0, barBottom);
+            gradient.addColorStop(1, barTop);
 
             ctx.fillStyle = gradient;
             ctx.fillRect(

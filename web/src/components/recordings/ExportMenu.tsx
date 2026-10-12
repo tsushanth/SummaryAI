@@ -64,22 +64,22 @@ export function ExportMenu({ recording, summary, transcript }: ExportMenuProps) 
     <div className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-md hover:bg-gray-50"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-md hover:bg-accent"
       >
         <Download className="w-4 h-4" />
         Export
       </button>
-      {notice && <span className="ml-2 text-xs text-gray-500">{notice}</span>}
+      {notice && <span className="ml-2 text-xs text-muted-foreground">{notice}</span>}
       {open && (
-        <div className="absolute right-0 z-20 mt-1 w-56 bg-white border rounded-lg shadow-lg p-2 text-sm">
+        <div className="absolute right-0 z-20 mt-1 w-56 bg-card border rounded-lg shadow-lg p-2 text-sm">
           {(['summary', 'transcript'] as Kind[]).map((kind) => (
             <div key={kind} className="mb-2 last:mb-0">
-              <div className="px-2 py-1 text-xs font-semibold uppercase text-gray-400">{kind}</div>
+              <div className="px-2 py-1 text-xs font-semibold uppercase text-muted-foreground">{kind}</div>
               {formats.map((f) => (
                 <button
                   key={f.id}
                   onClick={() => run(kind, f.id)}
-                  className="block w-full text-left px-2 py-1 rounded hover:bg-gray-100"
+                  className="block w-full text-left px-2 py-1 rounded hover:bg-accent"
                 >
                   {f.label}
                 </button>

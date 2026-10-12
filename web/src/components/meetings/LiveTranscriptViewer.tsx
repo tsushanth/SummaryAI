@@ -17,10 +17,10 @@ const speakerColors = [
   'bg-success/15 text-success',
   'bg-accent text-accent-foreground',
   'bg-amber-500/15 text-amber-800 dark:text-amber-300',
-  'bg-pink-100 text-pink-800',
-  'bg-teal-100 text-teal-800',
-  'bg-indigo-100 text-indigo-800',
-  'bg-rose-100 text-rose-800',
+  'bg-pink-500/15 text-pink-800 dark:text-pink-300',
+  'bg-teal-500/15 text-teal-800 dark:text-teal-300',
+  'bg-indigo-500/15 text-indigo-800 dark:text-indigo-300',
+  'bg-rose-500/15 text-rose-800 dark:text-rose-300',
 ];
 
 function formatTimestamp(seconds: number): string {

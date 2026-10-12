@@ -87,7 +87,7 @@ export function UpgradePrompt({ feature, className = '' }: UpgradePromptProps) {
       </p>
       <Link
         href="/subscription"
-        className="inline-flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+        className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-2.5 rounded-lg font-medium hover:bg-primary/90 transition-colors"
       >
         <Sparkles className="w-4 h-4" />
         Upgrade Now

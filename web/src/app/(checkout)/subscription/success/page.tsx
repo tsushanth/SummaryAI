@@ -77,7 +77,7 @@ function SuccessContent() {
         {/* CTA */}
         <Link
           href="/recordings"
-          className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl font-medium transition-colors"
+          className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-xl font-medium transition-colors"
         >
           Start using Meeting Mind
           <ArrowRight className="w-5 h-5" />

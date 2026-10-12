@@ -43,12 +43,12 @@ export function RecordingOrganizer({
 
   return (
     <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
-      <label className="flex items-center gap-1.5 text-gray-600">
+      <label className="flex items-center gap-1.5 text-muted-foreground">
         <FolderIcon className="w-4 h-4" />
         <select
           value={recording.folder_id ?? ''}
           onChange={(e) => run(() => moveRecordingToFolder(recording.id, e.target.value || null))}
-          className="border rounded-md px-2 py-1 bg-white"
+          className="border rounded-md px-2 py-1 bg-card"
           aria-label="Folder"
         >
           <option value="">No folder</option>
@@ -62,7 +62,7 @@ export function RecordingOrganizer({
 
       <div className="flex flex-wrap items-center gap-1.5">
         {tags.map((t) => (
-          <span key={t} className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded text-gray-700">
+          <span key={t} className="inline-flex items-center gap-1 px-2 py-0.5 bg-muted rounded text-foreground/80">
             #{t}
             <button
               title={`Remove ${t}`}
@@ -87,7 +87,7 @@ export function RecordingOrganizer({
           className="border rounded-md px-2 py-0.5 w-28"
         />
       </div>
-      {error && <span className="text-red-600">{error}</span>}
+      {error && <span className="text-destructive">{error}</span>}
     </div>
   );
 }
