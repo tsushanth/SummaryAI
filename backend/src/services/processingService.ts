@@ -149,12 +149,18 @@ async function processRecordingAsync(
     let summary: ParsedSummary;
 
     if (config.ANTHROPIC_API_KEY) {
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('preferences')
+        .eq('id', userId)
+        .maybeSingle();
       summary = await generateSummaryWithAnthropic(
         transcript.fullText,
         transcript.segments,
         recording.output_language,
         resolveSummaryTemplate({
           recordingTemplate: recording.summary_template,
+          userDefault: profile?.preferences?.default_summary_template,
           recordingType: recording.recording_type,
         })
       );

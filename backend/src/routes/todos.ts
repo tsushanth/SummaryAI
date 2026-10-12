@@ -18,6 +18,15 @@ const router = Router();
 const PRIORITY_VALUES = ['none', 'low', 'medium', 'high'] as const;
 type Priority = (typeof PRIORITY_VALUES)[number];
 
+// Due dates arrive as full ISO datetimes or plain YYYY-MM-DD (date pickers); stored as timestamptz.
+const dueDateSchema = z
+  .string()
+  .refine((v) => /^\d{4}-\d{2}-\d{2}(T.*)?$/.test(v) && !Number.isNaN(new Date(v).getTime()), 'Invalid date');
+
+function normalizeDue(v: string | null | undefined): string | null {
+  return v ? new Date(v).toISOString() : null;
+}
+
 /**
  * Clients (Android) name the free-text field `notes`; the column is `description`.
  * Emit both so either client works.
@@ -39,6 +48,7 @@ interface Todo {
   is_completed: boolean;
   priority: Priority;
   due_date: string | null;
+  assignee: string | null;
   completed_at: string | null;
   created_at: string;
   updated_at: string;
@@ -50,6 +60,7 @@ interface CreateTodoRequest {
   notes?: string;
   priority?: Priority;
   due_date?: string;
+  assignee?: string;
   recording_id?: string;
 }
 
@@ -60,6 +71,7 @@ interface UpdateTodoRequest {
   is_completed?: boolean;
   priority?: Priority;
   due_date?: string | null;
+  assignee?: string | null;
 }
 
 interface ListTodosResponse {
@@ -86,7 +98,8 @@ const createTodoSchema = z.object({
   description: z.string().max(2000).optional(),
   notes: z.string().max(2000).optional(),
   priority: z.enum(PRIORITY_VALUES).optional().default('medium'),
-  due_date: z.string().datetime().optional(),
+  due_date: dueDateSchema.optional(),
+  assignee: z.string().max(200).optional(),
   recording_id: z.string().uuid().optional(),
 });
 
@@ -96,7 +109,8 @@ const updateTodoSchema = z.object({
   notes: z.string().max(2000).optional().nullable(),
   is_completed: z.boolean().optional(),
   priority: z.enum(PRIORITY_VALUES).optional(),
-  due_date: z.string().datetime().optional().nullable(),
+  due_date: dueDateSchema.optional().nullable(),
+  assignee: z.string().max(200).optional().nullable(),
 });
 
 const listQuerySchema = z.object({
@@ -203,7 +217,8 @@ router.post(
         title: body.title,
         description: body.description || body.notes || null,
         priority: body.priority || 'medium',
-        due_date: body.due_date || null,
+        due_date: normalizeDue(body.due_date),
+        ...(body.assignee?.trim() ? { assignee: body.assignee.trim() } : {}),
         recording_id: body.recording_id || null,
         is_completed: false,
       })
@@ -329,7 +344,8 @@ router.patch(
     const newNotes = body.description !== undefined ? body.description : body.notes;
     if (newNotes !== undefined) updates.description = newNotes;
     if (body.priority !== undefined) updates.priority = body.priority;
-    if (body.due_date !== undefined) updates.due_date = body.due_date;
+    if (body.due_date !== undefined) updates.due_date = normalizeDue(body.due_date);
+    if (body.assignee !== undefined) updates.assignee = body.assignee?.trim() || null;
     if (body.is_completed !== undefined) {
       updates.is_completed = body.is_completed;
       updates.completed_at = body.is_completed ? new Date().toISOString() : null;
