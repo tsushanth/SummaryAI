@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit">Bewerken</string>
+    <string name="save">Opslaan</string>
+    <string name="copy">Kopiëren</string>
+    <string name="todo_assignee">Toegewezen aan (optioneel)</string>
+    <string name="todo_due_date">Deadline (optioneel)</string>
+    <string name="todo_due_date_pick">Datum kiezen</string>
+    <string name="todo_due_date_clear">Datum wissen</string>
+    <string name="todo_due_chip">Deadline %1$s</string>
+    <string name="summary_template_title">Samenvattingsstijl</string>
+    <string name="summary_template_current">Huidig: %1$s</string>
+    <string name="summary_template_not_set">Niet ingesteld (gebruikt je standaard)</string>
+    <string name="summary_template_regenerate">Samenvatting opnieuw genereren</string>
+    <string name="summary_template_regenerating">Opnieuw genereren…</string>
+    <string name="summary_template_confirm_title">Samenvatting opnieuw genereren?</string>
+    <string name="summary_template_confirm_message">Hiermee worden de huidige samenvatting, kernpunten en actiepunten vervangen door een nieuwe versie in de stijl %1$s. Dit kan niet ongedaan worden gemaakt.</string>
+    <string name="summary_template_regenerate_confirm">Opnieuw genereren</string>
+    <string name="summary_template_failed">De samenvatting kon niet opnieuw worden gegenereerd</string>
+    <string name="summary_template_done">Samenvatting opnieuw gegenereerd</string>
+    <string name="summary_template_load_failed">Samenvattingsstijlen konden niet worden geladen</string>
+    <string name="followup_email">Opvolgmail opstellen</string>
+    <string name="followup_email_title">Opvolgmail</string>
+    <string name="followup_email_subject">Onderwerp</string>
+    <string name="followup_email_body">Bericht</string>
+    <string name="followup_email_drafting">Opstellen…</string>
+    <string name="followup_email_failed">De e-mail kon niet worden opgesteld</string>
+    <string name="followup_email_copied">E-mail gekopieerd</string>
+    <string name="followup_email_send">Verzenden</string>
+    <string name="followup_email_no_app">Geen e-mailapp gevonden</string>
+    <string name="action_items_to_todos">Toevoegen aan mijn taken</string>
+    <string name="action_items_to_todos_adding">Toevoegen…</string>
+    <string name="action_items_to_todos_added">%1$d toegevoegd aan je taken</string>
+    <string name="action_items_to_todos_added_skipped">%1$d toegevoegd aan je taken (%2$d stonden er al in)</string>
+    <string name="action_items_to_todos_none_new">Alle actiepunten staan al in je taken</string>
+    <string name="action_items_to_todos_failed">Actiepunten konden niet aan je taken worden toegevoegd</string>
+    <string name="chat_all_meetings">Vraag over alle vergaderingen</string>
+    <string name="chat_all_meetings_title">Vraag het aan je vergaderingen</string>
+    <string name="chat_all_meetings_placeholder">bijv. Wat hebben we besloten over de prijzen?</string>
+    <string name="chat_all_meetings_empty_title">Vraag over al je vergaderingen</string>
+    <string name="chat_all_meetings_empty_message">Antwoorden komen uit je samenvattingen en transcripts, met links naar de vergaderingen waar ze vandaan komen.</string>
+    <string name="chat_all_meetings_sources">Bronnen</string>
+    <string name="chat_all_meetings_failed">Er kon geen antwoord worden opgehaald. Probeer het opnieuw.</string>
+    <string name="chat_all_meetings_send">Verzenden</string>
+    <string name="settings_default_template">Standaard samenvattingsstijl</string>
+    <string name="settings_default_template_hint">Wordt gebruikt voor nieuwe opnames, tenzij je voor een specifieke opname een stijl kiest</string>
+</resources>

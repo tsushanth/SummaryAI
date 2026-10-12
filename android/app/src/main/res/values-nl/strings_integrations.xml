@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="integrations_title">Samenvattingen elders naartoe sturen</string>
+    <string name="integrations_desc">Nadat elke vergadering is verwerkt, kan MeetingMind de samenvatting en actiepunten naar een webhook, Slack of Notion sturen. Geheimen worden versleuteld opgeslagen en nooit meer getoond.</string>
+    <string name="integration_webhook">Webhook</string>
+    <string name="integration_webhook_url">Webhook-URL (https)</string>
+    <string name="integration_webhook_secret">Ondertekeningsgeheim (optioneel)</string>
+    <string name="integration_slack">Slack</string>
+    <string name="integration_slack_url">Inkomende Slack-webhook-URL</string>
+    <string name="integration_notion">Notion</string>
+    <string name="integration_notion_token">Notion-integratietoken</string>
+    <string name="integration_notion_database">Notion-database-ID</string>
+    <string name="integration_connected">Verbonden</string>
+    <string name="integration_last_delivery">Laatste levering: %1$s</string>
+    <string name="integration_leave_to_keep">Voer een nieuwe waarde in om te vervangen</string>
+    <string name="integration_save">Opslaan</string>
+    <string name="integration_test">Test verzenden</string>
+    <string name="integration_remove">Verwijderen</string>
+    <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
+    <string name="tile_record_label">Vergadering opnemen</string>
+    <string name="widget_record_label">Opnemen</string>
+    <string name="widget_description">Start een opname vanaf je startscherm</string>
+    <string name="analytics_title">Spreektijd</string>
+    <string name="analytics_questions">%1$d vragen</string>
+    <string name="analytics_words">%1$d woorden</string>
+    <string name="analytics_longest_monologue">Langste monoloog: %1$s (%2$s)</string>
+</resources>

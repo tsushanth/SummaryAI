@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="weekly_stats_title">Ultimi 7 giorni</string>
+    <string name="weekly_stats_meetings">Riunioni</string>
+    <string name="weekly_stats_hours">Ore registrate</string>
+    <string name="weekly_stats_action_items">Attività</string>
+</resources>
