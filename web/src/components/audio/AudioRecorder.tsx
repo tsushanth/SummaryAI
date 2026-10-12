@@ -66,18 +66,18 @@ export function AudioRecorder({
 
       {isRecording && (
         <div className="text-center">
-          <p className="text-2xl font-mono font-semibold text-gray-900">
+          <p className="text-2xl font-mono font-semibold text-foreground">
             {formatDuration(duration)}
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             {isPaused ? 'Paused' : 'Recording...'}
           </p>
         </div>
       )}
 
       {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-600">{error}</p>
+        <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
+          <p className="text-sm text-destructive">{error}</p>
         </div>
       )}
     </div>

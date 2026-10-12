@@ -5,12 +5,12 @@ import { Loader2 } from 'lucide-react';
 
 export default function AuthPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 w-16 h-16 bg-primary rounded-2xl flex items-center justify-center">
             <svg
-              className="w-10 h-10 text-white"
+              className="w-10 h-10 text-primary-foreground"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

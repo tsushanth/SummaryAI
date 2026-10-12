@@ -8,10 +8,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
@@ -24,6 +26,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.domain.model.Recording
+import com.kreativekoala.summaryai.ui.components.MmCard
+import com.kreativekoala.summaryai.ui.components.MmEmptyState
+import com.kreativekoala.summaryai.ui.components.SkeletonCardList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,16 +61,17 @@ fun SearchScreen(
                             .focusRequester(focusRequester),
                         placeholder = { Text(stringResource(R.string.search)) },
                         singleLine = true,
+                        shape = MaterialTheme.shapes.large,
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                            focusedIndicatorColor = MaterialTheme.colorScheme.surface,
-                            unfocusedIndicatorColor = MaterialTheme.colorScheme.surface
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
                         ),
                         trailingIcon = {
                             if (uiState.query.isNotEmpty()) {
                                 IconButton(onClick = { viewModel.updateQuery("") }) {
-                                    Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.clear))
+                                    Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.ui_clear_search))
                                 }
                             }
                         }
@@ -80,12 +86,7 @@ fun SearchScreen(
                 .padding(paddingValues)
         ) {
             if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+                SkeletonCardList(count = 4, loadingDescription = stringResource(R.string.ui_loading))
             } else if (uiState.query.isEmpty()) {
                 EmptySearchContent()
             } else if (uiState.results.isEmpty()) {
@@ -114,57 +115,22 @@ fun SearchScreen(
 
 @Composable
 private fun EmptySearchContent() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            imageVector = Icons.Default.Search,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = stringResource(R.string.search_prompt),
-            style = MaterialTheme.typography.titleMedium
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = stringResource(R.string.search_hint),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        MmEmptyState(
+            icon = Icons.Default.Search,
+            title = stringResource(R.string.search_prompt),
+            message = stringResource(R.string.search_hint)
         )
     }
 }
 
 @Composable
 private fun NoResultsContent(query: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = stringResource(R.string.no_results),
-            style = MaterialTheme.typography.titleMedium
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = stringResource(R.string.no_results_for_query, query),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        MmEmptyState(
+            icon = Icons.Default.SearchOff,
+            title = stringResource(R.string.no_results),
+            message = stringResource(R.string.no_results_for_query, query)
         )
     }
 }
@@ -175,11 +141,7 @@ private fun SearchResultItem(
     query: String,
     onClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-    ) {
+    MmCard(onClick = onClick) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {

@@ -6,7 +6,9 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { RecordingCard } from '@/components/recordings/RecordingCard';
 import { PaywallModal } from '@/components/subscription/PaywallModal';
 import { Button } from '@/components/ui/button';
-import { Plus, Mic, Loader2 } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
+import { SkeletonCardList } from '@/components/ui/skeleton';
+import { Plus, Mic, CloudOff } from 'lucide-react';
 import Link from 'next/link';
 
 const FREE_TIER_LIMIT = 3;
@@ -32,10 +34,10 @@ export default function RecordingsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Recordings</h1>
-          <p className="text-gray-500">
+          <p className="text-muted-foreground">
             {recordings.length} recording{recordings.length !== 1 ? 's' : ''}
             {!subLoading && !isSubscribed && (
-              <span className="ml-2 text-xs text-amber-600 font-medium">
+              <span className="ml-2 text-xs text-amber-700 dark:text-amber-300 font-medium">
                 {recordings.length}/{FREE_TIER_LIMIT} free used
               </span>
             )}
@@ -43,39 +45,40 @@ export default function RecordingsPage() {
         </div>
         <Link href="/recordings/new" onClick={handleNewRecording}>
           <Button>
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
             New Recording
           </Button>
         </Link>
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <SkeletonCardList count={3} label="Loading recordings" />
         </div>
       ) : error ? (
-        <div className="text-center py-20">
-          <p className="text-red-500 mb-4">Failed to load recordings</p>
-          <Button variant="outline" onClick={() => window.location.reload()}>
-            Retry
-          </Button>
-        </div>
-      ) : recordings.length === 0 ? (
-        <div className="text-center py-20">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Mic className="w-8 h-8 text-gray-400" />
-          </div>
-          <h3 className="text-lg font-medium mb-2">No recordings yet</h3>
-          <p className="text-gray-500 mb-4">
-            Create your first recording to get started
-          </p>
-          <Link href="/recordings/new">
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              New Recording
+        <EmptyState
+          icon={<CloudOff />}
+          title="Failed to load recordings"
+          action={
+            <Button variant="outline" onClick={() => window.location.reload()}>
+              Retry
             </Button>
-          </Link>
-        </div>
+          }
+        />
+      ) : recordings.length === 0 ? (
+        <EmptyState
+          icon={<Mic />}
+          title="No recordings yet"
+          message="Create your first recording to get started"
+          action={
+            <Link href="/recordings/new">
+              <Button>
+                <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
+                New Recording
+              </Button>
+            </Link>
+          }
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {recordings.map((recording) => (

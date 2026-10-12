@@ -64,7 +64,7 @@ function getStatusBadge(status: PhoneCallStatus) {
   switch (status) {
     case 'completed':
       return (
-        <span className="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 flex items-center gap-1">
+        <span className="px-2 py-0.5 text-xs rounded-full bg-success/15 text-success flex items-center gap-1">
           <CheckCircle className="w-3 h-3" />
           Completed
         </span>
@@ -72,14 +72,14 @@ function getStatusBadge(status: PhoneCallStatus) {
     case 'in_progress':
     case 'recording':
       return (
-        <span className="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700 flex items-center gap-1">
+        <span className="px-2 py-0.5 text-xs rounded-full bg-accent text-accent-foreground flex items-center gap-1">
           <Loader2 className="w-3 h-3 animate-spin" />
           {status === 'recording' ? 'Recording' : 'In Progress'}
         </span>
       );
     case 'ringing':
       return (
-        <span className="px-2 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-700 flex items-center gap-1">
+        <span className="px-2 py-0.5 text-xs rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 flex items-center gap-1">
           <Phone className="w-3 h-3" />
           Ringing
         </span>
@@ -88,20 +88,20 @@ function getStatusBadge(status: PhoneCallStatus) {
     case 'busy':
     case 'no_answer':
       return (
-        <span className="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-700 flex items-center gap-1">
+        <span className="px-2 py-0.5 text-xs rounded-full bg-destructive/10 text-destructive flex items-center gap-1">
           <XCircle className="w-3 h-3" />
           {status === 'busy' ? 'Busy' : status === 'no_answer' ? 'No Answer' : 'Failed'}
         </span>
       );
     case 'cancelled':
       return (
-        <span className="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
+        <span className="px-2 py-0.5 text-xs rounded-full bg-secondary text-foreground/90">
           Cancelled
         </span>
       );
     default:
       return (
-        <span className="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
+        <span className="px-2 py-0.5 text-xs rounded-full bg-secondary text-foreground/90">
           {status}
         </span>
       );
@@ -113,21 +113,21 @@ function PhoneCallCard({ call }: { call: PhoneCallType }) {
     <Card className="p-4 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-3">
-          <div className="mt-1 p-2 bg-gray-100 rounded-full">
-            <PhoneOutgoing className="w-4 h-4 text-gray-600" />
+          <div className="mt-1 p-2 bg-secondary rounded-full">
+            <PhoneOutgoing className="w-4 h-4 text-muted-foreground" />
           </div>
           <div>
             <h3 className="font-medium">
               {call.to_name || formatPhoneNumber(call.to_number)}
             </h3>
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-muted-foreground">
                 {formatPhoneNumber(call.to_number)}
               </span>
               {call.to_name && (
                 <>
-                  <span className="text-gray-300">|</span>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-muted-foreground/60">|</span>
+                  <span className="text-sm text-muted-foreground">
                     From: {formatPhoneNumber(call.from_number)}
                   </span>
                 </>
@@ -136,13 +136,13 @@ function PhoneCallCard({ call }: { call: PhoneCallType }) {
             <div className="flex items-center gap-2 mt-2">
               {getStatusBadge(call.status)}
               {call.recording_duration && (
-                <span className="text-xs text-gray-500 flex items-center gap-1">
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
                   <Clock className="w-3 h-3" />
                   {formatDuration(call.recording_duration)}
                 </span>
               )}
               {call.is_recording && (
-                <span className="text-xs text-red-600 flex items-center gap-1">
+                <span className="text-xs text-destructive flex items-center gap-1">
                   <Mic className="w-3 h-3 animate-pulse" />
                   Recording
                 </span>
@@ -160,7 +160,7 @@ function PhoneCallCard({ call }: { call: PhoneCallType }) {
           </div>
         </div>
         <div className="text-right">
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-muted-foreground">
             {formatDateTime(call.started_at || call.created_at)}
           </span>
         </div>
@@ -186,7 +186,7 @@ export default function PhoneCallsPage() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-gray-500">
+      <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
         <AlertCircle className="w-12 h-12 mb-4 opacity-30" />
         <p>Failed to load phone calls</p>
       </div>
@@ -200,7 +200,7 @@ export default function PhoneCallsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold">Phone Calls</h1>
-          <p className="text-gray-500 mt-1">
+          <p className="text-muted-foreground mt-1">
             View your recorded phone call transcriptions
           </p>
         </div>
@@ -214,9 +214,9 @@ export default function PhoneCallsPage() {
 
       {calls.length === 0 ? (
         <Card className="p-12 flex flex-col items-center justify-center">
-          <PhoneCall className="w-16 h-16 text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-700 mb-2">No phone calls yet</h3>
-          <p className="text-gray-500 text-center max-w-md mb-4">
+          <PhoneCall className="w-16 h-16 text-muted-foreground/60 mb-4" />
+          <h3 className="text-lg font-medium text-foreground/90 mb-2">No phone calls yet</h3>
+          <p className="text-muted-foreground text-center max-w-md mb-4">
             Make calls through the Meeting Mind mobile app to record and transcribe your phone conversations.
           </p>
           <Link href="/phone/settings">

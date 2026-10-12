@@ -5,14 +5,14 @@ const statusConfig: Record<
   RecordingStatus,
   { label: string; className: string }
 > = {
-  pending: { label: 'Pending', className: 'bg-gray-100 text-gray-800' },
-  uploading: { label: 'Uploading', className: 'bg-yellow-100 text-yellow-800' },
-  uploaded: { label: 'Processing', className: 'bg-blue-100 text-blue-800' },
-  transcribing: { label: 'Transcribing', className: 'bg-blue-100 text-blue-800' },
-  transcribed: { label: 'Summarizing', className: 'bg-purple-100 text-purple-800' },
-  summarizing: { label: 'Summarizing', className: 'bg-purple-100 text-purple-800' },
-  completed: { label: 'Completed', className: 'bg-green-100 text-green-800' },
-  failed: { label: 'Failed', className: 'bg-red-100 text-red-800' },
+  pending: { label: 'Pending', className: 'bg-secondary text-secondary-foreground' },
+  uploading: { label: 'Uploading', className: 'bg-amber-500/15 text-amber-800 dark:text-amber-300' },
+  uploaded: { label: 'Processing', className: 'bg-accent text-accent-foreground' },
+  transcribing: { label: 'Transcribing', className: 'bg-accent text-accent-foreground' },
+  transcribed: { label: 'Summarizing', className: 'bg-accent text-accent-foreground' },
+  summarizing: { label: 'Summarizing', className: 'bg-accent text-accent-foreground' },
+  completed: { label: 'Completed', className: 'bg-success/15 text-success' },
+  failed: { label: 'Failed', className: 'bg-destructive/15 text-destructive' },
 };
 
 export function StatusBadge({ status }: { status: RecordingStatus }) {
@@ -21,7 +21,7 @@ export function StatusBadge({ status }: { status: RecordingStatus }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium',
+        'inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium',
         config.className
       )}
     >

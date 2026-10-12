@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/lib/utils/cn';
+import { Chip } from '@/components/ui/chip';
 
 interface TodoFiltersProps {
   currentFilter: string;
@@ -16,20 +16,15 @@ const filters = [
 
 export function TodoFilters({ currentFilter, onFilterChange }: TodoFiltersProps) {
   return (
-    <div className="flex gap-2 flex-wrap">
+    <div className="flex gap-2 flex-wrap" role="group" aria-label="Filter todos">
       {filters.map((filter) => (
-        <button
+        <Chip
           key={filter.value}
+          selected={currentFilter === filter.value}
           onClick={() => onFilterChange(filter.value)}
-          className={cn(
-            'px-3 py-1.5 text-sm font-medium rounded-full transition-colors',
-            currentFilter === filter.value
-              ? 'bg-blue-100 text-blue-700'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          )}
         >
           {filter.label}
-        </button>
+        </Chip>
       ))}
     </div>
   );

@@ -105,14 +105,14 @@ export default function NewRecordingPage() {
       <div className="mb-6">
         <Link
           href="/recordings"
-          className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to Recordings
         </Link>
       </div>
 
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">New Recording</h1>
+      <h1 className="text-2xl font-bold text-foreground mb-6">New Recording</h1>
 
       <div className="space-y-6">
         {/* Title Input */}
@@ -137,8 +137,8 @@ export default function NewRecordingPage() {
             className={cn(
               'flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg border-2 transition-colors',
               mode === 'record'
-                ? 'border-blue-600 bg-blue-50 text-blue-700'
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'border-primary bg-accent text-accent-foreground'
+                : 'border-border hover:border-input'
             )}
             disabled={isSubmitting}
           >
@@ -150,8 +150,8 @@ export default function NewRecordingPage() {
             className={cn(
               'flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg border-2 transition-colors',
               mode === 'upload'
-                ? 'border-blue-600 bg-blue-50 text-blue-700'
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'border-primary bg-accent text-accent-foreground'
+                : 'border-border hover:border-input'
             )}
             disabled={isSubmitting}
           >
@@ -176,8 +176,8 @@ export default function NewRecordingPage() {
                   onResume={recorder.resumeRecording}
                 />
                 {recorder.audioBlob && !recorder.isRecording && (
-                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="text-sm text-green-700">
+                  <div className="p-4 bg-success/10 border border-success/30 rounded-lg">
+                    <p className="text-sm text-success">
                       Recording captured! Ready to upload.
                     </p>
                   </div>
@@ -206,8 +206,8 @@ export default function NewRecordingPage() {
 
         {/* Error Display */}
         {submitError && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-600">{submitError}</p>
+          <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-lg">
+            <p className="text-sm text-destructive">{submitError}</p>
           </div>
         )}
 

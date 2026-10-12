@@ -22,7 +22,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -30,8 +30,8 @@ export default function SettingsPage() {
   return (
     <div className="p-6 max-w-2xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-500">Manage your account settings</p>
+        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+        <p className="text-muted-foreground">Manage your account settings</p>
       </div>
 
       <div className="space-y-6">
@@ -48,26 +48,26 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent>
             {subscriptionLoading ? (
-              <div className="flex items-center gap-2 text-gray-500">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Loading...
               </div>
             ) : isPremium ? (
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+                  <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
                     <Sparkles className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">
+                    <p className="font-medium text-foreground">
                       Meeting Mind Pro
                       {plan && (
-                        <span className="text-gray-500 font-normal ml-1">
+                        <span className="text-muted-foreground font-normal ml-1">
                           ({plan.charAt(0).toUpperCase() + plan.slice(1)})
                         </span>
                       )}
                     </p>
-                    <p className="text-sm text-gray-500 flex items-center gap-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
                       <Calendar className="h-3.5 w-3.5" />
                       {status === 'trialing' ? 'Trial ends' : 'Renews'}{' '}
                       {expiresAt ? new Date(expiresAt).toLocaleDateString() : 'N/A'}
@@ -89,7 +89,7 @@ export default function SettingsPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   You&apos;re on the free plan. Upgrade to Pro for unlimited recordings,
                   AI summaries, meeting bot, and more.
                 </p>
@@ -101,7 +101,7 @@ export default function SettingsPage() {
                     </Button>
                   </Link>
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   7-day free trial with yearly plan
                 </p>
               </div>
@@ -127,17 +127,17 @@ export default function SettingsPage() {
                   className="w-16 h-16 rounded-full"
                 />
               ) : (
-                <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
-                  <span className="text-xl font-semibold text-blue-600">
+                <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center">
+                  <span className="text-xl font-semibold text-primary">
                     {user?.user_metadata?.full_name?.[0] || user?.email?.[0]?.toUpperCase() || '?'}
                   </span>
                 </div>
               )}
               <div>
-                <p className="font-medium text-gray-900">
+                <p className="font-medium text-foreground">
                   {user?.user_metadata?.full_name || 'User'}
                 </p>
-                <p className="text-sm text-gray-500">{user?.email}</p>
+                <p className="text-sm text-muted-foreground">{user?.email}</p>
               </div>
             </div>
           </CardContent>
@@ -176,12 +176,12 @@ export default function SettingsPage() {
             <CardTitle>About</CardTitle>
             <CardDescription>Meeting Mind Web App</CardDescription>
           </CardHeader>
-          <CardContent className="text-sm text-gray-600 space-y-2">
+          <CardContent className="text-sm text-muted-foreground space-y-2">
             <p>
               Meeting Mind helps you capture, transcribe, and summarize your meetings
               and conversations with AI-powered insights.
             </p>
-            <p className="text-gray-400">Version 1.0.0</p>
+            <p className="text-muted-foreground">Version 1.0.0</p>
           </CardContent>
         </Card>
       </div>

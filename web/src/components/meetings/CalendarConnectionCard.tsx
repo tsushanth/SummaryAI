@@ -80,11 +80,11 @@ export function CalendarConnectionCard({
             <p className="font-medium capitalize">
               {connection.provider === 'google' ? 'Google' : 'Microsoft'} Calendar
             </p>
-            <p className="text-sm text-gray-500">{connection.provider_email}</p>
+            <p className="text-sm text-muted-foreground">{connection.provider_email}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-400 mr-2">
+          <span className="text-xs text-muted-foreground mr-2">
             {formatLastSynced(connection.last_synced_at)}
           </span>
           <Button
@@ -103,7 +103,7 @@ export function CalendarConnectionCard({
             size="sm"
             onClick={onDisconnect}
             disabled={isDisconnecting}
-            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
           >
             <Trash2 className="w-4 h-4" />
           </Button>

@@ -92,7 +92,7 @@ export default function MeetingsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Meetings</h1>
-          <p className="text-gray-500">
+          <p className="text-muted-foreground">
             Manage calendar connections and upcoming meetings
           </p>
         </div>
@@ -103,9 +103,9 @@ export default function MeetingsPage() {
       </div>
 
       {banner && (
-        <div className="mb-6 flex items-start justify-between gap-4 rounded-md bg-yellow-50 border border-yellow-200 px-4 py-3 text-sm text-yellow-800">
+        <div className="mb-6 flex items-start justify-between gap-4 rounded-md bg-amber-500/10 border border-amber-500/30 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
           <span>{banner}</span>
-          <button onClick={() => setBanner(null)} className="shrink-0 text-yellow-800 hover:text-yellow-900">
+          <button onClick={() => setBanner(null)} className="shrink-0 text-amber-800 dark:text-amber-300 hover:text-foreground">
             Dismiss
           </button>
         </div>
@@ -129,11 +129,11 @@ export default function MeetingsPage() {
           </div>
         ) : connections.length === 0 ? (
           <Card className="p-6 text-center">
-            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Calendar className="w-6 h-6 text-gray-400" />
+            <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center mx-auto mb-3">
+              <Calendar className="w-6 h-6 text-muted-foreground" />
             </div>
             <h3 className="font-medium mb-2">No calendars connected</h3>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-muted-foreground mb-4">
               Connect your calendar to automatically sync meetings
             </p>
             <div className="flex justify-center gap-3">
@@ -194,16 +194,16 @@ export default function MeetingsPage() {
           <div className="flex flex-col items-center justify-center py-8">
             <Loader2 className="w-6 h-6 animate-spin text-primary mb-2" />
             {isSyncingAfterConnect && (
-              <p className="text-sm text-gray-500">Syncing calendar events...</p>
+              <p className="text-sm text-muted-foreground">Syncing calendar events...</p>
             )}
           </div>
         ) : upcomingMeetings.length === 0 ? (
           <Card className="p-6 text-center">
-            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Calendar className="w-6 h-6 text-gray-400" />
+            <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center mx-auto mb-3">
+              <Calendar className="w-6 h-6 text-muted-foreground" />
             </div>
             <h3 className="font-medium mb-2">No upcoming meetings</h3>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-muted-foreground mb-4">
               {connections.length > 0
                 ? 'Your calendar meetings will appear here'
                 : 'Connect a calendar or add a meeting manually'}
@@ -232,7 +232,7 @@ export default function MeetingsPage() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">Past Meetings</h2>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               Recordings are available in the{' '}
               <Link href="/recordings" className="text-primary hover:underline">
                 Recordings

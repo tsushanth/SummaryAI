@@ -55,12 +55,12 @@ function VerifiedPhoneCard({
     <Card className="p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-green-100 rounded-full">
-            <CheckCircle className="w-4 h-4 text-green-600" />
+          <div className="p-2 bg-success/15 rounded-full">
+            <CheckCircle className="w-4 h-4 text-success" />
           </div>
           <div>
             <p className="font-medium">{formatPhoneNumber(phone.phone_number)}</p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Verified on {new Date(phone.verified_at).toLocaleDateString()}
             </p>
           </div>
@@ -70,7 +70,7 @@ function VerifiedPhoneCard({
           size="sm"
           onClick={handleDelete}
           disabled={isDeleting}
-          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+          className="text-destructive hover:text-destructive hover:bg-destructive/10"
         >
           {isDeleting ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -133,7 +133,7 @@ function AddPhoneForm({ onSuccess }: { onSuccess: () => void }) {
       {step === 'input' ? (
         <form onSubmit={handleSendCode} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground/90 mb-1">
               Phone Number
             </label>
             <input
@@ -141,16 +141,16 @@ function AddPhoneForm({ onSuccess }: { onSuccess: () => void }) {
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               placeholder="+1 (555) 123-4567"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               required
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               We'll send a verification code to this number
             </p>
           </div>
 
           {error && (
-            <p className="text-sm text-red-600 flex items-center gap-1">
+            <p className="text-sm text-destructive flex items-center gap-1">
               <AlertCircle className="w-4 h-4" />
               {error}
             </p>
@@ -167,13 +167,13 @@ function AddPhoneForm({ onSuccess }: { onSuccess: () => void }) {
         </form>
       ) : (
         <form onSubmit={handleVerifyCode} className="space-y-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             We sent a verification code to{' '}
             <span className="font-medium">{phoneNumber}</span>
           </p>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground/90 mb-1">
               Verification Code
             </label>
             <input
@@ -181,14 +181,14 @@ function AddPhoneForm({ onSuccess }: { onSuccess: () => void }) {
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               placeholder="123456"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-center text-2xl tracking-widest"
+              className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-center text-2xl tracking-widest"
               maxLength={6}
               required
             />
           </div>
 
           {error && (
-            <p className="text-sm text-red-600 flex items-center gap-1">
+            <p className="text-sm text-destructive flex items-center gap-1">
               <AlertCircle className="w-4 h-4" />
               {error}
             </p>
@@ -255,22 +255,22 @@ export default function PhoneSettingsPage() {
       <div className="mb-6">
         <Link
           href="/phone"
-          className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1 mb-2"
+          className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 mb-2"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Phone Calls
         </Link>
         <h1 className="text-2xl font-semibold">Phone Settings</h1>
-        <p className="text-gray-500 mt-1">
+        <p className="text-muted-foreground mt-1">
           Manage your verified phone numbers for call recording
         </p>
       </div>
 
       {/* Info card */}
-      <Card className="p-4 mb-6 bg-blue-50 border-blue-200">
+      <Card className="p-4 mb-6 bg-accent border-border">
         <div className="flex gap-3">
-          <Shield className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-blue-800">
+          <Shield className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-accent-foreground">
             <p className="font-medium mb-1">About Phone Call Recording</p>
             <p>
               To record phone calls, you need to verify your phone number. Once verified,
@@ -286,9 +286,9 @@ export default function PhoneSettingsPage() {
         <h2 className="text-lg font-medium mb-3">Verified Numbers</h2>
         {phones.length === 0 ? (
           <Card className="p-8 flex flex-col items-center justify-center text-center">
-            <Phone className="w-12 h-12 text-gray-300 mb-3" />
-            <p className="text-gray-500">No verified phone numbers yet</p>
-            <p className="text-sm text-gray-400 mt-1">
+            <Phone className="w-12 h-12 text-muted-foreground/60 mb-3" />
+            <p className="text-muted-foreground">No verified phone numbers yet</p>
+            <p className="text-sm text-muted-foreground mt-1">
               Add a phone number below to get started
             </p>
           </Card>
