@@ -12,17 +12,23 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
         serif: ['var(--font-serif)', 'Georgia', 'serif'],
+        display: ['var(--font-sans)', 'system-ui', 'sans-serif'],
       },
       colors: {
         // Marketing-site palette (landing page only — the dashboard keeps the tokens below)
-        ink: '#15131F',
-        paper: '#F7F5FC',
-        slate: '#615F76',
+        ink: 'hsl(var(--foreground))',
+        paper: 'hsl(var(--background))',
+        slate: 'hsl(var(--muted-foreground))',
         brand: {
-          indigo: '#4B4FE0',
-          lavender: '#CBCDFB',
-          signal: '#2E9B6B',
+          indigo: 'hsl(var(--primary))',
+          lavender: 'hsl(var(--accent))',
+          signal: 'hsl(var(--success))',
         },
+        mark: {
+          DEFAULT: 'hsl(var(--mark))',
+          foreground: 'hsl(var(--mark-foreground))',
+        },
+        warning: 'hsl(var(--warning))',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',

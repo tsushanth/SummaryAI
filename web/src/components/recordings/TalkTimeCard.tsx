@@ -15,11 +15,11 @@ export function TalkTimeCard({ analytics }: { analytics: MeetingAnalytics }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Talk time</CardTitle>
+        <CardTitle className="text-lg">Talk time</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div
-          className="flex h-3 w-full overflow-hidden rounded-full bg-muted"
+          className="ribbon h-3 bg-muted"
           role="img"
           aria-label={analytics.speakers
             .map((s) => `${s.name} ${Math.round(s.talk_share * 100)}%`)
@@ -28,7 +28,7 @@ export function TalkTimeCard({ analytics }: { analytics: MeetingAnalytics }) {
           {analytics.speakers.map((s) => (
             <div
               key={s.speaker_index}
-              style={{ width: `${Math.max(0, s.talk_share * 100)}%`, backgroundColor: speakerColor(s.name) }}
+              style={{ width: `${Math.max(0, s.talk_share * 100)}%`, backgroundColor: speakerColor(String(s.speaker_index)) }}
             />
           ))}
         </div>
@@ -38,16 +38,16 @@ export function TalkTimeCard({ analytics }: { analytics: MeetingAnalytics }) {
               <div className="flex items-center justify-between text-sm">
                 <span className="flex items-center gap-2">
                   <span
-                    className="inline-block h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: speakerColor(s.name) }}
+                    className="inline-block h-2.5 w-2.5 rounded-[2px]"
+                    style={{ backgroundColor: speakerColor(String(s.speaker_index)) }}
                     aria-hidden="true"
                   />
                   {s.name}
                 </span>
-                <span className="font-semibold">{Math.round(s.talk_share * 100)}%</span>
+                <span className="font-semibold tabular">{Math.round(s.talk_share * 100)}%</span>
               </div>
               <p className="text-xs text-muted-foreground">
-                {s.word_count} words · {s.question_count} questions
+                {s.word_count} words, {s.question_count} questions
               </p>
             </li>
           ))}

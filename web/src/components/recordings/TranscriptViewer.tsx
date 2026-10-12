@@ -146,13 +146,13 @@ export function TranscriptViewer({
     <div className="space-y-4">
       {/* Speaker Toolbar */}
       {speakerInfo.length > 1 && (
-        <div className="bg-muted rounded-lg p-4 space-y-3">
+        <div className="space-y-3 rounded-md bg-card p-4">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-foreground/90">Speakers</span>
             {selectedSpeakers.size !== speakerInfo.length && (
               <button
                 onClick={selectAllSpeakers}
-                className="text-xs text-primary hover:underline"
+                className="min-h-[32px] text-sm font-medium text-primary hover:underline"
               >
                 Show all
               </button>
@@ -172,8 +172,8 @@ export function TranscriptViewer({
                   key={speaker.index}
                   style={{ backgroundColor: speakerColor(String(speaker.index)) }}
                   className={cn(
-                    'flex items-center gap-2 px-3 py-2 rounded-lg text-white transition-opacity',
-                    !isSelected && 'opacity-50'
+                    'flex items-center gap-2 rounded-md px-3 py-1.5 text-white transition-opacity',
+                    !isSelected && 'opacity-60'
                   )}
                 >
                   {isEditing ? (
@@ -277,7 +277,7 @@ export function TranscriptViewer({
       )}
 
       {/* Transcript Segments */}
-      <div className="space-y-1">
+      <div className="space-y-0.5">
         {filteredSegments.map((segment, index) => {
           const isActive =
             currentTime >= segment.start_time && currentTime < segment.end_time;
@@ -288,22 +288,23 @@ export function TranscriptViewer({
             <div
               key={segment.segment_id || index}
               onClick={() => onSeek?.(segment.start_time)}
+              style={{ borderLeftColor: color }}
               aria-current={isActive ? 'true' : undefined}
               className={cn(
-                'flex items-start gap-3 p-3 rounded-lg transition-colors',
+                'flex items-start gap-3 rounded-md border-l-[3px] px-3 py-3 transition-colors',
                 onSeek && 'cursor-pointer',
-                isActive ? 'bg-accent' : 'hover:bg-accent/50'
+                isActive ? 'bg-mark' : 'hover:bg-card'
               )}
             >
               <div
                 aria-hidden="true"
                 style={{ backgroundColor: color }}
-                className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+                className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md text-xs font-semibold text-white"
               >
                 {speakerInitials(name)}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 mb-0.5">
+                <div className="mb-0.5 flex items-baseline gap-2">
                   <span className="text-sm font-semibold text-foreground">
                     {name}
                   </span>
@@ -313,12 +314,12 @@ export function TranscriptViewer({
                       onSeek?.(segment.start_time);
                     }}
                     aria-label={`Jump to ${formatDuration(segment.start_time)}`}
-                    className="text-xs text-muted-foreground hover:text-primary hover:underline"
+                    className="text-sm text-muted-foreground tabular hover:text-primary hover:underline"
                   >
                     {formatDuration(segment.start_time)}
                   </button>
                 </div>
-                <p className="text-foreground/90 leading-relaxed">{segment.text}</p>
+                <p className="minute text-foreground/90">{segment.text}</p>
               </div>
             </div>
           );

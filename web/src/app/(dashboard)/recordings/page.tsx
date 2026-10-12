@@ -34,16 +34,16 @@ export default function RecordingsPage() {
   };
 
   return (
-    <div className="p-6">
+    <div className="mx-auto max-w-5xl px-4 py-6 sm:px-8 sm:py-8">
       {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} />}
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">Recordings</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-semibold tracking-tight">Recordings</h1>
+          <p className="text-sm text-muted-foreground tabular">
             {recordings.length} recording{recordings.length !== 1 ? 's' : ''}
             {!subLoading && !isSubscribed && !isFiltered && (
-              <span className="ml-2 text-xs text-amber-700 dark:text-amber-300 font-medium">
+              <span className="ml-2 rounded-sm bg-mark px-1.5 py-0.5 text-xs font-semibold text-mark-foreground">
                 {recordings.length}/{FREE_TIER_LIMIT} free used
               </span>
             )}
@@ -70,9 +70,7 @@ export default function RecordingsPage() {
       <RecordingFilters value={filters} onChange={setFilters} />
 
       {isLoading ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <SkeletonCardList count={3} label="Loading recordings" />
-        </div>
+        <SkeletonCardList count={4} label="Loading recordings" />
       ) : error ? (
         <EmptyState
           icon={<CloudOff />}
@@ -97,7 +95,7 @@ export default function RecordingsPage() {
         <EmptyState
           icon={<Mic />}
           title="No recordings yet"
-          message="Create your first recording to get started"
+          message="Record a meeting, upload an audio file, or connect your calendar so calls arrive on their own. Each one becomes a transcript, a summary and a list of what people agreed to do."
           action={
             <Link href="/recordings/new">
               <Button>
@@ -110,11 +108,11 @@ export default function RecordingsPage() {
       ) : (
         <div className="space-y-8">
           {groupRecordingsByDate(recordings).map((group) => (
-            <section key={group.label}>
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-3">
+            <section key={group.label} className="md:grid md:grid-cols-[8rem_minmax(0,1fr)] md:gap-6">
+              <h2 className="mb-2 px-3 text-base font-semibold text-foreground md:sticky md:top-0 md:self-start md:px-0 md:pt-3 md:text-right">
                 {group.label}
               </h2>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="space-y-1">
                 {group.recordings.map((recording) => (
                   <RecordingCard key={recording.id} recording={recording} />
                 ))}

@@ -38,7 +38,7 @@ export function PaywallModal({ onClose, reason = 'recording_limit' }: PaywallMod
 
         {/* Features list */}
         <div className="-mt-4 bg-card rounded-t-2xl px-6 pt-6 pb-2">
-          <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">
+          <p className="text-sm font-semibold text-muted-foreground mb-4">
             Everything in Pro
           </p>
           <ul className="space-y-3 mb-6">

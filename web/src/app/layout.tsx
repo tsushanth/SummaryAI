@@ -1,15 +1,18 @@
 import type { Metadata } from 'next';
-import { Inter, Fraunces } from 'next/font/google';
+import { Schibsted_Grotesk, Newsreader } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import WebFailureReporter from '@/components/WebFailureReporter'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
-// Display serif for the marketing site's headlines — the dashboard keeps using Inter alone.
-const fraunces = Fraunces({
+// UI + headings: a grotesk with newsroom roots. Reading text (summaries, transcripts): a text serif.
+const sans = Schibsted_Grotesk({ subsets: ['latin'], variable: '--font-sans', display: 'swap' });
+const serif = Newsreader({
   subsets: ['latin'],
-  axes: ['opsz', 'SOFT', 'WONK'],
+  axes: ['opsz'],
+  style: ['normal', 'italic'],
   variable: '--font-serif',
+  adjustFontFallback: false,
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -37,7 +40,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.variable} ${fraunces.variable} font-sans`}>
+      <body className={`${sans.variable} ${serif.variable} font-sans`}>
         <WebFailureReporter />
         <AuthProvider>{children}</AuthProvider>
       </body>

@@ -69,6 +69,7 @@ import { updateRecording, updateSpeakerNames } from '@/lib/api/recordings';
 import { useSubscription } from '@/hooks/useSubscription';
 import { PremiumGate } from '@/components/subscription/PremiumGate';
 import { TalkTimeCard } from '@/components/recordings/TalkTimeCard';
+import { SpeakerTimeline } from '@/components/recordings/VoiceRibbon';
 import { useRecordingAnalytics } from '@/hooks/useRecordingAnalytics';
 
 type Tab = 'summary' | 'transcript' | 'qa';
@@ -116,9 +117,10 @@ export default function RecordingDetailPage() {
 
   if (isLoading) {
     return (
-      <div role="status" aria-label="Loading recording" className="space-y-4 p-6">
+      <div role="status" aria-label="Loading recording" className="space-y-4 p-4 sm:p-8">
         <Skeleton className="h-8 w-1/2" />
         <Skeleton className="h-4 w-1/3" />
+        <Skeleton className="h-8 w-full" />
         <Skeleton className="h-40 w-full" />
         <span className="sr-only">Loading recording</span>
       </div>
@@ -127,15 +129,15 @@ export default function RecordingDetailPage() {
 
   if (!recording) {
     return (
-      <div className="p-6">
+      <div className="p-4 sm:p-8">
         <Link
           href="/recordings"
-          className="inline-flex items-center text-muted-foreground hover:text-foreground mb-4"
+          className="mb-4 inline-flex min-h-[44px] items-center rounded-md text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
+          <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
           Back to recordings
         </Link>
-        <div className="text-center py-20">
+        <div className="py-20 text-center">
           <p className="text-muted-foreground">Recording not found</p>
         </div>
       </div>
@@ -147,73 +149,87 @@ export default function RecordingDetailPage() {
   );
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="border-b border-border bg-card p-6">
+    <div className="flex h-full flex-col">
+      {/* Header: the heading of the minutes */}
+      <div className="border-b border-border bg-card px-4 pb-4 pt-3 sm:px-8">
         <Link
           href="/recordings"
-          className="inline-flex items-center text-muted-foreground hover:text-foreground mb-4"
+          className="mb-2 inline-flex min-h-[44px] items-center rounded-md text-sm text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
+          <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
           Back to recordings
         </Link>
 
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-2xl font-bold">{recording.title}</h1>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0 flex-1 basis-80">
+            <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+              <h1 className="text-3xl font-semibold leading-tight tracking-tight">{recording.title}</h1>
               <StatusBadge status={recording.status} />
               <button
                 onClick={toggleFavorite}
                 aria-pressed={recording.is_favorite}
                 aria-label={recording.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
-                className="flex h-11 w-11 items-center justify-center rounded-lg hover:bg-accent"
+                className="flex h-11 w-11 items-center justify-center rounded-md hover:bg-accent"
               >
                 <Star
                   className={cn(
-                    'w-5 h-5',
-                    recording.is_favorite
-                      ? 'text-amber-500 fill-amber-500'
-                      : 'text-muted-foreground/60'
+                    'h-5 w-5',
+                    recording.is_favorite ? 'fill-warning text-warning' : 'text-muted-foreground'
                   )}
+                  aria-hidden="true"
                 />
               </button>
             </div>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Clock className="w-4 h-4" />
-                {formatDuration(recording.duration_seconds)}
-              </span>
-              {recording.word_count && (
-                <span className="flex items-center gap-1">
-                  <FileText className="w-4 h-4" />
-                  {recording.word_count.toLocaleString()} words
-                </span>
-              )}
-              <span className="flex items-center gap-1">
-                <Calendar className="w-4 h-4" />
-                {formatDate(recording.created_at)}
-              </span>
+            <dl className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-muted-foreground tabular">
+              <div className="flex items-center gap-1.5">
+                <Calendar className="h-4 w-4" aria-hidden="true" />
+                <dt className="sr-only">Recorded</dt>
+                <dd>{formatDate(recording.created_at)}</dd>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Clock className="h-4 w-4" aria-hidden="true" />
+                <dt className="sr-only">Length</dt>
+                <dd>{formatDuration(recording.duration_seconds)}</dd>
+              </div>
+              {recording.word_count ? (
+                <div className="flex items-center gap-1.5">
+                  <FileText className="h-4 w-4" aria-hidden="true" />
+                  <dd>{recording.word_count.toLocaleString()}</dd>
+                  <dt>words</dt>
+                </div>
+              ) : null}
               {recording.language && (
-                <span className="flex items-center gap-1">
-                  <Globe className="w-4 h-4" />
-                  {LANGUAGE_NAMES[recording.language] || recording.language.toUpperCase()}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <Globe className="h-4 w-4" aria-hidden="true" />
+                  <dt className="sr-only">Language</dt>
+                  <dd>{LANGUAGE_NAMES[recording.language] || recording.language.toUpperCase()}</dd>
+                </div>
               )}
-            </div>
+            </dl>
             <RecordingOrganizer recording={recording} onChanged={refresh} />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <ExportMenu recording={recording} summary={summary} transcript={transcript} audioUrl={audioUrl} />
             <ShareLinkPanel recordingId={recording.id} />
           </div>
         </div>
 
+        {/* Speaker timeline: who spoke when, click to jump */}
+        {transcript && transcript.segments.length > 0 && (
+          <SpeakerTimeline
+            className="mt-4"
+            segments={transcript.segments}
+            speakerNames={transcript.speaker_names}
+            currentTime={currentTime}
+            onSeek={handleSeek}
+          />
+        )}
+
         {/* Processing banner */}
         {isProcessing && (
-          <div className="mt-4 p-3 bg-accent border border-border rounded-lg flex items-center gap-3">
-            <Loader2 className="w-5 h-5 animate-spin text-primary" />
-            <span className="text-accent-foreground">
+          <div role="status" className="mt-4 flex items-center gap-3 rounded-md bg-mark p-3 text-mark-foreground">
+            <Loader2 className="h-5 w-5 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+            <span>
               {recording.status === 'pending'
                 ? 'Waiting for meeting to start...'
                 : recording.status === 'transcribing'
@@ -227,7 +243,7 @@ export default function RecordingDetailPage() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-border bg-card px-6">
+      <div className="border-b border-border bg-card px-4 sm:px-8">
         <nav className="flex gap-6" role="tablist" aria-label="Recording sections">
           {(['transcript', 'summary', 'qa'] as Tab[]).map((tab) => {
             const isPremiumTab = tab === 'summary' || tab === 'qa';
@@ -239,16 +255,16 @@ export default function RecordingDetailPage() {
                 aria-selected={activeTab === tab}
                 onClick={() => setActiveTab(tab)}
                 className={cn(
-                  'min-h-[44px] py-3 border-b-2 text-sm font-medium transition-colors capitalize flex items-center gap-1.5',
+                  'flex min-h-[44px] items-center gap-1.5 border-b-[3px] py-2 text-sm font-semibold capitalize transition-colors',
                   activeTab === tab
-                    ? 'border-primary text-primary'
+                    ? 'border-primary text-foreground'
                     : 'border-transparent text-muted-foreground hover:text-foreground'
                 )}
               >
                 {tab === 'qa' ? 'Q&A' : tab}
                 {showLock && (
-                  <span className="text-xs bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full">
-                    PRO
+                  <span className="rounded-sm bg-mark px-1.5 py-0.5 text-xs font-semibold text-mark-foreground">
+                    Pro
                   </span>
                 )}
               </button>
@@ -258,26 +274,34 @@ export default function RecordingDetailPage() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-1 overflow-auto px-4 py-6 sm:px-8">
         {activeTab === 'transcript' && (
-          <div className="max-w-3xl space-y-4">
-            {analytics && <TalkTimeCard analytics={analytics} />}
-            {transcript ? (
-              <TranscriptViewer
-                transcript={transcript}
-                currentTime={currentTime}
-                onSeek={handleSeek}
-                onSpeakerNameChange={handleSpeakerNameChange}
-                isUpdating={isUpdatingSpeakers}
-              />
-            ) : (
-              <div className="text-center py-10 text-muted-foreground">
-                {isProcessing ? (
-                  <p>Transcript will appear here once processing is complete</p>
-                ) : (
-                  <p>No transcript available</p>
-                )}
-              </div>
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_17rem]">
+            <div className="min-w-0 max-w-3xl space-y-4">
+              {transcript ? (
+                <TranscriptViewer
+                  transcript={transcript}
+                  currentTime={currentTime}
+                  onSeek={handleSeek}
+                  onSpeakerNameChange={handleSpeakerNameChange}
+                  isUpdating={isUpdatingSpeakers}
+                />
+              ) : (
+                <div className="py-10 text-muted-foreground">
+                  {isProcessing ? (
+                    <p>Transcript will appear here once processing is complete.</p>
+                  ) : (
+                    <p>No transcript available.</p>
+                  )}
+                </div>
+              )}
+            </div>
+            {analytics && (
+              <aside aria-label="Talk time" className="order-first lg:order-none">
+                <div className="lg:sticky lg:top-0">
+                  <TalkTimeCard analytics={analytics} />
+                </div>
+              </aside>
             )}
           </div>
         )}
@@ -298,11 +322,11 @@ export default function RecordingDetailPage() {
                   />
                 </>
               ) : (
-                <div className="text-center py-10 text-muted-foreground">
+                <div className="py-10 text-muted-foreground">
                   {isProcessing ? (
-                    <p>Summary will appear here once processing is complete</p>
+                    <p>Summary will appear here once processing is complete.</p>
                   ) : (
-                    <p>No summary available</p>
+                    <p>No summary available.</p>
                   )}
                 </div>
               )}
@@ -311,7 +335,7 @@ export default function RecordingDetailPage() {
         )}
 
         {activeTab === 'qa' && (
-          <div className="max-w-3xl h-[500px]">
+          <div className="h-[500px] max-w-3xl">
             <PremiumGate feature="qaChat">
               <QAChat
                 recordingId={recording.id}
@@ -325,8 +349,8 @@ export default function RecordingDetailPage() {
 
       {/* Audio Player */}
       {audioUrl && (
-        <div className="border-t border-border p-4 bg-card">
-          <div className="max-w-3xl mx-auto">
+        <div className="border-t border-border bg-card p-3 sm:p-4">
+          <div className="mx-auto max-w-3xl">
             <AudioPlayer
               src={audioUrl}
               onTimeUpdate={setCurrentTime}

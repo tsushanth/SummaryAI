@@ -25,7 +25,7 @@ export function SkeletonCardList({
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          className="space-y-2.5 rounded-xl border border-border/60 bg-card p-4"
+          className="space-y-2.5 rounded-lg border border-border bg-card p-4"
         >
           <Skeleton className="h-4 w-3/5" />
           <Skeleton className="h-3 w-full" />

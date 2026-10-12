@@ -6,7 +6,7 @@ const statusConfig: Record<
   { label: string; className: string }
 > = {
   pending: { label: 'Pending', className: 'bg-secondary text-secondary-foreground' },
-  uploading: { label: 'Uploading', className: 'bg-amber-500/15 text-amber-800 dark:text-amber-300' },
+  uploading: { label: 'Uploading', className: 'bg-mark text-mark-foreground' },
   uploaded: { label: 'Processing', className: 'bg-accent text-accent-foreground' },
   transcribing: { label: 'Transcribing', className: 'bg-accent text-accent-foreground' },
   transcribed: { label: 'Summarizing', className: 'bg-accent text-accent-foreground' },
@@ -21,7 +21,7 @@ export function StatusBadge({ status }: { status: RecordingStatus }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium',
+        'inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-semibold',
         config.className
       )}
     >

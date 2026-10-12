@@ -3,54 +3,61 @@
 @tailwind utilities;
 
 @layer base {
-  /* Design tokens. Primary matches the Android app (indigo). Values are HSL channels. */
+  /* Design tokens: see web/DESIGN.md. Values are HSL channels.
+     paper/ink/signal/mark are the named palette; voice colors live in lib/utils/speakers.ts. */
   :root {
-    --background: 250 33% 98%;
-    --foreground: 250 25% 11%;
+    --background: 216 24% 96%;          /* paper  #F2F4F7 */
+    --foreground: 213 35% 13%;          /* ink    #16212E */
     --card: 0 0% 100%;
-    --card-foreground: 250 25% 11%;
+    --card-foreground: 213 35% 13%;
     --popover: 0 0% 100%;
-    --popover-foreground: 250 25% 11%;
-    --primary: 239 71% 58%;
+    --popover-foreground: 213 35% 13%;
+    --primary: 229 64% 49%;             /* signal #2D4ACB */
     --primary-foreground: 0 0% 100%;
-    --secondary: 240 40% 95%;
-    --secondary-foreground: 250 30% 20%;
-    --muted: 250 25% 95%;
-    --muted-foreground: 250 8% 38%;
-    --accent: 239 80% 95%;
-    --accent-foreground: 239 60% 30%;
-    --destructive: 0 72% 45%;
+    --secondary: 213 24% 93%;
+    --secondary-foreground: 213 30% 20%;
+    --muted: 213 24% 93%;
+    --muted-foreground: 215 16% 35%;
+    --accent: 227 70% 94%;
+    --accent-foreground: 230 66% 36%;
+    --destructive: 4 76% 40%;
     --destructive-foreground: 0 0% 100%;
-    --success: 158 62% 28%;
+    --success: 155 60% 26%;
     --success-foreground: 0 0% 100%;
-    --border: 250 20% 90%;
-    --input: 250 20% 86%;
-    --ring: 239 71% 58%;
-    --radius: 0.75rem;
+    --warning: 39 100% 27%;
+    --mark: 48 92% 81%;                 /* highlighter #FBE9A0 */
+    --mark-foreground: 213 35% 13%;
+    --border: 214 23% 88%;
+    --input: 214 12% 58%;
+    --ring: 229 64% 49%;
+    --radius: 0.5rem;
   }
 
   .dark {
-    --background: 250 20% 8%;
-    --foreground: 250 20% 96%;
-    --card: 250 18% 12%;
-    --card-foreground: 250 20% 96%;
-    --popover: 250 18% 12%;
-    --popover-foreground: 250 20% 96%;
-    --primary: 237 85% 74%;
-    --primary-foreground: 250 30% 10%;
-    --secondary: 250 14% 18%;
-    --secondary-foreground: 250 20% 94%;
-    --muted: 250 14% 16%;
-    --muted-foreground: 250 10% 70%;
-    --accent: 250 20% 20%;
-    --accent-foreground: 250 30% 92%;
-    --destructive: 0 70% 55%;
-    --destructive-foreground: 0 0% 100%;
-    --success: 158 55% 45%;
-    --success-foreground: 250 30% 10%;
-    --border: 250 12% 22%;
-    --input: 250 12% 26%;
-    --ring: 237 85% 74%;
+    --background: 215 29% 8%;           /* paper #0F141B */
+    --foreground: 213 31% 93%;          /* ink   #E8EDF3 */
+    --card: 214 26% 12%;
+    --card-foreground: 213 31% 93%;
+    --popover: 214 26% 12%;
+    --popover-foreground: 213 31% 93%;
+    --primary: 229 100% 81%;            /* signal #9FB1FF */
+    --primary-foreground: 215 29% 8%;
+    --secondary: 214 26% 16%;
+    --secondary-foreground: 213 31% 92%;
+    --muted: 214 26% 16%;
+    --muted-foreground: 214 17% 66%;
+    --accent: 226 39% 22%;
+    --accent-foreground: 229 100% 89%;
+    --destructive: 5 84% 68%;
+    --destructive-foreground: 215 29% 8%;
+    --success: 153 49% 54%;
+    --success-foreground: 215 29% 8%;
+    --warning: 40 90% 62%;
+    --mark: 49 66% 19%;
+    --mark-foreground: 213 31% 93%;
+    --border: 215 22% 21%;
+    --input: 215 16% 40%;
+    --ring: 229 100% 81%;
   }
 }
 
@@ -59,7 +66,13 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+  }
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+  .tabular {
+    font-variant-numeric: lining-nums; /* Schibsted tabular figures are slab-like, so keep proportional lining */
   }
 }
 
@@ -72,6 +85,34 @@
     * {
       animation-duration: 0.01ms !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
+  }
+}
+
+/* The minute: serif reading text for summaries and transcripts, longer leading */
+@layer components {
+  .minute {
+    font-family: var(--font-serif), Georgia, serif;
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    max-width: 68ch;
+  }
+  /* Voice ribbon: segments sized by talk time, colored per speaker */
+  .ribbon {
+    display: flex;
+    gap: 2px;
+    height: 0.5rem;
+    overflow: hidden;
+    border-radius: 2px;
+  }
+  /* One orchestrated moment: the landing ribbon draws in once */
+  @keyframes ribbon-in {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+  .ribbon-draw {
+    transform-origin: left center;
+    animation: ribbon-in 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 }

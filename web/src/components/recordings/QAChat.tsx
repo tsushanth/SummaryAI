@@ -48,7 +48,7 @@ export function QAChat({ recordingId, isReady, onSeek }: QAChatProps) {
       <div className="flex-1 overflow-auto space-y-4 pb-4">
         {questions.length === 0 ? (
           <div className="text-center py-10 text-muted-foreground">
-            <Sparkles className="w-12 h-12 mx-auto mb-3 text-muted-foreground/60" />
+            <Sparkles className="mx-auto mb-3 h-8 w-8 text-muted-foreground" aria-hidden="true" />
             <p className="font-medium">Ask questions about this recording</p>
             <p className="text-sm mt-1">
               The AI will answer based on the transcript content
@@ -101,21 +101,21 @@ function QAMessage({
     <div className="space-y-3">
       {/* Question */}
       <div className="flex items-start gap-3">
-        <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
+        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-accent">
           <User className="w-4 h-4 text-primary" />
         </div>
-        <div className="flex-1 bg-accent rounded-lg p-3">
+        <div className="flex-1 rounded-md bg-accent p-3">
           <p className="text-foreground">{qa.question}</p>
         </div>
       </div>
 
       {/* Answer */}
       <div className="flex items-start gap-3">
-        <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
+        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-accent">
           <Sparkles className="w-4 h-4 text-primary" />
         </div>
-        <div className="flex-1 bg-card border rounded-lg p-3">
-          <p className="text-foreground whitespace-pre-wrap">{qa.answer}</p>
+        <div className="flex-1 rounded-md border border-border bg-card p-3">
+          <p className="minute whitespace-pre-wrap text-foreground">{qa.answer}</p>
 
           {/* Citations */}
           {qa.citations && qa.citations.length > 0 && (
@@ -126,7 +126,7 @@ function QAMessage({
                   <button
                     key={index}
                     onClick={() => onSeek?.(citation.timestamp)}
-                    className="flex items-center gap-2 text-sm text-primary hover:underline"
+                    className="flex min-h-[32px] items-center gap-2 text-sm text-primary hover:underline"
                   >
                     <Clock className="w-3 h-3" />
                     <span>{formatDuration(citation.timestamp)}</span>
@@ -144,11 +144,11 @@ function QAMessage({
             <div className="mt-2">
               <span
                 className={cn(
-                  'text-xs px-2 py-0.5 rounded',
+                  'rounded-sm px-2 py-0.5 text-xs font-medium',
                   qa.confidence >= 0.8
                     ? 'bg-success/15 text-success'
                     : qa.confidence >= 0.5
-                      ? 'bg-amber-500/15 text-amber-800 dark:text-amber-300'
+                      ? 'bg-mark text-mark-foreground'
                       : 'bg-secondary text-muted-foreground'
                 )}
               >
