@@ -17,7 +17,7 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.PictureAsPdf
-import androidx.compose.material.icons.filled.TextSnippet
+import androidx.compose.material.icons.automirrored.filled.TextSnippet
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -126,7 +126,7 @@ fun ShareExportSheet(
             ) { run(ShareExporter.ExportType.SUMMARY_PDF) }
 
             ShareRow(
-                icon = Icons.Default.TextSnippet,
+                icon = Icons.AutoMirrored.Filled.TextSnippet,
                 title = "Share Summary as Text",
                 enabled = summary != null && !isGenerating
             ) { run(ShareExporter.ExportType.SUMMARY_TEXT) }
@@ -138,14 +138,14 @@ fun ShareExportSheet(
             ) { run(ShareExporter.ExportType.TRANSCRIPT_PDF) }
 
             ShareRow(
-                icon = Icons.Default.TextSnippet,
+                icon = Icons.AutoMirrored.Filled.TextSnippet,
                 title = "Share Transcript as Text",
                 enabled = transcript != null && !isGenerating
             ) { run(ShareExporter.ExportType.TRANSCRIPT_TEXT) }
 
             if (hasMeetingId) {
                 ShareRow(
-                    icon = Icons.Default.TextSnippet,
+                    icon = Icons.AutoMirrored.Filled.TextSnippet,
                     title = "Share Live Transcript as Text",
                     enabled = !isGenerating
                 ) { run(ShareExporter.ExportType.LIVE_TRANSCRIPT_TEXT) }

@@ -5,12 +5,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -94,7 +92,7 @@ fun AuthScreen(
             Box(
                 modifier = Modifier
                     .size(104.dp)
-                    .clip(RoundedCornerShape(30.dp))
+                    .clip(MaterialTheme.shapes.extraLarge)
                     .background(MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center
             ) {
@@ -112,7 +110,7 @@ fun AuthScreen(
                 text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -124,7 +122,7 @@ fun AuthScreen(
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(64.dp))
+            Spacer(modifier = Modifier.height(48.dp))
 
             // Google Sign-In Button
             OutlinedButton(
@@ -135,6 +133,7 @@ fun AuthScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
+                shape = MaterialTheme.shapes.medium,
                 enabled = !uiState.isLoading && !authState.isLoading
             ) {
                 if (uiState.isLoading || authState.isLoading) {
@@ -161,14 +160,14 @@ fun AuthScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                HorizontalDivider(modifier = Modifier.weight(1f))
+                HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
                 Text(
                     text = stringResource(R.string.or_divider),
                     modifier = Modifier.padding(horizontal = 16.dp),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                HorizontalDivider(modifier = Modifier.weight(1f))
+                HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -179,6 +178,7 @@ fun AuthScreen(
                 onValueChange = { email = it },
                 label = { Text(stringResource(R.string.email)) },
                 modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
@@ -198,6 +198,7 @@ fun AuthScreen(
                 onValueChange = { password = it },
                 label = { Text(stringResource(R.string.password)) },
                 modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
                 singleLine = true,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(
@@ -241,6 +242,7 @@ fun AuthScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
+                shape = MaterialTheme.shapes.medium,
                 enabled = email.isNotBlank() && password.isNotBlank() && !uiState.isLoading && !authState.isLoading
             ) {
                 if (uiState.isLoading || authState.isLoading) {
@@ -258,6 +260,7 @@ fun AuthScreen(
 
             // Toggle between sign in and sign up
             TextButton(
+                modifier = Modifier.heightIn(min = 48.dp),
                 onClick = { isSignUpMode = !isSignUpMode },
                 enabled = !uiState.isLoading && !authState.isLoading
             ) {

@@ -1,39 +1,22 @@
 package com.kreativekoala.summaryai.ui.phone
 
-import android.Manifest
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
-import com.kreativekoala.summaryai.domain.model.PhoneCall
-import com.kreativekoala.summaryai.domain.model.PhoneCallStatus
-import com.kreativekoala.summaryai.domain.model.VerifiedPhone
-import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -56,7 +39,7 @@ internal fun NoVerifiedPhoneContent(
                 .clip(CircleShape)
                 .background(
                     brush = androidx.compose.ui.graphics.Brush.linearGradient(
-                        colors = listOf(Color(0xFF2196F3), Color(0xFF4CAF50))
+                        colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.tertiary)
                     )
                 ),
             contentAlignment = Alignment.Center
@@ -94,7 +77,7 @@ internal fun NoVerifiedPhoneContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            shape = RoundedCornerShape(12.dp)
+            shape = MaterialTheme.shapes.medium
         ) {
             Icon(
                 Icons.Default.Phone,
@@ -170,7 +153,7 @@ internal fun VerificationBottomSheet(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = MaterialTheme.shapes.medium
                     ) {
                         if (verificationState == VerificationState.SENDING_CODE) {
                             CircularProgressIndicator(
@@ -224,7 +207,7 @@ internal fun VerificationBottomSheet(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = MaterialTheme.shapes.medium
                     ) {
                         if (verificationState == VerificationState.VERIFYING) {
                             CircularProgressIndicator(
@@ -247,7 +230,7 @@ internal fun VerificationBottomSheet(
                     Icon(
                         Icons.Default.CheckCircle,
                         contentDescription = null,
-                        tint = Color(0xFF4CAF50),
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(64.dp)
                     )
 
@@ -257,7 +240,7 @@ internal fun VerificationBottomSheet(
                         text = "Phone Verified!",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF4CAF50)
+                        color = MaterialTheme.colorScheme.primary
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -275,7 +258,7 @@ internal fun VerificationBottomSheet(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = MaterialTheme.shapes.medium
                     ) {
                         Text("Done")
                     }
@@ -285,7 +268,7 @@ internal fun VerificationBottomSheet(
                     Icon(
                         Icons.Default.Error,
                         contentDescription = null,
-                        tint = Color.Red,
+                        tint = MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(64.dp)
                     )
 
@@ -295,7 +278,7 @@ internal fun VerificationBottomSheet(
                         text = "Verification Failed",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Red
+                        color = MaterialTheme.colorScheme.error
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -314,7 +297,7 @@ internal fun VerificationBottomSheet(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = MaterialTheme.shapes.medium
                     ) {
                         Text("Try Again")
                     }

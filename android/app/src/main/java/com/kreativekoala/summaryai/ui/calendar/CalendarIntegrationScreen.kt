@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.domain.model.CalendarConnection
+import com.kreativekoala.summaryai.ui.components.MmCard
+import com.kreativekoala.summaryai.ui.components.SkeletonCardList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,12 +74,7 @@ fun CalendarIntegrationScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+                SkeletonCardList(count = 2, modifier = Modifier.padding(0.dp))
             } else {
                 // Connected calendars
                 uiState.connections.forEach { connection ->
@@ -121,12 +118,7 @@ private fun ConnectedCalendarItem(
 ) {
     var showDisconnectDialog by remember { mutableStateOf(false) }
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
+    MmCard {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -157,6 +149,7 @@ private fun ConnectedCalendarItem(
             }
 
             TextButton(
+                modifier = Modifier.heightIn(min = 48.dp),
                 onClick = { showDisconnectDialog = true },
                 colors = ButtonDefaults.textButtonColors(
                     contentColor = MaterialTheme.colorScheme.error
@@ -198,10 +191,7 @@ private fun CalendarProviderItem(
     iconTint: Color,
     onClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = onClick
-    ) {
+    MmCard(onClick = onClick, modifier = Modifier.heightIn(min = 56.dp)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

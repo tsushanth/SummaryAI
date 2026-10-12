@@ -18,7 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Checklist
-import androidx.compose.material.icons.filled.Notes
+import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -124,7 +124,7 @@ internal fun SummaryTab(
             val text = (summary.detailedSummary ?: summary.shortSummary).applyingSpeakerNames(speakerNames)
             MmCard {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    MmSectionHeader(title = stringResource(R.string.ui_notes), icon = Icons.Default.Notes)
+                    MmSectionHeader(title = stringResource(R.string.ui_notes), icon = Icons.AutoMirrored.Filled.Notes)
                     Text(text = text, style = MaterialTheme.typography.bodyMedium)
                 }
             }

@@ -1,38 +1,28 @@
 package com.kreativekoala.summaryai.ui.phone
 
-import android.Manifest
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.PhoneCallback
+import androidx.compose.material.icons.automirrored.filled.PhoneMissed
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
 import com.kreativekoala.summaryai.domain.model.PhoneCall
 import com.kreativekoala.summaryai.domain.model.PhoneCallStatus
-import com.kreativekoala.summaryai.domain.model.VerifiedPhone
+import com.kreativekoala.summaryai.ui.components.MmCard
+import com.kreativekoala.summaryai.ui.components.MmEmptyState
+import com.kreativekoala.summaryai.ui.components.SkeletonCardList
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -49,19 +39,14 @@ internal fun CallsContent(
     onCallClick: (PhoneCall) -> Unit
 ) {
     if (isLoading && calls.isEmpty()) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
+        SkeletonCardList(count = 5, loadingDescription = "Loading calls")
     } else if (calls.isEmpty()) {
         EmptyCallsContent()
     } else {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(calls) { call ->
                 PhoneCallCard(
@@ -86,18 +71,8 @@ internal fun PhoneCallCard(
     onRecordingClick: (String) -> Unit,
     onCallClick: ((PhoneCall) -> Unit)? = null
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(
-                if (onCallClick != null) {
-                    Modifier.clickable { onCallClick(call) }
-                } else {
-                    Modifier
-                }
-            ),
-        shape = RoundedCornerShape(12.dp)
-    ) {
+    val accent = callStatusColor(call.status)
+    MmCard(onClick = onCallClick?.let { cb -> { cb(call) } }) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -110,32 +85,20 @@ internal fun PhoneCallCard(
                     .size(44.dp)
                     .clip(CircleShape)
                     .background(
-                        when (call.status) {
-                            PhoneCallStatus.COMPLETED -> Color(0xFF4CAF50).copy(alpha = 0.15f)
-                            PhoneCallStatus.IN_PROGRESS, PhoneCallStatus.RECORDING -> Color(0xFF2196F3).copy(alpha = 0.15f)
-                            PhoneCallStatus.RINGING -> Color(0xFFFF9800).copy(alpha = 0.15f)
-                            PhoneCallStatus.FAILED, PhoneCallStatus.BUSY, PhoneCallStatus.NO_ANSWER -> Color(0xFFF44336).copy(alpha = 0.15f)
-                            else -> MaterialTheme.colorScheme.surfaceVariant
-                        }
+                        accent.copy(alpha = 0.15f)
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = when (call.status) {
-                        PhoneCallStatus.COMPLETED -> Icons.Default.PhoneCallback
+                        PhoneCallStatus.COMPLETED -> Icons.AutoMirrored.Filled.PhoneCallback
                         PhoneCallStatus.IN_PROGRESS, PhoneCallStatus.RECORDING -> Icons.Default.Phone
                         PhoneCallStatus.RINGING -> Icons.Default.PhoneInTalk
-                        PhoneCallStatus.FAILED, PhoneCallStatus.BUSY, PhoneCallStatus.NO_ANSWER -> Icons.Default.PhoneMissed
+                        PhoneCallStatus.FAILED, PhoneCallStatus.BUSY, PhoneCallStatus.NO_ANSWER -> Icons.AutoMirrored.Filled.PhoneMissed
                         else -> Icons.Default.Phone
                     },
                     contentDescription = null,
-                    tint = when (call.status) {
-                        PhoneCallStatus.COMPLETED -> Color(0xFF4CAF50)
-                        PhoneCallStatus.IN_PROGRESS, PhoneCallStatus.RECORDING -> Color(0xFF2196F3)
-                        PhoneCallStatus.RINGING -> Color(0xFFFF9800)
-                        PhoneCallStatus.FAILED, PhoneCallStatus.BUSY, PhoneCallStatus.NO_ANSWER -> Color(0xFFF44336)
-                        else -> MaterialTheme.colorScheme.onSurfaceVariant
-                    }
+                    tint = accent
                 )
             }
 
@@ -156,13 +119,7 @@ internal fun PhoneCallCard(
                     Text(
                         text = call.status.displayName,
                         style = MaterialTheme.typography.bodySmall,
-                        color = when (call.status) {
-                            PhoneCallStatus.COMPLETED -> Color(0xFF4CAF50)
-                            PhoneCallStatus.IN_PROGRESS, PhoneCallStatus.RECORDING -> Color(0xFF2196F3)
-                            PhoneCallStatus.RINGING -> Color(0xFFFF9800)
-                            PhoneCallStatus.FAILED, PhoneCallStatus.BUSY, PhoneCallStatus.NO_ANSWER -> Color(0xFFF44336)
-                            else -> MaterialTheme.colorScheme.onSurfaceVariant
-                        }
+                        color = accent
                     )
 
                     call.recordingDuration?.let {
@@ -179,13 +136,13 @@ internal fun PhoneCallCard(
                                 modifier = Modifier
                                     .size(8.dp)
                                     .clip(CircleShape)
-                                    .background(Color.Red)
+                                    .background(MaterialTheme.colorScheme.error)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = "Recording",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = Color.Red
+                                color = MaterialTheme.colorScheme.error
                             )
                         }
                     }
@@ -235,32 +192,25 @@ internal fun PhoneCallCard(
 
 @Composable
 internal fun EmptyCallsContent() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            Icons.Default.Phone,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        MmEmptyState(
+            icon = Icons.Default.Phone,
+            title = "No calls yet",
+            message = "Make a call using the dialer to get started"
         )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "No calls yet",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Medium
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Make a call using the dialer to get started",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
+    }
+}
+
+/** Status accent with enough contrast on both light and dark surfaces. */
+@Composable
+internal fun callStatusColor(status: PhoneCallStatus): Color {
+    val dark = isSystemInDarkTheme()
+    return when (status) {
+        PhoneCallStatus.COMPLETED -> if (dark) Color(0xFF66BB6A) else Color(0xFF2E7D32)
+        PhoneCallStatus.IN_PROGRESS, PhoneCallStatus.RECORDING -> if (dark) Color(0xFF64B5F6) else Color(0xFF1565C0)
+        PhoneCallStatus.RINGING -> if (dark) Color(0xFFFFB74D) else Color(0xFFB45309)
+        PhoneCallStatus.FAILED, PhoneCallStatus.BUSY, PhoneCallStatus.NO_ANSWER -> MaterialTheme.colorScheme.error
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 }
 

@@ -2,8 +2,9 @@ package com.kreativekoala.summaryai.ui.meetings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Link
@@ -75,6 +76,7 @@ fun JoinMeetingScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -85,14 +87,14 @@ fun JoinMeetingScreen(
                 modifier = Modifier
                     .size(72.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFEDE7F6)),
+                    .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Videocam,
                     contentDescription = null,
                     modifier = Modifier.size(36.dp),
-                    tint = Color(0xFF7C4DFF)
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
 
@@ -101,7 +103,8 @@ fun JoinMeetingScreen(
             // Title
             Text(
                 text = stringResource(R.string.join_meeting),
-                style = MaterialTheme.typography.headlineSmall
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -139,11 +142,11 @@ fun JoinMeetingScreen(
                     )
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(12.dp),
+                shape = MaterialTheme.shapes.medium,
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow
                 )
             )
 
@@ -159,7 +162,7 @@ fun JoinMeetingScreen(
             Text(
                 text = stringResource(R.string.optional),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
@@ -178,18 +181,18 @@ fun JoinMeetingScreen(
                     )
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(12.dp),
+                shape = MaterialTheme.shapes.medium,
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow
                 )
             )
 
             Text(
                 text = stringResource(R.string.bot_name_hint),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 4.dp)
@@ -223,18 +226,15 @@ fun JoinMeetingScreen(
                 onClick = viewModel::joinMeeting,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp),
+                    .heightIn(min = 52.dp),
                 enabled = uiState.meetingUrl.isNotBlank() && !uiState.isJoining,
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                )
+                shape = MaterialTheme.shapes.medium,
             ) {
                 if (uiState.isJoining) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onSurface
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
                     Icon(
@@ -269,7 +269,7 @@ fun JoinMeetingScreen(
                 PlatformIcon(name = "Webex", color = Color(0xFF00BCF2))
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
