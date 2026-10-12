@@ -28,7 +28,7 @@ export function reportBackendError(req: { method: string; path?: string; user?: 
   if (statusCode < 500) return;
   // The affected user's account id (opaque, never the email) so the owner can find and contact them. Absent when the
   // request failed before authentication.
-  void post('backend_error', `${req.method} ${req.path ?? ''}`, err, { status: String(statusCode) }, 5000, req.user?.id);
+  void post('backend_error', `${req.method} ${(req.path ?? '').replace(/(\/api\/public\/shares\/)[^/?#\s]+/g, '$1[redacted]')}`, err, { status: String(statusCode) }, 5000, req.user?.id);
 }
 
 /** A background job or flow failed (worker, queue, cron). */

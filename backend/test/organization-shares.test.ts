@@ -60,7 +60,7 @@ const { recordingSharesRouter, publicSharesRouter } = await import('../src/route
 const { default: searchRouter, escapeLike } = await import('../src/routes/search.js');
 const { default: recordingsRouter } = await import('../src/routes/recordings.js');
 const { errorHandler } = await import('../src/middleware/errorHandler.js');
-const { generateShareToken, hashShareToken, normalizeTags, SHARE_TOKEN_REGEX, createRateLimiter } =
+const { generateShareToken, hashShareToken, normalizeTags, SHARE_TOKEN_REGEX, createRateLimiter, redactShareToken, clientKey, tokenKey } =
   await import('../src/lib/shareToken.js');
 
 const UUID = '11111111-1111-4111-8111-111111111111';
@@ -222,10 +222,49 @@ describe('recordings organization', () => {
   });
 });
 
+describe('share log/rate-limit hygiene', () => {
+  const tok = generateShareToken();
+
+  it('redacts tokens from URLs and paths', () => {
+    expect(redactShareToken(`/v1/api/public/shares/${tok}?x=1`)).toBe('/v1/api/public/shares/[redacted]?x=1');
+    expect(redactShareToken('/api/recordings/abc')).toBe('/api/recordings/abc');
+    expect(redactShareToken(`GET /api/public/shares/${tok}`)).not.toContain(tok);
+  });
+
+  it('only honors the forwarded viewer IP with the matching proxy secret', () => {
+    const base = { ip: '9.9.9.9', headers: { 'fly-client-ip': '5.5.5.5' } as any };
+    delete process.env.SHARE_PROXY_SECRET;
+    expect(clientKey({ ...base, headers: { ...base.headers, 'x-share-client-ip': '1.2.3.4', 'x-share-proxy-secret': 'x' } } as any)).toBe('5.5.5.5');
+    process.env.SHARE_PROXY_SECRET = 's3cret-value';
+    try {
+      const h = (secret: string) => ({ ...base, headers: { ...base.headers, 'x-share-client-ip': '1.2.3.4', 'x-share-proxy-secret': secret } });
+      expect(clientKey(h('s3cret-value') as any)).toBe('web:1.2.3.4');
+      expect(clientKey(h('wrong-value!!') as any)).toBe('5.5.5.5');
+      expect(clientKey(h('s') as any)).toBe('5.5.5.5');
+      expect(clientKey(base as any)).toBe('5.5.5.5');
+    } finally {
+      delete process.env.SHARE_PROXY_SECRET;
+    }
+  });
+
+  it('per-token limiter buckets by token hash, not by IP', () => {
+    const limiter = createRateLimiter({ windowMs: 1000, max: 1, keyFn: tokenKey });
+    const run = (ip: string, token: string) => {
+      const res: any = { statusCode: 200, setHeader: vi.fn(), status(c: number) { this.statusCode = c; return this; }, json: vi.fn() };
+      const next = vi.fn();
+      limiter({ headers: {}, ip, params: { token } } as any, res, next);
+      return { res, next };
+    };
+    expect(run('1.1.1.1', tok).next).toHaveBeenCalled();
+    expect(run('2.2.2.2', tok).res.statusCode).toBe(429);
+    expect(run('2.2.2.2', generateShareToken()).next).toHaveBeenCalled();
+  });
+});
+
 describe('share links (owner)', () => {
   it('create returns the token once, stores only its hash, and requires ownership', async () => {
     queue('recordings', { data: { id: UUID }, error: null });
-    queue('recording_shares', { data: { id: UUID2, recording_id: UUID }, error: null });
+    queue('recording_shares', { count: 0, data: null, error: null }, { data: { id: UUID2, recording_id: UUID }, error: null });
     const { status, body } = await request('POST', `/api/recordings/${UUID}/shares`, {
       include_transcript: true,
       expires_in_days: 7,
@@ -233,13 +272,20 @@ describe('share links (owner)', () => {
     expect(status).toBe(201);
     expect(body.token).toMatch(SHARE_TOKEN_REGEX);
     expect(body.url).toBe(`https://web.example/share/${body.token}`);
-    const insert = calls.find((c) => c.table === 'recording_shares')!.ops.find((o) => o[0] === 'insert')![1];
+    const insert = calls.filter((c) => c.table === 'recording_shares')[1].ops.find((o) => o[0] === 'insert')![1];
     expect(insert.token_hash).toBe(hashShareToken(body.token));
     expect(JSON.stringify(insert)).not.toContain(body.token);
     expect(insert.user_id).toBe('user-1');
     expect(insert.include_transcript).toBe(true);
     expect(insert.expires_at).toBeTruthy();
     expect(hasEq(calls[0], 'user_id', 'user-1')).toBe(true);
+  });
+
+  it('create refuses once a recording has the max number of active links', async () => {
+    queue('recordings', { data: { id: UUID }, error: null });
+    queue('recording_shares', { count: 50, data: null, error: null });
+    expect((await request('POST', `/api/recordings/${UUID}/shares`, {})).status).toBe(400);
+    expect(calls.filter((c) => c.table === 'recording_shares').some((c) => c.ops.some((o) => o[0] === 'insert'))).toBe(false);
   });
 
   it('create 404s for a recording the caller does not own', async () => {
@@ -325,6 +371,22 @@ describe('share links (public)', () => {
     // recording is re-checked against the share owner
     const recCall = calls.find((c) => c.table === 'recordings')!;
     expect(hasEq(recCall, 'user_id', 'owner')).toBe(true);
+  });
+
+  it('404 and 429 responses are also no-store and noindex', async () => {
+    queue('recording_shares', { data: null, error: null });
+    const r = await request('GET', `/api/public/shares/${token}`);
+    expect(r.status).toBe(404);
+    expect(r.headers.get('cache-control')).toBe('no-store');
+    expect(r.headers.get('x-robots-tag')).toContain('noindex');
+  });
+
+  it('a share whose recording no longer belongs to the owner is the same 404', async () => {
+    queue('recording_shares', { data: validShare, error: null });
+    queue('recordings', { data: null, error: null });
+    const r = await request('GET', `/api/public/shares/${token}`);
+    expect(r.status).toBe(404);
+    expect(calls.some((c) => c.table === 'summaries' || c.table === 'transcripts')).toBe(false);
   });
 
   it('includes the transcript with custom speaker names when opted in', async () => {
