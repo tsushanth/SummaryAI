@@ -32,13 +32,13 @@ interface AIInsightsPanelProps {
 function getVerificationIcon(status: VerificationStatus | null) {
   switch (status) {
     case 'verified':
-      return <CheckCircle className="w-4 h-4 text-green-500" />;
+      return <CheckCircle className="w-4 h-4 text-success" />;
     case 'disputed':
-      return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
+      return <AlertTriangle className="w-4 h-4 text-amber-500" />;
     case 'false':
-      return <XCircle className="w-4 h-4 text-red-500" />;
+      return <XCircle className="w-4 h-4 text-destructive" />;
     default:
-      return <HelpCircle className="w-4 h-4 text-gray-400" />;
+      return <HelpCircle className="w-4 h-4 text-muted-foreground" />;
   }
 }
 
@@ -80,19 +80,19 @@ function InsightSection({
     <div className="border rounded-lg overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+        className="w-full flex items-center justify-between p-3 bg-muted hover:bg-accent transition-colors"
       >
         <div className="flex items-center gap-2">
           {icon}
           <span className="font-medium text-sm">{title}</span>
-          <span className="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">
+          <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
             {insights.length}
           </span>
         </div>
         {isOpen ? (
-          <ChevronUp className="w-4 h-4 text-gray-400" />
+          <ChevronUp className="w-4 h-4 text-muted-foreground" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-gray-400" />
+          <ChevronDown className="w-4 h-4 text-muted-foreground" />
         )}
       </button>
 
@@ -116,7 +116,7 @@ export function AIInsightsPanel({
 }: AIInsightsPanelProps) {
   if (insights.length === 0 && !isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
         <Lightbulb className="w-12 h-12 mb-4 opacity-30" />
         <p className="text-sm">No insights yet</p>
         <p className="text-xs mt-1">AI insights will appear as the meeting progresses</p>
@@ -134,7 +134,7 @@ export function AIInsightsPanel({
         renderInsight={(insight) => (
           <div className="flex gap-2">
             <span className="text-amber-500 mt-0.5">•</span>
-            <p className="text-sm text-gray-700">{insight.content}</p>
+            <p className="text-sm text-foreground/90">{insight.content}</p>
           </div>
         )}
       />
@@ -142,21 +142,21 @@ export function AIInsightsPanel({
       {/* Fact Checks */}
       <InsightSection
         title="Fact Checks"
-        icon={<CheckCircle className="w-4 h-4 text-green-500" />}
+        icon={<CheckCircle className="w-4 h-4 text-success" />}
         insights={groupedInsights.fact_checks}
         renderInsight={(insight) => (
           <div className="space-y-1">
             <div className="flex items-start gap-2">
               {getVerificationIcon(insight.verification_status)}
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-700">{insight.content}</p>
+                <p className="text-sm text-foreground/90">{insight.content}</p>
                 <span
                   className={cn(
                     'text-xs',
-                    insight.verification_status === 'verified' && 'text-green-600',
-                    insight.verification_status === 'disputed' && 'text-yellow-600',
-                    insight.verification_status === 'false' && 'text-red-600',
-                    !insight.verification_status && 'text-gray-500'
+                    insight.verification_status === 'verified' && 'text-success',
+                    insight.verification_status === 'disputed' && 'text-amber-700 dark:text-amber-300',
+                    insight.verification_status === 'false' && 'text-destructive',
+                    !insight.verification_status && 'text-muted-foreground'
                   )}
                 >
                   {getVerificationLabel(insight.verification_status)}
@@ -166,7 +166,7 @@ export function AIInsightsPanel({
               </div>
             </div>
             {insight.context && (
-              <p className="text-xs text-gray-500 ml-6 italic">"{insight.context}"</p>
+              <p className="text-xs text-muted-foreground ml-6 italic">"{insight.context}"</p>
             )}
           </div>
         )}
@@ -175,22 +175,22 @@ export function AIInsightsPanel({
       {/* Suggested Questions */}
       <InsightSection
         title="Suggested Questions"
-        icon={<MessageCircleQuestion className="w-4 h-4 text-blue-500" />}
+        icon={<MessageCircleQuestion className="w-4 h-4 text-primary" />}
         insights={groupedInsights.questions}
         renderInsight={(insight) => (
-          <p className="text-sm text-gray-700">{insight.content}</p>
+          <p className="text-sm text-foreground/90">{insight.content}</p>
         )}
       />
 
       {/* Contradictions / Cross-meeting */}
       <InsightSection
         title="Cross-Meeting Insights"
-        icon={<GitCompare className="w-4 h-4 text-purple-500" />}
+        icon={<GitCompare className="w-4 h-4 text-primary" />}
         insights={groupedInsights.contradictions}
         defaultOpen={groupedInsights.contradictions.length > 0}
         renderInsight={(insight) => (
           <div className="space-y-2">
-            <p className="text-sm text-gray-700">{insight.content}</p>
+            <p className="text-sm text-foreground/90">{insight.content}</p>
             {insight.related_recording_id && (
               <Link
                 href={`/recordings/${insight.related_recording_id}`}
@@ -207,7 +207,7 @@ export function AIInsightsPanel({
       {/* Loading indicator */}
       {isLoading && insights.length === 0 && (
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+          <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
         </div>
       )}
     </div>

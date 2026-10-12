@@ -42,34 +42,34 @@ export default function TodosPage() {
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Todos</h1>
-        <p className="text-gray-500">Manage your action items from recordings</p>
+        <h1 className="text-2xl font-bold text-foreground">Todos</h1>
+        <p className="text-muted-foreground">Manage your action items from recordings</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <Card>
           <CardContent className="pt-4">
-            <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-            <p className="text-sm text-gray-500">Total</p>
+            <p className="text-2xl font-bold text-foreground">{stats.total}</p>
+            <p className="text-sm text-muted-foreground">Total</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4">
-            <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
-            <p className="text-sm text-gray-500">Pending</p>
+            <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">{stats.pending}</p>
+            <p className="text-sm text-muted-foreground">Pending</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4">
-            <p className="text-2xl font-bold text-blue-600">{stats.inProgress}</p>
-            <p className="text-sm text-gray-500">In Progress</p>
+            <p className="text-2xl font-bold text-primary">{stats.inProgress}</p>
+            <p className="text-sm text-muted-foreground">In Progress</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4">
-            <p className="text-2xl font-bold text-green-600">{stats.completed}</p>
-            <p className="text-sm text-gray-500">Completed</p>
+            <p className="text-2xl font-bold text-success">{stats.completed}</p>
+            <p className="text-sm text-muted-foreground">Completed</p>
           </CardContent>
         </Card>
       </div>
@@ -89,13 +89,13 @@ export default function TodosPage() {
       {/* Todo List */}
       {isLoading ? (
         <div className="flex justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : filter === 'all' ? (
         <div className="space-y-6">
           {inProgressTodos.length > 0 && (
             <div>
-              <h2 className="text-sm font-medium text-gray-500 mb-3">In Progress</h2>
+              <h2 className="text-sm font-medium text-muted-foreground mb-3">In Progress</h2>
               <TodoList
                 todos={inProgressTodos}
                 onToggle={toggleTodo}
@@ -106,7 +106,7 @@ export default function TodosPage() {
           )}
           {pendingTodos.length > 0 && (
             <div>
-              <h2 className="text-sm font-medium text-gray-500 mb-3">Pending</h2>
+              <h2 className="text-sm font-medium text-muted-foreground mb-3">Pending</h2>
               <TodoList
                 todos={pendingTodos}
                 onToggle={toggleTodo}
@@ -117,7 +117,7 @@ export default function TodosPage() {
           )}
           {completedTodos.length > 0 && (
             <div>
-              <h2 className="text-sm font-medium text-gray-500 mb-3">Completed</h2>
+              <h2 className="text-sm font-medium text-muted-foreground mb-3">Completed</h2>
               <TodoList
                 todos={completedTodos}
                 onToggle={toggleTodo}

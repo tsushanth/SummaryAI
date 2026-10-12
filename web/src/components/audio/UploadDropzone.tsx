@@ -102,23 +102,23 @@ export function UploadDropzone({
 
   if (selectedFile) {
     return (
-      <div className="border-2 border-gray-200 rounded-lg p-4">
+      <div className="border-2 border-border rounded-lg p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <File className="h-5 w-5 text-blue-600" />
+            <div className="p-2 bg-accent rounded-lg">
+              <File className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900">{selectedFile.name}</p>
-              <p className="text-xs text-gray-500">{formatFileSize(selectedFile.size)}</p>
+              <p className="text-sm font-medium text-foreground">{selectedFile.name}</p>
+              <p className="text-xs text-muted-foreground">{formatFileSize(selectedFile.size)}</p>
             </div>
           </div>
           <button
             onClick={clearFile}
-            className="p-1 hover:bg-gray-100 rounded"
+            className="p-1 hover:bg-accent rounded"
             disabled={disabled}
           >
-            <X className="h-4 w-4 text-gray-500" />
+            <X className="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
       </div>
@@ -132,8 +132,8 @@ export function UploadDropzone({
       onDragLeave={handleDragLeave}
       className={cn(
         'border-2 border-dashed rounded-lg p-8 text-center transition-colors',
-        isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300',
-        disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-gray-400'
+        isDragging ? 'border-primary bg-accent' : 'border-input',
+        disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-muted-foreground'
       )}
     >
       <input
@@ -145,15 +145,15 @@ export function UploadDropzone({
         disabled={disabled}
       />
       <label htmlFor="file-upload" className={disabled ? 'cursor-not-allowed' : 'cursor-pointer'}>
-        <Upload className="h-10 w-10 mx-auto text-gray-400 mb-3" />
-        <p className="text-sm text-gray-600 mb-1">
-          <span className="font-medium text-blue-600">Click to upload</span> or drag and drop
+        <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+        <p className="text-sm text-muted-foreground mb-1">
+          <span className="font-medium text-primary">Click to upload</span> or drag and drop
         </p>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-muted-foreground">
           Audio files up to {Math.round(maxSize / 1024 / 1024)}MB
         </p>
       </label>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
     </div>
   );
 }

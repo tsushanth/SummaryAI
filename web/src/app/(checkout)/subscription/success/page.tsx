@@ -22,8 +22,8 @@ function SuccessContent() {
   if (isVerifying) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
-        <Loader2 className="w-12 h-12 animate-spin text-blue-600 mb-4" />
-        <p className="text-gray-600">Confirming your subscription...</p>
+        <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
+        <p className="text-muted-foreground">Confirming your subscription...</p>
       </div>
     );
   }
@@ -32,43 +32,43 @@ function SuccessContent() {
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
       <div className="max-w-md w-full text-center">
         {/* Success icon */}
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle className="w-12 h-12 text-green-600" />
+        <div className="w-20 h-20 bg-success/15 rounded-full flex items-center justify-center mx-auto mb-6">
+          <CheckCircle className="w-12 h-12 text-success" />
         </div>
 
         {/* Header */}
-        <h1 className="text-3xl font-bold text-gray-900 mb-3">
+        <h1 className="text-3xl font-bold text-foreground mb-3">
           Welcome to Pro!
         </h1>
-        <p className="text-lg text-gray-600 mb-8">
+        <p className="text-lg text-muted-foreground mb-8">
           Your subscription is now active. You have full access to all Meeting Mind Pro features.
         </p>
 
         {/* Features unlocked */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 mb-8">
+        <div className="bg-accent rounded-2xl p-6 mb-8">
           <div className="flex items-center gap-2 justify-center mb-4">
-            <Sparkles className="w-5 h-5 text-blue-600" />
-            <span className="font-semibold text-gray-900">Features Unlocked</span>
+            <Sparkles className="w-5 h-5 text-primary" />
+            <span className="font-semibold text-foreground">Features Unlocked</span>
           </div>
-          <ul className="text-sm text-gray-600 space-y-2">
+          <ul className="text-sm text-muted-foreground space-y-2">
             <li className="flex items-center gap-2 justify-center">
-              <CheckCircle className="w-4 h-4 text-green-500" />
+              <CheckCircle className="w-4 h-4 text-success" />
               Unlimited recordings
             </li>
             <li className="flex items-center gap-2 justify-center">
-              <CheckCircle className="w-4 h-4 text-green-500" />
+              <CheckCircle className="w-4 h-4 text-success" />
               AI summaries & transcriptions
             </li>
             <li className="flex items-center gap-2 justify-center">
-              <CheckCircle className="w-4 h-4 text-green-500" />
+              <CheckCircle className="w-4 h-4 text-success" />
               Q&A chat with your recordings
             </li>
             <li className="flex items-center gap-2 justify-center">
-              <CheckCircle className="w-4 h-4 text-green-500" />
+              <CheckCircle className="w-4 h-4 text-success" />
               Meeting bot for Zoom, Teams, Meet
             </li>
             <li className="flex items-center gap-2 justify-center">
-              <CheckCircle className="w-4 h-4 text-green-500" />
+              <CheckCircle className="w-4 h-4 text-success" />
               Phone call recording
             </li>
           </ul>
@@ -77,13 +77,13 @@ function SuccessContent() {
         {/* CTA */}
         <Link
           href="/recordings"
-          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-colors"
+          className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl font-medium transition-colors"
         >
           Start using Meeting Mind
           <ArrowRight className="w-5 h-5" />
         </Link>
 
-        <p className="text-sm text-gray-500 mt-6">
+        <p className="text-sm text-muted-foreground mt-6">
           You can manage your subscription anytime in Settings.
         </p>
       </div>
@@ -96,8 +96,8 @@ export default function SubscriptionSuccessPage() {
     <Suspense
       fallback={
         <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mb-4" />
-          <p className="text-gray-600">Loading...</p>
+          <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       }
     >

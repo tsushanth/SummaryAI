@@ -29,7 +29,7 @@ export function PremiumGate({
   // Show loading state
   if (isLoading) {
     return (
-      <div className="animate-pulse bg-gray-100 rounded-lg h-32" />
+      <div className="animate-pulse bg-secondary rounded-lg h-32" />
     );
   }
 
@@ -74,25 +74,25 @@ export function UpgradePrompt({ feature, className = '' }: UpgradePromptProps) {
 
   return (
     <div
-      className={`bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-6 text-center ${className}`}
+      className={`bg-accent border border-border rounded-xl p-6 text-center ${className}`}
     >
-      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <Lock className="w-6 h-6 text-blue-600" />
+      <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
+        <Lock className="w-6 h-6 text-primary" />
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+      <h3 className="text-lg font-semibold text-foreground mb-2">
         Upgrade to Pro
       </h3>
-      <p className="text-gray-600 mb-4">
+      <p className="text-muted-foreground mb-4">
         Get access to {featureName} and more with Meeting Mind Pro.
       </p>
       <Link
         href="/subscription"
-        className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+        className="inline-flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-lg font-medium hover:bg-primary/90 transition-colors"
       >
         <Sparkles className="w-4 h-4" />
         Upgrade Now
       </Link>
-      <p className="text-xs text-gray-500 mt-3">
+      <p className="text-xs text-muted-foreground mt-3">
         Save 30% compared to App Store prices
       </p>
     </div>
@@ -105,7 +105,7 @@ export function UpgradePrompt({ feature, className = '' }: UpgradePromptProps) {
 export function ProBadge({ className = '' }: { className?: string }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold px-2 py-0.5 rounded-full ${className}`}
+      className={`inline-flex items-center gap-1 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full ${className}`}
     >
       <Sparkles className="w-3 h-3" />
       PRO
@@ -126,7 +126,7 @@ export function UpgradeLink() {
   return (
     <Link
       href="/subscription"
-      className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
+      className="inline-flex items-center gap-1 text-primary hover:text-accent-foreground text-sm font-medium"
     >
       <Sparkles className="w-3.5 h-3.5" />
       Upgrade

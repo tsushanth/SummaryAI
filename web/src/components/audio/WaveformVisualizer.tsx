@@ -113,7 +113,7 @@ export function WaveformVisualizer({ isRecording, isPaused }: WaveformVisualizer
       ref={canvasRef}
       width={600}
       height={100}
-      className="w-full h-24 rounded-lg bg-gray-100"
+      className="w-full h-24 rounded-lg bg-secondary"
     />
   );
 }

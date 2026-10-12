@@ -15,9 +15,9 @@ export function TodoList({ todos, onToggle, onEdit, onDelete }: TodoListProps) {
   if (todos.length === 0) {
     return (
       <div className="text-center py-12">
-        <CheckCircle className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-        <p className="text-gray-500">No todos found</p>
-        <p className="text-sm text-gray-400">Add a new todo above to get started</p>
+        <CheckCircle className="h-12 w-12 mx-auto text-muted-foreground/60 mb-3" />
+        <p className="text-muted-foreground">No todos found</p>
+        <p className="text-sm text-muted-foreground">Add a new todo above to get started</p>
       </div>
     );
   }

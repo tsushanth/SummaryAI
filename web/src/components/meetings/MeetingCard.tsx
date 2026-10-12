@@ -44,7 +44,7 @@ function getPlatformIcon(platform: MeetingPlatform) {
         </svg>
       );
     default:
-      return <Video className="w-4 h-4 text-gray-500" />;
+      return <Video className="w-4 h-4 text-muted-foreground" />;
   }
 }
 
@@ -67,46 +67,46 @@ function getStatusBadge(status: MeetingStatus) {
   switch (status) {
     case 'scheduled':
       return (
-        <span className="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700">
+        <span className="px-2 py-0.5 text-xs rounded-full bg-accent text-accent-foreground">
           Scheduled
         </span>
       );
     case 'bot_queued':
       return (
-        <span className="px-2 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-700 flex items-center gap-1">
+        <span className="px-2 py-0.5 text-xs rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 flex items-center gap-1">
           <Loader2 className="w-3 h-3 animate-spin" />
           Queued
         </span>
       );
     case 'bot_joining':
       return (
-        <span className="px-2 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-700 flex items-center gap-1">
+        <span className="px-2 py-0.5 text-xs rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 flex items-center gap-1">
           <Loader2 className="w-3 h-3 animate-spin" />
           Joining
         </span>
       );
     case 'bot_in_meeting':
       return (
-        <span className="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-700 flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+        <span className="px-2 py-0.5 text-xs rounded-full bg-destructive/10 text-destructive flex items-center gap-1">
+          <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
           Recording
         </span>
       );
     case 'completed':
       return (
-        <span className="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700">
+        <span className="px-2 py-0.5 text-xs rounded-full bg-success/15 text-success">
           Completed
         </span>
       );
     case 'failed':
       return (
-        <span className="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-700">
+        <span className="px-2 py-0.5 text-xs rounded-full bg-destructive/10 text-destructive">
           Failed
         </span>
       );
     case 'cancelled':
       return (
-        <span className="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
+        <span className="px-2 py-0.5 text-xs rounded-full bg-secondary text-foreground/90">
           Cancelled
         </span>
       );
@@ -151,11 +151,11 @@ export function MeetingCard({
           <div>
             <h3 className="font-medium">{meeting.title}</h3>
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-muted-foreground">
                 {getPlatformLabel(meeting.platform)}
               </span>
-              <span className="text-gray-300">|</span>
-              <span className="text-sm text-gray-500">
+              <span className="text-muted-foreground/60">|</span>
+              <span className="text-sm text-muted-foreground">
                 {formatMeetingTime(meeting.scheduled_start)}
               </span>
             </div>
@@ -164,7 +164,7 @@ export function MeetingCard({
               {meeting.status === 'bot_in_meeting' && (
                 <Link
                   href={`/meetings/${meeting.id}`}
-                  className="text-xs text-red-600 hover:underline flex items-center gap-1 font-medium"
+                  className="text-xs text-destructive hover:underline flex items-center gap-1 font-medium"
                 >
                   <Radio className="w-3 h-3 animate-pulse" />
                   View Live
@@ -184,19 +184,19 @@ export function MeetingCard({
         </div>
         <div className="flex items-center gap-2">
           <label className="flex items-center gap-2 cursor-pointer">
-            <span className="text-sm text-gray-600">Auto-record</span>
+            <span className="text-sm text-muted-foreground">Auto-record</span>
             <button
               onClick={handleToggle}
               disabled={isUpdating || meeting.status === 'completed' || meeting.status === 'cancelled'}
               className={cn(
                 'relative w-10 h-6 rounded-full transition-colors',
-                meeting.auto_join ? 'bg-primary' : 'bg-gray-300',
+                meeting.auto_join ? 'bg-primary' : 'bg-muted-foreground/40',
                 (isUpdating || meeting.status === 'completed' || meeting.status === 'cancelled') && 'opacity-50 cursor-not-allowed'
               )}
             >
               <span
                 className={cn(
-                  'absolute top-1 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200',
+                  'absolute top-1 left-0.5 w-4 h-4 rounded-full bg-card shadow transition-transform duration-200',
                   meeting.auto_join ? 'translate-x-4' : 'translate-x-0'
                 )}
               />

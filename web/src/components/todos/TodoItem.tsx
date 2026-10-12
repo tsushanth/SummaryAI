@@ -43,8 +43,8 @@ export function TodoItem({ todo, onToggle, onEdit, onDelete }: TodoItemProps) {
   return (
     <div
       className={cn(
-        'flex items-center gap-3 p-3 bg-white border rounded-lg group transition-colors',
-        isCompleted ? 'bg-gray-50' : 'hover:border-gray-300'
+        'flex items-center gap-3 p-3 bg-card border rounded-lg group transition-colors',
+        isCompleted ? 'bg-muted' : 'hover:border-input'
       )}
     >
       <button
@@ -52,8 +52,8 @@ export function TodoItem({ todo, onToggle, onEdit, onDelete }: TodoItemProps) {
         className={cn(
           'flex-shrink-0 w-5 h-5 rounded-full border-2 transition-colors',
           isCompleted
-            ? 'bg-green-500 border-green-500 text-white'
-            : 'border-gray-300 hover:border-green-500'
+            ? 'bg-success border-success text-white'
+            : 'border-input hover:border-success'
         )}
       >
         {isCompleted && <Check className="h-3 w-3 m-auto" />}
@@ -81,13 +81,13 @@ export function TodoItem({ todo, onToggle, onEdit, onDelete }: TodoItemProps) {
             <p
               className={cn(
                 'text-sm',
-                isCompleted ? 'text-gray-400 line-through' : 'text-gray-900'
+                isCompleted ? 'text-muted-foreground line-through' : 'text-foreground'
               )}
             >
               {todo.title}
             </p>
             {todo.recording_id && (
-              <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                 <Link className="h-3 w-3" />
                 Linked to recording
               </p>
@@ -97,13 +97,13 @@ export function TodoItem({ todo, onToggle, onEdit, onDelete }: TodoItemProps) {
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
               onClick={() => setIsEditing(true)}
-              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded"
+              className="p-1.5 text-muted-foreground hover:text-muted-foreground hover:bg-accent rounded"
             >
               <Edit2 className="h-4 w-4" />
             </button>
             <button
               onClick={onDelete}
-              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"
+              className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded"
             >
               <Trash2 className="h-4 w-4" />
             </button>

@@ -128,12 +128,12 @@ export function JoinMeetingModal({
         className="absolute inset-0 bg-black/50"
         onClick={handleClose}
       />
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+      <div className="relative bg-card rounded-lg shadow-xl w-full max-w-md p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Add Meeting</h2>
           <button
             onClick={handleClose}
-            className="p-1 hover:bg-gray-100 rounded"
+            className="p-1 hover:bg-accent rounded"
           >
             <X className="w-5 h-5" />
           </button>
@@ -142,7 +142,7 @@ export function JoinMeetingModal({
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-foreground/90 mb-1">
                 Meeting Title
               </label>
               <Input
@@ -158,11 +158,11 @@ export function JoinMeetingModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-foreground/90 mb-1">
                 Meeting URL
               </label>
               <div className="relative">
-                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   type="url"
                   value={url}
@@ -175,7 +175,7 @@ export function JoinMeetingModal({
                 />
               </div>
               {detectedPlatform && (
-                <p className="text-sm text-green-600 mt-1">
+                <p className="text-sm text-success mt-1">
                   Detected: {detectedPlatform}
                 </p>
               )}
@@ -183,11 +183,11 @@ export function JoinMeetingModal({
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-foreground/90 mb-1">
                   Date
                 </label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     type="date"
                     value={date}
@@ -200,11 +200,11 @@ export function JoinMeetingModal({
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-foreground/90 mb-1">
                   Time
                 </label>
                 <div className="relative">
-                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     type="time"
                     value={time}
@@ -224,18 +224,18 @@ export function JoinMeetingModal({
                 id="autoJoin"
                 checked={autoJoin}
                 onChange={(e) => setAutoJoin(e.target.checked)}
-                className="rounded border-gray-300"
+                className="rounded border-input"
               />
-              <label htmlFor="autoJoin" className="text-sm text-gray-700">
+              <label htmlFor="autoJoin" className="text-sm text-foreground/90">
                 Auto-record this meeting
               </label>
             </div>
 
             {error && (
-              <p className="text-sm text-red-600">{error}</p>
+              <p className="text-sm text-destructive">{error}</p>
             )}
 
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Supported platforms: Zoom, Google Meet, Microsoft Teams, Webex
             </p>
           </div>
