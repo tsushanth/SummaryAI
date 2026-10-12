@@ -126,6 +126,7 @@ fun MeetingMindTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = MeetingMindTypography,
+        shapes = MeetingMindShapes,
         content = content
     )
 }
