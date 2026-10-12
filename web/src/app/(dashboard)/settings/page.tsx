@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useSubscription, useCustomerPortal } from '@/hooks/useSubscription';
 import Link from 'next/link';
+import { DefaultTemplateCard } from '@/components/settings/DefaultTemplateCard';
 
 export default function SettingsPage() {
   const { user, signOut, loading } = useAuth();
@@ -35,6 +36,8 @@ export default function SettingsPage() {
       </div>
 
       <div className="space-y-6">
+        <DefaultTemplateCard />
+
         {/* Subscription Card */}
         <Card>
           <CardHeader>

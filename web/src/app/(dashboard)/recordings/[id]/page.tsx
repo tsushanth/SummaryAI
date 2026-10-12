@@ -12,6 +12,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ExportMenu } from '@/components/recordings/ExportMenu';
 import { ShareLinkPanel } from '@/components/recordings/ShareLinkPanel';
 import { RecordingOrganizer } from '@/components/recordings/RecordingOrganizer';
+import { SummaryTemplatePanel } from '@/components/recordings/SummaryTemplatePanel';
+import { ActionItemsToTodosButton } from '@/components/recordings/ActionItemsToTodosButton';
 import { formatDuration, formatDate } from '@/lib/utils/audio';
 import {
   ArrowLeft,
@@ -276,7 +278,17 @@ export default function RecordingDetailPage() {
           <div className="max-w-3xl">
             <PremiumGate feature="aiSummaries">
               {summary ? (
-                <SummaryCard summary={summary} />
+                <>
+                  <SummaryTemplatePanel
+                    recordingId={recording.id}
+                    currentTemplate={recording.summary_template}
+                    onRegenerated={refresh}
+                  />
+                  <SummaryCard
+                    summary={summary}
+                    actionItemsFooter={<ActionItemsToTodosButton recordingId={recording.id} />}
+                  />
+                </>
               ) : (
                 <div className="text-center py-10 text-muted-foreground">
                   {isProcessing ? (

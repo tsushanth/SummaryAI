@@ -7,6 +7,7 @@ import { TodoList } from '@/components/todos/TodoList';
 import { TodoForm } from '@/components/todos/TodoForm';
 import { TodoFilters } from '@/components/todos/TodoFilters';
 import { useTodos } from '@/hooks/useTodos';
+import type { TodoExtras } from '@/components/todos/TodoItem';
 
 export default function TodosPage() {
   const [filter, setFilter] = useState('all');
@@ -14,12 +15,19 @@ export default function TodosPage() {
     filter !== 'all' ? { status: filter } : undefined
   );
 
-  const handleAddTodo = async (title: string) => {
-    await addTodo({ title });
+  const handleAddTodo = async (title: string, extras?: TodoExtras) => {
+    await addTodo({
+      title,
+      ...(extras?.assignee ? { assignee: extras.assignee } : {}),
+      ...(extras?.due_date ? { due_date: extras.due_date } : {}),
+    });
   };
 
-  const handleEditTodo = (id: string, title: string) => {
-    editTodo(id, { title });
+  const handleEditTodo = (id: string, title: string, extras?: TodoExtras) => {
+    editTodo(id, {
+      title,
+      ...(extras ? { assignee: extras.assignee, due_date: extras.due_date || null } : {}),
+    });
   };
 
   // Filter todos client-side for immediate feedback

@@ -49,6 +49,7 @@ export async function middleware(request: NextRequest) {
     !user &&
     (request.nextUrl.pathname.startsWith('/recordings') ||
       request.nextUrl.pathname.startsWith('/search') ||
+      request.nextUrl.pathname.startsWith('/chat') ||
       request.nextUrl.pathname.startsWith('/meetings') ||
       request.nextUrl.pathname.startsWith('/todos') ||
       request.nextUrl.pathname.startsWith('/phone') ||

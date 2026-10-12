@@ -4,6 +4,8 @@ import { cn } from '@/lib/utils/cn';
 
 interface SummaryCardProps {
   summary: Summary;
+  /** Rendered under the action items list (e.g. an "add to todos" button). */
+  actionItemsFooter?: React.ReactNode;
 }
 
 const priorityColors = {
@@ -12,7 +14,7 @@ const priorityColors = {
   low: 'text-success',
 };
 
-export function SummaryCard({ summary }: SummaryCardProps) {
+export function SummaryCard({ summary, actionItemsFooter }: SummaryCardProps) {
   return (
     <div className="space-y-6">
       {/* Main Summary */}
@@ -74,6 +76,7 @@ export function SummaryCard({ summary }: SummaryCardProps) {
               </li>
             ))}
           </ul>
+          {actionItemsFooter}
         </div>
       )}
 
