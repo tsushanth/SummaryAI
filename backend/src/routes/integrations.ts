@@ -13,6 +13,7 @@ import {
   listIntegrations,
   publicView,
   sendTest,
+  StoredSecretUnreadableError,
   upsertIntegration,
   type IntegrationKind,
 } from '../services/integrationsService.js';
@@ -53,6 +54,7 @@ router.put(
       const row = await upsertIntegration(req.user!.id, kind, body);
       res.json({ integration: publicView(row) });
     } catch (e) {
+      if (e instanceof StoredSecretUnreadableError) throw Errors.conflict(e.message);
       if (e instanceof Error && (e.name === 'SsrfError' || /required|must be|valid/.test(e.message))) {
         throw Errors.badRequest(e.message);
       }

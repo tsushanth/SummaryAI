@@ -227,6 +227,22 @@ export async function listIntegrations(userId: string): Promise<IntegrationRow[]
   return (data ?? []) as IntegrationRow[];
 }
 
+/** Stored ciphertext can no longer be decrypted (e.g. ENCRYPTION_KEY changed). */
+export class StoredSecretUnreadableError extends Error {
+  constructor() {
+    super('Saved credentials can no longer be read. Re-enter the URL and secret to replace them.');
+    this.name = 'StoredSecretUnreadableError';
+  }
+}
+
+function decryptStored(ciphertext: string): string {
+  try {
+    return decryptToken(ciphertext);
+  } catch {
+    throw new StoredSecretUnreadableError();
+  }
+}
+
 export async function upsertIntegration(
   userId: string,
   kind: IntegrationKind,
@@ -234,8 +250,10 @@ export async function upsertIntegration(
 ): Promise<IntegrationRow> {
   // Omitted url/secret mean "keep the stored value" (secrets are write-only on the client).
   const existing = (await listIntegrations(userId)).find((r) => r.kind === kind);
-  const url = input.url ?? (existing?.url_encrypted ? decryptToken(existing.url_encrypted) : undefined);
-  const secret = input.secret ?? (existing?.secret_encrypted ? decryptToken(existing.secret_encrypted) : undefined);
+  // Stored values are only decrypted when the caller did not supply a replacement, so re-entering
+  // everything always works even if the old ciphertext is unreadable.
+  const url = input.url ?? (existing?.url_encrypted ? decryptStored(existing.url_encrypted) : undefined);
+  const secret = input.secret ?? (existing?.secret_encrypted ? decryptStored(existing.secret_encrypted) : undefined);
   const database_id = input.database_id ?? existing?.config?.database_id;
   validateIntegrationInput(kind, { url, secret, database_id });
   const config: Record<string, any> = {};
@@ -300,7 +318,13 @@ export async function sendTest(userId: string, kind: IntegrationKind, opts: Deli
     key_points: [],
     action_items: [],
   };
-  const r = await deliverToIntegration(kind, credsOf(row), payload, { ...opts, maxAttempts: opts.maxAttempts ?? 1 });
+  let creds: ReturnType<typeof credsOf>;
+  try {
+    creds = credsOf(row);
+  } catch {
+    return { ok: false, attempts: 0, error: new StoredSecretUnreadableError().message };
+  }
+  const r = await deliverToIntegration(kind, creds, payload, { ...opts, maxAttempts: opts.maxAttempts ?? 1 });
   await record(row, null, 'test', r);
   return r;
 }
