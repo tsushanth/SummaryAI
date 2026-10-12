@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MoreVert
@@ -56,6 +57,9 @@ import com.kreativekoala.summaryai.ui.components.MmEmptyState
 import com.kreativekoala.summaryai.ui.components.MmStatusPill
 import com.kreativekoala.summaryai.ui.components.SkeletonCardList
 import com.kreativekoala.summaryai.ui.navigation.LocalTabReselection
+import com.kreativekoala.summaryai.ui.recordings.organize.FolderTagFilterRow
+import com.kreativekoala.summaryai.ui.recordings.organize.OrganizeSheet
+import com.kreativekoala.summaryai.ui.recordings.organize.groupedRecordingItems
 import com.kreativekoala.summaryai.ui.theme.Green50
 import com.kreativekoala.summaryai.ui.theme.Orange50
 import com.kreativekoala.summaryai.ui.theme.RecordingRed
@@ -98,6 +102,7 @@ fun RecordingsListScreen(
     val pendingUploads by viewModel.pendingUploads.collectAsState()
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+    var organizeTarget by remember { mutableStateOf<Recording?>(null) }
 
     // Track if we need to scroll to top after refresh
     var shouldScrollToTop by remember { mutableStateOf(false) }
@@ -142,6 +147,14 @@ fun RecordingsListScreen(
         if (shouldLoadMore.value) {
             viewModel.loadMore()
         }
+    }
+
+    organizeTarget?.let { target ->
+        OrganizeSheet(
+            recording = target,
+            onDismiss = { organizeTarget = null },
+            onChanged = { viewModel.refresh() }
+        )
     }
 
     Scaffold(
@@ -239,6 +252,15 @@ fun RecordingsListScreen(
                 )
             }
 
+            FolderTagFilterRow(
+                folders = uiState.folders,
+                tags = uiState.tags,
+                selectedFolderId = uiState.selectedFolderId,
+                selectedTag = uiState.selectedTag,
+                onFolder = viewModel::selectFolder,
+                onTag = viewModel::selectTag,
+            )
+
             // Search bar - iOS style
             Surface(
                 modifier = Modifier
@@ -310,15 +332,13 @@ fun RecordingsListScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                     ) {
-                        items(
-                            items = uiState.recordings,
-                            key = { it.id }
-                        ) { recording ->
+                        groupedRecordingItems(uiState.recordings) { recording ->
                             RecordingCardIOS(
                                 recording = recording,
                                 onClick = { onRecordingClick(recording.id) },
                                 onToggleFavorite = { viewModel.toggleFavorite(recording) },
-                                onDelete = { viewModel.deleteRecording(recording) }
+                                onDelete = { viewModel.deleteRecording(recording) },
+                                onOrganize = { organizeTarget = recording }
                             )
                         }
 
@@ -375,7 +395,8 @@ private fun RecordingCardIOS(
     recording: Recording,
     onClick: () -> Unit,
     onToggleFavorite: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onOrganize: () -> Unit = {}
 ) {
     var showMenu by remember { mutableStateOf(false) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
@@ -472,6 +493,16 @@ private fun RecordingCardIOS(
                                 contentDescription = null,
                                 tint = if (recording.isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
                             )
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Folder and tags") },
+                        onClick = {
+                            showMenu = false
+                            onOrganize()
+                        },
+                        leadingIcon = {
+                            Icon(imageVector = Icons.Default.FolderOpen, contentDescription = null)
                         }
                     )
                     DropdownMenuItem(

@@ -3,12 +3,13 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils/cn';
-import { Mic, ListTodo, Settings, LogOut, Calendar, Sparkles } from 'lucide-react';
+import { Mic, ListTodo, Settings, LogOut, Calendar, Sparkles, Search } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useSubscription } from '@/hooks/useSubscription';
 
 const navigation = [
   { name: 'Recordings', href: '/recordings', icon: Mic },
+  { name: 'Search', href: '/search', icon: Search },
   { name: 'Meetings', href: '/meetings', icon: Calendar },
   { name: 'Todos', href: '/todos', icon: ListTodo },
   { name: 'Settings', href: '/settings', icon: Settings },

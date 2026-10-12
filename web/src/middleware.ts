@@ -43,10 +43,12 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // NOTE: /share/[token] is intentionally public and must NOT be added to the list below.
   // Protected routes - redirect to auth if not logged in
   if (
     !user &&
     (request.nextUrl.pathname.startsWith('/recordings') ||
+      request.nextUrl.pathname.startsWith('/search') ||
       request.nextUrl.pathname.startsWith('/meetings') ||
       request.nextUrl.pathname.startsWith('/todos') ||
       request.nextUrl.pathname.startsWith('/phone') ||

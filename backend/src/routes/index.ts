@@ -15,6 +15,9 @@ import phoneRoutes from './phone.js';
 import subscriptionsRoutes from './subscriptions.js';
 import attributionRoutes from './attribution.js';
 import coachingRoutes from './coaching.js';
+import { foldersRouter, tagsRouter } from './folders.js';
+import { recordingSharesRouter, publicSharesRouter } from './shares.js';
+import searchRoutes from './search.js';
 
 const router = Router();
 
@@ -33,8 +36,15 @@ router.use('/api/calendar', calendarCallbackRouter);
 // Internal worker routes (internal auth)
 router.use('/internal/worker', meetingsWorkerRouter);
 
+// Public share links (no auth - unguessable token, rate limited)
+router.use('/api/public/shares', publicSharesRouter);
+
 // API routes (require auth)
 router.use('/api', intelligenceRoutes);
+router.use('/api/recordings/:id/shares', recordingSharesRouter);
+router.use('/api/folders', foldersRouter);
+router.use('/api/tags', tagsRouter);
+router.use('/api/search', searchRoutes);
 router.use('/api/recordings', recordingsRoutes);
 router.use('/api/todos', todosRoutes);
 router.use('/api/users', usersRoutes);

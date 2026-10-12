@@ -5,6 +5,8 @@ import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kreativekoala.summaryai.data.api.models.FolderDto
+import com.kreativekoala.summaryai.data.repository.OrganizeRepository
 import com.kreativekoala.summaryai.data.repository.RecordingsRepository
 import com.kreativekoala.summaryai.domain.model.Recording
 import com.kreativekoala.summaryai.domain.model.RecordingStatus
@@ -38,8 +40,16 @@ data class RecordingsListUiState(
     val selectedTab: RecordingsTab = RecordingsTab.ALL,
     val error: String? = null,
     val hasMore: Boolean = true,
-    val currentPage: Int = 1
+    val currentPage: Int = 1,
+    // Organization (folders / tags), filtered client-side over the loaded pages
+    val folders: List<FolderDto> = emptyList(),
+    val selectedFolderId: String? = null,
+    val selectedTag: String? = null
 ) {
+    /** Distinct tags across loaded recordings, case-insensitive. */
+    val tags: List<String>
+        get() = allRecordings.flatMap { it.tags }.distinctBy { it.lowercase() }.sortedBy { it.lowercase() }
+
     // For backwards compatibility
     val recordings: List<Recording> get() = filteredRecordings
 }
@@ -53,7 +63,8 @@ data class PendingUpload(
 @HiltViewModel
 class RecordingsListViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val recordingsRepository: RecordingsRepository
+    private val recordingsRepository: RecordingsRepository,
+    private val organizeRepository: OrganizeRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RecordingsListUiState())
@@ -67,6 +78,7 @@ class RecordingsListViewModel @Inject constructor(
     init {
         Log.i(TAG, "RecordingsListViewModel init - loading recordings")
         loadRecordings()
+        loadFolders()
         startPolling()
         refreshPendingUploads()
     }
@@ -114,6 +126,30 @@ class RecordingsListViewModel @Inject constructor(
         _pendingUploads.value = _pendingUploads.value.filterNot { it.file == pending.file }
     }
 
+    fun loadFolders() {
+        viewModelScope.launch {
+            organizeRepository.getFolders().onSuccess { folders ->
+                val selected = _uiState.value.selectedFolderId
+                _uiState.value = _uiState.value.copy(
+                    folders = folders,
+                    // A folder deleted elsewhere must not leave the list filtered to nothing
+                    selectedFolderId = if (selected != null && folders.none { it.id == selected }) null else selected
+                )
+                applyFilter()
+            }
+        }
+    }
+
+    fun selectFolder(folderId: String?) {
+        _uiState.value = _uiState.value.copy(selectedFolderId = folderId)
+        applyFilter()
+    }
+
+    fun selectTag(tag: String?) {
+        _uiState.value = _uiState.value.copy(selectedTag = tag)
+        applyFilter()
+    }
+
     fun selectTab(tab: RecordingsTab) {
         if (_uiState.value.selectedTab != tab) {
             _uiState.value = _uiState.value.copy(
@@ -133,6 +169,7 @@ class RecordingsListViewModel @Inject constructor(
             hasMore = true
         )
         loadRecordings()
+        loadFolders()
         refreshPendingUploads()
     }
 
@@ -216,7 +253,12 @@ class RecordingsListViewModel @Inject constructor(
             RecordingsTab.FAVORITES -> allRecordings.filter { it.isFavorite }
             RecordingsTab.IMPORTED -> allRecordings.filter { it.recordingType == RecordingType.IMPORTED }
         }
-        _uiState.value = _uiState.value.copy(filteredRecordings = filtered)
+        val folderId = _uiState.value.selectedFolderId
+        val tag = _uiState.value.selectedTag
+        val organized = filtered
+            .let { list -> if (folderId != null) list.filter { it.folderId == folderId } else list }
+            .let { list -> if (tag != null) list.filter { r -> r.tags.any { it.equals(tag, ignoreCase = true) } } else list }
+        _uiState.value = _uiState.value.copy(filteredRecordings = organized)
     }
 
     private fun loadRecordings(append: Boolean = false) {

@@ -2,6 +2,7 @@ package com.kreativekoala.summaryai.ui.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kreativekoala.summaryai.data.repository.OrganizeRepository
 import com.kreativekoala.summaryai.data.repository.RecordingsRepository
 import com.kreativekoala.summaryai.domain.model.Recording
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +24,8 @@ data class SearchUiState(
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val recordingsRepository: RecordingsRepository
+    private val recordingsRepository: RecordingsRepository,
+    private val organizeRepository: OrganizeRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
@@ -82,16 +84,21 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private fun performSearch(query: String) {
+    private suspend fun performSearch(query: String) {
         if (query.isBlank()) {
             _uiState.value = _uiState.value.copy(results = emptyList())
             return
         }
 
         val lowerQuery = query.lowercase()
-        val results = _uiState.value.allRecordings.filter { recording ->
-            recording.title.lowercase().contains(lowerQuery)
-        }
+        val all = _uiState.value.allRecordings
+        val titleMatches = all.filter { recording -> recording.title.lowercase().contains(lowerQuery) }
+        // Server-side search also matches summary and transcript text (needs >= 2 chars).
+        val remoteIds = if (query.trim().length >= 2) {
+            organizeRepository.search(query.trim()).getOrNull()?.map { it.recording.id }?.toSet().orEmpty()
+        } else emptySet()
+        val titleIds = titleMatches.map { it.id }.toSet()
+        val results = titleMatches + all.filter { it.id in remoteIds && it.id !in titleIds }
 
         _uiState.value = _uiState.value.copy(results = results)
     }

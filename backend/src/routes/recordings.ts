@@ -14,6 +14,7 @@ import { triggerProcessing } from '../services/processingService.js';
 import { SUMMARY_TEMPLATE_IDS } from '../services/summaryTemplates.js';
 import { normalizeActionItems } from '../services/summaryService.js';
 import questionsRouter from './questions.js';
+import { normalizeTags } from '../lib/shareToken.js';
 
 import type {
   CreateRecordingRequest,
@@ -56,7 +57,23 @@ const listQuerySchema = z.object({
   status: z.enum(['pending', 'uploading', 'uploaded', 'transcribing', 'transcribed', 'summarizing', 'completed', 'failed']).optional(),
   sort: z.enum(['created_at', 'updated_at', 'title', 'duration_seconds']).optional().default('created_at'),
   order: z.enum(['asc', 'desc']).optional().default('desc'),
+  // Organization filters. folder_id=none returns unfiled recordings.
+  folder_id: z.union([z.literal('none'), z.string().uuid()]).optional(),
+  tag: z.string().trim().min(1).max(40).optional(),
+  favorite: z.enum(['true', 'false']).optional(),
+  from: z.string().datetime({ offset: true }).optional(),
+  to: z.string().datetime({ offset: true }).optional(),
 });
+
+function applyOrganizationFilters(q: any, query: { folder_id?: string; tag?: string; favorite?: string; from?: string; to?: string }) {
+  if (query.folder_id === 'none') q = q.is('folder_id', null);
+  else if (query.folder_id) q = q.eq('folder_id', query.folder_id);
+  if (query.tag) q = q.contains('tags', [query.tag]);
+  if (query.favorite) q = q.eq('is_favorite', query.favorite === 'true');
+  if (query.from) q = q.gte('created_at', query.from);
+  if (query.to) q = q.lte('created_at', query.to);
+  return q;
+}
 
 // ============================================================================
 // POST /api/recordings
@@ -341,6 +358,7 @@ router.get(
     if (query.status) {
       dbQuery = dbQuery.eq('status', query.status);
     }
+    dbQuery = applyOrganizationFilters(dbQuery, query as any);
 
     let { data: recordings, error, count } = await dbQuery;
 
@@ -354,6 +372,7 @@ router.get(
       if (query.status) {
         countQuery = countQuery.eq('status', query.status);
       }
+      countQuery = applyOrganizationFilters(countQuery, query as any);
       const countResult = await countQuery;
       if (countResult.error) {
         console.error('Failed to count recordings:', countResult.error);
@@ -471,8 +490,9 @@ router.get(
 
 const updateRecordingSchema = z.object({
   title: z.string().min(1).max(255).optional(),
-  tags: z.array(z.string()).optional(),
+  tags: z.array(z.string().max(100)).max(50).optional(),
   is_favorite: z.boolean().optional(),
+  folder_id: z.string().uuid().nullable().optional(),
 });
 
 router.patch(
@@ -502,6 +522,22 @@ router.patch(
       throw Errors.notFound('Recording');
     }
 
+    // A folder can only be a folder the caller owns
+    if (body.folder_id) {
+      const { data: folder } = await supabaseAdmin
+        .from('folders')
+        .select('id')
+        .eq('id', body.folder_id)
+        .eq('user_id', userId)
+        .maybeSingle();
+      if (!folder) {
+        throw Errors.notFound('Folder');
+      }
+    }
+    if (body.tags) {
+      body.tags = normalizeTags(body.tags);
+    }
+
     // Update recording
     const { data: recording, error } = await supabaseAdmin
       .from('recordings')
@@ -510,6 +546,7 @@ router.patch(
         updated_at: new Date().toISOString(),
       })
       .eq('id', recordingId)
+      .eq('user_id', userId)
       .select()
       .single();
 
