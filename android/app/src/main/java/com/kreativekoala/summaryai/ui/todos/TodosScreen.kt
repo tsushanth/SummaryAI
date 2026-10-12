@@ -16,6 +16,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.domain.model.Todo
+import com.kreativekoala.summaryai.ui.components.MmCard
+import com.kreativekoala.summaryai.ui.components.MmChip
+import com.kreativekoala.summaryai.ui.components.MmEmptyState
+import com.kreativekoala.summaryai.ui.components.MmStatusPill
+import com.kreativekoala.summaryai.ui.components.SkeletonCardList
 import com.kreativekoala.summaryai.domain.model.TodoPriority
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,30 +66,21 @@ fun TodosScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 TodoFilter.values().forEach { filter ->
-                    FilterChip(
+                    MmChip(
+                        label = when (filter) {
+                            TodoFilter.ALL -> stringResource(R.string.all)
+                            TodoFilter.PENDING -> stringResource(R.string.pending_items)
+                            TodoFilter.COMPLETED -> stringResource(R.string.completed_items)
+                        },
                         selected = uiState.filter == filter,
-                        onClick = { viewModel.setFilter(filter) },
-                        label = {
-                            Text(
-                                when (filter) {
-                                    TodoFilter.ALL -> stringResource(R.string.all)
-                                    TodoFilter.PENDING -> stringResource(R.string.pending_items)
-                                    TodoFilter.COMPLETED -> stringResource(R.string.completed_items)
-                                }
-                            )
-                        }
+                        onClick = { viewModel.setFilter(filter) }
                     )
                 }
             }
 
             // Content
             if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+                SkeletonCardList(count = 5, loadingDescription = stringResource(R.string.ui_loading))
             } else if (uiState.todos.isEmpty()) {
                 EmptyTodosContent(filter = uiState.filter)
             } else {
@@ -127,34 +123,18 @@ fun TodosScreen(
 @Composable
 private fun EmptyTodosContent(filter: TodoFilter) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                imageVector = Icons.Default.Checklist,
-                contentDescription = null,
-                modifier = Modifier.size(64.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = when (filter) {
-                    TodoFilter.ALL -> stringResource(R.string.no_action_items)
-                    TodoFilter.PENDING -> stringResource(R.string.no_pending_items)
-                    TodoFilter.COMPLETED -> stringResource(R.string.no_completed_items)
-                },
-                style = MaterialTheme.typography.titleMedium
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = stringResource(R.string.action_items_empty_hint),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        MmEmptyState(
+            icon = Icons.Default.Checklist,
+            title = when (filter) {
+                TodoFilter.ALL -> stringResource(R.string.no_action_items)
+                TodoFilter.PENDING -> stringResource(R.string.no_pending_items)
+                TodoFilter.COMPLETED -> stringResource(R.string.no_completed_items)
+            },
+            message = stringResource(R.string.action_items_empty_hint)
+        )
     }
 }
 
@@ -167,9 +147,7 @@ private fun TodoItem(
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
-    Card(
-        modifier = Modifier.fillMaxWidth()
-    ) {
+    MmCard {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -213,17 +191,11 @@ private fun TodoItem(
                 ) {
                     // Priority badge
                     if (todo.priority != TodoPriority.NONE) {
-                        Surface(
-                            color = todo.priority.color.copy(alpha = 0.2f),
-                            shape = MaterialTheme.shapes.small
-                        ) {
-                            Text(
-                                text = todo.priority.displayName,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = todo.priority.color
-                            )
-                        }
+                        MmStatusPill(
+                            text = todo.priority.displayName,
+                            container = todo.priority.color.copy(alpha = 0.2f),
+                            content = todo.priority.color
+                        )
                     }
 
                     // Recording link
@@ -296,6 +268,7 @@ private fun AddTodoDialog(
                     onValueChange = onTitleChange,
                     label = { Text(stringResource(R.string.todo_title)) },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium,
                     singleLine = true
                 )
 
@@ -317,10 +290,10 @@ private fun AddTodoDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     TodoPriority.values().forEach { p ->
-                        FilterChip(
+                        MmChip(
+                            label = p.displayName,
                             selected = priority == p,
-                            onClick = { onPriorityChange(p) },
-                            label = { Text(p.displayName) }
+                            onClick = { onPriorityChange(p) }
                         )
                     }
                 }

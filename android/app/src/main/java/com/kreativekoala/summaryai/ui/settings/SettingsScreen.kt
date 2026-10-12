@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -16,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -23,6 +25,9 @@ import androidx.compose.ui.graphics.Color
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.data.preferences.ThemeMode
 import com.kreativekoala.summaryai.domain.model.User
+import com.kreativekoala.summaryai.ui.components.MmCard
+import com.kreativekoala.summaryai.ui.components.MmSectionHeader
+import com.kreativekoala.summaryai.ui.components.MmStatusPill
 import com.kreativekoala.crosspromokit.models.AppId
 import com.kreativekoala.crosspromokit.view.CrossPromoSection
 import com.kreativekoala.paywallkit.models.PaywallFeature
@@ -216,7 +221,10 @@ fun SettingsScreen(
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 Button(
                     onClick = { showSignOutDialog = true },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultMinSize(minHeight = 48.dp),
+                    shape = MaterialTheme.shapes.large,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.errorContainer,
                         contentColor = MaterialTheme.colorScheme.onErrorContainer
@@ -277,21 +285,21 @@ fun SettingsScreen(
                 text = {
                     Column {
                         languages.forEach { (code, nameRes) ->
+                            val isCurrent = currentLocaleTag == code
+                            val pick = {
+                                AppCompatDelegate.setApplicationLocales(
+                                    LocaleListCompat.forLanguageTags(code)
+                                )
+                                showLanguageDialog = false
+                            }
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 4.dp),
+                                    .defaultMinSize(minHeight = 48.dp)
+                                    .selectable(selected = isCurrent, role = Role.RadioButton, onClick = pick),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                RadioButton(
-                                    selected = currentLocaleTag == code || (currentLocaleTag == "en" && code == "en"),
-                                    onClick = {
-                                        AppCompatDelegate.setApplicationLocales(
-                                            LocaleListCompat.forLanguageTags(code)
-                                        )
-                                        showLanguageDialog = false
-                                    }
-                                )
+                                RadioButton(selected = isCurrent, onClick = null)
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = stringResource(nameRes),
@@ -342,17 +350,11 @@ private fun SettingsSection(
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        MmSectionHeader(
+            title = title,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
         )
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-        ) {
+        MmCard(modifier = Modifier.padding(horizontal = 16.dp)) {
             Column(content = content)
         }
     }
@@ -368,12 +370,14 @@ private fun SettingsItem(
 ) {
     Surface(
         onClick = onClick ?: {},
-        enabled = onClick != null
+        enabled = onClick != null,
+        color = Color.Transparent
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .defaultMinSize(minHeight = 56.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -452,17 +456,11 @@ private fun AccountCard(user: User, onUpgradeClick: () -> Unit) {
                 Text(stringResource(R.string.pro))
             }
         } else {
-            Surface(
-                color = MaterialTheme.colorScheme.primaryContainer,
-                shape = MaterialTheme.shapes.small
-            ) {
-                Text(
-                    text = stringResource(R.string.pro),
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
+            MmStatusPill(
+                text = stringResource(R.string.pro),
+                container = MaterialTheme.colorScheme.primaryContainer,
+                content = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         }
     }
 }
@@ -507,11 +505,12 @@ private fun ThemeOption(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    Surface(onClick = onClick) {
+    Surface(onClick = onClick, color = Color.Transparent) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .defaultMinSize(minHeight = 56.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
