@@ -269,4 +269,10 @@
     <string name="language_portuguese">Português</string>
     <string name="language_italian">Italiano</string>
     <string name="language_hindi">हिन्दी</string>
+    <string name="live_transcribe">Transkrypcja na żywo</string>
+    <string name="live_transcribe_listening">Słucham…</string>
+    <string name="no_recordings_in_filter">Brak wyników w tym filtrze</string>
+    <string name="no_recordings_in_filter_subtitle">Żadne nagranie jeszcze nie pasuje. Wybierz Wszystkie, aby zobaczyć wszystko.</string>
+    <string name="summary_no_speech">W tym nagraniu nie wykryto mowy, więc nie ma czego podsumować.</string>
+    <string name="error_load_recording_failed">Nie udało się wczytać tego nagrania. Sprawdź połączenie i spróbuj ponownie.</string>
 </resources>

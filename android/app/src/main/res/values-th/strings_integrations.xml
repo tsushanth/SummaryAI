@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="integrations_title">ส่งบทสรุปไปที่อื่น</string>
+    <string name="integrations_desc">หลังจากประมวลผลแต่ละการประชุมแล้ว MeetingMind สามารถส่งบทสรุปและรายการสิ่งที่ต้องทำไปยัง Webhook, Slack หรือ Notion ข้อมูลลับจะถูกเก็บแบบเข้ารหัสและจะไม่แสดงอีก</string>
+    <string name="integration_webhook">Webhook</string>
+    <string name="integration_webhook_url">URL ของ Webhook (https)</string>
+    <string name="integration_webhook_secret">รหัสลับสำหรับลงนาม (ไม่บังคับ)</string>
+    <string name="integration_slack">Slack</string>
+    <string name="integration_slack_url">URL Incoming Webhook ของ Slack</string>
+    <string name="integration_notion">Notion</string>
+    <string name="integration_notion_token">โทเค็นการเชื่อมต่อของ Notion</string>
+    <string name="integration_notion_database">ID ฐานข้อมูลของ Notion</string>
+    <string name="integration_connected">เชื่อมต่อแล้ว</string>
+    <string name="integration_last_delivery">การส่งล่าสุด: %1$s</string>
+    <string name="integration_leave_to_keep">ป้อนค่าใหม่เพื่อแทนที่</string>
+    <string name="integration_save">บันทึก</string>
+    <string name="integration_test">ส่งทดสอบ</string>
+    <string name="integration_remove">ลบ</string>
+    <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
+    <string name="tile_record_label">บันทึกการประชุม</string>
+    <string name="widget_record_label">บันทึก</string>
+    <string name="widget_description">เริ่มบันทึกจากหน้าจอหลักของคุณ</string>
+    <string name="analytics_title">เวลาพูด</string>
+    <string name="analytics_questions">%1$d คำถาม</string>
+    <string name="analytics_words">%1$d คำ</string>
+    <string name="analytics_longest_monologue">พูดยาวที่สุด: %1$s (%2$s)</string>
+</resources>

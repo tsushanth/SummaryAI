@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="weekly_stats_title">Son 7 gün</string>
+    <string name="weekly_stats_meetings">Toplantılar</string>
+    <string name="weekly_stats_hours">Kaydedilen saat</string>
+    <string name="weekly_stats_action_items">Görevler</string>
+</resources>

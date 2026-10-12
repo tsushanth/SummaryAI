@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit">تعديل</string>
+    <string name="save">حفظ</string>
+    <string name="copy">نسخ</string>
+    <string name="todo_assignee">المكلّف (اختياري)</string>
+    <string name="todo_due_date">تاريخ الاستحقاق (اختياري)</string>
+    <string name="todo_due_date_pick">اختيار التاريخ</string>
+    <string name="todo_due_date_clear">مسح التاريخ</string>
+    <string name="todo_due_chip">الاستحقاق %1$s</string>
+    <string name="summary_template_title">نمط الملخص</string>
+    <string name="summary_template_current">الحالي: %1$s</string>
+    <string name="summary_template_not_set">غير محدد (يُستخدم الافتراضي الخاص بك)</string>
+    <string name="summary_template_regenerate">إعادة إنشاء الملخص</string>
+    <string name="summary_template_regenerating">جارٍ إعادة الإنشاء…</string>
+    <string name="summary_template_confirm_title">إعادة إنشاء الملخص؟</string>
+    <string name="summary_template_confirm_message">سيؤدي ذلك إلى استبدال الملخص والنقاط الرئيسية والمهام الحالية بنسخة جديدة بنمط %1$s. لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="summary_template_regenerate_confirm">إعادة الإنشاء</string>
+    <string name="summary_template_failed">تعذّرت إعادة إنشاء الملخص</string>
+    <string name="summary_template_done">تمت إعادة إنشاء الملخص</string>
+    <string name="summary_template_load_failed">تعذّر تحميل أنماط الملخص</string>
+    <string name="followup_email">صياغة بريد متابعة</string>
+    <string name="followup_email_title">بريد المتابعة</string>
+    <string name="followup_email_subject">الموضوع</string>
+    <string name="followup_email_body">النص</string>
+    <string name="followup_email_drafting">جارٍ الصياغة…</string>
+    <string name="followup_email_failed">تعذّرت صياغة البريد الإلكتروني</string>
+    <string name="followup_email_copied">تم نسخ البريد الإلكتروني</string>
+    <string name="followup_email_send">إرسال</string>
+    <string name="followup_email_no_app">لم يتم العثور على تطبيق بريد إلكتروني</string>
+    <string name="action_items_to_todos">إضافة إلى مهامي</string>
+    <string name="action_items_to_todos_adding">جارٍ الإضافة…</string>
+    <string name="action_items_to_todos_added">تمت إضافة %1$d إلى مهامك</string>
+    <string name="action_items_to_todos_added_skipped">تمت إضافة %1$d إلى مهامك (%2$d موجودة مسبقاً)</string>
+    <string name="action_items_to_todos_none_new">جميع المهام موجودة بالفعل في قائمة مهامك</string>
+    <string name="action_items_to_todos_failed">تعذّرت إضافة المهام إلى قائمتك</string>
+    <string name="chat_all_meetings">اسأل عبر جميع الاجتماعات</string>
+    <string name="chat_all_meetings_title">اسأل اجتماعاتك</string>
+    <string name="chat_all_meetings_placeholder">مثال: ماذا قررنا بشأن التسعير؟</string>
+    <string name="chat_all_meetings_empty_title">اسأل عبر جميع اجتماعاتك</string>
+    <string name="chat_all_meetings_empty_message">تأتي الإجابات من ملخصاتك ونصوصك المفرّغة، مع روابط إلى الاجتماعات التي أُخذت منها.</string>
+    <string name="chat_all_meetings_sources">المصادر</string>
+    <string name="chat_all_meetings_failed">تعذّر الحصول على إجابة. حاول مرة أخرى.</string>
+    <string name="chat_all_meetings_send">إرسال</string>
+    <string name="settings_default_template">نمط الملخص الافتراضي</string>
+    <string name="settings_default_template_hint">يُستخدم للتسجيلات الجديدة ما لم تختر نمطاً لتسجيل محدد</string>
+</resources>

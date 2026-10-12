@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="weekly_stats_title">آخر 7 أيام</string>
+    <string name="weekly_stats_meetings">الاجتماعات</string>
+    <string name="weekly_stats_hours">ساعات التسجيل</string>
+    <string name="weekly_stats_action_items">المهام</string>
+</resources>

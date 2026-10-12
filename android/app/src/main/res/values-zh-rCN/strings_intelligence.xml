@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit">编辑</string>
+    <string name="save">保存</string>
+    <string name="copy">复制</string>
+    <string name="todo_assignee">负责人（可选）</string>
+    <string name="todo_due_date">截止日期（可选）</string>
+    <string name="todo_due_date_pick">选择日期</string>
+    <string name="todo_due_date_clear">清除日期</string>
+    <string name="todo_due_chip">截止 %1$s</string>
+    <string name="summary_template_title">摘要风格</string>
+    <string name="summary_template_current">当前：%1$s</string>
+    <string name="summary_template_not_set">未设置（使用您的默认值）</string>
+    <string name="summary_template_regenerate">重新生成摘要</string>
+    <string name="summary_template_regenerating">正在重新生成…</string>
+    <string name="summary_template_confirm_title">重新生成摘要？</string>
+    <string name="summary_template_confirm_message">这将用 %1$s 风格的新版本替换当前的摘要、要点和行动事项。此操作无法撤销。</string>
+    <string name="summary_template_regenerate_confirm">重新生成</string>
+    <string name="summary_template_failed">无法重新生成摘要</string>
+    <string name="summary_template_done">摘要已重新生成</string>
+    <string name="summary_template_load_failed">无法加载摘要风格</string>
+    <string name="followup_email">起草跟进邮件</string>
+    <string name="followup_email_title">跟进邮件</string>
+    <string name="followup_email_subject">主题</string>
+    <string name="followup_email_body">正文</string>
+    <string name="followup_email_drafting">正在起草…</string>
+    <string name="followup_email_failed">无法起草邮件</string>
+    <string name="followup_email_copied">邮件已复制</string>
+    <string name="followup_email_send">发送</string>
+    <string name="followup_email_no_app">未找到邮件应用</string>
+    <string name="action_items_to_todos">添加到我的待办</string>
+    <string name="action_items_to_todos_adding">正在添加…</string>
+    <string name="action_items_to_todos_added">已将 %1$d 项添加到您的待办</string>
+    <string name="action_items_to_todos_added_skipped">已将 %1$d 项添加到您的待办（%2$d 项已存在）</string>
+    <string name="action_items_to_todos_none_new">所有行动事项都已在您的待办中</string>
+    <string name="action_items_to_todos_failed">无法将行动事项添加到待办</string>
+    <string name="chat_all_meetings">向所有会议提问</string>
+    <string name="chat_all_meetings_title">向您的会议提问</string>
+    <string name="chat_all_meetings_placeholder">例如：我们对定价做了什么决定？</string>
+    <string name="chat_all_meetings_empty_title">向您的所有会议提问</string>
+    <string name="chat_all_meetings_empty_message">答案来自您的摘要和转录文本，并附有指向来源会议的链接。</string>
+    <string name="chat_all_meetings_sources">来源</string>
+    <string name="chat_all_meetings_failed">无法获取答案。请重试。</string>
+    <string name="chat_all_meetings_send">发送</string>
+    <string name="settings_default_template">默认摘要风格</string>
+    <string name="settings_default_template_hint">用于新录音，除非您为某条录音单独选择风格</string>
+</resources>

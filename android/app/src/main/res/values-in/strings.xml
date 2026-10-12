@@ -269,4 +269,10 @@
     <string name="language_portuguese">Português</string>
     <string name="language_italian">Italiano</string>
     <string name="language_hindi">हिन्दी</string>
+    <string name="live_transcribe">Transkripsi Langsung</string>
+    <string name="live_transcribe_listening">Mendengarkan…</string>
+    <string name="no_recordings_in_filter">Tidak ada apa pun di filter ini</string>
+    <string name="no_recordings_in_filter_subtitle">Belum ada rekaman yang cocok. Pilih Semua untuk melihat semuanya.</string>
+    <string name="summary_no_speech">Tidak ada ucapan yang terdeteksi dalam rekaman ini, jadi tidak ada yang bisa diringkas.</string>
+    <string name="error_load_recording_failed">Tidak dapat memuat rekaman ini. Periksa koneksi Anda dan coba lagi.</string>
 </resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ui_action_items">Công việc</string>
+    <string name="ui_notes">Ghi chú</string>
+    <string name="ui_loading">Đang tải</string>
+    <string name="ui_transcript_jump_to">Chuyển đến %1$s</string>
+    <string name="ui_transcript_speaker_line">%1$s lúc %2$s: %3$s</string>
+    <string name="ui_speakers_label">Người nói</string>
+    <string name="ui_no_recordings_title">Chưa có bản ghi nào</string>
+    <string name="ui_no_results_title">Không có bản ghi phù hợp</string>
+    <string name="ui_clear_search">Xóa tìm kiếm</string>
+</resources>

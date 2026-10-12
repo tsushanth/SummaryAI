@@ -269,4 +269,10 @@
     <string name="language_portuguese">Português</string>
     <string name="language_italian">Italiano</string>
     <string name="language_hindi">हिन्दी</string>
+    <string name="live_transcribe">Live transcriptie</string>
+    <string name="live_transcribe_listening">Luisteren…</string>
+    <string name="no_recordings_in_filter">Niets in dit filter</string>
+    <string name="no_recordings_in_filter_subtitle">Er zijn nog geen opnames die hierbij passen. Kies Alles om alles te zien.</string>
+    <string name="summary_no_speech">In deze opname is geen spraak gedetecteerd, dus er valt niets samen te vatten.</string>
+    <string name="error_load_recording_failed">Deze opname kon niet worden geladen. Controleer je verbinding en probeer het opnieuw.</string>
 </resources>

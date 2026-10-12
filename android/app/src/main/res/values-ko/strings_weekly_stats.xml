@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="weekly_stats_title">최근 7일</string>
+    <string name="weekly_stats_meetings">회의</string>
+    <string name="weekly_stats_hours">녹음 시간</string>
+    <string name="weekly_stats_action_items">실행 항목</string>
+</resources>

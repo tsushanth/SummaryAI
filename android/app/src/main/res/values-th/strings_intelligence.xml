@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit">แก้ไข</string>
+    <string name="save">บันทึก</string>
+    <string name="copy">คัดลอก</string>
+    <string name="todo_assignee">ผู้รับผิดชอบ (ไม่บังคับ)</string>
+    <string name="todo_due_date">วันครบกำหนด (ไม่บังคับ)</string>
+    <string name="todo_due_date_pick">เลือกวันที่</string>
+    <string name="todo_due_date_clear">ล้างวันที่</string>
+    <string name="todo_due_chip">ครบกำหนด %1$s</string>
+    <string name="summary_template_title">รูปแบบสรุป</string>
+    <string name="summary_template_current">ปัจจุบัน: %1$s</string>
+    <string name="summary_template_not_set">ยังไม่ได้ตั้งค่า (ใช้ค่าเริ่มต้นของคุณ)</string>
+    <string name="summary_template_regenerate">สร้างสรุปใหม่</string>
+    <string name="summary_template_regenerating">กำลังสร้างใหม่…</string>
+    <string name="summary_template_confirm_title">สร้างสรุปใหม่หรือไม่?</string>
+    <string name="summary_template_confirm_message">การดำเนินการนี้จะแทนที่สรุป ประเด็นสำคัญ และรายการสิ่งที่ต้องทำปัจจุบันด้วยเวอร์ชันใหม่ในรูปแบบ %1$s และไม่สามารถยกเลิกได้</string>
+    <string name="summary_template_regenerate_confirm">สร้างใหม่</string>
+    <string name="summary_template_failed">ไม่สามารถสร้างสรุปใหม่ได้</string>
+    <string name="summary_template_done">สร้างสรุปใหม่แล้ว</string>
+    <string name="summary_template_load_failed">ไม่สามารถโหลดรูปแบบสรุปได้</string>
+    <string name="followup_email">ร่างอีเมลติดตามผล</string>
+    <string name="followup_email_title">อีเมลติดตามผล</string>
+    <string name="followup_email_subject">หัวเรื่อง</string>
+    <string name="followup_email_body">เนื้อหา</string>
+    <string name="followup_email_drafting">กำลังร่าง…</string>
+    <string name="followup_email_failed">ไม่สามารถร่างอีเมลได้</string>
+    <string name="followup_email_copied">คัดลอกอีเมลแล้ว</string>
+    <string name="followup_email_send">ส่ง</string>
+    <string name="followup_email_no_app">ไม่พบแอปอีเมล</string>
+    <string name="action_items_to_todos">เพิ่มในรายการของฉัน</string>
+    <string name="action_items_to_todos_adding">กำลังเพิ่ม…</string>
+    <string name="action_items_to_todos_added">เพิ่ม %1$d รายการในรายการสิ่งที่ต้องทำของคุณแล้ว</string>
+    <string name="action_items_to_todos_added_skipped">เพิ่ม %1$d รายการในรายการสิ่งที่ต้องทำของคุณแล้ว (มีอยู่แล้ว %2$d รายการ)</string>
+    <string name="action_items_to_todos_none_new">รายการสิ่งที่ต้องทำทั้งหมดอยู่ในรายการของคุณแล้ว</string>
+    <string name="action_items_to_todos_failed">ไม่สามารถเพิ่มรายการสิ่งที่ต้องทำได้</string>
+    <string name="chat_all_meetings">ถามจากทุกการประชุม</string>
+    <string name="chat_all_meetings_title">ถามการประชุมของคุณ</string>
+    <string name="chat_all_meetings_placeholder">เช่น เราตัดสินใจอะไรเกี่ยวกับราคา?</string>
+    <string name="chat_all_meetings_empty_title">ถามจากทุกการประชุมของคุณ</string>
+    <string name="chat_all_meetings_empty_message">คำตอบมาจากบทสรุปและบทถอดเสียงของคุณ พร้อมลิงก์ไปยังการประชุมต้นทาง</string>
+    <string name="chat_all_meetings_sources">แหล่งที่มา</string>
+    <string name="chat_all_meetings_failed">ไม่สามารถรับคำตอบได้ ลองอีกครั้ง</string>
+    <string name="chat_all_meetings_send">ส่ง</string>
+    <string name="settings_default_template">รูปแบบสรุปเริ่มต้น</string>
+    <string name="settings_default_template_hint">ใช้กับการบันทึกใหม่ เว้นแต่คุณเลือกรูปแบบสำหรับการบันทึกนั้นโดยเฉพาะ</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ui_action_items">कार्य सूची</string>
+    <string name="ui_notes">नोट्स</string>
+    <string name="ui_loading">लोड हो रहा है</string>
+    <string name="ui_transcript_jump_to">%1$s पर जाएँ</string>
+    <string name="ui_transcript_speaker_line">%1$s, %2$s पर: %3$s</string>
+    <string name="ui_speakers_label">वक्ता</string>
+    <string name="ui_no_recordings_title">अभी कोई रिकॉर्डिंग नहीं है</string>
+    <string name="ui_no_results_title">कोई मिलती-जुलती रिकॉर्डिंग नहीं</string>
+    <string name="ui_clear_search">खोज साफ़ करें</string>
+</resources>

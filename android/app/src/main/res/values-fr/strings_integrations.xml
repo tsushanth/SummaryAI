@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="integrations_title">Envoyer les résumés ailleurs</string>
+    <string name="integrations_desc">Une fois chaque réunion traitée, MeetingMind peut envoyer le résumé et les tâches à un webhook, à Slack ou à Notion. Les secrets sont stockés chiffrés et ne sont jamais réaffichés.</string>
+    <string name="integration_webhook">Webhook</string>
+    <string name="integration_webhook_url">URL du webhook (https)</string>
+    <string name="integration_webhook_secret">Secret de signature (facultatif)</string>
+    <string name="integration_slack">Slack</string>
+    <string name="integration_slack_url">URL du webhook entrant Slack</string>
+    <string name="integration_notion">Notion</string>
+    <string name="integration_notion_token">Jeton d\'intégration Notion</string>
+    <string name="integration_notion_database">ID de la base de données Notion</string>
+    <string name="integration_connected">Connecté</string>
+    <string name="integration_last_delivery">Dernier envoi : %1$s</string>
+    <string name="integration_leave_to_keep">Saisissez une nouvelle valeur pour remplacer</string>
+    <string name="integration_save">Enregistrer</string>
+    <string name="integration_test">Envoyer un test</string>
+    <string name="integration_remove">Supprimer</string>
+    <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
+    <string name="tile_record_label">Enregistrer la réunion</string>
+    <string name="widget_record_label">Enregistrer</string>
+    <string name="widget_description">Lancez un enregistrement depuis votre écran d\'accueil</string>
+    <string name="analytics_title">Temps de parole</string>
+    <string name="analytics_questions">%1$d questions</string>
+    <string name="analytics_words">%1$d mots</string>
+    <string name="analytics_longest_monologue">Monologue le plus long : %1$s (%2$s)</string>
+</resources>

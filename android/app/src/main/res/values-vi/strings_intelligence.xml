@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit">Chỉnh sửa</string>
+    <string name="save">Lưu</string>
+    <string name="copy">Sao chép</string>
+    <string name="todo_assignee">Người phụ trách (tùy chọn)</string>
+    <string name="todo_due_date">Ngày đến hạn (tùy chọn)</string>
+    <string name="todo_due_date_pick">Chọn ngày</string>
+    <string name="todo_due_date_clear">Xóa ngày</string>
+    <string name="todo_due_chip">Hạn %1$s</string>
+    <string name="summary_template_title">Kiểu tóm tắt</string>
+    <string name="summary_template_current">Hiện tại: %1$s</string>
+    <string name="summary_template_not_set">Chưa đặt (dùng mặc định của bạn)</string>
+    <string name="summary_template_regenerate">Tạo lại bản tóm tắt</string>
+    <string name="summary_template_regenerating">Đang tạo lại…</string>
+    <string name="summary_template_confirm_title">Tạo lại bản tóm tắt?</string>
+    <string name="summary_template_confirm_message">Thao tác này sẽ thay bản tóm tắt, các điểm chính và công việc hiện tại bằng phiên bản mới theo kiểu %1$s. Không thể hoàn tác.</string>
+    <string name="summary_template_regenerate_confirm">Tạo lại</string>
+    <string name="summary_template_failed">Không thể tạo lại bản tóm tắt</string>
+    <string name="summary_template_done">Đã tạo lại bản tóm tắt</string>
+    <string name="summary_template_load_failed">Không thể tải các kiểu tóm tắt</string>
+    <string name="followup_email">Soạn email theo dõi</string>
+    <string name="followup_email_title">Email theo dõi</string>
+    <string name="followup_email_subject">Tiêu đề</string>
+    <string name="followup_email_body">Nội dung</string>
+    <string name="followup_email_drafting">Đang soạn…</string>
+    <string name="followup_email_failed">Không thể soạn email</string>
+    <string name="followup_email_copied">Đã sao chép email</string>
+    <string name="followup_email_send">Gửi</string>
+    <string name="followup_email_no_app">Không tìm thấy ứng dụng email</string>
+    <string name="action_items_to_todos">Thêm vào công việc của tôi</string>
+    <string name="action_items_to_todos_adding">Đang thêm…</string>
+    <string name="action_items_to_todos_added">Đã thêm %1$d vào công việc của bạn</string>
+    <string name="action_items_to_todos_added_skipped">Đã thêm %1$d vào công việc của bạn (%2$d đã có sẵn)</string>
+    <string name="action_items_to_todos_none_new">Tất cả công việc đã có trong danh sách của bạn</string>
+    <string name="action_items_to_todos_failed">Không thể thêm công việc vào danh sách</string>
+    <string name="chat_all_meetings">Hỏi trong tất cả cuộc họp</string>
+    <string name="chat_all_meetings_title">Hỏi các cuộc họp của bạn</string>
+    <string name="chat_all_meetings_placeholder">vd: Chúng ta đã quyết định gì về giá?</string>
+    <string name="chat_all_meetings_empty_title">Hỏi trong tất cả cuộc họp của bạn</string>
+    <string name="chat_all_meetings_empty_message">Câu trả lời lấy từ các bản tóm tắt và bản phiên âm của bạn, kèm liên kết đến cuộc họp nguồn.</string>
+    <string name="chat_all_meetings_sources">Nguồn</string>
+    <string name="chat_all_meetings_failed">Không thể nhận câu trả lời. Hãy thử lại.</string>
+    <string name="chat_all_meetings_send">Gửi</string>
+    <string name="settings_default_template">Kiểu tóm tắt mặc định</string>
+    <string name="settings_default_template_hint">Dùng cho các bản ghi mới, trừ khi bạn chọn kiểu riêng cho một bản ghi cụ thể</string>
+</resources>

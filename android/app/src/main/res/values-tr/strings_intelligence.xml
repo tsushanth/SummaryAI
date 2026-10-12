@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit">Düzenle</string>
+    <string name="save">Kaydet</string>
+    <string name="copy">Kopyala</string>
+    <string name="todo_assignee">Atanan kişi (isteğe bağlı)</string>
+    <string name="todo_due_date">Bitiş tarihi (isteğe bağlı)</string>
+    <string name="todo_due_date_pick">Tarih seç</string>
+    <string name="todo_due_date_clear">Tarihi temizle</string>
+    <string name="todo_due_chip">Bitiş: %1$s</string>
+    <string name="summary_template_title">Özet stili</string>
+    <string name="summary_template_current">Geçerli: %1$s</string>
+    <string name="summary_template_not_set">Ayarlanmadı (varsayılanınız kullanılır)</string>
+    <string name="summary_template_regenerate">Özeti yeniden oluştur</string>
+    <string name="summary_template_regenerating">Yeniden oluşturuluyor…</string>
+    <string name="summary_template_confirm_title">Özet yeniden oluşturulsun mu?</string>
+    <string name="summary_template_confirm_message">Bu işlem mevcut özeti, ana noktaları ve görevleri %1$s stilindeki yeni bir sürümle değiştirir. Bu işlem geri alınamaz.</string>
+    <string name="summary_template_regenerate_confirm">Yeniden oluştur</string>
+    <string name="summary_template_failed">Özet yeniden oluşturulamadı</string>
+    <string name="summary_template_done">Özet yeniden oluşturuldu</string>
+    <string name="summary_template_load_failed">Özet stilleri yüklenemedi</string>
+    <string name="followup_email">Takip e-postası taslağı oluştur</string>
+    <string name="followup_email_title">Takip e-postası</string>
+    <string name="followup_email_subject">Konu</string>
+    <string name="followup_email_body">İçerik</string>
+    <string name="followup_email_drafting">Taslak hazırlanıyor…</string>
+    <string name="followup_email_failed">E-posta taslağı oluşturulamadı</string>
+    <string name="followup_email_copied">E-posta kopyalandı</string>
+    <string name="followup_email_send">Gönder</string>
+    <string name="followup_email_no_app">E-posta uygulaması bulunamadı</string>
+    <string name="action_items_to_todos">Görevlerime ekle</string>
+    <string name="action_items_to_todos_adding">Ekleniyor…</string>
+    <string name="action_items_to_todos_added">%1$d görev görevlerinize eklendi</string>
+    <string name="action_items_to_todos_added_skipped">%1$d görev görevlerinize eklendi (%2$d zaten vardı)</string>
+    <string name="action_items_to_todos_none_new">Tüm görevler zaten görev listenizde</string>
+    <string name="action_items_to_todos_failed">Görevler listeye eklenemedi</string>
+    <string name="chat_all_meetings">Tüm toplantılarda sor</string>
+    <string name="chat_all_meetings_title">Toplantılarınıza sorun</string>
+    <string name="chat_all_meetings_placeholder">örn. Fiyatlandırma konusunda ne kararlaştırdık?</string>
+    <string name="chat_all_meetings_empty_title">Tüm toplantılarınızda sorun</string>
+    <string name="chat_all_meetings_empty_message">Yanıtlar, özetlerinizden ve transkriptlerinizden gelir ve geldikleri toplantılara bağlantılar içerir.</string>
+    <string name="chat_all_meetings_sources">Kaynaklar</string>
+    <string name="chat_all_meetings_failed">Yanıt alınamadı. Tekrar deneyin.</string>
+    <string name="chat_all_meetings_send">Gönder</string>
+    <string name="settings_default_template">Varsayılan özet stili</string>
+    <string name="settings_default_template_hint">Belirli bir kayıt için stil seçmediğiniz sürece yeni kayıtlarda kullanılır</string>
+</resources>

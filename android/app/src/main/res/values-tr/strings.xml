@@ -269,4 +269,10 @@
     <string name="language_portuguese">Português</string>
     <string name="language_italian">Italiano</string>
     <string name="language_hindi">हिन्दी</string>
+    <string name="live_transcribe">Canlı Transkripsiyon</string>
+    <string name="live_transcribe_listening">Dinleniyor…</string>
+    <string name="no_recordings_in_filter">Bu filtrede hiçbir şey yok</string>
+    <string name="no_recordings_in_filter_subtitle">Henüz eşleşen kayıt yok. Her şeyi görmek için Tümü\'nü seçin.</string>
+    <string name="summary_no_speech">Bu kayıtta konuşma algılanmadı, bu nedenle özetlenecek bir şey yok.</string>
+    <string name="error_load_recording_failed">Bu kayıt yüklenemedi. Bağlantınızı kontrol edip tekrar deneyin.</string>
 </resources>

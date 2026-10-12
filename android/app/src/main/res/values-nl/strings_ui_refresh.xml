@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ui_action_items">Actiepunten</string>
+    <string name="ui_notes">Notities</string>
+    <string name="ui_loading">Laden</string>
+    <string name="ui_transcript_jump_to">Ga naar %1$s</string>
+    <string name="ui_transcript_speaker_line">%1$s om %2$s: %3$s</string>
+    <string name="ui_speakers_label">Sprekers</string>
+    <string name="ui_no_recordings_title">Nog geen opnames</string>
+    <string name="ui_no_results_title">Geen overeenkomende opnames</string>
+    <string name="ui_clear_search">Zoekopdracht wissen</string>
+</resources>

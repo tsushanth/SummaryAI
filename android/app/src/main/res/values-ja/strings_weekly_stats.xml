@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="weekly_stats_title">過去7日間</string>
+    <string name="weekly_stats_meetings">会議</string>
+    <string name="weekly_stats_hours">録音時間</string>
+    <string name="weekly_stats_action_items">アクションアイテム</string>
+</resources>

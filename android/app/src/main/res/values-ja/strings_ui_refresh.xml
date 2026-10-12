@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ui_action_items">アクションアイテム</string>
+    <string name="ui_notes">ノート</string>
+    <string name="ui_loading">読み込み中</string>
+    <string name="ui_transcript_jump_to">%1$s に移動</string>
+    <string name="ui_transcript_speaker_line">%1$s（%2$s）: %3$s</string>
+    <string name="ui_speakers_label">話者</string>
+    <string name="ui_no_recordings_title">録音はまだありません</string>
+    <string name="ui_no_results_title">一致する録音がありません</string>
+    <string name="ui_clear_search">検索をクリア</string>
+</resources>

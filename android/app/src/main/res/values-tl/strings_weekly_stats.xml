@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="weekly_stats_title">Nakaraang 7 araw</string>
+    <string name="weekly_stats_meetings">Mga Pulong</string>
+    <string name="weekly_stats_hours">Oras na na-record</string>
+    <string name="weekly_stats_action_items">Mga Gawain</string>
+</resources>

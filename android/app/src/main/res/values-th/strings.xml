@@ -269,4 +269,10 @@
     <string name="language_portuguese">Português</string>
     <string name="language_italian">Italiano</string>
     <string name="language_hindi">हिन्दी</string>
+    <string name="live_transcribe">ถอดเสียงสด</string>
+    <string name="live_transcribe_listening">กำลังฟัง…</string>
+    <string name="no_recordings_in_filter">ไม่มีรายการในตัวกรองนี้</string>
+    <string name="no_recordings_in_filter_subtitle">ยังไม่มีการบันทึกที่ตรงกัน เลือก “ทั้งหมด” เพื่อดูทุกรายการ</string>
+    <string name="summary_no_speech">ไม่พบเสียงพูดในการบันทึกนี้ จึงไม่มีเนื้อหาให้สรุป</string>
+    <string name="error_load_recording_failed">ไม่สามารถโหลดการบันทึกนี้ได้ ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง</string>
 </resources>

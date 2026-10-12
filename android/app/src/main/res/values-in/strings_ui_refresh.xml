@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ui_action_items">Tugas</string>
+    <string name="ui_notes">Catatan</string>
+    <string name="ui_loading">Memuat</string>
+    <string name="ui_transcript_jump_to">Lompat ke %1$s</string>
+    <string name="ui_transcript_speaker_line">%1$s pada %2$s: %3$s</string>
+    <string name="ui_speakers_label">Pembicara</string>
+    <string name="ui_no_recordings_title">Belum ada rekaman</string>
+    <string name="ui_no_results_title">Tidak ada rekaman yang cocok</string>
+    <string name="ui_clear_search">Hapus pencarian</string>
+</resources>

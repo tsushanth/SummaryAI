@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit">Modifica</string>
+    <string name="save">Salva</string>
+    <string name="copy">Copia</string>
+    <string name="todo_assignee">Assegnatario (facoltativo)</string>
+    <string name="todo_due_date">Data di scadenza (facoltativa)</string>
+    <string name="todo_due_date_pick">Scegli data</string>
+    <string name="todo_due_date_clear">Cancella data</string>
+    <string name="todo_due_chip">Scade %1$s</string>
+    <string name="summary_template_title">Stile del riassunto</string>
+    <string name="summary_template_current">Attuale: %1$s</string>
+    <string name="summary_template_not_set">Non impostato (usa lo stile predefinito)</string>
+    <string name="summary_template_regenerate">Rigenera riassunto</string>
+    <string name="summary_template_regenerating">Rigenerazione…</string>
+    <string name="summary_template_confirm_title">Rigenerare il riassunto?</string>
+    <string name="summary_template_confirm_message">Questo sostituisce il riassunto, i punti chiave e le attività attuali con una nuova versione in stile %1$s. L\'operazione non può essere annullata.</string>
+    <string name="summary_template_regenerate_confirm">Rigenera</string>
+    <string name="summary_template_failed">Impossibile rigenerare il riassunto</string>
+    <string name="summary_template_done">Riassunto rigenerato</string>
+    <string name="summary_template_load_failed">Impossibile caricare gli stili di riassunto</string>
+    <string name="followup_email">Scrivi e-mail di follow-up</string>
+    <string name="followup_email_title">E-mail di follow-up</string>
+    <string name="followup_email_subject">Oggetto</string>
+    <string name="followup_email_body">Testo</string>
+    <string name="followup_email_drafting">Scrittura in corso…</string>
+    <string name="followup_email_failed">Impossibile scrivere l\'e-mail</string>
+    <string name="followup_email_copied">E-mail copiata</string>
+    <string name="followup_email_send">Invia</string>
+    <string name="followup_email_no_app">Nessuna app e-mail trovata</string>
+    <string name="action_items_to_todos">Aggiungi alle mie attività</string>
+    <string name="action_items_to_todos_adding">Aggiunta in corso…</string>
+    <string name="action_items_to_todos_added">%1$d aggiunte alle tue attività</string>
+    <string name="action_items_to_todos_added_skipped">%1$d aggiunte alle tue attività (%2$d già presenti)</string>
+    <string name="action_items_to_todos_none_new">Tutte le attività sono già nella tua lista</string>
+    <string name="action_items_to_todos_failed">Impossibile aggiungere le attività alla tua lista</string>
+    <string name="chat_all_meetings">Chiedi su tutte le riunioni</string>
+    <string name="chat_all_meetings_title">Interroga le tue riunioni</string>
+    <string name="chat_all_meetings_placeholder">es. Cosa abbiamo deciso sui prezzi?</string>
+    <string name="chat_all_meetings_empty_title">Chiedi su tutte le tue riunioni</string>
+    <string name="chat_all_meetings_empty_message">Le risposte arrivano dai tuoi riassunti e dalle trascrizioni, con link alle riunioni di origine.</string>
+    <string name="chat_all_meetings_sources">Fonti</string>
+    <string name="chat_all_meetings_failed">Impossibile ottenere una risposta. Riprova.</string>
+    <string name="chat_all_meetings_send">Invia</string>
+    <string name="settings_default_template">Stile di riassunto predefinito</string>
+    <string name="settings_default_template_hint">Usato per le nuove registrazioni, a meno che tu non scelga uno stile per una in particolare</string>
+</resources>

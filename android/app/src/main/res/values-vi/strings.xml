@@ -269,4 +269,10 @@
     <string name="language_portuguese">Português</string>
     <string name="language_italian">Italiano</string>
     <string name="language_hindi">हिन्दी</string>
+    <string name="live_transcribe">Phiên âm trực tiếp</string>
+    <string name="live_transcribe_listening">Đang lắng nghe…</string>
+    <string name="no_recordings_in_filter">Không có gì trong bộ lọc này</string>
+    <string name="no_recordings_in_filter_subtitle">Chưa có bản ghi nào phù hợp. Chọn Tất cả để xem mọi thứ.</string>
+    <string name="summary_no_speech">Không phát hiện giọng nói trong bản ghi này nên không có gì để tóm tắt.</string>
+    <string name="error_load_recording_failed">Không thể tải bản ghi này. Hãy kiểm tra kết nối và thử lại.</string>
 </resources>

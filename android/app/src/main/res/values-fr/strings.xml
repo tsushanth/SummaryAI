@@ -233,4 +233,10 @@
     <string name="language_portuguese">Português</string>
     <string name="language_italian">Italiano</string>
     <string name="language_hindi">हिन्दी</string>
+    <string name="live_transcribe">Transcription en direct</string>
+    <string name="live_transcribe_listening">Écoute en cours…</string>
+    <string name="no_recordings_in_filter">Rien dans ce filtre</string>
+    <string name="no_recordings_in_filter_subtitle">Aucun enregistrement ne correspond pour l\'instant. Sélectionnez Tout pour tout afficher.</string>
+    <string name="summary_no_speech">Aucune voix n\'a été détectée dans cet enregistrement, il n\'y a donc rien à résumer.</string>
+    <string name="error_load_recording_failed">Impossible de charger cet enregistrement. Vérifiez votre connexion et réessayez.</string>
 </resources>

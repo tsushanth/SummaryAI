@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit">Edytuj</string>
+    <string name="save">Zapisz</string>
+    <string name="copy">Kopiuj</string>
+    <string name="todo_assignee">Przypisano do (opcjonalnie)</string>
+    <string name="todo_due_date">Termin (opcjonalnie)</string>
+    <string name="todo_due_date_pick">Wybierz datę</string>
+    <string name="todo_due_date_clear">Wyczyść datę</string>
+    <string name="todo_due_chip">Termin: %1$s</string>
+    <string name="summary_template_title">Styl podsumowania</string>
+    <string name="summary_template_current">Obecny: %1$s</string>
+    <string name="summary_template_not_set">Nie ustawiono (używany jest domyślny)</string>
+    <string name="summary_template_regenerate">Wygeneruj podsumowanie ponownie</string>
+    <string name="summary_template_regenerating">Generowanie ponownie…</string>
+    <string name="summary_template_confirm_title">Wygenerować podsumowanie ponownie?</string>
+    <string name="summary_template_confirm_message">Spowoduje to zastąpienie obecnego podsumowania, najważniejszych punktów i zadań nową wersją w stylu: %1$s. Tej czynności nie można cofnąć.</string>
+    <string name="summary_template_regenerate_confirm">Wygeneruj ponownie</string>
+    <string name="summary_template_failed">Nie udało się ponownie wygenerować podsumowania</string>
+    <string name="summary_template_done">Podsumowanie wygenerowane ponownie</string>
+    <string name="summary_template_load_failed">Nie udało się wczytać stylów podsumowań</string>
+    <string name="followup_email">Napisz e-mail z podsumowaniem ustaleń</string>
+    <string name="followup_email_title">E-mail uzupełniający</string>
+    <string name="followup_email_subject">Temat</string>
+    <string name="followup_email_body">Treść</string>
+    <string name="followup_email_drafting">Pisanie…</string>
+    <string name="followup_email_failed">Nie udało się napisać e-maila</string>
+    <string name="followup_email_copied">Skopiowano e-mail</string>
+    <string name="followup_email_send">Wyślij</string>
+    <string name="followup_email_no_app">Nie znaleziono aplikacji pocztowej</string>
+    <string name="action_items_to_todos">Dodaj do moich zadań</string>
+    <string name="action_items_to_todos_adding">Dodawanie…</string>
+    <string name="action_items_to_todos_added">Dodano do twoich zadań: %1$d</string>
+    <string name="action_items_to_todos_added_skipped">Dodano do twoich zadań: %1$d (już istniejące: %2$d)</string>
+    <string name="action_items_to_todos_none_new">Wszystkie zadania są już na twojej liście</string>
+    <string name="action_items_to_todos_failed">Nie udało się dodać zadań do listy</string>
+    <string name="chat_all_meetings">Zapytaj o wszystkie spotkania</string>
+    <string name="chat_all_meetings_title">Zapytaj swoje spotkania</string>
+    <string name="chat_all_meetings_placeholder">np. Co ustaliliśmy w sprawie cen?</string>
+    <string name="chat_all_meetings_empty_title">Zapytaj o wszystkie swoje spotkania</string>
+    <string name="chat_all_meetings_empty_message">Odpowiedzi pochodzą z twoich podsumowań i transkrypcji, z linkami do spotkań, z których pochodzą.</string>
+    <string name="chat_all_meetings_sources">Źródła</string>
+    <string name="chat_all_meetings_failed">Nie udało się uzyskać odpowiedzi. Spróbuj ponownie.</string>
+    <string name="chat_all_meetings_send">Wyślij</string>
+    <string name="settings_default_template">Domyślny styl podsumowania</string>
+    <string name="settings_default_template_hint">Używany dla nowych nagrań, chyba że wybierzesz styl dla konkretnego nagrania</string>
+</resources>

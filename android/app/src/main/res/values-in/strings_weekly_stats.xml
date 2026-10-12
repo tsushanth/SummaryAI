@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="weekly_stats_title">7 hari terakhir</string>
+    <string name="weekly_stats_meetings">Rapat</string>
+    <string name="weekly_stats_hours">Jam terekam</string>
+    <string name="weekly_stats_action_items">Tugas</string>
+</resources>

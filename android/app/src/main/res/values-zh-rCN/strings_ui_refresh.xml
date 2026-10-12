@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ui_action_items">行动事项</string>
+    <string name="ui_notes">笔记</string>
+    <string name="ui_loading">正在加载</string>
+    <string name="ui_transcript_jump_to">跳转到 %1$s</string>
+    <string name="ui_transcript_speaker_line">%1$s 在 %2$s：%3$s</string>
+    <string name="ui_speakers_label">发言人</string>
+    <string name="ui_no_recordings_title">还没有录音</string>
+    <string name="ui_no_results_title">没有匹配的录音</string>
+    <string name="ui_clear_search">清除搜索</string>
+</resources>

@@ -277,6 +277,6 @@
     <string name="language_hindi">हिन्दी</string>
 
     <!-- Facebook SDK -->
-    <string name="facebook_app_id">2151317385689073</string>
-    <string name="facebook_client_token">d50af257c9bd994081b1686067f83e24</string>
+    <string name="facebook_app_id" translatable="false">2151317385689073</string>
+    <string name="facebook_client_token" translatable="false">d50af257c9bd994081b1686067f83e24</string>
 </resources>

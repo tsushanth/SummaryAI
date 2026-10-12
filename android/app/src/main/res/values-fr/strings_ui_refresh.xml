@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ui_action_items">Tâches à faire</string>
+    <string name="ui_notes">Notes</string>
+    <string name="ui_loading">Chargement</string>
+    <string name="ui_transcript_jump_to">Aller à %1$s</string>
+    <string name="ui_transcript_speaker_line">%1$s à %2$s : %3$s</string>
+    <string name="ui_speakers_label">Intervenants</string>
+    <string name="ui_no_recordings_title">Aucun enregistrement pour l\'instant</string>
+    <string name="ui_no_results_title">Aucun enregistrement correspondant</string>
+    <string name="ui_clear_search">Effacer la recherche</string>
+</resources>

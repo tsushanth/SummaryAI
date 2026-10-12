@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit">Bearbeiten</string>
+    <string name="save">Speichern</string>
+    <string name="copy">Kopieren</string>
+    <string name="todo_assignee">Zuständig (optional)</string>
+    <string name="todo_due_date">Fälligkeitsdatum (optional)</string>
+    <string name="todo_due_date_pick">Datum wählen</string>
+    <string name="todo_due_date_clear">Datum löschen</string>
+    <string name="todo_due_chip">Fällig %1$s</string>
+    <string name="summary_template_title">Zusammenfassungsstil</string>
+    <string name="summary_template_current">Aktuell: %1$s</string>
+    <string name="summary_template_not_set">Nicht festgelegt (Standard wird verwendet)</string>
+    <string name="summary_template_regenerate">Zusammenfassung neu erstellen</string>
+    <string name="summary_template_regenerating">Wird neu erstellt…</string>
+    <string name="summary_template_confirm_title">Zusammenfassung neu erstellen?</string>
+    <string name="summary_template_confirm_message">Dadurch werden die aktuelle Zusammenfassung, die Kernpunkte und die Aufgaben durch eine neue Version im Stil „%1$s“ ersetzt. Dies kann nicht rückgängig gemacht werden.</string>
+    <string name="summary_template_regenerate_confirm">Neu erstellen</string>
+    <string name="summary_template_failed">Die Zusammenfassung konnte nicht neu erstellt werden</string>
+    <string name="summary_template_done">Zusammenfassung neu erstellt</string>
+    <string name="summary_template_load_failed">Zusammenfassungsstile konnten nicht geladen werden</string>
+    <string name="followup_email">Follow-up-E-Mail entwerfen</string>
+    <string name="followup_email_title">Follow-up-E-Mail</string>
+    <string name="followup_email_subject">Betreff</string>
+    <string name="followup_email_body">Text</string>
+    <string name="followup_email_drafting">Wird entworfen…</string>
+    <string name="followup_email_failed">Die E-Mail konnte nicht entworfen werden</string>
+    <string name="followup_email_copied">E-Mail kopiert</string>
+    <string name="followup_email_send">Senden</string>
+    <string name="followup_email_no_app">Keine E-Mail-App gefunden</string>
+    <string name="action_items_to_todos">Zu meinen Aufgaben hinzufügen</string>
+    <string name="action_items_to_todos_adding">Wird hinzugefügt…</string>
+    <string name="action_items_to_todos_added">%1$d zu Ihren Aufgaben hinzugefügt</string>
+    <string name="action_items_to_todos_added_skipped">%1$d zu Ihren Aufgaben hinzugefügt (%2$d bereits vorhanden)</string>
+    <string name="action_items_to_todos_none_new">Alle Aufgaben sind bereits in Ihrer Aufgabenliste</string>
+    <string name="action_items_to_todos_failed">Die Aufgaben konnten nicht hinzugefügt werden</string>
+    <string name="chat_all_meetings">In allen Besprechungen fragen</string>
+    <string name="chat_all_meetings_title">Ihre Besprechungen befragen</string>
+    <string name="chat_all_meetings_placeholder">z. B. Was haben wir zur Preisgestaltung beschlossen?</string>
+    <string name="chat_all_meetings_empty_title">In allen Ihren Besprechungen fragen</string>
+    <string name="chat_all_meetings_empty_message">Die Antworten stammen aus Ihren Zusammenfassungen und Transkripten, mit Links zu den jeweiligen Besprechungen.</string>
+    <string name="chat_all_meetings_sources">Quellen</string>
+    <string name="chat_all_meetings_failed">Es konnte keine Antwort abgerufen werden. Versuchen Sie es erneut.</string>
+    <string name="chat_all_meetings_send">Senden</string>
+    <string name="settings_default_template">Standard-Zusammenfassungsstil</string>
+    <string name="settings_default_template_hint">Wird für neue Aufnahmen verwendet, sofern Sie für eine bestimmte keinen Stil wählen</string>
+</resources>

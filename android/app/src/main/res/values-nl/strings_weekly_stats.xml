@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="weekly_stats_title">Laatste 7 dagen</string>
+    <string name="weekly_stats_meetings">Vergaderingen</string>
+    <string name="weekly_stats_hours">Opgenomen uren</string>
+    <string name="weekly_stats_action_items">Actiepunten</string>
+</resources>
