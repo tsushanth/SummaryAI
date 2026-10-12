@@ -111,6 +111,9 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     debugImplementation(libs.androidx.ui.tooling)
 
+    // Unit tests
+    testImplementation("junit:junit:4.13.2")
+
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)

@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.TextSnippet
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,6 +42,7 @@ import com.kreativekoala.summaryai.data.repository.MeetingsRepository
 import com.kreativekoala.summaryai.domain.model.Recording
 import com.kreativekoala.summaryai.domain.model.Summary
 import com.kreativekoala.summaryai.domain.model.Transcript
+import com.kreativekoala.summaryai.ui.recordings.organize.PublicLinkSheet
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -66,6 +68,7 @@ fun ShareExportSheet(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var isGenerating by remember { mutableStateOf(false) }
+    var showPublicLink by remember { mutableStateOf(false) }
 
     val meetingsRepository = remember(context) {
         EntryPointAccessors.fromApplication(
@@ -97,6 +100,11 @@ fun ShareExportSheet(
             result.onFailure { e -> onError(e.message ?: "Couldn't share.") }
             onDismiss()
         }
+    }
+
+    if (showPublicLink) {
+        PublicLinkSheet(recordingId = recording.id, onDismiss = onDismiss)
+        return
     }
 
     ModalBottomSheet(
@@ -148,6 +156,12 @@ fun ShareExportSheet(
                     enabled = !isGenerating
                 ) { run(ShareExporter.ExportType.LIVE_TRANSCRIPT_PDF) }
             }
+
+            ShareRow(
+                icon = Icons.Default.Link,
+                title = "Create public link",
+                enabled = !isGenerating
+            ) { showPublicLink = true }
 
             ShareRow(
                 icon = Icons.Default.Audiotrack,

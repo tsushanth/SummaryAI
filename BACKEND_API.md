@@ -1534,3 +1534,22 @@ const rateLimits = {
 
 *Document version: 1.0*
 *Last updated: January 2026*
+
+## Organization, sharing and search (slice C)
+
+All routes except `GET /api/public/shares/:token` require `Authorization: Bearer <token>`; every query is scoped to the caller.
+
+| Method | Path | Notes |
+|--------|------|-------|
+| GET | `/api/folders` | `{ folders: [{ id, name, recording_count, created_at, updated_at }] }` |
+| POST | `/api/folders` | body `{ name }` (1-60 chars); 409 on duplicate name |
+| PATCH | `/api/folders/:id` | body `{ name }` |
+| DELETE | `/api/folders/:id` | recordings become unfiled, never deleted |
+| GET | `/api/tags` | `{ tags: [{ tag, count }] }` |
+| GET | `/api/recordings` | new filters: `folder_id` (uuid or `none`), `tag`, `favorite=true|false`, `from`, `to` (ISO datetimes) |
+| PATCH | `/api/recordings/:id` | now also accepts `folder_id` (uuid or null) and normalizes `tags` |
+| GET | `/api/search?q=` | title + summary + transcript; `{ results: [{ recording, match, snippet }] }` |
+| POST | `/api/recordings/:id/shares` | body `{ include_transcript?, expires_in_days? (1-365 or null) }` -> `{ share, token, url }`; token shown once |
+| GET | `/api/recordings/:id/shares` | share metadata (no tokens) |
+| DELETE | `/api/recordings/:id/shares/:shareId` | revoke; immediate |
+| GET | `/api/public/shares/:token` | no auth, 60 req/min/IP; unknown/revoked/expired/malformed all return the same 404 |

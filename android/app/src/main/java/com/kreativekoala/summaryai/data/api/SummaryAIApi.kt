@@ -220,4 +220,49 @@ interface SummaryAIApi {
     suspend fun hangupCall(
         @Path("id") callId: String
     ): HangupResponse
+
+    // MARK: - Organization (folders, tags, public share links, search)
+
+    @GET("api/folders")
+    suspend fun getFolders(): FoldersResponse
+
+    @POST("api/folders")
+    suspend fun createFolder(@Body request: FolderNameRequest): FolderResponse
+
+    @PATCH("api/folders/{id}")
+    suspend fun renameFolder(
+        @Path("id") id: String,
+        @Body request: FolderNameRequest
+    ): FolderResponse
+
+    @DELETE("api/folders/{id}")
+    suspend fun deleteFolder(@Path("id") id: String): Response<Unit>
+
+    @GET("api/tags")
+    suspend fun getTags(): TagsResponse
+
+    /** Raw JSON body so that `{"folder_id":null}` (un-file) is actually sent; Gson drops null fields. */
+    @PATCH("api/recordings/{id}")
+    suspend fun setRecordingFolder(
+        @Path("id") id: String,
+        @Body body: RequestBody
+    ): UpdateRecordingResponse
+
+    @GET("api/recordings/{id}/shares")
+    suspend fun getShares(@Path("id") id: String): SharesResponse
+
+    @POST("api/recordings/{id}/shares")
+    suspend fun createShare(
+        @Path("id") id: String,
+        @Body request: CreateShareRequest
+    ): CreateShareResponse
+
+    @DELETE("api/recordings/{id}/shares/{shareId}")
+    suspend fun revokeShare(
+        @Path("id") id: String,
+        @Path("shareId") shareId: String
+    ): Response<Unit>
+
+    @GET("api/search")
+    suspend fun searchRecordings(@Query("q") query: String): SearchResponse
 }

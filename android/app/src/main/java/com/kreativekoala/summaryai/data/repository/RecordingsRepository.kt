@@ -255,7 +255,9 @@ private fun RecordingDto.toDomain() = Recording(
         RecordingType.IMPORTED -> com.kreativekoala.summaryai.domain.model.RecordingType.IMPORTED
         null -> null
     },
-    meetingId = meetingId
+    meetingId = meetingId,
+    tags = tags ?: emptyList(),
+    folderId = folderId
 )
 
 private fun GetRecordingResponse.toDomain() = RecordingDetail(

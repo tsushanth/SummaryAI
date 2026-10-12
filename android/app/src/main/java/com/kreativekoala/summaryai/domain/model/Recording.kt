@@ -53,7 +53,9 @@ data class Recording(
     val createdAt: String,
     val isFavorite: Boolean = false,
     val recordingType: RecordingType? = null,
-    val meetingId: String? = null
+    val meetingId: String? = null,
+    val tags: List<String> = emptyList(),
+    val folderId: String? = null
 ) {
     val formattedDuration: String
         get() {

@@ -39,7 +39,9 @@ data class RecordingDto(
     @SerializedName("recording_type") val recordingType: RecordingType? = null,
     @SerializedName("meeting_id") val meetingId: String? = null,
     @SerializedName("created_at") val createdAt: String? = null,
-    @SerializedName("updated_at") val updatedAt: String? = null
+    @SerializedName("updated_at") val updatedAt: String? = null,
+    val tags: List<String>? = null,
+    @SerializedName("folder_id") val folderId: String? = null
 )
 
 // MARK: - Transcript
@@ -108,7 +110,8 @@ data class UpdateSpeakerNamesRequest(
 
 data class UpdateRecordingRequest(
     val title: String? = null,
-    @SerializedName("is_favorite") val isFavorite: Boolean? = null
+    @SerializedName("is_favorite") val isFavorite: Boolean? = null,
+    val tags: List<String>? = null
 )
 
 data class UpdateRecordingResponse(
