@@ -7,7 +7,8 @@ import { StatusBadge } from '@/components/recordings/StatusBadge';
 import { TranscriptViewer } from '@/components/recordings/TranscriptViewer';
 import { SummaryCard } from '@/components/recordings/SummaryCard';
 import { QAChat } from '@/components/recordings/QAChat';
-import { AudioPlayer } from '@/components/audio/AudioPlayer';
+import { AudioPlayer, type SeekRequest } from '@/components/audio/AudioPlayer';
+import { Skeleton } from '@/components/ui/skeleton';
 import { formatDuration, formatDate } from '@/lib/utils/audio';
 import {
   ArrowLeft,
@@ -73,11 +74,13 @@ export default function RecordingDetailPage() {
   const { isSubscribed } = useSubscription();
   const [activeTab, setActiveTab] = useState<Tab>('transcript');
   const [currentTime, setCurrentTime] = useState(0);
+  const [seekRequest, setSeekRequest] = useState<SeekRequest | null>(null);
   const [isUpdatingSpeakers, setIsUpdatingSpeakers] = useState(false);
 
   const handleSeek = (time: number) => {
-    // This would need to be wired up to the audio player
+    // Moves the audio player; its timeupdate then keeps currentTime in sync
     setCurrentTime(time);
+    setSeekRequest({ time, nonce: Date.now() });
   };
 
   const toggleFavorite = async () => {
@@ -101,8 +104,11 @@ export default function RecordingDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div role="status" aria-label="Loading recording" className="space-y-4 p-6">
+        <Skeleton className="h-8 w-1/2" />
+        <Skeleton className="h-4 w-1/3" />
+        <Skeleton className="h-40 w-full" />
+        <span className="sr-only">Loading recording</span>
       </div>
     );
   }
@@ -112,13 +118,13 @@ export default function RecordingDetailPage() {
       <div className="p-6">
         <Link
           href="/recordings"
-          className="inline-flex items-center text-gray-500 hover:text-gray-700 mb-4"
+          className="inline-flex items-center text-muted-foreground hover:text-foreground mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to recordings
         </Link>
         <div className="text-center py-20">
-          <p className="text-gray-500">Recording not found</p>
+          <p className="text-muted-foreground">Recording not found</p>
         </div>
       </div>
     );
@@ -131,10 +137,10 @@ export default function RecordingDetailPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="border-b bg-white p-6">
+      <div className="border-b border-border bg-card p-6">
         <Link
           href="/recordings"
-          className="inline-flex items-center text-gray-500 hover:text-gray-700 mb-4"
+          className="inline-flex items-center text-muted-foreground hover:text-foreground mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to recordings
@@ -145,18 +151,23 @@ export default function RecordingDetailPage() {
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-2xl font-bold">{recording.title}</h1>
               <StatusBadge status={recording.status} />
-              <button onClick={toggleFavorite}>
+              <button
+                onClick={toggleFavorite}
+                aria-pressed={recording.is_favorite}
+                aria-label={recording.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
+                className="flex h-11 w-11 items-center justify-center rounded-lg hover:bg-accent"
+              >
                 <Star
                   className={cn(
                     'w-5 h-5',
                     recording.is_favorite
-                      ? 'text-yellow-500 fill-yellow-500'
-                      : 'text-gray-300'
+                      ? 'text-amber-500 fill-amber-500'
+                      : 'text-muted-foreground/60'
                   )}
                 />
               </button>
             </div>
-            <div className="flex items-center gap-4 text-sm text-gray-500">
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Clock className="w-4 h-4" />
                 {formatDuration(recording.duration_seconds)}
@@ -183,9 +194,9 @@ export default function RecordingDetailPage() {
 
         {/* Processing banner */}
         {isProcessing && (
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-3">
-            <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
-            <span className="text-blue-800">
+          <div className="mt-4 p-3 bg-accent border border-border rounded-lg flex items-center gap-3">
+            <Loader2 className="w-5 h-5 animate-spin text-primary" />
+            <span className="text-accent-foreground">
               {recording.status === 'pending'
                 ? 'Waiting for meeting to start...'
                 : recording.status === 'transcribing'
@@ -199,25 +210,27 @@ export default function RecordingDetailPage() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b bg-white px-6">
-        <nav className="flex gap-6">
+      <div className="border-b border-border bg-card px-6">
+        <nav className="flex gap-6" role="tablist" aria-label="Recording sections">
           {(['transcript', 'summary', 'qa'] as Tab[]).map((tab) => {
             const isPremiumTab = tab === 'summary' || tab === 'qa';
             const showLock = isPremiumTab && !isSubscribed;
             return (
               <button
                 key={tab}
+                role="tab"
+                aria-selected={activeTab === tab}
                 onClick={() => setActiveTab(tab)}
                 className={cn(
-                  'py-3 border-b-2 text-sm font-medium transition-colors capitalize flex items-center gap-1.5',
+                  'min-h-[44px] py-3 border-b-2 text-sm font-medium transition-colors capitalize flex items-center gap-1.5',
                   activeTab === tab
                     ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
                 )}
               >
                 {tab === 'qa' ? 'Q&A' : tab}
                 {showLock && (
-                  <span className="text-xs bg-gradient-to-r from-primary to-purple-600 text-white px-1.5 py-0.5 rounded-full">
+                  <span className="text-xs bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full">
                     PRO
                   </span>
                 )}
@@ -240,7 +253,7 @@ export default function RecordingDetailPage() {
                 isUpdating={isUpdatingSpeakers}
               />
             ) : (
-              <div className="text-center py-10 text-gray-500">
+              <div className="text-center py-10 text-muted-foreground">
                 {isProcessing ? (
                   <p>Transcript will appear here once processing is complete</p>
                 ) : (
@@ -257,7 +270,7 @@ export default function RecordingDetailPage() {
               {summary ? (
                 <SummaryCard summary={summary} />
               ) : (
-                <div className="text-center py-10 text-gray-500">
+                <div className="text-center py-10 text-muted-foreground">
                   {isProcessing ? (
                     <p>Summary will appear here once processing is complete</p>
                   ) : (
@@ -284,9 +297,13 @@ export default function RecordingDetailPage() {
 
       {/* Audio Player */}
       {audioUrl && (
-        <div className="border-t p-4 bg-white">
+        <div className="border-t border-border p-4 bg-card">
           <div className="max-w-3xl mx-auto">
-            <AudioPlayer src={audioUrl} onTimeUpdate={setCurrentTime} />
+            <AudioPlayer
+              src={audioUrl}
+              onTimeUpdate={setCurrentTime}
+              seekRequest={seekRequest}
+            />
           </div>
         </div>
       )}

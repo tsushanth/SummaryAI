@@ -5,6 +5,7 @@ import { Edit2, Check, X } from 'lucide-react';
 import type { Transcript } from '@/types/api';
 import { formatDuration } from '@/lib/utils/audio';
 import { cn } from '@/lib/utils/cn';
+import { speakerColor, speakerInitials } from '@/lib/utils/speakers';
 
 interface TranscriptViewerProps {
   transcript: Transcript;
@@ -13,17 +14,6 @@ interface TranscriptViewerProps {
   onSpeakerNameChange?: (speakerNames: Record<string, string>) => void;
   isUpdating?: boolean;
 }
-
-const speakerColors = [
-  'bg-blue-100 text-blue-800 border-blue-200',
-  'bg-green-100 text-green-800 border-green-200',
-  'bg-purple-100 text-purple-800 border-purple-200',
-  'bg-orange-100 text-orange-800 border-orange-200',
-  'bg-pink-100 text-pink-800 border-pink-200',
-  'bg-teal-100 text-teal-800 border-teal-200',
-  'bg-indigo-100 text-indigo-800 border-indigo-200',
-  'bg-rose-100 text-rose-800 border-rose-200',
-];
 
 interface SpeakerInfo {
   index: number;
@@ -156,13 +146,13 @@ export function TranscriptViewer({
     <div className="space-y-4">
       {/* Speaker Toolbar */}
       {speakerInfo.length > 1 && (
-        <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+        <div className="bg-muted rounded-lg p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">Speakers</span>
+            <span className="text-sm font-medium text-foreground/90">Speakers</span>
             {selectedSpeakers.size !== speakerInfo.length && (
               <button
                 onClick={selectAllSpeakers}
-                className="text-xs text-blue-600 hover:underline"
+                className="text-xs text-primary hover:underline"
               >
                 Show all
               </button>
@@ -180,9 +170,9 @@ export function TranscriptViewer({
               return (
                 <div
                   key={speaker.index}
+                  style={{ backgroundColor: speakerColor(String(speaker.index)) }}
                   className={cn(
-                    'flex items-center gap-2 px-3 py-2 rounded-lg border transition-all',
-                    speakerColors[speaker.index % speakerColors.length],
+                    'flex items-center gap-2 px-3 py-2 rounded-lg text-white transition-opacity',
                     !isSelected && 'opacity-50'
                   )}
                 >
@@ -193,20 +183,23 @@ export function TranscriptViewer({
                         value={editingName}
                         onChange={(e) => setEditingName(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        className="w-24 px-1 py-0.5 text-sm rounded border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        aria-label="Speaker name"
+                        className="w-24 px-1 py-0.5 text-sm text-foreground bg-card rounded border border-input focus:outline-none focus:ring-2 focus:ring-ring"
                         autoFocus
                         disabled={isUpdating}
                       />
                       <button
                         onClick={saveEditing}
                         disabled={isUpdating || !editingName.trim()}
-                        className="p-0.5 hover:bg-white/50 rounded disabled:opacity-50"
+                        aria-label="Save speaker name"
+                        className="p-1 hover:bg-white/20 rounded disabled:opacity-50"
                       >
                         <Check className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={cancelEditing}
-                        className="p-0.5 hover:bg-white/50 rounded"
+                        aria-label="Cancel renaming"
+                        className="p-1 hover:bg-white/20 rounded"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -215,14 +208,16 @@ export function TranscriptViewer({
                     <>
                       <button
                         onClick={() => toggleSpeaker(speaker.index)}
-                        className="text-sm font-medium hover:underline"
+                        aria-pressed={isSelected}
+                        className="min-h-[28px] text-sm font-medium hover:underline"
                       >
                         {speaker.name}
                       </button>
                       {onSpeakerNameChange && (
                         <button
                           onClick={() => startEditing(speaker)}
-                          className="p-0.5 hover:bg-white/50 rounded"
+                          className="p-1 hover:bg-white/20 rounded"
+                          aria-label={`Rename ${speaker.name}`}
                           title="Rename speaker"
                         >
                           <Edit2 className="w-3 h-3" />
@@ -242,7 +237,7 @@ export function TranscriptViewer({
 
       {/* Single speaker - just show edit option */}
       {speakerInfo.length === 1 && onSpeakerNameChange && (
-        <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           {editingSpeaker === speakerInfo[0].index ? (
             <div className="flex items-center gap-1">
               <span>Speaker:</span>
@@ -251,28 +246,28 @@ export function TranscriptViewer({
                 value={editingName}
                 onChange={(e) => setEditingName(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-32 px-2 py-1 text-sm rounded border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-32 px-2 py-1 text-sm rounded border border-input focus:outline-none focus:ring-2 focus:ring-ring bg-card text-foreground"
                 autoFocus
                 disabled={isUpdating}
               />
               <button
                 onClick={saveEditing}
                 disabled={isUpdating || !editingName.trim()}
-                className="p-1 hover:bg-gray-100 rounded disabled:opacity-50"
+                className="p-1 hover:bg-accent rounded disabled:opacity-50"
               >
-                <Check className="w-4 h-4 text-green-600" />
+                <Check className="w-4 h-4 text-success" />
               </button>
               <button
                 onClick={cancelEditing}
-                className="p-1 hover:bg-gray-100 rounded"
+                className="p-1 hover:bg-accent rounded"
               >
-                <X className="w-4 h-4 text-gray-500" />
+                <X className="w-4 h-4 text-muted-foreground" />
               </button>
             </div>
           ) : (
             <button
               onClick={() => startEditing(speakerInfo[0])}
-              className="flex items-center gap-1 hover:text-blue-600"
+              className="flex items-center gap-1 hover:text-primary"
             >
               <span>Speaker: {speakerInfo[0].name}</span>
               <Edit2 className="w-3.5 h-3.5" />
@@ -282,36 +277,49 @@ export function TranscriptViewer({
       )}
 
       {/* Transcript Segments */}
-      <div className="space-y-4">
+      <div className="space-y-1">
         {filteredSegments.map((segment, index) => {
           const isActive =
             currentTime >= segment.start_time && currentTime < segment.end_time;
+          const name = getSpeakerName(segment.speaker_index);
+          const color = speakerColor(String(segment.speaker_index));
 
           return (
             <div
               key={segment.segment_id || index}
+              onClick={() => onSeek?.(segment.start_time)}
+              aria-current={isActive ? 'true' : undefined}
               className={cn(
-                'p-3 rounded-lg transition-colors',
-                isActive ? 'bg-blue-50' : 'hover:bg-gray-50'
+                'flex items-start gap-3 p-3 rounded-lg transition-colors',
+                onSeek && 'cursor-pointer',
+                isActive ? 'bg-accent' : 'hover:bg-accent/50'
               )}
             >
-              <div className="flex items-center gap-2 mb-1">
-                <span
-                  className={cn(
-                    'text-xs font-medium px-2 py-0.5 rounded',
-                    speakerColors[segment.speaker_index % speakerColors.length]
-                  )}
-                >
-                  {getSpeakerName(segment.speaker_index)}
-                </span>
-                <button
-                  onClick={() => onSeek?.(segment.start_time)}
-                  className="text-xs text-blue-600 hover:underline"
-                >
-                  {formatDuration(segment.start_time)}
-                </button>
+              <div
+                aria-hidden="true"
+                style={{ backgroundColor: color }}
+                className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+              >
+                {speakerInitials(name)}
               </div>
-              <p className="text-gray-700 leading-relaxed">{segment.text}</p>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-sm font-semibold text-foreground">
+                    {name}
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSeek?.(segment.start_time);
+                    }}
+                    aria-label={`Jump to ${formatDuration(segment.start_time)}`}
+                    className="text-xs text-muted-foreground hover:text-primary hover:underline"
+                  >
+                    {formatDuration(segment.start_time)}
+                  </button>
+                </div>
+                <p className="text-foreground/90 leading-relaxed">{segment.text}</p>
+              </div>
             </div>
           );
         })}
@@ -319,11 +327,11 @@ export function TranscriptViewer({
 
       {/* Empty state when all filtered out */}
       {filteredSegments.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-muted-foreground">
           <p>No segments to display.</p>
           <button
             onClick={selectAllSpeakers}
-            className="text-blue-600 hover:underline mt-2"
+            className="text-primary hover:underline mt-2"
           >
             Show all speakers
           </button>

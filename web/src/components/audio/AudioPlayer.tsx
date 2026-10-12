@@ -11,16 +11,22 @@ import {
   Volume2,
   VolumeX,
 } from 'lucide-react';
-import { cn } from '@/lib/utils/cn';
+
+/** Ask the player to jump to `time` seconds. Use a fresh `nonce` for every request. */
+export interface SeekRequest {
+  time: number;
+  nonce: number;
+}
 
 interface AudioPlayerProps {
   src: string;
   onTimeUpdate?: (time: number) => void;
+  seekRequest?: SeekRequest | null;
 }
 
 const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
-export function AudioPlayer({ src, onTimeUpdate }: AudioPlayerProps) {
+export function AudioPlayer({ src, onTimeUpdate, seekRequest }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -55,6 +61,21 @@ export function AudioPlayer({ src, onTimeUpdate }: AudioPlayerProps) {
       audio.removeEventListener('ended', handleEnded);
     };
   }, [onTimeUpdate]);
+
+  // Jump when a transcript line or Q&A citation asks for it
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !seekRequest) return;
+    audio.currentTime = Math.max(0, seekRequest.time);
+    setCurrentTime(audio.currentTime);
+    audio
+      .play()
+      .then(() => setIsPlaying(true))
+      .catch(() => {
+        // Autoplay can be blocked; the position still moved
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seekRequest?.nonce]);
 
   const togglePlay = () => {
     const audio = audioRef.current;
@@ -101,23 +122,23 @@ export function AudioPlayer({ src, onTimeUpdate }: AudioPlayerProps) {
     seek(parseFloat(e.target.value));
   };
 
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
-
   return (
-    <div className="bg-white border rounded-lg p-4">
+    <div className="bg-card border border-border/60 rounded-xl p-4">
       <audio ref={audioRef} src={src} preload="metadata" />
 
       {/* Progress bar */}
       <div className="mb-4">
         <input
           type="range"
+          aria-label="Seek"
+          aria-valuetext={`${formatDuration(currentTime)} of ${formatDuration(duration)}`}
           min={0}
           max={duration || 100}
           value={currentTime}
           onChange={handleSeek}
-          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
+          className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
         />
-        <div className="flex justify-between text-xs text-gray-500 mt-1">
+        <div className="flex justify-between text-xs text-muted-foreground mt-1">
           <span>{formatDuration(currentTime)}</span>
           <span>{formatDuration(duration)}</span>
         </div>
@@ -125,40 +146,47 @@ export function AudioPlayer({ src, onTimeUpdate }: AudioPlayerProps) {
 
       {/* Controls */}
       <div className="flex items-center justify-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => skip(-15)}>
-          <SkipBack className="w-5 h-5" />
+        <Button variant="ghost" size="icon" aria-label="Back 15 seconds" onClick={() => skip(-15)}>
+          <SkipBack className="w-5 h-5" aria-hidden="true" />
         </Button>
 
         <Button
           size="icon"
           className="w-12 h-12 rounded-full"
+          aria-label={isPlaying ? 'Pause' : 'Play'}
           onClick={togglePlay}
         >
           {isPlaying ? (
-            <Pause className="w-6 h-6" />
+            <Pause className="w-6 h-6" aria-hidden="true" />
           ) : (
-            <Play className="w-6 h-6 ml-1" />
+            <Play className="w-6 h-6 ml-1" aria-hidden="true" />
           )}
         </Button>
 
-        <Button variant="ghost" size="icon" onClick={() => skip(15)}>
-          <SkipForward className="w-5 h-5" />
+        <Button variant="ghost" size="icon" aria-label="Forward 15 seconds" onClick={() => skip(15)}>
+          <SkipForward className="w-5 h-5" aria-hidden="true" />
         </Button>
 
         <Button
           variant="ghost"
           size="sm"
+          aria-label={`Playback speed ${speed}x`}
           onClick={handleSpeedChange}
           className="min-w-[4rem]"
         >
           {speed}x
         </Button>
 
-        <Button variant="ghost" size="icon" onClick={toggleMute}>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={isMuted ? 'Unmute' : 'Mute'}
+          onClick={toggleMute}
+        >
           {isMuted ? (
-            <VolumeX className="w-5 h-5" />
+            <VolumeX className="w-5 h-5" aria-hidden="true" />
           ) : (
-            <Volume2 className="w-5 h-5" />
+            <Volume2 className="w-5 h-5" aria-hidden="true" />
           )}
         </Button>
       </div>
@@ -168,10 +196,11 @@ export function AudioPlayer({ src, onTimeUpdate }: AudioPlayerProps) {
 
 // Expose seek method via ref
 export function useAudioPlayer() {
-  const [currentTime, setCurrentTime] = useState(0);
+  const [currentTime] = useState(0);
 
   const seek = (time: number) => {
-    // This will be handled by the AudioPlayer component
+    // Seeking is requested through AudioPlayer's `seekRequest` prop
+    void time;
   };
 
   return { currentTime, seek };

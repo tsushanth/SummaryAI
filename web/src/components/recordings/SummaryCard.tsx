@@ -7,9 +7,9 @@ interface SummaryCardProps {
 }
 
 const priorityColors = {
-  high: 'text-red-600',
-  medium: 'text-orange-600',
-  low: 'text-green-600',
+  high: 'text-destructive',
+  medium: 'text-amber-700 dark:text-amber-300',
+  low: 'text-success',
 };
 
 export function SummaryCard({ summary }: SummaryCardProps) {
@@ -18,7 +18,7 @@ export function SummaryCard({ summary }: SummaryCardProps) {
       {/* Main Summary */}
       <div>
         <h3 className="text-lg font-semibold mb-2">Summary</h3>
-        <p className="text-gray-700 leading-relaxed">{summary.summary}</p>
+        <p className="text-foreground/90 leading-relaxed">{summary.summary}</p>
       </div>
 
       {/* Key Points */}
@@ -28,8 +28,8 @@ export function SummaryCard({ summary }: SummaryCardProps) {
           <ul className="space-y-2">
             {summary.key_points.map((point, index) => (
               <li key={index} className="flex items-start gap-2">
-                <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                <span className="text-gray-700">{point}</span>
+                <CheckCircle className="w-5 h-5 text-success mt-0.5 flex-shrink-0" />
+                <span className="text-foreground/90">{point}</span>
               </li>
             ))}
           </ul>
@@ -44,7 +44,7 @@ export function SummaryCard({ summary }: SummaryCardProps) {
             {summary.action_items.map((item, index) => (
               <li
                 key={index}
-                className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg"
+                className="flex items-start gap-3 p-3 bg-muted rounded-lg"
               >
                 <AlertCircle
                   className={cn(
@@ -53,8 +53,8 @@ export function SummaryCard({ summary }: SummaryCardProps) {
                   )}
                 />
                 <div className="flex-1">
-                  <p className="text-gray-700">{item.text}</p>
-                  <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                  <p className="text-foreground/90">{item.text}</p>
+                  <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
                     {item.assignee && <span>Assigned to: {item.assignee}</span>}
                     {item.due_date && (
                       <span>
@@ -85,7 +85,7 @@ export function SummaryCard({ summary }: SummaryCardProps) {
             {summary.topics.map((topic, index) => (
               <span
                 key={index}
-                className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                className="inline-flex items-center gap-1 px-3 py-1 bg-accent text-accent-foreground rounded-full text-sm"
               >
                 <Tag className="w-3 h-3" />
                 {topic}
