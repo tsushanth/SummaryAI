@@ -43,8 +43,16 @@ data class Todo(
     val priority: TodoPriority,
     val dueDate: String?,
     val recordingId: String?,
-    val createdAt: String
+    val createdAt: String,
+    val assignee: String? = null
 ) {
+    /** Calendar date part (YYYY-MM-DD) of [dueDate], which may be a date or full ISO datetime. */
+    val dueDateDisplay: String?
+        get() = dueDate?.takeIf { it.length >= 10 }?.substring(0, 10)
+
+    val hasAssignee: Boolean
+        get() = !assignee.isNullOrBlank()
+
     val hasDueDate: Boolean
         get() = dueDate != null
 

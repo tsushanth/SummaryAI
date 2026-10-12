@@ -3,11 +3,12 @@
 import { CheckCircle } from 'lucide-react';
 import { TodoItem } from './TodoItem';
 import type { Todo } from '@/types/api';
+import type { TodoExtras } from './TodoItem';
 
 interface TodoListProps {
   todos: Todo[];
   onToggle: (id: string) => void;
-  onEdit: (id: string, title: string) => void;
+  onEdit: (id: string, title: string, extras?: TodoExtras) => void;
   onDelete: (id: string) => void;
 }
 
@@ -29,7 +30,7 @@ export function TodoList({ todos, onToggle, onEdit, onDelete }: TodoListProps) {
           key={todo.id}
           todo={todo}
           onToggle={() => onToggle(todo.id)}
-          onEdit={(title) => onEdit(todo.id, title)}
+          onEdit={(title, extras) => onEdit(todo.id, title, extras)}
           onDelete={() => onDelete(todo.id)}
         />
       ))}

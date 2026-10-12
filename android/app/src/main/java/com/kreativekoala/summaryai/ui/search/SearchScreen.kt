@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SearchOff
@@ -35,7 +36,8 @@ import com.kreativekoala.summaryai.ui.components.SkeletonCardList
 fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel(),
     onRecordingClick: (String) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onAskAllMeetings: (() -> Unit)? = null
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val focusRequester = remember { FocusRequester() }
@@ -76,6 +78,16 @@ fun SearchScreen(
                             }
                         }
                     )
+                },
+                actions = {
+                    if (onAskAllMeetings != null) {
+                        IconButton(onClick = onAskAllMeetings) {
+                            Icon(
+                                Icons.Default.AutoAwesome,
+                                contentDescription = stringResource(R.string.chat_all_meetings)
+                            )
+                        }
+                    }
                 }
             )
         }

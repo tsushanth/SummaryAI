@@ -100,6 +100,38 @@ interface SummaryAIApi {
         @Path("id") id: String
     ): Response<Unit>
 
+    // MARK: - Intelligence (templates, regenerate, follow-up email, action items, chat)
+
+    @GET("api/summary-templates")
+    suspend fun getSummaryTemplates(): SummaryTemplatesResponse
+
+    @PUT("api/summary-templates/default")
+    suspend fun setDefaultSummaryTemplate(
+        @Body request: SetDefaultTemplateRequest
+    ): DefaultTemplateResponse
+
+    @POST("api/recordings/{id}/regenerate-summary")
+    suspend fun regenerateSummary(
+        @Path("id") id: String,
+        @Body request: RegenerateSummaryRequest
+    ): RegenerateSummaryResponse
+
+    @POST("api/recordings/{id}/follow-up-email")
+    suspend fun followUpEmail(
+        @Path("id") id: String,
+        @Body request: FollowUpEmailRequest
+    ): FollowUpEmailResponse
+
+    @POST("api/recordings/{id}/action-items-to-todos")
+    suspend fun actionItemsToTodos(
+        @Path("id") id: String
+    ): ActionItemsToTodosResponse
+
+    @POST("api/chat")
+    suspend fun chatAcrossMeetings(
+        @Body request: CrossMeetingChatRequest
+    ): CrossMeetingChatResponse
+
     // MARK: - Meetings
 
     @GET("api/meetings")

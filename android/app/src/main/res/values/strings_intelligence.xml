@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit">Edit</string>
+    <string name="save">Save</string>
+    <string name="copy">Copy</string>
+    <string name="todo_assignee">Assignee (optional)</string>
+    <string name="todo_due_date">Due date (optional)</string>
+    <string name="todo_due_date_pick">Pick date</string>
+    <string name="todo_due_date_clear">Clear date</string>
+    <string name="todo_due_chip">Due %1$s</string>
+
+    <string name="summary_template_title">Summary style</string>
+    <string name="summary_template_current">Current: %1$s</string>
+    <string name="summary_template_not_set">Not set (uses your default)</string>
+    <string name="summary_template_regenerate">Regenerate summary</string>
+    <string name="summary_template_regenerating">Regenerating…</string>
+    <string name="summary_template_confirm_title">Regenerate summary?</string>
+    <string name="summary_template_confirm_message">This replaces the current summary, key points and action items with a new %1$s version. This cannot be undone.</string>
+    <string name="summary_template_regenerate_confirm">Regenerate</string>
+    <string name="summary_template_failed">Could not regenerate the summary</string>
+    <string name="summary_template_done">Summary regenerated</string>
+    <string name="summary_template_load_failed">Could not load summary styles</string>
+
+    <string name="followup_email">Draft follow-up email</string>
+    <string name="followup_email_title">Follow-up email</string>
+    <string name="followup_email_subject">Subject</string>
+    <string name="followup_email_body">Body</string>
+    <string name="followup_email_drafting">Drafting…</string>
+    <string name="followup_email_failed">Could not draft the email</string>
+    <string name="followup_email_copied">Email copied</string>
+    <string name="followup_email_send">Send</string>
+    <string name="followup_email_no_app">No email app found</string>
+
+    <string name="action_items_to_todos">Add to my todos</string>
+    <string name="action_items_to_todos_adding">Adding…</string>
+    <string name="action_items_to_todos_added">Added %1$d to your todos</string>
+    <string name="action_items_to_todos_added_skipped">Added %1$d to your todos (%2$d already there)</string>
+    <string name="action_items_to_todos_none_new">All action items are already in your todos</string>
+    <string name="action_items_to_todos_failed">Could not add action items to todos</string>
+
+    <string name="chat_all_meetings">Ask across all meetings</string>
+    <string name="chat_all_meetings_title">Ask your meetings</string>
+    <string name="chat_all_meetings_placeholder">e.g. What did we decide about pricing?</string>
+    <string name="chat_all_meetings_empty_title">Ask across all your meetings</string>
+    <string name="chat_all_meetings_empty_message">Answers come from your summaries and transcripts, with links to the meetings they came from.</string>
+    <string name="chat_all_meetings_sources">Sources</string>
+    <string name="chat_all_meetings_failed">Could not get an answer. Try again.</string>
+    <string name="chat_all_meetings_send">Send</string>
+
+    <string name="settings_default_template">Default summary style</string>
+    <string name="settings_default_template_hint">Used for new recordings unless you pick a style for a specific one</string>
+</resources>

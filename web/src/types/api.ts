@@ -36,6 +36,7 @@ export interface Recording {
   created_at: string;
   updated_at: string;
   processed_at: string | null;
+  summary_template?: string | null;
 }
 
 export interface TranscriptSegment {
@@ -95,6 +96,7 @@ export interface Todo {
   completed_at: string | null;
   created_at: string;
   updated_at: string;
+  assignee?: string | null;
 }
 
 // Q&A types
@@ -167,6 +169,7 @@ export interface CreateTodoRequest {
   priority?: TodoPriority;
   due_date?: string;
   recording_id?: string;
+  assignee?: string;
 }
 
 export interface UpdateTodoRequest {
@@ -174,7 +177,9 @@ export interface UpdateTodoRequest {
   description?: string;
   status?: TodoStatus;
   priority?: TodoPriority;
-  due_date?: string;
+  due_date?: string | null;
+  /** Empty string clears the assignee on the server. */
+  assignee?: string | null;
 }
 
 export interface AskQuestionRequest {
@@ -413,4 +418,37 @@ export interface StartRecordingResponse {
 
 export interface PhoneCallResponse {
   call: PhoneCall;
+}
+
+// Intelligence types (templates, follow-up email, cross-meeting chat)
+export interface SummaryTemplate {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface SummaryTemplatesResponse {
+  templates: SummaryTemplate[];
+  default_template: string;
+}
+
+export interface FollowUpEmail {
+  subject: string;
+  body: string;
+}
+
+export interface ChatCitation {
+  recording_id: string;
+  title: string;
+  snippet: string;
+}
+
+export interface CrossMeetingChatResponse {
+  answer: string;
+  citations: ChatCitation[];
+}
+
+export interface ActionItemsToTodosResponse {
+  todos: Todo[];
+  skipped: number;
 }
