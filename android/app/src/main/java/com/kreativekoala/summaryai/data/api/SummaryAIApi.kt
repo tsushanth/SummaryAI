@@ -184,6 +184,9 @@ interface SummaryAIApi {
         @Path("id") recordingId: String
     ): MeetingAnalyticsResponse
 
+    @GET("api/stats/weekly")
+    suspend fun getWeeklyStats(): com.kreativekoala.summaryai.data.api.models.WeeklyStatsDto
+
     // MARK: - User
 
     @GET("api/users/profile")

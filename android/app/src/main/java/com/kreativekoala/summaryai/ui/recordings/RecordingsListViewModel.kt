@@ -6,7 +6,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kreativekoala.summaryai.data.api.models.FolderDto
+import com.kreativekoala.summaryai.data.api.models.WeeklyStatsDto
 import com.kreativekoala.summaryai.data.repository.OrganizeRepository
+import com.kreativekoala.summaryai.data.repository.StatsRepository
 import com.kreativekoala.summaryai.data.repository.RecordingsRepository
 import com.kreativekoala.summaryai.domain.model.Recording
 import com.kreativekoala.summaryai.domain.model.RecordingStatus
@@ -64,11 +66,21 @@ data class PendingUpload(
 class RecordingsListViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val recordingsRepository: RecordingsRepository,
-    private val organizeRepository: OrganizeRepository
+    private val organizeRepository: OrganizeRepository,
+    private val statsRepository: StatsRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RecordingsListUiState())
     val uiState: StateFlow<RecordingsListUiState> = _uiState.asStateFlow()
+
+    private val _weeklyStats = MutableStateFlow<WeeklyStatsDto?>(null)
+    val weeklyStats: StateFlow<WeeklyStatsDto?> = _weeklyStats.asStateFlow()
+
+    fun loadWeeklyStats() {
+        viewModelScope.launch {
+            statsRepository.weekly().onSuccess { _weeklyStats.value = it }
+        }
+    }
 
     private val _pendingUploads = MutableStateFlow<List<PendingUpload>>(emptyList())
     val pendingUploads: StateFlow<List<PendingUpload>> = _pendingUploads.asStateFlow()
@@ -170,6 +182,7 @@ class RecordingsListViewModel @Inject constructor(
         )
         loadRecordings()
         loadFolders()
+        loadWeeklyStats()
         refreshPendingUploads()
     }
 

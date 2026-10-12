@@ -51,6 +51,8 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: android.content.Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        // singleTop: links and tile/widget taps now arrive here instead of a second instance.
+        PromoCodeManager.handleIntent(intent)
         if (intent.action == ACTION_START_RECORDING) startRecordingRequested = true
     }
 
