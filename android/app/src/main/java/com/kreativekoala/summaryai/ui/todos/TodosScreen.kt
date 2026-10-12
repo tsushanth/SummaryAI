@@ -1,6 +1,8 @@
 package com.kreativekoala.summaryai.ui.todos
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -97,6 +99,7 @@ fun TodosScreen(
                             todo = todo,
                             onToggle = { viewModel.toggleTodo(todo) },
                             onDelete = { viewModel.deleteTodo(todo) },
+                            onEdit = { viewModel.showEditDialog(todo) },
                             onRecordingClick = todo.recordingId?.let { { onRecordingClick(it) } }
                         )
                     }
@@ -110,6 +113,11 @@ fun TodosScreen(
                 title = uiState.newTodoTitle,
                 notes = uiState.newTodoNotes,
                 priority = uiState.newTodoPriority,
+                assignee = uiState.newTodoAssignee,
+                dueDate = uiState.newTodoDueDate,
+                isEditing = uiState.editingTodoId != null,
+                onAssigneeChange = viewModel::updateNewTodoAssignee,
+                onDueDateChange = viewModel::updateNewTodoDueDate,
                 onTitleChange = viewModel::updateNewTodoTitle,
                 onNotesChange = viewModel::updateNewTodoNotes,
                 onPriorityChange = viewModel::updateNewTodoPriority,
@@ -143,6 +151,7 @@ private fun TodoItem(
     todo: Todo,
     onToggle: () -> Unit,
     onDelete: () -> Unit,
+    onEdit: () -> Unit,
     onRecordingClick: (() -> Unit)?
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -198,6 +207,8 @@ private fun TodoItem(
                         )
                     }
 
+                    TodoMetaChips(todo)
+
                     // Recording link
                     if (todo.isFromRecording && onRecordingClick != null) {
                         TextButton(
@@ -226,6 +237,14 @@ private fun TodoItem(
                     onDismissRequest = { showMenu = false }
                 ) {
                     DropdownMenuItem(
+                        text = { Text(stringResource(R.string.edit)) },
+                        onClick = {
+                            showMenu = false
+                            onEdit()
+                        },
+                        leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) }
+                    )
+                    DropdownMenuItem(
                         text = { Text(stringResource(R.string.delete)) },
                         onClick = {
                             showMenu = false
@@ -250,6 +269,11 @@ private fun AddTodoDialog(
     title: String,
     notes: String,
     priority: TodoPriority,
+    assignee: String,
+    dueDate: String,
+    isEditing: Boolean,
+    onAssigneeChange: (String) -> Unit,
+    onDueDateChange: (String) -> Unit,
     onTitleChange: (String) -> Unit,
     onNotesChange: (String) -> Unit,
     onPriorityChange: (TodoPriority) -> Unit,
@@ -258,9 +282,10 @@ private fun AddTodoDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.add_todo)) },
+        title = { Text(stringResource(if (isEditing) R.string.edit else R.string.add_todo)) },
         text = {
             Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 OutlinedTextField(
@@ -279,6 +304,13 @@ private fun AddTodoDialog(
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 2,
                     maxLines = 4
+                )
+
+                TodoAssigneeAndDueFields(
+                    assignee = assignee,
+                    dueDate = dueDate,
+                    onAssigneeChange = onAssigneeChange,
+                    onDueDateChange = onDueDateChange
                 )
 
                 // Priority selector
@@ -304,7 +336,7 @@ private fun AddTodoDialog(
                 onClick = onConfirm,
                 enabled = title.isNotBlank()
             ) {
-                Text(stringResource(R.string.add))
+                Text(stringResource(if (isEditing) R.string.save else R.string.add))
             }
         },
         dismissButton = {

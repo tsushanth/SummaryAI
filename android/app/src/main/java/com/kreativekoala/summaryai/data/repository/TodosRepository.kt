@@ -58,7 +58,8 @@ class TodosRepository @Inject constructor(
         notes: String? = null,
         recordingId: String? = null,
         priority: DomainPriority = DomainPriority.NONE,
-        dueDate: String? = null
+        dueDate: String? = null,
+        assignee: String? = null
     ): Result<Todo> = withContext(Dispatchers.IO) {
         try {
             val response = api.createTodo(
@@ -67,7 +68,8 @@ class TodosRepository @Inject constructor(
                     notes = notes,
                     recordingId = recordingId,
                     priority = priority.toApi(),
-                    dueDate = dueDate
+                    dueDate = dueDate,
+                    assignee = assignee
                 )
             )
             Result.success(response.todo.toDomain())
@@ -85,7 +87,8 @@ class TodosRepository @Inject constructor(
         notes: String? = null,
         isCompleted: Boolean? = null,
         priority: DomainPriority? = null,
-        dueDate: String? = null
+        dueDate: String? = null,
+        assignee: String? = null
     ): Result<Todo> = withContext(Dispatchers.IO) {
         try {
             val response = api.updateTodo(
@@ -95,7 +98,8 @@ class TodosRepository @Inject constructor(
                     notes = notes,
                     isCompleted = isCompleted,
                     priority = priority?.toApi(),
-                    dueDate = dueDate
+                    dueDate = dueDate,
+                    assignee = assignee
                 )
             )
             Result.success(response.todo.toDomain())
@@ -133,7 +137,8 @@ private fun TodoDto.toDomain() = Todo(
     priority = priority.toDomain(),
     dueDate = dueDate,
     recordingId = recordingId,
-    createdAt = createdAt
+    createdAt = createdAt,
+    assignee = assignee
 )
 
 private fun TodoPriority.toDomain(): DomainPriority = when (this) {

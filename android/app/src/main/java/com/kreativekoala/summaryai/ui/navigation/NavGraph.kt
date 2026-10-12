@@ -86,6 +86,7 @@ sealed class Screen(val route: String) {
     object CalendarIntegration : Screen("calendar")
     object Integrations : Screen("integrations")
     object Search : Screen("search")
+    object AskAllMeetings : Screen("ask_all_meetings")
     object Phone : Screen("phone")
     object Settings : Screen("settings")
     object Paywall : Screen("paywall")
@@ -439,6 +440,17 @@ fun MeetingMindNavGraph(
             // Search
             composable(Screen.Search.route) {
                 SearchScreen(
+                    onRecordingClick = { recordingId ->
+                        navController.navigate(Screen.RecordingDetail.createRoute(recordingId))
+                    },
+                    onNavigateBack = { navController.popBackStack() },
+                    onAskAllMeetings = { navController.navigate(Screen.AskAllMeetings.route) }
+                )
+            }
+
+            // Cross-meeting chat (reached from Search)
+            composable(Screen.AskAllMeetings.route) {
+                com.kreativekoala.summaryai.ui.intelligence.AllMeetingsChatScreen(
                     onRecordingClick = { recordingId ->
                         navController.navigate(Screen.RecordingDetail.createRoute(recordingId))
                     },

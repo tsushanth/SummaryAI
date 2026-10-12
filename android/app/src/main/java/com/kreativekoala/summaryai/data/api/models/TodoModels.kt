@@ -22,7 +22,8 @@ data class TodoDto(
     @SerializedName("due_date") val dueDate: String?,
     @SerializedName("completed_at") val completedAt: String?,
     @SerializedName("created_at") val createdAt: String,
-    @SerializedName("updated_at") val updatedAt: String
+    @SerializedName("updated_at") val updatedAt: String,
+    val assignee: String? = null
 )
 
 // MARK: - API Requests
@@ -32,7 +33,8 @@ data class CreateTodoRequest(
     val notes: String? = null,
     @SerializedName("recording_id") val recordingId: String? = null,
     val priority: TodoPriority = TodoPriority.NONE,
-    @SerializedName("due_date") val dueDate: String? = null
+    @SerializedName("due_date") val dueDate: String? = null,
+    val assignee: String? = null
 )
 
 data class UpdateTodoRequest(
@@ -40,7 +42,8 @@ data class UpdateTodoRequest(
     val notes: String? = null,
     @SerializedName("is_completed") val isCompleted: Boolean? = null,
     val priority: TodoPriority? = null,
-    @SerializedName("due_date") val dueDate: String? = null
+    @SerializedName("due_date") val dueDate: String? = null,
+    val assignee: String? = null
 )
 
 // MARK: - API Responses

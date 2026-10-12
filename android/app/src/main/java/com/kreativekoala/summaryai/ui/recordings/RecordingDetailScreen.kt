@@ -20,6 +20,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.ui.components.MmEmptyState
 import com.kreativekoala.summaryai.ui.components.SkeletonBox
+import com.kreativekoala.summaryai.ui.intelligence.ActionItemsToTodosButton
+import com.kreativekoala.summaryai.ui.intelligence.SummaryIntelligenceCard
 import com.kreativekoala.summaryai.ui.recordings.share.EditSpeakerNamesSheet
 import com.kreativekoala.summaryai.ui.recordings.share.ShareExportSheet
 import kotlinx.coroutines.launch
@@ -180,7 +182,15 @@ fun RecordingDetailScreen(
                         summary = detail.summary.takeUnless { hasNoSpeech },
                         hasNoSpeech = hasNoSpeech,
                         speakerNames = detail.transcript?.speakerNames,
-                        analytics = uiState.analytics
+                        analytics = uiState.analytics,
+                        headerContent = {
+                            SummaryIntelligenceCard(
+                                currentTemplateId = detail.recording.summaryTemplate,
+                                onRegenerated = viewModel::refresh,
+                                onMessage = { msg -> scope.launch { snackbarHostState.showSnackbar(msg) } }
+                            )
+                        },
+                        actionItemsFooter = { ActionItemsToTodosButton() }
                     )
                     DetailTab.TRANSCRIPT -> TranscriptTab(
                         transcript = detail.transcript,

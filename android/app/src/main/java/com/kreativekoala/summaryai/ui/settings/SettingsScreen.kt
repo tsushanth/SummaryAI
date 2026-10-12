@@ -129,6 +129,9 @@ fun SettingsScreen(
                 )
             }
 
+            // Default summary template
+            com.kreativekoala.summaryai.ui.intelligence.DefaultSummaryTemplateSection()
+
             // Language Section
             SettingsSection(title = stringResource(R.string.language)) {
                 SettingsItem(

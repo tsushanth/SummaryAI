@@ -55,7 +55,8 @@ data class Recording(
     val recordingType: RecordingType? = null,
     val meetingId: String? = null,
     val tags: List<String> = emptyList(),
-    val folderId: String? = null
+    val folderId: String? = null,
+    val summaryTemplate: String? = null
 ) {
     val formattedDuration: String
         get() {

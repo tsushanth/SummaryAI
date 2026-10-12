@@ -41,7 +41,8 @@ data class RecordingDto(
     @SerializedName("created_at") val createdAt: String? = null,
     @SerializedName("updated_at") val updatedAt: String? = null,
     val tags: List<String>? = null,
-    @SerializedName("folder_id") val folderId: String? = null
+    @SerializedName("folder_id") val folderId: String? = null,
+    @SerializedName("summary_template") val summaryTemplate: String? = null
 )
 
 // MARK: - Transcript

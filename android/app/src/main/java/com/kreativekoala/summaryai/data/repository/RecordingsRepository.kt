@@ -257,7 +257,8 @@ private fun RecordingDto.toDomain() = Recording(
     },
     meetingId = meetingId,
     tags = tags ?: emptyList(),
-    folderId = folderId
+    folderId = folderId,
+    summaryTemplate = summaryTemplate
 )
 
 private fun GetRecordingResponse.toDomain() = RecordingDetail(

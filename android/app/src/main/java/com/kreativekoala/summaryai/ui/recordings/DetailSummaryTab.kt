@@ -40,7 +40,9 @@ internal fun SummaryTab(
     summary: Summary?,
     hasNoSpeech: Boolean = false,
     speakerNames: Map<String, String>? = null,
-    analytics: com.kreativekoala.summaryai.data.api.models.MeetingAnalyticsDto? = null
+    analytics: com.kreativekoala.summaryai.data.api.models.MeetingAnalyticsDto? = null,
+    headerContent: (@Composable () -> Unit)? = null,
+    actionItemsFooter: (@Composable () -> Unit)? = null
 ) {
     if (summary == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -59,6 +61,7 @@ internal fun SummaryTab(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        if (!hasNoSpeech) headerContent?.invoke()
         if (analytics != null && !hasNoSpeech) {
             TalkTimeCard(analytics)
         }
@@ -116,6 +119,7 @@ internal fun SummaryTab(
                             )
                         }
                     }
+                    actionItemsFooter?.invoke()
                 }
             }
         }

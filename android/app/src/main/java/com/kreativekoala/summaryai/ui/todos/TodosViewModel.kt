@@ -26,7 +26,12 @@ data class TodosUiState(
     val showAddDialog: Boolean = false,
     val newTodoTitle: String = "",
     val newTodoNotes: String = "",
-    val newTodoPriority: TodoPriority = TodoPriority.NONE
+    val newTodoPriority: TodoPriority = TodoPriority.NONE,
+    val newTodoAssignee: String = "",
+    /** YYYY-MM-DD or empty */
+    val newTodoDueDate: String = "",
+    /** Non-null while the dialog is editing an existing todo */
+    val editingTodoId: String? = null
 )
 
 @HiltViewModel
@@ -51,8 +56,31 @@ class TodosViewModel @Inject constructor(
             showAddDialog = true,
             newTodoTitle = "",
             newTodoNotes = "",
-            newTodoPriority = TodoPriority.NONE
+            newTodoPriority = TodoPriority.NONE,
+            newTodoAssignee = "",
+            newTodoDueDate = "",
+            editingTodoId = null
         )
+    }
+
+    fun showEditDialog(todo: Todo) {
+        _uiState.value = _uiState.value.copy(
+            showAddDialog = true,
+            newTodoTitle = todo.title,
+            newTodoNotes = todo.notes.orEmpty(),
+            newTodoPriority = todo.priority,
+            newTodoAssignee = todo.assignee.orEmpty(),
+            newTodoDueDate = todo.dueDateDisplay.orEmpty(),
+            editingTodoId = todo.id
+        )
+    }
+
+    fun updateNewTodoAssignee(assignee: String) {
+        _uiState.value = _uiState.value.copy(newTodoAssignee = assignee)
+    }
+
+    fun updateNewTodoDueDate(dueDate: String) {
+        _uiState.value = _uiState.value.copy(newTodoDueDate = dueDate)
     }
 
     fun hideAddDialog() {
@@ -76,11 +104,26 @@ class TodosViewModel @Inject constructor(
         if (state.newTodoTitle.isBlank()) return
 
         viewModelScope.launch {
-            val result = todosRepository.createTodo(
-                title = state.newTodoTitle,
-                notes = state.newTodoNotes.ifBlank { null },
-                priority = state.newTodoPriority
-            )
+            val editingId = state.editingTodoId
+            val result = if (editingId != null) {
+                // Blank assignee is sent as "" so the backend clears it
+                todosRepository.updateTodo(
+                    id = editingId,
+                    title = state.newTodoTitle,
+                    notes = state.newTodoNotes,
+                    priority = state.newTodoPriority,
+                    dueDate = state.newTodoDueDate.ifBlank { null },
+                    assignee = state.newTodoAssignee.trim()
+                )
+            } else {
+                todosRepository.createTodo(
+                    title = state.newTodoTitle,
+                    notes = state.newTodoNotes.ifBlank { null },
+                    priority = state.newTodoPriority,
+                    dueDate = state.newTodoDueDate.ifBlank { null },
+                    assignee = state.newTodoAssignee.trim().ifBlank { null }
+                )
+            }
 
             result.fold(
                 onSuccess = {
