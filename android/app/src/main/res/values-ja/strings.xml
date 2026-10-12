@@ -233,4 +233,10 @@
     <string name="language_portuguese">Português</string>
     <string name="language_italian">Italiano</string>
     <string name="language_hindi">हिन्दी</string>
+    <string name="live_transcribe">リアルタイム文字起こし</string>
+    <string name="live_transcribe_listening">聞き取り中…</string>
+    <string name="no_recordings_in_filter">このフィルターには何もありません</string>
+    <string name="no_recordings_in_filter_subtitle">一致する録音はまだありません。「すべて」を選択すると全件が表示されます。</string>
+    <string name="summary_no_speech">この録音から音声が検出されなかったため、要約する内容がありません。</string>
+    <string name="error_load_recording_failed">この録音を読み込めませんでした。接続を確認して、もう一度お試しください。</string>
 </resources>

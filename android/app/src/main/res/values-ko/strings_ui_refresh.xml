@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ui_action_items">실행 항목</string>
+    <string name="ui_notes">노트</string>
+    <string name="ui_loading">불러오는 중</string>
+    <string name="ui_transcript_jump_to">%1$s(으)로 이동</string>
+    <string name="ui_transcript_speaker_line">%1$s, %2$s: %3$s</string>
+    <string name="ui_speakers_label">화자</string>
+    <string name="ui_no_recordings_title">아직 녹음이 없습니다</string>
+    <string name="ui_no_results_title">일치하는 녹음이 없습니다</string>
+    <string name="ui_clear_search">검색 지우기</string>
+</resources>

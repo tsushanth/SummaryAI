@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="weekly_stats_title">7 วันที่ผ่านมา</string>
+    <string name="weekly_stats_meetings">การประชุม</string>
+    <string name="weekly_stats_hours">ชั่วโมงที่บันทึก</string>
+    <string name="weekly_stats_action_items">รายการสิ่งที่ต้องทำ</string>
+</resources>

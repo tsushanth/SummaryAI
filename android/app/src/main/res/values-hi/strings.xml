@@ -233,4 +233,10 @@
     <string name="language_portuguese">Português</string>
     <string name="language_italian">Italiano</string>
     <string name="language_hindi">हिन्दी</string>
+    <string name="live_transcribe">लाइव ट्रांसक्रिप्शन</string>
+    <string name="live_transcribe_listening">सुन रहा है…</string>
+    <string name="no_recordings_in_filter">इस फ़िल्टर में कुछ नहीं है</string>
+    <string name="no_recordings_in_filter_subtitle">अभी कोई रिकॉर्डिंग मेल नहीं खाती। सब कुछ देखने के लिए “सभी” चुनें।</string>
+    <string name="summary_no_speech">इस रिकॉर्डिंग में कोई आवाज़ नहीं मिली, इसलिए सारांश बनाने के लिए कुछ नहीं है।</string>
+    <string name="error_load_recording_failed">यह रिकॉर्डिंग लोड नहीं हो सकी। अपना कनेक्शन जाँचें और पुनः प्रयास करें।</string>
 </resources>

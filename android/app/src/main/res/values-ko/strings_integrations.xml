@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="integrations_title">요약을 다른 곳으로 보내기</string>
+    <string name="integrations_desc">각 회의가 처리된 후 MeetingMind가 요약과 실행 항목을 웹훅, Slack 또는 Notion으로 보낼 수 있습니다. 비밀 값은 암호화되어 저장되며 다시 표시되지 않습니다.</string>
+    <string name="integration_webhook">Webhook</string>
+    <string name="integration_webhook_url">Webhook URL (https)</string>
+    <string name="integration_webhook_secret">서명 비밀 값 (선택)</string>
+    <string name="integration_slack">Slack</string>
+    <string name="integration_slack_url">Slack 수신 웹훅 URL</string>
+    <string name="integration_notion">Notion</string>
+    <string name="integration_notion_token">Notion 통합 토큰</string>
+    <string name="integration_notion_database">Notion 데이터베이스 ID</string>
+    <string name="integration_connected">연결됨</string>
+    <string name="integration_last_delivery">마지막 전송: %1$s</string>
+    <string name="integration_leave_to_keep">바꾸려면 새 값을 입력하세요</string>
+    <string name="integration_save">저장</string>
+    <string name="integration_test">테스트 보내기</string>
+    <string name="integration_remove">제거</string>
+    <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
+    <string name="tile_record_label">회의 녹음</string>
+    <string name="widget_record_label">녹음</string>
+    <string name="widget_description">홈 화면에서 바로 녹음 시작</string>
+    <string name="analytics_title">발언 시간</string>
+    <string name="analytics_questions">질문 %1$d개</string>
+    <string name="analytics_words">%1$d단어</string>
+    <string name="analytics_longest_monologue">가장 긴 독백: %1$s (%2$s)</string>
+</resources>

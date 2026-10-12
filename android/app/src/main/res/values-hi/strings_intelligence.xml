@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit">संपादित करें</string>
+    <string name="save">सहेजें</string>
+    <string name="copy">कॉपी करें</string>
+    <string name="todo_assignee">ज़िम्मेदार व्यक्ति (वैकल्पिक)</string>
+    <string name="todo_due_date">नियत तारीख (वैकल्पिक)</string>
+    <string name="todo_due_date_pick">तारीख चुनें</string>
+    <string name="todo_due_date_clear">तारीख साफ़ करें</string>
+    <string name="todo_due_chip">नियत तारीख %1$s</string>
+    <string name="summary_template_title">सारांश शैली</string>
+    <string name="summary_template_current">वर्तमान: %1$s</string>
+    <string name="summary_template_not_set">सेट नहीं है (आपकी डिफ़ॉल्ट शैली इस्तेमाल होगी)</string>
+    <string name="summary_template_regenerate">सारांश दोबारा बनाएँ</string>
+    <string name="summary_template_regenerating">दोबारा बन रहा है…</string>
+    <string name="summary_template_confirm_title">सारांश दोबारा बनाएँ?</string>
+    <string name="summary_template_confirm_message">इससे मौजूदा सारांश, मुख्य बिंदु और कार्य सूची %1$s शैली के नए संस्करण से बदल जाएँगे। इसे पूर्ववत नहीं किया जा सकता।</string>
+    <string name="summary_template_regenerate_confirm">दोबारा बनाएँ</string>
+    <string name="summary_template_failed">सारांश दोबारा नहीं बनाया जा सका</string>
+    <string name="summary_template_done">सारांश दोबारा बनाया गया</string>
+    <string name="summary_template_load_failed">सारांश शैलियाँ लोड नहीं हो सकीं</string>
+    <string name="followup_email">फ़ॉलो-अप ईमेल का मसौदा बनाएँ</string>
+    <string name="followup_email_title">फ़ॉलो-अप ईमेल</string>
+    <string name="followup_email_subject">विषय</string>
+    <string name="followup_email_body">मुख्य भाग</string>
+    <string name="followup_email_drafting">मसौदा बन रहा है…</string>
+    <string name="followup_email_failed">ईमेल का मसौदा नहीं बनाया जा सका</string>
+    <string name="followup_email_copied">ईमेल कॉपी किया गया</string>
+    <string name="followup_email_send">भेजें</string>
+    <string name="followup_email_no_app">कोई ईमेल ऐप नहीं मिला</string>
+    <string name="action_items_to_todos">मेरी कार्य सूची में जोड़ें</string>
+    <string name="action_items_to_todos_adding">जोड़ा जा रहा है…</string>
+    <string name="action_items_to_todos_added">%1$d आइटम आपकी कार्य सूची में जोड़े गए</string>
+    <string name="action_items_to_todos_added_skipped">%1$d आइटम आपकी कार्य सूची में जोड़े गए (%2$d पहले से मौजूद थे)</string>
+    <string name="action_items_to_todos_none_new">सभी कार्य पहले से आपकी कार्य सूची में हैं</string>
+    <string name="action_items_to_todos_failed">कार्य, कार्य सूची में नहीं जोड़े जा सके</string>
+    <string name="chat_all_meetings">सभी मीटिंग में पूछें</string>
+    <string name="chat_all_meetings_title">अपनी मीटिंग से पूछें</string>
+    <string name="chat_all_meetings_placeholder">उदा. कीमतों के बारे में हमने क्या तय किया?</string>
+    <string name="chat_all_meetings_empty_title">अपनी सभी मीटिंग में पूछें</string>
+    <string name="chat_all_meetings_empty_message">जवाब आपके सारांशों और प्रतिलेखों से आते हैं, साथ में उन मीटिंग के लिंक होते हैं जहाँ से वे लिए गए हैं।</string>
+    <string name="chat_all_meetings_sources">स्रोत</string>
+    <string name="chat_all_meetings_failed">जवाब नहीं मिल सका। पुनः प्रयास करें।</string>
+    <string name="chat_all_meetings_send">भेजें</string>
+    <string name="settings_default_template">डिफ़ॉल्ट सारांश शैली</string>
+    <string name="settings_default_template_hint">नई रिकॉर्डिंग के लिए इस्तेमाल होती है, जब तक आप किसी विशेष रिकॉर्डिंग के लिए शैली न चुनें</string>
+</resources>

@@ -269,4 +269,10 @@
     <string name="language_portuguese">Português</string>
     <string name="language_italian">Italiano</string>
     <string name="language_hindi">हिन्दी</string>
+    <string name="live_transcribe">النسخ المباشر</string>
+    <string name="live_transcribe_listening">جارٍ الاستماع…</string>
+    <string name="no_recordings_in_filter">لا يوجد شيء في هذا الفلتر</string>
+    <string name="no_recordings_in_filter_subtitle">لا توجد تسجيلات مطابقة بعد. اختر «الكل» لعرض كل شيء.</string>
+    <string name="summary_no_speech">لم يتم اكتشاف أي كلام في هذا التسجيل، لذا لا يوجد ما يمكن تلخيصه.</string>
+    <string name="error_load_recording_failed">تعذّر تحميل هذا التسجيل. تحقق من اتصالك وحاول مرة أخرى.</string>
 </resources>

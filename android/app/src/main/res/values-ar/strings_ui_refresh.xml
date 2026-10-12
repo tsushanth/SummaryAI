@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ui_action_items">المهام</string>
+    <string name="ui_notes">الملاحظات</string>
+    <string name="ui_loading">جارٍ التحميل</string>
+    <string name="ui_transcript_jump_to">الانتقال إلى %1$s</string>
+    <string name="ui_transcript_speaker_line">%1$s عند %2$s: %3$s</string>
+    <string name="ui_speakers_label">المتحدثون</string>
+    <string name="ui_no_recordings_title">لا توجد تسجيلات بعد</string>
+    <string name="ui_no_results_title">لا توجد تسجيلات مطابقة</string>
+    <string name="ui_clear_search">مسح البحث</string>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="weekly_stats_title">पिछले 7 दिन</string>
+    <string name="weekly_stats_meetings">मीटिंग</string>
+    <string name="weekly_stats_hours">रिकॉर्ड किए गए घंटे</string>
+    <string name="weekly_stats_action_items">कार्य सूची</string>
+</resources>

@@ -233,4 +233,10 @@
     <string name="language_portuguese">Português</string>
     <string name="language_italian">Italiano</string>
     <string name="language_hindi">हिन्दी</string>
+    <string name="live_transcribe">实时转录</string>
+    <string name="live_transcribe_listening">正在聆听…</string>
+    <string name="no_recordings_in_filter">此筛选条件下没有内容</string>
+    <string name="no_recordings_in_filter_subtitle">暂无符合条件的录音。选择“全部”可查看所有录音。</string>
+    <string name="summary_no_speech">此录音中未检测到语音，因此没有可摘要的内容。</string>
+    <string name="error_load_recording_failed">无法加载此录音。请检查网络连接后重试。</string>
 </resources>

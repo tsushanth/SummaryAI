@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ui_action_items">รายการสิ่งที่ต้องทำ</string>
+    <string name="ui_notes">บันทึกย่อ</string>
+    <string name="ui_loading">กำลังโหลด</string>
+    <string name="ui_transcript_jump_to">ไปที่ %1$s</string>
+    <string name="ui_transcript_speaker_line">%1$s เวลา %2$s: %3$s</string>
+    <string name="ui_speakers_label">ผู้พูด</string>
+    <string name="ui_no_recordings_title">ยังไม่มีการบันทึก</string>
+    <string name="ui_no_results_title">ไม่มีการบันทึกที่ตรงกัน</string>
+    <string name="ui_clear_search">ล้างการค้นหา</string>
+</resources>
