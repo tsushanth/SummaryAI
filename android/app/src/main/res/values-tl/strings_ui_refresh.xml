@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ui_action_items">Mga Gawain</string>
+    <string name="ui_notes">Mga Tala</string>
+    <string name="ui_loading">Naglo-load</string>
+    <string name="ui_transcript_jump_to">Pumunta sa %1$s</string>
+    <string name="ui_transcript_speaker_line">%1$s sa %2$s: %3$s</string>
+    <string name="ui_speakers_label">Mga Nagsasalita</string>
+    <string name="ui_no_recordings_title">Wala pang mga recording</string>
+    <string name="ui_no_results_title">Walang tumutugmang recording</string>
+    <string name="ui_clear_search">I-clear ang paghahanap</string>
+</resources>

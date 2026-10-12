@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ui_action_items">Задачи</string>
+    <string name="ui_notes">Заметки</string>
+    <string name="ui_loading">Загрузка</string>
+    <string name="ui_transcript_jump_to">Перейти к %1$s</string>
+    <string name="ui_transcript_speaker_line">%1$s в %2$s: %3$s</string>
+    <string name="ui_speakers_label">Участники</string>
+    <string name="ui_no_recordings_title">Записей пока нет</string>
+    <string name="ui_no_results_title">Подходящих записей нет</string>
+    <string name="ui_clear_search">Очистить поиск</string>
+</resources>

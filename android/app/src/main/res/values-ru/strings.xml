@@ -269,4 +269,10 @@
     <string name="language_portuguese">Português</string>
     <string name="language_italian">Italiano</string>
     <string name="language_hindi">हिन्दी</string>
+    <string name="live_transcribe">Живая транскрипция</string>
+    <string name="live_transcribe_listening">Слушаю…</string>
+    <string name="no_recordings_in_filter">В этом фильтре ничего нет</string>
+    <string name="no_recordings_in_filter_subtitle">Подходящих записей пока нет. Выберите «Все», чтобы увидеть всё.</string>
+    <string name="summary_no_speech">В этой записи не обнаружена речь, поэтому резюмировать нечего.</string>
+    <string name="error_load_recording_failed">Не удалось загрузить эту запись. Проверьте подключение и повторите попытку.</string>
 </resources>

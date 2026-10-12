@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ui_action_items">Görevler</string>
+    <string name="ui_notes">Notlar</string>
+    <string name="ui_loading">Yükleniyor</string>
+    <string name="ui_transcript_jump_to">%1$s konumuna git</string>
+    <string name="ui_transcript_speaker_line">%1$s, %2$s: %3$s</string>
+    <string name="ui_speakers_label">Konuşmacılar</string>
+    <string name="ui_no_recordings_title">Henüz kayıt yok</string>
+    <string name="ui_no_results_title">Eşleşen kayıt yok</string>
+    <string name="ui_clear_search">Aramayı temizle</string>
+</resources>

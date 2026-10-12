@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit">Edit</string>
+    <string name="save">Simpan</string>
+    <string name="copy">Salin</string>
+    <string name="todo_assignee">Penerima tugasan (pilihan)</string>
+    <string name="todo_due_date">Tarikh akhir (pilihan)</string>
+    <string name="todo_due_date_pick">Pilih tarikh</string>
+    <string name="todo_due_date_clear">Kosongkan tarikh</string>
+    <string name="todo_due_chip">Tarikh akhir %1$s</string>
+    <string name="summary_template_title">Gaya ringkasan</string>
+    <string name="summary_template_current">Semasa: %1$s</string>
+    <string name="summary_template_not_set">Belum ditetapkan (menggunakan lalai anda)</string>
+    <string name="summary_template_regenerate">Jana semula ringkasan</string>
+    <string name="summary_template_regenerating">Menjana semula…</string>
+    <string name="summary_template_confirm_title">Jana semula ringkasan?</string>
+    <string name="summary_template_confirm_message">Ini akan menggantikan ringkasan, perkara penting dan tugasan semasa dengan versi baharu bergaya %1$s. Tindakan ini tidak boleh dibuat asal.</string>
+    <string name="summary_template_regenerate_confirm">Jana semula</string>
+    <string name="summary_template_failed">Tidak dapat menjana semula ringkasan</string>
+    <string name="summary_template_done">Ringkasan dijana semula</string>
+    <string name="summary_template_load_failed">Tidak dapat memuatkan gaya ringkasan</string>
+    <string name="followup_email">Draf e-mel susulan</string>
+    <string name="followup_email_title">E-mel susulan</string>
+    <string name="followup_email_subject">Subjek</string>
+    <string name="followup_email_body">Kandungan</string>
+    <string name="followup_email_drafting">Menyediakan draf…</string>
+    <string name="followup_email_failed">Tidak dapat menyediakan draf e-mel</string>
+    <string name="followup_email_copied">E-mel disalin</string>
+    <string name="followup_email_send">Hantar</string>
+    <string name="followup_email_no_app">Tiada apl e-mel ditemui</string>
+    <string name="action_items_to_todos">Tambah ke tugasan saya</string>
+    <string name="action_items_to_todos_adding">Menambah…</string>
+    <string name="action_items_to_todos_added">%1$d ditambah ke tugasan anda</string>
+    <string name="action_items_to_todos_added_skipped">%1$d ditambah ke tugasan anda (%2$d sudah ada)</string>
+    <string name="action_items_to_todos_none_new">Semua tugasan sudah ada dalam senarai anda</string>
+    <string name="action_items_to_todos_failed">Tidak dapat menambah tugasan ke senarai</string>
+    <string name="chat_all_meetings">Tanya merentas semua mesyuarat</string>
+    <string name="chat_all_meetings_title">Tanya mesyuarat anda</string>
+    <string name="chat_all_meetings_placeholder">cth. Apa yang kita putuskan tentang harga?</string>
+    <string name="chat_all_meetings_empty_title">Tanya merentas semua mesyuarat anda</string>
+    <string name="chat_all_meetings_empty_message">Jawapan datang daripada ringkasan dan transkrip anda, dengan pautan ke mesyuarat asalnya.</string>
+    <string name="chat_all_meetings_sources">Sumber</string>
+    <string name="chat_all_meetings_failed">Tidak dapat mendapatkan jawapan. Cuba lagi.</string>
+    <string name="chat_all_meetings_send">Hantar</string>
+    <string name="settings_default_template">Gaya ringkasan lalai</string>
+    <string name="settings_default_template_hint">Digunakan untuk rakaman baharu kecuali anda memilih gaya untuk rakaman tertentu</string>
+</resources>

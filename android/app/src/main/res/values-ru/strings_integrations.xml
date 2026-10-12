@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="integrations_title">Отправка резюме в другие сервисы</string>
+    <string name="integrations_desc">После обработки каждой встречи MeetingMind может отправить резюме и задачи в вебхук, Slack или Notion. Секреты хранятся в зашифрованном виде и больше никогда не показываются.</string>
+    <string name="integration_webhook">Webhook</string>
+    <string name="integration_webhook_url">URL вебхука (https)</string>
+    <string name="integration_webhook_secret">Секрет подписи (необязательно)</string>
+    <string name="integration_slack">Slack</string>
+    <string name="integration_slack_url">URL входящего вебхука Slack</string>
+    <string name="integration_notion">Notion</string>
+    <string name="integration_notion_token">Токен интеграции Notion</string>
+    <string name="integration_notion_database">ID базы данных Notion</string>
+    <string name="integration_connected">Подключено</string>
+    <string name="integration_last_delivery">Последняя доставка: %1$s</string>
+    <string name="integration_leave_to_keep">Введите новое значение для замены</string>
+    <string name="integration_save">Сохранить</string>
+    <string name="integration_test">Отправить тест</string>
+    <string name="integration_remove">Удалить</string>
+    <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
+    <string name="tile_record_label">Записать встречу</string>
+    <string name="widget_record_label">Запись</string>
+    <string name="widget_description">Начните запись с главного экрана</string>
+    <string name="analytics_title">Время речи</string>
+    <string name="analytics_questions">Вопросов: %1$d</string>
+    <string name="analytics_words">Слов: %1$d</string>
+    <string name="analytics_longest_monologue">Самый длинный монолог: %1$s (%2$s)</string>
+</resources>

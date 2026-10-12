@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit">Edit</string>
+    <string name="save">Simpan</string>
+    <string name="copy">Salin</string>
+    <string name="todo_assignee">Penanggung jawab (opsional)</string>
+    <string name="todo_due_date">Tenggat waktu (opsional)</string>
+    <string name="todo_due_date_pick">Pilih tanggal</string>
+    <string name="todo_due_date_clear">Hapus tanggal</string>
+    <string name="todo_due_chip">Tenggat %1$s</string>
+    <string name="summary_template_title">Gaya ringkasan</string>
+    <string name="summary_template_current">Saat ini: %1$s</string>
+    <string name="summary_template_not_set">Belum diatur (memakai default Anda)</string>
+    <string name="summary_template_regenerate">Buat ulang ringkasan</string>
+    <string name="summary_template_regenerating">Membuat ulang…</string>
+    <string name="summary_template_confirm_title">Buat ulang ringkasan?</string>
+    <string name="summary_template_confirm_message">Ini akan mengganti ringkasan, poin penting, dan tugas saat ini dengan versi baru bergaya %1$s. Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="summary_template_regenerate_confirm">Buat ulang</string>
+    <string name="summary_template_failed">Tidak dapat membuat ulang ringkasan</string>
+    <string name="summary_template_done">Ringkasan dibuat ulang</string>
+    <string name="summary_template_load_failed">Tidak dapat memuat gaya ringkasan</string>
+    <string name="followup_email">Buat draf email tindak lanjut</string>
+    <string name="followup_email_title">Email tindak lanjut</string>
+    <string name="followup_email_subject">Subjek</string>
+    <string name="followup_email_body">Isi</string>
+    <string name="followup_email_drafting">Membuat draf…</string>
+    <string name="followup_email_failed">Tidak dapat membuat draf email</string>
+    <string name="followup_email_copied">Email disalin</string>
+    <string name="followup_email_send">Kirim</string>
+    <string name="followup_email_no_app">Aplikasi email tidak ditemukan</string>
+    <string name="action_items_to_todos">Tambahkan ke tugas saya</string>
+    <string name="action_items_to_todos_adding">Menambahkan…</string>
+    <string name="action_items_to_todos_added">%1$d ditambahkan ke tugas Anda</string>
+    <string name="action_items_to_todos_added_skipped">%1$d ditambahkan ke tugas Anda (%2$d sudah ada)</string>
+    <string name="action_items_to_todos_none_new">Semua tugas sudah ada di daftar tugas Anda</string>
+    <string name="action_items_to_todos_failed">Tidak dapat menambahkan tugas ke daftar</string>
+    <string name="chat_all_meetings">Tanya di semua rapat</string>
+    <string name="chat_all_meetings_title">Tanyakan rapat Anda</string>
+    <string name="chat_all_meetings_placeholder">mis. Apa yang kita putuskan soal harga?</string>
+    <string name="chat_all_meetings_empty_title">Tanya di semua rapat Anda</string>
+    <string name="chat_all_meetings_empty_message">Jawaban berasal dari ringkasan dan transkrip Anda, dengan tautan ke rapat asalnya.</string>
+    <string name="chat_all_meetings_sources">Sumber</string>
+    <string name="chat_all_meetings_failed">Tidak dapat memperoleh jawaban. Coba lagi.</string>
+    <string name="chat_all_meetings_send">Kirim</string>
+    <string name="settings_default_template">Gaya ringkasan default</string>
+    <string name="settings_default_template_hint">Dipakai untuk rekaman baru kecuali Anda memilih gaya untuk rekaman tertentu</string>
+</resources>

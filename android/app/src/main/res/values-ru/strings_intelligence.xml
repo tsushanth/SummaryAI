@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit">Изменить</string>
+    <string name="save">Сохранить</string>
+    <string name="copy">Копировать</string>
+    <string name="todo_assignee">Исполнитель (необязательно)</string>
+    <string name="todo_due_date">Срок (необязательно)</string>
+    <string name="todo_due_date_pick">Выбрать дату</string>
+    <string name="todo_due_date_clear">Сбросить дату</string>
+    <string name="todo_due_chip">Срок: %1$s</string>
+    <string name="summary_template_title">Стиль резюме</string>
+    <string name="summary_template_current">Текущий: %1$s</string>
+    <string name="summary_template_not_set">Не задан (используется стиль по умолчанию)</string>
+    <string name="summary_template_regenerate">Создать резюме заново</string>
+    <string name="summary_template_regenerating">Создаётся заново…</string>
+    <string name="summary_template_confirm_title">Создать резюме заново?</string>
+    <string name="summary_template_confirm_message">Текущие резюме, ключевые моменты и задачи будут заменены новой версией в стиле «%1$s». Это действие нельзя отменить.</string>
+    <string name="summary_template_regenerate_confirm">Создать заново</string>
+    <string name="summary_template_failed">Не удалось создать резюме заново</string>
+    <string name="summary_template_done">Резюме создано заново</string>
+    <string name="summary_template_load_failed">Не удалось загрузить стили резюме</string>
+    <string name="followup_email">Составить письмо-напоминание</string>
+    <string name="followup_email_title">Письмо-напоминание</string>
+    <string name="followup_email_subject">Тема</string>
+    <string name="followup_email_body">Текст</string>
+    <string name="followup_email_drafting">Составляется…</string>
+    <string name="followup_email_failed">Не удалось составить письмо</string>
+    <string name="followup_email_copied">Письмо скопировано</string>
+    <string name="followup_email_send">Отправить</string>
+    <string name="followup_email_no_app">Приложение для почты не найдено</string>
+    <string name="action_items_to_todos">Добавить в мои задачи</string>
+    <string name="action_items_to_todos_adding">Добавляется…</string>
+    <string name="action_items_to_todos_added">Добавлено в ваши задачи: %1$d</string>
+    <string name="action_items_to_todos_added_skipped">Добавлено в ваши задачи: %1$d (уже были: %2$d)</string>
+    <string name="action_items_to_todos_none_new">Все задачи уже есть в вашем списке</string>
+    <string name="action_items_to_todos_failed">Не удалось добавить задачи в список</string>
+    <string name="chat_all_meetings">Спросить по всем встречам</string>
+    <string name="chat_all_meetings_title">Спросите свои встречи</string>
+    <string name="chat_all_meetings_placeholder">например: что мы решили насчёт цен?</string>
+    <string name="chat_all_meetings_empty_title">Спросите по всем своим встречам</string>
+    <string name="chat_all_meetings_empty_message">Ответы формируются по вашим резюме и транскриптам, со ссылками на встречи, откуда они взяты.</string>
+    <string name="chat_all_meetings_sources">Источники</string>
+    <string name="chat_all_meetings_failed">Не удалось получить ответ. Повторите попытку.</string>
+    <string name="chat_all_meetings_send">Отправить</string>
+    <string name="settings_default_template">Стиль резюме по умолчанию</string>
+    <string name="settings_default_template_hint">Применяется к новым записям, если вы не выберете стиль для конкретной записи</string>
+</resources>

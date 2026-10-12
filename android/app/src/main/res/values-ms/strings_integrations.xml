@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="integrations_title">Hantar ringkasan ke tempat lain</string>
+    <string name="integrations_desc">Selepas setiap mesyuarat diproses, MeetingMind boleh menghantar ringkasan dan tugasan ke webhook, Slack atau Notion. Rahsia disimpan dalam bentuk disulitkan dan tidak akan dipaparkan semula.</string>
+    <string name="integration_webhook">Webhook</string>
+    <string name="integration_webhook_url">URL Webhook (https)</string>
+    <string name="integration_webhook_secret">Rahsia penandatanganan (pilihan)</string>
+    <string name="integration_slack">Slack</string>
+    <string name="integration_slack_url">URL webhook masuk Slack</string>
+    <string name="integration_notion">Notion</string>
+    <string name="integration_notion_token">Token integrasi Notion</string>
+    <string name="integration_notion_database">ID pangkalan data Notion</string>
+    <string name="integration_connected">Disambungkan</string>
+    <string name="integration_last_delivery">Penghantaran terakhir: %1$s</string>
+    <string name="integration_leave_to_keep">Masukkan nilai baharu untuk menggantikan</string>
+    <string name="integration_save">Simpan</string>
+    <string name="integration_test">Hantar ujian</string>
+    <string name="integration_remove">Alih keluar</string>
+    <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
+    <string name="tile_record_label">Rakam mesyuarat</string>
+    <string name="widget_record_label">Rakam</string>
+    <string name="widget_description">Mulakan rakaman dari skrin utama anda</string>
+    <string name="analytics_title">Masa bercakap</string>
+    <string name="analytics_questions">%1$d soalan</string>
+    <string name="analytics_words">%1$d perkataan</string>
+    <string name="analytics_longest_monologue">Monolog terpanjang: %1$s (%2$s)</string>
+</resources>

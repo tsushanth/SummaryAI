@@ -269,4 +269,10 @@
     <string name="language_portuguese">Português</string>
     <string name="language_italian">Italiano</string>
     <string name="language_hindi">हिन्दी</string>
+    <string name="live_transcribe">Live Transcribe</string>
+    <string name="live_transcribe_listening">Nakikinig…</string>
+    <string name="no_recordings_in_filter">Walang laman ang filter na ito</string>
+    <string name="no_recordings_in_filter_subtitle">Wala pang recording na tumutugma. Piliin ang Lahat para makita ang lahat.</string>
+    <string name="summary_no_speech">Walang narinig na pagsasalita sa recording na ito, kaya walang maibubuod.</string>
+    <string name="error_load_recording_failed">Hindi ma-load ang recording na ito. Tingnan ang iyong koneksyon at subukan muli.</string>
 </resources>

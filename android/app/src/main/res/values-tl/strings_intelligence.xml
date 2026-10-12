@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit">I-edit</string>
+    <string name="save">I-save</string>
+    <string name="copy">Kopyahin</string>
+    <string name="todo_assignee">Nakatalaga kay (opsyonal)</string>
+    <string name="todo_due_date">Takdang petsa (opsyonal)</string>
+    <string name="todo_due_date_pick">Pumili ng petsa</string>
+    <string name="todo_due_date_clear">I-clear ang petsa</string>
+    <string name="todo_due_chip">Due %1$s</string>
+    <string name="summary_template_title">Istilo ng buod</string>
+    <string name="summary_template_current">Kasalukuyan: %1$s</string>
+    <string name="summary_template_not_set">Hindi pa naitakda (gagamitin ang iyong default)</string>
+    <string name="summary_template_regenerate">I-regenerate ang buod</string>
+    <string name="summary_template_regenerating">Nire-regenerate…</string>
+    <string name="summary_template_confirm_title">I-regenerate ang buod?</string>
+    <string name="summary_template_confirm_message">Papalitan nito ang kasalukuyang buod, mahahalagang punto, at mga gawain ng bagong bersyon sa istilong %1$s. Hindi na ito maibabalik.</string>
+    <string name="summary_template_regenerate_confirm">I-regenerate</string>
+    <string name="summary_template_failed">Hindi ma-regenerate ang buod</string>
+    <string name="summary_template_done">Na-regenerate ang buod</string>
+    <string name="summary_template_load_failed">Hindi ma-load ang mga istilo ng buod</string>
+    <string name="followup_email">Gumawa ng draft ng follow-up na email</string>
+    <string name="followup_email_title">Follow-up na email</string>
+    <string name="followup_email_subject">Paksa</string>
+    <string name="followup_email_body">Nilalaman</string>
+    <string name="followup_email_drafting">Gumagawa ng draft…</string>
+    <string name="followup_email_failed">Hindi magawa ang draft ng email</string>
+    <string name="followup_email_copied">Nakopya ang email</string>
+    <string name="followup_email_send">Ipadala</string>
+    <string name="followup_email_no_app">Walang nakitang email app</string>
+    <string name="action_items_to_todos">Idagdag sa aking mga gawain</string>
+    <string name="action_items_to_todos_adding">Idinadagdag…</string>
+    <string name="action_items_to_todos_added">Nadagdag ang %1$d sa iyong mga gawain</string>
+    <string name="action_items_to_todos_added_skipped">Nadagdag ang %1$d sa iyong mga gawain (%2$d ang naroon na)</string>
+    <string name="action_items_to_todos_none_new">Nasa iyong mga gawain na ang lahat ng action item</string>
+    <string name="action_items_to_todos_failed">Hindi maidagdag ang mga action item sa iyong mga gawain</string>
+    <string name="chat_all_meetings">Magtanong sa lahat ng pulong</string>
+    <string name="chat_all_meetings_title">Tanungin ang iyong mga pulong</string>
+    <string name="chat_all_meetings_placeholder">hal. Ano ang napagpasyahan natin tungkol sa pagpepresyo?</string>
+    <string name="chat_all_meetings_empty_title">Magtanong sa lahat ng iyong pulong</string>
+    <string name="chat_all_meetings_empty_message">Ang mga sagot ay galing sa iyong mga buod at transcript, may mga link sa mga pulong na pinagmulan nito.</string>
+    <string name="chat_all_meetings_sources">Mga pinagmulan</string>
+    <string name="chat_all_meetings_failed">Hindi makakuha ng sagot. Subukan muli.</string>
+    <string name="chat_all_meetings_send">Ipadala</string>
+    <string name="settings_default_template">Default na istilo ng buod</string>
+    <string name="settings_default_template_hint">Gagamitin sa mga bagong recording maliban kung pipili ka ng istilo para sa isang partikular</string>
+</resources>
