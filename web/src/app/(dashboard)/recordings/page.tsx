@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { SkeletonCardList } from '@/components/ui/skeleton';
 import { RecordingFilters, filtersToParams, type RecordingFilterState } from '@/components/recordings/RecordingFilters';
+import { WeeklyStatsCard } from '@/components/recordings/WeeklyStatsCard';
 import { groupRecordingsByDate } from '@/lib/recordingGroups';
 import { Plus, Mic, CloudOff, Search } from 'lucide-react';
 import Link from 'next/link';
@@ -63,6 +64,8 @@ export default function RecordingsPage() {
           </Link>
         </div>
       </div>
+
+      {!isFiltered && <WeeklyStatsCard />}
 
       <RecordingFilters value={filters} onChange={setFilters} />
 

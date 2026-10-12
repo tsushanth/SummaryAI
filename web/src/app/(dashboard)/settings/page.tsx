@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { User, LogOut, Loader2, Sparkles, CreditCard, Calendar } from 'lucide-react';
+import { User, LogOut, Loader2, Sparkles, CreditCard, Calendar, Plug } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -106,6 +106,21 @@ export default function SettingsPage() {
                 </p>
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Plug className="h-5 w-5" />
+              Integrations
+            </CardTitle>
+            <CardDescription>Send summaries to a webhook, Slack or Notion</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/settings/integrations">
+              <Button variant="outline">Manage integrations</Button>
+            </Link>
           </CardContent>
         </Card>
 

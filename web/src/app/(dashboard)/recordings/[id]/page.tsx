@@ -66,6 +66,8 @@ import { cn } from '@/lib/utils/cn';
 import { updateRecording, updateSpeakerNames } from '@/lib/api/recordings';
 import { useSubscription } from '@/hooks/useSubscription';
 import { PremiumGate } from '@/components/subscription/PremiumGate';
+import { TalkTimeCard } from '@/components/recordings/TalkTimeCard';
+import { useRecordingAnalytics } from '@/hooks/useRecordingAnalytics';
 
 type Tab = 'summary' | 'transcript' | 'qa';
 
@@ -75,6 +77,11 @@ export default function RecordingDetailPage() {
   const { recording, transcript, summary, audioUrl, isLoading, refresh } =
     useRecording(id);
   const { isSubscribed } = useSubscription();
+  const { analytics } = useRecordingAnalytics(
+    id,
+    recording?.status === 'completed',
+    JSON.stringify(transcript?.speaker_names ?? {})
+  );
   const [activeTab, setActiveTab] = useState<Tab>('transcript');
   const [currentTime, setCurrentTime] = useState(0);
   const [seekRequest, setSeekRequest] = useState<SeekRequest | null>(null);
@@ -251,7 +258,8 @@ export default function RecordingDetailPage() {
       {/* Content */}
       <div className="flex-1 overflow-auto p-6">
         {activeTab === 'transcript' && (
-          <div className="max-w-3xl">
+          <div className="max-w-3xl space-y-4">
+            {analytics && <TalkTimeCard analytics={analytics} />}
             {transcript ? (
               <TranscriptViewer
                 transcript={transcript}
