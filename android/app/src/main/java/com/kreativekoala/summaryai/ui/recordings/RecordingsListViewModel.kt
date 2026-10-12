@@ -14,6 +14,7 @@ import com.kreativekoala.summaryai.domain.model.Recording
 import com.kreativekoala.summaryai.domain.model.RecordingStatus
 import com.kreativekoala.summaryai.domain.model.RecordingType
 import com.kreativekoala.summaryai.data.repository.RecordingsFilter
+import com.kreativekoala.summaryai.data.repository.UNFILED_FOLDER_ID
 import com.kreativekoala.summaryai.service.AudioRecordingService
 import com.kreativekoala.summaryai.ui.recordings.organize.DateRangeSelection
 import com.kreativekoala.summaryai.ui.recordings.organize.buildRecordingsFilter
@@ -28,6 +29,13 @@ import java.io.File
 import javax.inject.Inject
 
 private const val TAG = "RecordingsListVM"
+
+/** Server `recording_type` for tabs backed by it; null for tabs that show every type. */
+internal fun recordingTypeForTab(tab: RecordingsTab): String? = when (tab) {
+    RecordingsTab.MEETINGS -> "meeting"
+    RecordingsTab.IMPORTED -> "imported"
+    else -> null
+}
 
 enum class RecordingsTab {
     ALL,
@@ -107,7 +115,8 @@ class RecordingsListViewModel @Inject constructor(
             favoritesTab = s.selectedTab == RecordingsTab.FAVORITES,
             folderId = s.selectedFolderId,
             tag = s.selectedTag,
-            range = s.dateRange
+            range = s.dateRange,
+            recordingType = recordingTypeForTab(s.selectedTab)
         )
     }
 
@@ -176,7 +185,7 @@ class RecordingsListViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(
                     folders = folders,
                     // A folder deleted elsewhere must not leave the list filtered to nothing
-                    selectedFolderId = if (selected != null && folders.none { it.id == selected }) null else selected
+                    selectedFolderId = if (selected != null && selected != UNFILED_FOLDER_ID && folders.none { it.id == selected }) null else selected
                 )
                 applyFilter()
             }
@@ -217,15 +226,17 @@ class RecordingsListViewModel @Inject constructor(
     fun selectTab(tab: RecordingsTab) {
         val old = _uiState.value.selectedTab
         if (old != tab) {
+            val before = currentFilter()
             _uiState.value = _uiState.value.copy(
                 selectedTab = tab,
                 currentPage = 1,
                 hasMore = true
             )
-            // Favorites is a server filter, so entering or leaving it needs a fresh page 1.
-            if (old == RecordingsTab.FAVORITES || tab == RecordingsTab.FAVORITES) {
-                _uiState.value = _uiState.value.copy(allRecordings = emptyList(), filteredRecordings = emptyList())
-                loadRecordings()
+            // Favorites and the Meetings/Imported types are server filters, so a tab change that
+            // alters the server query needs a fresh page 1 (loadRecordings bumps the generation,
+            // discarding any in-flight response for the old tab).
+            if (currentFilter() != before) {
+                reloadForFilterChange()
             } else {
                 applyFilter()
             }
@@ -366,7 +377,13 @@ class RecordingsListViewModel @Inject constructor(
         val folderId = _uiState.value.selectedFolderId
         val tag = _uiState.value.selectedTag
         val organized = filtered
-            .let { list -> if (folderId != null) list.filter { it.folderId == folderId } else list }
+            .let { list ->
+                when (folderId) {
+                    null -> list
+                    UNFILED_FOLDER_ID -> list.filter { it.folderId == null }
+                    else -> list.filter { it.folderId == folderId }
+                }
+            }
             .let { list -> if (tag != null) list.filter { r -> r.tags.any { it.equals(tag, ignoreCase = true) } } else list }
         _uiState.value = _uiState.value.copy(filteredRecordings = organized)
     }
@@ -431,12 +448,14 @@ class RecordingsListViewModel @Inject constructor(
     }
 
     private suspend fun refreshSilently() {
+        val generation = loadGeneration
         val result = recordingsRepository.getRecordings(
             page = 1,
             perPage = _uiState.value.allRecordings.size.coerceIn(20, 50), // backend caps per_page at 50
             filter = currentFilter()
         )
 
+        if (generation != loadGeneration) return // filter/tab changed while polling
         result.onSuccess { recordings ->
             _uiState.value = _uiState.value.copy(allRecordings = recordings)
             applyFilter()

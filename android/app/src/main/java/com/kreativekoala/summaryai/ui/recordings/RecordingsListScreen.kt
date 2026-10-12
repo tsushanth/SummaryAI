@@ -277,6 +277,7 @@ fun RecordingsListScreen(
             }
 
             FolderTagFilterRow(
+                showUnfiled = true,
                 folders = uiState.folders,
                 tags = uiState.tags,
                 selectedFolderId = uiState.selectedFolderId,

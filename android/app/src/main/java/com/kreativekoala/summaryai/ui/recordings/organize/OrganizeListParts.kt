@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kreativekoala.summaryai.data.api.models.FolderDto
+import com.kreativekoala.summaryai.data.repository.UNFILED_FOLDER_ID
 import com.kreativekoala.summaryai.domain.model.Recording
 
 /** Horizontal chip row: one chip per folder, then one per tag. Tapping a selected chip clears it. */
@@ -38,6 +39,8 @@ fun FolderTagFilterRow(
     dateRangeLabel: String? = null,
     onPickDateRange: (() -> Unit)? = null,
     onClearDateRange: (() -> Unit)? = null,
+    /** When true, an "Unfiled" chip (folder_id=none) precedes the folder chips. */
+    showUnfiled: Boolean = false,
 ) {
     if (folders.isEmpty() && tags.isEmpty() && onManageFolders == null && onPickDateRange == null) return
     Row(
@@ -52,6 +55,10 @@ fun FolderTagFilterRow(
             OrganizeChip(label = dateRangeLabel ?: "Any date", selected = active) {
                 if (active && onClearDateRange != null) onClearDateRange() else onPickDateRange()
             }
+        }
+        if (showUnfiled) {
+            val selected = selectedFolderId == UNFILED_FOLDER_ID
+            OrganizeChip(label = "Unfiled", selected = selected) { onFolder(if (selected) null else UNFILED_FOLDER_ID) }
         }
         folders.forEach { f ->
             val selected = f.id == selectedFolderId

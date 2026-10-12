@@ -50,6 +50,7 @@ class RecordingsRepository @Inject constructor(
                 status = status?.name?.lowercase(),
                 folderId = filter.folderId,
                 tag = filter.tag,
+                recordingType = filter.recordingType,
                 favorite = filter.favorite,
                 from = filter.from,
                 to = filter.to
