@@ -201,7 +201,7 @@ export default function LandingPage() {
               >
                 See what it does
               </a>
-              <p className="text-sm text-muted-foreground">No credit card. 7-day free trial.</p>
+              <p className="text-sm text-muted-foreground">7-day free trial on the yearly plan. Cancel anytime.</p>
             </div>
           </div>
 
