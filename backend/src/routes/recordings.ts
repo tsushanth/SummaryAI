@@ -11,6 +11,7 @@ import { asyncHandler, Errors } from '../middleware/errorHandler.js';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
 import { triggerProcessing } from '../services/processingService.js';
+import { computeMeetingAnalytics } from '../services/meetingAnalytics.js';
 import questionsRouter from './questions.js';
 
 import type {
@@ -574,6 +575,34 @@ router.patch(
     }
 
     res.status(200).json({ transcript });
+  })
+);
+
+// GET /api/recordings/:id/analytics
+// Talk time, word counts, questions and longest monologue per speaker
+router.get(
+  '/:id/analytics',
+  authenticate,
+  asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+    const recordingId = req.params.id;
+
+    const { data: recording } = await supabaseAdmin
+      .from('recordings')
+      .select('id')
+      .eq('id', recordingId)
+      .eq('user_id', userId)
+      .single();
+    if (!recording) throw Errors.notFound('Recording');
+
+    const { data: transcript } = await supabaseAdmin
+      .from('transcripts')
+      .select('segments, speaker_names')
+      .eq('recording_id', recordingId)
+      .maybeSingle();
+    if (!transcript) throw Errors.notFound('Transcript');
+
+    res.json({ analytics: computeMeetingAnalytics(transcript.segments, transcript.speaker_names) });
   })
 );
 

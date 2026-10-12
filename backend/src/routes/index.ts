@@ -14,6 +14,7 @@ import phoneRoutes from './phone.js';
 import subscriptionsRoutes from './subscriptions.js';
 import attributionRoutes from './attribution.js';
 import coachingRoutes from './coaching.js';
+import integrationsRoutes from './integrations.js';
 
 const router = Router();
 
@@ -41,5 +42,6 @@ router.use('/api/calendar', calendarRoutes);
 router.use('/api/phone', phoneRoutes);
 router.use('/api/subscriptions', subscriptionsRoutes);
 router.use('/api/coaching', coachingRoutes);
+router.use('/api/integrations', integrationsRoutes);
 
 export default router;
