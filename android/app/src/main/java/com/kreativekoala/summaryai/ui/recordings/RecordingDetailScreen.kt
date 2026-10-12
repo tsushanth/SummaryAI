@@ -71,6 +71,9 @@ fun RecordingDetailScreen(
                     }
                 },
                 actions = {
+                    detail?.recording?.let { rec ->
+                        com.kreativekoala.summaryai.ui.recordings.organize.StarAction(rec.id, rec.isFavorite)
+                    }
                     IconButton(onClick = { showMoreMenu = true }) {
                         Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more))
                     }

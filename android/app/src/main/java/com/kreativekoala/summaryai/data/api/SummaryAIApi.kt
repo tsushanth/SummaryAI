@@ -29,7 +29,12 @@ interface SummaryAIApi {
         @Query("per_page") perPage: Int = 20,
         @Query("status") status: String? = null,
         @Query("sort") sort: String = "created_at",
-        @Query("order") order: String = "desc"
+        @Query("order") order: String = "desc",
+        @Query("folder_id") folderId: String? = null,
+        @Query("tag") tag: String? = null,
+        @Query("favorite") favorite: Boolean? = null,
+        @Query("from") from: String? = null,
+        @Query("to") to: String? = null
     ): ListRecordingsResponse
 
     @GET("api/recordings/{id}")
@@ -293,5 +298,5 @@ interface SummaryAIApi {
     ): Response<Unit>
 
     @GET("api/search")
-    suspend fun searchRecordings(@Query("q") query: String): SearchResponse
+    suspend fun searchRecordings(@Query("q") query: String, @Query("limit") limit: Int = 50): SearchResponse
 }
