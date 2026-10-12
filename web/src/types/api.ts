@@ -37,6 +37,8 @@ export interface Recording {
   updated_at: string;
   processed_at: string | null;
   summary_template?: string | null;
+  /** Linked meeting (live-transcript source); present on recordings made from meetings */
+  meeting_id?: string | null;
 }
 
 export interface TranscriptSegment {
@@ -73,6 +75,8 @@ export interface Summary {
   id: string;
   recording_id: string;
   summary: string;
+  /** Not returned by the backend today; Android reads it from older payloads, so web does too. */
+  detailed_summary?: string | null;
   key_points: string[];
   action_items: ActionItem[];
   topics: string[];
@@ -451,4 +455,24 @@ export interface CrossMeetingChatResponse {
 export interface ActionItemsToTodosResponse {
   todos: Todo[];
   skipped: number;
+}
+
+// Stitched live transcript (GET /api/meetings/:id/live-transcript/stitched)
+export interface StitchedTranscriptSegment {
+  id: string;
+  speaker_label: string;
+  speaker_index: number;
+  text: string;
+  start_time: number;
+  end_time: number;
+  confidence: number;
+}
+
+export interface StitchedLiveTranscript {
+  full_text: string;
+  segments: StitchedTranscriptSegment[];
+  word_count: number;
+  speaker_count: number;
+  duration_seconds: number;
+  source: string;
 }
