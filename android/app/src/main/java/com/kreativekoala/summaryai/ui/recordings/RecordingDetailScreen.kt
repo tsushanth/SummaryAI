@@ -179,7 +179,8 @@ fun RecordingDetailScreen(
                         // An empty transcript makes the model reply with "please resubmit"; hide that
                         summary = detail.summary.takeUnless { hasNoSpeech },
                         hasNoSpeech = hasNoSpeech,
-                        speakerNames = detail.transcript?.speakerNames
+                        speakerNames = detail.transcript?.speakerNames,
+                        analytics = uiState.analytics
                     )
                     DetailTab.TRANSCRIPT -> TranscriptTab(
                         transcript = detail.transcript,

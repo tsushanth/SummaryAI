@@ -44,6 +44,7 @@ import androidx.navigation.navArgument
 
 import com.kreativekoala.summaryai.ui.auth.AuthScreen
 import com.kreativekoala.summaryai.ui.calendar.CalendarIntegrationScreen
+import com.kreativekoala.summaryai.ui.integrations.IntegrationsScreen
 import com.kreativekoala.summaryai.ui.meetings.JoinMeetingScreen
 import com.kreativekoala.summaryai.ui.meetings.MeetingsScreen
 import com.kreativekoala.summaryai.ui.onboarding.OnboardingScreen
@@ -83,6 +84,7 @@ sealed class Screen(val route: String) {
     object Meetings : Screen("meetings")
     object JoinMeeting : Screen("meetings/join")
     object CalendarIntegration : Screen("calendar")
+    object Integrations : Screen("integrations")
     object Search : Screen("search")
     object Phone : Screen("phone")
     object Settings : Screen("settings")
@@ -138,6 +140,9 @@ fun MeetingMindNavGraph(
     // Live check — called at every gated action (start recording, join meeting,
     // place call) so the gate is re-evaluated, not captured at composition.
     shouldHardGate: () -> Boolean = { false },
+    // Set by the quick-settings tile / home-screen widget; consumed once.
+    startRecordingRequested: Boolean = false,
+    onStartRecordingHandled: () -> Unit = {},
     navController: NavHostController = rememberNavController()
 ) {
     // Helper for routing gated actions. Mutating navController inline reads
@@ -156,6 +161,14 @@ fun MeetingMindNavGraph(
             !isAuthenticated -> Screen.Auth.route
             !hasCompletedOnboarding -> Screen.Onboarding.route
             else -> Screen.Recordings.route
+        }
+    }
+
+    // Tile / widget shortcut: jump to the recording tab once signed in and onboarded.
+    LaunchedEffect(startRecordingRequested, isAuthenticated, hasCompletedOnboarding) {
+        if (startRecordingRequested && isAuthenticated && hasCompletedOnboarding) {
+            navigateGated(Screen.Recording.route)
+            onStartRecordingHandled()
         }
     }
 
@@ -416,6 +429,13 @@ fun MeetingMindNavGraph(
                 )
             }
 
+            // Integrations (webhook / Slack / Notion)
+            composable(Screen.Integrations.route) {
+                IntegrationsScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
             // Search
             composable(Screen.Search.route) {
                 SearchScreen(
@@ -440,6 +460,9 @@ fun MeetingMindNavGraph(
                 SettingsScreen(
                     onCalendarClick = {
                         navController.navigate(Screen.CalendarIntegration.route)
+                    },
+                    onIntegrationsClick = {
+                        navController.navigate(Screen.Integrations.route)
                     },
                     onUpgradeClick = {
                         navController.navigate(Screen.Paywall.route)

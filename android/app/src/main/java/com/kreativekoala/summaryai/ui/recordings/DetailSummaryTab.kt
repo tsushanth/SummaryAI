@@ -39,7 +39,8 @@ import com.kreativekoala.summaryai.ui.recordings.share.applyingSpeakerNames
 internal fun SummaryTab(
     summary: Summary?,
     hasNoSpeech: Boolean = false,
-    speakerNames: Map<String, String>? = null
+    speakerNames: Map<String, String>? = null,
+    analytics: com.kreativekoala.summaryai.data.api.models.MeetingAnalyticsDto? = null
 ) {
     if (summary == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -58,6 +59,9 @@ internal fun SummaryTab(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        if (analytics != null && !hasNoSpeech) {
+            TalkTimeCard(analytics)
+        }
         // Overview first: it is what people read before anything else
         if (summary.hasKeyPoints) {
             MmCard {

@@ -8,6 +8,8 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.kreativekoala.summaryai.R
+import com.kreativekoala.summaryai.data.api.models.MeetingAnalyticsDto
+import com.kreativekoala.summaryai.data.repository.IntegrationsRepository
 import com.kreativekoala.summaryai.data.repository.RecordingsRepository
 import com.kreativekoala.summaryai.domain.model.RecordingDetail
 import com.kreativekoala.summaryai.domain.model.RecordingStatus
@@ -54,13 +56,15 @@ data class RecordingDetailUiState(
     val isDeleting: Boolean = false,
     val deleted: Boolean = false,
     val showLiveTranscript: Boolean = true,  // Default to live for live meetings
-    val audioPlayerState: AudioPlayerState = AudioPlayerState()
+    val audioPlayerState: AudioPlayerState = AudioPlayerState(),
+    val analytics: MeetingAnalyticsDto? = null
 )
 
 @HiltViewModel
 class RecordingDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val recordingsRepository: RecordingsRepository,
+    private val integrationsRepository: IntegrationsRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -305,6 +309,8 @@ class RecordingDetailViewModel @Inject constructor(
                     // Start polling if still processing
                     if (detail.recording.isProcessing) {
                         startPolling()
+                    } else if (detail.transcript != null) {
+                        loadAnalytics()
                     }
                 },
                 onFailure = { error ->
@@ -314,6 +320,15 @@ class RecordingDetailViewModel @Inject constructor(
                     )
                 }
             )
+        }
+    }
+
+    /** Talk-time tile. Best effort: failures just hide the tile. */
+    private fun loadAnalytics() {
+        viewModelScope.launch {
+            integrationsRepository.analytics(recordingId).onSuccess { a ->
+                _uiState.value = _uiState.value.copy(analytics = a)
+            }
         }
     }
 
@@ -336,6 +351,7 @@ class RecordingDetailViewModel @Inject constructor(
 
                     if (!detail.recording.isProcessing) {
                         pollingActive = false
+                        if (detail.transcript != null) loadAnalytics()
                     }
                 }
             }

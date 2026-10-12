@@ -155,6 +155,35 @@ interface SummaryAIApi {
     @POST("api/calendar/sync")
     suspend fun syncCalendar(): Response<Unit>
 
+    // MARK: - Integrations
+
+    @GET("api/integrations")
+    suspend fun getIntegrations(): IntegrationsResponse
+
+    @PUT("api/integrations/{kind}")
+    suspend fun saveIntegration(
+        @Path("kind") kind: String,
+        @Body body: IntegrationUpsertRequest
+    ): IntegrationResponse
+
+    @DELETE("api/integrations/{kind}")
+    suspend fun deleteIntegration(
+        @Path("kind") kind: String
+    ): Response<Unit>
+
+    @POST("api/integrations/{kind}/test")
+    suspend fun testIntegration(
+        @Path("kind") kind: String
+    ): IntegrationTestResponse
+
+    @GET("api/integrations/deliveries")
+    suspend fun getIntegrationDeliveries(): IntegrationDeliveriesResponse
+
+    @GET("api/recordings/{id}/analytics")
+    suspend fun getMeetingAnalytics(
+        @Path("id") recordingId: String
+    ): MeetingAnalyticsResponse
+
     // MARK: - User
 
     @GET("api/users/profile")

@@ -7,6 +7,7 @@ import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
 import { v4 as uuidv4 } from 'uuid';
 import Anthropic from '@anthropic-ai/sdk';
+import { dispatchRecordingCompleted } from './integrationsService.js';
 import { instrumentAnthropic, withFeature } from '../lib/llm.js';
 import { buildSummaryPrompts, parseSummaryResponse, normalizeActionItems, type ParsedSummary } from './summaryService.js';
 import { resolveSummaryTemplate } from './summaryTemplates.js';
@@ -208,6 +209,9 @@ async function processRecordingAsync(
     }
 
     console.log(`[Processing] ${jobId}: Completed successfully, status updated to 'completed'`);
+
+    // Fire-and-forget: integration failures must never affect processing.
+    void dispatchRecordingCompleted(recordingId);
 
   } catch (error) {
     console.error(`[Processing] ${jobId}: Error:`, error);
