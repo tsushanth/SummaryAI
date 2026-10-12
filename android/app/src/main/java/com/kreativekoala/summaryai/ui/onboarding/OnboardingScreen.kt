@@ -7,26 +7,19 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.kreativekoala.paywallkit.manager.PaywallManager
 import com.kreativekoala.summaryai.R
 import kotlinx.coroutines.launch
 
@@ -116,12 +109,12 @@ fun OnboardingScreen(
                 Surface(
                     modifier = Modifier
                         .padding(horizontal = 4.dp)
-                        .size(if (isSelected) 10.dp else 8.dp),
-                    shape = MaterialTheme.shapes.small,
+                        .size(width = if (isSelected) 24.dp else 8.dp, height = 8.dp),
+                    shape = CircleShape,
                     color = if (isSelected)
                         MaterialTheme.colorScheme.primary
                     else
-                        MaterialTheme.colorScheme.surfaceVariant
+                        MaterialTheme.colorScheme.outlineVariant
                 ) {}
             }
         }
@@ -143,7 +136,8 @@ fun OnboardingScreen(
                             pagerState.animateScrollToPage(pagerState.currentPage - 1)
                         }
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).height(52.dp),
+                    shape = MaterialTheme.shapes.medium
                 ) {
                     Text(stringResource(R.string.back))
                 }
@@ -160,7 +154,8 @@ fun OnboardingScreen(
                         }
                     }
                 },
-                modifier = Modifier.weight(if (pagerState.currentPage > 0) 1f else 2f)
+                modifier = Modifier.weight(if (pagerState.currentPage > 0) 1f else 2f).height(52.dp),
+                shape = MaterialTheme.shapes.medium
             ) {
                 Text(
                     if (pagerState.currentPage == pages.size - 1)
@@ -181,8 +176,8 @@ private fun OnboardingPageContent(page: OnboardingPage) {
         verticalArrangement = Arrangement.Center
     ) {
         Surface(
-            modifier = Modifier.size(120.dp),
-            shape = MaterialTheme.shapes.extraLarge,
+            modifier = Modifier.size(128.dp),
+            shape = CircleShape,
             color = MaterialTheme.colorScheme.primaryContainer
         ) {
             Box(contentAlignment = Alignment.Center) {
@@ -200,6 +195,7 @@ private fun OnboardingPageContent(page: OnboardingPage) {
         Text(
             text = page.title,
             style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
 

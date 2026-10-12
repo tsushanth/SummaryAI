@@ -52,10 +52,10 @@ export default async function SharedRecordingPage({ params }: { params: { token:
 
   if (!data) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
+      <main className="min-h-screen flex items-center justify-center bg-background p-6">
         <div className="text-center max-w-sm">
           <h1 className="text-xl font-semibold mb-2">Link unavailable</h1>
-          <p className="text-gray-500">
+          <p className="text-muted-foreground">
             This link is invalid, has expired, or was revoked by its owner.
           </p>
         </div>
@@ -66,11 +66,11 @@ export default async function SharedRecordingPage({ params }: { params: { token:
   const { recording, summary, transcript } = data;
 
   return (
-    <main className="min-h-screen bg-gray-50 py-10 px-4">
-      <div className="max-w-3xl mx-auto bg-white border rounded-xl shadow-sm p-6 md:p-8 space-y-8">
+    <main className="min-h-screen bg-background py-10 px-4">
+      <div className="max-w-3xl mx-auto bg-card border rounded-xl shadow-sm p-6 md:p-8 space-y-8">
         <header>
           <h1 className="text-2xl font-bold">{recording.title}</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             {new Date(recording.created_at).toLocaleDateString('en-US', {
               month: 'long',
               day: 'numeric',
@@ -84,12 +84,12 @@ export default async function SharedRecordingPage({ params }: { params: { token:
           <>
             <section>
               <h2 className="text-lg font-semibold mb-2">Summary</h2>
-              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{summary.summary}</p>
+              <p className="text-foreground/80 leading-relaxed whitespace-pre-wrap">{summary.summary}</p>
             </section>
             {summary.key_points.length > 0 && (
               <section>
                 <h2 className="text-lg font-semibold mb-2">Key points</h2>
-                <ul className="list-disc pl-5 space-y-1 text-gray-700">
+                <ul className="list-disc pl-5 space-y-1 text-foreground/80">
                   {summary.key_points.map((p, i) => (
                     <li key={i}>{p}</li>
                   ))}
@@ -99,7 +99,7 @@ export default async function SharedRecordingPage({ params }: { params: { token:
             {summary.action_items.length > 0 && (
               <section>
                 <h2 className="text-lg font-semibold mb-2">Action items</h2>
-                <ul className="list-disc pl-5 space-y-1 text-gray-700">
+                <ul className="list-disc pl-5 space-y-1 text-foreground/80">
                   {summary.action_items.map((p, i) => (
                     <li key={i}>{p}</li>
                   ))}
@@ -109,7 +109,7 @@ export default async function SharedRecordingPage({ params }: { params: { token:
             {summary.topics.length > 0 && (
               <section className="flex flex-wrap gap-2">
                 {summary.topics.map((t, i) => (
-                  <span key={i} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                  <span key={i} className="px-3 py-1 bg-accent text-accent-foreground rounded-full text-sm">
                     {t}
                   </span>
                 ))}
@@ -117,7 +117,7 @@ export default async function SharedRecordingPage({ params }: { params: { token:
             )}
           </>
         ) : (
-          <p className="text-gray-500">No summary is available for this recording.</p>
+          <p className="text-muted-foreground">No summary is available for this recording.</p>
         )}
 
         {transcript && (
@@ -126,17 +126,17 @@ export default async function SharedRecordingPage({ params }: { params: { token:
             <div className="space-y-3">
               {transcript.segments.map((s, i) => (
                 <div key={i}>
-                  <div className="text-xs text-gray-500">
-                    <span className="font-medium text-gray-700">{s.speaker}</span> · {mmss(s.start_time)}
+                  <div className="text-xs text-muted-foreground">
+                    <span className="font-medium text-foreground/80">{s.speaker}</span> · {mmss(s.start_time)}
                   </div>
-                  <p className="text-gray-700">{s.text}</p>
+                  <p className="text-foreground/80">{s.text}</p>
                 </div>
               ))}
             </div>
           </section>
         )}
 
-        <footer className="pt-4 border-t text-xs text-gray-400">
+        <footer className="pt-4 border-t text-xs text-muted-foreground">
           Shared with Meeting Mind. This page is read-only.
         </footer>
       </div>

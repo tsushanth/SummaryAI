@@ -1,12 +1,13 @@
 import { Suspense } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { GoogleSignIn } from '@/components/auth/GoogleSignIn';
+import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 
 export default function AuthPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background p-4">
+      <Card className="w-full max-w-md shadow-sm">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 w-16 h-16 bg-primary rounded-2xl flex items-center justify-center">
             <svg
@@ -33,10 +34,20 @@ export default function AuthPage() {
             <GoogleSignIn />
           </Suspense>
           <p className="text-xs text-center text-muted-foreground">
-            By continuing, you agree to our Terms of Service and Privacy Policy
+            By continuing, you agree to our{' '}
+            <Link href="/terms" className="rounded-sm underline underline-offset-2 hover:text-foreground">
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link href="/privacy" className="rounded-sm underline underline-offset-2 hover:text-foreground">
+              Privacy Policy
+            </Link>
           </p>
         </CardContent>
       </Card>
+      <Link href="/" className="rounded-sm text-sm text-muted-foreground hover:text-foreground">
+        Back to home
+      </Link>
     </div>
   );
 }

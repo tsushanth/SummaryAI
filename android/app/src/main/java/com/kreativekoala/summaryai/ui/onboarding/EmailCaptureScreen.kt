@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,7 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.kreativekoala.paywallkit.manager.PaywallManager
 import com.kreativekoala.summaryai.ui.theme.BrandIndigo
 import com.kreativekoala.summaryai.ui.theme.Indigo60
@@ -92,7 +91,7 @@ fun EmailCaptureScreen(
 
             Text(
                 text = "Save your progress",
-                fontSize = 28.sp,
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
@@ -101,8 +100,8 @@ fun EmailCaptureScreen(
 
             Text(
                 text = "Drop your email so your recordings sync across devices and we can send you the occasional tip.",
-                fontSize = 15.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
@@ -114,6 +113,7 @@ fun EmailCaptureScreen(
                 onValueChange = { email = it },
                 placeholder = { Text("you@email.com") },
                 singleLine = true,
+                shape = MaterialTheme.shapes.medium,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -140,6 +140,7 @@ fun EmailCaptureScreen(
                     onContinue()
                 },
                 enabled = isValid && !isSubmitting,
+                shape = MaterialTheme.shapes.medium,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
@@ -147,22 +148,22 @@ fun EmailCaptureScreen(
                 if (isSubmitting) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         strokeWidth = 2.dp
                     )
                 } else {
                     Text("Continue", fontWeight = FontWeight.SemiBold)
                     Spacer(Modifier.width(8.dp))
-                    Icon(Icons.Default.ArrowForward, contentDescription = null)
+                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
                 }
             }
 
             Spacer(Modifier.height(8.dp))
 
-            TextButton(onClick = onContinue) {
+            TextButton(onClick = onContinue, modifier = Modifier.heightIn(min = 48.dp)) {
                 Text(
                     "Skip for now",
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 

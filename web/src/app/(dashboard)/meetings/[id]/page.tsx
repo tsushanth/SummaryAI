@@ -239,7 +239,7 @@ export default function MeetingDetailPage() {
                 <Lightbulb className="w-4 h-4" />
                 AI Insights
                 {insights.insights.length > 0 && (
-                  <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-primary text-white">
+                  <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
                     {insights.insights.length}
                   </span>
                 )}

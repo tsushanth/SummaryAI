@@ -52,7 +52,7 @@ export function TodoItem({ todo, onToggle, onEdit, onDelete }: TodoItemProps) {
         className={cn(
           'flex-shrink-0 w-5 h-5 rounded-full border-2 transition-colors',
           isCompleted
-            ? 'bg-success border-success text-white'
+            ? 'bg-success border-success text-success-foreground'
             : 'border-input hover:border-success'
         )}
       >

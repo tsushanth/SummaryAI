@@ -10,6 +10,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -205,7 +206,7 @@ fun SettingsScreen(
                 )
                 HorizontalDivider(modifier = Modifier.padding(start = 56.dp))
                 SettingsItem(
-                    icon = Icons.Default.HelpOutline,
+                    icon = Icons.AutoMirrored.Filled.HelpOutline,
                     title = stringResource(R.string.help_faq),
                     onClick = {
                         // TODO: Open FAQ screen
