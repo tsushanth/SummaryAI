@@ -1,5 +1,6 @@
 package com.kreativekoala.summaryai.service
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
@@ -22,6 +23,8 @@ class RecordTileService : TileService() {
         }
     }
 
+    // The Intent overload is only used below API 34, where the PendingIntent overload does not exist.
+    @SuppressLint("StartActivityAndCollapseDeprecated")
     @Suppress("DEPRECATION")
     override fun onClick() {
         super.onClick()

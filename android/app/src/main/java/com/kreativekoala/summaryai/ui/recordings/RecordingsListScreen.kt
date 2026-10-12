@@ -102,6 +102,7 @@ fun RecordingsListScreen(
 
     val uiState by viewModel.uiState.collectAsState()
     val pendingUploads by viewModel.pendingUploads.collectAsState()
+    val weeklyStats by viewModel.weeklyStats.collectAsState()
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     var organizeTarget by remember { mutableStateOf<Recording?>(null) }
@@ -323,6 +324,10 @@ fun RecordingsListScreen(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            }
+
+            weeklyStats?.let {
+                WeeklyStatsCard(it, modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
             }
 
             // Pending uploads banner — surfaces recordings that finished but failed
