@@ -20,7 +20,7 @@ function builder(table: string) {
   return q;
 }
 
-const mockConfig = vi.hoisted(() => ({ ENCRYPTION_KEY: 'aa'.repeat(32), SUPABASE_SERVICE_ROLE_KEY: 'x' }));
+const mockConfig = vi.hoisted(() => ({ ENCRYPTION_KEY: 'aa'.repeat(32) }));
 
 vi.mock('../src/lib/supabase.js', () => ({ supabaseAdmin: { from: vi.fn((t: string) => builder(t)) } }));
 vi.mock('../src/middleware/auth.js', () => ({

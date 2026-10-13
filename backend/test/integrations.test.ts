@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('../src/lib/supabase.js', () => ({ supabaseAdmin: { from: vi.fn() } }));
 vi.mock('../src/config/index.js', () => ({
-  config: { ENCRYPTION_KEY: '', SUPABASE_SERVICE_ROLE_KEY: 'test-service-role' },
+  config: { ENCRYPTION_KEY: '' },
 }));
 
 const guard = await import('../src/lib/ssrfGuard.js');
