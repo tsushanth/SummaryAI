@@ -52,6 +52,12 @@ This writes `~/.git-hooks/pre-push` and sets git's global `core.hooksPath`. Afte
 
 **Do not disable or bypass the hook without explicit user permission.** If a push is blocked, read the output — it points at the offending line, file, or pattern. Fix the secret; don't work around the scanner. A bypass exists (`SKIP_SECRETS_SCAN=1 git push`) but use it only after confirming the match is a true false positive.
 
+## Android signing credentials
+
+- **Never write a keystore password, key password or keystore file into a repo.** The upload keystore is shared by every Android app on this machine; its password was once committed to ~10 public repos and had to be treated as burned.
+- Credentials live in `~/.gradle/gradle.properties` (`ANDROID_UPLOAD_STORE_FILE`, `ANDROID_UPLOAD_STORE_PASSWORD`, `ANDROID_UPLOAD_KEY_ALIAS`, `ANDROID_UPLOAD_KEY_PASSWORD`). Build files read them with `providers.gradleProperty(...)`; see `android/app/build.gradle.kts`.
+- The pre-push hook blocks a literal `storePassword`/`keyPassword`, any value stored in `~/.gradle/gradle.properties` or `~/.git-hooks/known-secrets.txt` (one secret per line; add any password you reuse elsewhere), and files named `AndroidAppKey`, `*.jks`, `*.keystore`.
+
 ## LLM API keys
 
 - **Never embed paid LLM API keys (OpenAI, Anthropic) in client-side code** — extensions, mobile apps, public web JS. Always use a server proxy. Past incident: 20+ OpenAI keys leaked across Chrome extensions, triggered a portfolio-wide migration off OpenAI.
