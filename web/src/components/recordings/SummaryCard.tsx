@@ -1,8 +1,11 @@
 import type { Summary } from '@/types/api';
 import { cn } from '@/lib/utils/cn';
+import { applySpeakerNames } from '@/lib/exportFormats';
 
 interface SummaryCardProps {
   summary: Summary;
+  /** Speaker index -> display name, so "Speaker 2" in the generated text shows the real name. */
+  speakerNames?: Record<string, string> | null;
   /** Rendered under the action items list (e.g. an "add to todos" button). */
   actionItemsFooter?: React.ReactNode;
 }
@@ -25,19 +28,20 @@ function formatDue(due: string): string {
 }
 
 /** The minute: serif reading text, plain headings, action items as a margin-marked list. */
-export function SummaryCard({ summary, actionItemsFooter }: SummaryCardProps) {
+export function SummaryCard({ summary, speakerNames, actionItemsFooter }: SummaryCardProps) {
+  const name = (t: string) => applySpeakerNames(t, speakerNames);
   return (
     <div className="space-y-8">
       <section>
         <h3 className="mb-2 text-xl font-semibold tracking-tight">Summary</h3>
-        <p className="minute whitespace-pre-line text-foreground/90">{summary.summary}</p>
+        <p className="minute whitespace-pre-line text-foreground/90">{name(summary.summary)}</p>
       </section>
 
       {summary.detailed_summary?.trim() && (
         <section>
           <h3 className="mb-2 text-xl font-semibold tracking-tight">Detailed summary</h3>
           <div className="minute space-y-3 text-foreground/90">
-            {summary.detailed_summary
+            {name(summary.detailed_summary)
               .trim()
               .split(/\n{2,}/)
               .map((para, index) => (
@@ -53,7 +57,7 @@ export function SummaryCard({ summary, actionItemsFooter }: SummaryCardProps) {
           <ul className="minute list-disc space-y-2 pl-6 marker:text-primary">
             {summary.key_points.map((point, index) => (
               <li key={index} className="pl-1 text-foreground/90">
-                {point}
+                {name(point)}
               </li>
             ))}
           </ul>
@@ -73,12 +77,12 @@ export function SummaryCard({ summary, actionItemsFooter }: SummaryCardProps) {
                   aria-hidden="true"
                   className={cn('absolute inset-y-2 left-1.5 w-1 rounded-full', priorityBar[item.priority])}
                 />
-                <p className="minute text-foreground/90">{item.text}</p>
+                <p className="minute text-foreground/90">{name(item.text)}</p>
                 <dl className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-sm text-muted-foreground tabular">
                   {item.assignee && (
                     <div className="flex gap-1">
                       <dt>Assigned to</dt>
-                      <dd className="text-foreground">{item.assignee}</dd>
+                      <dd className="text-foreground">{name(item.assignee)}</dd>
                     </div>
                   )}
                   {item.due_date && (

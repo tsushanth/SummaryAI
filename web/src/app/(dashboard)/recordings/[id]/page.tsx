@@ -313,6 +313,7 @@ export default function RecordingDetailPage() {
                 <>
                   <SummaryCard
                     summary={summary}
+                    speakerNames={transcript?.speaker_names}
                     actionItemsFooter={<ActionItemsToTodosButton recordingId={recording.id} />}
                   />
                   {/* Style controls come after the content people came to read */}
