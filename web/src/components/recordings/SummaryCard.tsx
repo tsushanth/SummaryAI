@@ -1,6 +1,6 @@
 import type { Summary } from '@/types/api';
 import { cn } from '@/lib/utils/cn';
-import { applySpeakerNames } from '@/lib/exportFormats';
+import { actionItemText, applySpeakerNames } from '@/lib/exportFormats';
 
 interface SummaryCardProps {
   summary: Summary;
@@ -77,7 +77,7 @@ export function SummaryCard({ summary, speakerNames, actionItemsFooter }: Summar
                   aria-hidden="true"
                   className={cn('absolute inset-y-2 left-1.5 w-1 rounded-full', priorityBar[item.priority])}
                 />
-                <p className="minute text-foreground/90">{name(item.text)}</p>
+                <p className="minute text-foreground/90">{name(actionItemText(item))}</p>
                 <dl className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-sm text-muted-foreground tabular">
                   {item.assignee && (
                     <div className="flex gap-1">

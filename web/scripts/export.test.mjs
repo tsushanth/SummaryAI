@@ -4,6 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   applySpeakerNames,
+  actionItemText,
   summaryMarkdown,
   transcriptMarkdown,
   liveTranscriptMarkdown,
@@ -95,3 +96,26 @@ test('plain text and file name helpers', () => {
   assert.equal(safeFileName('a/b:c*'), 'a-b-c-');
   assert.equal(safeFileName('  '), 'Recording');
 });
+
+test('actionItemText reads task, title or legacy text', () => {
+  assert.equal(actionItemText({ task: 'A', title: 'B', text: 'C' }), 'A');
+  assert.equal(actionItemText({ title: 'B' }), 'B');
+  assert.equal(actionItemText({ text: 'C' }), 'C');
+  assert.equal(actionItemText({}), '');
+});
+
+test('applySpeakerNames tolerates missing text and keeps unnamed speakers', () => {
+  assert.equal(applySpeakerNames(undefined, { '0': 'Maya' }), '');
+  assert.equal(applySpeakerNames(null, null), '');
+  assert.equal(applySpeakerNames('Speaker 0 and Speaker 3', { '0': 'Maya' }), 'Maya and Speaker 3');
+});
+
+test('markdown export includes action items from the real payload shape', () => {
+  const md = summaryMarkdown(
+    { title: 'T' },
+    { summary: 's', action_items: [{ task: 'Do it', title: 'Do it', assignee: 'Speaker 0', due_date: null, priority: 'high' }] },
+    { '0': 'Maya' }
+  );
+  assert.match(md, /• Do it \(Maya\)/);
+});
+

@@ -11,9 +11,15 @@ import type { Recording, StitchedLiveTranscript, Summary, Transcript } from '@/t
  * load it directly.
  */
 
+/** The action's wording, whichever field the payload carries (the backend sends task/title; text is older). */
+export function actionItemText(item: { text?: string; task?: string; title?: string }): string {
+  return item.task ?? item.title ?? item.text ?? '';
+}
+
 const SPEAKER_REGEX = /\bSpeaker\s+(\d+)\b/gi;
 
-export function applySpeakerNames(text: string, names?: Record<string, string> | null): string {
+export function applySpeakerNames(text: string | null | undefined, names?: Record<string, string> | null): string {
+  if (!text) return '';
   if (!names || Object.keys(names).length === 0) return text;
   return text.replace(SPEAKER_REGEX, (match, idx: string) => {
     const custom = names[idx]?.trim();
@@ -62,7 +68,7 @@ export function summaryMarkdown(
     lines.push(
       '',
       '## Action Items',
-      ...summary.action_items.map((i) => `• ${a(i.text)}${i.assignee ? ` (${a(i.assignee)})` : ''}`)
+      ...summary.action_items.map((i) => `• ${a(actionItemText(i))}${i.assignee ? ` (${a(i.assignee)})` : ''}`)
     );
   }
   if (summary.topics?.length) {

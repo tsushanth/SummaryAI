@@ -65,7 +65,10 @@ export interface Transcript {
 }
 
 export interface ActionItem {
-  text: string;
+  /** The backend sends the action as `task` and `title`; `text` only exists on older payloads. */
+  text?: string;
+  task?: string;
+  title?: string;
   assignee: string | null;
   due_date: string | null;
   priority: 'high' | 'medium' | 'low';
