@@ -19,6 +19,11 @@ const priorityBar = {
   low: 'bg-success',
 };
 
+/** Due dates are ISO when the model resolved one, otherwise its own wording ("Friday", "next week"). */
+function formatDue(due: string): string {
+  return /^\d{4}-\d{2}-\d{2}/.test(due) ? new Date(due).toLocaleDateString() : due;
+}
+
 /** The minute: serif reading text, plain headings, action items as a margin-marked list. */
 export function SummaryCard({ summary, actionItemsFooter }: SummaryCardProps) {
   return (
@@ -79,7 +84,7 @@ export function SummaryCard({ summary, actionItemsFooter }: SummaryCardProps) {
                   {item.due_date && (
                     <div className="flex gap-1">
                       <dt>Due</dt>
-                      <dd className="text-foreground">{new Date(item.due_date).toLocaleDateString()}</dd>
+                      <dd className="text-foreground">{formatDue(item.due_date)}</dd>
                     </div>
                   )}
                   <div className={cn('font-semibold capitalize', priorityText[item.priority])}>

@@ -85,7 +85,7 @@ export default function RecordingDetailPage() {
     recording?.status === 'completed',
     JSON.stringify(transcript?.speaker_names ?? {})
   );
-  const [activeTab, setActiveTab] = useState<Tab>('transcript');
+  const [activeTab, setActiveTab] = useState<Tab>('summary');
   const [currentTime, setCurrentTime] = useState(0);
   const [seekRequest, setSeekRequest] = useState<SeekRequest | null>(null);
   const [isUpdatingSpeakers, setIsUpdatingSpeakers] = useState(false);
@@ -245,7 +245,7 @@ export default function RecordingDetailPage() {
       {/* Tabs */}
       <div className="border-b border-border bg-card px-4 sm:px-8">
         <nav className="flex gap-6" role="tablist" aria-label="Recording sections">
-          {(['transcript', 'summary', 'qa'] as Tab[]).map((tab) => {
+          {(['summary', 'transcript', 'qa'] as Tab[]).map((tab) => {
             const isPremiumTab = tab === 'summary' || tab === 'qa';
             const showLock = isPremiumTab && !isSubscribed;
             return (
@@ -311,15 +311,18 @@ export default function RecordingDetailPage() {
             <PremiumGate feature="aiSummaries">
               {summary ? (
                 <>
-                  <SummaryTemplatePanel
-                    recordingId={recording.id}
-                    currentTemplate={recording.summary_template}
-                    onRegenerated={refresh}
-                  />
                   <SummaryCard
                     summary={summary}
                     actionItemsFooter={<ActionItemsToTodosButton recordingId={recording.id} />}
                   />
+                  {/* Style controls come after the content people came to read */}
+                  <div className="mt-10">
+                    <SummaryTemplatePanel
+                      recordingId={recording.id}
+                      currentTemplate={recording.summary_template}
+                      onRegenerated={refresh}
+                    />
+                  </div>
                 </>
               ) : (
                 <div className="py-10 text-muted-foreground">
