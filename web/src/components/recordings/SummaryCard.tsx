@@ -30,7 +30,7 @@ export function SummaryCard({ summary, actionItemsFooter }: SummaryCardProps) {
     <div className="space-y-8">
       <section>
         <h3 className="mb-2 text-xl font-semibold tracking-tight">Summary</h3>
-        <p className="minute text-foreground/90">{summary.summary}</p>
+        <p className="minute whitespace-pre-line text-foreground/90">{summary.summary}</p>
       </section>
 
       {summary.detailed_summary?.trim() && (
