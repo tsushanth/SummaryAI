@@ -344,6 +344,9 @@ fun MeetingMindNavGraph(
                     onLiveCaptionClick = {
                         navController.navigate(Screen.LiveCaption.route)
                     },
+                    onTodosClick = {
+                        navController.navigate(Screen.Todos.route) { launchSingleTop = true }
+                    },
                 )
             }
 
@@ -387,7 +390,8 @@ fun MeetingMindNavGraph(
                 TodosScreen(
                     onRecordingClick = { recordingId ->
                         navController.navigate(Screen.RecordingDetail.createRoute(recordingId))
-                    }
+                    },
+                    onBack = { navController.popBackStack() }
                 )
             }
 

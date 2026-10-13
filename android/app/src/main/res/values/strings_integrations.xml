@@ -25,7 +25,7 @@
 
     <!-- Meeting analytics -->
     <string name="analytics_title">Talk time</string>
-    <string name="analytics_questions">%1$d questions</string>
-    <string name="analytics_words">%1$d words</string>
+    <string name="analytics_questions">Questions: %1$d</string>
+    <string name="analytics_words">Words: %1$d</string>
     <string name="analytics_longest_monologue">Longest monologue: %1$s (%2$s)</string>
 </resources>

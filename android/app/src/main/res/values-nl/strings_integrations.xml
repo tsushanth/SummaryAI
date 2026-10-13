@@ -21,7 +21,7 @@
     <string name="widget_record_label">Opnemen</string>
     <string name="widget_description">Start een opname vanaf je startscherm</string>
     <string name="analytics_title">Spreektijd</string>
-    <string name="analytics_questions">%1$d vragen</string>
-    <string name="analytics_words">%1$d woorden</string>
+    <string name="analytics_questions">Vragen: %1$d</string>
+    <string name="analytics_words">Woorden: %1$d</string>
     <string name="analytics_longest_monologue">Langste monoloog: %1$s (%2$s)</string>
 </resources>

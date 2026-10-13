@@ -21,7 +21,7 @@
     <string name="widget_record_label">บันทึก</string>
     <string name="widget_description">เริ่มบันทึกจากหน้าจอหลักของคุณ</string>
     <string name="analytics_title">เวลาพูด</string>
-    <string name="analytics_questions">%1$d คำถาม</string>
-    <string name="analytics_words">%1$d คำ</string>
+    <string name="analytics_questions">คำถาม: %1$d</string>
+    <string name="analytics_words">คำ: %1$d</string>
     <string name="analytics_longest_monologue">พูดยาวที่สุด: %1$s (%2$s)</string>
 </resources>

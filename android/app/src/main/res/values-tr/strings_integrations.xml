@@ -21,7 +21,7 @@
     <string name="widget_record_label">Kaydet</string>
     <string name="widget_description">Ana ekranınızdan kayda başlayın</string>
     <string name="analytics_title">Konuşma süresi</string>
-    <string name="analytics_questions">%1$d soru</string>
-    <string name="analytics_words">%1$d kelime</string>
+    <string name="analytics_questions">Soru: %1$d</string>
+    <string name="analytics_words">Kelime: %1$d</string>
     <string name="analytics_longest_monologue">En uzun monolog: %1$s (%2$s)</string>
 </resources>

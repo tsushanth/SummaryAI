@@ -6,7 +6,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.ui.draw.clip
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardActions
@@ -30,8 +33,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.delay
 import com.kreativekoala.summaryai.R
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AuthScreen(
     viewModel: AuthViewModel = hiltViewModel(),
@@ -46,6 +51,16 @@ fun AuthScreen(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var isSignUpMode by remember { mutableStateOf(false) }
+
+    // With the keyboard open there is little room: drop the logo block and keep the submit button on screen.
+    val imeVisible = WindowInsets.isImeVisible
+    val submitButtonRequester = remember { BringIntoViewRequester() }
+    LaunchedEffect(imeVisible) {
+        if (imeVisible) {
+            delay(150) // let the window finish resizing before measuring
+            submitButtonRequester.bringIntoView()
+        }
+    }
 
     // Handle auth success
     LaunchedEffect(authState.isAuthenticated) {
@@ -87,42 +102,47 @@ fun AuthScreen(
                 .padding(vertical = 48.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // App Icon
-            // The launcher glyph is white, so it needs a colored tile to be visible in light theme
-            Box(
-                modifier = Modifier
-                    .size(104.dp)
-                    .clip(MaterialTheme.shapes.extraLarge)
-                    .background(MaterialTheme.colorScheme.primary),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = stringResource(R.string.app_name),
-                    modifier = Modifier.size(104.dp)
+            AnimatedVisibility(visible = !imeVisible) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                // App Icon
+                // The launcher glyph is white, so it needs a colored tile to be visible in light theme
+                Box(
+                    modifier = Modifier
+                        .size(104.dp)
+                        .clip(MaterialTheme.shapes.extraLarge)
+                        .background(MaterialTheme.colorScheme.primary),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                        contentDescription = stringResource(R.string.app_name),
+                        modifier = Modifier.size(104.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // App name
+                Text(
+                    text = stringResource(R.string.app_name),
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = stringResource(R.string.auth_tagline),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(48.dp))
+
+                }
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // App name
-            Text(
-                text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = stringResource(R.string.auth_tagline),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(48.dp))
 
             // Google Sign-In Button
             OutlinedButton(
@@ -241,7 +261,8 @@ fun AuthScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .height(56.dp)
+                    .bringIntoViewRequester(submitButtonRequester),
                 shape = MaterialTheme.shapes.medium,
                 enabled = email.isNotBlank() && password.isNotBlank() && !uiState.isLoading && !authState.isLoading
             ) {

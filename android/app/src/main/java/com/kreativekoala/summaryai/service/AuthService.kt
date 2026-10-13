@@ -127,7 +127,7 @@ class AuthService @Inject constructor(
                             email = user?.email ?: "",
                             fullName = user?.userMetadata.metaString("full_name"),
                             avatarUrl = user?.userMetadata.metaString("avatar_url"),
-                            provider = AuthProvider.GOOGLE,
+                            provider = user?.appMetadata.restoredProvider(),
                             subscriptionStatus = SubscriptionStatus.FREE,
                             subscriptionExpiresAt = null
                         ),
@@ -158,7 +158,7 @@ class AuthService @Inject constructor(
                         email = user?.email ?: "",
                         fullName = user?.userMetadata.metaString("full_name"),
                         avatarUrl = user?.userMetadata.metaString("avatar_url"),
-                        provider = AuthProvider.GOOGLE,
+                        provider = user?.appMetadata.restoredProvider(),
                         subscriptionStatus = SubscriptionStatus.FREE,
                         subscriptionExpiresAt = null
                     ),
@@ -485,5 +485,9 @@ class AuthService @Inject constructor(
 }
 
 /** Plain string value of a user-metadata field; JsonElement.toString() would keep the JSON quotes. */
+/** Sign-in method recorded by Supabase in app_metadata; email accounts must not be labelled Google. */
+private fun JsonObject?.restoredProvider(): AuthProvider =
+    if (metaString("provider") == "email") AuthProvider.EMAIL else AuthProvider.GOOGLE
+
 private fun JsonObject?.metaString(key: String): String? =
     (this?.get(key) as? JsonPrimitive)?.contentOrNull

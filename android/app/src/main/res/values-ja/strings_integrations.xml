@@ -22,6 +22,6 @@
     <string name="widget_description">ホーム画面から録音を開始</string>
     <string name="analytics_title">発言時間</string>
     <string name="analytics_questions">質問 %1$d 件</string>
-    <string name="analytics_words">%1$d 語</string>
+    <string name="analytics_words">語: %1$d</string>
     <string name="analytics_longest_monologue">最長の独白: %1$s（%2$s）</string>
 </resources>

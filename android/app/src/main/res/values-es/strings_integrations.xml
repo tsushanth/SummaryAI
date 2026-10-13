@@ -21,7 +21,7 @@
     <string name="widget_record_label">Grabar</string>
     <string name="widget_description">Inicia una grabación desde la pantalla de inicio</string>
     <string name="analytics_title">Tiempo de habla</string>
-    <string name="analytics_questions">%1$d preguntas</string>
-    <string name="analytics_words">%1$d palabras</string>
+    <string name="analytics_questions">Preguntas: %1$d</string>
+    <string name="analytics_words">Palabras: %1$d</string>
     <string name="analytics_longest_monologue">Monólogo más largo: %1$s (%2$s)</string>
 </resources>

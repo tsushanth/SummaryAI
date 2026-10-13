@@ -61,10 +61,6 @@ internal fun SummaryTab(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        if (!hasNoSpeech) headerContent?.invoke()
-        if (analytics != null && !hasNoSpeech) {
-            TalkTimeCard(analytics)
-        }
         // Overview first: it is what people read before anything else
         if (summary.hasKeyPoints) {
             MmCard {
@@ -130,7 +126,7 @@ internal fun SummaryTab(
             val text = (shortText ?: detailedText!!).applyingSpeakerNames(speakerNames)
             MmCard {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    MmSectionHeader(title = stringResource(R.string.ui_notes), icon = Icons.AutoMirrored.Filled.Notes)
+                    MmSectionHeader(title = stringResource(R.string.summary), icon = Icons.AutoMirrored.Filled.Notes)
                     Text(text = text, style = MaterialTheme.typography.bodyMedium)
                 }
             }
@@ -148,5 +144,10 @@ internal fun SummaryTab(
                 }
             }
         }
+        // The summary comes first; analytics and style controls are secondary
+        if (analytics != null && !hasNoSpeech) {
+            TalkTimeCard(analytics)
+        }
+        if (!hasNoSpeech) headerContent?.invoke()
     }
 }

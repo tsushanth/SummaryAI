@@ -79,6 +79,8 @@ fun RecordingsListScreen(
     onStartRecording: () -> Unit,
     onSearchClick: () -> Unit,
     onLiveCaptionClick: () -> Unit = {},
+    // The Action Items chip opens the Todos screen; the list itself has no todos to show.
+    onTodosClick: () -> Unit = {},
 ) {
     // Log when this composable is rendered
     LaunchedEffect(Unit) {
@@ -261,8 +263,8 @@ fun RecordingsListScreen(
                 )
                 FilterChipIOS(
                     label = stringResource(R.string.todos),
-                    selected = uiState.selectedTab == RecordingsTab.TODOS,
-                    onClick = { viewModel.selectTab(RecordingsTab.TODOS) }
+                    selected = false,
+                    onClick = onTodosClick
                 )
                 FilterChipIOS(
                     label = stringResource(R.string.favorites),
