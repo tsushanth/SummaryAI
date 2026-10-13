@@ -119,3 +119,8 @@ test('markdown export includes action items from the real payload shape', () => 
   assert.match(md, /• Do it \(Maya\)/);
 });
 
+test('applySpeakerNames collapses a name the model already wrote in parentheses', () => {
+  assert.equal(applySpeakerNames('Speaker 2 (Alex) can deliver it.', { '2': 'Alex' }), 'Alex can deliver it.');
+  assert.equal(applySpeakerNames('Speaker 2 (Alexandra) can.', { '2': 'Alex' }), 'Alex (Alexandra) can.');
+});
+

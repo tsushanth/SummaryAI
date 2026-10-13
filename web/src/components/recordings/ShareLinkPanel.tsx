@@ -93,7 +93,7 @@ export function ShareLinkPanel({ recordingId }: { recordingId: string }) {
             <select
               value={expiresDays}
               onChange={(e) => setExpiresDays(e.target.value)}
-              className="border rounded px-2 py-1"
+              className="rounded border border-input bg-card px-2 py-1 text-foreground"
             >
               <option value="1">in 1 day</option>
               <option value="7">in 7 days</option>

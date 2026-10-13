@@ -48,7 +48,7 @@ export function RecordingOrganizer({
         <select
           value={recording.folder_id ?? ''}
           onChange={(e) => run(() => moveRecordingToFolder(recording.id, e.target.value || null))}
-          className="border rounded-md px-2 py-1 bg-card"
+          className="rounded-md border border-input bg-card px-2 py-1 text-foreground"
           aria-label="Folder"
         >
           <option value="">No folder</option>
@@ -84,7 +84,7 @@ export function RecordingOrganizer({
           onBlur={addTag}
           placeholder="Add tag"
           maxLength={40}
-          className="border rounded-md px-2 py-0.5 w-28"
+          className="w-28 rounded-md border border-input bg-card px-2 py-0.5 text-foreground placeholder:text-muted-foreground"
         />
       </div>
       {error && <span className="text-destructive">{error}</span>}

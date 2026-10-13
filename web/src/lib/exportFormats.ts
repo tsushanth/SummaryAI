@@ -21,10 +21,18 @@ const SPEAKER_REGEX = /\bSpeaker\s+(\d+)\b/gi;
 export function applySpeakerNames(text: string | null | undefined, names?: Record<string, string> | null): string {
   if (!text) return '';
   if (!names || Object.keys(names).length === 0) return text;
-  return text.replace(SPEAKER_REGEX, (match, idx: string) => {
+  let out = text.replace(SPEAKER_REGEX, (match, idx: string) => {
     const custom = names[idx]?.trim();
     return custom ? custom : match;
   });
+  // The model often writes the name it heard next to the label ("Speaker 2 (Alex)"), which would now read
+  // "Alex (Alex)". Collapse a name that repeats itself in parentheses.
+  for (const raw of Object.values(names)) {
+    const n = raw?.trim();
+    if (!n) continue;
+    out = out.split(`${n} (${n})`).join(n);
+  }
+  return out;
 }
 
 function mmss(seconds: number): string {

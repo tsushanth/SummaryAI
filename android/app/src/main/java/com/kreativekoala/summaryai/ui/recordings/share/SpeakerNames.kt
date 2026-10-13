@@ -10,9 +10,16 @@ private val SPEAKER_REGEX = Regex("""\bSpeaker\s+(\d+)\b""", RegexOption.IGNORE_
 
 fun String.applyingSpeakerNames(names: Map<String, String>?): String {
     if (names.isNullOrEmpty()) return this
-    return SPEAKER_REGEX.replace(this) { match ->
+    var out = SPEAKER_REGEX.replace(this) { match ->
         val idx = match.groupValues[1]
         val custom = names[idx]?.trim()
         if (!custom.isNullOrEmpty()) custom else match.value
     }
+    // The model often writes the name it heard next to the label ("Speaker 2 (Alex)"), which would now read
+    // "Alex (Alex)". Collapse a name that repeats itself in parentheses.
+    for (raw in names.values) {
+        val n = raw.trim()
+        if (n.isNotEmpty()) out = out.replace("$n ($n)", n)
+    }
+    return out
 }

@@ -141,7 +141,7 @@ function AddPhoneForm({ onSuccess }: { onSuccess: () => void }) {
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               placeholder="+1 (555) 123-4567"
-              className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-3 py-2 border border-input bg-card text-foreground placeholder:text-muted-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               required
             />
             <p className="text-xs text-muted-foreground mt-1">
@@ -181,7 +181,7 @@ function AddPhoneForm({ onSuccess }: { onSuccess: () => void }) {
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               placeholder="123456"
-              className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-center text-2xl tracking-widest"
+              className="w-full px-3 py-2 border border-input bg-card text-foreground placeholder:text-muted-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-center text-2xl tracking-widest"
               maxLength={6}
               required
             />
