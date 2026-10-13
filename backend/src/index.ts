@@ -115,6 +115,11 @@ async function startServer(): Promise<void> {
   app.listen(config.PORT, () => {
     console.log(`✅ Server running on port ${config.PORT}`);
     console.log(`📍 API available at http://localhost:${config.PORT}/${config.API_VERSION}`);
+    // Local testing against a real database must not start the recovery loops (they act on real users' meetings and bots).
+    if (process.env.DISABLE_BACKGROUND_LOOPS === '1') {
+      console.log('[startup] DISABLE_BACKGROUND_LOOPS=1: coaching recovery, stuck-meeting and bot reconcilers not started');
+      return;
+    }
     // Re-attach tickers for any coaching sessions that were in flight when this
     // process last died (e.g. previous deploy / Fly machine restart).
     import('./services/coachingService.js').then(m => m.recoverActiveSessions())
