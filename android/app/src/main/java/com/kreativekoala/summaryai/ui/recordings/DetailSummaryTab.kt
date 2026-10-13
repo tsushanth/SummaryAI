@@ -1,6 +1,7 @@
 package com.kreativekoala.summaryai.ui.recordings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,10 +17,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.automirrored.filled.Notes
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -94,18 +93,15 @@ internal fun SummaryTab(
                     MmSectionHeader(title = stringResource(R.string.ui_action_items), icon = Icons.Default.Checklist)
                     summary.actionItems.forEach { item ->
                         Row(verticalAlignment = Alignment.Top) {
+                            // Neutral marker: a filled check reads as "completed", which these are not
                             Box(
-                                modifier = Modifier
-                                    .size(22.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary),
+                                modifier = Modifier.size(22.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    Icons.Default.Check,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(14.dp),
-                                    tint = MaterialTheme.colorScheme.onPrimary
+                                Box(
+                                    modifier = Modifier
+                                        .size(10.dp)
+                                        .border(1.5.dp, MaterialTheme.colorScheme.onSurfaceVariant, CircleShape)
                                 )
                             }
                             Spacer(modifier = Modifier.width(12.dp))
