@@ -134,16 +134,26 @@ const PLANS = [
   },
 ];
 
-const DEMO_RESULTS = [
-  'Launch delayed to Q2, pending test results',
-  'Marketing to deliver assets by Friday',
-  'Dev to onboard the new hire by Monday',
-];
-
-// Illustrative speaker timeline for the hero: [speaker color, width %]
-const HERO_RIBBON: [string, number][] = [
-  ['#4A4DCB', 22], ['#0B7A75', 9], ['#4A4DCB', 14], ['#A33A5B', 12], ['#0B7A75', 18], ['#B4501A', 7], ['#4A4DCB', 18],
-];
+/** A real capture of the app (sample meeting), one image per color scheme. */
+function Shot({
+  name, width, height, alt, priority, className,
+}: { name: string; width: number; height: number; alt: string; priority?: boolean; className?: string }) {
+  return (
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcSet={`/landing/${name}-dark.webp`} />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={`/landing/${name}-light.webp`}
+        width={width}
+        height={height}
+        alt={alt}
+        loading={priority ? 'eager' : 'lazy'}
+        decoding="async"
+        className={className}
+      />
+    </picture>
+  );
+}
 
 export default function LandingPage() {
   return (
@@ -205,47 +215,48 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Illustrative minutes */}
-          <figure className="mt-14 rounded-lg border border-border bg-card p-5 sm:p-8">
-            <div className="ribbon-draw ribbon h-5 sm:h-6" aria-hidden="true">
-              {HERO_RIBBON.map(([color, w], i) => (
-                <span key={i} style={{ width: `${w}%`, backgroundColor: color }} />
-              ))}
-            </div>
-            <figcaption className="mt-2 text-sm text-muted-foreground">
-              A 40-minute product sync, colored by who was speaking (illustrative).
-            </figcaption>
+          {/* The real app, captured from a sample meeting */}
+          <div className="relative mt-12 pb-2 md:mt-14 md:pb-12">
+            <figure className="hidden overflow-hidden rounded-lg border border-border bg-card md:block">
+              <Shot
+                name="app"
+                width={2560}
+                height={1600}
+                className="h-auto w-full"
+                alt="A meeting in MeetingMind: a colored timeline of who spoke, the summary on the Summary tab, and Transcript and Q&A tabs"
+              />
+            </figure>
+            <figure className="mx-auto w-[260px] overflow-hidden rounded-[1.25rem] border border-border bg-card md:absolute md:bottom-0 md:right-3 md:mx-0 md:w-[17%] md:min-w-[150px]">
+              <Shot
+                name="phone"
+                width={1170}
+                height={2532}
+                priority
+                className="h-auto w-full"
+                alt="The same meeting on a phone"
+              />
+            </figure>
+            <p className="mt-3 text-center text-sm text-muted-foreground md:text-left">A sample meeting in MeetingMind. The people and company are made up.</p>
+          </div>
 
-            <div className="mt-8 grid gap-8 lg:grid-cols-2">
-              <div>
-                <h2 className="text-sm font-semibold text-muted-foreground">What was said</h2>
-                <div className="minute mt-3 space-y-3 text-foreground/85">
-                  <p className="grid grid-cols-[6rem_1fr] gap-3">
-                    <span className="font-sans text-sm leading-[2] tabular text-muted-foreground">Priya 14:02</span>
-                    <span>So testing pushed the launch to Q2, and marketing still needs new assets by Friday.</span>
-                  </p>
-                  <p className="grid grid-cols-[6rem_1fr] gap-3">
-                    <span className="font-sans text-sm leading-[2] tabular text-muted-foreground">Dev 14:03</span>
-                    <span>And can we get the new hire set up before Monday?</span>
-                  </p>
-                </div>
-              </div>
-              <div>
-                <h2 className="text-sm font-semibold text-muted-foreground">What you get back</h2>
-                <ul className="minute mt-3 space-y-2 text-foreground">
-                  {DEMO_RESULTS.map((line, i) => (
-                    <li key={line} className="relative rounded-sm py-0.5 pl-4">
-                      <span
-                        aria-hidden="true"
-                        className="absolute inset-y-1.5 left-0 w-1 rounded-full bg-primary"
-                      />
-                      {i === 0 ? <mark className="rounded-sm bg-mark px-1 text-mark-foreground">{line}</mark> : line}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+          <div className="mt-16 grid items-center gap-10 lg:mt-24 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-16">
+            <div>
+              <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">Every action has an owner and a date.</h2>
+              <p className="mt-4 max-w-md text-lg leading-relaxed text-muted-foreground">
+                MeetingMind picks out who agreed to do what and by when, and lists it with a priority.
+                Add the whole list to your todos in one tap.
+              </p>
             </div>
-          </figure>
+            <figure className="overflow-hidden rounded-lg border border-border bg-background p-4 sm:p-6">
+              <Shot
+                name="actions"
+                width={1536}
+                height={800}
+                className="h-auto w-full"
+                alt="Action items from the meeting, each with an owner, a due date and a priority"
+              />
+            </figure>
+          </div>
         </div>
       </section>
 

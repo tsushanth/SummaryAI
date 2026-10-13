@@ -12,6 +12,11 @@ const nextConfig = {
           { key: 'Referrer-Policy', value: 'no-referrer' },
         ],
       },
+      {
+        // Landing-page screenshots: replaced by publishing new files, so a day of caching is plenty.
+        source: '/landing/:path*',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' }],
+      },
     ];
   },
   images: {
