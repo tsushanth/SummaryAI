@@ -143,10 +143,11 @@ private fun IntegrationCard(
     showSecret: Boolean,
     secretLabel: String,
     showDatabase: Boolean,
-    onSave: (kind: String, url: String?, secret: String?, databaseId: String?) -> Unit,
+    onSave: (kind: String, url: String?, secret: String?, databaseId: String?, onResult: (Boolean) -> Unit) -> Unit,
     onTest: (String) -> Unit,
     onRemove: (String) -> Unit
 ) {
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
     // Secrets are write-only: fields start empty and the saved values are never shown.
     var url by remember(kind) { mutableStateOf("") }
     var secret by remember(kind) { mutableStateOf("") }
@@ -211,23 +212,28 @@ private fun IntegrationCard(
                 Button(
                     enabled = !busy,
                     onClick = {
+                        // Close the keyboard so the result message below it is actually visible.
+                        focusManager.clearFocus()
                         onSave(
                             kind,
                             url.takeIf { it.isNotBlank() },
                             secret.takeIf { it.isNotBlank() },
                             databaseId.takeIf { it.isNotBlank() }
-                        )
-                        // Clear secret fields after submitting; they are never echoed back.
-                        url = ""
-                        secret = ""
+                        ) { saved ->
+                            // Clear secret fields only once stored (never echoed back); keep input on failure.
+                            if (saved) {
+                                url = ""
+                                secret = ""
+                            }
+                        }
                     }
                 ) { Text(stringResource(R.string.integration_save)) }
 
                 if (state != null) {
-                    OutlinedButton(enabled = !busy, onClick = { onTest(kind) }) {
+                    OutlinedButton(enabled = !busy, onClick = { focusManager.clearFocus(); onTest(kind) }) {
                         Text(stringResource(R.string.integration_test))
                     }
-                    TextButton(enabled = !busy, onClick = { onRemove(kind) }) {
+                    TextButton(enabled = !busy, onClick = { focusManager.clearFocus(); onRemove(kind) }) {
                         Text(stringResource(R.string.integration_remove))
                     }
                 }

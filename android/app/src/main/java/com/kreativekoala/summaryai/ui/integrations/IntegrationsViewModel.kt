@@ -46,7 +46,7 @@ class IntegrationsViewModel @Inject constructor(
         }
     }
 
-    fun save(kind: String, url: String?, secret: String?, databaseId: String?) {
+    fun save(kind: String, url: String?, secret: String?, databaseId: String?, onResult: (Boolean) -> Unit = {}) {
         viewModelScope.launch {
             _uiState.update { it.copy(busyKind = kind) }
             repository.save(kind, url, secret, databaseId).fold(
@@ -58,9 +58,11 @@ class IntegrationsViewModel @Inject constructor(
                             message = "Saved."
                         )
                     }
+                    onResult(true)
                 },
                 onFailure = { e ->
                     _uiState.update { it.copy(busyKind = null, message = e.message ?: "Could not save.") }
+                    onResult(false)
                 }
             )
         }
