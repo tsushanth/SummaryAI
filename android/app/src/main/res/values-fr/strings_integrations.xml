@@ -16,6 +16,14 @@
     <string name="integration_save">Enregistrer</string>
     <string name="integration_test">Envoyer un test</string>
     <string name="integration_remove">Supprimer</string>
+    <string name="integrations_saved">Enregistré.</string>
+    <string name="integrations_removed">Supprimé.</string>
+    <string name="integrations_test_delivered">Test envoyé.</string>
+    <string name="integrations_test_failed">Échec du test.</string>
+    <string name="integrations_load_failed">Impossible de charger les intégrations.</string>
+    <string name="integrations_save_failed">Impossible d\'enregistrer.</string>
+    <string name="integrations_remove_failed">Impossible de supprimer.</string>
+    <string name="integrations_message_with_detail">%1$s %2$s</string>
     <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
     <string name="tile_record_label">Enregistrer la réunion</string>
     <string name="widget_record_label">Enregistrer</string>

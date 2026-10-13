@@ -16,6 +16,14 @@
     <string name="integration_save">Save</string>
     <string name="integration_test">Send test</string>
     <string name="integration_remove">Remove</string>
+    <string name="integrations_saved">Saved.</string>
+    <string name="integrations_removed">Removed.</string>
+    <string name="integrations_test_delivered">Test delivered.</string>
+    <string name="integrations_test_failed">Test failed.</string>
+    <string name="integrations_load_failed">Could not load integrations.</string>
+    <string name="integrations_save_failed">Could not save.</string>
+    <string name="integrations_remove_failed">Could not remove.</string>
+    <string name="integrations_message_with_detail">%1$s %2$s</string>
     <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
 
     <!-- Quick settings tile + widget -->

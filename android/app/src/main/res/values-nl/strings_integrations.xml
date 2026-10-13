@@ -16,6 +16,14 @@
     <string name="integration_save">Opslaan</string>
     <string name="integration_test">Test verzenden</string>
     <string name="integration_remove">Verwijderen</string>
+    <string name="integrations_saved">Opgeslagen.</string>
+    <string name="integrations_removed">Verwijderd.</string>
+    <string name="integrations_test_delivered">Test verzonden.</string>
+    <string name="integrations_test_failed">Test mislukt.</string>
+    <string name="integrations_load_failed">Integraties konden niet worden geladen.</string>
+    <string name="integrations_save_failed">Opslaan is niet gelukt.</string>
+    <string name="integrations_remove_failed">Verwijderen is niet gelukt.</string>
+    <string name="integrations_message_with_detail">%1$s %2$s</string>
     <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
     <string name="tile_record_label">Vergadering opnemen</string>
     <string name="widget_record_label">Opnemen</string>

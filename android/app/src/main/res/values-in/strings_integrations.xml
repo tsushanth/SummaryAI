@@ -16,6 +16,14 @@
     <string name="integration_save">Simpan</string>
     <string name="integration_test">Kirim uji coba</string>
     <string name="integration_remove">Hapus</string>
+    <string name="integrations_saved">Tersimpan.</string>
+    <string name="integrations_removed">Dihapus.</string>
+    <string name="integrations_test_delivered">Uji coba terkirim.</string>
+    <string name="integrations_test_failed">Uji coba gagal.</string>
+    <string name="integrations_load_failed">Tidak dapat memuat integrasi.</string>
+    <string name="integrations_save_failed">Tidak dapat menyimpan.</string>
+    <string name="integrations_remove_failed">Tidak dapat menghapus.</string>
+    <string name="integrations_message_with_detail">%1$s %2$s</string>
     <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
     <string name="tile_record_label">Rekam rapat</string>
     <string name="widget_record_label">Rekam</string>
