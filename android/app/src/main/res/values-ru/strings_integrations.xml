@@ -16,6 +16,14 @@
     <string name="integration_save">Сохранить</string>
     <string name="integration_test">Отправить тест</string>
     <string name="integration_remove">Удалить</string>
+    <string name="integrations_saved">Сохранено.</string>
+    <string name="integrations_removed">Удалено.</string>
+    <string name="integrations_test_delivered">Тест доставлен.</string>
+    <string name="integrations_test_failed">Тест не удался.</string>
+    <string name="integrations_load_failed">Не удалось загрузить интеграции.</string>
+    <string name="integrations_save_failed">Не удалось сохранить.</string>
+    <string name="integrations_remove_failed">Не удалось удалить.</string>
+    <string name="integrations_message_with_detail">%1$s %2$s</string>
     <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
     <string name="tile_record_label">Записать встречу</string>
     <string name="widget_record_label">Запись</string>

@@ -16,6 +16,14 @@
     <string name="integration_save">저장</string>
     <string name="integration_test">테스트 보내기</string>
     <string name="integration_remove">제거</string>
+    <string name="integrations_saved">저장되었습니다.</string>
+    <string name="integrations_removed">제거되었습니다.</string>
+    <string name="integrations_test_delivered">테스트가 전송되었습니다.</string>
+    <string name="integrations_test_failed">테스트에 실패했습니다.</string>
+    <string name="integrations_load_failed">연동을 불러오지 못했습니다.</string>
+    <string name="integrations_save_failed">저장하지 못했습니다.</string>
+    <string name="integrations_remove_failed">제거하지 못했습니다.</string>
+    <string name="integrations_message_with_detail">%1$s %2$s</string>
     <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
     <string name="tile_record_label">회의 녹음</string>
     <string name="widget_record_label">녹음</string>

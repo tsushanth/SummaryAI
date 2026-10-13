@@ -16,6 +16,14 @@
     <string name="integration_save">Guardar</string>
     <string name="integration_test">Enviar prueba</string>
     <string name="integration_remove">Quitar</string>
+    <string name="integrations_saved">Guardado.</string>
+    <string name="integrations_removed">Quitado.</string>
+    <string name="integrations_test_delivered">Prueba enviada.</string>
+    <string name="integrations_test_failed">La prueba falló.</string>
+    <string name="integrations_load_failed">No se pudieron cargar las integraciones.</string>
+    <string name="integrations_save_failed">No se pudo guardar.</string>
+    <string name="integrations_remove_failed">No se pudo quitar.</string>
+    <string name="integrations_message_with_detail">%1$s %2$s</string>
     <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
     <string name="tile_record_label">Grabar reunión</string>
     <string name="widget_record_label">Grabar</string>

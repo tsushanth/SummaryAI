@@ -16,6 +16,14 @@
     <string name="integration_save">保存</string>
     <string name="integration_test">发送测试</string>
     <string name="integration_remove">移除</string>
+    <string name="integrations_saved">已保存。</string>
+    <string name="integrations_removed">已移除。</string>
+    <string name="integrations_test_delivered">测试已发送。</string>
+    <string name="integrations_test_failed">测试失败。</string>
+    <string name="integrations_load_failed">无法加载集成。</string>
+    <string name="integrations_save_failed">无法保存。</string>
+    <string name="integrations_remove_failed">无法移除。</string>
+    <string name="integrations_message_with_detail">%1$s%2$s</string>
     <string name="settings_integrations_subtitle">Webhook、Slack、Notion</string>
     <string name="tile_record_label">录制会议</string>
     <string name="widget_record_label">录音</string>

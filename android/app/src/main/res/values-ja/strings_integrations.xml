@@ -16,6 +16,14 @@
     <string name="integration_save">保存</string>
     <string name="integration_test">テスト送信</string>
     <string name="integration_remove">削除</string>
+    <string name="integrations_saved">保存しました。</string>
+    <string name="integrations_removed">削除しました。</string>
+    <string name="integrations_test_delivered">テストを送信しました。</string>
+    <string name="integrations_test_failed">テストに失敗しました。</string>
+    <string name="integrations_load_failed">連携を読み込めませんでした。</string>
+    <string name="integrations_save_failed">保存できませんでした。</string>
+    <string name="integrations_remove_failed">削除できませんでした。</string>
+    <string name="integrations_message_with_detail">%1$s%2$s</string>
     <string name="settings_integrations_subtitle">Webhook、Slack、Notion</string>
     <string name="tile_record_label">会議を録音</string>
     <string name="widget_record_label">録音</string>

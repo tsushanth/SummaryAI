@@ -16,6 +16,14 @@
     <string name="integration_save">บันทึก</string>
     <string name="integration_test">ส่งทดสอบ</string>
     <string name="integration_remove">ลบ</string>
+    <string name="integrations_saved">บันทึกแล้ว</string>
+    <string name="integrations_removed">ลบแล้ว</string>
+    <string name="integrations_test_delivered">ส่งการทดสอบแล้ว</string>
+    <string name="integrations_test_failed">การทดสอบล้มเหลว</string>
+    <string name="integrations_load_failed">โหลดการเชื่อมต่อไม่ได้</string>
+    <string name="integrations_save_failed">บันทึกไม่ได้</string>
+    <string name="integrations_remove_failed">ลบไม่ได้</string>
+    <string name="integrations_message_with_detail">%1$s: %2$s</string>
     <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
     <string name="tile_record_label">บันทึกการประชุม</string>
     <string name="widget_record_label">บันทึก</string>

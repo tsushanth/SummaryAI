@@ -16,6 +16,14 @@
     <string name="integration_save">Lưu</string>
     <string name="integration_test">Gửi thử</string>
     <string name="integration_remove">Gỡ bỏ</string>
+    <string name="integrations_saved">Đã lưu.</string>
+    <string name="integrations_removed">Đã gỡ bỏ.</string>
+    <string name="integrations_test_delivered">Đã gửi thử.</string>
+    <string name="integrations_test_failed">Gửi thử không thành công.</string>
+    <string name="integrations_load_failed">Không thể tải các tích hợp.</string>
+    <string name="integrations_save_failed">Không thể lưu.</string>
+    <string name="integrations_remove_failed">Không thể gỡ bỏ.</string>
+    <string name="integrations_message_with_detail">%1$s %2$s</string>
     <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
     <string name="tile_record_label">Ghi âm cuộc họp</string>
     <string name="widget_record_label">Ghi âm</string>

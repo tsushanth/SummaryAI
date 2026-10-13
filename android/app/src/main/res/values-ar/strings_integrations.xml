@@ -16,6 +16,14 @@
     <string name="integration_save">حفظ</string>
     <string name="integration_test">إرسال اختبار</string>
     <string name="integration_remove">إزالة</string>
+    <string name="integrations_saved">تم الحفظ.</string>
+    <string name="integrations_removed">تمت الإزالة.</string>
+    <string name="integrations_test_delivered">تم تسليم الاختبار.</string>
+    <string name="integrations_test_failed">فشل الاختبار.</string>
+    <string name="integrations_load_failed">تعذّر تحميل التكاملات.</string>
+    <string name="integrations_save_failed">تعذّر الحفظ.</string>
+    <string name="integrations_remove_failed">تعذّرت الإزالة.</string>
+    <string name="integrations_message_with_detail">%1$s %2$s</string>
     <string name="settings_integrations_subtitle">Webhook وSlack وNotion</string>
     <string name="tile_record_label">تسجيل الاجتماع</string>
     <string name="widget_record_label">تسجيل</string>

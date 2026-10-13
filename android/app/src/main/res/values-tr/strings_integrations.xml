@@ -16,6 +16,14 @@
     <string name="integration_save">Kaydet</string>
     <string name="integration_test">Test gönder</string>
     <string name="integration_remove">Kaldır</string>
+    <string name="integrations_saved">Kaydedildi.</string>
+    <string name="integrations_removed">Kaldırıldı.</string>
+    <string name="integrations_test_delivered">Test gönderildi.</string>
+    <string name="integrations_test_failed">Test başarısız oldu.</string>
+    <string name="integrations_load_failed">Entegrasyonlar yüklenemedi.</string>
+    <string name="integrations_save_failed">Kaydedilemedi.</string>
+    <string name="integrations_remove_failed">Kaldırılamadı.</string>
+    <string name="integrations_message_with_detail">%1$s %2$s</string>
     <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
     <string name="tile_record_label">Toplantıyı kaydet</string>
     <string name="widget_record_label">Kaydet</string>
