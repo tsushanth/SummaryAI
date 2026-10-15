@@ -116,30 +116,17 @@ class BillingManager @Inject constructor(
         val result = billingClient.queryProductDetails(params)
         if (result.billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
             val billingProducts = result.productDetailsList?.mapNotNull { details ->
-                val subOffer = details.subscriptionOfferDetails?.firstOrNull() ?: return@mapNotNull null
-                val offerToken = subOffer.offerToken
-
-                // Detect free trial from pricing phases
-                val trialDays = subOffer.pricingPhases.pricingPhaseList
-                    .firstOrNull { it.priceAmountMicros == 0L }
-                    ?.let { phase ->
-                        val billingPeriod = phase.billingPeriod // e.g. P7D, P1M
-                        when {
-                            billingPeriod.contains("D") -> billingPeriod.filter { it.isDigit() }.toIntOrNull()
-                            billingPeriod.contains("W") -> (billingPeriod.filter { it.isDigit() }.toIntOrNull() ?: 1) * 7
-                            else -> null
-                        }
-                    }
-
-                // Get the paid phase price
-                val paidPhase = subOffer.pricingPhases.pricingPhaseList
-                    .firstOrNull { it.priceAmountMicros > 0 } ?: return@mapNotNull null
+                val selected = selectOffer(details) ?: return@mapNotNull null
+                val offerToken = selected.offer.offerToken
+                val trialDays = selected.trialDays
+                val paidPhase = selected.paidPhase
+                val paidBillingPeriod = paidPhase.billingPeriod
 
                 // Derive period from billing cycle of the paid phase
                 val period = when {
-                    paidPhase.billingPeriod == "P1W" || paidPhase.billingPeriod == "P7D"
+                    paidBillingPeriod == "P1W" || paidBillingPeriod == "P7D"
                         || details.productId.contains("week", ignoreCase = true) -> BillingProduct.Period.WEEKLY
-                    paidPhase.billingPeriod == "P1M"
+                    paidBillingPeriod == "P1M"
                         || details.productId == "monthly"
                         || details.productId.contains("month", ignoreCase = true) -> BillingProduct.Period.MONTHLY
                     else -> BillingProduct.Period.YEARLY
@@ -165,6 +152,25 @@ class BillingManager @Inject constructor(
         }
     }
 
+    /**
+     * Picks the offer Play should bill (longest free trial the user is eligible for, else the
+     * base plan) via the pure [OfferSelector]. Play returns only offers the user is eligible for.
+     */
+    private fun selectOffer(details: ProductDetails): SelectedOffer? {
+        val offers = details.subscriptionOfferDetails ?: return null
+        return OfferSelector.select(
+            offers.map { o ->
+                OfferCandidate(
+                    offerToken = o.offerToken,
+                    offerId = o.offerId,
+                    phases = o.pricingPhases.pricingPhaseList.map {
+                        OfferPhase(it.priceAmountMicros, it.billingPeriod, it.formattedPrice, it.priceCurrencyCode)
+                    },
+                )
+            }
+        )
+    }
+
     /** Isolated coaching subscription query. Errors here must not affect _products. */
     private suspend fun queryCoachingProduct() {
         val params = QueryProductDetailsParams.newBuilder()
@@ -186,8 +192,8 @@ class BillingManager @Inject constructor(
             Log.w(TAG, "queryCoachingProduct: product not available yet (Play Console may still be propagating)")
             return
         }
-        val subOffer = details.subscriptionOfferDetails?.firstOrNull() ?: return
-        val paidPhase = subOffer.pricingPhases.pricingPhaseList.firstOrNull { it.priceAmountMicros > 0 } ?: return
+        val selected = selectOffer(details) ?: return
+        val paidPhase = selected.paidPhase
         _coachingProduct.value = BillingProduct(
             productId = details.productId,
             title = details.title,
@@ -197,7 +203,7 @@ class BillingManager @Inject constructor(
             period = BillingProduct.Period.MONTHLY,
             trialDays = null,
             productDetails = details,
-            offerToken = subOffer.offerToken,
+            offerToken = selected.offer.offerToken,
         )
         Log.d(TAG, "Loaded coaching product: ${details.productId} @ ${paidPhase.formattedPrice}")
     }
