@@ -9,7 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import Anthropic from '@anthropic-ai/sdk';
 import { dispatchRecordingCompleted } from './integrationsService.js';
 import { instrumentAnthropic, withFeature } from '../lib/llm.js';
-import { buildSummaryPrompts, parseSummaryResponse, normalizeActionItems, type ParsedSummary } from './summaryService.js';
+import { normalizeActionItems, type ParsedSummary } from './summaryService.js';
+import { generateSummary, type CompleteFn } from './summaryGeneration.js';
 import { resolveSummaryTemplate } from './summaryTemplates.js';
 
 export interface ProcessingJob {
@@ -163,7 +164,8 @@ async function processRecordingAsync(
           recordingTemplate: recording.summary_template,
           userDefault: profile?.preferences?.default_summary_template,
           recordingType: recording.recording_type,
-        })
+        }),
+        recordingId
       );
     } else {
       console.warn(`[Processing] ${jobId}: No Anthropic API key, using mock summary`);
@@ -391,11 +393,11 @@ async function extractTextFromPdf(
 /**
  * Format transcript with speaker labels for better context
  */
-function formatTranscriptWithSpeakers(segments: TranscriptSegment[]): string {
+function formatSpeakerTurns(segments: TranscriptSegment[]): string[] {
   return segments.map(segment => {
     const timestamp = formatTimestamp(segment.start_time);
     return `[${timestamp}] ${segment.speaker_label}: ${segment.text}`;
-  }).join('\n\n');
+  });
 }
 
 /**
@@ -439,40 +441,51 @@ function languageNameForCode(code: string | null | undefined): string | null {
 /**
  * Generate summary using Anthropic API
  */
-async function generateSummaryWithAnthropic(
+export async function generateSummaryWithAnthropic(
   fullText: string,
   segments: TranscriptSegment[],
   outputLanguage?: string | null,
-  templateId?: string | null
+  templateId?: string | null,
+  recordingId?: string | null
 ): Promise<ParsedSummary> {
   const anthropic = instrumentAnthropic(new Anthropic({ apiKey: config.ANTHROPIC_API_KEY }));
 
-  // Format transcript with speaker labels for better context
-  const speakerFormattedText = formatTranscriptWithSpeakers(segments);
-
-  // Truncate transcript if too long (roughly 100k chars = ~25k tokens)
-  const truncatedText = speakerFormattedText.length > 100000
-    ? speakerFormattedText.substring(0, 100000) + '...'
-    : speakerFormattedText;
+  // Speaker-labelled turns. Up to 100k characters this is one call; longer transcripts are summarised in
+  // chunks (never truncated), see summaryGeneration.ts.
+  const turns = formatSpeakerTurns(segments);
 
   // Get unique speakers for the prompt
   const uniqueSpeakers = [...new Set(segments.map(s => s.speaker_label))];
-  const { system, user } = buildSummaryPrompts({
-    templateId,
-    transcriptText: truncatedText,
+
+  // One literal feature label per call site (the llm-usage source guard checks them).
+  const complete: CompleteFn = async ({ kind, system, user, maxTokens }) => {
+    const params = {
+      model: config.ANTHROPIC_MODEL,
+      max_tokens: maxTokens,
+      system,
+      messages: [{ role: 'user' as const, content: user }],
+    };
+    const response =
+      kind === 'chunk'
+        ? await withFeature('summary_chunk', () => anthropic.messages.create(params))
+        : kind === 'merge'
+          ? await withFeature('summary_merge', () => anthropic.messages.create(params))
+          : await withFeature('summary', () => anthropic.messages.create(params));
+    return {
+      text: response.content[0]?.type === 'text' ? response.content[0].text : '',
+      stopReason: response.stop_reason,
+    };
+  };
+
+  return generateSummary({
+    turns,
     speakers: uniqueSpeakers,
+    templateId,
     languageName: languageNameForCode(outputLanguage),
-  });
-
-  const response = await withFeature('summary', () => anthropic.messages.create({
+    complete,
+    recordingId,
     model: config.ANTHROPIC_MODEL,
-    max_tokens: 4096,
-    system,
-    messages: [{ role: 'user', content: user }],
-  }));
-
-  const responseText = response.content[0]?.type === 'text' ? response.content[0].text : '';
-  return parseSummaryResponse(responseText);
+  });
 }
 
 /**

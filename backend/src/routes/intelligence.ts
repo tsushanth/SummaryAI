@@ -10,16 +10,18 @@ import { v4 as uuidv4 } from 'uuid';
 import { authenticate } from '../middleware/auth.js';
 import { asyncHandler, Errors } from '../middleware/errorHandler.js';
 import { supabaseAdmin } from '../lib/supabase.js';
+import { config } from '../config/index.js';
 import {
   SUMMARY_TEMPLATES,
   SUMMARY_TEMPLATE_IDS,
   DEFAULT_SUMMARY_TEMPLATE,
   isSummaryTemplateId,
 } from '../services/summaryTemplates.js';
-import { buildSummaryPrompts, parseSummaryResponse, normalizeActionItems } from '../services/summaryService.js';
+import { normalizeActionItems } from '../services/summaryService.js';
+import { generateSummary } from '../services/summaryGeneration.js';
 import {
   completeText,
-  formatSegments,
+  segmentTurns,
   buildFollowUpPrompt,
   parseEmailDraft,
   chunkText,
@@ -127,21 +129,28 @@ router.post(
 
     const segments = Array.isArray(transcript.segments) ? transcript.segments : [];
     const speakers = [...new Set(segments.map((s: any) => s.speaker_label).filter(Boolean))] as string[];
-    const { system, user } = buildSummaryPrompts({
-      templateId: template,
-      transcriptText: formatSegments(segments, transcript.full_text ?? ''),
-      speakers,
-      languageName: null,
-    });
+    // Same long-transcript handling as the first summary: <= 100k chars is one call, longer is map-reduce (no truncation).
+    const turns: string[] = segments.length > 0 ? segmentTurns(segments) : [transcript.full_text ?? ''];
 
-    let text: string;
+    let parsed;
     try {
-      text = await completeText({ feature: 'summary', system, user });
+      parsed = await generateSummary({
+        turns,
+        speakers,
+        templateId: template,
+        languageName: null,
+        recordingId,
+        model: config.ANTHROPIC_MODEL,
+        // completeText carries one 'intelligence' feature label for all calls, and does not expose stop_reason
+        // (a truncated reply still fails JSON parsing and is retried once).
+        complete: async ({ system, user, maxTokens }) => ({
+          text: await completeText({ feature: 'summary', system, user, maxTokens }),
+        }),
+      });
     } catch (e) {
       console.error('regenerate-summary failed:', e);
       throw Errors.internal('Failed to generate summary');
     }
-    const parsed = parseSummaryResponse(text);
 
     const fields = {
       summary: parsed.summary,
