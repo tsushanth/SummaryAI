@@ -110,8 +110,8 @@ export function ShareLinkPanel({ recordingId }: { recordingId: string }) {
           </button>
 
           {newUrl && (
-            <div className="p-2 bg-green-50 border border-green-200 rounded space-y-1">
-              <div className="break-all text-xs">{newUrl}</div>
+            <div className="p-2 bg-muted text-foreground border border-border rounded space-y-1">
+              <div className="break-all text-xs select-all">{newUrl}</div>
               <button
                 onClick={() =>
                   navigator.clipboard
@@ -130,7 +130,7 @@ export function ShareLinkPanel({ recordingId }: { recordingId: string }) {
           )}
 
           {loaded && active.length === 0 && (
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               No active links yet. Links are private until you create one, and you can revoke them at any time.
             </p>
           )}
