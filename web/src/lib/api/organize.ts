@@ -103,3 +103,18 @@ export async function searchRecordings(q: string): Promise<SearchResult[]> {
   );
   return res.results;
 }
+
+export interface EmailSummaryResult {
+  email: string;
+  status: 'sent' | 'failed';
+}
+
+export async function emailSummary(
+  recordingId: string,
+  opts: { recipients: string[]; note?: string }
+): Promise<{ results: EmailSummaryResult[] }> {
+  return apiClient(`/api/recordings/${recordingId}/email-summary`, {
+    method: 'POST',
+    body: JSON.stringify(opts),
+  });
+}

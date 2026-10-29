@@ -17,6 +17,7 @@ import attributionRoutes from './attribution.js';
 import coachingRoutes from './coaching.js';
 import { foldersRouter, tagsRouter } from './folders.js';
 import { recordingSharesRouter, publicSharesRouter } from './shares.js';
+import { summaryEmailRouter } from './summaryEmail.js';
 import searchRoutes from './search.js';
 import integrationsRoutes from './integrations.js';
 import statsRoutes from './stats.js';
@@ -44,6 +45,7 @@ router.use('/api/public/shares', publicSharesRouter);
 // API routes (require auth)
 router.use('/api', intelligenceRoutes);
 router.use('/api/recordings/:id/shares', recordingSharesRouter);
+router.use('/api/recordings/:id/email-summary', summaryEmailRouter);
 router.use('/api/folders', foldersRouter);
 router.use('/api/tags', tagsRouter);
 router.use('/api/search', searchRoutes);
