@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 vi.mock('../src/config/index.js', () => ({
-  config: { ANTHROPIC_API_KEY: 'sk-ant-test', ANTHROPIC_MODEL: 'claude-sonnet-4-6', ANTHROPIC_MAX_TOKENS: 1024, QA_MAX_CONTEXT_TOKENS: 5000, QA_MAX_RELEVANT_SEGMENTS: 5 },
+  config: { ANTHROPIC_API_KEY: 'sk-ant-test', ANTHROPIC_MODEL: 'claude-sonnet-4-6', SUMMARY_MODEL: 'claude-haiku-4-5-20251001', ANTHROPIC_MAX_TOKENS: 1024, QA_MAX_CONTEXT_TOKENS: 5000, QA_MAX_RELEVANT_SEGMENTS: 5 },
 }));
 
 type Sent = { key: string; items: Array<Record<string, any>> };

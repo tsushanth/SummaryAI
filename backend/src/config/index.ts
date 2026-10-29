@@ -41,6 +41,10 @@ const envSchema = z.object({
   // Anthropic (LLM for Q&A and summarization)
   ANTHROPIC_API_KEY: z.string().optional(),
   ANTHROPIC_MODEL: z.string().default('claude-sonnet-4-6'),
+  // Model for meeting summaries (first summary, regenerate, long-meeting chunk notes and merge). Haiku 4.5 on purpose:
+  // 2026-10-29 Stage 1 evaluation: close to Sonnet on action items and decisions at about a third of the cost; Q&A,
+  // follow-up email and chat keep ANTHROPIC_MODEL.
+  SUMMARY_MODEL: z.string().default('claude-haiku-4-5-20251001'),
   ANTHROPIC_MAX_TOKENS: z.string().transform(Number).default('2048'),
 
   // Q&A Configuration

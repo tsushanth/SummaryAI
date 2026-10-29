@@ -15,13 +15,15 @@ export async function completeText(opts: {
   system: string;
   user: string;
   maxTokens?: number;
+  /** Overrides config.ANTHROPIC_MODEL (used by summary regeneration). */
+  model?: string;
 }): Promise<string> {
   if (!config.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY is not configured');
   if (!client) client = instrumentAnthropic(new Anthropic({ apiKey: config.ANTHROPIC_API_KEY }));
   const anthropic = client;
   // One literal label so the llm-usage source guard can verify it; callers pass a sub-feature for logs only.
   const response = await withFeature('intelligence', () => anthropic.messages.create({
-    model: config.ANTHROPIC_MODEL,
+    model: opts.model ?? config.ANTHROPIC_MODEL,
     max_tokens: opts.maxTokens ?? 2048,
     system: opts.system,
     messages: [{ role: 'user', content: opts.user }],
