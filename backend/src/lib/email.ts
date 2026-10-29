@@ -37,6 +37,11 @@ const APP_NAMES: Record<string, string> = {
 // is not affected. Resend gives send.kreativekoala.llc its own clean DNS.
 const SENDING_DOMAIN = 'send.kreativekoala.llc'
 
+// Apps with their own verified Resend domain send from it instead (checked 2026-10-29).
+const APP_SENDING_DOMAINS: Record<string, string> = {
+  meetingmind: 'send.meetingmind.org',
+}
+
 // ── Client ───────────────────────────────────────────────────────────────────
 
 let _resend: Resend | null = null
@@ -56,6 +61,8 @@ export interface SendEmailOptions {
   to: string | string[]
   subject: string
   html: string
+  /** Plain-text alternative; improves deliverability and is shown by text-only clients */
+  text?: string
   /** Override the reply-to address (defaults to app@mail.kreativekoala.llc) */
   replyTo?: string
 }
@@ -64,19 +71,22 @@ export async function sendEmail(opts: SendEmailOptions): Promise<void> {
   const appName = APP_NAMES[opts.app]
   if (!appName) throw new Error(`Unknown app slug "${opts.app}". Add it to APP_NAMES in src/lib/email.ts`)
 
-  const from = `${appName} <${opts.app}@${SENDING_DOMAIN}>`
+  const from = `${appName} <${opts.app}@${APP_SENDING_DOMAINS[opts.app] ?? SENDING_DOMAIN}>`
 
-  await client().emails.send({
+  // The Resend SDK reports failures in the result instead of throwing, so surface them.
+  const { error } = await client().emails.send({
     from,
     to: opts.to,
     subject: opts.subject,
     html: opts.html,
+    ...(opts.text ? { text: opts.text } : {}),
     ...(opts.replyTo ? { replyTo: opts.replyTo } : {}),
   })
+  if (error) throw new Error(`Resend send failed: ${error.name}: ${error.message}`)
 }
 
 /** Convenience: build the from string without sending (useful for logging/debugging) */
 export function fromAddress(app: string): string {
   const appName = APP_NAMES[app] ?? app
-  return `${appName} <${app}@${SENDING_DOMAIN}>`
+  return `${appName} <${app}@${APP_SENDING_DOMAINS[app] ?? SENDING_DOMAIN}>`
 }

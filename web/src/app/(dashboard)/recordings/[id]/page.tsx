@@ -11,6 +11,7 @@ import { AudioPlayer, type SeekRequest } from '@/components/audio/AudioPlayer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ExportMenu } from '@/components/recordings/ExportMenu';
 import { ShareLinkPanel } from '@/components/recordings/ShareLinkPanel';
+import { EmailSummaryPanel } from '@/components/recordings/EmailSummaryPanel';
 import { RecordingOrganizer } from '@/components/recordings/RecordingOrganizer';
 import { SummaryTemplatePanel } from '@/components/recordings/SummaryTemplatePanel';
 import { ActionItemsToTodosButton } from '@/components/recordings/ActionItemsToTodosButton';
@@ -211,6 +212,7 @@ export default function RecordingDetailPage() {
           <div className="flex flex-wrap items-center gap-2">
             <ExportMenu recording={recording} summary={summary} transcript={transcript} audioUrl={audioUrl} />
             <ShareLinkPanel recordingId={recording.id} />
+            <EmailSummaryPanel recordingId={recording.id} />
           </div>
         </div>
 
