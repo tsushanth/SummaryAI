@@ -30,11 +30,21 @@ function detectPlatform(url: string): string | null {
   return null;
 }
 
+// A link copied from a meeting app's address bar or "copy joining info" often has no scheme
+// ("meet.google.com/abc-defg-hij"). Add https:// so it validates and joins the same way.
+function normalizeMeetingUrl(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return '';
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed) && !/^[^/\s]+\.[^/\s]+:\d+/.test(trimmed)) return trimmed;
+  return /^[^\s/]+\.[^\s/]+/.test(trimmed) ? `https://${trimmed}` : trimmed;
+}
+
 function isValidMeetingUrl(url: string): boolean {
   if (!url) return false;
   try {
     const parsed = new URL(url);
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    return (parsed.protocol === 'http:' || parsed.protocol === 'https:') && parsed.hostname.includes('.');
   } catch {
     return false;
   }
@@ -46,8 +56,10 @@ function getDefaultDateTime(): { date: string; time: string } {
   const minutes = Math.ceil(now.getMinutes() / 15) * 15;
   now.setMinutes(minutes, 0, 0);
 
-  const date = now.toISOString().split('T')[0];
-  const time = now.toTimeString().slice(0, 5);
+  // Local date and time. toISOString() is UTC, so in the evening (PT) it gave tomorrow's date.
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  const time = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
   return { date, time };
 }
 
@@ -67,8 +79,9 @@ export function JoinMeetingModal({
 
   if (!isOpen) return null;
 
-  const detectedPlatform = url ? detectPlatform(url) : null;
-  const isValidUrl = isValidMeetingUrl(url);
+  const normalizedUrl = normalizeMeetingUrl(url);
+  const isValidUrl = isValidMeetingUrl(normalizedUrl);
+  const detectedPlatform = isValidUrl ? detectPlatform(normalizedUrl) : null;
   const isValidForm = isValidUrl && title.trim().length > 0 && date && time;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -94,7 +107,7 @@ export function JoinMeetingModal({
       const scheduled_start = new Date(`${date}T${time}`).toISOString();
       await onSubmit({
         title: title.trim(),
-        join_url: url,
+        join_url: normalizedUrl,
         scheduled_start,
         auto_join: autoJoin,
       });
@@ -164,7 +177,11 @@ export function JoinMeetingModal({
               <div className="relative">
                 <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  type="url"
+                  type="text"
+                  inputMode="url"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                   value={url}
                   onChange={(e) => {
                     setUrl(e.target.value);
@@ -177,6 +194,11 @@ export function JoinMeetingModal({
               {detectedPlatform && (
                 <p className="text-sm text-success mt-1">
                   Detected: {detectedPlatform}
+                </p>
+              )}
+              {url.trim() && !isValidUrl && (
+                <p className="text-sm text-destructive mt-1">
+                  That does not look like a full meeting link. Paste the whole link, for example https://meet.google.com/abc-defg-hij
                 </p>
               )}
             </div>
