@@ -27,6 +27,11 @@ const envSchema = z.object({
   MAX_AUDIO_FILE_SIZE_MB: z.string().transform(Number).default('2048'),
   MAX_RECORDING_DURATION_SECONDS: z.string().transform(Number).default('14400'),
 
+  // Free tier. Default false = no recording-count limit and AI summaries are free for everyone.
+  // Set to 'true' (fly env / secret, then restart) to restore the old limit of 3 recordings and
+  // subscriber-only summaries. See src/services/freeTier.ts.
+  FREE_TIER_LEGACY_LIMITS: z.enum(['true', 'false']).default('false').transform((v) => v === 'true'),
+
   // Upload URL expiry (in seconds)
   UPLOAD_URL_EXPIRY_SECONDS: z.string().transform(Number).default('3600'),
 

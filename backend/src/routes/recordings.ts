@@ -15,7 +15,13 @@ import { SUMMARY_TEMPLATE_IDS } from '../services/summaryTemplates.js';
 import { normalizeActionItems } from '../services/summaryService.js';
 import { computeMeetingAnalytics } from '../services/meetingAnalytics.js';
 import questionsRouter from './questions.js';
-import { normalizeTags } from '../lib/shareToken.js';
+import { normalizeTags, createRateLimiter } from '../lib/shareToken.js';
+import {
+  FREE_TIER_RECORDING_LIMIT,
+  CREATE_RECORDING_WINDOW_MS,
+  CREATE_RECORDING_MAX_PER_WINDOW,
+  isBlockedByLegacyRecordingLimit,
+} from '../services/freeTier.js';
 
 import type {
   CreateRecordingRequest,
@@ -85,71 +91,32 @@ function applyOrganizationFilters(q: any, query: { folder_id?: string; tag?: str
 // Create a new recording and get upload URL
 // ============================================================================
 
-const FREE_TIER_RECORDING_LIMIT = 3;
+// Per-user cap on recording creation (abuse backstop now that there is no free-tier recording count).
+const createRecordingLimiter = createRateLimiter({
+  windowMs: CREATE_RECORDING_WINDOW_MS,
+  max: CREATE_RECORDING_MAX_PER_WINDOW,
+  keyFn: (req) => `u:${req.user?.id ?? 'anon'}`,
+});
 
 router.post(
   '/',
   authenticate,
+  createRecordingLimiter,
   asyncHandler(async (req: Request, res: Response<CreateRecordingResponse | ErrorResponse>) => {
     const userId = req.user!.id;
 
     // Validate request body
     const body = createRecordingSchema.parse(req.body) as CreateRecordingRequest;
 
-    // Enforce free tier recording limit
-    // Check multiple sources for subscription status:
-    // 1. profiles table (legacy)
-    // 2. subscriptions table (server-side purchase tracking)
-    // 3. Client-provided header (StoreKit verified on device)
-    let isSubscribed = false;
-
-    // Check profiles table
-    const { data: profile } = await supabaseAdmin
-      .from('profiles')
-      .select('subscription_status')
-      .eq('id', userId)
-      .single();
-
-    if (profile?.subscription_status === 'active' || profile?.subscription_status === 'trialing') {
-      isSubscribed = true;
-    }
-
-    // Check subscriptions table
-    if (!isSubscribed) {
-      const { data: sub } = await supabaseAdmin
-        .from('subscriptions')
-        .select('status')
-        .eq('user_id', userId)
-        .in('status', ['active', 'trialing'])
-        .limit(1)
-        .maybeSingle();
-
-      if (sub) isSubscribed = true;
-    }
-
-    // Trust client-provided subscription status (StoreKit verified on device)
-    if (!isSubscribed && req.headers['x-subscription-active'] === 'true') {
-      console.log(`[Recordings] Trusting client subscription header for ${userId}`);
-      isSubscribed = true;
-    }
-
-    console.log(`[Recordings] Subscription check for ${userId}: ${isSubscribed}`);
-
-    if (!isSubscribed) {
-      const { count } = await supabaseAdmin
-        .from('recordings')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId);
-
-      if ((count ?? 0) >= FREE_TIER_RECORDING_LIMIT) {
-        res.status(403).json({
-          error: {
-            code: 'SUBSCRIPTION_REQUIRED',
-            message: `Free tier is limited to ${FREE_TIER_RECORDING_LIMIT} recordings. Upgrade to Pro for unlimited recordings.`,
-          },
-        });
-        return;
-      }
+    // Legacy free-tier recording limit. OFF by default (FREE_TIER_LEGACY_LIMITS=false): everyone can record.
+    if (await isBlockedByLegacyRecordingLimit(userId, req.headers['x-subscription-active'] === 'true')) {
+      res.status(403).json({
+        error: {
+          code: 'SUBSCRIPTION_REQUIRED',
+          message: `Free tier is limited to ${FREE_TIER_RECORDING_LIMIT} recordings. Upgrade to Pro for unlimited recordings.`,
+        },
+      });
+      return;
     }
 
     // Generate recording ID and file path based on content type

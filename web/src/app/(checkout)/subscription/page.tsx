@@ -132,11 +132,10 @@ function SubscriptionContent() {
 
       {/* Features */}
       <div className="bg-muted rounded-xl p-4 mb-6">
-        <p className="font-medium text-foreground text-sm mb-3">All plans include:</p>
+        <p className="font-medium text-foreground text-sm mb-1">All plans include:</p>
+        <p className="text-xs text-muted-foreground mb-3">Recording, transcripts and summaries are free for everyone.</p>
         <div className="grid grid-cols-1 gap-2">
           {[
-            'Unlimited recordings',
-            'AI transcription & summaries',
             'Q&A chat with recordings',
             'Meeting bot (Zoom, Teams, Meet)',
             'Phone call recording',

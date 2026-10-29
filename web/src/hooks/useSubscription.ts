@@ -11,6 +11,7 @@ import {
 } from '@/lib/api/subscription';
 import { useState, useCallback } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
+import { FREE_TIER_DEFAULT_FEATURES } from '@/lib/featureGates';
 
 /**
  * Hook to get and manage subscription status
@@ -40,15 +41,7 @@ export function useSubscription() {
     plan: data?.plan,
     provider: data?.provider,
     expiresAt: data?.expiresAt,
-    features: data?.features ?? {
-      unlimitedRecordings: false,
-      aiSummaries: false,
-      qaChat: false,
-      meetingBot: false,
-      phoneRecording: false,
-      calendarSync: false,
-      exportPdf: false,
-    },
+    features: data?.features ?? FREE_TIER_DEFAULT_FEATURES,
     isLoading: authLoading || isLoading,
     error,
     refresh: mutate,

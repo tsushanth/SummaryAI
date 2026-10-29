@@ -46,7 +46,7 @@ export default function SettingsPage() {
               Subscription
             </CardTitle>
             <CardDescription>
-              {isPremium ? 'Manage your Pro subscription' : 'Upgrade to unlock all features'}
+              {isPremium ? 'Manage your Pro subscription' : 'Upgrade for Q&A, meeting bot and phone calls'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -93,8 +93,8 @@ export default function SettingsPage() {
             ) : (
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  You&apos;re on the free plan. Upgrade to Pro for unlimited recordings,
-                  AI summaries, meeting bot, and more.
+                  You&apos;re on the free plan: recording, transcripts and summaries are free.
+                  Upgrade to Pro for Q&amp;A on your recordings, the meeting bot, and phone call recording.
                 </p>
                 <div className="flex gap-3">
                   <Link href="/subscription">
