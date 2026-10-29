@@ -65,29 +65,50 @@ function stringArray(raw: unknown): string[] {
   return raw.filter((v): v is string => typeof v === 'string' && v.trim().length > 0).map((v) => v.trim());
 }
 
-/** Parse the model's reply (raw JSON, or JSON inside a code fence). Falls back to plain text. */
-export function parseSummaryResponse(responseText: string): ParsedSummary {
+export interface ParsedSummaryResult {
+  summary: ParsedSummary;
+  /** True when the reply was not usable JSON and the raw text was returned as the summary instead. */
+  fellBack: boolean;
+}
+
+/**
+ * Parse the model's reply (raw JSON, or JSON inside a code fence). Falls back to plain text, and reports
+ * whether it did so, so callers can retry or log instead of treating a broken reply as a normal summary.
+ */
+export function parseSummaryResponseDetailed(responseText: string): ParsedSummaryResult {
   try {
     const match = responseText.match(/```(?:json)?\s*([\s\S]*?)```/) || responseText.match(/\{[\s\S]*\}/);
     const jsonString = match?.[1] || match?.[0] || responseText;
     const parsed = JSON.parse(jsonString);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('summary reply is not a JSON object');
     return {
-      summary: typeof parsed.summary === 'string' && parsed.summary.trim() ? parsed.summary : 'No summary available.',
-      detailedSummary:
-        typeof parsed.detailed_summary === 'string' && parsed.detailed_summary.trim() ? parsed.detailed_summary.trim() : null,
-      keyPoints: stringArray(parsed.key_points),
-      actionItems: normalizeActionItems(parsed.action_items),
-      topics: stringArray(parsed.topics),
+      fellBack: false,
+      summary: {
+        summary: typeof parsed.summary === 'string' && parsed.summary.trim() ? parsed.summary : 'No summary available.',
+        detailedSummary:
+          typeof parsed.detailed_summary === 'string' && parsed.detailed_summary.trim() ? parsed.detailed_summary.trim() : null,
+        keyPoints: stringArray(parsed.key_points),
+        actionItems: normalizeActionItems(parsed.action_items),
+        topics: stringArray(parsed.topics),
+      },
     };
   } catch {
     return {
-      summary: responseText.trim() || 'Summary generation failed.',
-      detailedSummary: null,
-      keyPoints: [],
-      actionItems: [],
-      topics: [],
+      fellBack: true,
+      summary: {
+        summary: responseText.trim() || 'Summary generation failed.',
+        detailedSummary: null,
+        keyPoints: [],
+        actionItems: [],
+        topics: [],
+      },
     };
   }
+}
+
+/** Parse the model's reply (raw JSON, or JSON inside a code fence). Falls back to plain text. */
+export function parseSummaryResponse(responseText: string): ParsedSummary {
+  return parseSummaryResponseDetailed(responseText).summary;
 }
 
 export interface SummaryPromptInput {
@@ -95,6 +116,11 @@ export interface SummaryPromptInput {
   transcriptText: string;
   speakers: string[];
   languageName?: string | null;
+  /**
+   * Map-reduce only: set when `transcriptText` is condensed notes of consecutive transcript parts instead of the
+   * transcript itself. Omitted for normal meetings, which keep the exact prompt below unchanged.
+   */
+  fromNotes?: boolean;
 }
 
 export interface SummaryPrompts {
@@ -110,13 +136,18 @@ export function buildSummaryPrompts(input: SummaryPromptInput): SummaryPrompts {
     ? `\n\nWrite the entire summary, detailed_summary, key_points, action_items, and topics in ${input.languageName}. JSON keys remain in English; only the values are translated.`
     : '';
 
+  const notesPreamble = input.fromNotes
+    ? 'The meeting was too long to read in one pass, so the transcript was condensed, in order and in full, into the notes below (one block per consecutive part, each ending where the next begins). Treat the notes as the transcript: cover the whole meeting from the first block to the last, and do not mention that it was condensed.\n\n'
+    : '';
+  const transcriptLabel = input.fromNotes ? 'Notes' : 'Transcript';
+
   const user = `Analyze this transcript and produce a "${template.name}" summary.
 
 Template instructions: ${template.instructions}
 
 Also provide action items (if any; include who committed to each as the assignee) and the main topics discussed.
 
-${speakerList}Transcript:
+${speakerList}${notesPreamble}${transcriptLabel}:
 ${input.transcriptText}
 
 Important: reference speakers by name to show who said what. For action items, use the speaker's name as the assignee when they committed to do something.${languageInstruction}

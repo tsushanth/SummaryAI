@@ -155,6 +155,21 @@ describe('other endpoints', () => {
     expect(db.recordings[0].summary_template).toBe('standup');
   });
 
+  it('regenerate-summary on a 250k-char transcript is map-reduce and covers the end (no truncation)', async () => {
+    db.transcripts[0].segments = Array.from({ length: 500 }, (_, i) => ({
+      speaker_label: i % 2 ? 'Bob' : 'Alice',
+      start_time: i * 10,
+      text: `LINE-${i} ` + 'w'.repeat(500),
+    }));
+    llmReply = JSON.stringify({ summary: 'Long', key_points: [], action_items: [], topics: [] });
+    const r = await call('POST', '/recordings/11111111-1111-4111-8111-111111111111/regenerate-summary', 'alice', { template: 'standup' });
+    expect(r.status).toBe(200);
+    expect(llmCalls.length).toBeGreaterThanOrEqual(5);
+    expect(llmCalls.some((c) => c.user.includes('LINE-499 '))).toBe(true);
+    expect(llmCalls[llmCalls.length - 1].user).toContain('Standup');
+    expect(db.summaries[0].summary).toBe('Long');
+  });
+
   it('follow-up email returns subject and body', async () => {
     llmReply = JSON.stringify({ subject: 'Recap', body: 'Thanks all.' });
     const r = await call('POST', '/recordings/11111111-1111-4111-8111-111111111111/follow-up-email', 'alice', {});

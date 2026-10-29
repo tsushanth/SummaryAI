@@ -126,7 +126,7 @@ describe('source guard', () => {
 
   it('every Anthropic client is instrumented and every messages.create/stream is labelled with the expected feature', () => {
     const expected: Record<string, string[]> = {
-      'services/processingService.ts': ['pdf_extract', 'summary'],
+      'services/processingService.ts': ['pdf_extract', 'summary_chunk', 'summary_merge', 'summary'],
       'services/llmService.ts': ['qa'],
       'services/intelligenceService.ts': ['intelligence'],
       'services/coachingService.ts': ['coaching'],

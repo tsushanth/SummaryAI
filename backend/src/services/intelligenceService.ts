@@ -53,10 +53,15 @@ function ts(seconds: number): string {
   return `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
 }
 
+/** One "[m:ss] Name: text" entry per speaker turn. */
+export function segmentTurns(segments: SegmentLike[]): string[] {
+  return segments.map((s) => `[${ts(s.start_time ?? 0)}] ${s.speaker_label ?? 'Speaker'}: ${s.text ?? ''}`);
+}
+
 export function formatSegments(segments: SegmentLike[] | null | undefined, fullText: string, maxChars = 100000): string {
   const text =
     Array.isArray(segments) && segments.length > 0
-      ? segments.map((s) => `[${ts(s.start_time ?? 0)}] ${s.speaker_label ?? 'Speaker'}: ${s.text ?? ''}`).join('\n\n')
+      ? segmentTurns(segments).join('\n\n')
       : fullText;
   return text.length > maxChars ? text.slice(0, maxChars) + '...' : text;
 }
