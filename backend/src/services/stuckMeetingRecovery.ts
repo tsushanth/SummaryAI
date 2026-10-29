@@ -14,6 +14,7 @@
 import { randomUUID } from 'node:crypto';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { finalizeBotRecording } from './recallService.js';
+import { reportRecordingFailureById, botFailureCode } from '../lib/recordingFailure.js';
 import type { BotRun, Meeting } from '../types/meetings.js';
 
 const SCAN_INTERVAL_MS = 5 * 60 * 1000;        // 5 min
@@ -242,6 +243,7 @@ async function markBotRunFailed(
       .from('recordings')
       .update({ status: 'failed', error_message: errorMessage })
       .eq('id', meeting.recording_id);
+    reportRecordingFailureById(meeting.recording_id, botFailureCode(errorMessage));
   }
 }
 

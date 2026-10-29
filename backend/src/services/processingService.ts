@@ -12,6 +12,7 @@ import { instrumentAnthropic, withFeature } from '../lib/llm.js';
 import { normalizeActionItems, type ParsedSummary } from './summaryService.js';
 import { generateSummary, type CompleteFn } from './summaryGeneration.js';
 import { resolveSummaryTemplate } from './summaryTemplates.js';
+import { reportRecordingFailure } from '../lib/recordingFailure.js';
 
 export interface ProcessingJob {
   id: string;
@@ -39,6 +40,14 @@ interface TranscriptionResult {
   detectedLanguage: string;
 }
 
+// Recordings whose processing job is running inside THIS Node process right now.
+// The orphan-recovery pass uses it to avoid touching a job that is merely slow.
+const activeProcessing = new Set<string>();
+
+export function getActiveProcessingIds(): ReadonlySet<string> {
+  return activeProcessing;
+}
+
 /**
  * Trigger async processing for a recording
  */
@@ -51,9 +60,14 @@ export async function triggerProcessing(
   console.log(`[Processing] Triggering job ${jobId} for recording ${recordingId}`);
 
   // Run processing in the background without blocking the response
-  processRecordingAsync(recordingId, userId, jobId).catch((err) => {
-    console.error(`[Processing] Job ${jobId} failed:`, err);
-  });
+  activeProcessing.add(recordingId);
+  processRecordingAsync(recordingId, userId, jobId)
+    .catch((err) => {
+      console.error(`[Processing] Job ${jobId} failed:`, err);
+    })
+    .finally(() => {
+      activeProcessing.delete(recordingId);
+    });
 
   return {
     id: jobId,
@@ -74,6 +88,9 @@ async function processRecordingAsync(
 ): Promise<void> {
   console.log(`[Processing] Starting job ${jobId}`);
 
+  // Non-content metadata for the failure reporter, filled in as the job progresses.
+  let reportMeta: { source?: string | null; durationSeconds?: number | null; stage?: string | null } = {};
+
   try {
     // Get recording details
     const { data: recording, error: recordingError } = await supabaseAdmin
@@ -86,10 +103,13 @@ async function processRecordingAsync(
       throw new Error('Recording not found');
     }
 
+    reportMeta = { source: recording.source, durationSeconds: recording.duration_seconds };
+
     // Check if this is a PDF (imported document)
     const isPdf = recording.content_type === 'application/pdf' || recording.file_path?.endsWith('.pdf');
 
     // Step 1: Update status to transcribing
+    reportMeta.stage = 'transcribing';
     await updateStatus(recordingId, 'transcribing');
     console.log(`[Processing] ${jobId}: Status -> transcribing (isPdf: ${isPdf})`);
 
@@ -144,6 +164,7 @@ async function processRecordingAsync(
     console.log(`[Processing] ${jobId}: Status -> transcribed`);
 
     // Step 6: Update status to summarizing
+    reportMeta.stage = 'summarizing';
     await updateStatus(recordingId, 'summarizing');
     console.log(`[Processing] ${jobId}: Status -> summarizing`);
 
@@ -202,6 +223,9 @@ async function processRecordingAsync(
       .from('recordings')
       .update({
         status: 'completed',
+        // A recovered job must not keep RECOVERY_RETRY_1 (or any old failure) on a completed row.
+        error_code: null,
+        error_message: null,
         processed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         speaker_count: transcript.speakerCount,
@@ -233,6 +257,8 @@ async function processRecordingAsync(
         updated_at: new Date().toISOString(),
       })
       .eq('id', recordingId);
+
+    reportRecordingFailure('PROCESSING_ERROR', reportMeta);
   }
 }
 
