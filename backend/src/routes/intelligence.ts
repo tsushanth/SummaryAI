@@ -140,11 +140,11 @@ router.post(
         templateId: template,
         languageName: null,
         recordingId,
-        model: config.ANTHROPIC_MODEL,
+        model: config.SUMMARY_MODEL,
         // completeText carries one 'intelligence' feature label for all calls, and does not expose stop_reason
         // (a truncated reply still fails JSON parsing and is retried once).
         complete: async ({ system, user, maxTokens }) => ({
-          text: await completeText({ feature: 'summary', system, user, maxTokens }),
+          text: await completeText({ feature: 'summary', system, user, maxTokens, model: config.SUMMARY_MODEL }),
         }),
       });
     } catch (e) {

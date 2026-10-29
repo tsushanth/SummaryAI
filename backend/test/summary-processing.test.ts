@@ -10,7 +10,7 @@ vi.mock('@anthropic-ai/sdk', () => ({
   },
 }));
 vi.mock('../src/config/index.js', () => ({
-  config: { ANTHROPIC_API_KEY: 'sk-ant-test', ANTHROPIC_MODEL: 'claude-sonnet-4-6' },
+  config: { ANTHROPIC_API_KEY: 'sk-ant-test', ANTHROPIC_MODEL: 'claude-sonnet-4-6', SUMMARY_MODEL: 'claude-haiku-4-5-20251001' },
 }));
 vi.mock('../src/lib/supabase.js', () => ({ supabaseAdmin: {} }));
 vi.mock('../src/services/integrationsService.js', () => ({ dispatchRecordingCompleted: vi.fn() }));
@@ -51,7 +51,7 @@ describe('generateSummaryWithAnthropic', () => {
     const out = await generateSummaryWithAnthropic('', s as any, 'es', 'general', 'rec-1');
     expect(create).toHaveBeenCalledTimes(1);
     const p = create.mock.calls[0][0];
-    expect(p.model).toBe('claude-sonnet-4-6');
+    expect(p.model).toBe('claude-haiku-4-5-20251001'); // summaries run on SUMMARY_MODEL, not the Q&A model
     expect(p.max_tokens).toBe(8192);
     expect(p.messages[0].content).toContain('[0:00] Ann: TURN-0 ');
     expect(p.messages[0].content).toContain('[3:10] Bob: TURN-19 ');

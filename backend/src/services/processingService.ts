@@ -205,7 +205,7 @@ async function processRecordingAsync(
       action_items: summary.actionItems,
       topics: summary.topics,
       llm_provider: config.ANTHROPIC_API_KEY ? 'anthropic' : 'mock',
-      llm_model: config.ANTHROPIC_API_KEY ? config.ANTHROPIC_MODEL : 'mock',
+      llm_model: config.ANTHROPIC_API_KEY ? config.SUMMARY_MODEL : 'mock',
     };
     let { error: summaryError } = await supabaseAdmin.from('summaries').insert(summaryRow);
     if (summaryError && /detailed_summary/.test(summaryError.message)) {
@@ -486,7 +486,7 @@ export async function generateSummaryWithAnthropic(
   // One literal feature label per call site (the llm-usage source guard checks them).
   const complete: CompleteFn = async ({ kind, system, user, maxTokens }) => {
     const params = {
-      model: config.ANTHROPIC_MODEL,
+      model: config.SUMMARY_MODEL,
       max_tokens: maxTokens,
       system,
       messages: [{ role: 'user' as const, content: user }],
@@ -510,7 +510,7 @@ export async function generateSummaryWithAnthropic(
     languageName: languageNameForCode(outputLanguage),
     complete,
     recordingId,
-    model: config.ANTHROPIC_MODEL,
+    model: config.SUMMARY_MODEL,
   });
 }
 
