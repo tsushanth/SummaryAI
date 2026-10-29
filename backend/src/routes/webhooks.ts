@@ -13,6 +13,7 @@ import { config } from '../config/index.js';
 import { RecallWebhookPayload, BotRun, Meeting, RecallTranscriptWebhookPayload } from '../types/meetings.js';
 import { finalizeBotRecording } from '../services/recallService.js';
 import { triggerProcessing } from '../services/processingService.js';
+import { reportRecordingFailureById, botFailureCode } from '../lib/recordingFailure.js';
 import { queueInsightGeneration } from '../services/liveInsightsService.js';
 import { grantCredits } from '../services/coachingService.js';
 import { TwilioService } from '../services/twilioService.js';
@@ -391,6 +392,7 @@ async function handleBotFatal(
         error_message: errorMessage,
       })
       .eq('id', meeting.recording_id);
+    reportRecordingFailureById(meeting.recording_id, 'BOT_FATAL');
     console.log(`[Webhook] Marked pending recording ${meeting.recording_id} as failed due to bot fatal error`);
   }
 }
@@ -432,6 +434,7 @@ async function handleRecordingPermissionDenied(
         error_message: errorMessage,
       })
       .eq('id', meeting.recording_id);
+    reportRecordingFailureById(meeting.recording_id, 'RECORDING_PERMISSION_DENIED');
     console.log(`[Webhook] Marked pending recording ${meeting.recording_id} as failed due to recording permission denied`);
   }
 }
@@ -498,6 +501,7 @@ async function markBotFailed(
         error_message: errorMessage,
       })
       .eq('id', meeting.recording_id);
+    reportRecordingFailureById(meeting.recording_id, botFailureCode(errorMessage));
     console.log(`[Webhook] Marked pending recording ${meeting.recording_id} as failed`);
   }
 }

@@ -650,7 +650,7 @@ router.post(
     // Reset status and trigger processing
     await supabaseAdmin
       .from('recordings')
-      .update({ status: 'uploaded', error_message: null, updated_at: new Date().toISOString() })
+      .update({ status: 'uploaded', error_message: null, error_code: null, updated_at: new Date().toISOString() })
       .eq('id', recordingId);
 
     const job = await triggerProcessing(recordingId, userId);
@@ -689,7 +689,7 @@ router.post(
     await supabaseAdmin.from('summaries').delete().eq('recording_id', recordingId);
     await supabaseAdmin
       .from('recordings')
-      .update({ status: 'uploaded', error_message: null, updated_at: new Date().toISOString() })
+      .update({ status: 'uploaded', error_message: null, error_code: null, updated_at: new Date().toISOString() })
       .eq('id', recordingId);
 
     const job = await triggerProcessing(recordingId, recording.user_id);

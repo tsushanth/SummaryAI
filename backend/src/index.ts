@@ -136,6 +136,10 @@ async function startServer(): Promise<void> {
     // would have.
     import('./services/stuckMeetingRecovery.js').then(m => m.startBotRecordingReconcilerLoop())
       .catch(e => console.error('[BotRecordingReconciler] init failed:', e));
+    // Backstop for processing jobs killed mid-way (deploy / OOM): retries a young
+    // orphan once, otherwise marks it failed so the user sees a retry button.
+    import('./services/orphanedProcessingRecovery.js').then(m => m.startOrphanedProcessingRecoveryLoop())
+      .catch(e => console.error('[OrphanRecovery] init failed:', e));
     // Backstop for scheduleBotJoin's in-memory setTimeout getting dropped by
     // a Fly.io machine restart between scheduling and join time.
     import('./services/botSchedulerService.js').then(m => m.startBotJoinReconcilerLoop())
