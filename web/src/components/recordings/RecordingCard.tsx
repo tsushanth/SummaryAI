@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { formatDuration, formatRelativeDate } from '@/lib/utils/audio';
-import { StatusBadge } from './StatusBadge';
+import { StatusBadge, isLiveRecording } from './StatusBadge';
 import { VoiceSwatches } from './VoiceRibbon';
 import type { Recording } from '@/types/api';
 import { Star } from 'lucide-react';
@@ -30,7 +30,7 @@ export function RecordingCard({ recording }: { recording: Recording }) {
             </div>
             <div className="flex gap-1">
               <dt className="sr-only">Length</dt>
-              <dd>{formatDuration(recording.duration_seconds)}</dd>
+              <dd>{isLiveRecording(recording) ? 'In progress' : formatDuration(recording.duration_seconds)}</dd>
             </div>
             {recording.word_count ? (
               <div className="flex gap-1">
@@ -52,7 +52,7 @@ export function RecordingCard({ recording }: { recording: Recording }) {
             </div>
           )}
         </div>
-        <StatusBadge status={recording.status} />
+        <StatusBadge status={recording.status} live={isLiveRecording(recording)} />
       </div>
     </Link>
   );

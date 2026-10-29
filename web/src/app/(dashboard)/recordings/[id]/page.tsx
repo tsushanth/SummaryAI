@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useRecording } from '@/hooks/useRecordings';
-import { StatusBadge } from '@/components/recordings/StatusBadge';
+import { StatusBadge, isLiveRecording } from '@/components/recordings/StatusBadge';
 import { TranscriptViewer } from '@/components/recordings/TranscriptViewer';
 import { SummaryCard } from '@/components/recordings/SummaryCard';
 import { QAChat } from '@/components/recordings/QAChat';
@@ -145,6 +145,7 @@ export default function RecordingDetailPage() {
     );
   }
 
+  const isLive = isLiveRecording(recording);
   const isProcessing = ['pending', 'uploading', 'uploaded', 'transcribing', 'summarizing'].includes(
     recording.status
   );
@@ -165,7 +166,7 @@ export default function RecordingDetailPage() {
           <div className="min-w-0 flex-1 basis-80">
             <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1">
               <h1 className="text-3xl font-semibold leading-tight tracking-tight">{recording.title}</h1>
-              <StatusBadge status={recording.status} />
+              <StatusBadge status={recording.status} live={isLive} />
               <button
                 onClick={toggleFavorite}
                 aria-pressed={recording.is_favorite}
@@ -190,7 +191,7 @@ export default function RecordingDetailPage() {
               <div className="flex items-center gap-1.5">
                 <Clock className="h-4 w-4" aria-hidden="true" />
                 <dt className="sr-only">Length</dt>
-                <dd>{formatDuration(recording.duration_seconds)}</dd>
+                <dd>{isLive ? 'In progress' : formatDuration(recording.duration_seconds)}</dd>
               </div>
               {recording.word_count ? (
                 <div className="flex items-center gap-1.5">
@@ -230,9 +231,15 @@ export default function RecordingDetailPage() {
         {/* Processing banner */}
         {isProcessing && (
           <div role="status" className="mt-4 flex items-center gap-3 rounded-md bg-mark p-3 text-mark-foreground">
-            <Loader2 className="h-5 w-5 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+            {isLive ? (
+              <span className="h-3 w-3 rounded-full bg-destructive animate-pulse motion-reduce:animate-none" aria-hidden="true" />
+            ) : (
+              <Loader2 className="h-5 w-5 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+            )}
             <span>
-              {recording.status === 'pending'
+              {isLive
+                ? 'Recording in progress. The transcript and summary appear after the meeting ends.'
+                : recording.status === 'pending'
                 ? 'Waiting for meeting to start...'
                 : recording.status === 'transcribing'
                   ? 'Transcribing audio...'
