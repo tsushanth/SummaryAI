@@ -68,6 +68,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils/cn';
 import { updateRecording, updateSpeakerNames } from '@/lib/api/recordings';
 import { useSubscription } from '@/hooks/useSubscription';
+import { isTabLocked } from '@/lib/featureGates';
 import { PremiumGate } from '@/components/subscription/PremiumGate';
 import { TalkTimeCard } from '@/components/recordings/TalkTimeCard';
 import { SpeakerTimeline } from '@/components/recordings/VoiceRibbon';
@@ -80,7 +81,7 @@ export default function RecordingDetailPage() {
   const id = params.id as string;
   const { recording, transcript, summary, audioUrl, isLoading, refresh } =
     useRecording(id);
-  const { isSubscribed } = useSubscription();
+  const { features, isLoading: subscriptionLoading } = useSubscription();
   const { analytics } = useRecordingAnalytics(
     id,
     recording?.status === 'completed',
@@ -255,8 +256,7 @@ export default function RecordingDetailPage() {
       <div className="border-b border-border bg-card px-4 sm:px-8">
         <nav className="flex gap-6" role="tablist" aria-label="Recording sections">
           {(['summary', 'transcript', 'qa'] as Tab[]).map((tab) => {
-            const isPremiumTab = tab === 'summary' || tab === 'qa';
-            const showLock = isPremiumTab && !isSubscribed;
+            const showLock = isTabLocked(tab, features, subscriptionLoading);
             return (
               <button
                 key={tab}

@@ -8,6 +8,7 @@ import Stripe from 'stripe';
 import { authenticate } from '../middleware/auth.js';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
+import { planFeatures } from '../services/freeTier.js';
 import type { ErrorResponse } from '../types/api.js';
 
 const router = Router();
@@ -96,15 +97,7 @@ router.get('/status', async (req: Request, res: Response) => {
       provider: profile?.subscription_provider || null,
       expiresAt: profile?.subscription_expires_at || null,
       subscribedAt: profile?.subscribed_at || null,
-      features: {
-        unlimitedRecordings: isSubscribed,
-        aiSummaries: isSubscribed,
-        qaChat: isSubscribed,
-        meetingBot: isSubscribed,
-        phoneRecording: isSubscribed,
-        calendarSync: isSubscribed,
-        exportPdf: isSubscribed,
-      },
+      features: planFeatures(isSubscribed),
     });
   } catch (err) {
     console.error('[Subscriptions] Get status error:', err);

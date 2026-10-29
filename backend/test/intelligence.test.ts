@@ -170,6 +170,18 @@ describe('other endpoints', () => {
     expect(db.summaries[0].summary).toBe('Long');
   });
 
+  it('a free user (profile status free, no subscription row) can regenerate the summary and draft the follow-up email', async () => {
+    db.profiles = [{ id: 'alice', subscription_status: 'free', preferences: {} }];
+    db.subscriptions = [];
+    llmReply = JSON.stringify({ summary: 'Free regen', key_points: [], action_items: [], topics: [] });
+    const regen = await call('POST', '/recordings/11111111-1111-4111-8111-111111111111/regenerate-summary', 'alice', { template: 'standup' });
+    expect(regen.status).toBe(200);
+    expect(db.summaries[0].summary).toBe('Free regen');
+    llmReply = JSON.stringify({ subject: 'Recap', body: 'Thanks all.' });
+    const email = await call('POST', '/recordings/11111111-1111-4111-8111-111111111111/follow-up-email', 'alice', {});
+    expect(email.status).toBe(200);
+  });
+
   it('follow-up email returns subject and body', async () => {
     llmReply = JSON.stringify({ subject: 'Recap', body: 'Thanks all.' });
     const r = await call('POST', '/recordings/11111111-1111-4111-8111-111111111111/follow-up-email', 'alice', {});

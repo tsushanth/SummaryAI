@@ -101,7 +101,7 @@ const PLANS = [
     cadence: '/week',
     was: '$6.99',
     price: '$4.89',
-    features: ['Unlimited recording', 'Transcripts & summaries', '36+ languages'],
+    features: ['Everything in Free', '36+ languages'],
   },
   {
     name: 'Monthly',
@@ -109,8 +109,7 @@ const PLANS = [
     was: '$14.99',
     price: '$10.49',
     features: [
-      'Unlimited recording',
-      'Transcripts & summaries',
+      'Everything in Free',
       'Ask questions, get cited answers',
       'Meeting bot for Zoom, Teams, Meet',
       'Phone call recording',
@@ -125,8 +124,7 @@ const PLANS = [
     highlight: true,
     features: [
       '7-day free trial',
-      'Unlimited recording',
-      'Transcripts & summaries',
+      'Everything in Free',
       'Ask questions, get cited answers',
       'Meeting bot for Zoom, Teams, Meet',
       'Phone call recording',
@@ -327,6 +325,7 @@ export default function LandingPage() {
             One price, wherever you subscribe.
           </h2>
           <p className="mt-4 max-w-xl text-lg text-muted-foreground">
+            Recording, transcripts and summaries are free. Pro adds Q&amp;A, the meeting bot and phone call recording.
             Subscribing here instead of through the app saves you 30%. Cancel anytime.
           </p>
 

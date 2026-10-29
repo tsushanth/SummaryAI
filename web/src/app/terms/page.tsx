@@ -48,7 +48,8 @@ export default function TermsPage() {
 
           <h3 className="text-lg font-medium text-foreground/80 mb-3">Free Tier</h3>
           <p className="text-muted-foreground mb-4">
-            Free users can record up to 10 minutes per recording. Pro features require a paid subscription.
+            Recording, transcripts and summaries are free, subject to per-file size and length limits and fair use.
+            Pro features (such as Q&amp;A, the meeting bot and phone call recording) require a paid subscription.
           </p>
 
           <h3 className="text-lg font-medium text-foreground/80 mb-3">Billing</h3>

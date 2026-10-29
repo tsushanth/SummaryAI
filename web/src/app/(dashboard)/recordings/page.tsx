@@ -10,21 +10,23 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { SkeletonCardList } from '@/components/ui/skeleton';
 import { RecordingFilters, filtersToParams, type RecordingFilterState } from '@/components/recordings/RecordingFilters';
 import { WeeklyStatsCard } from '@/components/recordings/WeeklyStatsCard';
+import { hasRecordingLimit, LEGACY_FREE_RECORDING_LIMIT as FREE_TIER_LIMIT } from '@/lib/featureGates';
 import { groupRecordingsByDate } from '@/lib/recordingGroups';
 import { Plus, Mic, CloudOff, Search } from 'lucide-react';
 import Link from 'next/link';
 
-const FREE_TIER_LIMIT = 3;
 
 export default function RecordingsPage() {
   const [filters, setFilters] = useState<RecordingFilterState>({});
   const params = filtersToParams(filters);
   const isFiltered = Object.keys(params).length > 0;
   const { recordings, isLoading, error } = useRecordings({ per_page: 50, ...params });
-  const { isSubscribed, isLoading: subLoading } = useSubscription();
+  const { features, isLoading: subLoading } = useSubscription();
+  // Only true when the backend runs with FREE_TIER_LEGACY_LIMITS=true; otherwise recording is unlimited for everyone.
+  const limitApplies = hasRecordingLimit(features, subLoading);
   const [showPaywall, setShowPaywall] = useState(false);
 
-  const atFreeLimit = !subLoading && !isSubscribed && !isFiltered && recordings.length >= FREE_TIER_LIMIT;
+  const atFreeLimit = limitApplies && !isFiltered && recordings.length >= FREE_TIER_LIMIT;
 
   const handleNewRecording = (e: React.MouseEvent) => {
     if (atFreeLimit) {
@@ -42,7 +44,7 @@ export default function RecordingsPage() {
           <h1 className="text-3xl font-semibold tracking-tight">Recordings</h1>
           <p className="text-sm text-muted-foreground tabular">
             {recordings.length} recording{recordings.length !== 1 ? 's' : ''}
-            {!subLoading && !isSubscribed && !isFiltered && (
+            {limitApplies && !isFiltered && (
               <span className="ml-2 rounded-sm bg-mark px-1.5 py-0.5 text-xs font-semibold text-mark-foreground">
                 {recordings.length}/{FREE_TIER_LIMIT} free used
               </span>

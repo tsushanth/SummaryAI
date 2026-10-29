@@ -3,6 +3,7 @@
 import { X, Sparkles, Mic, FileText, MessageSquare, Zap } from 'lucide-react';
 import { useCheckout } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
+import { LEGACY_FREE_RECORDING_LIMIT } from '@/lib/featureGates';
 
 interface PaywallModalProps {
   onClose?: () => void;
@@ -31,7 +32,7 @@ export function PaywallModal({ onClose, reason = 'recording_limit' }: PaywallMod
           <h2 className="text-2xl font-bold mb-2">Upgrade to Pro</h2>
           <p className="text-primary-foreground/90">
             {reason === 'recording_limit'
-              ? "You've used all 3 free recordings. Upgrade to keep going."
+              ? `You've used all ${LEGACY_FREE_RECORDING_LIMIT} free recordings. Upgrade to keep going.`
               : 'This feature requires a Pro subscription.'}
           </p>
         </div>
@@ -39,14 +40,14 @@ export function PaywallModal({ onClose, reason = 'recording_limit' }: PaywallMod
         {/* Features list */}
         <div className="-mt-4 bg-card rounded-t-2xl px-6 pt-6 pb-2">
           <p className="text-sm font-semibold text-muted-foreground mb-4">
-            Everything in Pro
+            Pro adds (recording, transcripts and summaries stay free)
           </p>
           <ul className="space-y-3 mb-6">
             {[
-              { icon: Mic, text: 'Unlimited recordings' },
-              { icon: FileText, text: 'AI summaries for every meeting' },
               { icon: MessageSquare, text: 'Ask questions about your recordings' },
-              { icon: Zap, text: 'Calendar sync & meeting bot' },
+              { icon: Zap, text: 'Meeting bot for Zoom, Teams, Meet' },
+              { icon: Mic, text: 'Phone call recording' },
+              { icon: FileText, text: 'Calendar sync' },
             ].map(({ icon: Icon, text }) => (
               <li key={text} className="flex items-center gap-3 text-foreground/90">
                 <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center flex-shrink-0">

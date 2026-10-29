@@ -112,7 +112,7 @@ export function Sidebar() {
               <Sparkles className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
               <div className="flex-1">
                 <p className="text-sm font-semibold">Upgrade to Pro</p>
-                <p className="text-xs">Save 30% on web</p>
+                <p className="text-xs">Q&amp;A, meeting bot, phone calls</p>
               </div>
             </Link>
           </div>
