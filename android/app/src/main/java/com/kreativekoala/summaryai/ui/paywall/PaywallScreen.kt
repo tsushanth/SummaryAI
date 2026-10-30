@@ -26,6 +26,8 @@ fun PaywallScreen(
     onNavigateBack: () -> Unit,
     onPurchaseSuccess: () -> Unit,
     forceHardGate: Boolean = false,
+    // Tap-triggered paywalls (still-paid features) must always offer a way out.
+    forceDismissible: Boolean = false,
     viewModel: PaywallViewModel = hiltViewModel()
 ) {
     val products by viewModel.products.collectAsState()
@@ -36,7 +38,11 @@ fun PaywallScreen(
     // Hard gate overrides the server-side ExperimentManager. Used when the
     // user attempts a gated action (start recording, join meeting, place call)
     // after exhausting their free opens — they must convert or background.
-    val dismissible = if (forceHardGate) false else ExperimentManager.isDismissible()
+    val dismissible = when {
+        forceHardGate -> false
+        forceDismissible -> true
+        else -> ExperimentManager.isDismissible()
+    }
 
     BackHandler(enabled = !dismissible) { /* swallow back */ }
 
