@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/client';
+import { reportWebFailure } from '@/components/WebFailureReporter';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 
@@ -47,6 +48,12 @@ export async function apiClient<T>(
   });
 
   if (!response.ok) {
+    // 5xx seen from the browser also covers a gateway/proxy answering for a dead backend (502/503/504), which the
+    // backend's own reporter never sees. Path only: ids and the query string are dropped.
+    if (response.status >= 500) {
+      const path = endpoint.split('?')[0].replace(/\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=\/|$)/gi, '/:id').replace(/\/\d{3,}(?=\/|$)/g, '/:id');
+      reportWebFailure('api_5xx', new Error(`API request failed with status ${response.status}`), { endpoint: path, status: String(response.status) });
+    }
     const error = await response.json().catch(() => ({}));
     throw new ApiError(
       response.status,

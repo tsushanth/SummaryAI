@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Mail } from 'lucide-react';
 import { emailSummary, type EmailSummaryResult } from '@/lib/api/organize';
+import { reportUnexpectedWebFailure } from '@/components/WebFailureReporter';
 
 const MAX_RECIPIENTS = 10;
 const EMAIL_RE = /[^\s,;<>"'()]+@[^\s,;<>"'()]+\.[^\s,;<>"'()]+/g;
@@ -42,6 +43,7 @@ export function EmailSummaryPanel({ recordingId }: { recordingId: string }) {
       // Leave only the failed addresses so a retry does not email the others twice.
       setRaw(failed.join(', '));
     } catch (e) {
+      reportUnexpectedWebFailure('email_summary_send', e);
       setError(e instanceof Error ? e.message : 'Failed to send');
     } finally {
       setBusy(false);
