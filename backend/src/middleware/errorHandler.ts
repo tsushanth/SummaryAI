@@ -7,6 +7,7 @@ import { ZodError } from 'zod';
 import type { ErrorResponse } from '../types/api.js';
 import { config } from '../config/index.js';
 import { reportBackendError } from '../lib/failureReporter.js';
+import { REPORTED } from './serverErrorReporter.js';
 
 /**
  * Custom application error class
@@ -86,6 +87,7 @@ export function errorHandler(
 
   // Handle AppError
   if (err instanceof AppError) {
+    if (err.statusCode >= 500) (res.locals as Record<symbol, unknown>)[REPORTED] = true;
     reportBackendError(req, err, err.statusCode);
     res.status(err.statusCode).json({
       error: {
@@ -122,6 +124,7 @@ export function errorHandler(
 
   // Log unexpected errors
   console.error('Unexpected error:', err);
+  (res.locals as Record<symbol, unknown>)[REPORTED] = true;
   reportBackendError(req, err, 500);
 
   // Generic error response

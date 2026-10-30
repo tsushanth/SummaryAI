@@ -8,6 +8,7 @@
  * Privacy: logs carry ids, model, stop reason and lengths only. Never transcript text, prompts or answers.
  */
 
+import { reportAlert } from '../lib/alerts.js';
 import { buildSummaryPrompts, parseSummaryResponseDetailed, type ParsedSummary } from './summaryService.js';
 
 /**
@@ -179,6 +180,12 @@ async function summaryJsonCall(
     parseFailed: last!.parsed.fellBack,
     promptChars: prompts.user.length,
     responseChars: last!.textChars,
+  });
+  // The caller stores the raw-text fallback as a normal completed summary, so this is the only place that knows it is degraded.
+  reportAlert('summary_degraded', last!.stopReason === 'max_tokens' ? 'REPLY_TRUNCATED' : 'REPLY_NOT_PARSEABLE', {
+    kind,
+    model: input.model,
+    stop_reason: last!.stopReason ?? 'none',
   });
   return last!.parsed.summary;
 }

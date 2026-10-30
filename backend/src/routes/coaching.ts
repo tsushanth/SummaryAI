@@ -28,6 +28,7 @@ import {
   InvalidPersonaError,
 } from '../services/coachingService.js';
 import { PERSONAS } from '../services/coachingPersonas.js';
+import { reportAlert, reportProviderFailure } from '../lib/alerts.js';
 import { getSubscriptionPurchase, acknowledgeSubscription } from '../services/googlePlayBilling.js';
 
 const COACHING_SUBSCRIPTION_PRODUCTS = new Set<string>([
@@ -213,6 +214,9 @@ router.post('/iap/google-play/verify', asyncHandler(async (req: Request, res: Re
     purchase = await getSubscriptionPurchase(purchase_token);
   } catch (e: any) {
     const msg = e?.response?.data?.error?.message || e?.message || 'unknown';
+    // The user paid and gets no credits. Auth/config on OUR side (service account, API access) is provider-wide.
+    if (/GOOGLE_PLAY_SA_JSON not configured/.test(String(e?.message))) reportAlert('play_billing', 'SERVICE_ACCOUNT_NOT_CONFIGURED');
+    else reportProviderFailure('google_play', { status: e?.code ?? e?.response?.status, message: e?.message });
     return res.status(400).json({ error: 'verify_failed', message: msg });
   }
 
@@ -238,7 +242,11 @@ router.post('/iap/google-play/verify', asyncHandler(async (req: Request, res: Re
 
   if (purchase.acknowledgementState === 'ACKNOWLEDGEMENT_STATE_PENDING') {
     try { await acknowledgeSubscription(product_id, purchase_token); }
-    catch (e: any) { console.warn('[Coaching] acknowledge failed (non-fatal):', e?.message || e); }
+    catch (e: any) {
+      console.warn('[Coaching] acknowledge failed (non-fatal):', e?.message || e);
+      // Google refunds a subscription that is not acknowledged within 3 days.
+      reportAlert('play_billing', 'ACKNOWLEDGE_FAILED');
+    }
   }
 
   const balance = await getCreditBalance(userId);

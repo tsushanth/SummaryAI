@@ -17,6 +17,7 @@ import { authenticate } from '../middleware/auth.js';
 import { asyncHandler, Errors } from '../middleware/errorHandler.js';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
+import { reportAlert, reportProviderFailure } from '../lib/alerts.js';
 import { sendEmail } from '../lib/email.js';
 import { actionItemLine, renderSummaryEmail, summarySubject } from '../lib/summaryEmail.js';
 
@@ -97,6 +98,10 @@ summaryEmailRouter.post(
           return { email, status: 'sent' as const };
         } catch (err) {
           console.error(`[summary-email] send failed for recording ${recordingId}:`, err instanceof Error ? err.message : err);
+          // The client only gets status 'failed' (HTTP 200), so without this nothing server-side signals it. A missing
+          // RESEND_API_KEY or a rejected key is provider-wide; everything else is a per-send failure. No address, no title.
+          if (err instanceof Error && /RESEND_API_KEY is not set/.test(err.message)) reportAlert('provider_unavailable', 'RESEND_KEY_MISSING', { provider: 'resend' });
+          else reportProviderFailure('resend', err instanceof Error && /\b(401|403)\b|API key|restricted/i.test(err.message) ? { status: 401 } : err);
           return { email, status: 'failed' as const };
         }
       })
@@ -105,7 +110,11 @@ summaryEmailRouter.post(
     const { error: logError } = await supabaseAdmin.from('summary_email_sends').insert(
       results.map((r) => ({ recording_id: recordingId, user_id: userId, recipient_email: r.email, status: r.status }))
     );
-    if (logError) console.error('[summary-email] failed to log sends:', logError);
+    if (logError) {
+      console.error('[summary-email] failed to log sends:', logError);
+      // The daily per-user cap counts these rows, so a failing log write silently disables the cap.
+      reportAlert('summary_email', 'SEND_LOG_WRITE_FAILED');
+    }
 
     res.json({ results });
   })

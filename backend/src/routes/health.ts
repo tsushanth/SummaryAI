@@ -5,6 +5,7 @@
 import { Router, Request, Response } from 'express';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
+import { getLoopStatus } from '../lib/loopMonitor.js';
 
 const router = Router();
 
@@ -16,6 +17,7 @@ interface HealthResponse {
     database: 'ok' | 'error';
     storage: 'ok' | 'error';
   };
+  loops?: { name: string; minutesSinceHeartbeat: number | null; stale: boolean }[];
 }
 
 /**
@@ -56,8 +58,10 @@ router.get('/detailed', async (_req: Request, res: Response<HealthResponse>) => 
     checks.storage = 'error';
   }
 
-  // Determine overall status
-  const hasErrors = checks.database === 'error' || checks.storage === 'error';
+  // Background loops: stale = no heartbeat for 3x its interval (min 10 min). Point the reporter's backend probe at this URL
+  // to get a dead-man signal for a loop that stopped while the process stays up.
+  const loops = getLoopStatus();
+  const hasErrors = checks.database === 'error' || checks.storage === 'error' || loops.some((l) => l.stale);
   const status = hasErrors ? 'degraded' : 'healthy';
 
   res.status(hasErrors ? 503 : 200).json({
@@ -65,7 +69,8 @@ router.get('/detailed', async (_req: Request, res: Response<HealthResponse>) => 
     version: config.API_VERSION,
     timestamp: new Date().toISOString(),
     checks,
-  });
+    loops,
+  } as HealthResponse);
 });
 
 export default router;

@@ -3,6 +3,7 @@
  * API client for Recall.ai meeting bot service
  */
 
+import { reportProviderHttpFailure } from '../lib/alerts.js';
 import {
   RecallBotCreateRequest,
   RecallBotResponse,
@@ -53,6 +54,7 @@ export class RecallService {
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`[Recall API] Error ${response.status}: ${errorText}`);
+      reportProviderHttpFailure('recall', response.status);
       throw new Error(`Recall API error: ${response.status} - ${errorText}`);
     }
 

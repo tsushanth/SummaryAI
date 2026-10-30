@@ -13,6 +13,7 @@ import { normalizeActionItems, type ParsedSummary } from './summaryService.js';
 import { generateSummary, type CompleteFn } from './summaryGeneration.js';
 import { resolveSummaryTemplate } from './summaryTemplates.js';
 import { reportRecordingFailure } from '../lib/recordingFailure.js';
+import { reportAlert, reportProviderFailure, reportProviderHttpFailure } from '../lib/alerts.js';
 
 export interface ProcessingJob {
   id: string;
@@ -135,6 +136,8 @@ async function processRecordingAsync(
       transcript = await transcribeWithDeepgram(fileData, recording.file_path);
     } else {
       console.warn(`[Processing] ${jobId}: No Deepgram API key, using mock transcription`);
+      // A real user's recording would get a FAKE transcript and a 'completed' status.
+      if (process.env.NODE_ENV === 'production') reportAlert('provider_unavailable', 'DEEPGRAM_KEY_MISSING', { provider: 'deepgram' });
       transcript = createMockTranscript(recording.duration_seconds || 60);
     }
 
@@ -190,6 +193,7 @@ async function processRecordingAsync(
       );
     } else {
       console.warn(`[Processing] ${jobId}: No Anthropic API key, using mock summary`);
+      if (process.env.NODE_ENV === 'production') reportAlert('provider_unavailable', 'ANTHROPIC_KEY_MISSING', { provider: 'anthropic' });
       summary = createMockSummary(transcript.fullText);
     }
 
@@ -247,18 +251,25 @@ async function processRecordingAsync(
   } catch (error) {
     console.error(`[Processing] ${jobId}: Error:`, error);
 
-    // Mark as failed
-    await supabaseAdmin
-      .from('recordings')
-      .update({
-        status: 'failed',
-        error_message: error instanceof Error ? error.message : 'Processing failed',
-        error_code: 'PROCESSING_ERROR',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', recordingId);
-
+    // Report first and independently of the database write below: if Supabase is the thing that is down, the
+    // update can throw and, before, no report was ever sent (and the rejection was only logged by triggerProcessing).
     reportRecordingFailure('PROCESSING_ERROR', reportMeta);
+
+    // Mark as failed
+    try {
+      await supabaseAdmin
+        .from('recordings')
+        .update({
+          status: 'failed',
+          error_message: error instanceof Error ? error.message : 'Processing failed',
+          error_code: 'PROCESSING_ERROR',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', recordingId);
+    } catch (updateErr) {
+      console.error(`[Processing] ${jobId}: could not mark recording failed:`, updateErr);
+      reportAlert('recording_failure_cause', 'MARK_FAILED_WRITE_FAILED');
+    }
   }
 }
 
@@ -277,17 +288,25 @@ async function transcribeWithDeepgram(
   const contentType = ext === 'wav' ? 'audio/wav' : ext === 'mp3' ? 'audio/mpeg' : 'audio/mp4';
 
   // Call Deepgram API with detect_language enabled for auto-detection
-  const response = await fetch('https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true&diarize=true&paragraphs=true&utterances=true&detect_language=true', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Token ${config.DEEPGRAM_API_KEY}`,
-      'Content-Type': contentType,
-    },
-    body: buffer,
-  });
+  let response: Response;
+  try {
+    response = await fetch('https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true&diarize=true&paragraphs=true&utterances=true&detect_language=true', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Token ${config.DEEPGRAM_API_KEY}`,
+        'Content-Type': contentType,
+      },
+      body: buffer,
+    });
+  } catch (e) {
+    reportProviderFailure('deepgram', e);
+    throw e;
+  }
 
   if (!response.ok) {
     const errorText = await response.text();
+    // A rejected key or exhausted credit fails EVERY recording: classified here into one provider-wide alert.
+    reportProviderHttpFailure('deepgram', response.status);
     throw new Error(`Deepgram API error: ${response.status} - ${errorText}`);
   }
 
@@ -376,6 +395,7 @@ async function extractTextFromPdf(
         fullText = response.content[0]?.type === 'text' ? response.content[0].text : '';
       } else {
         fullText = 'PDF text extraction failed - no pdf-parse library or Anthropic API key available.';
+        reportAlert('pdf_extraction_failed', 'NO_EXTRACTOR_AVAILABLE');
       }
     }
 
@@ -406,6 +426,8 @@ async function extractTextFromPdf(
     };
   } catch (error) {
     console.error('PDF extraction error:', error);
+    // The placeholder below is stored and summarised as if it were the document.
+    reportAlert('pdf_extraction_failed', 'EXTRACTION_THREW');
     return {
       segments: [],
       fullText: 'Failed to extract text from PDF.',
