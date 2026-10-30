@@ -26,6 +26,8 @@ fun PaywallScreen(
     onNavigateBack: () -> Unit,
     onPurchaseSuccess: () -> Unit,
     forceHardGate: Boolean = false,
+    // Tap-triggered paywalls (still-paid features) must always offer a way out.
+    forceDismissible: Boolean = false,
     viewModel: PaywallViewModel = hiltViewModel()
 ) {
     val products by viewModel.products.collectAsState()
@@ -36,7 +38,11 @@ fun PaywallScreen(
     // Hard gate overrides the server-side ExperimentManager. Used when the
     // user attempts a gated action (start recording, join meeting, place call)
     // after exhausting their free opens — they must convert or background.
-    val dismissible = if (forceHardGate) false else ExperimentManager.isDismissible()
+    val dismissible = when {
+        forceHardGate -> false
+        forceDismissible -> true
+        else -> ExperimentManager.isDismissible()
+    }
 
     BackHandler(enabled = !dismissible) { /* swallow back */ }
 
@@ -71,12 +77,12 @@ fun PaywallScreen(
         )
     }
 
+    // Recording, transcripts and summaries are free; only these features are paid.
     val features = listOf(
-        PaywallFeature("\uD83C\uDF99\uFE0F", "Unlimited Recordings", "Record every meeting"),
-        PaywallFeature("\uD83D\uDCDD", "AI Summaries", "Automatic meeting notes"),
-        PaywallFeature("\uD83D\uDD0D", "Smart Search", "Find any moment"),
-        PaywallFeature("\uD83D\uDCE4", "Export", "Share notes anywhere"),
-        PaywallFeature("\u2601\uFE0F", "Cloud Storage", "Unlimited storage")
+        PaywallFeature("\uD83E\uDD16", "Meeting bot", "Joins Google Meet and Zoom for you"),
+        PaywallFeature("\uD83D\uDCDE", "Phone call recording", "Record and summarize your calls"),
+        PaywallFeature("\uD83D\uDCAC", "Meeting Q&A", "Ask questions across your meetings"),
+        PaywallFeature("\u2705", "Still free", "Recording, transcripts and summaries")
     )
 
     PaywallView(

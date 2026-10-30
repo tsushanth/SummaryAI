@@ -2,7 +2,6 @@ package com.kreativekoala.summaryai
 
 import android.os.Bundle
 import com.kreativekoala.paywallkit.manager.PromoCodeManager
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -20,7 +19,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
-import com.kreativekoala.summaryai.data.preferences.AppOpenTracker
 import com.kreativekoala.summaryai.data.preferences.ThemeMode
 import com.kreativekoala.summaryai.data.preferences.ThemePreferences
 import com.kreativekoala.summaryai.service.AuthService
@@ -37,10 +35,8 @@ class MainActivity : AppCompatActivity() {
 
     @Inject lateinit var authService: AuthService
     @Inject lateinit var themePreferences: ThemePreferences
-    @Inject lateinit var appOpenTracker: AppOpenTracker
     @Inject lateinit var billingManager: BillingManager
 
-    private var showPaywall by mutableStateOf(false)
     private var startRecordingRequested by mutableStateOf(false)
 
     companion object {
@@ -68,21 +64,11 @@ class MainActivity : AppCompatActivity() {
         if (intent?.action == ACTION_START_RECORDING) startRecordingRequested = true
         enableEdgeToEdge()
 
-        val openCount = appOpenTracker.incrementAndGetCount()
-        Log.d("MainActivity", "App open count: $openCount (limit: ${AppOpenTracker.FREE_OPEN_LIMIT})")
-
         // RatingKit — fires Play In-App Review prompt after sustained engagement.
         RatingKit.trackAppOpen(this)
 
         // Initialize billing (connects to Play Billing, loads products, checks existing purchases)
         billingManager.initialize()
-
-        // Gate based on open count + subscription status
-        lifecycleScope.launch {
-            billingManager.isSubscribed.collect { subscribed ->
-                showPaywall = !subscribed && openCount > AppOpenTracker.FREE_OPEN_LIMIT
-            }
-        }
 
         // Fire RatingKit's "purchase peak" whenever a subscription transitions
         // to active during this session. StateFlow already de-dupes consecutive
@@ -105,8 +91,6 @@ class MainActivity : AppCompatActivity() {
                 ThemeMode.DARK -> true
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
             }
-            val isSubscribed by billingManager.isSubscribed.collectAsState()
-            val products by billingManager.products.collectAsState()
 
             MeetingMindTheme(darkTheme = isDarkTheme) {
                 Surface(
@@ -128,15 +112,11 @@ class MainActivity : AppCompatActivity() {
                         MeetingMindNavGraph(
                             isAuthenticated = authState.isAuthenticated,
                             hasCompletedOnboarding = authState.hasCompletedOnboarding,
-                            showPaywall = showPaywall && !isSubscribed,
                             startRecordingRequested = startRecordingRequested,
                             onStartRecordingHandled = { startRecordingRequested = false },
-                            // Live check: re-evaluated at every gated action call site.
-                            // Reads SharedPreferences (open count) + StateFlow (subscription).
-                            shouldHardGate = {
-                                !billingManager.isSubscribed.value &&
-                                        appOpenTracker.hasExceededFreeLimit()
-                            }
+                            // Live check, re-evaluated when the user taps a still-paid feature
+                            // (Join Meeting bot, Phone call recording). Recording is free.
+                            isPaidFeatureLocked = { !billingManager.isSubscribed.value }
                         )
                     }
                 }

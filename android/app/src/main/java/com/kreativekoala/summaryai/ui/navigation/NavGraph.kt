@@ -90,7 +90,8 @@ sealed class Screen(val route: String) {
     object Phone : Screen("phone")
     object Settings : Screen("settings")
     object Paywall : Screen("paywall")
-    object HardPaywall : Screen("paywall/hard")
+    /** Dismissible paywall shown when a free user taps a still-paid feature (Join Meeting, Phone). */
+    object FeaturePaywall : Screen("paywall/feature")
 }
 
 // Bottom navigation items
@@ -137,20 +138,19 @@ val bottomNavItems = listOf(
 fun MeetingMindNavGraph(
     isAuthenticated: Boolean,
     hasCompletedOnboarding: Boolean,
-    showPaywall: Boolean = false,
-    // Live check — called at every gated action (start recording, join meeting,
-    // place call) so the gate is re-evaluated, not captured at composition.
-    shouldHardGate: () -> Boolean = { false },
+    // Live check, called when the user taps a still-paid feature (meeting bot, phone
+    // call recording) so it is re-evaluated, not captured at composition. Recording,
+    // transcripts and summaries are free and never go through this.
+    isPaidFeatureLocked: () -> Boolean = { false },
     // Set by the quick-settings tile / home-screen widget; consumed once.
     startRecordingRequested: Boolean = false,
     onStartRecordingHandled: () -> Unit = {},
     navController: NavHostController = rememberNavController()
 ) {
-    // Helper for routing gated actions. Mutating navController inline reads
-    // cleaner at call sites and keeps the hard-gate logic centralized.
-    val navigateGated: (String) -> Unit = { targetRoute ->
-        if (shouldHardGate()) {
-            navController.navigate(Screen.HardPaywall.route)
+    // Helper for routing taps on still-paid features (Join Meeting bot).
+    val navigatePaidFeature: (String) -> Unit = { targetRoute ->
+        if (isPaidFeatureLocked()) {
+            navController.navigate(Screen.FeaturePaywall.route) { launchSingleTop = true }
         } else {
             navController.navigate(targetRoute)
         }
@@ -168,17 +168,8 @@ fun MeetingMindNavGraph(
     // Tile / widget shortcut: jump to the recording tab once signed in and onboarded.
     LaunchedEffect(startRecordingRequested, isAuthenticated, hasCompletedOnboarding) {
         if (startRecordingRequested && isAuthenticated && hasCompletedOnboarding) {
-            navigateGated(Screen.Recording.route)
+            navController.navigate(Screen.Recording.route)
             onStartRecordingHandled()
-        }
-    }
-
-    // Navigate to paywall when triggered from MainActivity (open count gate)
-    LaunchedEffect(showPaywall, isAuthenticated, hasCompletedOnboarding) {
-        if (showPaywall && isAuthenticated && hasCompletedOnboarding) {
-            navController.navigate(Screen.Paywall.route) {
-                launchSingleTop = true
-            }
         }
     }
 
@@ -250,13 +241,12 @@ fun MeetingMindNavGraph(
                                         // Tab is already selected - trigger scroll-to-top
                                         tabReselectionState.onTabReselected()
                                     } else {
-                                        // Gate Recording + Phone tabs at the action level —
-                                        // if the user has exhausted free opens AND is not
-                                        // subscribed, route them to the hard paywall instead.
-                                        val isGatedAction = item.screen.route == Screen.Recording.route ||
-                                                item.screen.route == Screen.Phone.route
-                                        if (isGatedAction && shouldHardGate()) {
-                                            navController.navigate(Screen.HardPaywall.route) {
+                                        // Phone (call recording) is still a paid feature: a
+                                        // non-subscriber who taps it gets a dismissible paywall.
+                                        // Record is free and is never gated.
+                                        val isPaidTab = item.screen.route == Screen.Phone.route
+                                        if (isPaidTab && isPaidFeatureLocked()) {
+                                            navController.navigate(Screen.FeaturePaywall.route) {
                                                 launchSingleTop = true
                                             }
                                         } else {
@@ -297,7 +287,7 @@ fun MeetingMindNavGraph(
             Screen.Auth.route,
             Screen.Onboarding.route,
             Screen.Paywall.route,
-            Screen.HardPaywall.route
+            Screen.FeaturePaywall.route
         )
         NavHost(
             navController = navController,
@@ -323,8 +313,9 @@ fun MeetingMindNavGraph(
             // Onboarding
             composable(Screen.Onboarding.route) {
                 OnboardingScreen(
+                    // No paywall after onboarding: go straight to the recordings list.
                     onComplete = {
-                        navController.navigate(Screen.Paywall.route) {
+                        navController.navigate(Screen.Recordings.route) {
                             popUpTo(Screen.Onboarding.route) { inclusive = true }
                         }
                     }
@@ -337,7 +328,7 @@ fun MeetingMindNavGraph(
                     onRecordingClick = { recordingId ->
                         navController.navigate(Screen.RecordingDetail.createRoute(recordingId))
                     },
-                    onStartRecording = { navigateGated(Screen.Recording.route) },
+                    onStartRecording = { navController.navigate(Screen.Recording.route) },
                     onSearchClick = {
                         navController.navigate(Screen.Search.route)
                     },
@@ -398,7 +389,7 @@ fun MeetingMindNavGraph(
             // Meetings
             composable(Screen.Meetings.route) {
                 MeetingsScreen(
-                    onJoinMeetingClick = { navigateGated(Screen.JoinMeeting.route) },
+                    onJoinMeetingClick = { navigatePaidFeature(Screen.JoinMeeting.route) },
                     onRecordingClick = { recordingId ->
                         navController.navigate(Screen.RecordingDetail.createRoute(recordingId))
                     },
@@ -491,7 +482,7 @@ fun MeetingMindNavGraph(
                 )
             }
 
-            // Paywall (soft — onboarding + manual upgrade)
+            // Paywall (soft - manual upgrade from Settings)
             composable(Screen.Paywall.route) {
                 PaywallScreen(
                     onNavigateBack = {
@@ -508,19 +499,17 @@ fun MeetingMindNavGraph(
                                 popUpTo(0) { inclusive = true }
                             }
                         }
-                    }
+                    },
+                    // Only reachable by tapping Upgrade, so always offer a way out.
+                    forceDismissible = true
                 )
             }
 
-            // HardPaywall — entered when user attempts a gated action past the
-            // free limit. Non-dismissable, swallows back.
-            composable(Screen.HardPaywall.route) {
+            // FeaturePaywall - entered when a free user taps a still-paid feature
+            // (Join Meeting bot, Phone). Always dismissible so the user can go back.
+            composable(Screen.FeaturePaywall.route) {
                 PaywallScreen(
-                    onNavigateBack = {
-                        // No-op fallback. The PaywallScreen swallows back internally
-                        // when forceHardGate=true, but onDismiss can still be invoked
-                        // by PaywallView's close button if isDismissible were true.
-                    },
+                    onNavigateBack = { navController.popBackStack() },
                     onPurchaseSuccess = {
                         if (!navController.popBackStack()) {
                             navController.navigate(Screen.Recordings.route) {
@@ -528,7 +517,7 @@ fun MeetingMindNavGraph(
                             }
                         }
                     },
-                    forceHardGate = true
+                    forceDismissible = true
                 )
             }
         }
