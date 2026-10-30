@@ -253,6 +253,15 @@ class AuthService @Inject constructor(
             Result.success(Unit)
         } catch (e: ApiException) {
             Log.e(TAG, "Google sign-in API exception: ${e.statusCode}", e)
+            // 12501 = the user closed the picker, 12502 = a sign-in already in progress: not failures.
+            if (e.statusCode != 12501 && e.statusCode != 12502) {
+                com.kreativekoala.summaryai.FailureReporter.failure(
+                    flow = "google_sign_in",
+                    t = e,
+                    message = "Google sign-in failed: status ${e.statusCode}",
+                    context = mapOf("status" to e.statusCode.toString()),
+                )
+            }
             _authState.value = _authState.value.copy(
                 isLoading = false,
                 error = "Google sign-in failed: ${e.statusCode}"
@@ -260,6 +269,13 @@ class AuthService @Inject constructor(
             Result.failure(e)
         } catch (e: Exception) {
             Log.e(TAG, "Sign-in exception: ${e.message}", e)
+            if (e !is kotlinx.coroutines.CancellationException) {
+                com.kreativekoala.summaryai.FailureReporter.failure(
+                    flow = "google_sign_in",
+                    t = e,
+                    message = "Google sign-in token exchange failed: ${e.javaClass.simpleName}",
+                )
+            }
             _authState.value = _authState.value.copy(
                 isLoading = false,
                 error = e.message

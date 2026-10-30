@@ -377,8 +377,14 @@ class BillingManager @Inject constructor(
             }
             BillingClient.BillingResponseCode.USER_CANCELED ->
                 Log.d(TAG, "Purchase cancelled by user")
-            else ->
+            else -> {
                 Log.w(TAG, "Purchase failed: ${result.debugMessage}")
+                com.kreativekoala.summaryai.FailureReporter.failure(
+                    flow = "play_billing_purchase",
+                    message = "Play Billing purchase failed: code ${result.responseCode}",
+                    context = mapOf("code" to result.responseCode.toString()),
+                )
+            }
         }
     }
 }
