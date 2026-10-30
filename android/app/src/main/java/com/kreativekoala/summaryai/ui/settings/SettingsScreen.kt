@@ -89,11 +89,10 @@ fun SettingsScreen(
             appId = "meetingmind",
             appName = "MeetingMind",
             features = listOf(
-                PaywallFeature("\uD83C\uDFA4", "Unlimited Recordings"),
-                PaywallFeature("\uD83D\uDCDD", "AI Summaries"),
-                PaywallFeature("\uD83D\uDD0D", "Smart Search"),
-                PaywallFeature("\uD83D\uDCE4", "Export"),
-                PaywallFeature("☁\uFE0F", "Cloud Storage")
+                PaywallFeature("\uD83E\uDD16", "Meeting bot (Google Meet, Zoom)"),
+                PaywallFeature("\uD83D\uDCDE", "Phone call recording"),
+                PaywallFeature("\uD83D\uDCAC", "Meeting Q&A"),
+                PaywallFeature("\u2705", "Recording, transcripts and summaries are free")
             ),
             theme = PaywallTheme(accent = Color(0xFF6C63FF), accent2 = Color(0xFF9C27B0)),
             onDone = { showPaywallPreview = false }
