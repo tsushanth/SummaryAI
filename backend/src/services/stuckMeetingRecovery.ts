@@ -369,11 +369,68 @@ export async function reconcileStuckBotRecordings(): Promise<void> {
   }
 }
 
+/** A bot run still pending/joining this long after its last update will never get a status webhook. */
+export const STALE_BOT_RUN_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Close out bot_runs left in `pending`/`joining` for 24 h+. Recall's status webhooks (bot.joining_call, in_call_recording,
+ * call_ended, ...) are the only thing that advances a run; when they were missed (stale webhook subscription, May-June
+ * 2026) the row stayed `joining` forever, kept the BOT_NEVER_JOINED invariant firing, and misled anyone reading bot_runs.
+ * Only the bot_runs row is touched (never the meeting or the recording): `completed` when the meeting's recording did
+ * complete (the live-transcript stitcher finished it), otherwise `failed` with a distinct error_code.
+ */
+export async function expireStaleBotRuns(): Promise<number> {
+  const cutoffIso = new Date(Date.now() - STALE_BOT_RUN_MS).toISOString();
+  const { data: stale, error } = await supabaseAdmin
+    .from('bot_runs')
+    .select('id, meeting_id')
+    .in('status', ['pending', 'joining'])
+    .lt('updated_at', cutoffIso)
+    .limit(50);
+  if (error) {
+    console.error(`${BOT_RUN_TAG} stale scan failed:`, error.message);
+    reportLoopScanError('BotRecordingReconciler');
+    return 0;
+  }
+  if (!stale?.length) return 0;
+
+  let closed = 0;
+  for (const run of stale as Array<{ id: string; meeting_id: string }>) {
+    let recordingDone = false;
+    const { data: meeting } = await supabaseAdmin.from('meetings').select('recording_id').eq('id', run.meeting_id).maybeSingle();
+    const recordingId = (meeting as { recording_id: string | null } | null)?.recording_id;
+    if (recordingId) {
+      const { data: rec } = await supabaseAdmin.from('recordings').select('status').eq('id', recordingId).maybeSingle();
+      recordingDone = (rec as { status: string } | null)?.status === 'completed';
+    }
+    const patch = recordingDone
+      ? { status: 'completed' }
+      : { status: 'failed', error_code: 'STATUS_NEVER_REPORTED', error_message: 'No bot status was reported within 24 hours' };
+    const { error: updErr } = await supabaseAdmin
+      .from('bot_runs')
+      .update(patch)
+      .eq('id', run.id)
+      .in('status', ['pending', 'joining']); // never overwrite a status a late webhook just set
+    if (updErr) {
+      console.error(`${BOT_RUN_TAG} stale close failed for bot_run=${run.id.slice(0, 8)}: ${updErr.message}`);
+      continue;
+    }
+    closed++;
+  }
+  if (closed) console.log(`${BOT_RUN_TAG} closed ${closed} stale pending/joining bot run(s)`);
+  return closed;
+}
+
+async function reconcilePass(): Promise<void> {
+  await reconcileStuckBotRecordings();
+  await expireStaleBotRuns();
+}
+
 export function startBotRecordingReconcilerLoop(): void {
   registerLoop('BotRecordingReconciler', BOT_RUN_SCAN_INTERVAL_MS);
-  void runLoopPass('BotRecordingReconciler', reconcileStuckBotRecordings);
+  void runLoopPass('BotRecordingReconciler', reconcilePass);
   setInterval(() => {
-    void runLoopPass('BotRecordingReconciler', reconcileStuckBotRecordings);
+    void runLoopPass('BotRecordingReconciler', reconcilePass);
   }, BOT_RUN_SCAN_INTERVAL_MS);
   console.log(`${BOT_RUN_TAG} loop started (interval=${BOT_RUN_SCAN_INTERVAL_MS / 1000}s, min_age=${BOT_RUN_MIN_AGE_MS / 1000}s)`);
 }
