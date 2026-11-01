@@ -24,8 +24,8 @@ import { alertWebhookFailure, alertPaymentFailure } from '../services/alertingSe
 
 const router = Router();
 
-// Twilio callbacks carry X-Twilio-Signature. PHASE 1: verify + log only (enforce: false). See lib/twilioWebhookAuth.ts.
-router.use('/twilio', twilioWebhookAuth({ enforce: false }));
+// Twilio callbacks carry X-Twilio-Signature. PHASE 2: enforce (403 when unsigned or forged). See lib/twilioWebhookAuth.ts.
+router.use('/twilio', twilioWebhookAuth({ enforce: true }));
 
 /**
  * Helper to extract header value (handles string | string[] | undefined)
