@@ -6,7 +6,6 @@
 
 import { isRevenueCatAuthorized } from '../lib/webhookAuth.js';
 import { Router, Request, Response } from 'express';
-import { Webhook } from 'svix';
 import { checkRecallWebhook } from '../lib/recallWebhookAuth.js';
 import { twiml as TwiML } from 'twilio';
 import Stripe from 'stripe';
@@ -25,92 +24,20 @@ import { alertWebhookFailure, alertPaymentFailure } from '../services/alertingSe
 const router = Router();
 
 /**
- * Helper to extract header value (handles string | string[] | undefined)
- */
-function getHeader(headers: Record<string, string | string[] | undefined>, name: string): string | undefined {
-  const value = headers[name];
-  if (Array.isArray(value)) {
-    return value[0];
-  }
-  return value;
-}
-
-/**
- * LEGACY Recall check, kept ONLY so phase 1 never rejects anything the old code accepted (and still rejects what it rejected).
- * It is fail-open (no Svix headers => accept) and verifies JSON.stringify(req.body) rather than the raw bytes.
- * The real check is checkRecallWebhook() (lib/recallWebhookAuth.ts); phase 2 deletes this function.
- */
-function legacyVerifyRecallSignature(
-  payload: string,
-  headers: Record<string, string | string[] | undefined>
-): boolean {
-  const webhookSecret = config.RECALL_WEBHOOK_SECRET;
-
-  // Extract Svix headers (Express lowercases all headers)
-  const svixId = getHeader(headers, 'svix-id');
-  const svixTimestamp = getHeader(headers, 'svix-timestamp');
-  const svixSignature = getHeader(headers, 'svix-signature');
-
-  // Log headers for debugging
-  console.log('[Webhook] Incoming headers:', Object.keys(headers).filter(k => !k.startsWith('x-cloud') && !k.startsWith('x-forwarded')).join(', '));
-  console.log('[Webhook] Svix headers present:', { svixId: !!svixId, svixTimestamp: !!svixTimestamp, svixSignature: !!svixSignature });
-
-  // If no Svix headers are present, Recall.ai webhook signing may not be enabled
-  // Accept the webhook but log a warning
-  if (!svixId && !svixTimestamp && !svixSignature) {
-    console.warn('[Webhook] No Svix headers found - webhook signing may not be enabled in Recall.ai dashboard');
-    console.warn('[Webhook] Accepting webhook without signature verification (configure signing in production)');
-    return true;
-  }
-
-  // If some Svix headers are present but not all, reject
-  if (!svixId || !svixTimestamp || !svixSignature) {
-    console.error('[Webhook] Partial Svix headers - id:', !!svixId, 'timestamp:', !!svixTimestamp, 'signature:', !!svixSignature);
-    return false;
-  }
-
-  // If no secret configured but headers are present, we can't verify
-  if (!webhookSecret) {
-    console.warn('[Webhook] RECALL_WEBHOOK_SECRET not set but Svix headers present, skipping verification');
-    return true;
-  }
-
-  try {
-    const wh = new Webhook(webhookSecret);
-    const svixHeaders = {
-      'svix-id': svixId,
-      'svix-timestamp': svixTimestamp,
-      'svix-signature': svixSignature,
-    };
-    wh.verify(payload, svixHeaders);
-    console.log('[Webhook] Svix verification successful');
-    return true;
-  } catch (err) {
-    console.error('[Webhook] Svix verification failed:', err);
-    return false;
-  }
-}
-
-/**
  * POST /webhooks/recall
  * Handle Recall.ai webhook events
  */
 router.post('/recall', async (req: Request, res: Response) => {
-  // Verify webhook signature using Svix headers
-  const rawBody = JSON.stringify(req.body);
-  const headers = req.headers;
-
-  // PHASE 1: verify the raw body with Recall's documented Svix scheme; log + alert on failure but ACCEPT. Legacy rejections stay.
+  // PHASE 2: enforced. Fails closed: no secret, no/partial Svix headers, stale timestamp or bad signature => refused.
   const recallCheck = checkRecallWebhook({
     route: '/webhooks/recall',
     rawBody: (req as Request & { rawBody?: Buffer }).rawBody,
-    headers,
+    headers: req.headers,
     secrets: [config.RECALL_WEBHOOK_SECRET, config.RECALL_VERIFICATION_SECRET],
-    enforce: false,
+    enforce: true,
     alert: (flow, code, ctx) => { reportAlert(flow, code, ctx); },
   });
-
-  if (!recallCheck.verdict.ok && !legacyVerifyRecallSignature(rawBody, headers)) {
+  if (!recallCheck.accept) {
     console.error('[Webhook] Invalid Recall signature');
     // A rotated/mismatched signing secret silently drops EVERY bot webhook (recordings never finish).
     reportAlert('webhook_rejected', 'RECALL_SIGNATURE_INVALID');
@@ -528,16 +455,21 @@ async function markBotFailed(
  * Payload format: https://docs.recall.ai/docs/real-time-webhook-endpoints
  */
 router.post('/recall/transcript', async (req: Request, res: Response) => {
-  // PHASE 1: this route had no verification at all (it inserts transcripts and queues LLM insight generation). Real-time endpoints
-  // are signed with the workspace verification secret + webhook-* headers. Verify and log, still accept.
-  checkRecallWebhook({
+  // PHASE 2: enforced (this route had no verification at all; it inserts transcripts and queues LLM insight generation).
+  // Real-time endpoints are signed with the workspace verification secret + webhook-* headers (set RECALL_VERIFICATION_SECRET).
+  const transcriptCheck = checkRecallWebhook({
     route: '/webhooks/recall/transcript',
     rawBody: (req as Request & { rawBody?: Buffer }).rawBody,
     headers: req.headers,
     secrets: [config.RECALL_WEBHOOK_SECRET, config.RECALL_VERIFICATION_SECRET],
-    enforce: false,
+    enforce: true,
     alert: (flow, code, ctx) => { reportAlert(flow, code, ctx); },
   });
+
+  if (!transcriptCheck.accept) {
+    res.status(401).json({ error: 'Invalid signature' });
+    return;
+  }
 
   const payload = req.body as RecallTranscriptWebhookPayload;
   const { event, data } = payload;
