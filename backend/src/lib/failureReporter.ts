@@ -6,7 +6,10 @@
 const ENDPOINT = process.env.FAILURE_REPORTER_URL || 'https://app-failure-reporter.t-sushanth.workers.dev/v1/report';
 const KEY = process.env.FAILURE_REPORTER_KEY || 'afr_a60112f598c3f7206a8ecb8866dc22c3';
 const APP_VERSION = process.env.FLY_IMAGE_REF || process.env.K_REVISION || process.env.npm_package_version || 'unknown';
-const DISABLED = process.env.FAILURE_REPORTER_DISABLED === '1' || process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development';
+// Test runners (node --test, vitest, jest) must never post to the production reporter, even when NODE_ENV is unset or overridden.
+// A test that stubs fetch itself can opt back in with FAILURE_REPORTER_FORCE=1.
+const IN_TEST_RUNNER = !!(process.env.VITEST || process.env.JEST_WORKER_ID || process.env.NODE_TEST_CONTEXT);
+const DISABLED = process.env.FAILURE_REPORTER_DISABLED === '1' || process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development' || (IN_TEST_RUNNER && process.env.FAILURE_REPORTER_FORCE !== '1');
 
 type Kind = 'crash' | 'failure' | 'backend_error';
 
