@@ -17,11 +17,14 @@ export const REQUIRED_IN_PRODUCTION = [
   'RESEND_API_KEY',
 ] as const;
 
-/** Features that fail on use when unset (billing, phone, calendar). */
+/**
+ * Features that fail on use when unset (billing, phone, calendar). REVENUECAT_WEBHOOK_AUTH_HEADER is deliberately not
+ * listed: MeetingMind does not use RevenueCat (iOS = StoreKit 2, Android = Play billing + RTDN), and the webhook route
+ * rejects every request when it is unset.
+ */
 export const FEATURE_SECRETS = [
   'STRIPE_SECRET_KEY',
   'STRIPE_WEBHOOK_SECRET',
-  'REVENUECAT_WEBHOOK_AUTH_HEADER',
   'GOOGLE_PLAY_SA_JSON',
   'TWILIO_ACCOUNT_SID',
   'TWILIO_AUTH_TOKEN',

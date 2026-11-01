@@ -4,6 +4,7 @@
  * Recall.ai uses Svix for webhook delivery
  */
 
+import { isRevenueCatAuthorized } from '../lib/webhookAuth.js';
 import { Router, Request, Response } from 'express';
 import { Webhook } from 'svix';
 import { twiml as TwiML } from 'twilio';
@@ -1630,7 +1631,13 @@ router.post('/revenuecat', async (req: Request, res: Response) => {
   const authHeader = req.headers['authorization'];
   const expectedAuth = config.REVENUECAT_WEBHOOK_AUTH_HEADER;
 
-  if (expectedAuth && authHeader !== expectedAuth) {
+  if (!expectedAuth) {
+    // Not configured = feature off. Reject without alerting (RevenueCat is unused; the startup check no longer lists it).
+    console.warn('[RevenueCat Webhook] Rejected: REVENUECAT_WEBHOOK_AUTH_HEADER is not configured');
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+  if (!isRevenueCatAuthorized(authHeader, expectedAuth)) {
     console.error('[RevenueCat Webhook] Invalid authorization header');
     reportAlert('webhook_rejected', 'REVENUECAT_AUTH_INVALID');
     res.status(401).json({ error: 'Unauthorized' });
