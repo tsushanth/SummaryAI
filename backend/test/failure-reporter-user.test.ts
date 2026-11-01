@@ -9,6 +9,7 @@ describe('failure reporter user reference', () => {
     // The reporter is disabled when NODE_ENV is test/development; load it as production would.
     vi.stubEnv('NODE_ENV', 'production');
     vi.stubEnv('FAILURE_REPORTER_DISABLED', '0');
+    vi.stubEnv('FAILURE_REPORTER_FORCE', '1'); // the reporter is also off under vitest; this file stubs fetch itself
   });
 
   it('attaches the signed-in user id (never an email) to a backend error', async () => {
