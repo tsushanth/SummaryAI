@@ -17,6 +17,7 @@ import { reportRecordingFailureById, botFailureCode } from '../lib/recordingFail
 import { queueInsightGeneration } from '../services/liveInsightsService.js';
 import { grantCredits } from '../services/coachingService.js';
 import { TwilioService } from '../services/twilioService.js';
+import { reportAlert } from '../lib/alerts.js';
 import { alertWebhookFailure, alertPaymentFailure } from '../services/alertingService.js';
 
 const router = Router();
@@ -99,6 +100,8 @@ router.post('/recall', async (req: Request, res: Response) => {
 
   if (!verifyRecallSignature(rawBody, headers)) {
     console.error('[Webhook] Invalid Recall signature');
+    // A rotated/mismatched signing secret silently drops EVERY bot webhook (recordings never finish).
+    reportAlert('webhook_rejected', 'RECALL_SIGNATURE_INVALID');
     res.status(401).json({ error: 'Invalid signature' });
     return;
   }
@@ -679,6 +682,7 @@ router.post('/twilio/caller-connect', async (req: Request, res: Response) => {
     res.type('text/xml').send(twiml);
   } catch (error) {
     console.error('[Twilio Webhook] Error in caller-connect:', error);
+    reportAlert('twilio_webhook_error', 'CALLER_CONNECT');
     const response = new TwiML.VoiceResponse();
     response.say('Sorry, there was an error with your call.');
     res.type('text/xml').send(response.toString());
@@ -736,6 +740,7 @@ router.post('/twilio/server-call-answer', async (req: Request, res: Response) =>
     res.type('text/xml').send(response.toString());
   } catch (error) {
     console.error('[Twilio Webhook] Error in server-call-answer:', error);
+    reportAlert('twilio_webhook_error', 'SERVER_CALL_ANSWER');
     const response = new TwiML.VoiceResponse();
     response.say('Sorry, there was an error with your call.');
     res.type('text/xml').send(response.toString());
@@ -813,6 +818,7 @@ router.post('/twilio/voip-outbound', async (req: Request, res: Response) => {
     res.type('text/xml').send(twiml);
   } catch (error) {
     console.error('[Twilio Webhook] Error in voip-outbound:', error);
+    reportAlert('twilio_webhook_error', 'VOIP_OUTBOUND');
     const response = new TwiML.VoiceResponse();
     response.say('Sorry, there was an error placing your call.');
     res.type('text/xml').send(response.toString());
@@ -895,6 +901,7 @@ router.post('/twilio/recipient-whisper', async (req: Request, res: Response) => 
     res.type('text/xml').send(response.toString());
   } catch (error) {
     console.error('[Twilio Webhook] Error in recipient-whisper:', error);
+    reportAlert('twilio_webhook_error', 'RECIPIENT_WHISPER');
     // Return empty TwiML on error to continue the call
     res.type('text/xml').send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
   }
@@ -1014,6 +1021,7 @@ router.post('/twilio/dial-complete', async (req: Request, res: Response) => {
         .eq('id', callId);
     } catch (error) {
       console.error('[Twilio Webhook] Error in dial-complete:', error);
+      reportAlert('twilio_webhook_error', 'DIAL_COMPLETE');
     }
   }
 
@@ -1163,6 +1171,7 @@ router.post('/twilio/recording-complete', async (req: Request, res: Response) =>
       }
     } catch (error) {
       console.error('[Twilio Webhook] Error processing recording:', error);
+      reportAlert('twilio_webhook_error', 'RECORDING_PROCESSING');
       // Update phone call with error but don't fail the webhook
       await supabaseAdmin
         .from('phone_calls')
@@ -1235,6 +1244,7 @@ router.post('/stripe', async (req: Request, res: Response) => {
     event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
   } catch (err) {
     console.error('[Stripe Webhook] Signature verification failed:', err);
+    reportAlert('webhook_rejected', 'STRIPE_SIGNATURE_INVALID');
     console.error('[Stripe Webhook] Body type:', typeof req.body, Buffer.isBuffer(req.body) ? '(Buffer)' : '');
     res.status(400).json({ error: 'Invalid signature' });
     return;
@@ -1622,6 +1632,7 @@ router.post('/revenuecat', async (req: Request, res: Response) => {
 
   if (expectedAuth && authHeader !== expectedAuth) {
     console.error('[RevenueCat Webhook] Invalid authorization header');
+    reportAlert('webhook_rejected', 'REVENUECAT_AUTH_INVALID');
     res.status(401).json({ error: 'Unauthorized' });
     return;
   }

@@ -17,6 +17,8 @@
  * had billing disabled, which made every auto-record toggle silently fail.
  */
 
+import { registerLoop, runLoopPass, reportLoopScanError } from '../lib/loopMonitor.js';
+import { reportAlert } from '../lib/alerts.js';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
 
@@ -146,9 +148,12 @@ async function triggerBotJoin(meetingId: string, userId: string): Promise<void> 
     if (!response.ok) {
       const error = await response.text();
       console.error(`[Scheduler] Bot join failed: ${error}`);
+      // The job is already claimed ('executed'), so nothing retries this: the bot never joins and the user gets no recording.
+      reportAlert('bot_join_failed', 'WORKER_HTTP_ERROR', { status: response.status });
     }
   } catch (error) {
     console.error(`[Scheduler] Failed to trigger bot join:`, error);
+    reportAlert('bot_join_failed', 'TRIGGER_UNREACHABLE');
   }
 }
 
@@ -217,6 +222,7 @@ export async function reconcileDueBotJoins(): Promise<void> {
 
   if (error) {
     console.error(`${RECONCILER_TAG} scan failed:`, error);
+    reportLoopScanError('BotJoinReconciler');
     return;
   }
   if (!dueJobs || dueJobs.length === 0) return;
@@ -257,8 +263,9 @@ export async function reconcileDueBotJoins(): Promise<void> {
 
 export function startBotJoinReconcilerLoop(): void {
   if (reconcilerTimer) return;
+  registerLoop('BotJoinReconciler', RECONCILER_INTERVAL_MS);
   reconcilerTimer = setInterval(() => {
-    reconcileDueBotJoins().catch((e) => console.error(`${RECONCILER_TAG} loop error:`, e));
+    void runLoopPass('BotJoinReconciler', reconcileDueBotJoins);
   }, RECONCILER_INTERVAL_MS);
   console.log(`${RECONCILER_TAG} started (interval ${RECONCILER_INTERVAL_MS / 1000}s)`);
 }

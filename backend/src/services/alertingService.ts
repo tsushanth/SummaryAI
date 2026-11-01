@@ -3,6 +3,8 @@
  * Sends notifications for critical events like webhook failures and payment issues
  */
 
+import { reportAlert } from '../lib/alerts.js';
+
 interface AlertPayload {
   title: string;
   message: string;
@@ -105,6 +107,9 @@ export async function alertWebhookFailure(
 
   console.error(`[ALERT] Stripe webhook failure - ${eventType}:`, errorMessage);
 
+  // SLACK_WEBHOOK_URL is not set in production, so this used to only reach the console. Event type is a Stripe enum, not content.
+  reportAlert('stripe_webhook_failed', String(eventType).replace(/[^A-Za-z0-9._-]/g, '').slice(0, 60) || 'unknown_event');
+
   await sendSlackAlert({
     title: 'Stripe Webhook Failure',
     message: `*Event:* ${eventType}\n*Error:* ${errorMessage}`,
@@ -123,6 +128,8 @@ export async function alertPaymentFailure(
   error?: string
 ): Promise<void> {
   console.error(`[ALERT] Payment failure for user ${userId}:`, error);
+  // No user id, email or amount: they stay in the Slack/console path only.
+  reportAlert('payment_failed', 'PAYMENT_FAILURE_EVENT', {}, 60 * 60_000);
 
   await sendSlackAlert({
     title: 'Payment Failed - Customer Action Required',

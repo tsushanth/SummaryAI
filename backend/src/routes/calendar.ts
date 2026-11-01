@@ -26,6 +26,7 @@
  * or used by the AI services (Anthropic, Deepgram).
  */
 
+import { reportAlert } from '../lib/alerts.js';
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { supabaseAdmin } from '../lib/supabase.js';
@@ -877,6 +878,8 @@ router.post(
         meetingsUpdated += result.updated;
       } catch (syncError) {
         console.error(`[Calendar] Sync failed for connection ${connection.id}:`, syncError);
+        // The response is still 200 ("synced: 0"), so this is the only signal. invalid_grant = the user's refresh token is dead.
+        reportAlert('calendar_sync_failed', /refresh token|expired/i.test(syncError instanceof Error ? syncError.message : '') ? 'TOKEN_REFRESH_FAILED' : 'SYNC_ERROR', { provider: (connection as { provider?: string }).provider });
       }
     }
 

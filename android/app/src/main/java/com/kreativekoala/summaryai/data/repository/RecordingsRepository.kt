@@ -98,6 +98,7 @@ class RecordingsRepository @Inject constructor(
         durationSeconds: Int,
         onProgress: (Float) -> Unit = {}
     ): Result<Recording> = withContext(Dispatchers.IO) {
+        var stage = "create"
         try {
             val fileSize = audioFile.length()
             Log.d(TAG, "Creating recording - title: $title, duration: $durationSeconds, size: $fileSize")
@@ -113,6 +114,7 @@ class RecordingsRepository @Inject constructor(
             Log.d(TAG, "Recording created: id=${createResponse.recording.id}")
 
             // Step 2: Upload file to storage
+            stage = "storage_put"
             val uploadInfo = createResponse.upload
             val body = ProgressRequestBody(
                 delegate = audioFile.asRequestBody("audio/mp4".toMediaType()),
@@ -134,6 +136,7 @@ class RecordingsRepository @Inject constructor(
             }
 
             // Step 3: Complete upload
+            stage = "complete"
             Log.d(TAG, "Completing upload for recording: ${createResponse.recording.id}")
             val completeResponse = api.completeUpload(
                 id = createResponse.recording.id,
@@ -143,6 +146,15 @@ class RecordingsRepository @Inject constructor(
 
             Result.success(completeResponse.recording.toDomain())
         } catch (e: Exception) {
+            // Stable message per stage + exception class (no titles, ids or URLs) so the reporter dedupes it.
+            if (e !is kotlinx.coroutines.CancellationException) {
+                com.kreativekoala.summaryai.FailureReporter.failure(
+                    flow = "recording_upload",
+                    t = e,
+                    message = "Recording upload failed at $stage: ${e.javaClass.simpleName}",
+                    context = mapOf("stage" to stage),
+                )
+            }
             Result.failure(e)
         }
     }

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link2, X } from 'lucide-react';
 import { createShare, listShares, revokeShare, type ShareLink } from '@/lib/api/organize';
+import { reportUnexpectedWebFailure } from '@/components/WebFailureReporter';
 
 /**
  * Public share links for one recording. The full URL is only available right
@@ -23,7 +24,8 @@ export function ShareLinkPanel({ recordingId }: { recordingId: string }) {
     try {
       setShares(await listShares(recordingId));
       setLoaded(true);
-    } catch {
+    } catch (e) {
+      reportUnexpectedWebFailure('share_links_load', e);
       setError('Could not load share links');
     }
   }, [recordingId]);
@@ -43,6 +45,7 @@ export function ShareLinkPanel({ recordingId }: { recordingId: string }) {
       setNewUrl(res.url);
       await load();
     } catch (e) {
+      reportUnexpectedWebFailure('share_link_create', e);
       setError(e instanceof Error ? e.message : 'Failed to create link');
     } finally {
       setBusy(false);
@@ -55,7 +58,8 @@ export function ShareLinkPanel({ recordingId }: { recordingId: string }) {
     try {
       await revokeShare(recordingId, id);
       await load();
-    } catch {
+    } catch (e) {
+      reportUnexpectedWebFailure('share_link_revoke', e);
       setError('Failed to revoke link');
     } finally {
       setBusy(false);

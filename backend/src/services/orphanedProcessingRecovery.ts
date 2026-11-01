@@ -24,6 +24,8 @@
 import { supabaseAdmin } from '../lib/supabase.js';
 import { triggerProcessing, getActiveProcessingIds } from './processingService.js';
 import { reportRecordingFailure, reportRecordingRetry } from '../lib/recordingFailure.js';
+import { registerLoop, runLoopPass, reportLoopScanError } from '../lib/loopMonitor.js';
+import { reportAlert } from '../lib/alerts.js';
 
 export const ORPHAN_SCAN_INTERVAL_MS = 5 * 60 * 1000;   // 5 min
 export const ORPHAN_MIN_AGE_MS       = 45 * 60 * 1000;  // legit processing takes minutes, even for multi-hour audio
@@ -63,6 +65,7 @@ export async function recoverOrphanedProcessing(now: number = Date.now()): Promi
     .limit(MAX_ORPHANS_PER_PASS * 5);
   if (error) {
     console.error(`${TAG} scan failed:`, error.message);
+    reportLoopScanError('OrphanRecovery');
     return;
   }
   if (!data?.length) return;
@@ -120,6 +123,7 @@ export async function recoverOrphanedProcessing(now: number = Date.now()): Promi
       reportRecordingFailure(INTERRUPTED_CODE, meta(r));
     } catch (e: any) {
       console.error(`${TAG} ${tag} decision=error message=${e?.message || e}`);
+      reportAlert('recording_recovery_failed', 'ORPHAN_RECOVERY_ERROR', { loop: 'OrphanRecovery' });
     }
   }
 }
@@ -141,9 +145,10 @@ async function claim(r: OrphanRow, patch: Record<string, unknown>): Promise<bool
 }
 
 export function startOrphanedProcessingRecoveryLoop(): void {
-  recoverOrphanedProcessing().catch(e => console.error(`${TAG} initial scan threw:`, e));
+  registerLoop('OrphanRecovery', ORPHAN_SCAN_INTERVAL_MS);
+  void runLoopPass('OrphanRecovery', recoverOrphanedProcessing);
   setInterval(() => {
-    recoverOrphanedProcessing().catch(e => console.error(`${TAG} scan threw:`, e));
+    void runLoopPass('OrphanRecovery', recoverOrphanedProcessing);
   }, ORPHAN_SCAN_INTERVAL_MS);
   console.log(`${TAG} loop started (interval=${ORPHAN_SCAN_INTERVAL_MS / 1000}s, min_idle=${ORPHAN_MIN_AGE_MS / 60000}min, max_per_pass=${MAX_ORPHANS_PER_PASS})`);
 }

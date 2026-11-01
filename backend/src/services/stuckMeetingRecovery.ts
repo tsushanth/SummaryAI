@@ -16,6 +16,8 @@ import { supabaseAdmin } from '../lib/supabase.js';
 import { finalizeBotRecording } from './recallService.js';
 import { reportRecordingFailureById, botFailureCode } from '../lib/recordingFailure.js';
 import type { BotRun, Meeting } from '../types/meetings.js';
+import { registerLoop, runLoopPass, reportLoopScanError } from '../lib/loopMonitor.js';
+import { reportAlert } from '../lib/alerts.js';
 
 const SCAN_INTERVAL_MS = 5 * 60 * 1000;        // 5 min
 const MIN_AGE_MS       = 10 * 60 * 1000;       // only touch recordings >10 min old
@@ -195,6 +197,7 @@ async function scanAndRecover(): Promise<void> {
     .limit(50);
   if (error) {
     console.error(`${TAG} scan failed:`, error.message);
+    reportLoopScanError('StuckRecovery');
     return;
   }
   if (!stuck?.length) return;
@@ -205,15 +208,17 @@ async function scanAndRecover(): Promise<void> {
       await stitchStuckRecording(r.id, r.meeting_id as string);
     } catch (e: any) {
       console.error(`${TAG} recover failed for ${r.id.slice(0, 8)}: ${e?.message || e}`);
+      reportAlert('recording_recovery_failed', 'LIVE_TRANSCRIPT_STITCH_FAILED', { loop: 'StuckRecovery' });
     }
   }
 }
 
 export function startStuckMeetingRecoveryLoop(): void {
   // Run once on boot then every 5 min.
-  scanAndRecover().catch(e => console.error(`${TAG} initial scan threw:`, e));
+  registerLoop('StuckRecovery', SCAN_INTERVAL_MS);
+  void runLoopPass('StuckRecovery', scanAndRecover);
   setInterval(() => {
-    scanAndRecover().catch(e => console.error(`${TAG} scan threw:`, e));
+    void runLoopPass('StuckRecovery', scanAndRecover);
   }, SCAN_INTERVAL_MS);
   console.log(`${TAG} loop started (interval=${SCAN_INTERVAL_MS / 1000}s, min_age=${MIN_AGE_MS / 1000}s)`);
 }
@@ -284,6 +289,7 @@ export async function reconcileStuckBotRecordings(): Promise<void> {
 
   if (error) {
     console.error(`${BOT_RUN_TAG} scan failed:`, error.message);
+    reportLoopScanError('BotRecordingReconciler');
     return;
   }
   if (!stuckRuns?.length) return;
@@ -338,6 +344,8 @@ export async function reconcileStuckBotRecordings(): Promise<void> {
     } catch (e: any) {
       const message = e?.message || String(e);
       console.error(`${BOT_RUN_TAG} recover failed for bot_run=${botRun.id.slice(0, 8)}: ${message}`);
+      // Left in 'processing' for the next scan, so without this a recording that can never be finalized retries silently forever.
+      reportAlert('recording_recovery_failed', isPermanentUploadError(message) ? 'BOT_RECORDING_TOO_LARGE' : 'BOT_FINALIZE_FAILED', { loop: 'BotRecordingReconciler' });
 
       if (isPermanentUploadError(message)) {
         // Retrying this would just re-download the whole recording from
@@ -362,9 +370,10 @@ export async function reconcileStuckBotRecordings(): Promise<void> {
 }
 
 export function startBotRecordingReconcilerLoop(): void {
-  reconcileStuckBotRecordings().catch(e => console.error(`${BOT_RUN_TAG} initial scan threw:`, e));
+  registerLoop('BotRecordingReconciler', BOT_RUN_SCAN_INTERVAL_MS);
+  void runLoopPass('BotRecordingReconciler', reconcileStuckBotRecordings);
   setInterval(() => {
-    reconcileStuckBotRecordings().catch(e => console.error(`${BOT_RUN_TAG} scan threw:`, e));
+    void runLoopPass('BotRecordingReconciler', reconcileStuckBotRecordings);
   }, BOT_RUN_SCAN_INTERVAL_MS);
   console.log(`${BOT_RUN_TAG} loop started (interval=${BOT_RUN_SCAN_INTERVAL_MS / 1000}s, min_age=${BOT_RUN_MIN_AGE_MS / 1000}s)`);
 }

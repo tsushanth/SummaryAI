@@ -38,6 +38,16 @@ export function reportWebFailure(flow: string, err: unknown, extra: Record<strin
   }
 }
 
+/**
+ * For catch blocks around API calls: reports anything that is not an expected 4xx (validation, limits, not-found are the
+ * user's doing and the server already answered them). Network errors are filtered by IGNORE; 5xx and code bugs are sent.
+ */
+export function reportUnexpectedWebFailure(flow: string, err: unknown, extra: Record<string, string> = {}) {
+  const e = err as { name?: string; status?: number } | null
+  if (e && e.name === 'ApiError' && typeof e.status === 'number' && e.status < 500) return
+  reportWebFailure(flow, err, extra)
+}
+
 /** Mount once in the root layout. Catches uncaught errors and unhandled promise rejections. */
 export default function WebFailureReporter() {
   useEffect(() => {

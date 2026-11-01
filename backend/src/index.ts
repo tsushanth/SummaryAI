@@ -13,6 +13,10 @@ import morgan from 'morgan';
 import { config, logConfig } from './config/index.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { reportFailure, reportCrash } from './lib/failureReporter.js';
+import { serverErrorReporter } from './middleware/serverErrorReporter.js';
+import { checkStartupConfig } from './lib/startupConfig.js';
+import { startLoopWatchdog, reportLoopInitFailure } from './lib/loopMonitor.js';
+import { startPipelineInvariantLoop } from './services/pipelineInvariants.js';
 import { testConnection } from './lib/supabase.js';
 import { flushLlmUsage } from './lib/llm.js';
 import routes from './routes/index.js';
@@ -68,6 +72,9 @@ app.set('trust proxy', true);
 // Routes
 // ============================================================================
 
+// Report every 5xx, including ones handlers send directly (they never reach errorHandler).
+app.use(serverErrorReporter);
+
 // API version prefix
 app.use(`/${config.API_VERSION}`, routes);
 
@@ -108,8 +115,12 @@ async function startServer(): Promise<void> {
   const dbConnected = await testConnection();
   if (!dbConnected) {
     console.error('❌ Failed to connect to Supabase. Check your configuration.');
+    await reportCrash('startup', new Error('Startup aborted: cannot connect to Supabase'));
     process.exit(1);
   }
+
+  // Missing provider secrets would otherwise only show up as mock transcripts or per-request failures.
+  checkStartupConfig();
 
   // Start listening
   app.listen(config.PORT, () => {
@@ -124,26 +135,28 @@ async function startServer(): Promise<void> {
     // process last died (e.g. previous deploy / Fly machine restart).
     import('./services/coachingService.js').then(m => m.recoverActiveSessions())
       .catch(e => console.error('[Coaching] recovery failed:', e));
+    startLoopWatchdog();
+    startPipelineInvariantLoop();
     // Backstop for the Recall bot.status_change webhook subscription gap:
     // auto-stitches live_transcripts into the transcripts table for any
     // recording stuck in `pending` for >10 min.
     import('./services/stuckMeetingRecovery.js').then(m => m.startStuckMeetingRecoveryLoop())
-      .catch(e => console.error('[StuckRecovery] init failed:', e));
+      .catch(e => { console.error('[StuckRecovery] init failed:', e); reportLoopInitFailure('StuckRecovery'); });
     // Backstop for the Recall `recording.done` / `audio_mixed.done` webhook
     // being dropped or never subscribed: polls Recall directly for any
     // bot_run stuck in `processing` whose recording never advanced past
     // `uploading`/file_path=null, and finalizes it the same way the webhook
     // would have.
     import('./services/stuckMeetingRecovery.js').then(m => m.startBotRecordingReconcilerLoop())
-      .catch(e => console.error('[BotRecordingReconciler] init failed:', e));
+      .catch(e => { console.error('[BotRecordingReconciler] init failed:', e); reportLoopInitFailure('BotRecordingReconciler'); });
     // Backstop for processing jobs killed mid-way (deploy / OOM): retries a young
     // orphan once, otherwise marks it failed so the user sees a retry button.
     import('./services/orphanedProcessingRecovery.js').then(m => m.startOrphanedProcessingRecoveryLoop())
-      .catch(e => console.error('[OrphanRecovery] init failed:', e));
+      .catch(e => { console.error('[OrphanRecovery] init failed:', e); reportLoopInitFailure('OrphanRecovery'); });
     // Backstop for scheduleBotJoin's in-memory setTimeout getting dropped by
     // a Fly.io machine restart between scheduling and join time.
     import('./services/botSchedulerService.js').then(m => m.startBotJoinReconcilerLoop())
-      .catch(e => console.error('[BotJoinReconciler] init failed:', e));
+      .catch(e => { console.error('[BotJoinReconciler] init failed:', e); reportLoopInitFailure('BotJoinReconciler'); });
   });
 }
 

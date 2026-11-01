@@ -3,6 +3,7 @@
  * All outbound HTTP goes through safeFetch (SSRF guard). Secrets are stored encrypted.
  */
 
+import { reportAlert } from '../lib/alerts.js';
 import crypto from 'node:crypto';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { safeFetch, validateOutboundUrl, SsrfError, type SafeFetchOptions } from '../lib/ssrfGuard.js';
@@ -373,10 +374,13 @@ export async function dispatchRecordingCompleted(recordingId: string, opts: Deli
           await record(row, recordingId, payload.event, r);
         } catch (e) {
           console.error('[Integrations] delivery bookkeeping failed:', e instanceof Error ? e.message : e);
+          // Our side (credential decrypt after a key rotation, DB write), not the customer's endpoint being down.
+          reportAlert('integration_dispatch_error', 'DELIVERY_BOOKKEEPING_FAILED');
         }
       })
     );
   } catch (e) {
     console.error('[Integrations] dispatch failed:', e instanceof Error ? e.message : e);
+    reportAlert('integration_dispatch_error', 'DISPATCH_FAILED');
   }
 }
