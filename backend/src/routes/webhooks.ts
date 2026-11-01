@@ -7,6 +7,7 @@
 import { isRevenueCatAuthorized } from '../lib/webhookAuth.js';
 import { Router, Request, Response } from 'express';
 import { Webhook } from 'svix';
+import { checkRecallWebhook } from '../lib/recallWebhookAuth.js';
 import { twiml as TwiML } from 'twilio';
 import Stripe from 'stripe';
 import { supabaseAdmin } from '../lib/supabase.js';
@@ -35,11 +36,11 @@ function getHeader(headers: Record<string, string | string[] | undefined>, name:
 }
 
 /**
- * Verify Recall.ai webhook signature
- * Note: Recall.ai webhook signing must be enabled in their dashboard
- * If Svix headers are present, verify with Svix. Otherwise, accept the webhook.
+ * LEGACY Recall check, kept ONLY so phase 1 never rejects anything the old code accepted (and still rejects what it rejected).
+ * It is fail-open (no Svix headers => accept) and verifies JSON.stringify(req.body) rather than the raw bytes.
+ * The real check is checkRecallWebhook() (lib/recallWebhookAuth.ts); phase 2 deletes this function.
  */
-function verifyRecallSignature(
+function legacyVerifyRecallSignature(
   payload: string,
   headers: Record<string, string | string[] | undefined>
 ): boolean {
@@ -99,7 +100,17 @@ router.post('/recall', async (req: Request, res: Response) => {
   const rawBody = JSON.stringify(req.body);
   const headers = req.headers;
 
-  if (!verifyRecallSignature(rawBody, headers)) {
+  // PHASE 1: verify the raw body with Recall's documented Svix scheme; log + alert on failure but ACCEPT. Legacy rejections stay.
+  const recallCheck = checkRecallWebhook({
+    route: '/webhooks/recall',
+    rawBody: (req as Request & { rawBody?: Buffer }).rawBody,
+    headers,
+    secrets: [config.RECALL_WEBHOOK_SECRET, config.RECALL_VERIFICATION_SECRET],
+    enforce: false,
+    alert: (flow, code, ctx) => { reportAlert(flow, code, ctx); },
+  });
+
+  if (!recallCheck.verdict.ok && !legacyVerifyRecallSignature(rawBody, headers)) {
     console.error('[Webhook] Invalid Recall signature');
     // A rotated/mismatched signing secret silently drops EVERY bot webhook (recordings never finish).
     reportAlert('webhook_rejected', 'RECALL_SIGNATURE_INVALID');
@@ -517,6 +528,17 @@ async function markBotFailed(
  * Payload format: https://docs.recall.ai/docs/real-time-webhook-endpoints
  */
 router.post('/recall/transcript', async (req: Request, res: Response) => {
+  // PHASE 1: this route had no verification at all (it inserts transcripts and queues LLM insight generation). Real-time endpoints
+  // are signed with the workspace verification secret + webhook-* headers. Verify and log, still accept.
+  checkRecallWebhook({
+    route: '/webhooks/recall/transcript',
+    rawBody: (req as Request & { rawBody?: Buffer }).rawBody,
+    headers: req.headers,
+    secrets: [config.RECALL_WEBHOOK_SECRET, config.RECALL_VERIFICATION_SECRET],
+    enforce: false,
+    alert: (flow, code, ctx) => { reportAlert(flow, code, ctx); },
+  });
+
   const payload = req.body as RecallTranscriptWebhookPayload;
   const { event, data } = payload;
 

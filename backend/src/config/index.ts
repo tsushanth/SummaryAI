@@ -55,6 +55,8 @@ const envSchema = z.object({
   RECALL_API_KEY: z.string().optional(),
   RECALL_REGION: z.string().default('us-west-2'),
   RECALL_WEBHOOK_SECRET: z.string().optional(),
+  // Recall workspace verification secret (real-time endpoints; accounts created on/after 2025-12-15). Tried in addition to RECALL_WEBHOOK_SECRET.
+  RECALL_VERIFICATION_SECRET: z.string().optional(),
 
   // Google Calendar OAuth
   GOOGLE_CLIENT_ID: z.string().optional(),

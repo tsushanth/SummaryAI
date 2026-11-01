@@ -61,7 +61,13 @@ app.use(morgan(config.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use('/v1/webhooks/stripe', express.raw({ type: 'application/json' }));
 app.use('/webhooks/stripe', express.raw({ type: 'application/json' }));
 
-app.use(express.json({ limit: '10mb' }));
+// Recall webhooks are signed over the exact bytes sent, so keep them next to the parsed body (req.rawBody) for those routes only.
+app.use(express.json({
+  limit: '10mb',
+  verify: (req, _res, buf) => {
+    if ((req as Request).originalUrl.split('?')[0]?.includes('/webhooks/recall')) (req as Request & { rawBody?: Buffer }).rawBody = buf;
+  },
+}));
 // Twilio webhooks send application/x-www-form-urlencoded data
 app.use(express.urlencoded({ extended: true }));
 
