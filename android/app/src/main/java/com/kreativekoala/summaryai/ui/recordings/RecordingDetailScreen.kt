@@ -34,8 +34,7 @@ import androidx.compose.ui.unit.dp
 fun RecordingDetailScreen(
     recordingId: String,
     viewModel: RecordingDetailViewModel = hiltViewModel(),
-    onNavigateBack: () -> Unit,
-    onUpgradeClick: () -> Unit
+    onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val detail = uiState.recordingDetail

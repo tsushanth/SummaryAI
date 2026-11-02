@@ -113,10 +113,7 @@ class MainActivity : AppCompatActivity() {
                             isAuthenticated = authState.isAuthenticated,
                             hasCompletedOnboarding = authState.hasCompletedOnboarding,
                             startRecordingRequested = startRecordingRequested,
-                            onStartRecordingHandled = { startRecordingRequested = false },
-                            // Live check, re-evaluated when the user taps a still-paid feature
-                            // (Join Meeting bot, Phone call recording). Recording is free.
-                            isPaidFeatureLocked = { !billingManager.isSubscribed.value }
+                            onStartRecordingHandled = { startRecordingRequested = false }
                         )
                     }
                 }
