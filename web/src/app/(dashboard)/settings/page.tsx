@@ -8,6 +8,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { useSubscription, useCustomerPortal } from '@/hooks/useSubscription';
 import Link from 'next/link';
 import { DefaultTemplateCard } from '@/components/settings/DefaultTemplateCard';
+import { DeleteAccountCard } from '@/components/settings/DeleteAccountCard';
 
 export default function SettingsPage() {
   const { user, signOut, loading } = useAuth();
@@ -146,6 +147,8 @@ export default function SettingsPage() {
             </Button>
           </CardContent>
         </Card>
+
+        <DeleteAccountCard />
 
         {/* About Card */}
         <Card>
