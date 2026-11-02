@@ -132,6 +132,8 @@ export interface CreateRecordingRequest {
   content_type: string;
   file_size: number;
   recording_type?: RecordingType;
+  /** Language code for the summary (see lib/outputLanguages.ts); omit to follow the recording's language. */
+  output_language?: string;
 }
 
 export interface CreateRecordingResponse {
