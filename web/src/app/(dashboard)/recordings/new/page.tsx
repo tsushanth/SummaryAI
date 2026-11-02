@@ -1,6 +1,15 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { useBeforeUnloadGuard } from '@/hooks/useBeforeUnloadGuard';
+import {
+  createIndexedDbStore,
+  discardPending,
+  newPendingId,
+  savePending,
+  shouldBlockUnload,
+  uploadWithPersistence,
+} from '@/lib/pendingUpload';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Mic, Upload, Loader2 } from 'lucide-react';
 import Link from 'next/link';
@@ -11,7 +20,7 @@ import { AudioRecorder } from '@/components/audio/AudioRecorder';
 import { UploadDropzone } from '@/components/audio/UploadDropzone';
 import { ProgressBar } from '@/components/audio/ProgressBar';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
-import { createRecording, uploadAudio, completeUpload } from '@/lib/api/recordings';
+import { createRecording, uploadAudio, completeUpload, deleteRecording } from '@/lib/api/recordings';
 import { cn } from '@/lib/utils/cn';
 
 type InputMode = 'record' | 'upload';
@@ -26,6 +35,34 @@ export default function NewRecordingPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const recorder = useAudioRecorder();
+
+  // Don't let a tab close/reload lose a recording in progress or an upload in flight.
+  useBeforeUnloadGuard(
+    shouldBlockUnload({ isRecording: recorder.isRecording, isPaused: recorder.isPaused, isSubmitting })
+  );
+
+  // Keep the finished recording in IndexedDB until the upload succeeds (see lib/pendingUpload.ts).
+  const pendingIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (recorder.audioBlob && !recorder.isRecording) {
+      const blob = recorder.audioBlob;
+      const id = pendingIdRef.current ?? (pendingIdRef.current = newPendingId());
+      const ext = blob.type.includes('mp4') ? 'mp4' : 'webm';
+      savePending(createIndexedDbStore(), {
+        id,
+        title: '',
+        blob,
+        fileName: `recording-${Date.now()}.${ext}`,
+        contentType: blob.type || 'audio/webm',
+        fileSize: blob.size,
+        createdAt: Date.now(),
+      }).catch(() => {}); // best effort: private mode / quota
+    } else if (!recorder.audioBlob && pendingIdRef.current) {
+      // A new recording was started or the old one was reset: drop the saved copy of the discarded one.
+      discardPending(createIndexedDbStore(), pendingIdRef.current).catch(() => {});
+      pendingIdRef.current = null;
+    }
+  }, [recorder.audioBlob, recorder.isRecording]);
 
   const handleFileSelect = useCallback((file: File) => {
     setSelectedFile(file);
@@ -54,6 +91,33 @@ export default function NewRecordingPage() {
     setUploadProgress(0);
 
     try {
+      if (mode === 'record') {
+        // Browser recording: the blob stays in IndexedDB until completeUpload succeeds.
+        const id = pendingIdRef.current ?? newPendingId();
+        pendingIdRef.current = id;
+        const ext = audioBlob.type.includes('mp4') ? 'mp4' : 'webm';
+        const fileName = `recording-${Date.now()}.${ext}`;
+        const contentType = audioBlob.type || 'audio/webm';
+        const { recordingId } = await uploadWithPersistence(
+          createIndexedDbStore(),
+          { id, title: title.trim(), blob: audioBlob, fileName, contentType, fileSize: audioBlob.size, createdAt: Date.now() },
+          {
+            create: async (req) => {
+              const { recording, upload_info } = await createRecording(req);
+              return { recordingId: recording.id, uploadInfo: upload_info };
+            },
+            upload: (info, blob, onProgress) =>
+              uploadAudio(info, new File([blob], fileName, { type: contentType }), onProgress),
+            complete: completeUpload,
+            discardStale: deleteRecording,
+            onProgress: setUploadProgress,
+          }
+        );
+        pendingIdRef.current = null;
+        router.push(`/recordings/${recordingId}`);
+        return;
+      }
+
       // Determine file details
       const fileName = selectedFile?.name || `recording-${Date.now()}.webm`;
       const contentType = audioBlob.type || 'audio/webm';
@@ -97,6 +161,14 @@ export default function NewRecordingPage() {
       <div className="mb-6">
         <Link
           href="/recordings"
+          onClick={(e) => {
+            if (
+              shouldBlockUnload({ isRecording: recorder.isRecording, isPaused: recorder.isPaused, isSubmitting }) &&
+              !window.confirm('Leave this page? Your recording in progress will be lost.')
+            ) {
+              e.preventDefault();
+            }
+          }}
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
