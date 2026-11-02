@@ -5,6 +5,8 @@
 import { Router, Request, Response } from 'express';
 import { authenticate } from '../middleware/auth.js';
 import { supabaseAdmin } from '../lib/supabase.js';
+import { config } from '../config/index.js';
+import { removeUserAudioFiles } from '../services/accountDeletion.js';
 import type { ErrorResponse } from '../types/api.js';
 
 const router = Router();
@@ -32,7 +34,23 @@ router.delete('/account', async (req: Request, res: Response<{ success: boolean 
   console.log(`[Users] Delete account request for user: ${userId}`);
 
   try {
-    // Delete user data from all tables first (in order of dependencies)
+    // 0. Delete the user's audio files from storage FIRST: the recording rows hold the only pointer to them.
+    //    If this fails we stop before touching anything else, so the user can simply retry.
+    try {
+      const removed = await removeUserAudioFiles(supabaseAdmin, config.STORAGE_BUCKET_AUDIO, userId);
+      console.log(`[Users] Removed ${removed} audio file(s) for user: ${userId}`);
+    } catch (storageErr) {
+      console.error('[Users] Error deleting audio files:', storageErr);
+      res.status(500).json({
+        error: {
+          code: 'STORAGE_DELETE_FAILED',
+          message: 'Failed to delete your audio files. Nothing was deleted; please try again.',
+        },
+      });
+      return;
+    }
+
+    // Delete user data from all tables (in order of dependencies)
 
     // 1. Delete todos
     const { error: todosError } = await supabaseAdmin
