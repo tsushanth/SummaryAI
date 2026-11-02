@@ -54,7 +54,6 @@ import com.kreativekoala.summaryai.domain.model.RecordingStatus
 import com.kreativekoala.summaryai.ui.components.MmCard
 import com.kreativekoala.summaryai.ui.components.MmChip
 import com.kreativekoala.summaryai.ui.components.MmEmptyState
-import com.kreativekoala.summaryai.ui.components.MmStatusPill
 import com.kreativekoala.summaryai.ui.components.SkeletonCardList
 import com.kreativekoala.summaryai.ui.navigation.LocalTabReselection
 import com.kreativekoala.summaryai.ui.recordings.organize.DateRangePickerDialog
@@ -229,11 +228,7 @@ fun RecordingsListScreen(
                             modifier = if (uiState.isRefreshing) Modifier.rotate(rotation) else Modifier
                         )
                     }
-                    // PRO badge
-                    MmStatusPill(
-                        text = stringResource(R.string.pro),
-                        modifier = Modifier.padding(end = 16.dp)
-                    )
+                    Spacer(modifier = Modifier.width(8.dp))
                 }
             )
         }
