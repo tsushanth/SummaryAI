@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { User, LogOut, Loader2, Sparkles, CreditCard, Calendar, Plug } from 'lucide-react';
+import { User, LogOut, Loader2, CreditCard, Calendar, Plug } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -12,7 +12,7 @@ import { DefaultTemplateCard } from '@/components/settings/DefaultTemplateCard';
 export default function SettingsPage() {
   const { user, signOut, loading } = useAuth();
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const { isPremium, status, plan, expiresAt, isLoading: subscriptionLoading } = useSubscription();
+  const { hasStripeBilling, status, expiresAt, isLoading: subscriptionLoading } = useSubscription();
   const { openPortal, isLoading: portalLoading } = useCustomerPortal();
 
   const handleSignOut = async () => {
@@ -38,79 +38,38 @@ export default function SettingsPage() {
       <div className="space-y-6">
         <DefaultTemplateCard />
 
-        {/* Subscription Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5" />
-              Subscription
-            </CardTitle>
-            <CardDescription>
-              {isPremium ? 'Manage your Pro subscription' : 'Upgrade for Q&A, meeting bot and phone calls'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {subscriptionLoading ? (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Loading...
-              </div>
-            ) : isPremium ? (
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-                    <Sparkles className="h-5 w-5 text-primary-foreground" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-foreground">
-                      Meeting Mind Pro
-                      {plan && (
-                        <span className="text-muted-foreground font-normal ml-1">
-                          ({plan.charAt(0).toUpperCase() + plan.slice(1)})
-                        </span>
-                      )}
-                    </p>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      <Calendar className="h-3.5 w-3.5" />
-                      {status === 'trialing' ? 'Trial ends' : 'Renews'}{' '}
-                      {expiresAt ? new Date(expiresAt).toLocaleDateString() : 'N/A'}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  onClick={openPortal}
-                  disabled={portalLoading}
-                >
-                  {portalLoading ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <CreditCard className="h-4 w-4 mr-2" />
-                  )}
-                  Manage Subscription
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  You&apos;re on the free plan: recording, transcripts and summaries are free.
-                  Upgrade to Pro for Q&amp;A on your recordings, the meeting bot, and phone call recording.
+        {/* Billing: only for people who subscribed on the web (Stripe) before MeetingMind became free */}
+        {!subscriptionLoading && hasStripeBilling && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5" />
+                Billing
+              </CardTitle>
+              <CardDescription>MeetingMind is free, so you no longer need a paid plan</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Your earlier web subscription is still active and keeps billing through Stripe until you cancel it.
+              </p>
+              {expiresAt && (
+                <p className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <Calendar className="h-3.5 w-3.5" />
+                  {status === 'trialing' ? 'Trial ends' : 'Current period ends'}{' '}
+                  {new Date(expiresAt).toLocaleDateString()}
                 </p>
-                <div className="flex gap-3">
-                  <Link href="/subscription">
-                    <Button>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Upgrade to Pro
-                    </Button>
-                  </Link>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  7-day free trial with yearly plan
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              )}
+              <Button variant="outline" onClick={openPortal} disabled={portalLoading}>
+                {portalLoading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <CreditCard className="h-4 w-4 mr-2" />
+                )}
+                Manage or cancel subscription
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>

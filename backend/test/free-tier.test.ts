@@ -105,33 +105,29 @@ describe('free tier constants', () => {
   });
 });
 
-describe('planFeatures', () => {
-  it('free user: recording, summaries and exports are free; Q&A, bot, phone, calendar stay paid', () => {
-    expect(freeTier.planFeatures(false, false)).toEqual({
+describe('planFeatures (MeetingMind is free for everyone)', () => {
+  it('grants every feature to a free user', () => {
+    const features = freeTier.planFeatures();
+    expect(features).toEqual({
       unlimitedRecordings: true,
       aiSummaries: true,
-      qaChat: false,
-      meetingBot: false,
-      phoneRecording: false,
-      calendarSync: false,
+      qaChat: true,
+      meetingBot: true,
+      phoneRecording: true,
+      calendarSync: true,
       exportPdf: true,
     });
   });
 
-  it('subscriber gets everything', () => {
-    expect(Object.values(freeTier.planFeatures(true, false)).every(Boolean)).toBe(true);
+  it('has no subscriber/free distinction: the function takes no arguments', () => {
+    expect(freeTier.planFeatures.length).toBe(0);
+    expect(Object.values(freeTier.planFeatures()).every(Boolean)).toBe(true);
   });
 
-  it('legacy mode restores the old matrix: free user gets nothing', () => {
-    expect(Object.values(freeTier.planFeatures(false, true)).some(Boolean)).toBe(false);
-    expect(Object.values(freeTier.planFeatures(true, true)).every(Boolean)).toBe(true);
-  });
-
-  it('uses the config flag when the second argument is omitted', () => {
+  it('does not depend on the dormant legacy recording-limit switch', () => {
     cfg.FREE_TIER_LEGACY_LIMITS = true;
-    expect(freeTier.planFeatures(false).aiSummaries).toBe(false);
+    expect(Object.values(freeTier.planFeatures()).every(Boolean)).toBe(true);
     cfg.FREE_TIER_LEGACY_LIMITS = false;
-    expect(freeTier.planFeatures(false).aiSummaries).toBe(true);
   });
 });
 

@@ -8,7 +8,6 @@ import {
   Laptop,
   Monitor,
   Globe,
-  Check,
   ListChecks,
   MessageSquareText,
   AudioLines,
@@ -95,43 +94,6 @@ const PLATFORMS = [
   },
 ];
 
-const PLANS = [
-  {
-    name: 'Weekly',
-    cadence: '/week',
-    was: '$6.99',
-    price: '$4.89',
-    features: ['Everything in Free', '36+ languages'],
-  },
-  {
-    name: 'Monthly',
-    cadence: '/month',
-    was: '$14.99',
-    price: '$10.49',
-    features: [
-      'Everything in Free',
-      'Ask questions, get cited answers',
-      'Meeting bot for Zoom, Teams, Meet',
-      'Phone call recording',
-    ],
-  },
-  {
-    name: 'Yearly',
-    cadence: '/year',
-    was: '$69.99',
-    price: '$48.99',
-    note: 'Works out to $4.08/month',
-    highlight: true,
-    features: [
-      '7-day free trial',
-      'Everything in Free',
-      'Ask questions, get cited answers',
-      'Meeting bot for Zoom, Teams, Meet',
-      'Phone call recording',
-    ],
-  },
-];
-
 /** A real capture of the app (sample meeting), one image per color scheme. */
 function Shot({
   name, width, height, alt, priority, className,
@@ -166,7 +128,7 @@ export default function LandingPage() {
           <div className="hidden items-center gap-8 text-[15px] text-muted-foreground md:flex">
             <a href="#features" className="rounded-sm hover:text-foreground">Features</a>
             <a href="#platforms" className="rounded-sm hover:text-foreground">Download</a>
-            <a href="#pricing" className="rounded-sm hover:text-foreground">Pricing</a>
+            <a href="#pricing" className="rounded-sm hover:text-foreground">Free</a>
           </div>
           <div className="flex items-center gap-3 sm:gap-4">
             <Link
@@ -209,7 +171,7 @@ export default function LandingPage() {
               >
                 See what it does
               </a>
-              <p className="text-sm text-muted-foreground">7-day free trial on the yearly plan. Cancel anytime.</p>
+              <p className="text-sm text-muted-foreground">Free to use. No credit card.</p>
             </div>
           </div>
 
@@ -318,68 +280,18 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing */}
+      {/* Free */}
       <section id="pricing" className="border-t border-border bg-card">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
           <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            One price, wherever you subscribe.
+            MeetingMind is free.
           </h2>
           <p className="mt-4 max-w-xl text-lg text-muted-foreground">
-            Recording, transcripts and summaries are free. Pro adds Q&amp;A, the meeting bot and phone call recording.
-            Subscribing here instead of through the app saves you 30%. Cancel anytime.
+            Every feature is included at no charge: recording, transcripts, summaries, questions about your
+            meetings, the meeting bot and phone call recording. Fair use applies, along with the per-file size
+            and length limits in our <Link href="/terms" className="underline underline-offset-4 hover:text-foreground">Terms</Link>.
           </p>
-
-          <div className="mt-12 grid gap-4 sm:grid-cols-3">
-            {PLANS.map((plan) => (
-              <div
-                key={plan.name}
-                className={`rounded-lg border p-6 sm:p-7 ${
-                  plan.highlight ? 'border-primary bg-background ring-1 ring-primary' : 'border-border bg-background'
-                }`}
-              >
-                <div className="flex items-baseline justify-between">
-                  <h3 className="text-lg font-semibold">{plan.name}</h3>
-                  {plan.highlight && (
-                    <span className="rounded-sm bg-mark px-2 py-0.5 text-xs font-semibold text-mark-foreground">
-                      Most popular
-                    </span>
-                  )}
-                </div>
-                <div className="mt-4 flex items-baseline gap-2">
-                  <span className="text-4xl font-semibold tracking-tight tabular">{plan.price}</span>
-                  <span className="text-sm text-muted-foreground">{plan.cadence}</span>
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  <span className="line-through">{plan.was}</span> before the 30% web saving
-                </p>
-                {plan.note && <p className="mt-1 text-sm text-muted-foreground">{plan.note}</p>}
-                <ul className="mt-6 space-y-2.5">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex gap-2.5 text-[15px] leading-relaxed text-foreground/90">
-                      <Check
-                        className="mt-1 h-3.5 w-3.5 flex-shrink-0 text-success"
-                        strokeWidth={2.5}
-                        aria-hidden="true"
-                      />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/subscription"
-                  className={`mt-8 flex h-11 items-center justify-center rounded-md text-[15px] font-semibold transition-colors ${
-                    plan.highlight
-                      ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                      : 'border border-input bg-card text-foreground hover:bg-accent'
-                  }`}
-                >
-                  {plan.highlight ? 'Start free trial' : 'Subscribe'}
-                </Link>
-              </div>
-            ))}
-          </div>
-
-          <p className="mt-8 text-sm text-muted-foreground">
+          <p className="mt-6 text-sm text-muted-foreground">
             Supports 36+ languages, including Spanish, French, German, Japanese, Korean,
             Mandarin, and Hindi, detected automatically.
           </p>
@@ -410,7 +322,7 @@ export default function LandingPage() {
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
             <a href="#features" className="rounded-sm hover:text-foreground">Features</a>
-            <a href="#pricing" className="rounded-sm hover:text-foreground">Pricing</a>
+            <a href="#pricing" className="rounded-sm hover:text-foreground">Free</a>
             <Link href="/privacy" className="rounded-sm hover:text-foreground">Privacy</Link>
             <Link href="/terms" className="rounded-sm hover:text-foreground">Terms</Link>
           </div>
