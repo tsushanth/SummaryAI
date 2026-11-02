@@ -66,8 +66,9 @@ export function DeleteAccountCard() {
       <Dialog open={open} onClose={close} title="Delete your account?">
         <div className="space-y-3 text-sm text-muted-foreground">
           <p>
-            This permanently deletes your account and your data: recordings, transcripts, summaries, to-dos, calendar
-            connections and settings. It cannot be undone, and the mobile apps will be signed out too.
+            This permanently deletes your account and your data: recordings and their audio files, transcripts,
+            summaries, to-dos, calendar connections and settings. It cannot be undone, and the mobile apps will be
+            signed out too.
           </p>
           {stripeWarning && (
             <p role="alert" className="rounded-md bg-destructive/10 p-3 text-destructive">
