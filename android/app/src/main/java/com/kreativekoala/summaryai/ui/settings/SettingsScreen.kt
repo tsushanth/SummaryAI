@@ -31,9 +31,6 @@ import com.kreativekoala.summaryai.ui.components.MmSectionHeader
 import com.kreativekoala.summaryai.ui.components.MmStatusPill
 import com.kreativekoala.crosspromokit.models.AppId
 import com.kreativekoala.crosspromokit.view.CrossPromoSection
-import com.kreativekoala.paywallkit.models.PaywallFeature
-import com.kreativekoala.paywallkit.models.PaywallTheme
-import com.kreativekoala.paywallkit.view.PaywallPreview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,7 +38,6 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     onCalendarClick: () -> Unit,
     onIntegrationsClick: () -> Unit = {},
-    onUpgradeClick: () -> Unit,
     onSignOut: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -50,8 +46,6 @@ fun SettingsScreen(
     var showSignOutDialog by remember { mutableStateOf(false) }
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
-    var tapCount by remember { mutableIntStateOf(0) }
-    var showPaywallPreview by remember { mutableStateOf(false) }
 
     val languages = remember {
         listOf(
@@ -84,22 +78,6 @@ fun SettingsScreen(
         }
     }
 
-    if (showPaywallPreview) {
-        PaywallPreview(
-            appId = "meetingmind",
-            appName = "MeetingMind",
-            features = listOf(
-                PaywallFeature("\uD83E\uDD16", "Meeting bot (Google Meet, Zoom)"),
-                PaywallFeature("\uD83D\uDCDE", "Phone call recording"),
-                PaywallFeature("\uD83D\uDCAC", "Meeting Q&A"),
-                PaywallFeature("\u2705", "Recording, transcripts and summaries are free")
-            ),
-            theme = PaywallTheme(accent = Color(0xFF6C63FF), accent2 = Color(0xFF9C27B0)),
-            onDone = { showPaywallPreview = false }
-        )
-        return
-    }
-
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
@@ -117,7 +95,7 @@ fun SettingsScreen(
             // Account Section
             uiState.user?.let { user ->
                 SettingsSection(title = stringResource(R.string.account)) {
-                    AccountCard(user = user, onUpgradeClick = onUpgradeClick)
+                    AccountCard(user = user)
                 }
             }
 
@@ -187,19 +165,8 @@ fun SettingsScreen(
                 SettingsItem(
                     icon = Icons.Default.Info,
                     title = stringResource(R.string.version),
-                    subtitle = uiState.appVersion,
-                    onClick = { tapCount++ }
+                    subtitle = uiState.appVersion
                 )
-                if (tapCount >= 5) {
-                    Button(
-                        onClick = { showPaywallPreview = true },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                    ) {
-                        Text("Preview Paywalls")
-                    }
-                }
                 HorizontalDivider(modifier = Modifier.padding(start = 56.dp))
                 SettingsItem(
                     icon = Icons.Default.Build,
@@ -419,7 +386,7 @@ private fun SettingsItem(
 }
 
 @Composable
-private fun AccountCard(user: User, onUpgradeClick: () -> Unit) {
+private fun AccountCard(user: User) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -459,18 +426,6 @@ private fun AccountCard(user: User, onUpgradeClick: () -> Unit) {
                 text = stringResource(R.string.via_provider, user.provider.displayName),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        if (!user.isPro) {
-            FilledTonalButton(onClick = onUpgradeClick) {
-                Text(stringResource(R.string.pro))
-            }
-        } else {
-            MmStatusPill(
-                text = stringResource(R.string.pro),
-                container = MaterialTheme.colorScheme.primaryContainer,
-                content = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
     }

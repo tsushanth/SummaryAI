@@ -48,7 +48,6 @@ import com.kreativekoala.summaryai.ui.integrations.IntegrationsScreen
 import com.kreativekoala.summaryai.ui.meetings.JoinMeetingScreen
 import com.kreativekoala.summaryai.ui.meetings.MeetingsScreen
 import com.kreativekoala.summaryai.ui.onboarding.OnboardingScreen
-import com.kreativekoala.summaryai.ui.paywall.PaywallScreen
 import com.kreativekoala.summaryai.ui.phone.PhoneScreen
 import com.kreativekoala.summaryai.ui.recording.RecordingScreen
 import com.kreativekoala.summaryai.ui.livecaption.LiveCaptionScreen
@@ -89,9 +88,6 @@ sealed class Screen(val route: String) {
     object AskAllMeetings : Screen("ask_all_meetings")
     object Phone : Screen("phone")
     object Settings : Screen("settings")
-    object Paywall : Screen("paywall")
-    /** Dismissible paywall shown when a free user taps a still-paid feature (Join Meeting, Phone). */
-    object FeaturePaywall : Screen("paywall/feature")
 }
 
 // Bottom navigation items
@@ -138,23 +134,11 @@ val bottomNavItems = listOf(
 fun MeetingMindNavGraph(
     isAuthenticated: Boolean,
     hasCompletedOnboarding: Boolean,
-    // Live check, called when the user taps a still-paid feature (meeting bot, phone
-    // call recording) so it is re-evaluated, not captured at composition. Recording,
-    // transcripts and summaries are free and never go through this.
-    isPaidFeatureLocked: () -> Boolean = { false },
     // Set by the quick-settings tile / home-screen widget; consumed once.
     startRecordingRequested: Boolean = false,
     onStartRecordingHandled: () -> Unit = {},
     navController: NavHostController = rememberNavController()
 ) {
-    // Helper for routing taps on still-paid features (Join Meeting bot).
-    val navigatePaidFeature: (String) -> Unit = { targetRoute ->
-        if (isPaidFeatureLocked()) {
-            navController.navigate(Screen.FeaturePaywall.route) { launchSingleTop = true }
-        } else {
-            navController.navigate(targetRoute)
-        }
-    }
     // Only compute startDestination once on initial composition.
     // Subsequent state changes are handled by the LaunchedEffect below.
     val startDestination = remember {
@@ -241,22 +225,12 @@ fun MeetingMindNavGraph(
                                         // Tab is already selected - trigger scroll-to-top
                                         tabReselectionState.onTabReselected()
                                     } else {
-                                        // Phone (call recording) is still a paid feature: a
-                                        // non-subscriber who taps it gets a dismissible paywall.
-                                        // Record is free and is never gated.
-                                        val isPaidTab = item.screen.route == Screen.Phone.route
-                                        if (isPaidTab && isPaidFeatureLocked()) {
-                                            navController.navigate(Screen.FeaturePaywall.route) {
-                                                launchSingleTop = true
+                                        navController.navigate(item.screen.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
                                             }
-                                        } else {
-                                            navController.navigate(item.screen.route) {
-                                                popUpTo(navController.graph.findStartDestination().id) {
-                                                    saveState = true
-                                                }
-                                                launchSingleTop = true
-                                                restoreState = true
-                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
                                         }
                                     }
                                 },
@@ -285,9 +259,7 @@ fun MeetingMindNavGraph(
         // as well doubled the gap above every title. Only screens without a top bar need it.
         val needsStatusBarPadding = currentDestination?.route in setOf(
             Screen.Auth.route,
-            Screen.Onboarding.route,
-            Screen.Paywall.route,
-            Screen.FeaturePaywall.route
+            Screen.Onboarding.route
         )
         NavHost(
             navController = navController,
@@ -351,8 +323,7 @@ fun MeetingMindNavGraph(
                 val recordingId = backStackEntry.arguments?.getString("recordingId") ?: return@composable
                 RecordingDetailScreen(
                     recordingId = recordingId,
-                    onNavigateBack = { navController.popBackStack() },
-                    onUpgradeClick = { navController.navigate(Screen.Paywall.route) }
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 
@@ -389,7 +360,7 @@ fun MeetingMindNavGraph(
             // Meetings
             composable(Screen.Meetings.route) {
                 MeetingsScreen(
-                    onJoinMeetingClick = { navigatePaidFeature(Screen.JoinMeeting.route) },
+                    onJoinMeetingClick = { navController.navigate(Screen.JoinMeeting.route) },
                     onRecordingClick = { recordingId ->
                         navController.navigate(Screen.RecordingDetail.createRoute(recordingId))
                     },
@@ -471,53 +442,11 @@ fun MeetingMindNavGraph(
                     onIntegrationsClick = {
                         navController.navigate(Screen.Integrations.route)
                     },
-                    onUpgradeClick = {
-                        navController.navigate(Screen.Paywall.route)
-                    },
                     onSignOut = {
                         navController.navigate(Screen.Auth.route) {
                             popUpTo(0) { inclusive = true }
                         }
                     }
-                )
-            }
-
-            // Paywall (soft - manual upgrade from Settings)
-            composable(Screen.Paywall.route) {
-                PaywallScreen(
-                    onNavigateBack = {
-                        // If there's nothing to pop back to (e.g. from onboarding), go to recordings
-                        if (!navController.popBackStack()) {
-                            navController.navigate(Screen.Recordings.route) {
-                                popUpTo(0) { inclusive = true }
-                            }
-                        }
-                    },
-                    onPurchaseSuccess = {
-                        if (!navController.popBackStack()) {
-                            navController.navigate(Screen.Recordings.route) {
-                                popUpTo(0) { inclusive = true }
-                            }
-                        }
-                    },
-                    // Only reachable by tapping Upgrade, so always offer a way out.
-                    forceDismissible = true
-                )
-            }
-
-            // FeaturePaywall - entered when a free user taps a still-paid feature
-            // (Join Meeting bot, Phone). Always dismissible so the user can go back.
-            composable(Screen.FeaturePaywall.route) {
-                PaywallScreen(
-                    onNavigateBack = { navController.popBackStack() },
-                    onPurchaseSuccess = {
-                        if (!navController.popBackStack()) {
-                            navController.navigate(Screen.Recordings.route) {
-                                popUpTo(0) { inclusive = true }
-                            }
-                        }
-                    },
-                    forceDismissible = true
                 )
             }
         }
