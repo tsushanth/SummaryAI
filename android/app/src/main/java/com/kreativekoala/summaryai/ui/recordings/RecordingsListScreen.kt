@@ -60,6 +60,7 @@ import com.kreativekoala.summaryai.ui.recordings.organize.DateRangePickerDialog
 import com.kreativekoala.summaryai.ui.recordings.organize.FolderManageSheet
 import com.kreativekoala.summaryai.ui.recordings.organize.FolderTagFilterRow
 import com.kreativekoala.summaryai.ui.recordings.organize.OrganizeSheet
+import com.kreativekoala.summaryai.data.sample.SampleMeeting
 import com.kreativekoala.summaryai.ui.recordings.organize.groupedRecordingItems
 import com.kreativekoala.summaryai.ui.theme.Green50
 import com.kreativekoala.summaryai.ui.theme.Orange50
@@ -506,11 +507,13 @@ private fun RecordingCardIOS(
                     )
                 }
 
+                val isSample = SampleMeeting.isSample(recording.id)
                 DropdownMenu(
                     expanded = showMenu,
                     onDismissRequest = { showMenu = false }
                 ) {
-                    DropdownMenuItem(
+                    // The bundled sample is local-only: favorites and folders would call the server for a record it lacks.
+                    if (!isSample) DropdownMenuItem(
                         text = {
                             Text(if (recording.isFavorite) stringResource(R.string.remove_from_favorites) else stringResource(R.string.add_to_favorites))
                         },
@@ -526,7 +529,7 @@ private fun RecordingCardIOS(
                             )
                         }
                     )
-                    DropdownMenuItem(
+                    if (!isSample) DropdownMenuItem(
                         text = { Text("Folder and tags") },
                         onClick = {
                             showMenu = false

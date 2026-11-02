@@ -38,6 +38,8 @@ import com.kreativekoala.summaryai.ui.components.LiveWaveform
 import com.kreativekoala.summaryai.ui.components.MmEmptyState
 import com.kreativekoala.summaryai.ui.theme.RecordingRed
 import com.kreativekoala.ratingkit.RatingKit
+import com.kreativekoala.summaryai.service.activation.Activation
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import android.app.Activity
 
@@ -55,13 +57,37 @@ fun RecordingScreen(
     viewModel: RecordingViewModel = hiltViewModel(),
     onRecordingComplete: (String) -> Unit,
     onCancel: () -> Unit,
+    onOpenSample: () -> Unit = {},
     showAsTab: Boolean = false
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val recordingState = uiState.recordingState
 
+    // First run: the big record button asks for the microphone and, once granted, starts recording (one tap
+    // fewer than "Grant Permission" followed by a second record tap).
+    var startAfterGrant by rememberSaveable { mutableStateOf(false) }
+    var micDenied by rememberSaveable { mutableStateOf(false) }
+
     // Permission handling
-    val microphonePermission = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
+    val microphonePermission = rememberPermissionState(Manifest.permission.RECORD_AUDIO) { granted ->
+        Activation.track { micPermission(granted) }
+        if (granted) {
+            micDenied = false
+            if (startAfterGrant) {
+                startAfterGrant = false
+                viewModel.startRecording()
+            }
+        } else {
+            startAfterGrant = false
+            micDenied = true
+        }
+    }
+
+    // Funnel: the first-run prompt is on screen (once per install; the tracker de-dupes).
+    val promptVisible = uiState.firstRun && !recordingState.isRecording && !uiState.isUploading
+    LaunchedEffect(promptVisible) {
+        if (promptVisible) Activation.track { firstRunPromptShown() }
+    }
 
     // Handle upload completion
     val activity = LocalContext.current as? Activity
@@ -118,7 +144,16 @@ fun RecordingScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (!microphonePermission.status.isGranted) {
+            if (!microphonePermission.status.isGranted && uiState.firstRun && !micDenied) {
+                FirstRunRecordPrompt(
+                    onRecord = {
+                        viewModel.onRecordTapped()
+                        startAfterGrant = true
+                        microphonePermission.launchPermissionRequest()
+                    },
+                    onOpenSample = onOpenSample
+                )
+            } else if (!microphonePermission.status.isGranted) {
                 // Permission not granted
                 PermissionRequest(
                     shouldShowRationale = microphonePermission.status.shouldShowRationale,
@@ -132,7 +167,12 @@ fun RecordingScreen(
                 ReadyToRecordContentIOS(
                     title = uiState.title,
                     onTitleChange = viewModel::updateTitle,
-                    onStartRecording = viewModel::startRecording
+                    onStartRecording = {
+                        viewModel.onRecordTapped()
+                        viewModel.startRecording()
+                    },
+                    firstRun = uiState.firstRun,
+                    onOpenSample = onOpenSample
                 )
             } else {
                 // Recording in progress
@@ -152,6 +192,61 @@ fun RecordingScreen(
                     onStop = viewModel::stopAndUpload
                 )
             }
+        }
+    }
+}
+
+/**
+ * First run, microphone not yet allowed: one line saying what to do, one big record button, one short consent line
+ * and a way to see the product's output first. Tapping record asks for the microphone, then starts recording.
+ */
+@Composable
+private fun FirstRunRecordPrompt(
+    onRecord: () -> Unit,
+    onOpenSample: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(R.string.first_run_prompt),
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(40.dp))
+        val recordDescription = stringResource(R.string.first_run_record)
+        Surface(
+            onClick = onRecord,
+            modifier = Modifier
+                .size(96.dp)
+                .semantics { contentDescription = recordDescription },
+            shape = CircleShape,
+            color = RecordingRed,
+            shadowElevation = 4.dp
+        ) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                Icon(
+                    imageVector = Icons.Default.Mic,
+                    contentDescription = null,
+                    modifier = Modifier.size(44.dp),
+                    tint = Color.White
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.first_run_mic_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+        TextButton(onClick = onOpenSample, modifier = Modifier.heightIn(min = 48.dp)) {
+            Text(stringResource(R.string.first_run_see_sample))
         }
     }
 }
@@ -218,7 +313,9 @@ private fun ReadyToRecordContent(
 private fun ReadyToRecordContentIOS(
     title: String,
     onTitleChange: (String) -> Unit,
-    onStartRecording: () -> Unit
+    onStartRecording: () -> Unit,
+    firstRun: Boolean = false,
+    onOpenSample: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -227,6 +324,16 @@ private fun ReadyToRecordContentIOS(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(16.dp))
+
+        if (firstRun) {
+            Text(
+                text = stringResource(R.string.first_run_prompt),
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
         // Recording Title input
         Text(
@@ -302,6 +409,13 @@ private fun ReadyToRecordContentIOS(
                     shape = CircleShape,
                     color = RecordingRed
                 ) {}
+            }
+        }
+
+        if (firstRun) {
+            Spacer(modifier = Modifier.height(8.dp))
+            TextButton(onClick = onOpenSample, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text(stringResource(R.string.first_run_see_sample))
             }
         }
 

@@ -6,6 +6,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.kreativekoala.summaryai.data.local.PreferencesManager
 import com.kreativekoala.summaryai.data.local.TokenManager
+import com.kreativekoala.summaryai.data.sample.SampleMeetingStore
+import com.kreativekoala.summaryai.ui.onboarding.FirstRunState
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,6 +36,22 @@ object AppModule {
     fun providePreferencesManager(
         dataStore: DataStore<Preferences>
     ): PreferencesManager = PreferencesManager(dataStore)
+
+    @Provides
+    @Singleton
+    fun provideSampleMeetingStore(
+        @ApplicationContext context: Context
+    ): SampleMeetingStore = SampleMeetingStore(
+        context.getSharedPreferences(SampleMeetingStore.PREFS_NAME, Context.MODE_PRIVATE)
+    )
+
+    @Provides
+    @Singleton
+    fun provideFirstRunState(
+        @ApplicationContext context: Context
+    ): FirstRunState = FirstRunState(
+        context.getSharedPreferences(FirstRunState.PREFS_NAME, Context.MODE_PRIVATE)
+    )
 
     @Provides
     @Singleton
