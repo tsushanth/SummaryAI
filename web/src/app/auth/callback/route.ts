@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies, headers } from 'next/headers';
+import { safeNextPath } from '@/lib/emailAuth';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get('code');
   const error = searchParams.get('error');
+  const next = searchParams.get('next'); // set by the password-reset email link
 
   // Get the actual origin from headers (handles proxied requests like Cloud Run)
   const headersList = await headers();
@@ -75,6 +77,9 @@ export async function GET(request: Request) {
       // Clear the cookie
       cookieStore.delete('authReturnTo');
     }
+
+    // Password-reset links ask to land on a specific page (same-site paths only)
+    if (next) redirectUrl = `${origin}${safeNextPath(next)}`;
 
     return NextResponse.redirect(redirectUrl);
   }
