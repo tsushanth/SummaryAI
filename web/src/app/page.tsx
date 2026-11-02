@@ -3,10 +3,7 @@ import { RibbonMark } from '@/components/ui/ribbon-mark';
 import {
   ArrowUpRight,
   Sparkles,
-  Apple,
   Play,
-  Laptop,
-  Monitor,
   Globe,
   ListChecks,
   MessageSquareText,
@@ -36,17 +33,17 @@ const FEATURES: { title: string; body: string; icon: LucideIcon }[] = [
   },
   {
     title: 'Live transcript',
-    body: 'Follow along with a speaker-labeled transcript while the meeting is still happening.',
+    body: 'When the bot is in your meeting, follow along with a live transcript while it is still happening. The live transcript is English only.',
     icon: AudioLines,
   },
   {
     title: 'Calendar auto-join',
-    body: 'Connect Google or Outlook and the bot joins your Zoom, Teams, and Meet calls for you.',
+    body: 'Connect Google or Outlook, switch auto-join on for a meeting, and the bot joins your Zoom, Teams or Meet call at the start. It appears in the meeting as a participant.',
     icon: CalendarCheck,
   },
   {
-    title: 'Phone call recording',
-    body: 'Place calls from the app and get the same transcript and summary afterwards.',
+    title: 'Phone calls and in person',
+    body: 'Place a call from the app, or record a conversation in the room with your device microphone. You get the same transcript and summary afterwards.',
     icon: PhoneCall,
   },
   {
@@ -63,28 +60,10 @@ const FEATURES: { title: string; body: string; icon: LucideIcon }[] = [
 
 const PLATFORMS = [
   {
-    name: 'iPhone & iPad',
-    caption: 'iOS 17+',
-    href: 'https://apps.apple.com/us/app/meeting-mind/id6757317991',
-    icon: Apple,
-  },
-  {
     name: 'Android',
     caption: 'Android 10+, on Google Play',
     href: 'https://play.google.com/store/apps/details?id=com.kreativekoala.meetingmind',
     icon: Play,
-  },
-  {
-    name: 'Mac',
-    caption: 'Apple Silicon',
-    href: 'https://github.com/tsushanth/SummaryAI/releases',
-    icon: Laptop,
-  },
-  {
-    name: 'Windows',
-    caption: 'Windows 10+',
-    href: 'https://github.com/tsushanth/SummaryAI/releases',
-    icon: Monitor,
   },
   {
     name: 'Browser',
@@ -250,10 +229,10 @@ export default function LandingPage() {
       <section id="platforms" className="border-t border-border">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
           <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Wherever you take meetings.
+            On Android and in your browser.
           </h2>
           <p className="mt-4 max-w-xl text-lg text-muted-foreground">
-            Your recordings sync across every device you sign in on.
+            The Android app and the web app share one account, so your recordings are in both.
           </p>
 
           <div className="mt-10 divide-y divide-border border-y border-border">
@@ -290,6 +269,11 @@ export default function LandingPage() {
             Every feature is included at no charge: recording, transcripts, summaries, questions about your
             meetings, the meeting bot and phone call recording. Fair use applies, along with the per-file size
             and length limits in our <Link href="/terms" className="underline underline-offset-4 hover:text-foreground">Terms</Link>.
+          </p>
+          <p className="mt-4 max-w-xl text-sm text-muted-foreground">
+            You are responsible for telling the people you record and for following the recording laws that apply to you.
+            See our <Link href="/privacy" className="underline underline-offset-4 hover:text-foreground">Privacy Policy</Link> for
+            where your audio and text go.
           </p>
           <p className="mt-6 text-sm text-muted-foreground">
             Supports 36+ languages, including Spanish, French, German, Japanese, Korean,

@@ -20,6 +20,13 @@ const RECALL_REGION = config.RECALL_REGION || 'us-west-2';
 const RECALL_API_BASE = `https://${RECALL_REGION}.recall.ai/api/v1`;
 
 /**
+ * Message the bot posts to the meeting chat when it joins (only if MEETING_BOT_ANNOUNCE=true).
+ * Plain ASCII, no em dashes, under Google Meet's 500 character chat limit.
+ */
+export const BOT_ANNOUNCEMENT_MESSAGE =
+  'MeetingMind is recording this meeting to make notes for the host. Tell the host if you do not want to be recorded.';
+
+/**
  * Recall.ai API Service
  */
 export class RecallService {
@@ -119,6 +126,17 @@ export class RecallService {
     // Only add join_at if specified (for scheduled bots)
     if (params.join_at) {
       payload.join_at = params.join_at;
+    }
+
+    // Join announcement via Recall's automatic chat message (create-bot field `chat.on_bot_join`).
+    // Platforms Recall cannot chat on (Webex, GoTo) ignore it.
+    if (config.MEETING_BOT_ANNOUNCE) {
+      payload.chat = {
+        on_bot_join: {
+          send_to: 'everyone',
+          message: BOT_ANNOUNCEMENT_MESSAGE,
+        },
+      };
     }
 
     console.log(`[Recall] Creating bot for meeting: ${params.meeting_url}`);
