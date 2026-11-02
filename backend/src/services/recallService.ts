@@ -165,6 +165,41 @@ export class RecallService {
   }
 
   /**
+   * Account purge: permanently delete all recording media Recall stores for a bot
+   * (POST /bot/{id}/delete_media/). Documented responses: 200 ok, 400 bot still in progress, 409 deletion already
+   * running. 404 (bot unknown / already purged) counts as done. 'in_progress' means "try again later".
+   * Direct fetch on purpose: the shared request() alerts on every non-2xx, and 400/404/409 are expected here.
+   */
+  static async deleteBotMedia(botId: string): Promise<'deleted' | 'not_found' | 'in_progress'> {
+    if (!/^[A-Za-z0-9_-]+$/.test(botId)) throw new Error('Invalid Recall bot id');
+    const response = await fetch(`${RECALL_API_BASE}/bot/${botId}/delete_media/`, {
+      method: 'POST',
+      headers: { Authorization: `Token ${this.apiKey}`, 'Content-Type': 'application/json' },
+    });
+    if (response.ok) return 'deleted';
+    if (response.status === 404) return 'not_found';
+    if (response.status === 400 || response.status === 409) return 'in_progress';
+    reportProviderHttpFailure('recall', response.status);
+    throw new Error(`Recall delete_media failed: ${response.status}`);
+  }
+
+  /**
+   * Account purge: best-effort stop. Cancels a bot that has not joined yet and asks a live bot to leave, so a deleted
+   * account's bot does not keep recording. Never throws: a bot that already finished answers 4xx.
+   */
+  static async stopBot(botId: string): Promise<void> {
+    if (!/^[A-Za-z0-9_-]+$/.test(botId)) return;
+    const headers = { Authorization: `Token ${this.apiKey}`, 'Content-Type': 'application/json' };
+    for (const [method, path] of [['DELETE', `/bot/${botId}`], ['POST', `/bot/${botId}/leave_call/`]] as const) {
+      try {
+        await fetch(`${RECALL_API_BASE}${path}`, { method, headers });
+      } catch {
+        /* best effort */
+      }
+    }
+  }
+
+  /**
    * Schedule a bot to join a meeting at a specific time
    */
   static async scheduleBot(

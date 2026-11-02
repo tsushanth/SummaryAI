@@ -37,6 +37,10 @@ const envSchema = z.object({
   // (Recall create-bot field chat.on_bot_join; Zoom, Google Meet, Microsoft Teams only).
   MEETING_BOT_ANNOUNCE: z.enum(['true', 'false']).default('false').transform((v) => v === 'true'),
 
+  // Account purge dry run. When 'true', DELETE /api/users/account only COUNTS what it would delete (storage objects,
+  // Recall bots, Twilio recordings, rows) and deletes nothing. For verifying a deploy; leave unset in normal operation.
+  ACCOUNT_PURGE_DRY_RUN: z.enum(['true', 'false']).default('false').transform((v) => v === 'true'),
+
   // Upload URL expiry (in seconds)
   UPLOAD_URL_EXPIRY_SECONDS: z.string().transform(Number).default('3600'),
 
