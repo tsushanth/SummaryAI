@@ -5,36 +5,10 @@ import { Folder as FolderIcon, Plus, Pencil, Trash2, Star } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useFolders, useTags } from '@/hooks/useOrganize';
 import { createFolder, renameFolder, deleteFolder } from '@/lib/api/organize';
+import { filtersToParams, type RecordingFilterState } from '@/lib/recordingFilters';
 
-export interface RecordingFilterState {
-  /** undefined = all, 'none' = unfiled, otherwise a folder id */
-  folderId?: string;
-  tag?: string;
-  favorite?: boolean;
-  range?: 'today' | '7d' | '30d';
-}
-
-/** Converts filter state to API params. */
-export function filtersToParams(f: RecordingFilterState) {
-  const params: {
-    folder_id?: string;
-    tag?: string;
-    favorite?: boolean;
-    from?: string;
-  } = {};
-  if (f.folderId) params.folder_id = f.folderId;
-  if (f.tag) params.tag = f.tag;
-  if (f.favorite) params.favorite = true;
-  if (f.range) {
-    const d = new Date();
-    if (f.range === 'today') d.setHours(0, 0, 0, 0);
-    else d.setDate(d.getDate() - (f.range === '7d' ? 7 : 30));
-    // Round to the minute so the SWR key is stable between renders.
-    d.setSeconds(0, 0);
-    params.from = d.toISOString();
-  }
-  return params;
-}
+export { filtersToParams };
+export type { RecordingFilterState };
 
 const chip = (active: boolean) =>
   cn(
@@ -91,10 +65,24 @@ export function RecordingFilters({
     <div className="space-y-2 mb-6">
       <div className="flex flex-wrap items-center gap-2">
         <button
-          className={chip(!value.folderId && !value.favorite)}
-          onClick={() => onChange({ ...value, folderId: undefined, favorite: undefined })}
+          className={chip(!value.folderId && !value.favorite && !value.recordingType)}
+          onClick={() => onChange({ ...value, folderId: undefined, favorite: undefined, recordingType: undefined })}
         >
           All
+        </button>
+        <button
+          className={chip(value.recordingType === 'meeting')}
+          aria-pressed={value.recordingType === 'meeting'}
+          onClick={() => onChange({ ...value, recordingType: value.recordingType === 'meeting' ? undefined : 'meeting' })}
+        >
+          Meetings
+        </button>
+        <button
+          className={chip(value.recordingType === 'imported')}
+          aria-pressed={value.recordingType === 'imported'}
+          onClick={() => onChange({ ...value, recordingType: value.recordingType === 'imported' ? undefined : 'imported' })}
+        >
+          Imported
         </button>
         <button
           className={chip(!!value.favorite)}

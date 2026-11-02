@@ -2,17 +2,9 @@
 
 import useSWR from 'swr';
 import { getRecordings, getRecording } from '@/lib/api/recordings';
+import type { RecordingsQueryParams } from '@/lib/recordingsQuery';
 
-export function useRecordings(params?: {
-  page?: number;
-  per_page?: number;
-  status?: string;
-  folder_id?: string;
-  tag?: string;
-  favorite?: boolean;
-  from?: string;
-  to?: string;
-}) {
+export function useRecordings(params?: RecordingsQueryParams) {
   const { data, error, isLoading, mutate } = useSWR(
     ['recordings', params],
     () => getRecordings(params),

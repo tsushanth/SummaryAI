@@ -4,18 +4,21 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils/cn';
-import { Mic, ListTodo, Settings, LogOut, Calendar, Search, MessageSquare, Menu, X } from 'lucide-react';
+import { Mic, ListTodo, Settings, LogOut, Calendar, Search, MessageSquare, Phone, Menu, X, type LucideIcon } from 'lucide-react';
+import { NAV_ITEMS, type NavIconName } from '@/lib/navItems';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { RibbonMark } from '@/components/ui/ribbon-mark';
 
-const navigation = [
-  { name: 'Recordings', href: '/recordings', icon: Mic },
-  { name: 'Search', href: '/search', icon: Search },
-  { name: 'Ask AI', href: '/chat', icon: MessageSquare },
-  { name: 'Meetings', href: '/meetings', icon: Calendar },
-  { name: 'Todos', href: '/todos', icon: ListTodo },
-  { name: 'Settings', href: '/settings', icon: Settings },
-];
+const ICONS: Record<NavIconName, LucideIcon> = {
+  Mic,
+  Search,
+  MessageSquare,
+  Calendar,
+  Phone,
+  ListTodo,
+  Settings,
+};
+const navigation = NAV_ITEMS.map((item) => ({ ...item, icon: ICONS[item.icon] }));
 
 export function Sidebar() {
   const pathname = usePathname();

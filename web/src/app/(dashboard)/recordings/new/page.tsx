@@ -22,6 +22,7 @@ import { ProgressBar } from '@/components/audio/ProgressBar';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { createRecording, uploadAudio, completeUpload, deleteRecording } from '@/lib/api/recordings';
 import { cn } from '@/lib/utils/cn';
+import { OUTPUT_LANGUAGES, outputLanguageParam } from '@/lib/outputLanguages';
 
 type InputMode = 'record' | 'upload';
 
@@ -29,6 +30,7 @@ export default function NewRecordingPage() {
   const router = useRouter();
   const [mode, setMode] = useState<InputMode>('record');
   const [title, setTitle] = useState('');
+  const [outputLanguage, setOutputLanguage] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -100,7 +102,7 @@ export default function NewRecordingPage() {
         const contentType = audioBlob.type || 'audio/webm';
         const { recordingId } = await uploadWithPersistence(
           createIndexedDbStore(),
-          { id, title: title.trim(), blob: audioBlob, fileName, contentType, fileSize: audioBlob.size, createdAt: Date.now() },
+          { id, title: title.trim(), blob: audioBlob, fileName, contentType, fileSize: audioBlob.size, createdAt: Date.now(), outputLanguage: outputLanguageParam(outputLanguage) },
           {
             create: async (req) => {
               const { recording, upload_info } = await createRecording(req);
@@ -129,6 +131,7 @@ export default function NewRecordingPage() {
         file_name: fileName,
         content_type: contentType,
         file_size: fileSize,
+        output_language: outputLanguageParam(outputLanguage),
       });
 
       // Step 2: Upload audio file using signed URL
@@ -191,6 +194,32 @@ export default function NewRecordingPage() {
               onChange={(e) => setTitle(e.target.value)}
               disabled={isSubmitting}
             />
+          </CardContent>
+        </Card>
+
+        {/* Summary language */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Summary language</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <select
+              value={outputLanguage}
+              onChange={(e) => setOutputLanguage(e.target.value)}
+              disabled={isSubmitting}
+              aria-label="Summary language"
+              className="flex h-10 w-full rounded-md border border-input bg-card px-3 text-sm"
+            >
+              <option value="">Same language as the recording</option>
+              {OUTPUT_LANGUAGES.map((l) => (
+                <option key={l.code} value={l.code}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
+            <p className="mt-2 text-xs text-muted-foreground">
+              The transcript stays in the spoken language; only the summary is written in this language.
+            </p>
           </CardContent>
         </Card>
 

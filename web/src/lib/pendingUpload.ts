@@ -15,6 +15,8 @@ export interface PendingUpload {
   fileSize: number;
   /** ms since epoch */
   createdAt: number;
+  /** Summary language code (see lib/outputLanguages.ts); omitted = follow the recording's language. */
+  outputLanguage?: string;
   /** Set once the backend created a recording row for this attempt (may be half-uploaded). */
   recordingId?: string;
 }
@@ -129,6 +131,7 @@ export interface UploadDeps {
     file_name: string;
     content_type: string;
     file_size: number;
+    output_language?: string;
   }): Promise<{ recordingId: string; uploadInfo: { url: string; method: string; headers: Record<string, string> } }>;
   upload(
     uploadInfo: { url: string; method: string; headers: Record<string, string> },
@@ -159,6 +162,7 @@ export async function uploadWithPersistence(
     file_name: entry.fileName,
     content_type: entry.contentType,
     file_size: entry.fileSize,
+    ...(entry.outputLanguage ? { output_language: entry.outputLanguage } : {}),
   });
   // Remember the row we just created: if the upload fails, the next attempt cleans it up.
   await store.put({ ...entry, recordingId: created.recordingId }).catch(() => {});
