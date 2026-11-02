@@ -170,6 +170,9 @@ dependencies {
     // Firebase Analytics (for Google Ads conversion tracking)
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     implementation("com.google.firebase:firebase-analytics")
+    // Play install referrer (utm_* capture). Already on the classpath transitively via the Facebook SDK (1.0);
+    // declared so the version is ours. ~20 KB, Google-published.
+    implementation("com.android.installreferrer:installreferrer:2.2")
 
     // TikTok Events SDK (install attribution & event tracking)
     implementation("com.github.tiktok:tiktok-business-android-sdk:1.6.0")

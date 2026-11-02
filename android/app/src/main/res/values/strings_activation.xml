@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- First-run flow and sample meeting. English only for now; other locales fall back to these. -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="first_run_prompt">Record 30 seconds of anything, even just you talking, and watch your summary appear.</string>
+    <string name="first_run_mic_note">We only use the microphone while you are recording.</string>
+    <string name="first_run_record">Tap to record</string>
+    <string name="first_run_see_sample">Or see a sample meeting first</string>
+    <string name="sample_cta_title">Now try yours</string>
+    <string name="sample_cta_button">Record your own</string>
+    <string name="sample_chat_locked">Record your own meeting to ask questions about it.</string>
+    <string name="sample_badge">Sample, fictional</string>
+</resources>

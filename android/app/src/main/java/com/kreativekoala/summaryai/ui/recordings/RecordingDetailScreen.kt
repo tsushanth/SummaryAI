@@ -2,6 +2,8 @@ package com.kreativekoala.summaryai.ui.recordings
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -25,6 +27,8 @@ import com.kreativekoala.summaryai.ui.intelligence.SummaryIntelligenceCard
 import com.kreativekoala.summaryai.ui.recordings.share.EditSpeakerNamesSheet
 import com.kreativekoala.summaryai.ui.recordings.share.ShareExportSheet
 import kotlinx.coroutines.launch
+import com.kreativekoala.summaryai.data.sample.SampleMeeting
+import com.kreativekoala.summaryai.service.activation.Activation
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.unit.dp
@@ -34,10 +38,20 @@ import androidx.compose.ui.unit.dp
 fun RecordingDetailScreen(
     recordingId: String,
     viewModel: RecordingDetailViewModel = hiltViewModel(),
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onRecordYours: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val detail = uiState.recordingDetail
+    // The bundled sample is local-only and read-only: no star, no template regeneration, no to-do sync, no audio.
+    val isSample = SampleMeeting.isSample(recordingId)
+
+    // Funnel: a real summary was put in front of the user (sample and real are counted separately).
+    val summaryShown = detail?.summary != null && detail.transcript?.hasNoSpeech != true &&
+        uiState.selectedTab == DetailTab.SUMMARY
+    LaunchedEffect(summaryShown, isSample) {
+        if (summaryShown) Activation.track { summaryViewed(sample = isSample) }
+    }
 
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showMoreMenu by remember { mutableStateOf(false) }
@@ -72,7 +86,7 @@ fun RecordingDetailScreen(
                     }
                 },
                 actions = {
-                    detail?.recording?.let { rec ->
+                    detail?.recording?.takeUnless { isSample }?.let { rec ->
                         com.kreativekoala.summaryai.ui.recordings.organize.StarAction(rec.id, rec.isFavorite)
                     }
                     IconButton(onClick = { showMoreMenu = true }) {
@@ -82,23 +96,28 @@ fun RecordingDetailScreen(
                         expanded = showMoreMenu,
                         onDismissRequest = { showMoreMenu = false }
                     ) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.export)) },
-                            onClick = {
-                                showMoreMenu = false
-                                showShareSheet = true
-                            },
-                            leadingIcon = { Icon(Icons.Default.Share, contentDescription = null) }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Rename Speakers") },
-                            onClick = {
-                                showMoreMenu = false
-                                showSpeakerEditor = true
-                            },
-                            enabled = detail?.transcript != null,
-                            leadingIcon = { Icon(Icons.Default.PersonOutline, contentDescription = null) }
-                        )
+                        // Export includes a public-link option that needs a server record the sample does not have.
+                        if (!isSample) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.export)) },
+                                onClick = {
+                                    showMoreMenu = false
+                                    showShareSheet = true
+                                },
+                                leadingIcon = { Icon(Icons.Default.Share, contentDescription = null) }
+                            )
+                        }
+                        if (!isSample) {
+                            DropdownMenuItem(
+                                text = { Text("Rename Speakers") },
+                                onClick = {
+                                    showMoreMenu = false
+                                    showSpeakerEditor = true
+                                },
+                                enabled = detail?.transcript != null,
+                                leadingIcon = { Icon(Icons.Default.PersonOutline, contentDescription = null) }
+                            )
+                        }
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.delete)) },
                             onClick = {
@@ -154,15 +173,24 @@ fun RecordingDetailScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                // Audio player area
-                AudioPlayerCard(
-                    audioPlayerState = uiState.audioPlayerState,
-                    durationFormatted = detail.recording.formattedDuration,
-                    audioUrl = detail.recording.audioUrl,
-                    onPlayPause = viewModel::togglePlayPause,
-                    onSeekForward = viewModel::seekForward,
-                    onSeekBackward = viewModel::seekBackward
-                )
+                if (isSample) {
+                    Text(
+                        text = stringResource(R.string.sample_badge),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                    )
+                } else {
+                    // Audio player area
+                    AudioPlayerCard(
+                        audioPlayerState = uiState.audioPlayerState,
+                        durationFormatted = detail.recording.formattedDuration,
+                        audioUrl = detail.recording.audioUrl,
+                        onPlayPause = viewModel::togglePlayPause,
+                        onSeekForward = viewModel::seekForward,
+                        onSeekBackward = viewModel::seekBackward
+                    )
+                }
 
                 // Processing indicator
                 if (detail.recording.isProcessing) {
@@ -178,6 +206,7 @@ fun RecordingDetailScreen(
                 val hasNoSpeech = detail.transcript?.hasNoSpeech == true
 
                 // Tab content
+                Box(modifier = Modifier.weight(1f)) {
                 when (uiState.selectedTab) {
                     DetailTab.SUMMARY -> SummaryTab(
                         // An empty transcript makes the model reply with "please resubmit"; hide that
@@ -185,14 +214,16 @@ fun RecordingDetailScreen(
                         hasNoSpeech = hasNoSpeech,
                         speakerNames = detail.transcript?.speakerNames,
                         analytics = uiState.analytics,
-                        headerContent = {
-                            SummaryIntelligenceCard(
-                                currentTemplateId = detail.recording.summaryTemplate,
-                                onRegenerated = viewModel::refresh,
-                                onMessage = { msg -> scope.launch { snackbarHostState.showSnackbar(msg) } }
-                            )
+                        headerContent = if (isSample) null else {
+                            {
+                                SummaryIntelligenceCard(
+                                    currentTemplateId = detail.recording.summaryTemplate,
+                                    onRegenerated = viewModel::refresh,
+                                    onMessage = { msg -> scope.launch { snackbarHostState.showSnackbar(msg) } }
+                                )
+                            }
                         },
-                        actionItemsFooter = { ActionItemsToTodosButton() }
+                        actionItemsFooter = if (isSample) null else { { ActionItemsToTodosButton() } }
                     )
                     DetailTab.TRANSCRIPT -> TranscriptTab(
                         transcript = detail.transcript,
@@ -204,7 +235,14 @@ fun RecordingDetailScreen(
                         canSeek = detail.recording.audioUrl != null,
                         onSeekTo = viewModel::seekTo
                     )
-                    DetailTab.CHAT -> ChatTab(
+                    DetailTab.CHAT -> if (isSample) {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            MmEmptyState(
+                                icon = Icons.Default.PersonOutline,
+                                title = stringResource(R.string.sample_chat_locked)
+                            )
+                        }
+                    } else ChatTab(
                         qaMessages = uiState.qaMessages,
                         currentQuestion = uiState.currentQuestion,
                         isAskingQuestion = uiState.isAskingQuestion,
@@ -215,6 +253,11 @@ fun RecordingDetailScreen(
                             viewModel.askQuestion()
                         }
                     )
+                }
+                }
+
+                if (isSample) {
+                    SampleRecordYoursBar(onRecordYours = onRecordYours)
                 }
             }
         }
@@ -268,6 +311,26 @@ fun RecordingDetailScreen(
                 },
                 onDismiss = { showSpeakerEditor = false }
             )
+        }
+    }
+}
+
+/** Pinned under the sample: the next step is the user's own recording. */
+@Composable
+private fun SampleRecordYoursBar(onRecordYours: () -> Unit) {
+    Surface(tonalElevation = 3.dp, modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+            Text(
+                text = stringResource(R.string.sample_cta_title),
+                style = MaterialTheme.typography.titleSmall
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(
+                onClick = onRecordYours,
+                modifier = Modifier.fillMaxWidth().height(48.dp)
+            ) {
+                Text(stringResource(R.string.sample_cta_button))
+            }
         }
     }
 }

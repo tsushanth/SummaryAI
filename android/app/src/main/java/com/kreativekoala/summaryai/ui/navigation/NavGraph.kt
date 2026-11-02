@@ -29,6 +29,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -47,7 +49,10 @@ import com.kreativekoala.summaryai.ui.calendar.CalendarIntegrationScreen
 import com.kreativekoala.summaryai.ui.integrations.IntegrationsScreen
 import com.kreativekoala.summaryai.ui.meetings.JoinMeetingScreen
 import com.kreativekoala.summaryai.ui.meetings.MeetingsScreen
+import com.kreativekoala.summaryai.ui.onboarding.FirstRunRouting
 import com.kreativekoala.summaryai.ui.onboarding.OnboardingScreen
+import com.kreativekoala.summaryai.data.sample.SampleMeeting
+import com.kreativekoala.summaryai.service.activation.Activation
 import com.kreativekoala.summaryai.ui.phone.PhoneScreen
 import com.kreativekoala.summaryai.ui.recording.RecordingScreen
 import com.kreativekoala.summaryai.ui.livecaption.LiveCaptionScreen
@@ -134,6 +139,10 @@ val bottomNavItems = listOf(
 fun MeetingMindNavGraph(
     isAuthenticated: Boolean,
     hasCompletedOnboarding: Boolean,
+    // True only when the signed-in account has no email at all (then, and only then, ask for it).
+    emailMissing: Boolean = false,
+    // Called once when a brand-new signed-in user lands on Record: seeds the sample, marks onboarding done.
+    onFirstRunStarted: () -> Unit = {},
     // Set by the quick-settings tile / home-screen widget; consumed once.
     startRecordingRequested: Boolean = false,
     onStartRecordingHandled: () -> Unit = {},
@@ -142,10 +151,13 @@ fun MeetingMindNavGraph(
     // Only compute startDestination once on initial composition.
     // Subsequent state changes are handled by the LaunchedEffect below.
     val startDestination = remember {
-        when {
-            !isAuthenticated -> Screen.Auth.route
-            !hasCompletedOnboarding -> Screen.Onboarding.route
-            else -> Screen.Recordings.route
+        FirstRunRouting.target(isAuthenticated, hasCompletedOnboarding, emailMissing)
+    }
+
+    // A brand-new user starts on Record (see FirstRunRouting); do the one-time first-run setup as they land there.
+    LaunchedEffect(isAuthenticated, hasCompletedOnboarding, emailMissing) {
+        if (FirstRunRouting.isFirstRun(isAuthenticated, hasCompletedOnboarding) && !emailMissing) {
+            onFirstRunStarted()
         }
     }
 
@@ -159,17 +171,20 @@ fun MeetingMindNavGraph(
 
     // Navigate when auth state changes - must handle transition from unauthenticated to authenticated
     LaunchedEffect(isAuthenticated, hasCompletedOnboarding) {
-        val targetRoute = when {
-            !isAuthenticated -> Screen.Auth.route
-            !hasCompletedOnboarding -> Screen.Onboarding.route
-            else -> Screen.Recordings.route
-        }
+        val targetRoute = FirstRunRouting.target(isAuthenticated, hasCompletedOnboarding, emailMissing)
         val currentRoute = navController.currentDestination?.route
 
         android.util.Log.i("NavGraph", "Auth state changed: isAuth=$isAuthenticated, hasOnboarding=$hasCompletedOnboarding, currentRoute=$currentRoute, targetRoute=$targetRoute")
 
+        // First run: signed in but not onboarded. Skip the old slides and go straight to Record (or to the
+        // email screen when the account has no email).
+        if (isAuthenticated && !hasCompletedOnboarding && currentRoute == Screen.Auth.route) {
+            navController.navigate(targetRoute) {
+                popUpTo(Screen.Auth.route) { inclusive = true }
+            }
+        }
         // If authenticated and should be on recordings, navigate there from auth or onboarding
-        if (isAuthenticated && hasCompletedOnboarding) {
+        else if (isAuthenticated && hasCompletedOnboarding) {
             if (currentRoute == Screen.Auth.route) {
                 android.util.Log.i("NavGraph", "Navigating from auth to recordings")
                 navController.navigate(Screen.Recordings.route) {
@@ -193,6 +208,22 @@ fun MeetingMindNavGraph(
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+
+    // Activation funnel: leaving the first-run Record screen without ever tapping record counts as a skip.
+    var previousRoute by remember { mutableStateOf<String?>(null) }
+    val openedSample = navBackStackEntry?.arguments?.getString("recordingId") == SampleMeeting.ID
+    LaunchedEffect(currentDestination?.route, openedSample) {
+        val route = currentDestination?.route
+        if (previousRoute == Screen.Recording.route && route != null && route != Screen.Recording.route) {
+            val to = when {
+                openedSample -> "sample"
+                route == Screen.Recordings.route -> "list"
+                else -> "other"
+            }
+            Activation.track { leftFirstRunPrompt(to) }
+        }
+        previousRoute = route
+    }
 
     // State for handling tab re-selection (scroll-to-top behavior)
     val tabReselectionState = remember { TabReselectionState() }
@@ -274,7 +305,7 @@ fun MeetingMindNavGraph(
                 AuthScreen(
                     onAuthSuccess = {
                         navController.navigate(
-                            if (hasCompletedOnboarding) Screen.Recordings.route else Screen.Onboarding.route
+                            FirstRunRouting.target(isAuthenticated = true, hasCompletedOnboarding, emailMissing)
                         ) {
                             popUpTo(Screen.Auth.route) { inclusive = true }
                         }
@@ -284,10 +315,11 @@ fun MeetingMindNavGraph(
 
             // Onboarding
             composable(Screen.Onboarding.route) {
+                // Email-only screen: reached only for an account with no email on file.
                 OnboardingScreen(
-                    // No paywall after onboarding: go straight to the recordings list.
                     onComplete = {
-                        navController.navigate(Screen.Recordings.route) {
+                        onFirstRunStarted()
+                        navController.navigate(Screen.Recording.route) {
                             popUpTo(Screen.Onboarding.route) { inclusive = true }
                         }
                     }
@@ -323,7 +355,13 @@ fun MeetingMindNavGraph(
                 val recordingId = backStackEntry.arguments?.getString("recordingId") ?: return@composable
                 RecordingDetailScreen(
                     recordingId = recordingId,
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() },
+                    onRecordYours = {
+                        navController.navigate(Screen.Recording.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
 
@@ -336,6 +374,9 @@ fun MeetingMindNavGraph(
                         }
                     },
                     onCancel = { navController.navigate(Screen.Recordings.route) },
+                    onOpenSample = {
+                        navController.navigate(Screen.RecordingDetail.createRoute(SampleMeeting.ID))
+                    },
                     showAsTab = true
                 )
             }
