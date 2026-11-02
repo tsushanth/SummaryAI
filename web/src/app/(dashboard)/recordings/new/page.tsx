@@ -102,7 +102,7 @@ export default function NewRecordingPage() {
         const contentType = audioBlob.type || 'audio/webm';
         const { recordingId } = await uploadWithPersistence(
           createIndexedDbStore(),
-          { id, title: title.trim(), blob: audioBlob, fileName, contentType, fileSize: audioBlob.size, createdAt: Date.now() },
+          { id, title: title.trim(), blob: audioBlob, fileName, contentType, fileSize: audioBlob.size, createdAt: Date.now(), outputLanguage: outputLanguageParam(outputLanguage) },
           {
             create: async (req) => {
               const { recording, upload_info } = await createRecording(req);

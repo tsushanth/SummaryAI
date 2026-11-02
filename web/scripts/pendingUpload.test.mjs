@@ -35,6 +35,15 @@ const okDeps = (calls, over = {}) => ({
   ...over,
 });
 
+test('the chosen summary language is passed to the create request, and omitted when not chosen', async () => {
+  const seen = [];
+  const deps = okDeps([], { create: async (req) => { seen.push(req); return { recordingId: 'r', uploadInfo: { url: 'u', method: 'PUT', headers: {} } }; } });
+  await uploadWithPersistence(createMemoryStore(), entry({ outputLanguage: 'fr' }), deps);
+  await uploadWithPersistence(createMemoryStore(), entry(), deps);
+  assert.equal(seen[0].output_language, 'fr');
+  assert.equal('output_language' in seen[1], false);
+});
+
 test('save then list returns newest first and keeps the blob', async () => {
   const store = createMemoryStore();
   await savePending(store, entry({ id: 'a', createdAt: 1 }));
