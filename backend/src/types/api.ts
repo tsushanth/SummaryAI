@@ -123,6 +123,12 @@ export interface GetRecordingResponse {
   summary?: Summary;
   audio_url?: string;
   audio_url_expires_at?: string;
+  /** Additive. Why there is, or is not, a summary: see services/shortRecordingGuard.ts. */
+  summary_status?: 'ready' | 'processing' | 'too_short' | 'no_speech' | 'failed_upload' | 'failed' | 'unavailable';
+  /** Additive. Plain sentence for the user when summary_status is too_short, no_speech or failed_upload; otherwise null. */
+  summary_message?: string | null;
+  /** Additive. The configured minimum length (seconds) a recording needs to be summarised. */
+  summary_min_seconds?: number;
 }
 
 // ============================================================================

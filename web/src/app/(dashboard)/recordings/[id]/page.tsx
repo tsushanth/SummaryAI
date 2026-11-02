@@ -74,6 +74,8 @@ import { updateRecording, updateSpeakerNames } from '@/lib/api/recordings';
 import { TalkTimeCard } from '@/components/recordings/TalkTimeCard';
 import { SpeakerTimeline } from '@/components/recordings/VoiceRibbon';
 import { useRecordingAnalytics } from '@/hooks/useRecordingAnalytics';
+import { NoSummaryNotice } from '@/components/recordings/NoSummaryNotice';
+import { getSummaryView } from '@/lib/summaryState';
 
 type Tab = 'summary' | 'transcript' | 'qa';
 
@@ -81,7 +83,7 @@ export default function RecordingDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
-  const { recording, transcript, summary, audioUrl, isLoading, refresh } =
+  const { recording, transcript, summary, audioUrl, summaryStatus, summaryMinSeconds, isLoading, refresh } =
     useRecording(id);
   const { analytics } = useRecordingAnalytics(
     id,
@@ -149,6 +151,13 @@ export default function RecordingDetailPage() {
   }
 
   const isLive = isLiveRecording(recording);
+  const noSummaryView = getSummaryView({
+    status: recording.status,
+    error_code: recording.error_code,
+    hasSummary: false,
+    summary_status: summaryStatus,
+    summary_min_seconds: summaryMinSeconds,
+  });
   const isProcessing = ['pending', 'uploading', 'uploaded', 'transcribing', 'summarizing'].includes(
     recording.status
   );
@@ -169,7 +178,7 @@ export default function RecordingDetailPage() {
           <div className="min-w-0 flex-1 basis-80">
             <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1">
               <h1 className="text-3xl font-semibold leading-tight tracking-tight">{recording.title}</h1>
-              <StatusBadge status={recording.status} live={isLive} />
+              <StatusBadge status={recording.status} live={isLive} errorCode={recording.error_code} />
               <button
                 onClick={toggleFavorite}
                 aria-pressed={recording.is_favorite}
@@ -334,13 +343,7 @@ export default function RecordingDetailPage() {
                 </div>
               </>
             ) : (
-              <div className="py-10 text-muted-foreground">
-                {isProcessing ? (
-                  <p>Summary will appear here once processing is complete.</p>
-                ) : (
-                  <p>No summary available.</p>
-                )}
-              </div>
+              noSummaryView.kind !== 'summary' && <NoSummaryNotice view={noSummaryView} />
             )}
           </div>
         )}

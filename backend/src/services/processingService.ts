@@ -14,6 +14,8 @@ import { generateSummary, type CompleteFn } from './summaryGeneration.js';
 import { resolveSummaryTemplate } from './summaryTemplates.js';
 import { reportRecordingFailure } from '../lib/recordingFailure.js';
 import { reportAlert, reportProviderFailure, reportProviderHttpFailure } from '../lib/alerts.js';
+import { getRecordingLimits } from '../config/recordingLimits.js';
+import { evaluateSummaryEligibility, countSpeechUnits } from './shortRecordingGuard.js';
 
 export interface ProcessingJob {
   id: string;
@@ -39,6 +41,8 @@ interface TranscriptionResult {
   wordCount: number;
   speakerCount: number;
   detectedLanguage: string;
+  /** Audio length as measured by the transcription provider; absent for PDFs and when the provider omits it. */
+  durationSeconds?: number | null;
 }
 
 // Recordings whose processing job is running inside THIS Node process right now.
@@ -165,6 +169,41 @@ async function processRecordingAsync(
     // Step 5: Update status to transcribed
     await updateStatus(recordingId, 'transcribed');
     console.log(`[Processing] ${jobId}: Status -> transcribed`);
+
+    // Too short / no speech: keep the transcript, skip the LLM (cost, and it only writes filler) and write no summary row.
+    // The recording still ends 'completed' so every client stops polling; error_code tells them why there is no summary.
+    const eligibility = evaluateSummaryEligibility(
+      {
+        // The provider's measured length beats the client-reported one; either may be missing.
+        durationSeconds: transcript.durationSeconds && transcript.durationSeconds > 0
+          ? transcript.durationSeconds
+          : recording.duration_seconds,
+        wordCount: Math.max(transcript.wordCount, countSpeechUnits(transcript.fullText)),
+        isDocument: !!isPdf,
+      },
+      getRecordingLimits()
+    );
+    if (eligibility.eligible === false) {
+      const { error: shortError } = await supabaseAdmin
+        .from('recordings')
+        .update({
+          status: 'completed',
+          error_code: eligibility.code,
+          error_message: null,
+          processed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          speaker_count: transcript.speakerCount,
+          word_count: transcript.wordCount,
+          language: transcript.detectedLanguage,
+        })
+        .eq('id', recordingId);
+      if (shortError) {
+        throw new Error(`Failed to update recording status: ${shortError.message}`);
+      }
+      console.log(`[Processing] ${jobId}: ${eligibility.code} (${transcript.wordCount} words), summary skipped, status -> completed`);
+      // No integration dispatch: there is no summary to deliver.
+      return;
+    }
 
     // Step 6: Update status to summarizing
     reportMeta.stage = 'summarizing';
@@ -337,7 +376,10 @@ async function transcribeWithDeepgram(
   const speakers = new Set(segments.map((s: TranscriptSegment) => s.speaker_index));
   const speakerCount = Math.max(1, speakers.size);
 
-  return { segments, fullText, wordCount, speakerCount, detectedLanguage };
+  const rawDuration = Number(result.metadata?.duration);
+  const durationSeconds = Number.isFinite(rawDuration) && rawDuration > 0 ? rawDuration : null;
+
+  return { segments, fullText, wordCount, speakerCount, detectedLanguage, durationSeconds };
 }
 
 /**
@@ -579,6 +621,7 @@ function createMockTranscript(durationSeconds: number): TranscriptionResult {
     wordCount,
     speakerCount: 2,
     detectedLanguage: 'en',
+    durationSeconds,
   };
 }
 

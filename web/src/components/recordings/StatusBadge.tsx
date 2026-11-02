@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils/cn';
 import type { Recording, RecordingStatus } from '@/types/api';
+import { recordingBadgeOverride } from '@/lib/summaryState';
 
 const statusConfig: Record<
   RecordingStatus,
@@ -24,12 +25,34 @@ export function isLiveRecording(recording: Pick<Recording, 'status' | 'meeting_i
   return recording.status === 'uploading' && !!recording.meeting_id;
 }
 
-export function StatusBadge({ status, live = false }: { status: RecordingStatus; live?: boolean }) {
+export function StatusBadge({
+  status,
+  live = false,
+  errorCode,
+}: {
+  status: RecordingStatus;
+  live?: boolean;
+  /** Recording.error_code: relabels "Completed" (too short / no speech) and "Failed" (abandoned upload). */
+  errorCode?: string | null;
+}) {
   if (live) {
     return (
       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-xs font-semibold bg-destructive/15 text-destructive">
         <span className="h-2 w-2 rounded-full bg-destructive animate-pulse motion-reduce:animate-none" aria-hidden="true" />
         Recording
+      </span>
+    );
+  }
+  const override = recordingBadgeOverride({ status, error_code: errorCode });
+  if (override) {
+    return (
+      <span
+        className={cn(
+          'inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-semibold',
+          override.tone === 'error' ? 'bg-destructive/15 text-destructive' : 'bg-secondary text-secondary-foreground'
+        )}
+      >
+        {override.label}
       </span>
     );
   }
