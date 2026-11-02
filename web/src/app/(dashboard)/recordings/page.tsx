@@ -6,6 +6,7 @@ import { RecordingCard } from '@/components/recordings/RecordingCard';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { SkeletonCardList } from '@/components/ui/skeleton';
+import { PendingUploadsBanner } from '@/components/recordings/PendingUploadsBanner';
 import { RecordingFilters, filtersToParams, type RecordingFilterState } from '@/components/recordings/RecordingFilters';
 import { WeeklyStatsCard } from '@/components/recordings/WeeklyStatsCard';
 import { groupRecordingsByDate } from '@/lib/recordingGroups';
@@ -43,6 +44,8 @@ export default function RecordingsPage() {
           </Link>
         </div>
       </div>
+
+      <PendingUploadsBanner />
 
       {!isFiltered && <WeeklyStatsCard />}
 
