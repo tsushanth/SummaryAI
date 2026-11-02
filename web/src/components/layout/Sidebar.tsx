@@ -4,9 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils/cn';
-import { Mic, ListTodo, Settings, LogOut, Calendar, Sparkles, Search, MessageSquare, Menu, X } from 'lucide-react';
+import { Mic, ListTodo, Settings, LogOut, Calendar, Search, MessageSquare, Menu, X } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { useSubscription } from '@/hooks/useSubscription';
 import { RibbonMark } from '@/components/ui/ribbon-mark';
 
 const navigation = [
@@ -22,7 +21,6 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, signOut } = useAuth();
-  const { isSubscribed, isLoading: subscriptionLoading } = useSubscription();
   const [open, setOpen] = useState(false);
 
   // Close the mobile drawer on navigation and on Escape
@@ -101,22 +99,6 @@ export function Sidebar() {
             );
           })}
         </nav>
-
-        {/* Upgrade note for free users: a marked-up line, not a banner */}
-        {!subscriptionLoading && !isSubscribed && (
-          <div className="px-3 pb-3">
-            <Link
-              href="/subscription"
-              className="flex items-center gap-2.5 rounded-md bg-mark px-3 py-2.5 text-mark-foreground transition-opacity hover:opacity-90"
-            >
-              <Sparkles className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
-              <div className="flex-1">
-                <p className="text-sm font-semibold">Upgrade to Pro</p>
-                <p className="text-xs">Q&amp;A, meeting bot, phone calls</p>
-              </div>
-            </Link>
-          </div>
-        )}
 
         {/* User section */}
         <div className="border-t border-border p-3">

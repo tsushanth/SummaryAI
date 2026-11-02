@@ -67,9 +67,6 @@ const LANGUAGE_NAMES: Record<string, string> = {
 import Link from 'next/link';
 import { cn } from '@/lib/utils/cn';
 import { updateRecording, updateSpeakerNames } from '@/lib/api/recordings';
-import { useSubscription } from '@/hooks/useSubscription';
-import { isTabLocked } from '@/lib/featureGates';
-import { PremiumGate } from '@/components/subscription/PremiumGate';
 import { TalkTimeCard } from '@/components/recordings/TalkTimeCard';
 import { SpeakerTimeline } from '@/components/recordings/VoiceRibbon';
 import { useRecordingAnalytics } from '@/hooks/useRecordingAnalytics';
@@ -81,7 +78,6 @@ export default function RecordingDetailPage() {
   const id = params.id as string;
   const { recording, transcript, summary, audioUrl, isLoading, refresh } =
     useRecording(id);
-  const { features, isLoading: subscriptionLoading } = useSubscription();
   const { analytics } = useRecordingAnalytics(
     id,
     recording?.status === 'completed',
@@ -255,30 +251,22 @@ export default function RecordingDetailPage() {
       {/* Tabs */}
       <div className="border-b border-border bg-card px-4 sm:px-8">
         <nav className="flex gap-6" role="tablist" aria-label="Recording sections">
-          {(['summary', 'transcript', 'qa'] as Tab[]).map((tab) => {
-            const showLock = isTabLocked(tab, features, subscriptionLoading);
-            return (
-              <button
-                key={tab}
-                role="tab"
-                aria-selected={activeTab === tab}
-                onClick={() => setActiveTab(tab)}
-                className={cn(
-                  'flex min-h-[44px] items-center gap-1.5 border-b-[3px] py-2 text-sm font-semibold capitalize transition-colors',
-                  activeTab === tab
-                    ? 'border-primary text-foreground'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                )}
-              >
-                {tab === 'qa' ? 'Q&A' : tab}
-                {showLock && (
-                  <span className="rounded-sm bg-mark px-1.5 py-0.5 text-xs font-semibold text-mark-foreground">
-                    Pro
-                  </span>
-                )}
-              </button>
-            );
-          })}
+          {(['summary', 'transcript', 'qa'] as Tab[]).map((tab) => (
+            <button
+              key={tab}
+              role="tab"
+              aria-selected={activeTab === tab}
+              onClick={() => setActiveTab(tab)}
+              className={cn(
+                'flex min-h-[44px] items-center gap-1.5 border-b-[3px] py-2 text-sm font-semibold capitalize transition-colors',
+                activeTab === tab
+                  ? 'border-primary text-foreground'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              )}
+            >
+              {tab === 'qa' ? 'Q&A' : tab}
+            </button>
+          ))}
         </nav>
       </div>
 
@@ -317,45 +305,41 @@ export default function RecordingDetailPage() {
 
         {activeTab === 'summary' && (
           <div className="max-w-3xl">
-            <PremiumGate feature="aiSummaries">
-              {summary ? (
-                <>
-                  <SummaryCard
-                    summary={summary}
-                    speakerNames={transcript?.speaker_names}
-                    actionItemsFooter={<ActionItemsToTodosButton recordingId={recording.id} />}
+            {summary ? (
+              <>
+                <SummaryCard
+                  summary={summary}
+                  speakerNames={transcript?.speaker_names}
+                  actionItemsFooter={<ActionItemsToTodosButton recordingId={recording.id} />}
+                />
+                {/* Style controls come after the content people came to read */}
+                <div className="mt-10">
+                  <SummaryTemplatePanel
+                    recordingId={recording.id}
+                    currentTemplate={recording.summary_template}
+                    onRegenerated={refresh}
                   />
-                  {/* Style controls come after the content people came to read */}
-                  <div className="mt-10">
-                    <SummaryTemplatePanel
-                      recordingId={recording.id}
-                      currentTemplate={recording.summary_template}
-                      onRegenerated={refresh}
-                    />
-                  </div>
-                </>
-              ) : (
-                <div className="py-10 text-muted-foreground">
-                  {isProcessing ? (
-                    <p>Summary will appear here once processing is complete.</p>
-                  ) : (
-                    <p>No summary available.</p>
-                  )}
                 </div>
-              )}
-            </PremiumGate>
+              </>
+            ) : (
+              <div className="py-10 text-muted-foreground">
+                {isProcessing ? (
+                  <p>Summary will appear here once processing is complete.</p>
+                ) : (
+                  <p>No summary available.</p>
+                )}
+              </div>
+            )}
           </div>
         )}
 
         {activeTab === 'qa' && (
           <div className="h-[500px] max-w-3xl">
-            <PremiumGate feature="qaChat">
-              <QAChat
-                recordingId={recording.id}
-                isReady={recording.status === 'completed'}
-                onSeek={handleSeek}
-              />
-            </PremiumGate>
+            <QAChat
+              recordingId={recording.id}
+              isReady={recording.status === 'completed'}
+              onSeek={handleSeek}
+            />
           </div>
         )}
       </div>

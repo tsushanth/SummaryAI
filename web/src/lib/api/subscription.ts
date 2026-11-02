@@ -18,30 +18,8 @@ export interface SubscriptionStatus {
   };
 }
 
-export interface SubscriptionPrice {
-  planType: 'weekly' | 'monthly' | 'yearly';
-  price: number;
-  currency: string;
-  interval: string;
-  displayPrice: string;
-  savingsVsAppStore: string;
-  appStorePrice: string;
-  trialDays?: number;
-  highlighted?: boolean;
-  monthlyEquivalent?: string;
-}
-
-export interface CheckoutResponse {
-  checkoutUrl: string;
-  sessionId: string;
-}
-
 export interface PortalResponse {
   portalUrl: string;
-}
-
-export interface PricesResponse {
-  prices: SubscriptionPrice[];
 }
 
 /**
@@ -52,29 +30,10 @@ export async function getSubscriptionStatus(): Promise<SubscriptionStatus> {
 }
 
 /**
- * Create a Stripe checkout session
- */
-export async function createCheckoutSession(
-  planType: 'weekly' | 'monthly' | 'yearly'
-): Promise<CheckoutResponse> {
-  return apiClient<CheckoutResponse>('/api/subscriptions/checkout', {
-    method: 'POST',
-    body: JSON.stringify({ planType }),
-  });
-}
-
-/**
  * Create a Stripe customer portal session
  */
 export async function createPortalSession(): Promise<PortalResponse> {
   return apiClient<PortalResponse>('/api/subscriptions/portal', {
     method: 'POST',
   });
-}
-
-/**
- * Get available subscription prices
- */
-export async function getSubscriptionPrices(): Promise<PricesResponse> {
-  return apiClient<PricesResponse>('/api/subscriptions/prices');
 }

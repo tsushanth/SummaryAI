@@ -48,8 +48,9 @@ export default function TermsPage() {
 
           <h3 className="text-lg font-medium text-foreground/80 mb-3">Free Tier</h3>
           <p className="text-muted-foreground mb-4">
-            Recording, transcripts and summaries are free, subject to per-file size and length limits and fair use.
-            Pro features (such as Q&amp;A, the meeting bot and phone call recording) require a paid subscription.
+            MeetingMind is free, with all features included, subject to per-file size and length limits and fair use.
+            Some accounts that subscribed before MeetingMind became free may still have a paid subscription;
+            those continue to bill under the Billing terms below until cancelled.
           </p>
 
           <h3 className="text-lg font-medium text-foreground/80 mb-3">Billing</h3>

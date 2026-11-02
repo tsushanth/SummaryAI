@@ -3,18 +3,16 @@
 import useSWR from 'swr';
 import {
   getSubscriptionStatus,
-  getSubscriptionPrices,
-  createCheckoutSession,
   createPortalSession,
   SubscriptionStatus,
-  SubscriptionPrice,
 } from '@/lib/api/subscription';
 import { useState, useCallback } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { FREE_TIER_DEFAULT_FEATURES } from '@/lib/featureGates';
+import { hasStripeSubscription } from '@/lib/billing';
 
 /**
- * Hook to get and manage subscription status
+ * Billing status for the signed-in user. MeetingMind is free, so this is only used to find out whether the
+ * user still has a Stripe subscription to manage (see `hasStripeBilling`); nothing in the UI is gated on it.
  */
 export function useSubscription() {
   const { user, loading: authLoading } = useAuth();
@@ -29,19 +27,13 @@ export function useSubscription() {
     }
   );
 
-  const isSubscribed = data?.isSubscribed ?? false;
-  const isPremium =
-    data?.status === 'active' || data?.status === 'trialing';
-
   return {
     subscription: data,
-    isSubscribed,
-    isPremium,
+    hasStripeBilling: hasStripeSubscription(data),
     status: data?.status ?? 'free',
     plan: data?.plan,
     provider: data?.provider,
     expiresAt: data?.expiresAt,
-    features: data?.features ?? FREE_TIER_DEFAULT_FEATURES,
     isLoading: authLoading || isLoading,
     error,
     refresh: mutate,
@@ -49,68 +41,7 @@ export function useSubscription() {
 }
 
 /**
- * Hook to get subscription prices
- */
-export function useSubscriptionPrices() {
-  const { data, error, isLoading } = useSWR<{ prices: SubscriptionPrice[] }>(
-    'subscription-prices',
-    getSubscriptionPrices,
-    {
-      revalidateOnFocus: false,
-      dedupingInterval: 60000, // Cache for 1 minute
-    }
-  );
-
-  return {
-    prices: data?.prices ?? [],
-    isLoading,
-    error,
-  };
-}
-
-/**
- * Hook to handle checkout flow
- */
-export function useCheckout() {
-  const { user } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const startCheckout = useCallback(
-    async (planType: 'weekly' | 'monthly' | 'yearly') => {
-      // If not logged in, redirect to auth with return URL
-      if (!user) {
-        const returnUrl = `/subscription?plan=${planType}`;
-        window.location.href = `/auth?returnTo=${encodeURIComponent(returnUrl)}`;
-        return;
-      }
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const { checkoutUrl } = await createCheckoutSession(planType);
-        // Redirect to Stripe checkout
-        window.location.href = checkoutUrl;
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : 'Failed to start checkout';
-        setError(message);
-        setIsLoading(false);
-      }
-    },
-    [user]
-  );
-
-  return {
-    startCheckout,
-    isLoading,
-    error,
-  };
-}
-
-/**
- * Hook to open customer portal
+ * Hook to open the Stripe customer portal (for people who subscribed on the web before MeetingMind became free)
  */
 export function useCustomerPortal() {
   const [isLoading, setIsLoading] = useState(false);

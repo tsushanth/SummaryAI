@@ -1,15 +1,14 @@
 /**
  * Free tier rules, in one place.
  *
- * Since 2026-10-29 (phase 0 of the free-tier design) a free account can record or upload without a
- * recording-count limit and gets transcript, summary, key points, action items, regenerate, follow-up
- * email draft, share links and exports without a subscription. The paid tier is Q&A, cross-meeting
- * chat, the meeting bot, phone-call recording and calendar sync (those are gated in the clients; the
- * only server-side enforcement that ever existed was the recording count below).
+ * MeetingMind is free for everyone (owner policy, 2026-11). Every account gets every feature:
+ * recording, transcript, summary, Q&A, cross-meeting chat, the meeting bot, phone-call recording,
+ * calendar sync and exports. There are no paid tiers; the only server-side enforcement that ever
+ * existed was the recording count below, and it is OFF unless FREE_TIER_LEGACY_LIMITS=true.
  *
- * To restore the old behaviour (3 recordings, summaries for subscribers only) set the environment
- * variable FREE_TIER_LEGACY_LIMITS=true on the backend and restart. Nothing else needs to change:
- * the web app reads `features` from GET /api/subscriptions/status.
+ * The legacy recording limit (3 recordings for non-subscribers) is kept only as a dormant kill
+ * switch for the create-recording route. `planFeatures()` does NOT read it: clients must not show
+ * any paywall, so it always reports every feature as granted.
  *
  * Per-file limits (MAX_AUDIO_FILE_SIZE_MB, MAX_RECORDING_DURATION_SECONDS) are unchanged and are
  * enforced in the create-recording schema.
@@ -43,17 +42,19 @@ export interface PlanFeatures {
   exportPdf: boolean;
 }
 
-/** Feature flags returned by GET /api/subscriptions/status (the web app gates its UI on these). */
-export function planFeatures(isSubscribed: boolean, legacy: boolean = legacyFreeLimitsEnabled()): PlanFeatures {
-  const free = !legacy; // true = recording, summaries and exports are free for everyone
+/**
+ * Feature flags returned by GET /api/subscriptions/status. Everything is granted to every user.
+ * Subscription state no longer changes what a user can do, so this takes no arguments.
+ */
+export function planFeatures(): PlanFeatures {
   return {
-    unlimitedRecordings: free || isSubscribed,
-    aiSummaries: free || isSubscribed,
-    qaChat: isSubscribed,
-    meetingBot: isSubscribed,
-    phoneRecording: isSubscribed,
-    calendarSync: isSubscribed,
-    exportPdf: free || isSubscribed,
+    unlimitedRecordings: true,
+    aiSummaries: true,
+    qaChat: true,
+    meetingBot: true,
+    phoneRecording: true,
+    calendarSync: true,
+    exportPdf: true,
   };
 }
 

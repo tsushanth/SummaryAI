@@ -2,15 +2,12 @@
 
 import { useState } from 'react';
 import { useRecordings } from '@/hooks/useRecordings';
-import { useSubscription } from '@/hooks/useSubscription';
 import { RecordingCard } from '@/components/recordings/RecordingCard';
-import { PaywallModal } from '@/components/subscription/PaywallModal';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { SkeletonCardList } from '@/components/ui/skeleton';
 import { RecordingFilters, filtersToParams, type RecordingFilterState } from '@/components/recordings/RecordingFilters';
 import { WeeklyStatsCard } from '@/components/recordings/WeeklyStatsCard';
-import { hasRecordingLimit, LEGACY_FREE_RECORDING_LIMIT as FREE_TIER_LIMIT } from '@/lib/featureGates';
 import { groupRecordingsByDate } from '@/lib/recordingGroups';
 import { Plus, Mic, CloudOff, Search } from 'lucide-react';
 import Link from 'next/link';
@@ -21,34 +18,14 @@ export default function RecordingsPage() {
   const params = filtersToParams(filters);
   const isFiltered = Object.keys(params).length > 0;
   const { recordings, isLoading, error } = useRecordings({ per_page: 50, ...params });
-  const { features, isLoading: subLoading } = useSubscription();
-  // Only true when the backend runs with FREE_TIER_LEGACY_LIMITS=true; otherwise recording is unlimited for everyone.
-  const limitApplies = hasRecordingLimit(features, subLoading);
-  const [showPaywall, setShowPaywall] = useState(false);
-
-  const atFreeLimit = limitApplies && !isFiltered && recordings.length >= FREE_TIER_LIMIT;
-
-  const handleNewRecording = (e: React.MouseEvent) => {
-    if (atFreeLimit) {
-      e.preventDefault();
-      setShowPaywall(true);
-    }
-  };
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-8 sm:py-8">
-      {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} />}
-
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Recordings</h1>
           <p className="text-sm text-muted-foreground tabular">
             {recordings.length} recording{recordings.length !== 1 ? 's' : ''}
-            {limitApplies && !isFiltered && (
-              <span className="ml-2 rounded-sm bg-mark px-1.5 py-0.5 text-xs font-semibold text-mark-foreground">
-                {recordings.length}/{FREE_TIER_LIMIT} free used
-              </span>
-            )}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -58,7 +35,7 @@ export default function RecordingsPage() {
               Search
             </Button>
           </Link>
-          <Link href="/recordings/new" onClick={handleNewRecording}>
+          <Link href="/recordings/new">
             <Button>
               <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
               New Recording

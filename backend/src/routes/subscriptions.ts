@@ -97,7 +97,7 @@ router.get('/status', async (req: Request, res: Response) => {
       provider: profile?.subscription_provider || null,
       expiresAt: profile?.subscription_expires_at || null,
       subscribedAt: profile?.subscribed_at || null,
-      features: planFeatures(isSubscribed),
+      features: planFeatures(),
     });
   } catch (err) {
     console.error('[Subscriptions] Get status error:', err);

@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  async redirects() {
+    // The old Stripe checkout return URL; MeetingMind is free now and there is no checkout.
+    return [{ source: "/subscription/success", destination: "/recordings", permanent: false }];
+  },
   async headers() {
     // Public share pages: never cached, indexed, or leaked via Referer (the token is in the URL).
     return [
