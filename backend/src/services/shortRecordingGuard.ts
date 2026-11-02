@@ -17,8 +17,8 @@ export const FAILED_UPLOAD_CODE = 'FAILED_UPLOAD';
 export const NO_SPEECH_MESSAGE = 'No speech detected. Check your microphone and try again, or upload audio.';
 export const FAILED_UPLOAD_MESSAGE = 'This upload never finished. Record again, or upload the audio file.';
 
-export const tooShortMessage = (minSeconds: number) =>
-  `Too short to summarize. Record at least ${minSeconds} seconds, or upload audio.`;
+export const TOO_SHORT_MESSAGE = 'Too short to summarize. Say a little more, or upload audio.';
+export const tooShortMessage = (_minSeconds?: number) => TOO_SHORT_MESSAGE;
 
 // Scripts the transcription provider returns without spaces between words: a whitespace split sees a whole sentence as one "word".
 const UNSPACED = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\u0e00-\u0e7f]/g;
@@ -49,11 +49,13 @@ export function evaluateSummaryEligibility(
   if (input.wordCount <= 0) {
     return { eligible: false, reason: 'no_speech', code: NO_SPEECH_CODE, message: NO_SPEECH_MESSAGE };
   }
+  // Genuinely thin = too few words, or a short clip that is not dense. A fast 25 s dictation with 80 words is kept.
   const tooFewWords = input.wordCount < limits.minSummaryWords;
   // Unknown or zero duration = no information, so only the word rule applies.
   const hasDuration = typeof input.durationSeconds === 'number' && input.durationSeconds > 0;
-  const tooShortAudio = hasDuration && (input.durationSeconds as number) < limits.minSummarySeconds;
-  if (tooFewWords || tooShortAudio) {
+  const shortAndThin =
+    hasDuration && (input.durationSeconds as number) < limits.minSummarySeconds && input.wordCount < limits.denseWords;
+  if (tooFewWords || shortAndThin) {
     return { eligible: false, reason: 'too_short', code: TOO_SHORT_CODE, message: tooShortMessage(limits.minSummarySeconds) };
   }
   return { eligible: true };

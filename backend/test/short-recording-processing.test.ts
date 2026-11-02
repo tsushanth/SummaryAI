@@ -90,9 +90,16 @@ describe('short recordings', () => {
     expect(completion()).toMatchObject({ status: 'completed', error_code: 'NO_SPEECH', word_count: 0 });
   });
 
-  it('under 30 s by the audio provider duration, even if the client reported 600 s and there are 80 words', async () => {
-    recordingRow.duration_seconds = 600;
-    deepgramBody = deepgram(words(80), 22);
+  it('a 10 s clip with 20 words is too short', async () => {
+    recordingRow.duration_seconds = 600; // client value is overridden by the provider duration
+    deepgramBody = deepgram(words(20), 10);
+    await runJob();
+    expect(anthropicCreate).not.toHaveBeenCalled();
+    expect(completion()).toMatchObject({ error_code: 'TOO_SHORT' });
+  });
+
+  it('a 29 s clip with 59 words is too short', async () => {
+    deepgramBody = deepgram(words(59), 29);
     await runJob();
     expect(anthropicCreate).not.toHaveBeenCalled();
     expect(completion()).toMatchObject({ error_code: 'TOO_SHORT' });
@@ -108,6 +115,22 @@ describe('short recordings', () => {
 });
 
 describe('recordings at or above the threshold are unchanged', () => {
+  it('a dense 25 s dictation (80 words) is summarised', async () => {
+    recordingRow.duration_seconds = 25;
+    deepgramBody = deepgram(words(80), 25);
+    await runJob();
+    expect(anthropicCreate).toHaveBeenCalledTimes(1);
+    expect(summaryInserts()).toHaveLength(1);
+    expect(completion().error_code).toBeNull();
+  });
+
+  it('a 29 s clip with exactly 60 words is summarised', async () => {
+    deepgramBody = deepgram(words(60), 29);
+    await runJob();
+    expect(anthropicCreate).toHaveBeenCalledTimes(1);
+    expect(completion().error_code).toBeNull();
+  });
+
   it('exactly 30 s and 25 words: summarised, error_code cleared, integrations fired', async () => {
     recordingRow.duration_seconds = 30;
     recordingRow.error_code = 'RECOVERY_RETRY_1';

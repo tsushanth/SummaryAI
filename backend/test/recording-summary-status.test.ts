@@ -55,7 +55,7 @@ describe('GET /api/recordings/:id summary state', () => {
     expect(status).toBe(200);
     expect(body.summary).toBeUndefined();
     expect(body.summary_status).toBe('too_short');
-    expect(body.summary_message).toMatch(/^Too short to summarize\. Record at least 30 seconds/);
+    expect(body.summary_message).toBe('Too short to summarize. Say a little more, or upload audio.');
     expect(body.summary_min_seconds).toBe(30);
     expect(body.recording.status).toBe('completed'); // legacy enum value, old clients parse it
     expect(body.transcript.id).toBe('t');

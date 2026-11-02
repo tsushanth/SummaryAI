@@ -7,7 +7,6 @@
  * backend), error_code gives the same answer, so the page works either way.
  */
 
-export const DEFAULT_MIN_SUMMARY_SECONDS = 30;
 const RECORD_AGAIN = { label: 'Record again', href: '/recordings/new' } as const;
 
 export interface SummaryViewInput {
@@ -41,8 +40,7 @@ export function getSummaryView(input: SummaryViewInput): SummaryView {
             : null;
 
   if (reason === 'too_short') {
-    const n = input.summary_min_seconds && input.summary_min_seconds > 0 ? input.summary_min_seconds : DEFAULT_MIN_SUMMARY_SECONDS;
-    return { kind: 'too_short', title: 'Too short to summarize', body: `Record at least ${n} seconds, or upload audio.`, action: RECORD_AGAIN };
+    return { kind: 'too_short', title: 'Too short to summarize', body: 'Say a little more, or upload audio.', action: RECORD_AGAIN };
   }
   if (reason === 'no_speech') {
     return {

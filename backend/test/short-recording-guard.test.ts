@@ -12,13 +12,13 @@ import { getRecordingLimits, DEFAULT_RECORDING_LIMITS } from '../src/config/reco
 const L = DEFAULT_RECORDING_LIMITS;
 
 describe('recording limits config', () => {
-  it('defaults: 30 s, 25 words, 6 h', () => {
-    expect(getRecordingLimits({})).toEqual({ minSummarySeconds: 30, minSummaryWords: 25, abandonedUploadHours: 6 });
+  it('defaults: 30 s, 25 words, dense 60 words, 6 h', () => {
+    expect(getRecordingLimits({})).toEqual({ minSummarySeconds: 30, minSummaryWords: 25, denseWords: 60, abandonedUploadHours: 6 });
   });
   it('is env-overridable and ignores junk values', () => {
-    expect(getRecordingLimits({ MIN_SUMMARY_SECONDS: '45', MIN_SUMMARY_WORDS: '40', ABANDONED_UPLOAD_HOURS: '2' }))
-      .toEqual({ minSummarySeconds: 45, minSummaryWords: 40, abandonedUploadHours: 2 });
-    expect(getRecordingLimits({ MIN_SUMMARY_SECONDS: 'abc', MIN_SUMMARY_WORDS: '-3', ABANDONED_UPLOAD_HOURS: '' }))
+    expect(getRecordingLimits({ MIN_SUMMARY_SECONDS: '45', MIN_SUMMARY_WORDS: '40', DENSE_WORDS: '90', ABANDONED_UPLOAD_HOURS: '2' }))
+      .toEqual({ minSummarySeconds: 45, minSummaryWords: 40, denseWords: 90, abandonedUploadHours: 2 });
+    expect(getRecordingLimits({ MIN_SUMMARY_SECONDS: 'abc', MIN_SUMMARY_WORDS: '-3', DENSE_WORDS: 'x', ABANDONED_UPLOAD_HOURS: '' }))
       .toEqual(DEFAULT_RECORDING_LIMITS);
   });
   it('0 is a valid override (turns that rule off)', () => {
@@ -35,15 +35,23 @@ describe('evaluateSummaryEligibility', () => {
     expect(ok(120, 0)).toMatchObject({ eligible: false, reason: 'no_speech', code: NO_SPEECH_CODE });
     expect(ok(null, 0)).toMatchObject({ eligible: false, reason: 'no_speech' });
   });
-  it('under 30 s is too_short even with plenty of words', () => {
-    expect(ok(29, 200)).toMatchObject({ eligible: false, reason: 'too_short', code: TOO_SHORT_CODE });
-    expect(ok(12.4, 60)).toMatchObject({ eligible: false, reason: 'too_short' });
+  it('short AND thin is too_short: a 10 s clip with 20 words, a 29 s clip with 59 words', () => {
+    expect(ok(10, 20)).toMatchObject({ eligible: false, reason: 'too_short', code: TOO_SHORT_CODE });
+    expect(ok(29, 59)).toMatchObject({ eligible: false, reason: 'too_short' });
+    expect(ok(12.4, 30)).toMatchObject({ eligible: false, reason: 'too_short' });
   });
-  it('under 25 words is too_short even for a long clip', () => {
+  it('short but dense is summarised: 25 s with 80 words, 29 s with exactly 60 words', () => {
+    expect(ok(25, 80)).toEqual({ eligible: true });
+    expect(ok(29, 60)).toEqual({ eligible: true });
+  });
+  it('under 25 words is too_short whatever the length, even a very dense-looking short clip rule cannot save it', () => {
     expect(ok(600, 24)).toMatchObject({ eligible: false, reason: 'too_short' });
     expect(ok(600, 1)).toMatchObject({ eligible: false, reason: 'too_short' });
+    expect(ok(5, 24)).toMatchObject({ eligible: false, reason: 'too_short' });
   });
-  it('exactly 30 s and exactly 25 words is eligible (boundaries are inclusive)', () => {
+  it('30 s or longer with 25+ words is eligible (boundaries inclusive)', () => {
+    expect(ok(30, 25)).toEqual({ eligible: true });
+    expect(ok(29, 25)).toMatchObject({ eligible: false });
     expect(ok(30, 25)).toEqual({ eligible: true });
   });
   it('unknown / zero duration falls back to the word rule alone', () => {
@@ -55,13 +63,15 @@ describe('evaluateSummaryEligibility', () => {
     expect(evaluateSummaryEligibility({ durationSeconds: null, wordCount: 3, isDocument: true }, L)).toEqual({ eligible: true });
     expect(evaluateSummaryEligibility({ durationSeconds: null, wordCount: 0, isDocument: true }, L)).toEqual({ eligible: true });
   });
-  it('the message names the configured minimum', () => {
-    const r = evaluateSummaryEligibility({ durationSeconds: 5, wordCount: 3, isDocument: false }, { ...L, minSummarySeconds: 45 });
-    expect(r).toMatchObject({ eligible: false });
-    expect((r as any).message).toContain('45 seconds');
-    expect((r as any).message).toMatch(/^Too short to summarize\./);
+  it('the message asks for a little more', () => {
+    const r = evaluateSummaryEligibility({ durationSeconds: 5, wordCount: 3, isDocument: false }, L);
+    expect(r).toMatchObject({ eligible: false, message: 'Too short to summarize. Say a little more, or upload audio.' });
   });
-  it('a rule set to 0 is off', () => {
+  it('limits are configurable: dense threshold 90 makes 29 s / 80 words too short', () => {
+    expect(evaluateSummaryEligibility({ durationSeconds: 29, wordCount: 80, isDocument: false }, { ...L, denseWords: 90 }))
+      .toMatchObject({ eligible: false });
+  });
+  it('rules set to 0 are off', () => {
     expect(evaluateSummaryEligibility({ durationSeconds: 3, wordCount: 5, isDocument: false }, { ...L, minSummarySeconds: 0, minSummaryWords: 0 }))
       .toEqual({ eligible: true });
   });
@@ -87,7 +97,7 @@ describe('summaryStateFor (additive API fields)', () => {
   it('completed + TOO_SHORT and no summary row', () => {
     const s = summaryStateFor({ status: 'completed', error_code: 'TOO_SHORT' }, false, L);
     expect(s.summary_status).toBe('too_short');
-    expect(s.summary_message).toMatch(/30 seconds/);
+    expect(s.summary_message).toBe('Too short to summarize. Say a little more, or upload audio.');
     expect(s.summary_min_seconds).toBe(30);
   });
   it('completed + NO_SPEECH', () => {

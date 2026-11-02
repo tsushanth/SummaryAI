@@ -11,19 +11,19 @@ test('a summary always wins, even on a recording flagged too short', () => {
   assert.equal(getSummaryView({ ...base, hasSummary: true }).kind, 'summary');
 });
 
-test('too short from the API: clear title, the configured minimum, and a Record again action', () => {
+test('too short from the API: clear title, ask for a little more, and a Record again action', () => {
   const v = getSummaryView({ ...base, summary_status: 'too_short', summary_min_seconds: 45 });
   assert.equal(v.kind, 'too_short');
   assert.equal(v.title, 'Too short to summarize');
-  assert.equal(v.body, 'Record at least 45 seconds, or upload audio.');
+  assert.equal(v.body, 'Say a little more, or upload audio.');
   assert.equal(v.action?.label, 'Record again');
   assert.equal(v.action?.href, '/recordings/new');
 });
 
-test('too short without the new API fields (older backend): falls back to error_code and 30 s', () => {
+test('too short without the new API fields (older backend): falls back to error_code, same copy', () => {
   const v = getSummaryView({ ...base, error_code: 'TOO_SHORT' });
   assert.equal(v.kind, 'too_short');
-  assert.equal(v.body, 'Record at least 30 seconds, or upload audio.');
+  assert.equal(v.body, 'Say a little more, or upload audio.');
 });
 
 test('no speech detected: its own message, still offers Record again', () => {
