@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useRecording } from '@/hooks/useRecordings';
 import { StatusBadge, isLiveRecording } from '@/components/recordings/StatusBadge';
 import { TranscriptViewer } from '@/components/recordings/TranscriptViewer';
@@ -15,6 +15,9 @@ import { EmailSummaryPanel } from '@/components/recordings/EmailSummaryPanel';
 import { RecordingOrganizer } from '@/components/recordings/RecordingOrganizer';
 import { SummaryTemplatePanel } from '@/components/recordings/SummaryTemplatePanel';
 import { ActionItemsToTodosButton } from '@/components/recordings/ActionItemsToTodosButton';
+import { DeleteRecordingDialog } from '@/components/recordings/DeleteRecordingDialog';
+import { Button } from '@/components/ui/button';
+import { canDeleteRecording } from '@/lib/recordingDelete';
 import { formatDuration, formatDate } from '@/lib/utils/audio';
 import {
   ArrowLeft,
@@ -24,6 +27,7 @@ import {
   Loader2,
   Star,
   Globe,
+  Trash2,
 } from 'lucide-react';
 
 // Language code to display name mapping (Deepgram supported languages)
@@ -75,6 +79,7 @@ type Tab = 'summary' | 'transcript' | 'qa';
 
 export default function RecordingDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
   const { recording, transcript, summary, audioUrl, isLoading, refresh } =
     useRecording(id);
@@ -87,6 +92,7 @@ export default function RecordingDetailPage() {
   const [currentTime, setCurrentTime] = useState(0);
   const [seekRequest, setSeekRequest] = useState<SeekRequest | null>(null);
   const [isUpdatingSpeakers, setIsUpdatingSpeakers] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const handleSeek = (time: number) => {
     // Moves the audio player; its timeupdate then keeps currentTime in sync
@@ -211,6 +217,12 @@ export default function RecordingDetailPage() {
             <ExportMenu recording={recording} summary={summary} transcript={transcript} audioUrl={audioUrl} />
             <ShareLinkPanel recordingId={recording.id} />
             <EmailSummaryPanel recordingId={recording.id} />
+            {canDeleteRecording(recording) && (
+              <Button variant="outline" onClick={() => setConfirmDelete(true)} className="text-destructive">
+                <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
+                Delete
+              </Button>
+            )}
           </div>
         </div>
 
@@ -343,6 +355,13 @@ export default function RecordingDetailPage() {
           </div>
         )}
       </div>
+
+      <DeleteRecordingDialog
+        recording={recording}
+        open={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        onDeleted={() => router.push('/recordings')}
+      />
 
       {/* Audio Player */}
       {audioUrl && (
