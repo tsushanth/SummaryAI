@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { GoogleSignIn } from '@/components/auth/GoogleSignIn';
+import { EmailAuthSection } from '@/components/auth/EmailAuthSection';
 import { RibbonMark } from '@/components/ui/ribbon-mark';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
@@ -22,6 +23,12 @@ export default function AuthPage() {
             }
           >
             <GoogleSignIn />
+            <div className="flex items-center gap-3 text-xs uppercase tracking-wide text-muted-foreground" aria-hidden="true">
+              <span className="h-px flex-1 bg-border" />
+              or use email
+              <span className="h-px flex-1 bg-border" />
+            </div>
+            <EmailAuthSection />
           </Suspense>
           <p className="text-sm text-muted-foreground">
             By continuing, you agree to our{' '}
