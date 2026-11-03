@@ -1,0 +1,5 @@
+MeetingMind is free: record, transcribe and summarize meetings with no subscription.
+- Faster start: the intro slides are gone, so you can record in a few taps.
+- New "Sample meeting" shows what a finished transcript, summary and action items look like. You can delete it anytime.
+- Reliability fixes and better problem reporting.
+The optional AI Coach add-on still uses its own credits.
