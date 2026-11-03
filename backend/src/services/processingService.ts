@@ -8,6 +8,7 @@ import { config } from '../config/index.js';
 import { v4 as uuidv4 } from 'uuid';
 import Anthropic from '@anthropic-ai/sdk';
 import { dispatchRecordingCompleted } from './integrationsService.js';
+import { storeMeasuredDuration } from './recordingDuration.js';
 import { instrumentAnthropic, withFeature } from '../lib/llm.js';
 import { normalizeActionItems, type ParsedSummary } from './summaryService.js';
 import { generateSummary, type CompleteFn } from './summaryGeneration.js';
@@ -118,6 +119,8 @@ async function processRecordingAsync(
     let transcript: TranscriptionResult;
     let sttProvider = 'mock';
     let sttModel = 'mock';
+    // Length measured by the real provider (never the mock's made-up one, never a document's).
+    let measuredSeconds: number | null = null;
 
     if (isPdf) {
       // Extract text from PDF
@@ -133,6 +136,7 @@ async function processRecordingAsync(
       transcript = stt.transcript;
       sttProvider = stt.provider;
       sttModel = stt.model;
+      measuredSeconds = transcript.durationSeconds ?? null;
     } else {
       const soniox = getSttMode() === 'soniox';
       console.warn(`[Processing] ${jobId}: No ${soniox ? 'speech-to-text' : 'Deepgram'} API key, using mock transcription`);
@@ -161,6 +165,10 @@ async function processRecordingAsync(
     if (transcriptError) {
       throw new Error(`Failed to store transcript: ${transcriptError.message}`);
     }
+
+    // The page shows recordings.duration_seconds as the length; clients that sent none (the web app) left it NULL.
+    // Fill it from the provider's measurement; never overwrites a client-reported value.
+    await storeMeasuredDuration(recordingId, measuredSeconds, recording.duration_seconds);
 
     // Step 5: Update status to transcribed
     await updateStatus(recordingId, 'transcribed');

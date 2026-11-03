@@ -133,6 +133,8 @@ export interface CreateRecordingRequest {
   file_name: string;
   content_type: string;
   file_size: number;
+  /** Measured length in whole seconds (recorder clock or audio metadata); omitted when unknown. */
+  duration_seconds?: number;
   recording_type?: RecordingType;
   /** Language code for the summary (see lib/outputLanguages.ts); omit to follow the recording's language. */
   output_language?: string;

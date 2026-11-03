@@ -1,4 +1,5 @@
 import type { CreateRecordingRequest, CreateRecordingResponse } from '@/types/api';
+import { sanitizeDurationSeconds } from './recordingDuration.ts';
 
 /**
  * Body for POST /api/recordings. The backend schema (backend/src/routes/recordings.ts, createRecordingSchema) requires
@@ -6,8 +7,8 @@ import type { CreateRecordingRequest, CreateRecordingResponse } from '@/types/ap
  * ({"file_size_bytes":"Required"}) and no browser recording or upload can be created.
  */
 export function toCreateRecordingBody(req: CreateRecordingRequest): Record<string, unknown> {
-  const { file_size, ...rest } = req;
-  const body: Record<string, unknown> = { ...rest, file_size_bytes: file_size };
+  const { file_size, duration_seconds, ...rest } = req;
+  const body: Record<string, unknown> = { ...rest, file_size_bytes: file_size, duration_seconds: sanitizeDurationSeconds(duration_seconds) };
   for (const k of Object.keys(body)) if (body[k] === undefined) delete body[k];
   return body;
 }
