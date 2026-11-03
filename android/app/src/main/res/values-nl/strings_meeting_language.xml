@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meeting_language_label">Transcriptietaal</string>
+    <string name="meeting_language_auto">Automatisch detecteren</string>
+    <string name="meeting_language_hint">Automatisch detecteren werkt bij de meeste vergaderingen. Kies een taal als het transcript niet klopt. Je keuze wordt onthouden.</string>
+    <string name="meeting_language_dialog_title">Transcriptietaal</string>
+    <string name="meeting_language_change">Taal wijzigen</string>
+    <string name="meeting_language_active">Taal: %1$s</string>
+    <string name="meeting_language_changed">Transcriptietaal ingesteld op %1$s</string>
+    <string name="meeting_language_change_note">Geldt voor alles wat vanaf nu wordt gezegd.</string>
+    <string name="meeting_language_switch_unavailable">Deze vergadering kan de taal niet wijzigen tijdens de live-uitzending</string>
+    <string name="meeting_language_switch_failed">De taal kon niet worden gewijzigd. Probeer het opnieuw.</string>
+</resources>

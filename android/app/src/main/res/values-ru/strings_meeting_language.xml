@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meeting_language_label">Язык транскрипции</string>
+    <string name="meeting_language_auto">Определять автоматически</string>
+    <string name="meeting_language_hint">Автоопределение подходит для большинства встреч. Выберите язык, если расшифровка получается неверной. Ваш выбор запоминается.</string>
+    <string name="meeting_language_dialog_title">Язык транскрипции</string>
+    <string name="meeting_language_change">Сменить язык</string>
+    <string name="meeting_language_active">Язык: %1$s</string>
+    <string name="meeting_language_changed">Язык транскрипции изменён на %1$s</string>
+    <string name="meeting_language_change_note">Применяется к речи с этого момента.</string>
+    <string name="meeting_language_switch_unavailable">В этой встрече нельзя сменить язык в прямом эфире</string>
+    <string name="meeting_language_switch_failed">Не удалось сменить язык. Попробуйте ещё раз.</string>
+</resources>

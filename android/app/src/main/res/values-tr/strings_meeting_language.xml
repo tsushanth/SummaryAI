@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meeting_language_label">Transkripsiyon dili</string>
+    <string name="meeting_language_auto">Otomatik algıla</string>
+    <string name="meeting_language_hint">Otomatik algılama çoğu toplantıda işe yarar. Transkript hatalıysa bir dil seçin. Seçiminiz hatırlanır.</string>
+    <string name="meeting_language_dialog_title">Transkripsiyon dili</string>
+    <string name="meeting_language_change">Dili değiştir</string>
+    <string name="meeting_language_active">Dil: %1$s</string>
+    <string name="meeting_language_changed">Transkripsiyon dili %1$s olarak ayarlandı</string>
+    <string name="meeting_language_change_note">Bundan sonraki konuşmalara uygulanır.</string>
+    <string name="meeting_language_switch_unavailable">Bu toplantı canlıyken dil değiştiremez</string>
+    <string name="meeting_language_switch_failed">Dil değiştirilemedi. Lütfen tekrar deneyin.</string>
+</resources>

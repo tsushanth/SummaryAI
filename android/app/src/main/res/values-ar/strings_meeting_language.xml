@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meeting_language_label">لغة النسخ</string>
+    <string name="meeting_language_auto">الكشف التلقائي</string>
+    <string name="meeting_language_hint">يعمل الكشف التلقائي في معظم الاجتماعات. اختر لغة إذا كان النص غير صحيح. سيتم تذكّر اختيارك.</string>
+    <string name="meeting_language_dialog_title">لغة النسخ</string>
+    <string name="meeting_language_change">تغيير اللغة</string>
+    <string name="meeting_language_active">اللغة: %1$s</string>
+    <string name="meeting_language_changed">تم ضبط لغة النسخ على %1$s</string>
+    <string name="meeting_language_change_note">ينطبق على الكلام من الآن فصاعدًا.</string>
+    <string name="meeting_language_switch_unavailable">لا يمكن لهذا الاجتماع تغيير اللغة أثناء البث المباشر</string>
+    <string name="meeting_language_switch_failed">تعذّر تغيير اللغة. حاول مرة أخرى.</string>
+</resources>

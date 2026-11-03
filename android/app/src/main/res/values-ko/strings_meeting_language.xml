@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meeting_language_label">전사 언어</string>
+    <string name="meeting_language_auto">자동 감지</string>
+    <string name="meeting_language_hint">대부분의 회의에서는 자동 감지가 잘 작동합니다. 전사 결과가 맞지 않으면 언어를 선택하세요. 선택한 언어는 기억됩니다.</string>
+    <string name="meeting_language_dialog_title">전사 언어</string>
+    <string name="meeting_language_change">언어 변경</string>
+    <string name="meeting_language_active">언어: %1$s</string>
+    <string name="meeting_language_changed">전사 언어를 %1$s(으)로 설정했습니다</string>
+    <string name="meeting_language_change_note">지금부터 말하는 내용에 적용됩니다.</string>
+    <string name="meeting_language_switch_unavailable">이 회의는 라이브 중에 언어를 바꿀 수 없습니다</string>
+    <string name="meeting_language_switch_failed">언어를 변경하지 못했습니다. 다시 시도해 주세요.</string>
+</resources>

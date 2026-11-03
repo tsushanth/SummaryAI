@@ -1,5 +1,6 @@
 package com.kreativekoala.summaryai.data.repository
 
+import com.kreativekoala.summaryai.data.MeetingLanguages
 import com.kreativekoala.summaryai.data.api.SummaryAIApi
 import com.kreativekoala.summaryai.data.api.models.*
 import com.kreativekoala.summaryai.domain.model.LiveTranscriptSegment
@@ -7,8 +8,40 @@ import com.kreativekoala.summaryai.domain.model.Meeting
 import com.kreativekoala.summaryai.domain.model.MeetingStatus as DomainMeetingStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.google.gson.JsonParser
+import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
+
+/** Outcome of asking the backend to switch a live meeting's transcription language. */
+sealed interface LiveLanguageResult {
+    data class Success(val language: String) : LiveLanguageResult
+    /** HTTP 409: this meeting's transcription path cannot change language mid-meeting. */
+    data object NotSwitchable : LiveLanguageResult
+    data class Failed(val message: String?) : LiveLanguageResult
+}
+
+/**
+ * Builds the bot-join body. Auto-detect (or anything off the allow-list) leaves
+ * `transcription_language` out entirely, so the body is identical to what older builds sent.
+ */
+internal fun buildJoinRequest(joinUrl: String, botName: String?, language: String?) = JoinMeetingRequest(
+    joinUrl = joinUrl,
+    botName = botName,
+    transcriptionLanguage = MeetingLanguages.toRequestValue(language)
+)
+
+/** Pure mapping of the live-language HTTP outcome so it can be unit tested without a network. */
+internal fun mapLiveLanguageResponse(code: Int, body: String?, requested: String): LiveLanguageResult = when {
+    code == 409 -> LiveLanguageResult.NotSwitchable
+    code in 200..299 -> {
+        val echoed = runCatching {
+            JsonParser.parseString(body.orEmpty()).asJsonObject.get("language")?.asString.orEmpty()
+        }.getOrDefault("")
+        LiveLanguageResult.Success(echoed.ifBlank { requested })
+    }
+    else -> LiveLanguageResult.Failed("HTTP $code")
+}
 
 /**
  * Repository for meeting-related operations
@@ -64,15 +97,11 @@ class MeetingsRepository @Inject constructor(
      */
     suspend fun joinMeeting(
         joinUrl: String,
-        botName: String? = null
+        botName: String? = null,
+        transcriptionLanguage: String? = null
     ): Result<Pair<Meeting, String?>> = withContext(Dispatchers.IO) {
         try {
-            val response = api.joinMeeting(
-                JoinMeetingRequest(
-                    joinUrl = joinUrl,
-                    botName = botName
-                )
-            )
+            val response = api.joinMeeting(buildJoinRequest(joinUrl, botName, transcriptionLanguage))
             // Get recording ID from top-level response or from nested meeting
             val recordingId = response.recordingId ?: response.meeting.recordingId
             Result.success(Pair(response.meeting.toDomain(), recordingId))
@@ -98,6 +127,23 @@ class MeetingsRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
+    /**
+     * Switch the language a live meeting is transcribed in ("auto" or a primary subtag).
+     * A 409 comes back as [LiveLanguageResult.NotSwitchable], not an exception.
+     */
+    suspend fun setLiveLanguage(meetingId: String, language: String): LiveLanguageResult =
+        withContext(Dispatchers.IO) {
+            val value = MeetingLanguages.normalize(language)
+            try {
+                val response: Response<okhttp3.ResponseBody> =
+                    api.setLiveLanguage(meetingId, LiveLanguageRequest(value))
+                val text = if (response.isSuccessful) response.body()?.string() else null
+                mapLiveLanguageResponse(response.code(), text, value)
+            } catch (e: Exception) {
+                LiveLanguageResult.Failed(e.message)
+            }
+        }
 
     /**
      * Get live transcript segments for a meeting
@@ -138,7 +184,8 @@ private fun MeetingDto.toDomain() = Meeting(
     status = status.toDomainStatus(),
     botStatus = null, // Not returned in list endpoint
     autoJoin = autoJoin ?: false,
-    recordingId = recordingId
+    recordingId = recordingId,
+    transcriptionLanguage = transcriptionLanguage
 )
 
 private fun String.toDomainStatus(): DomainMeetingStatus = when (this.lowercase()) {

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meeting_language_label">Wika ng transcription</string>
+    <string name="meeting_language_auto">Awtomatikong tukuyin</string>
+    <string name="meeting_language_hint">Gumagana ang awtomatikong pagtukoy sa karamihan ng meeting. Pumili ng wika kung mali ang transcript. Naaalala ang iyong pinili.</string>
+    <string name="meeting_language_dialog_title">Wika ng transcription</string>
+    <string name="meeting_language_change">Palitan ang wika</string>
+    <string name="meeting_language_active">Wika: %1$s</string>
+    <string name="meeting_language_changed">Itinakda ang wika ng transcription sa %1$s</string>
+    <string name="meeting_language_change_note">Para sa mga sinasabi mula ngayon.</string>
+    <string name="meeting_language_switch_unavailable">Hindi mapapalitan ang wika ng meeting na ito habang live</string>
+    <string name="meeting_language_switch_failed">Hindi napalitan ang wika. Pakisubukan ulit.</string>
+</resources>

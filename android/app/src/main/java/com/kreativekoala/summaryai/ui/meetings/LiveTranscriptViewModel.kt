@@ -3,6 +3,9 @@ package com.kreativekoala.summaryai.ui.meetings
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kreativekoala.summaryai.data.MeetingLanguages
+import com.kreativekoala.summaryai.data.local.PreferencesManager
+import com.kreativekoala.summaryai.data.repository.LiveLanguageResult
 import com.kreativekoala.summaryai.data.repository.MeetingsRepository
 import com.kreativekoala.summaryai.domain.model.LiveTranscriptSegment
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,6 +14,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,12 +22,38 @@ data class LiveTranscriptUiState(
     val segments: List<LiveTranscriptSegment> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
-    val hasMore: Boolean = false
+    val hasMore: Boolean = false,
+    /** "auto" or a primary subtag. Auto-detect when the backend reports nothing. */
+    val activeLanguage: String = MeetingLanguages.AUTO,
+    val isChangingLanguage: Boolean = false,
+    val languageNotice: LanguageNotice? = null
 )
+
+/** One-shot result of a language change; the screen turns it into localized text. */
+sealed interface LanguageNotice {
+    data class Changed(val language: String) : LanguageNotice
+    /** HTTP 409 */
+    data object NotSwitchable : LanguageNotice
+    data object Failed : LanguageNotice
+}
+
+/** Maps the repository outcome to the new active language and the notice to show. */
+internal fun applyLiveLanguageResult(
+    previousLanguage: String,
+    result: LiveLanguageResult
+): Pair<String, LanguageNotice> = when (result) {
+    is LiveLanguageResult.Success -> {
+        val language = MeetingLanguages.normalize(result.language)
+        language to LanguageNotice.Changed(language)
+    }
+    LiveLanguageResult.NotSwitchable -> previousLanguage to LanguageNotice.NotSwitchable
+    is LiveLanguageResult.Failed -> previousLanguage to LanguageNotice.Failed
+}
 
 @HiltViewModel
 class LiveTranscriptViewModel @Inject constructor(
-    private val meetingsRepository: MeetingsRepository
+    private val meetingsRepository: MeetingsRepository,
+    private val preferencesManager: PreferencesManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LiveTranscriptUiState())
@@ -56,7 +86,45 @@ class LiveTranscriptViewModel @Inject constructor(
         if (newMeetingId != meetingId && newMeetingId.isNotEmpty()) {
             meetingId = newMeetingId
             reset()
+            loadActiveLanguage(newMeetingId)
         }
+    }
+
+    /** Backend value when it reports one, else what this device last started/switched the meeting to. */
+    private fun loadActiveLanguage(id: String) {
+        viewModelScope.launch {
+            val reported = meetingsRepository.getMeeting(id).getOrNull()?.transcriptionLanguage
+            val language = reported
+                ?: preferencesManager.lastMeetingLanguageFor(id).first()
+            if (id == meetingId && language != null) {
+                _uiState.value = _uiState.value.copy(activeLanguage = MeetingLanguages.normalize(language))
+            }
+        }
+    }
+
+    fun changeLanguage(code: String) {
+        val id = meetingId
+        if (id.isEmpty() || _uiState.value.isChangingLanguage) return
+        val requested = MeetingLanguages.normalize(code)
+        if (requested == _uiState.value.activeLanguage) return
+        _uiState.value = _uiState.value.copy(isChangingLanguage = true, languageNotice = null)
+        viewModelScope.launch {
+            val result = meetingsRepository.setLiveLanguage(id, requested)
+            if (result is LiveLanguageResult.Success) {
+                preferencesManager.setLastMeetingLanguage(id, result.language)
+            }
+            if (id != meetingId) return@launch
+            val (language, notice) = applyLiveLanguageResult(_uiState.value.activeLanguage, result)
+            _uiState.value = _uiState.value.copy(
+                activeLanguage = language,
+                isChangingLanguage = false,
+                languageNotice = notice
+            )
+        }
+    }
+
+    fun clearLanguageNotice() {
+        _uiState.value = _uiState.value.copy(languageNotice = null)
     }
 
     /**

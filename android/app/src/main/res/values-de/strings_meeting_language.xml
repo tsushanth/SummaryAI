@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meeting_language_label">Transkriptionssprache</string>
+    <string name="meeting_language_auto">Automatisch erkennen</string>
+    <string name="meeting_language_hint">Die automatische Erkennung funktioniert bei den meisten Meetings. Wähle eine Sprache, wenn das Transkript falsch ist. Deine Auswahl wird gespeichert.</string>
+    <string name="meeting_language_dialog_title">Transkriptionssprache</string>
+    <string name="meeting_language_change">Sprache ändern</string>
+    <string name="meeting_language_active">Sprache: %1$s</string>
+    <string name="meeting_language_changed">Transkriptionssprache auf %1$s gesetzt</string>
+    <string name="meeting_language_change_note">Gilt für alles, was ab jetzt gesprochen wird.</string>
+    <string name="meeting_language_switch_unavailable">Dieses Meeting kann die Sprache während der Live-Übertragung nicht wechseln</string>
+    <string name="meeting_language_switch_failed">Die Sprache konnte nicht geändert werden. Bitte versuche es erneut.</string>
+</resources>

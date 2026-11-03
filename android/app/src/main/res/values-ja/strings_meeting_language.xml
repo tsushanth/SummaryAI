@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meeting_language_label">文字起こしの言語</string>
+    <string name="meeting_language_auto">自動検出</string>
+    <string name="meeting_language_hint">ほとんどの会議では自動検出で問題ありません。文字起こしが合わない場合は言語を選んでください。選択は記憶されます。</string>
+    <string name="meeting_language_dialog_title">文字起こしの言語</string>
+    <string name="meeting_language_change">言語を変更</string>
+    <string name="meeting_language_active">言語: %1$s</string>
+    <string name="meeting_language_changed">文字起こしの言語を%1$sに変更しました</string>
+    <string name="meeting_language_change_note">今後の発言に適用されます。</string>
+    <string name="meeting_language_switch_unavailable">この会議はライブ中に言語を切り替えられません</string>
+    <string name="meeting_language_switch_failed">言語を変更できませんでした。もう一度お試しください。</string>
+</resources>

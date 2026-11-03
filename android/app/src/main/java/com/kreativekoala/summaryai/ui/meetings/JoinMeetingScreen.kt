@@ -200,6 +200,42 @@ fun JoinMeetingScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // Transcription language (Auto-detect by default, remembered for next time)
+            var showLanguageDialog by remember { mutableStateOf(false) }
+            Text(
+                text = stringResource(R.string.meeting_language_label),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            )
+            MeetingLanguageField(
+                selected = uiState.transcriptionLanguage,
+                onClick = { showLanguageDialog = true },
+                enabled = !uiState.isJoining
+            )
+            Text(
+                text = stringResource(R.string.meeting_language_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp)
+            )
+            if (showLanguageDialog) {
+                MeetingLanguageDialog(
+                    selected = uiState.transcriptionLanguage,
+                    onSelect = {
+                        viewModel.setTranscriptionLanguage(it)
+                        showLanguageDialog = false
+                    },
+                    onDismiss = { showLanguageDialog = false }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
             // AI Coach toggle
             val activity = LocalContext.current as? Activity
             com.kreativekoala.summaryai.ui.coaching.CoachingToggleCard(

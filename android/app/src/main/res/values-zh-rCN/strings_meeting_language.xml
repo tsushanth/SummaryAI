@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meeting_language_label">转录语言</string>
+    <string name="meeting_language_auto">自动检测</string>
+    <string name="meeting_language_hint">自动检测适用于大多数会议。如果转录不准确，请选择语言。系统会记住你的选择。</string>
+    <string name="meeting_language_dialog_title">转录语言</string>
+    <string name="meeting_language_change">更改语言</string>
+    <string name="meeting_language_active">语言：%1$s</string>
+    <string name="meeting_language_changed">转录语言已设为%1$s</string>
+    <string name="meeting_language_change_note">仅对此后的发言生效。</string>
+    <string name="meeting_language_switch_unavailable">此会议在进行中无法切换语言</string>
+    <string name="meeting_language_switch_failed">无法更改语言，请重试。</string>
+</resources>

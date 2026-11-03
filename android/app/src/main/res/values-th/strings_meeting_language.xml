@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meeting_language_label">ภาษาของการถอดเสียง</string>
+    <string name="meeting_language_auto">ตรวจจับอัตโนมัติ</string>
+    <string name="meeting_language_hint">การตรวจจับอัตโนมัติใช้ได้กับการประชุมส่วนใหญ่ หากถอดเสียงผิด ให้เลือกภาษา ระบบจะจำตัวเลือกของคุณ</string>
+    <string name="meeting_language_dialog_title">ภาษาของการถอดเสียง</string>
+    <string name="meeting_language_change">เปลี่ยนภาษา</string>
+    <string name="meeting_language_active">ภาษา: %1$s</string>
+    <string name="meeting_language_changed">ตั้งภาษาของการถอดเสียงเป็น %1$s แล้ว</string>
+    <string name="meeting_language_change_note">มีผลกับคำพูดตั้งแต่ตอนนี้เป็นต้นไป</string>
+    <string name="meeting_language_switch_unavailable">การประชุมนี้เปลี่ยนภาษาไม่ได้ขณะถ่ายทอดสด</string>
+    <string name="meeting_language_switch_failed">เปลี่ยนภาษาไม่สำเร็จ โปรดลองอีกครั้ง</string>
+</resources>

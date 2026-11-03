@@ -31,7 +31,9 @@ data class MeetingDto(
     @SerializedName("auto_join") val autoJoin: Boolean? = null,
     val status: String,
     @SerializedName("recording_id") val recordingId: String? = null,
-    @SerializedName("join_url") val joinUrl: String? = null
+    @SerializedName("join_url") val joinUrl: String? = null,
+    /** Language the bot transcribes in ("auto" or a primary subtag). Absent on older backends. */
+    @SerializedName("transcription_language") val transcriptionLanguage: String? = null
 )
 
 // MARK: - Calendar Connection
@@ -48,17 +50,25 @@ data class CalendarConnectionDto(
 
 data class JoinMeetingRequest(
     @SerializedName("join_url") val joinUrl: String,
-    @SerializedName("bot_name") val botName: String? = null
+    @SerializedName("bot_name") val botName: String? = null,
+    /** Omitted (null) for Auto-detect so older backends see the same body as before. */
+    @SerializedName("transcription_language") val transcriptionLanguage: String? = null
 )
 
 data class ScheduleMeetingBotRequest(
     @SerializedName("meeting_id") val meetingId: String,
-    @SerializedName("auto_join") val autoJoin: Boolean = true
+    @SerializedName("auto_join") val autoJoin: Boolean = true,
+    @SerializedName("transcription_language") val transcriptionLanguage: String? = null
 )
 
 data class UpdateMeetingRequest(
     @SerializedName("auto_join") val autoJoin: Boolean? = null,
     val title: String? = null
+)
+
+/** POST /api/meetings/:id/live-language. 409 means this meeting cannot switch language while live. */
+data class LiveLanguageRequest(
+    val language: String
 )
 
 // MARK: - API Responses

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meeting_language_label">Langue de transcription</string>
+    <string name="meeting_language_auto">Détection automatique</string>
+    <string name="meeting_language_hint">La détection automatique convient à la plupart des réunions. Choisissez une langue si la transcription est incorrecte. Votre choix est mémorisé.</string>
+    <string name="meeting_language_dialog_title">Langue de transcription</string>
+    <string name="meeting_language_change">Changer de langue</string>
+    <string name="meeting_language_active">Langue : %1$s</string>
+    <string name="meeting_language_changed">Langue de transcription définie sur %1$s</string>
+    <string name="meeting_language_change_note">S\'applique à la parole à partir de maintenant.</string>
+    <string name="meeting_language_switch_unavailable">Cette réunion ne peut pas changer de langue en direct</string>
+    <string name="meeting_language_switch_failed">Impossible de changer la langue. Veuillez réessayer.</string>
+</resources>

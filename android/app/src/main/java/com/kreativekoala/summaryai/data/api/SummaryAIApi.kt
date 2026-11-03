@@ -3,6 +3,7 @@ package com.kreativekoala.summaryai.data.api
 import com.kreativekoala.summaryai.data.api.models.*
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -163,6 +164,12 @@ interface SummaryAIApi {
         @Path("id") id: String,
         @Body request: UpdateMeetingRequest
     ): MeetingResponse
+
+    @POST("api/meetings/{id}/live-language")
+    suspend fun setLiveLanguage(
+        @Path("id") meetingId: String,
+        @Body request: LiveLanguageRequest
+    ): Response<ResponseBody>
 
     @GET("api/meetings/{id}/live-transcript")
     suspend fun getLiveTranscript(

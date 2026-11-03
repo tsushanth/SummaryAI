@@ -76,7 +76,36 @@ fun LiveTranscriptView(
         }
     }
 
-    Column(modifier = modifier.fillMaxSize()) {
+    var showLanguageDialog by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val notice = uiState.languageNotice
+    val noticeText = when (notice) {
+        is LanguageNotice.Changed -> stringResource(R.string.meeting_language_changed, meetingLanguageLabel(notice.language))
+        LanguageNotice.NotSwitchable -> stringResource(R.string.meeting_language_switch_unavailable)
+        LanguageNotice.Failed -> stringResource(R.string.meeting_language_switch_failed)
+        null -> null
+    }
+    LaunchedEffect(notice) {
+        if (noticeText != null) {
+            snackbarHostState.showSnackbar(noticeText)
+            viewModel.clearLanguageNotice()
+        }
+    }
+
+    if (showLanguageDialog) {
+        MeetingLanguageDialog(
+            selected = uiState.activeLanguage,
+            note = stringResource(R.string.meeting_language_change_note),
+            onSelect = {
+                showLanguageDialog = false
+                viewModel.changeLanguage(it)
+            },
+            onDismiss = { showLanguageDialog = false }
+        )
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize()) {
         // AI Coach live panel — only when a session is active for this meeting.
         if (hasCoachingSession) {
             CoachingLivePanel(
@@ -88,6 +117,13 @@ fun LiveTranscriptView(
 
         // Live indicator
         LiveIndicator()
+
+        // Active transcription language + change action
+        LanguageBar(
+            activeLanguage = uiState.activeLanguage,
+            isChanging = uiState.isChangingLanguage,
+            onChange = { showLanguageDialog = true }
+        )
 
         if (uiState.segments.isEmpty() && !uiState.isLoading) {
             // Empty state
@@ -132,6 +168,39 @@ fun LiveTranscriptView(
                     )
                 }
             }
+        }
+    }
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier = Modifier.align(Alignment.BottomCenter)
+    )
+    }
+}
+
+@Composable
+private fun LanguageBar(
+    activeLanguage: String,
+    isChanging: Boolean,
+    onChange: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(R.string.meeting_language_active, meetingLanguageLabel(activeLanguage)),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f)
+        )
+        TextButton(onClick = onChange, enabled = !isChanging) {
+            if (isChanging) {
+                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+            Text(stringResource(R.string.meeting_language_change))
         }
     }
 }

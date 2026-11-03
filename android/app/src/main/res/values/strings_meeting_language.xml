@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meeting_language_label">Transcription language</string>
+    <string name="meeting_language_auto">Auto-detect</string>
+    <string name="meeting_language_hint">Auto-detect works for most meetings. Pick a language if the transcript comes out wrong. Your choice is remembered.</string>
+    <string name="meeting_language_dialog_title">Transcription language</string>
+    <string name="meeting_language_change">Change language</string>
+    <string name="meeting_language_active">Language: %1$s</string>
+    <string name="meeting_language_changed">Transcription language set to %1$s</string>
+    <string name="meeting_language_change_note">Applies to speech from now on.</string>
+    <string name="meeting_language_switch_unavailable">This meeting cannot switch language while live</string>
+    <string name="meeting_language_switch_failed">Couldn\'t change the language. Please try again.</string>
+</resources>

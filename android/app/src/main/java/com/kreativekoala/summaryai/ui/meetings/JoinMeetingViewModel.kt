@@ -5,7 +5,9 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kreativekoala.summaryai.R
+import com.kreativekoala.summaryai.data.MeetingLanguages
 import com.kreativekoala.summaryai.data.api.coaching.CoachingPersonaKey
+import com.kreativekoala.summaryai.data.local.PreferencesManager
 import com.kreativekoala.summaryai.data.repository.CoachingRepository
 import com.kreativekoala.summaryai.data.repository.MeetingsRepository
 import com.kreativekoala.summaryai.service.BillingManager
@@ -15,6 +17,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,6 +29,8 @@ data class JoinMeetingUiState(
     val joinedMeetingId: String? = null,
     val joinedRecordingId: String? = null,
     val error: String? = null,
+    /** "auto" or a primary subtag; starts from the remembered default. */
+    val transcriptionLanguage: String = MeetingLanguages.AUTO,
     // Coaching state
     val coachingEnabled: Boolean = false,
     val coachingPersona: CoachingPersonaKey = CoachingPersonaKey.SalesDiscovery,
@@ -41,12 +46,17 @@ class JoinMeetingViewModel @Inject constructor(
     private val coachingRepository: CoachingRepository,
     private val activeCoachingSession: ActiveCoachingSession,
     private val billingManager: BillingManager,
+    private val preferencesManager: PreferencesManager,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(JoinMeetingUiState())
     val uiState: StateFlow<JoinMeetingUiState> = _uiState.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            val saved = preferencesManager.meetingLanguage.first()
+            _uiState.value = _uiState.value.copy(transcriptionLanguage = saved)
+        }
         billingManager.onCoachingSubscriptionPurchased = { productId, purchaseToken ->
             viewModelScope.launch {
                 _uiState.value = _uiState.value.copy(isLoadingCoachingCredits = true)
@@ -80,6 +90,13 @@ class JoinMeetingViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(botName = name)
     }
 
+    /** Picks the language for this join and remembers it as the default for next time. */
+    fun setTranscriptionLanguage(code: String) {
+        val normalized = MeetingLanguages.normalize(code)
+        _uiState.value = _uiState.value.copy(transcriptionLanguage = normalized)
+        viewModelScope.launch { preferencesManager.setMeetingLanguage(normalized) }
+    }
+
     fun joinMeeting() {
         val state = _uiState.value
         if (state.meetingUrl.isBlank()) return
@@ -92,11 +109,13 @@ class JoinMeetingViewModel @Inject constructor(
 
             val result = meetingsRepository.joinMeeting(
                 joinUrl = normalizedUrl,
-                botName = state.botName.ifBlank { null }
+                botName = state.botName.ifBlank { null },
+                transcriptionLanguage = state.transcriptionLanguage
             )
 
             result.fold(
                 onSuccess = { (meeting, recordingId) ->
+                    preferencesManager.setLastMeetingLanguage(meeting.id, state.transcriptionLanguage)
                     _uiState.value = _uiState.value.copy(
                         isJoining = false,
                         meetingJoined = true,
