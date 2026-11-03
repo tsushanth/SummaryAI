@@ -3,7 +3,7 @@
  * API client for Recall.ai meeting bot service
  */
 
-import { reportProviderHttpFailure } from '../lib/alerts.js';
+import { reportProviderHttpFailure, reportAlert } from '../lib/alerts.js';
 import {
   RecallBotCreateRequest,
   RecallBotResponse,
@@ -14,6 +14,7 @@ import {
 import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
 import { triggerProcessing } from './processingService.js';
+import { buildIngestUrl, mintLiveSttRef, planLiveStt } from '../lib/liveStt.js';
 
 // Get region from config or default to us-west-2
 const RECALL_REGION = config.RECALL_REGION || 'us-west-2';
@@ -86,30 +87,67 @@ export class RecallService {
     // Enable real-time by default if SERVICE_URL is configured
     const enableRealtime = options?.enableRealtimeTranscript ?? !!config.SERVICE_URL;
 
+    // Live STT provider (backend/LIVE_STT.md). Default 'recall' leaves the request exactly as it was.
+    const plan = planLiveStt({
+      LIVE_STT_PROVIDER: config.LIVE_STT_PROVIDER,
+      LIVE_STT_SHADOW: config.LIVE_STT_SHADOW,
+      LIVE_STT_WS_URL: config.LIVE_STT_WS_URL,
+      LIVE_STT_INGEST_SECRET: config.LIVE_STT_INGEST_SECRET,
+      NODE_ENV: config.NODE_ENV,
+    });
+    if (plan.provider === 'recall' && plan.reason === 'misconfigured') {
+      // Fail safe: the bot still gets Recall's own transcript. Names only, never values.
+      console.error('[Recall] LIVE_STT requested but LIVE_STT_WS_URL (wss://...) or LIVE_STT_INGEST_SECRET is missing/invalid; using Recall transcript');
+      reportAlert('live_stt', 'LIVE_STT_MISCONFIGURED', {}, 60 * 60_000);
+    }
+    const liveStt = plan.provider === 'recall' ? undefined : { ref: mintLiveSttRef(), provider: plan.provider };
+    const wsEndpoint = plan.provider === 'recall' || !liveStt
+      ? undefined
+      : {
+          type: 'websocket',
+          url: buildIngestUrl(plan.wsBase, plan.ingestSecret, liveStt.ref),
+          events: ['audio_mixed_raw.data', 'participant_events.speech_on', 'participant_events.speech_off'],
+        };
+
     // Build the recording config with optional real-time endpoints
-    const recordingConfig: Record<string, unknown> = {
-      transcript: {
-        provider: {
-          recallai_streaming: {
-            // Use low latency mode for real-time, accuracy mode otherwise
-            mode: enableRealtime ? 'prioritize_low_latency' : 'prioritize_accuracy',
-            // Low latency mode only supports English
-            language_code: 'en',
+    let recordingConfig: Record<string, unknown>;
+    if (plan.provider === 'soniox' && wsEndpoint) {
+      // Soniox is the source of truth: no Recall transcript block (also drops the per-hour Recall transcript add-on).
+      recordingConfig = { audio_mixed_raw: {}, realtime_endpoints: [wsEndpoint] };
+      console.log('[Recall] Live STT = soniox, audio_mixed_raw websocket endpoint enabled');
+    } else {
+      recordingConfig = {
+        transcript: {
+          provider: {
+            recallai_streaming: {
+              // Use low latency mode for real-time, accuracy mode otherwise
+              mode: enableRealtime ? 'prioritize_low_latency' : 'prioritize_accuracy',
+              // Low latency mode only supports English
+              language_code: 'en',
+            },
           },
         },
-      },
-    };
+      };
 
-    // Add real-time webhook endpoint for live transcription
-    if (enableRealtime && config.SERVICE_URL) {
-      recordingConfig.realtime_endpoints = [
-        {
-          type: 'webhook',
-          url: `${config.SERVICE_URL}/v1/webhooks/recall/transcript`,
-          events: ['transcript.data', 'transcript.partial_data'],
-        },
-      ];
-      console.log(`[Recall] Real-time transcript enabled, webhook: ${config.SERVICE_URL}/v1/webhooks/recall/transcript`);
+      // Add real-time webhook endpoint for live transcription
+      if (enableRealtime && config.SERVICE_URL) {
+        recordingConfig.realtime_endpoints = [
+          {
+            type: 'webhook',
+            url: `${config.SERVICE_URL}/v1/webhooks/recall/transcript`,
+            events: ['transcript.data', 'transcript.partial_data'],
+          },
+        ];
+        console.log(`[Recall] Real-time transcript enabled, webhook: ${config.SERVICE_URL}/v1/webhooks/recall/transcript`);
+      }
+
+      if (plan.provider === 'shadow' && wsEndpoint) {
+        // Shadow: Recall's transcript stays the source of truth; the audio stream feeds mm-live-stt for an A/B comparison only.
+        recordingConfig.audio_mixed_raw = {};
+        const eps = (recordingConfig.realtime_endpoints as unknown[] | undefined) ?? [];
+        recordingConfig.realtime_endpoints = [...eps, wsEndpoint];
+        console.log('[Recall] Live STT shadow: audio_mixed_raw websocket endpoint added next to Recall transcript');
+      }
     }
 
     const payload: Record<string, unknown> = {
@@ -141,10 +179,13 @@ export class RecallService {
 
     console.log(`[Recall] Creating bot for meeting: ${params.meeting_url}`);
 
-    return this.request<RecallBotResponse>('/bot', {
+    const bot = await this.request<RecallBotResponse>('/bot', {
       method: 'POST',
       body: JSON.stringify(payload),
     });
+    // Callers store these on the bot_run (see liveSttBotRunColumns). Absent on the default path.
+    if (liveStt) bot.live_stt = liveStt;
+    return bot;
   }
 
   /**
@@ -213,6 +254,14 @@ export class RecallService {
       join_at: joinAt.toISOString(),
     });
   }
+}
+
+/**
+ * Extra bot_runs columns for a bot created by createBot. `{}` on the default (recall) path, so the bot_runs insert is unchanged
+ * and works before migration 026 is applied.
+ */
+export function liveSttBotRunColumns(bot: Pick<RecallBotResponse, 'live_stt'>): { live_stt_ref?: string; live_stt_provider?: string } {
+  return bot.live_stt ? { live_stt_ref: bot.live_stt.ref, live_stt_provider: bot.live_stt.provider } : {};
 }
 
 /**
