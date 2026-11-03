@@ -15,6 +15,13 @@ import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
 import { triggerProcessing } from './processingService.js';
 import { buildIngestUrl, mintLiveSttRef, planLiveStt } from '../lib/liveStt.js';
+import { isMissingColumn } from './meetingLanguage.js';
+import {
+  languageToStore,
+  normalizeTranscriptionLanguage,
+  recallTranscriptProvider,
+  sonioxLanguageHints,
+} from '../lib/transcriptionLanguage.js';
 
 // Get region from config or default to us-west-2
 const RECALL_REGION = config.RECALL_REGION || 'us-west-2';
@@ -87,6 +94,10 @@ export class RecallService {
     // Enable real-time by default if SERVICE_URL is configured
     const enableRealtime = options?.enableRealtimeTranscript ?? !!config.SERVICE_URL;
 
+    // Per-meeting transcription language (backend/LIVE_STT.md). Unknown codes are ignored here: the routes validate and reject
+    // them before this point, and a bad value must never become a bot that fails to start.
+    const language = normalizeTranscriptionLanguage(params.transcription_language) ?? 'auto';
+
     // Live STT provider (backend/LIVE_STT.md). Default 'recall' leaves the request exactly as it was.
     const plan = planLiveStt({
       LIVE_STT_PROVIDER: config.LIVE_STT_PROVIDER,
@@ -105,7 +116,7 @@ export class RecallService {
       ? undefined
       : {
           type: 'websocket',
-          url: buildIngestUrl(plan.wsBase, plan.ingestSecret, liveStt.ref),
+          url: buildIngestUrl(plan.wsBase, plan.ingestSecret, liveStt.ref, sonioxLanguageHints(language)[0]),
           events: ['audio_mixed_raw.data', 'participant_events.speech_on', 'participant_events.speech_off'],
         };
 
@@ -119,12 +130,9 @@ export class RecallService {
       recordingConfig = {
         transcript: {
           provider: {
-            recallai_streaming: {
-              // Use low latency mode for real-time, accuracy mode otherwise
-              mode: enableRealtime ? 'prioritize_low_latency' : 'prioritize_accuracy',
-              // Low latency mode only supports English
-              language_code: 'en',
-            },
+            recallai_streaming: recallTranscriptProvider(language, enableRealtime, {
+              autoDetect: config.RECALL_AUTO_LANGUAGE === 'detect',
+            }),
           },
         },
       };
@@ -262,6 +270,32 @@ export class RecallService {
  */
 export function liveSttBotRunColumns(bot: Pick<RecallBotResponse, 'live_stt'>): { live_stt_ref?: string; live_stt_provider?: string } {
   return bot.live_stt ? { live_stt_ref: bot.live_stt.ref, live_stt_provider: bot.live_stt.provider } : {};
+}
+
+/**
+ * Extra bot_runs/meetings column for the chosen transcription language. `{}` for auto/none, so default inserts are unchanged and
+ * keep working before migration 027 is applied.
+ */
+export function transcriptionLanguageColumns(language: string | null | undefined): { transcription_language?: string } {
+  const stored = languageToStore(language);
+  return stored ? { transcription_language: stored } : {};
+}
+
+/**
+ * Insert a row that may carry a column added by a migration that might not be applied yet (027 transcription_language).
+ * If the database reports that exact column missing, retry once without it: the bot_runs/meetings row MUST still be written
+ * (the bot is already running; callers of the old inserts do not check errors). Any other error is returned untouched.
+ */
+export async function insertWithOptionalColumn<R extends Record<string, unknown>>(
+  table: { insert(row: R): PromiseLike<{ error: { code?: string; message?: string } | null }> },
+  row: R,
+  column: string
+): Promise<{ error: { code?: string; message?: string } | null }> {
+  const first = await table.insert(row);
+  if (!(column in row) || !isMissingColumn(first.error, column)) return first;
+  console.warn(`[DB] column ${column} is missing (migration not applied); retrying the insert without it`);
+  const { [column]: _dropped, ...rest } = row;
+  return table.insert(rest as unknown as R);
 }
 
 /**

@@ -51,9 +51,23 @@ export function mintIngestToken(secret: string, ref: string): string {
   return createHmac('sha256', secret).update(ref).digest('hex');
 }
 
-/** `<wsBase>/ingest/<ref>/?token=<hex>`. The `/` before `?` is required by Recall (HTTP 400 without it). */
-export function buildIngestUrl(wsBase: string, secret: string, ref: string): string {
-  return `${wsBase}/ingest/${ref}/?token=${mintIngestToken(secret, ref)}`;
+/**
+ * `<wsBase>/ingest/<ref>/?token=<hex>[&lang=<code>]`. The `/` before `?` is required by Recall (HTTP 400 without it).
+ * `lang` is the Soniox language hint chosen for the meeting; omitted for auto, so the default URL is unchanged. It is not covered
+ * by the token (the token stays HMAC(secret, ref)): it can only bias recognition, and only whoever already holds the URL can edit it.
+ */
+export function buildIngestUrl(wsBase: string, secret: string, ref: string, lang?: string): string {
+  const base = `${wsBase}/ingest/${ref}/?token=${mintIngestToken(secret, ref)}`;
+  return lang && /^[a-z]{2,3}$/.test(lang) ? `${base}&lang=${lang}` : base;
+}
+
+/**
+ * Signature of the backend -> live-stt control call: `v1=` + hex HMAC-SHA256(secret, `control.${timestampSec}.${rawBody}`).
+ * The `control.` prefix separates it from the segment-sink signature, so a captured sink request can never be replayed here
+ * (and the strict body schemas differ as well). Identical to live-stt/src/control.ts signControl.
+ */
+export function signLiveControl(secret: string, timestampSec: string, rawBody: string): string {
+  return 'v1=' + createHmac('sha256', secret).update(`control.${timestampSec}.${rawBody}`).digest('hex');
 }
 
 /** `v1=` + hex HMAC-SHA256(secret, `${timestampSec}.${rawBody}`). Same as live-stt/src/sink/httpSink.ts signBody. */
