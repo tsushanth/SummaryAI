@@ -10,4 +10,10 @@
     <string name="meeting_language_change_note">Dotyczy mowy od tego momentu.</string>
     <string name="meeting_language_switch_unavailable">To spotkanie nie może zmienić języka podczas transmisji na żywo</string>
     <string name="meeting_language_switch_failed">Nie udało się zmienić języka. Spróbuj ponownie.</string>
+    <string name="meeting_language_hint_auto_english_live">Automatyczne wykrywanie znajduje język dla ostatecznej transkrypcji. Napisy na żywo pozostają po angielsku, dopóki nie wybierzesz języka.</string>
+    <string name="meeting_language_hint_delayed">Napisy na żywo w tym języku mogą docierać z opóźnieniem %1$s min. Ostateczna transkrypcja nie jest dotknięta.</string>
+    <string name="meeting_language_reason_fixed">Język na żywo ustawiono, gdy bot dołączył, i nie można go zmienić podczas tego spotkania.</string>
+    <string name="meeting_language_reason_not_live">Język można zmienić tylko wtedy, gdy bot jest na spotkaniu.</string>
+    <string name="meeting_language_switch_not_live">Bota nie ma teraz na spotkaniu, więc nie można zmienić języka.</string>
+    <string name="meeting_language_saved_not_live">Zapisano %1$s dla ostatecznej transkrypcji, ale nie udało się teraz przełączyć transkrypcji na żywo.</string>
 </resources>

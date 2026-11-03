@@ -10,4 +10,10 @@
     <string name="meeting_language_change_note">Применяется к речи с этого момента.</string>
     <string name="meeting_language_switch_unavailable">В этой встрече нельзя сменить язык в прямом эфире</string>
     <string name="meeting_language_switch_failed">Не удалось сменить язык. Попробуйте ещё раз.</string>
+    <string name="meeting_language_hint_auto_english_live">Автоопределение находит язык для итоговой расшифровки. Живые субтитры остаются на английском, пока вы не выберете язык.</string>
+    <string name="meeting_language_hint_delayed">Живые субтитры на этом языке могут приходить с задержкой %1$s мин. Итоговая расшифровка не затрагивается.</string>
+    <string name="meeting_language_reason_fixed">Язык в прямом эфире задан при входе бота и не может быть изменён во время этой встречи.</string>
+    <string name="meeting_language_reason_not_live">Язык можно изменить только пока бот находится на встрече.</string>
+    <string name="meeting_language_switch_not_live">Бота сейчас нет на встрече, поэтому язык изменить нельзя.</string>
+    <string name="meeting_language_saved_not_live">%1$s сохранён для итоговой расшифровки, но переключить живую расшифровку сейчас не удалось.</string>
 </resources>

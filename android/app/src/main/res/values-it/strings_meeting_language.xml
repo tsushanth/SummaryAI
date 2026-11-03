@@ -10,4 +10,10 @@
     <string name="meeting_language_change_note">Vale per il parlato da ora in poi.</string>
     <string name="meeting_language_switch_unavailable">Questa riunione non può cambiare lingua mentre è in diretta</string>
     <string name="meeting_language_switch_failed">Impossibile cambiare la lingua. Riprova.</string>
+    <string name="meeting_language_hint_auto_english_live">Il rilevamento automatico trova la lingua per la trascrizione finale. I sottotitoli in diretta restano in inglese a meno che tu non scelga una lingua.</string>
+    <string name="meeting_language_hint_delayed">I sottotitoli in diretta in questa lingua possono arrivare con %1$s minuti di ritardo. La trascrizione finale non è interessata.</string>
+    <string name="meeting_language_reason_fixed">La lingua in diretta è stata impostata quando il bot è entrato e non può essere cambiata durante questa riunione.</string>
+    <string name="meeting_language_reason_not_live">La lingua può essere cambiata solo mentre il bot è nella riunione.</string>
+    <string name="meeting_language_switch_not_live">Il bot non è nella riunione in questo momento, quindi la lingua non può essere cambiata.</string>
+    <string name="meeting_language_saved_not_live">%1$s salvato per la trascrizione finale, ma la trascrizione in diretta non è stata cambiata.</string>
 </resources>

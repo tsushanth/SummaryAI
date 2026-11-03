@@ -28,17 +28,33 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kreativekoala.summaryai.R
+import com.kreativekoala.summaryai.data.LanguageCatalog
 import com.kreativekoala.summaryai.data.MeetingLanguages
 
 /** Display name for a stored language code: its own-script name, or the localized "Auto-detect". */
 @Composable
-fun meetingLanguageLabel(code: String?): String =
-    MeetingLanguages.nativeName(code) ?: stringResource(R.string.meeting_language_auto)
+fun meetingLanguageLabel(code: String?, catalog: LanguageCatalog): String =
+    if (MeetingLanguages.isAuto(code)) stringResource(R.string.meeting_language_auto)
+    else catalog.nativeName(code) ?: MeetingLanguages.normalize(code).uppercase()
+
+/**
+ * One line under the picker. On a provider whose live captions are only fast in English, a non-English
+ * choice makes them arrive minutes late, and Auto keeps them English; say so.
+ */
+@Composable
+fun meetingLanguageHint(selected: String, catalog: LanguageCatalog): String = when {
+    catalog.liveCaptionsDelayed(selected) ->
+        stringResource(R.string.meeting_language_hint_delayed, catalog.delayMinutes ?: "3-10")
+    catalog.englishOnlyLowLatency && MeetingLanguages.isAuto(selected) ->
+        stringResource(R.string.meeting_language_hint_auto_english_live)
+    else -> stringResource(R.string.meeting_language_hint)
+}
 
 /** Tappable field showing the current choice; opens [MeetingLanguageDialog] via [onClick]. */
 @Composable
 fun MeetingLanguageField(
     selected: String,
+    catalog: LanguageCatalog,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -61,7 +77,7 @@ fun MeetingLanguageField(
             )
             Spacer(Modifier.width(12.dp))
             Text(
-                text = meetingLanguageLabel(selected),
+                text = meetingLanguageLabel(selected, catalog),
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.weight(1f),
             )
@@ -73,12 +89,13 @@ fun MeetingLanguageField(
 @Composable
 fun MeetingLanguageDialog(
     selected: String,
+    catalog: LanguageCatalog,
     onSelect: (String) -> Unit,
     onDismiss: () -> Unit,
     note: String? = null,
 ) {
     val current = MeetingLanguages.normalize(selected)
-    val rows = listOf(MeetingLanguages.AUTO) + MeetingLanguages.options.map { it.code }
+    val rows = listOf(MeetingLanguages.AUTO) + catalog.languages.map { it.code }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.meeting_language_dialog_title)) },
@@ -107,7 +124,7 @@ fun MeetingLanguageDialog(
                             RadioButton(selected = code == current, onClick = null)
                             Spacer(Modifier.width(12.dp))
                             Text(
-                                text = meetingLanguageLabel(code),
+                                text = meetingLanguageLabel(code, catalog),
                                 style = MaterialTheme.typography.bodyLarge,
                             )
                         }

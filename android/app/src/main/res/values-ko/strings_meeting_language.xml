@@ -10,4 +10,10 @@
     <string name="meeting_language_change_note">지금부터 말하는 내용에 적용됩니다.</string>
     <string name="meeting_language_switch_unavailable">이 회의는 라이브 중에 언어를 바꿀 수 없습니다</string>
     <string name="meeting_language_switch_failed">언어를 변경하지 못했습니다. 다시 시도해 주세요.</string>
+    <string name="meeting_language_hint_auto_english_live">자동 감지는 최종 전사본의 언어를 찾아 줍니다. 언어를 선택하지 않으면 실시간 자막은 영어로 유지됩니다.</string>
+    <string name="meeting_language_hint_delayed">이 언어의 실시간 자막은 %1$s분 늦게 도착할 수 있습니다. 최종 전사본에는 영향이 없습니다.</string>
+    <string name="meeting_language_reason_fixed">실시간 언어는 봇이 참여할 때 정해졌으며 이 회의 중에는 변경할 수 없습니다.</string>
+    <string name="meeting_language_reason_not_live">언어는 봇이 회의에 있는 동안에만 변경할 수 있습니다.</string>
+    <string name="meeting_language_switch_not_live">봇이 지금 회의에 없어서 언어를 변경할 수 없습니다.</string>
+    <string name="meeting_language_saved_not_live">최종 전사본에는 %1$s을(를) 저장했지만 실시간 전사는 지금 전환하지 못했습니다.</string>
 </resources>

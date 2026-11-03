@@ -10,4 +10,10 @@
     <string name="meeting_language_change_note">Terpakai untuk pertuturan mulai sekarang.</string>
     <string name="meeting_language_switch_unavailable">Mesyuarat ini tidak boleh menukar bahasa semasa siaran langsung</string>
     <string name="meeting_language_switch_failed">Tidak dapat menukar bahasa. Sila cuba lagi.</string>
+    <string name="meeting_language_hint_auto_english_live">Pengesanan automatik mencari bahasa untuk transkrip akhir. Sari kata langsung kekal dalam bahasa Inggeris melainkan anda memilih bahasa.</string>
+    <string name="meeting_language_hint_delayed">Sari kata langsung dalam bahasa ini mungkin lewat %1$s minit. Transkrip akhir tidak terjejas.</string>
+    <string name="meeting_language_reason_fixed">Bahasa langsung ditetapkan semasa bot menyertai dan tidak boleh diubah semasa mesyuarat ini.</string>
+    <string name="meeting_language_reason_not_live">Bahasa hanya boleh diubah semasa bot berada dalam mesyuarat.</string>
+    <string name="meeting_language_switch_not_live">Bot tidak berada dalam mesyuarat sekarang, jadi bahasa tidak boleh diubah.</string>
+    <string name="meeting_language_saved_not_live">%1$s disimpan untuk transkrip akhir, tetapi transkrip langsung tidak dapat ditukar sekarang.</string>
 </resources>

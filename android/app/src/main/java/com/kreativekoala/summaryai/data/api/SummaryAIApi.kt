@@ -165,6 +165,20 @@ interface SummaryAIApi {
         @Body request: UpdateMeetingRequest
     ): MeetingResponse
 
+    @GET("api/meetings/transcription-languages")
+    suspend fun getTranscriptionLanguages(): TranscriptionLanguagesResponse
+
+    @PUT("api/meetings/transcription-languages/default")
+    suspend fun setDefaultTranscriptionLanguage(
+        @Body request: DefaultLanguageRequest
+    ): Response<ResponseBody>
+
+    /** Flat detail body (not wrapped in {meeting}); carries transcription_language and live_language. */
+    @GET("api/meetings/{id}")
+    suspend fun getMeetingDetail(
+        @Path("id") id: String
+    ): MeetingDetailDto
+
     @POST("api/meetings/{id}/live-language")
     suspend fun setLiveLanguage(
         @Path("id") meetingId: String,

@@ -10,4 +10,10 @@
     <string name="meeting_language_change_note">S\'applique à la parole à partir de maintenant.</string>
     <string name="meeting_language_switch_unavailable">Cette réunion ne peut pas changer de langue en direct</string>
     <string name="meeting_language_switch_failed">Impossible de changer la langue. Veuillez réessayer.</string>
+    <string name="meeting_language_hint_auto_english_live">La détection automatique trouve la langue pour la transcription finale. Les sous-titres en direct restent en anglais sauf si vous choisissez une langue.</string>
+    <string name="meeting_language_hint_delayed">Les sous-titres en direct dans cette langue peuvent arriver avec %1$s minutes de retard. La transcription finale n\'est pas affectée.</string>
+    <string name="meeting_language_reason_fixed">La langue en direct a été fixée à l\'arrivée du bot et ne peut pas être changée pendant cette réunion.</string>
+    <string name="meeting_language_reason_not_live">La langue ne peut être changée que lorsque le bot est dans la réunion.</string>
+    <string name="meeting_language_switch_not_live">Le bot n\'est pas dans la réunion pour le moment, la langue ne peut donc pas être changée.</string>
+    <string name="meeting_language_saved_not_live">%1$s enregistré pour la transcription finale, mais la transcription en direct n\'a pas pu être changée pour le moment.</string>
 </resources>

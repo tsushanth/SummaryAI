@@ -1,6 +1,7 @@
 package com.kreativekoala.summaryai.ui.meetings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,6 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.summaryai.R
+import com.kreativekoala.summaryai.data.LanguageCatalog
 import com.kreativekoala.summaryai.domain.model.Meeting
 import com.kreativekoala.summaryai.ui.components.MmCard
 import com.kreativekoala.summaryai.ui.components.MmEmptyState
@@ -127,6 +129,8 @@ fun MeetingsScreen(
                         MeetingCardIOS(
                             meeting = meeting,
                             onToggleAutoJoin = { viewModel.toggleAutoJoin(meeting) },
+                            catalog = uiState.languageCatalog,
+                            onLanguageSelected = { viewModel.setMeetingLanguage(meeting, it) },
                             onRecordingClick = meeting.recordingId?.let { { onRecordingClick(it) } }
                         )
                     }
@@ -211,8 +215,13 @@ private fun ConnectCalendarCardIOS(onClick: () -> Unit) {
 private fun MeetingCardIOS(
     meeting: Meeting,
     onToggleAutoJoin: () -> Unit,
+    catalog: LanguageCatalog,
+    onLanguageSelected: (String) -> Unit,
     onRecordingClick: (() -> Unit)?
 ) {
+    var showLanguageDialog by remember { mutableStateOf(false) }
+    // A meeting that never had a language follows the user's saved default.
+    val shownLanguage = meeting.transcriptionLanguage ?: catalog.defaultLanguage
     MmCard {
         Column(
             modifier = Modifier
@@ -275,6 +284,37 @@ private fun MeetingCardIOS(
                 Switch(
                     checked = meeting.autoJoin,
                     onCheckedChange = null
+                )
+            }
+
+            // Transcription language for this meeting (applied when the bot joins)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = 48.dp)
+                    .clickable(role = Role.Button) { showLanguageDialog = true },
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.meeting_language_label),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = meetingLanguageLabel(shownLanguage, catalog),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+            if (showLanguageDialog) {
+                MeetingLanguageDialog(
+                    selected = shownLanguage,
+                    catalog = catalog,
+                    onSelect = {
+                        showLanguageDialog = false
+                        onLanguageSelected(it)
+                    },
+                    onDismiss = { showLanguageDialog = false }
                 )
             }
 

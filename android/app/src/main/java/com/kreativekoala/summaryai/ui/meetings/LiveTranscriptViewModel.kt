@@ -3,10 +3,13 @@ package com.kreativekoala.summaryai.ui.meetings
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kreativekoala.summaryai.data.LanguageCatalog
 import com.kreativekoala.summaryai.data.MeetingLanguages
 import com.kreativekoala.summaryai.data.local.PreferencesManager
+import com.kreativekoala.summaryai.data.repository.LiveLanguageConflict
 import com.kreativekoala.summaryai.data.repository.LiveLanguageResult
 import com.kreativekoala.summaryai.data.repository.MeetingsRepository
+import com.kreativekoala.summaryai.data.repository.TranscriptionLanguagesRepository
 import com.kreativekoala.summaryai.domain.model.LiveTranscriptSegment
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -25,6 +28,11 @@ data class LiveTranscriptUiState(
     val hasMore: Boolean = false,
     /** "auto" or a primary subtag. Auto-detect when the backend reports nothing. */
     val activeLanguage: String = MeetingLanguages.AUTO,
+    /** False only when the backend says this meeting cannot switch now; unknown (older backend) = true. */
+    val canChangeLanguage: Boolean = true,
+    /** Backend `live_language.reason`: "not_live" | "provider_fixed" (null when changeable or unknown). */
+    val languageBlockedReason: String? = null,
+    val languageCatalog: LanguageCatalog = LanguageCatalog.FALLBACK,
     val isChangingLanguage: Boolean = false,
     val languageNotice: LanguageNotice? = null
 )
@@ -32,28 +40,43 @@ data class LiveTranscriptUiState(
 /** One-shot result of a language change; the screen turns it into localized text. */
 sealed interface LanguageNotice {
     data class Changed(val language: String) : LanguageNotice
-    /** HTTP 409 */
+    /** Saved for the final transcript, but the live stream was not switched. */
+    data class SavedNotLive(val language: String) : LanguageNotice
+    /** HTTP 409 LIVE_LANGUAGE_FIXED */
     data object NotSwitchable : LanguageNotice
+    /** HTTP 409 MEETING_NOT_LIVE */
+    data object NotLive : LanguageNotice
     data object Failed : LanguageNotice
 }
+
+/** What a change attempt leaves on screen. [blockedReason] non-null = the meeting cannot switch (hide the button). */
+internal data class LanguageOutcome(
+    val language: String,
+    val notice: LanguageNotice,
+    val blockedReason: String? = null
+)
 
 /** Maps the repository outcome to the new active language and the notice to show. */
 internal fun applyLiveLanguageResult(
     previousLanguage: String,
     result: LiveLanguageResult
-): Pair<String, LanguageNotice> = when (result) {
+): LanguageOutcome = when (result) {
     is LiveLanguageResult.Success -> {
         val language = MeetingLanguages.normalize(result.language)
-        language to LanguageNotice.Changed(language)
+        LanguageOutcome(language, if (result.liveApplied) LanguageNotice.Changed(language) else LanguageNotice.SavedNotLive(language))
     }
-    LiveLanguageResult.NotSwitchable -> previousLanguage to LanguageNotice.NotSwitchable
-    is LiveLanguageResult.Failed -> previousLanguage to LanguageNotice.Failed
+    is LiveLanguageResult.NotSwitchable -> when (result.conflict) {
+        LiveLanguageConflict.FIXED -> LanguageOutcome(previousLanguage, LanguageNotice.NotSwitchable, "provider_fixed")
+        LiveLanguageConflict.NOT_LIVE -> LanguageOutcome(previousLanguage, LanguageNotice.NotLive, "not_live")
+    }
+    is LiveLanguageResult.Failed -> LanguageOutcome(previousLanguage, LanguageNotice.Failed)
 }
 
 @HiltViewModel
 class LiveTranscriptViewModel @Inject constructor(
     private val meetingsRepository: MeetingsRepository,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
+    private val languagesRepository: TranscriptionLanguagesRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LiveTranscriptUiState())
@@ -86,19 +109,31 @@ class LiveTranscriptViewModel @Inject constructor(
         if (newMeetingId != meetingId && newMeetingId.isNotEmpty()) {
             meetingId = newMeetingId
             reset()
-            loadActiveLanguage(newMeetingId)
+            loadLanguageState(newMeetingId, withCatalog = true)
         }
     }
 
-    /** Backend value when it reports one, else what this device last started/switched the meeting to. */
-    private fun loadActiveLanguage(id: String) {
+    /**
+     * Language + whether it can be changed, from GET /api/meetings/:id `live_language`. Without it (older
+     * backend, or the call failed) fall back to what this device last set and leave the button available.
+     */
+    private fun loadLanguageState(id: String, withCatalog: Boolean) {
         viewModelScope.launch {
-            val reported = meetingsRepository.getMeeting(id).getOrNull()?.transcriptionLanguage
-            val language = reported
-                ?: preferencesManager.lastMeetingLanguageFor(id).first()
-            if (id == meetingId && language != null) {
-                _uiState.value = _uiState.value.copy(activeLanguage = MeetingLanguages.normalize(language))
+            if (withCatalog) {
+                val catalog = languagesRepository.refresh()
+                _uiState.value = _uiState.value.copy(languageCatalog = catalog)
             }
+            val detail = meetingsRepository.getMeetingLanguageState(id).getOrNull()
+            val live = detail?.liveLanguage
+            val reported = live?.language ?: detail?.transcriptionLanguage
+            val language = reported ?: preferencesManager.lastMeetingLanguageFor(id).first()
+            if (id != meetingId || _uiState.value.isChangingLanguage) return@launch
+            val canChange = live?.canChange ?: true
+            _uiState.value = _uiState.value.copy(
+                activeLanguage = if (language != null) MeetingLanguages.normalize(language) else _uiState.value.activeLanguage,
+                canChangeLanguage = canChange,
+                languageBlockedReason = if (canChange) null else (live?.reason ?: "provider_fixed")
+            )
         }
     }
 
@@ -114,11 +149,13 @@ class LiveTranscriptViewModel @Inject constructor(
                 preferencesManager.setLastMeetingLanguage(id, result.language)
             }
             if (id != meetingId) return@launch
-            val (language, notice) = applyLiveLanguageResult(_uiState.value.activeLanguage, result)
+            val outcome = applyLiveLanguageResult(_uiState.value.activeLanguage, result)
             _uiState.value = _uiState.value.copy(
-                activeLanguage = language,
+                activeLanguage = outcome.language,
+                canChangeLanguage = if (outcome.blockedReason != null) false else _uiState.value.canChangeLanguage,
+                languageBlockedReason = outcome.blockedReason ?: _uiState.value.languageBlockedReason,
                 isChangingLanguage = false,
-                languageNotice = notice
+                languageNotice = outcome.notice
             )
         }
     }
@@ -137,10 +174,13 @@ class LiveTranscriptViewModel @Inject constructor(
             // Initial fetch
             fetchTranscript()
 
-            // Poll every 2 seconds
+            // Poll every 2 seconds; re-check whether the language can be changed every ~30 s
+            // (the bot may join after the screen opens, and a failed first check should recover).
+            var ticks = 0
             while (true) {
                 delay(2000)
                 fetchTranscript()
+                if (++ticks % 15 == 0 && meetingId.isNotEmpty()) loadLanguageState(meetingId, withCatalog = false)
             }
         }
     }

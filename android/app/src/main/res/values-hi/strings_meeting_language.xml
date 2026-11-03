@@ -10,4 +10,10 @@
     <string name="meeting_language_change_note">अब से बोली गई बातों पर लागू होगा।</string>
     <string name="meeting_language_switch_unavailable">लाइव रहते हुए यह मीटिंग भाषा नहीं बदल सकती</string>
     <string name="meeting_language_switch_failed">भाषा बदली नहीं जा सकी। कृपया फिर कोशिश करें।</string>
+    <string name="meeting_language_hint_auto_english_live">अपने आप पहचान अंतिम ट्रांसक्रिप्ट के लिए भाषा ढूँढती है। जब तक आप भाषा न चुनें, लाइव कैप्शन अंग्रेज़ी में रहते हैं।</string>
+    <string name="meeting_language_hint_delayed">इस भाषा में लाइव कैप्शन %1$s मिनट देर से आ सकते हैं। अंतिम ट्रांसक्रिप्ट पर असर नहीं पड़ता।</string>
+    <string name="meeting_language_reason_fixed">लाइव भाषा बॉट के जुड़ते समय तय हो गई थी और इस मीटिंग के दौरान बदली नहीं जा सकती।</string>
+    <string name="meeting_language_reason_not_live">भाषा तभी बदली जा सकती है जब बॉट मीटिंग में हो।</string>
+    <string name="meeting_language_switch_not_live">बॉट अभी मीटिंग में नहीं है, इसलिए भाषा नहीं बदली जा सकती।</string>
+    <string name="meeting_language_saved_not_live">अंतिम ट्रांसक्रिप्ट के लिए %1$s सहेजी गई, लेकिन लाइव ट्रांसक्रिप्ट अभी बदली नहीं जा सकी।</string>
 </resources>

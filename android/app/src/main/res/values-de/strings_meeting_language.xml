@@ -10,4 +10,10 @@
     <string name="meeting_language_change_note">Gilt für alles, was ab jetzt gesprochen wird.</string>
     <string name="meeting_language_switch_unavailable">Dieses Meeting kann die Sprache während der Live-Übertragung nicht wechseln</string>
     <string name="meeting_language_switch_failed">Die Sprache konnte nicht geändert werden. Bitte versuche es erneut.</string>
+    <string name="meeting_language_hint_auto_english_live">Die automatische Erkennung findet die Sprache für das endgültige Transkript. Live-Untertitel bleiben Englisch, solange du keine Sprache wählst.</string>
+    <string name="meeting_language_hint_delayed">Live-Untertitel in dieser Sprache können mit %1$s Minuten Verzögerung eintreffen. Das endgültige Transkript ist nicht betroffen.</string>
+    <string name="meeting_language_reason_fixed">Die Live-Sprache wurde beim Beitritt des Bots festgelegt und kann in diesem Meeting nicht geändert werden.</string>
+    <string name="meeting_language_reason_not_live">Die Sprache kann nur geändert werden, solange der Bot im Meeting ist.</string>
+    <string name="meeting_language_switch_not_live">Der Bot ist gerade nicht im Meeting, daher kann die Sprache nicht geändert werden.</string>
+    <string name="meeting_language_saved_not_live">%1$s für das endgültige Transkript gespeichert, das Live-Transkript konnte aber gerade nicht umgestellt werden.</string>
 </resources>

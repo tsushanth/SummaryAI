@@ -10,4 +10,10 @@
     <string name="meeting_language_change_note">Applies to speech from now on.</string>
     <string name="meeting_language_switch_unavailable">This meeting cannot switch language while live</string>
     <string name="meeting_language_switch_failed">Couldn\'t change the language. Please try again.</string>
+    <string name="meeting_language_hint_auto_english_live">Auto-detect finds the language for the final transcript. Live captions stay in English unless you pick a language.</string>
+    <string name="meeting_language_hint_delayed">Live captions in this language can arrive %1$s minutes late. The final transcript is not affected.</string>
+    <string name="meeting_language_reason_fixed">The live language was set when the bot joined and can\'t be changed during this meeting.</string>
+    <string name="meeting_language_reason_not_live">The language can only be changed while the bot is in the meeting.</string>
+    <string name="meeting_language_switch_not_live">The bot isn\'t in the meeting right now, so the language can\'t be changed.</string>
+    <string name="meeting_language_saved_not_live">Saved %1$s for the final transcript, but the live transcript couldn\'t be switched right now.</string>
 </resources>

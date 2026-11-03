@@ -212,11 +212,12 @@ fun JoinMeetingScreen(
             )
             MeetingLanguageField(
                 selected = uiState.transcriptionLanguage,
+                catalog = uiState.languageCatalog,
                 onClick = { showLanguageDialog = true },
                 enabled = !uiState.isJoining
             )
             Text(
-                text = stringResource(R.string.meeting_language_hint),
+                text = meetingLanguageHint(uiState.transcriptionLanguage, uiState.languageCatalog),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
@@ -226,6 +227,7 @@ fun JoinMeetingScreen(
             if (showLanguageDialog) {
                 MeetingLanguageDialog(
                     selected = uiState.transcriptionLanguage,
+                    catalog = uiState.languageCatalog,
                     onSelect = {
                         viewModel.setTranscriptionLanguage(it)
                         showLanguageDialog = false

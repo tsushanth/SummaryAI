@@ -10,4 +10,10 @@
     <string name="meeting_language_change_note">仅对此后的发言生效。</string>
     <string name="meeting_language_switch_unavailable">此会议在进行中无法切换语言</string>
     <string name="meeting_language_switch_failed">无法更改语言，请重试。</string>
+    <string name="meeting_language_hint_auto_english_live">自动检测会为最终转录判断语言。除非你选择语言，否则实时字幕保持英语。</string>
+    <string name="meeting_language_hint_delayed">此语言的实时字幕可能延迟 %1$s 分钟到达。最终转录不受影响。</string>
+    <string name="meeting_language_reason_fixed">实时语言在机器人加入时已确定，本次会议期间无法更改。</string>
+    <string name="meeting_language_reason_not_live">只有在机器人处于会议中时才能更改语言。</string>
+    <string name="meeting_language_switch_not_live">机器人目前不在会议中，因此无法更改语言。</string>
+    <string name="meeting_language_saved_not_live">已为最终转录保存%1$s，但暂时无法切换实时转录。</string>
 </resources>

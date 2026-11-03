@@ -10,4 +10,10 @@
     <string name="meeting_language_change_note">Para sa mga sinasabi mula ngayon.</string>
     <string name="meeting_language_switch_unavailable">Hindi mapapalitan ang wika ng meeting na ito habang live</string>
     <string name="meeting_language_switch_failed">Hindi napalitan ang wika. Pakisubukan ulit.</string>
+    <string name="meeting_language_hint_auto_english_live">Hinahanap ng awtomatikong pagtukoy ang wika para sa final na transcript. Nananatiling Ingles ang live captions hangga\'t hindi ka pumipili ng wika.</string>
+    <string name="meeting_language_hint_delayed">Maaaring maantala ng %1$s minuto ang live captions sa wikang ito. Hindi apektado ang final na transcript.</string>
+    <string name="meeting_language_reason_fixed">Itinakda ang live na wika nang sumali ang bot at hindi na ito mapapalitan sa meeting na ito.</string>
+    <string name="meeting_language_reason_not_live">Mapapalitan lang ang wika habang nasa meeting ang bot.</string>
+    <string name="meeting_language_switch_not_live">Wala ang bot sa meeting ngayon, kaya hindi mapapalitan ang wika.</string>
+    <string name="meeting_language_saved_not_live">Na-save ang %1$s para sa final na transcript, pero hindi mapalitan ang live na transcript ngayon.</string>
 </resources>

@@ -41,8 +41,15 @@ class PreferencesManagerMeetingLanguageTest {
     @Test fun invalidValueFallsBackToAuto() = runBlocking {
         val m = manager()
         m.setMeetingLanguage("es")
-        m.setMeetingLanguage("zzz")
+        m.setMeetingLanguage("klingon")
         assertEquals("auto", m.meetingLanguage.first())
+    }
+
+    @Test fun catalogCache_roundTrips() = runBlocking {
+        val m = manager()
+        assertNull(m.languageCatalogCache())
+        m.setLanguageCatalogCache("{\"languages\":[]}")
+        assertEquals("{\"languages\":[]}", m.languageCatalogCache())
     }
 
     @Test fun lastMeetingLanguage_isPerMeeting() = runBlocking {

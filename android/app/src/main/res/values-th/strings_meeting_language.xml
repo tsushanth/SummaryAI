@@ -10,4 +10,10 @@
     <string name="meeting_language_change_note">มีผลกับคำพูดตั้งแต่ตอนนี้เป็นต้นไป</string>
     <string name="meeting_language_switch_unavailable">การประชุมนี้เปลี่ยนภาษาไม่ได้ขณะถ่ายทอดสด</string>
     <string name="meeting_language_switch_failed">เปลี่ยนภาษาไม่สำเร็จ โปรดลองอีกครั้ง</string>
+    <string name="meeting_language_hint_auto_english_live">การตรวจจับอัตโนมัติจะหาภาษาสำหรับข้อความถอดเสียงฉบับสุดท้าย คำบรรยายสดจะยังเป็นภาษาอังกฤษจนกว่าคุณจะเลือกภาษา</string>
+    <string name="meeting_language_hint_delayed">คำบรรยายสดในภาษานี้อาจมาช้า %1$s นาที ข้อความถอดเสียงฉบับสุดท้ายไม่ได้รับผลกระทบ</string>
+    <string name="meeting_language_reason_fixed">ภาษาของการถอดเสียงสดถูกกำหนดตอนบอทเข้าร่วม และเปลี่ยนไม่ได้ระหว่างการประชุมนี้</string>
+    <string name="meeting_language_reason_not_live">เปลี่ยนภาษาได้เฉพาะตอนที่บอทอยู่ในการประชุม</string>
+    <string name="meeting_language_switch_not_live">ตอนนี้บอทไม่ได้อยู่ในการประชุม จึงเปลี่ยนภาษาไม่ได้</string>
+    <string name="meeting_language_saved_not_live">บันทึก %1$s สำหรับข้อความถอดเสียงฉบับสุดท้ายแล้ว แต่ยังสลับการถอดเสียงสดไม่ได้ในตอนนี้</string>
 </resources>

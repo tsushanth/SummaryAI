@@ -5,11 +5,13 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kreativekoala.summaryai.R
+import com.kreativekoala.summaryai.data.LanguageCatalog
 import com.kreativekoala.summaryai.data.MeetingLanguages
 import com.kreativekoala.summaryai.data.api.coaching.CoachingPersonaKey
 import com.kreativekoala.summaryai.data.local.PreferencesManager
 import com.kreativekoala.summaryai.data.repository.CoachingRepository
 import com.kreativekoala.summaryai.data.repository.MeetingsRepository
+import com.kreativekoala.summaryai.data.repository.TranscriptionLanguagesRepository
 import com.kreativekoala.summaryai.service.BillingManager
 import com.kreativekoala.summaryai.ui.coaching.ActiveCoachingSession
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,6 +33,8 @@ data class JoinMeetingUiState(
     val error: String? = null,
     /** "auto" or a primary subtag; starts from the remembered default. */
     val transcriptionLanguage: String = MeetingLanguages.AUTO,
+    /** Backend-owned list (short built-in list until it loads). */
+    val languageCatalog: LanguageCatalog = LanguageCatalog.FALLBACK,
     // Coaching state
     val coachingEnabled: Boolean = false,
     val coachingPersona: CoachingPersonaKey = CoachingPersonaKey.SalesDiscovery,
@@ -47,15 +51,26 @@ class JoinMeetingViewModel @Inject constructor(
     private val activeCoachingSession: ActiveCoachingSession,
     private val billingManager: BillingManager,
     private val preferencesManager: PreferencesManager,
+    private val languagesRepository: TranscriptionLanguagesRepository,
 ) : ViewModel() {
+
+    private var userPickedLanguage = false
 
     private val _uiState = MutableStateFlow(JoinMeetingUiState())
     val uiState: StateFlow<JoinMeetingUiState> = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
+            // Local copy first (instant), then the backend's list and saved default.
             val saved = preferencesManager.meetingLanguage.first()
-            _uiState.value = _uiState.value.copy(transcriptionLanguage = saved)
+            if (!userPickedLanguage) _uiState.value = _uiState.value.copy(transcriptionLanguage = saved)
+            val catalog = languagesRepository.refresh()
+            _uiState.value = _uiState.value.copy(languageCatalog = catalog)
+            if (catalog.fromServer && !userPickedLanguage) {
+                val serverDefault = if (catalog.contains(catalog.defaultLanguage)) catalog.defaultLanguage else MeetingLanguages.AUTO
+                _uiState.value = _uiState.value.copy(transcriptionLanguage = serverDefault)
+                preferencesManager.setMeetingLanguage(serverDefault)
+            }
         }
         billingManager.onCoachingSubscriptionPurchased = { productId, purchaseToken ->
             viewModelScope.launch {
@@ -90,11 +105,15 @@ class JoinMeetingViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(botName = name)
     }
 
-    /** Picks the language for this join and remembers it as the default for next time. */
+    /** Picks the language for this join and remembers it as the default (backend, with a local cache). */
     fun setTranscriptionLanguage(code: String) {
         val normalized = MeetingLanguages.normalize(code)
+        userPickedLanguage = true
         _uiState.value = _uiState.value.copy(transcriptionLanguage = normalized)
-        viewModelScope.launch { preferencesManager.setMeetingLanguage(normalized) }
+        viewModelScope.launch {
+            preferencesManager.setMeetingLanguage(normalized)
+            languagesRepository.saveDefault(normalized)
+        }
     }
 
     fun joinMeeting() {
@@ -110,7 +129,7 @@ class JoinMeetingViewModel @Inject constructor(
             val result = meetingsRepository.joinMeeting(
                 joinUrl = normalizedUrl,
                 botName = state.botName.ifBlank { null },
-                transcriptionLanguage = state.transcriptionLanguage
+                transcriptionLanguage = joinLanguageValue(state)
             )
 
             result.fold(
@@ -135,6 +154,16 @@ class JoinMeetingViewModel @Inject constructor(
                 }
             )
         }
+    }
+
+    /**
+     * Omitted for Auto-detect (request body unchanged), unless the saved default on the backend is a
+     * language: then "auto" must be explicit or the backend would apply that default. A choice that is no
+     * longer on the backend list is dropped rather than risking a 400 on join.
+     */
+    private fun joinLanguageValue(state: JoinMeetingUiState): String? {
+        val choice = if (state.languageCatalog.contains(state.transcriptionLanguage)) state.transcriptionLanguage else MeetingLanguages.AUTO
+        return MeetingLanguages.requestValue(choice, state.languageCatalog.defaultLanguage.takeIf { state.languageCatalog.fromServer })
     }
 
     fun clearError() {

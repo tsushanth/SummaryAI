@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.kreativekoala.summaryai.data.MeetingLanguages
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,6 +24,7 @@ class PreferencesManager @Inject constructor(
         private val KEY_LAST_SYNC_TIME = stringPreferencesKey("last_sync_time")
         private val KEY_PREFERRED_LANGUAGE = stringPreferencesKey("preferred_language")
         private val KEY_MEETING_LANGUAGE = stringPreferencesKey("meeting_transcription_language")
+        private val KEY_LANGUAGE_CATALOG_CACHE = stringPreferencesKey("transcription_languages_cache")
         private val KEY_LAST_JOINED_LANGUAGE = stringPreferencesKey("last_joined_meeting_language")
         private val KEY_AUTO_JOIN_MEETINGS = booleanPreferencesKey("auto_join_meetings")
         private val KEY_NOTIFICATION_ENABLED = booleanPreferencesKey("notification_enabled")
@@ -72,6 +74,13 @@ class PreferencesManager @Inject constructor(
         dataStore.edit { preferences ->
             preferences[KEY_MEETING_LANGUAGE] = MeetingLanguages.normalize(language)
         }
+    }
+
+    // Last good GET /api/meetings/transcription-languages body, so the picker has the full list offline.
+    suspend fun languageCatalogCache(): String? = dataStore.data.first()[KEY_LANGUAGE_CATALOG_CACHE]
+
+    suspend fun setLanguageCatalogCache(json: String) {
+        dataStore.edit { preferences -> preferences[KEY_LANGUAGE_CATALOG_CACHE] = json }
     }
 
     // Language a meeting was last started or switched to from this device, so the live screen can
