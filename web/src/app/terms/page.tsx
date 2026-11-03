@@ -10,7 +10,7 @@ export default function TermsPage() {
     <div className="min-h-screen bg-background text-foreground py-16">
       <div className="max-w-[900px] mx-auto px-6">
         <h1 className="text-3xl md:text-4xl font-bold mb-2">Terms of Service</h1>
-        <p className="text-muted-foreground text-sm mb-12">Last updated: February 25, 2026</p>
+        <p className="text-muted-foreground text-sm mb-12">Last updated: 2026-11-03</p>
 
         <section className="mb-10">
           <h2 className="text-xl font-semibold mb-4">1. Agreement to Terms</h2>
@@ -80,24 +80,25 @@ export default function TermsPage() {
 
         <section className="mb-10">
           <h2 className="text-xl font-semibold mb-4">6. Third-Party Services and Data Processing</h2>
-          <p className="text-muted-foreground leading-relaxed">
-            Meeting Mind uses third-party services to provide transcription, summaries, Q&amp;A, meeting recording and calling.
-            These include Deepgram (transcription), Anthropic (summaries and Q&amp;A), Recall.ai (meeting bot), Twilio (phone calls)
-            and Supabase (accounts and storage), described in our{' '}
+          <p className="text-muted-foreground leading-relaxed mb-3">
+            Meeting Mind uses cloud-based third-party services to provide transcription, summarization, action item extraction,
+            and Q&amp;A features. By using these features, you acknowledge and consent to your content being processed
+            by the third-party services identified in our{' '}
             <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>.
-            By using these features you direct us to send your content to those services for that purpose. If you do not want
-            your content processed this way, do not use the features that need it, or delete your account.
+            These services include Deepgram (transcription), Anthropic (summaries and Q&amp;A), Recall.ai (meeting bot),
+            Twilio (phone calls), and Supabase (authentication and storage).
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            If you do not want your content processed this way, do not use the features that need it.
           </p>
         </section>
 
         <section className="mb-10">
           <h2 className="text-xl font-semibold mb-4">7. Recording Consent</h2>
           <p className="text-muted-foreground leading-relaxed">
-            You are responsible for telling the people you record and for following all laws that apply to recording,
-            including laws that require every participant&apos;s consent. This applies to the meeting bot, phone call
-            recording and microphone recording. The meeting bot appears in the meeting as a participant named
-            &quot;Meeting Mind.&quot; You agree not to use Meeting Mind to record anyone in a way that breaks the law or the rules
-            of the meeting platform. We may suspend accounts that do.
+            You are responsible for complying with all applicable laws regarding the recording of conversations.
+            Many jurisdictions require all-party consent before recording. Always ensure you have permission from
+            all participants before recording a meeting or phone call.
           </p>
         </section>
 

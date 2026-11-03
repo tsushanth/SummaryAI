@@ -2,149 +2,170 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy - Meeting Mind',
-  description: 'Meeting Mind Privacy Policy - what we collect, who processes it, and your choices.',
+  description: 'Meeting Mind Privacy Policy - How we collect, use, and protect your information.',
 };
-
-const PROVIDERS: { name: string; gets: string; why: string }[] = [
-  { name: 'Supabase', gets: 'Account data, database records, audio files', why: 'Authentication, database and file storage' },
-  { name: 'Deepgram', gets: 'Audio of your recordings', why: 'Speech-to-text and speaker identification' },
-  { name: 'Anthropic', gets: 'Transcript text and your questions about your recordings', why: 'Summaries, action items, Q&A, follow-up drafts and live insights (Claude models)' },
-  { name: 'Recall.ai', gets: 'Meeting audio and video, the meeting link, the bot name', why: 'The meeting bot that joins, records and live-transcribes meetings you request' },
-  { name: 'Twilio', gets: 'Phone numbers and call audio', why: 'Phone number verification, calling and call recording' },
-  { name: 'Google and Microsoft', gets: 'The read-only calendar access you grant; Google sign-in', why: 'Calendar sync and sign-in' },
-  { name: 'Resend', gets: 'Recipient addresses and summary content you choose to email', why: 'Delivering emails you ask us to send' },
-  { name: 'Google (Firebase Analytics, Google Play)', gets: 'Android usage events, device identifiers, purchase status', why: 'Analytics, app distribution and billing' },
-  { name: 'Stripe, RevenueCat, Google Play', gets: 'Subscription status (earlier subscribers only)', why: 'Billing' },
-  { name: 'Slack, Notion or a webhook you set up', gets: 'Recording title, summary and action items', why: 'Integrations you turn on yourself' },
-  { name: 'Cloudflare (our error reporter)', gets: 'Error details, app version, device model, an account identifier', why: 'Finding and fixing bugs' },
-];
 
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-background text-foreground py-16">
       <div className="max-w-[900px] mx-auto px-6">
         <h1 className="text-3xl md:text-4xl font-bold mb-2">Privacy Policy</h1>
-        <p className="text-muted-foreground text-sm mb-12">Last updated: [DATE OF PUBLICATION]</p>
+        <p className="text-muted-foreground text-sm mb-12">Last updated: 2026-11-03</p>
 
         <section className="mb-10">
-          <h2 className="text-xl font-semibold mb-4">1. Who we are</h2>
+          <h2 className="text-xl font-semibold mb-4">Introduction</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Meeting Mind is operated by Kreative Koala Solutions LLC, 5900 Balcones Drive, Ste 100, Austin, TX 78731, USA
-            (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). Meeting Mind is an Android app and a web app (meetingmind.org)
-            that records, transcribes and summarizes meetings, phone calls and in-person conversations.
+            Kreative Koala (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) operates the Meeting Mind Android app and
+            web app (meetingmind.org). This Privacy Policy explains how we collect, use, and protect your information.
           </p>
         </section>
 
         <section className="mb-10">
-          <h2 className="text-xl font-semibold mb-4">2. What we collect</h2>
-          <ul className="list-disc list-inside text-muted-foreground space-y-2">
-            <li><strong>Account:</strong> your email address and a password handled by our authentication provider (we never see it in plain text). If you use Google sign-in, your Google account email and name.</li>
-            <li><strong>Your recordings:</strong> audio you record with your device microphone, audio you upload, audio of phone calls you place through the app, and the recording of a meeting our bot joins at your request. For bot meetings the recording may include video where the meeting platform provides it.</li>
-            <li><strong>What we generate from them:</strong> transcripts (with speaker labels and timestamps), summaries, action items, and your questions and our answers.</li>
-            <li><strong>Calendar data, if you connect Google Calendar or Outlook:</strong> read-only. We store the meeting link, start and end time, time zone and an event identifier. We do not store event titles, descriptions or attendee lists. Calendar data is used only to join and schedule meetings you choose and is never sent to our AI providers.</li>
+          <h2 className="text-xl font-semibold mb-4">Information We Collect</h2>
+
+          <h3 className="text-lg font-medium text-foreground/80 mb-3">Information You Provide</h3>
+          <ul className="list-disc list-inside text-muted-foreground mb-4 space-y-2">
+            <li><strong>Account Information:</strong> Email address and password (stored securely via Supabase authentication). If you sign in with Google, your Google account email and name.</li>
+            <li><strong>Content:</strong> Audio you record or upload, audio of phone calls you place through the app, the recording of a meeting our bot joins at your request (audio, and video where the meeting platform provides it), and the transcripts, summaries, action items, and questions and answers generated from them.</li>
+            <li><strong>Calendar information, if you connect a calendar:</strong> the meeting link, start and end time, time zone, and an event identifier.</li>
             <li><strong>Phone numbers, if you use the phone feature:</strong> your verified number and the number you call, with call times and duration.</li>
-            <li><strong>Usage and device data:</strong> on Android, analytics events (such as screens viewed and features used) through Firebase Analytics, and technical error reports (error message, app version, device make and model, Android version, and an account identifier that is not your email).</li>
-            <li><strong>Sharing and email:</strong> the settings of any share link you create, and the recipient addresses you enter when you email a summary.</li>
+            <li><strong>Sharing and email:</strong> the settings of any share link you create and the recipient addresses you enter when you email a summary.</li>
           </ul>
-        </section>
 
-        <section className="mb-10">
-          <h2 className="text-xl font-semibold mb-4">3. How we use it</h2>
-          <p className="text-muted-foreground leading-relaxed">
-            To record, transcribe, summarize and answer questions about your recordings; to join meetings and place calls
-            you ask for; to sync your account across Android and web; to fix errors and understand how features are used;
-            and to send service messages. We do not sell your personal information and we do not use your content for advertising.
-          </p>
-        </section>
-
-        <section className="mb-10">
-          <h2 className="text-xl font-semibold mb-4">4. Who processes your data</h2>
-          <p className="text-muted-foreground leading-relaxed mb-4">
-            We use these service providers. Each receives only what it needs for the purpose shown, and each handles data under its own terms.
-          </p>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-muted-foreground">
-              <thead>
-                <tr className="border-b border-border text-foreground">
-                  <th className="py-2 pr-4 font-semibold">Provider</th>
-                  <th className="py-2 pr-4 font-semibold">What it receives</th>
-                  <th className="py-2 font-semibold">Why</th>
-                </tr>
-              </thead>
-              <tbody>
-                {PROVIDERS.map((p) => (
-                  <tr key={p.name} className="border-b border-border align-top">
-                    <td className="py-2 pr-4 font-medium text-foreground">{p.name}</td>
-                    <td className="py-2 pr-4">{p.gets}</td>
-                    <td className="py-2">{p.why}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-muted-foreground leading-relaxed mt-4">
-            We also disclose information when the law requires it, and in connection with a merger or acquisition.
-          </p>
-        </section>
-
-        <section className="mb-10">
-          <h2 className="text-xl font-semibold mb-4">5. Recording other people</h2>
-          <p className="text-muted-foreground leading-relaxed mb-3">
-            When you use the meeting bot, phone recording or your microphone to record, you are responsible for telling the
-            people you record and for following the consent and wiretapping laws that apply to you and to them. Many places
-            require every participant&apos;s consent. The meeting bot joins as a visible participant named &quot;Meeting Mind.&quot;
-            For phone calls, the other party hears a recording notice when they answer.
-          </p>
-          <p className="text-muted-foreground leading-relaxed">
-            If you were recorded by someone using Meeting Mind and want your data removed, email{' '}
-            <a href="mailto:privacy@kreativekoala.llc" className="text-primary hover:underline">privacy@kreativekoala.llc</a>.
-          </p>
-        </section>
-
-        <section className="mb-10">
-          <h2 className="text-xl font-semibold mb-4">6. Storage, security and retention</h2>
+          <h3 className="text-lg font-medium text-foreground/80 mb-3">Information Collected Automatically</h3>
           <ul className="list-disc list-inside text-muted-foreground space-y-2">
-            <li>We keep your recordings, transcripts, summaries and questions until you delete them or delete your account. There is no automatic purge.</li>
-            <li>Deleting a recording removes its audio file, transcript and summary from our systems.</li>
-            <li>Deleting your account removes your account and its records from our database. To make sure a recording&apos;s audio file is removed, delete the recording before you delete your account.</li>
-            <li>Phone call recordings are deleted from Twilio after we store them.</li>
-            <li>Data in transit is encrypted with HTTPS/TLS. Calendar access tokens and integration secrets are additionally encrypted by us.</li>
-            <li>Our providers keep data under their own retention terms.</li>
+            <li><strong>Analytics (Android):</strong> app usage events and device identifiers collected through Firebase Analytics.</li>
+            <li><strong>Error reports:</strong> error details, app version, device make and model, operating system version, and an account identifier.</li>
           </ul>
         </section>
 
         <section className="mb-10">
-          <h2 className="text-xl font-semibold mb-4">7. Your choices and rights</h2>
-          <p className="text-muted-foreground leading-relaxed mb-3">
-            You can delete recordings, delete your account, export your transcripts and summaries, revoke share links,
-            disconnect your calendar, turn auto-join off for any meeting, and remove integrations.
+          <h2 className="text-xl font-semibold mb-4">How We Use Your Information</h2>
+          <ul className="list-disc list-inside text-muted-foreground space-y-2">
+            <li>Provide the app&apos;s functionality</li>
+            <li>Transcribe your audio recordings using AI speech-to-text services</li>
+            <li>Generate AI-powered summaries, action items, and Q&amp;A from your transcripts</li>
+            <li>Join meetings and place calls that you ask for</li>
+            <li>Send account emails and emails you ask us to send</li>
+            <li>Fix errors and understand how Android features are used</li>
+          </ul>
+        </section>
+
+        <section className="mb-10">
+          <h2 className="text-xl font-semibold mb-4">Third-Party Services</h2>
+          <p className="text-muted-foreground leading-relaxed mb-4">
+            Meeting Mind uses the following third-party services to provide its features.
           </p>
-          <p className="text-muted-foreground leading-relaxed">
-            Depending on where you live, you may also have the right to access, correct, delete or port your personal data,
-            or to object to its processing. To use these rights, email{' '}
-            <a href="mailto:privacy@kreativekoala.llc" className="text-primary hover:underline">privacy@kreativekoala.llc</a>.
+
+          <h3 className="text-lg font-medium text-foreground/80 mb-3">Audio Transcription</h3>
+          <ul className="list-disc list-inside text-muted-foreground mb-4 space-y-2">
+            <li><strong>Deepgram</strong> (deepgram.com) &mdash; receives your audio and converts speech to text with speaker identification and timestamps</li>
+          </ul>
+
+          <h3 className="text-lg font-medium text-foreground/80 mb-3">AI Summaries &amp; Q&amp;A</h3>
+          <ul className="list-disc list-inside text-muted-foreground mb-4 space-y-2">
+            <li><strong>Anthropic</strong> (anthropic.com) &mdash; receives transcript text and your questions, and generates summaries, action items, answers, follow-up drafts and live insights using Claude models</li>
+          </ul>
+
+          <h3 className="text-lg font-medium text-foreground/80 mb-3">Meeting Bot</h3>
+          <ul className="list-disc list-inside text-muted-foreground mb-4 space-y-2">
+            <li><strong>Recall.ai</strong> (recall.ai) &mdash; runs the bot that joins meetings you request, records them and live-transcribes them</li>
+          </ul>
+
+          <h3 className="text-lg font-medium text-foreground/80 mb-3">Phone Calls</h3>
+          <ul className="list-disc list-inside text-muted-foreground mb-4 space-y-2">
+            <li><strong>Twilio</strong> (twilio.com) &mdash; phone number verification, calling infrastructure and call recording</li>
+          </ul>
+
+          <h3 className="text-lg font-medium text-foreground/80 mb-3">Authentication &amp; Storage</h3>
+          <ul className="list-disc list-inside text-muted-foreground mb-4 space-y-2">
+            <li><strong>Supabase</strong> (supabase.com) &mdash; provides authentication, database, and file storage services</li>
+          </ul>
+
+          <h3 className="text-lg font-medium text-foreground/80 mb-3">Email</h3>
+          <ul className="list-disc list-inside text-muted-foreground mb-4 space-y-2">
+            <li><strong>Resend</strong> (resend.com) &mdash; delivers emails you ask us to send, such as a recording summary</li>
+          </ul>
+
+          <h3 className="text-lg font-medium text-foreground/80 mb-3">Analytics, Sign-in and Calendar</h3>
+          <ul className="list-disc list-inside text-muted-foreground space-y-2">
+            <li><strong>Google Firebase Analytics</strong> &mdash; usage analytics in the Android app</li>
+            <li><strong>Google and Microsoft</strong> &mdash; Google sign-in, and read-only calendar access if you connect Google Calendar or Outlook</li>
+            <li><strong>Slack, Notion or a webhook you set up</strong> &mdash; receive a recording&apos;s title, summary and action items only if you turn on that integration</li>
+          </ul>
+        </section>
+
+        <section className="mb-10">
+          <h2 className="text-xl font-semibold mb-4">Data Storage and Security</h2>
+          <ul className="list-disc list-inside text-muted-foreground space-y-2">
+            <li>Your account, records and audio files are stored with Supabase</li>
+            <li>All data transmission is encrypted using HTTPS/TLS</li>
+            <li>Calendar access tokens and integration secrets are additionally encrypted by us</li>
+          </ul>
+        </section>
+
+        <section className="mb-10">
+          <h2 className="text-xl font-semibold mb-4">Data Sharing</h2>
+          <p className="text-muted-foreground mb-3">We do not sell your personal information. We share data with:</p>
+          <ul className="list-disc list-inside text-muted-foreground space-y-2">
+            <li><strong>The service providers listed above,</strong> for the purposes described there.</li>
+            <li><strong>Legal Requirements:</strong> When required by law</li>
+            <li><strong>Business Transfers:</strong> In connection with a merger or acquisition</li>
+          </ul>
+        </section>
+
+        <section className="mb-10">
+          <h2 className="text-xl font-semibold mb-4">Your Rights</h2>
+          <ul className="list-disc list-inside text-muted-foreground space-y-2">
+            <li><strong>Access:</strong> Request a copy of your personal data</li>
+            <li><strong>Delete:</strong> Delete recordings, or delete your account and its data (see Data Retention below)</li>
+            <li><strong>Export:</strong> Export your transcripts and summaries from the web app</li>
+            <li><strong>Other controls:</strong> Revoke share links, disconnect your calendar, and remove integrations</li>
+          </ul>
+          <p className="text-muted-foreground mt-4">
+            To exercise these rights, contact us at{' '}
+            <a href="mailto:privacy@kreativekoala.llc" className="text-primary hover:underline">
+              privacy@kreativekoala.llc
+            </a>
           </p>
         </section>
 
         <section className="mb-10">
-          <h2 className="text-xl font-semibold mb-4">8. Children</h2>
+          <h2 className="text-xl font-semibold mb-4">Data Retention</h2>
+          <ul className="list-disc list-inside text-muted-foreground space-y-2">
+            <li>We keep your recordings, transcripts, summaries and questions until you delete them or delete your account.</li>
+            <li>
+              When you delete your account, we delete, in this order: your audio, video and export files from storage;
+              the meeting media Recall.ai holds for your meeting bot recordings; any phone call recording still held at Twilio;
+              your database records (recordings, transcripts, summaries, questions and answers, meetings, bot runs, phone
+              numbers, share links, folders, calendar connections, integration settings and profile); and finally your sign-in account.
+            </li>
+            <li>If deleting at one of those providers fails, your account is still deleted and we retry that deletion automatically.</li>
+            <li>Account deletion does not delete data held by other providers (for example Deepgram, Anthropic and Resend), emails already sent, or content already sent to Slack, Notion or a webhook you set up, and it does not revoke calendar access you granted in your Google or Microsoft account. Those providers keep data under their own terms.</li>
+          </ul>
+        </section>
+
+        <section className="mb-10">
+          <h2 className="text-xl font-semibold mb-4">Children&apos;s Privacy</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Meeting Mind is not intended for children under 13. We do not knowingly collect information from children under 13.
+            The App is not intended for children under 13. We do not knowingly collect information from children under 13.
           </p>
         </section>
 
         <section className="mb-10">
-          <h2 className="text-xl font-semibold mb-4">9. Changes to this policy</h2>
+          <h2 className="text-xl font-semibold mb-4">Changes to This Policy</h2>
           <p className="text-muted-foreground leading-relaxed">
-            We may update this policy from time to time. Changes will be posted on this page with an updated date.
+            We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated date.
           </p>
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold mb-4">10. Contact us</h2>
+          <h2 className="text-xl font-semibold mb-4">Contact Us</h2>
           <p className="text-muted-foreground">
             Questions? Email us at{' '}
-            <a href="mailto:privacy@kreativekoala.llc" className="text-primary hover:underline">privacy@kreativekoala.llc</a>
+            <a href="mailto:privacy@kreativekoala.llc" className="text-primary hover:underline">
+              privacy@kreativekoala.llc
+            </a>
           </p>
         </section>
       </div>
