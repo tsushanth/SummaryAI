@@ -27,8 +27,10 @@ object NetworkModule {
     @Singleton
     fun provideAuthInterceptor(
         tokenManager: TokenManager,
-        subscriptionStatus: SubscriptionStatus
-    ): AuthInterceptor = AuthInterceptor(tokenManager, subscriptionStatus)
+        subscriptionStatus: SubscriptionStatus,
+        supabase: io.github.jan.supabase.SupabaseClient,
+        sessionEvents: com.kreativekoala.summaryai.data.auth.SessionEvents
+    ): AuthInterceptor = AuthInterceptor(tokenManager, subscriptionStatus, supabase, sessionEvents)
 
     @Provides
     @Singleton

@@ -47,20 +47,14 @@ class AuthService @Inject constructor(
     @ApplicationContext private val context: Context,
     private val tokenManager: TokenManager,
     private val preferencesManager: PreferencesManager,
-    private val api: SummaryAIApi
+    private val api: SummaryAIApi,
+    private val supabase: SupabaseClient,
+    private val sessionEvents: com.kreativekoala.summaryai.data.auth.SessionEvents
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private val _authState = MutableStateFlow(AuthState())
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
-
-    // Supabase client
-    private val supabase: SupabaseClient = createSupabaseClient(
-        supabaseUrl = BuildConfig.SUPABASE_URL,
-        supabaseKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY
-    ) {
-        install(Auth)
-    }
 
     // Google Sign-In client
     private val googleSignInClient: GoogleSignInClient by lazy {

@@ -81,6 +81,11 @@ android {
         jvmTarget = "17"
     }
 
+    testOptions {
+        // JVM unit tests call code that logs with android.util.Log
+        unitTests.isReturnDefaultValues = true
+    }
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -128,6 +133,8 @@ dependencies {
 
     // Unit tests
     testImplementation("junit:junit:4.13.2")
+    testImplementation("com.squareup.okhttp3:mockwebserver:5.0.0-alpha.14")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
 
     // Hilt
     implementation(libs.hilt.android)

@@ -3,7 +3,7 @@ package com.kreativekoala.summaryai.data.api
 import android.util.Log
 import com.kreativekoala.summaryai.BuildConfig
 import com.kreativekoala.summaryai.data.local.SubscriptionStatus
-import com.kreativekoala.summaryai.data.local.TokenManager
+import com.kreativekoala.summaryai.data.local.TokenStorage
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.gotrue.Auth
@@ -22,19 +22,11 @@ private const val TAG = "AuthInterceptor"
  */
 @Singleton
 class AuthInterceptor @Inject constructor(
-    private val tokenManager: TokenManager,
-    private val subscriptionStatus: SubscriptionStatus
+    private val tokenManager: TokenStorage,
+    private val subscriptionStatus: SubscriptionStatus,
+    private val supabase: SupabaseClient,
+    @Suppress("unused") private val sessionEvents: com.kreativekoala.summaryai.data.auth.SessionEvents
 ) : Interceptor {
-
-    // Supabase client for token refresh
-    private val supabase: SupabaseClient by lazy {
-        createSupabaseClient(
-            supabaseUrl = BuildConfig.SUPABASE_URL,
-            supabaseKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY
-        ) {
-            install(Auth)
-        }
-    }
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
