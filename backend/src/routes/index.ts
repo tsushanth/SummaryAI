@@ -14,6 +14,7 @@ import webhooksRoutes from './webhooks.js';
 import phoneRoutes from './phone.js';
 import subscriptionsRoutes from './subscriptions.js';
 import attributionRoutes from './attribution.js';
+import activationRoutes from './activation.js';
 import coachingRoutes from './coaching.js';
 import { foldersRouter, tagsRouter } from './folders.js';
 import { recordingSharesRouter, publicSharesRouter } from './shares.js';
@@ -33,6 +34,9 @@ router.use('/webhooks', webhooksRoutes);
 
 // Attribution (no auth required - called from iOS before sign-in)
 router.use('/api/attribution', attributionRoutes);
+
+// Activation funnel (flag ACTIVATION_EVENTS_ENABLED, off by default; events are anonymous, attribution authenticates itself)
+router.use('/api/activation', activationRoutes);
 
 // Calendar OAuth callback (no auth required - browser redirect)
 router.use('/api/calendar', calendarCallbackRouter);
