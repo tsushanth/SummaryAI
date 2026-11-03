@@ -95,6 +95,9 @@ fun RecordingScreen(
         uiState.uploadedRecordingId?.let { recordingId ->
             // Success peak — a recording made it all the way to the backend.
             RatingKit.trackAction(activity)
+            // Consume first: a first-run user has no list screen under Record, so Back from the detail returns here and
+            // would otherwise re-fire this effect and bounce straight forward again.
+            viewModel.onUploadedRecordingHandled(recordingId)
             onRecordingComplete(recordingId)
         }
     }

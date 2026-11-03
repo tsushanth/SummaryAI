@@ -201,11 +201,21 @@ class RecordingViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(error = null)
     }
 
+    /** Last finished upload the screen already navigated to; ignored so Back from the detail does not bounce forward again. */
+    private var handledUploadId: String? = null
+
+    /** The screen opened the finished recording; forget it so returning to Record shows the idle screen. */
+    fun onUploadedRecordingHandled(recordingId: String) {
+        handledUploadId = recordingId
+        _uiState.value = _uiState.value.copy(uploadedRecordingId = null)
+    }
+
     private fun applyUploadState(state: UploadState) {
+        val incomingId = state.uploadedRecordingId?.takeIf { it != handledUploadId }
         _uiState.value = _uiState.value.copy(
             isUploading = state.isUploading,
             uploadProgress = state.progress,
-            uploadedRecordingId = state.uploadedRecordingId ?: _uiState.value.uploadedRecordingId,
+            uploadedRecordingId = incomingId ?: _uiState.value.uploadedRecordingId,
             error = state.error ?: _uiState.value.error
         )
     }
