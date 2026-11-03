@@ -5,7 +5,7 @@
 
 import { Router, Request, Response } from 'express';
 import { supabaseAdmin } from '../lib/supabase.js';
-import { RecallService, detectPlatform } from '../services/recallService.js';
+import { RecallService, detectPlatform, liveSttBotRunColumns } from '../services/recallService.js';
 import {
   scheduleBotJoin,
   cancelScheduledBot,
@@ -295,6 +295,7 @@ router.post(
         meeting_id: meeting.id,
         user_id: userId,
         recall_bot_id: bot.id,
+        ...liveSttBotRunColumns(bot),
         status: 'joining',
         join_requested_at: now,
       });
@@ -521,6 +522,7 @@ router.post(
       meeting_id: meetingId,
       user_id: userId,
       recall_bot_id: bot.id,
+      ...liveSttBotRunColumns(bot),
       status: 'joining',
       join_requested_at: new Date().toISOString(),
     });
@@ -567,6 +569,7 @@ router.get(
       .select('*')
       .eq('meeting_id', meetingId)
       .eq('is_partial', false) // Only return final transcripts by default
+      .eq('shadow', false) // never show shadow-run (A/B comparison) rows
       .order('start_timestamp', { ascending: true });
 
     // Filter by timestamp if provided
@@ -628,7 +631,7 @@ router.get(
       word_count: stitched.wordCount,
       speaker_count: stitched.speakerCount,
       duration_seconds: stitched.durationSec,
-      source: 'recall_realtime',
+      source: 'recall_realtime', // unchanged field value for existing clients; the rows may come from the live-stt service
     });
   })
 );
@@ -822,6 +825,7 @@ meetingsWorkerRouter.post(
         meeting_id: meetingId,
         user_id: userId,
         recall_bot_id: bot.id,
+        ...liveSttBotRunColumns(bot),
         status: 'joining',
         join_requested_at: new Date().toISOString(),
       });

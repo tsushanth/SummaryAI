@@ -85,7 +85,7 @@ export default function TermsPage() {
             and Q&amp;A features. By using these features, you acknowledge and consent to your content being processed
             by the third-party services identified in our{' '}
             <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>.
-            These services include Deepgram (transcription), Anthropic (summaries and Q&amp;A), Recall.ai (meeting bot),
+            These services include Deepgram and Soniox (transcription), Anthropic (summaries and Q&amp;A), Recall.ai (meeting bot),
             Twilio (phone calls), and Supabase (authentication and storage).
           </p>
           <p className="text-muted-foreground leading-relaxed">

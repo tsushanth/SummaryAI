@@ -1,0 +1,21 @@
+{
+ "id": "485e3264-e52f-40da-8b2b-7ea7aa1c64c7",
+ "status": "completed",
+ "created_at": "2026-11-03T15:30:05.014Z",
+ "model": "stt-async-v6",
+ "audio_url": null,
+ "file_id": "97f5432a-fc1a-4483-8c75-a51c2f70f21c",
+ "filename": "recording.m4a",
+ "language_hints": null,
+ "enable_speaker_diarization": true,
+ "enable_language_identification": true,
+ "enable_audio_event_detection": false,
+ "audio_duration_ms": 30272,
+ "error_type": null,
+ "error_message": null,
+ "webhook_url": null,
+ "webhook_auth_header_name": null,
+ "webhook_auth_header_value": null,
+ "webhook_status_code": null,
+ "client_reference_id": null
+}

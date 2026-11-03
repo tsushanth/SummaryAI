@@ -247,6 +247,7 @@ async function tick(sessionId: string, persona: CoachingPersona): Promise<void> 
     .select('speaker_name, segment_text, end_timestamp')
     .eq('meeting_id', recording.meeting_id)
     .eq('is_partial', false)
+    .eq('shadow', false)
     .order('created_at', { ascending: false })
     .limit(TRANSCRIPT_TAIL_SEGMENTS);
   if (!segments || segments.length === 0) {

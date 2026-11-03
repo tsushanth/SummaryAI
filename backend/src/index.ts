@@ -21,6 +21,7 @@ import { testConnection } from './lib/supabase.js';
 import { flushLlmUsage } from './lib/llm.js';
 import { requestTiming, startRuntimeMonitor } from './lib/requestTiming.js';
 import routes from './routes/index.js';
+import { liveSegmentsBodyParser } from './routes/liveSegments.js';
 
 // Create Express app
 const app = express();
@@ -63,6 +64,9 @@ app.use(requestTiming());
 // This must come BEFORE express.json() middleware
 app.use('/v1/webhooks/stripe', express.raw({ type: 'application/json' }));
 app.use('/webhooks/stripe', express.raw({ type: 'application/json' }));
+
+// live-stt segment sink: signed over the exact bytes, 512 KB cap. Must come BEFORE express.json(). Mounted at the root and under the API prefix.
+app.use(['/internal/live-segments', `/${config.API_VERSION}/internal/live-segments`], liveSegmentsBodyParser);
 
 // Recall webhooks are signed over the exact bytes sent, so keep them next to the parsed body (req.rawBody) for those routes only.
 app.use(express.json({

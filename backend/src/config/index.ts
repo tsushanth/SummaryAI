@@ -81,6 +81,19 @@ const envSchema = z.object({
   // Encryption (for storing OAuth tokens)
   ENCRYPTION_KEY: z.string().optional(),
 
+  // Live transcription provider (see backend/LIVE_STT.md). Everything here is OFF by default.
+  // LIVE_STT_PROVIDER: 'recall' (default, Recall's built-in transcript) | 'soniox' (Recall raw audio -> mm-live-stt -> Soniox). Kept a
+  // plain string on purpose: an unknown value is treated as 'recall' (see lib/liveStt.ts) instead of crashing the boot.
+  LIVE_STT_PROVIDER: z.string().default('recall'),
+  // 'true' = keep Recall's transcript as the source of truth AND stream audio to mm-live-stt, whose segments are stored shadow=true.
+  LIVE_STT_SHADOW: z.string().default('false'),
+  // Public wss:// base URL of the mm-live-stt app (no path), e.g. wss://mm-live-stt.fly.dev
+  LIVE_STT_WS_URL: z.string().optional(),
+  // HMAC secret for the per-bot ingest token in the websocket URL (= the service's INGEST_TOKEN_SECRETS).
+  LIVE_STT_INGEST_SECRET: z.string().optional(),
+  // HMAC secret for POST /internal/live-segments (= the service's BACKEND_SINK_SECRET). Comma separated list allowed (rotation).
+  LIVE_STT_SHARED_SECRET: z.string().optional(),
+
   // Service URL (for internal worker callbacks)
   SERVICE_URL: z.string().optional(),
   INTERNAL_SECRET: z.string().optional(),
