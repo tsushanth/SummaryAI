@@ -1,6 +1,7 @@
 # Separate app on purpose: Recall's websocket retries only 3 s x 30 and then kills the endpoint for that bot, so a
 # deploy of the main backend must never be able to drop live meetings. Secrets are set with `fly secrets set` (never in this file):
 #   INGEST_TOKEN_SECRETS  SONIOX_API_KEY  BACKEND_SINK_SECRET  BACKEND_SINK_URL  ADMIN_TOKEN  ALERT_WEBHOOK_URL
+#   CONTROL_SECRETS (optional; defaults to BACKEND_SINK_SECRET) for POST /control/language
 # Non-secret defaults are in [env] below.
 app = "mm-live-stt"
 primary_region = "iad"

@@ -19,6 +19,7 @@ function main(): void {
     : logSink;
   const server = new IngestServer({
     ingestSecrets: cfg.ingestSecrets,
+    controlSecrets: cfg.controlSecrets,
     engine: new SonioxEngine({ apiKey: cfg.sonioxApiKey, model: cfg.sonioxModel, url: cfg.sonioxUrl, authMode: cfg.sonioxAuthMode, endpointDetection: cfg.sonioxEndpointDetection, endpointMaxDelayMs: cfg.sonioxEndpointMaxDelayMs }),
     // fallbackEngine: new ElevenLabsEngine(...)  (interface only in this skeleton; see stt/elevenlabs.ts)
     sink,

@@ -25,9 +25,23 @@ segments to the backend. Status: skeleton, tested against a fake Soniox and (opt
 | `MAX_SONIOX_STREAMS` (3), `MAX_SESSIONS` | caps; new meetings beyond the cap get HTTP 503 and an alert |
 | `SINK` (`http`), `BACKEND_SINK_URL`, `BACKEND_SINK_SECRET` | default sink: HMAC-signed POST to the backend |
 | `SINK=supabase`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` | alternative direct insert (see PR for why it is not the default) |
+| `CONTROL_SECRETS` (default `BACKEND_SINK_SECRET`) | comma list of HMAC secrets for `POST /control/language` (backend changes the meeting language while it runs); empty = route returns 404 |
 | `SONIOX_AUTH_MODE` (`header`), `SONIOX_ENDPOINT_DETECTION` (1), `SONIOX_MODEL` (`stt-rt-v6`) | Soniox client |
 | `ADMIN_TOKEN` | enables `GET /healthz?detail=1` (per-meeting metrics, hashed ids) |
 | `ALERT_WEBHOOK_URL` | alert hook target (429 / stream cap / fatal / degraded / failover); throttled per kind |
 
 Ingest URL for the Recall bot: `wss://<app>.fly.dev/ingest/<ref>/?token=<hex>` where `token = HMAC-SHA256(secret, ref)` and `ref`
 is an id the backend mints before it creates the bot (the trailing slash before `?` is required by Recall).
+
+## Language (per meeting)
+
+- Initial: optional `&lang=<soniox code>` on the ingest URL (`...?token=<hex>&lang=es`) becomes `language_hints: ["es"]` on the first
+  stream. No `lang` = no hints (`enable_language_identification` is always on). Unknown codes are ignored. `LANGUAGE_HINTS` stays the
+  service-wide default.
+- Change while the meeting runs: `POST /control/language` with body `{"v":1,"ref":"<ref>","language":"es"|"auto"}`, headers
+  `x-mm-timestamp` (unix s, +/-5 min) and `x-mm-signature: v1=hex(HMAC-SHA256(secret, "control.<ts>.<raw body>"))`. 200 = applied
+  (`changed:false` if it already was that language), 202 = no audio session yet, queued for when it connects (1 h, max 500 refs),
+  401/400/404/413/429 as usual. The running Soniox stream is closed WITHOUT finalizing and replaced by one with the new hints, which
+  replays the buffered audio from 1 s before the old stream's final watermark (the same path as a reconnect), so final words are kept
+  and the unfinalised tail is re-recognised in the new language. Tests: `test/language.test.ts`, `test/languageChange.test.ts`
+  (fake Soniox: 0.00% word loss, 100% audio coverage across a change).
