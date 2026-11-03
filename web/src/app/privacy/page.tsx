@@ -60,6 +60,7 @@ export default function PrivacyPage() {
           <h3 className="text-lg font-medium text-foreground/80 mb-3">Audio Transcription</h3>
           <ul className="list-disc list-inside text-muted-foreground mb-4 space-y-2">
             <li><strong>Deepgram</strong> (deepgram.com) &mdash; receives your audio and converts speech to text with speaker identification and timestamps</li>
+            <li><strong>Soniox</strong> (soniox.com) &mdash; may also receive your audio and convert speech to text, when we use Soniox as the transcription provider or run it alongside Deepgram to compare results. Deepgram remains a transcription provider while it is in use, including as a fallback.</li>
           </ul>
 
           <h3 className="text-lg font-medium text-foreground/80 mb-3">AI Summaries &amp; Q&amp;A</h3>
@@ -69,7 +70,7 @@ export default function PrivacyPage() {
 
           <h3 className="text-lg font-medium text-foreground/80 mb-3">Meeting Bot</h3>
           <ul className="list-disc list-inside text-muted-foreground mb-4 space-y-2">
-            <li><strong>Recall.ai</strong> (recall.ai) &mdash; runs the bot that joins meetings you request, records them and live-transcribes them</li>
+            <li><strong>Recall.ai</strong> (recall.ai) &mdash; runs the bot that joins meetings you request, records them and live-transcribes them. The live transcript of a meeting may instead be produced by Soniox from the meeting audio streamed from Recall.ai.</li>
           </ul>
 
           <h3 className="text-lg font-medium text-foreground/80 mb-3">Phone Calls</h3>
@@ -141,7 +142,7 @@ export default function PrivacyPage() {
               numbers, share links, folders, calendar connections, integration settings and profile); and finally your sign-in account.
             </li>
             <li>If deleting at one of those providers fails, your account is still deleted and we retry that deletion automatically.</li>
-            <li>Account deletion does not delete data held by other providers (for example Deepgram, Anthropic and Resend), emails already sent, or content already sent to Slack, Notion or a webhook you set up, and it does not revoke calendar access you granted in your Google or Microsoft account. Those providers keep data under their own terms.</li>
+            <li>Account deletion does not delete data held by other providers (for example Deepgram, Soniox, Anthropic and Resend), emails already sent, or content already sent to Slack, Notion or a webhook you set up, and it does not revoke calendar access you granted in your Google or Microsoft account. Those providers keep data under their own terms.</li>
           </ul>
         </section>
 
