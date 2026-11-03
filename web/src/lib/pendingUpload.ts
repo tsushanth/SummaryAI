@@ -13,6 +13,8 @@ export interface PendingUpload {
   fileName: string;
   contentType: string;
   fileSize: number;
+  /** Measured length in whole seconds (recorder clock); omitted when unknown. Sent as duration_seconds on create. */
+  durationSeconds?: number;
   /** ms since epoch */
   createdAt: number;
   /** Summary language code (see lib/outputLanguages.ts); omitted = follow the recording's language. */
@@ -131,6 +133,7 @@ export interface UploadDeps {
     file_name: string;
     content_type: string;
     file_size: number;
+    duration_seconds?: number;
     output_language?: string;
   }): Promise<{ recordingId: string; uploadInfo: { url: string; method: string; headers: Record<string, string> } }>;
   upload(
@@ -162,6 +165,7 @@ export async function uploadWithPersistence(
     file_name: entry.fileName,
     content_type: entry.contentType,
     file_size: entry.fileSize,
+    ...(entry.durationSeconds ? { duration_seconds: entry.durationSeconds } : {}),
     ...(entry.outputLanguage ? { output_language: entry.outputLanguage } : {}),
   });
   // Remember the row we just created: if the upload fails, the next attempt cleans it up.

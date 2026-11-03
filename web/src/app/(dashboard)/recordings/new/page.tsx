@@ -23,6 +23,7 @@ import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { createRecording, uploadAudio, completeUpload, deleteRecording } from '@/lib/api/recordings';
 import { cn } from '@/lib/utils/cn';
 import { OUTPUT_LANGUAGES, outputLanguageParam } from '@/lib/outputLanguages';
+import { readAudioDuration, sanitizeDurationSeconds } from '@/lib/recordingDuration';
 
 type InputMode = 'record' | 'upload';
 
@@ -57,6 +58,7 @@ export default function NewRecordingPage() {
         fileName: `recording-${Date.now()}.${ext}`,
         contentType: blob.type || 'audio/webm',
         fileSize: blob.size,
+        durationSeconds: recorder.recordedSeconds,
         createdAt: Date.now(),
       }).catch(() => {}); // best effort: private mode / quota
     } else if (!recorder.audioBlob && pendingIdRef.current) {
@@ -64,7 +66,7 @@ export default function NewRecordingPage() {
       discardPending(createIndexedDbStore(), pendingIdRef.current).catch(() => {});
       pendingIdRef.current = null;
     }
-  }, [recorder.audioBlob, recorder.isRecording]);
+  }, [recorder.audioBlob, recorder.isRecording, recorder.recordedSeconds]);
 
   const handleFileSelect = useCallback((file: File) => {
     setSelectedFile(file);
@@ -100,9 +102,11 @@ export default function NewRecordingPage() {
         const ext = audioBlob.type.includes('mp4') ? 'mp4' : 'webm';
         const fileName = `recording-${Date.now()}.${ext}`;
         const contentType = audioBlob.type || 'audio/webm';
+        // Recorder clock first (exact, pauses excluded); the blob's own metadata only if the clock gave nothing usable.
+        const durationSeconds = recorder.recordedSeconds ?? (await readAudioDuration(audioBlob));
         const { recordingId } = await uploadWithPersistence(
           createIndexedDbStore(),
-          { id, title: title.trim(), blob: audioBlob, fileName, contentType, fileSize: audioBlob.size, createdAt: Date.now(), outputLanguage: outputLanguageParam(outputLanguage) },
+          { id, title: title.trim(), blob: audioBlob, fileName, contentType, fileSize: audioBlob.size, durationSeconds, createdAt: Date.now(), outputLanguage: outputLanguageParam(outputLanguage) },
           {
             create: async (req) => {
               const { recording, upload_info } = await createRecording(req);
@@ -124,6 +128,8 @@ export default function NewRecordingPage() {
       const fileName = selectedFile?.name || `recording-${Date.now()}.webm`;
       const contentType = audioBlob.type || 'audio/webm';
       const fileSize = audioBlob.size;
+      // Uploaded file: read the length from its audio metadata (best effort, undefined if unreadable).
+      const durationSeconds = sanitizeDurationSeconds(await readAudioDuration(audioBlob));
 
       // Step 1: Create recording in backend (gets signed upload URL)
       const { recording, upload_info } = await createRecording({
@@ -131,6 +137,7 @@ export default function NewRecordingPage() {
         file_name: fileName,
         content_type: contentType,
         file_size: fileSize,
+        ...(durationSeconds ? { duration_seconds: durationSeconds } : {}),
         output_language: outputLanguageParam(outputLanguage),
       });
 
