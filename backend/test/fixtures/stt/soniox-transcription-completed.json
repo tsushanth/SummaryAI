@@ -1,0 +1,13 @@
+{
+ "id": "3f1b6c9e-0000-4000-8000-000000000001",
+ "status": "completed",
+ "created_at": "2026-11-03T12:00:00Z",
+ "model": "stt-async-v6",
+ "file_id": "9a7d1c20-0000-4000-8000-000000000002",
+ "filename": "recording.m4a",
+ "enable_speaker_diarization": true,
+ "enable_language_identification": true,
+ "audio_duration_ms": 21840,
+ "error_type": null,
+ "error_message": null
+}

@@ -1,38 +1,39 @@
 # Meeting Mind
 
-> Meeting Mind is an AI meeting-intelligence app that records, transcribes, and summarizes meetings, phone calls, and lectures, then lets you ask questions about your recordings and get AI-powered answers with citations.
+> Meeting Mind is a free AI meeting-notes app for Android and the web. It records and transcribes meetings, phone calls and in-person conversations, writes summaries and action items, and lets you ask questions about your recordings.
 
 ## What it does
 
-- Background audio recording (works with the screen locked)
-- Automatic speech-to-text transcription in 36+ languages, with speaker identification and timestamps
+- Record with your device microphone (in person, lectures, speakerphone) or upload existing audio
+- Speech-to-text transcription with speaker identification and timestamps, language detected automatically (36+ languages)
 - AI-generated summaries: key points, decisions, and action items
-- Q&A chat over your own recordings, with citations
-- Phone call recording and transcription
-- Meeting bot that auto-joins and records Zoom, Microsoft Teams, and Google Meet calls from your calendar
-- Cross-device sync (iOS, Android, web, and macOS/Windows desktop clients)
+- Q&A over your own recordings, with citations
+- Phone call recording and transcription (the other party hears a recording notice)
+- Meeting bot for Zoom, Microsoft Teams, and Google Meet: connect a Google or Outlook calendar (or paste a meeting link) and the bot joins as a visible participant named "Meeting Mind". The live transcript during a bot meeting is English only.
 
 ## Who it's for
 
-Professionals who attend recurring meetings, calls, or lectures and want an automatic record and summary instead of manual note-taking.
+People who attend recurring meetings, calls, or lectures and want an automatic record and summary instead of manual note-taking.
 
 ## Key pages
 
-- https://meetingmind.org/ — product overview
-- https://meetingmind.org/auth — sign in / sign up
-- https://meetingmind.org/privacy — privacy policy
-- https://meetingmind.org/terms — terms of service
+- https://meetingmind.org/ - product overview
+- https://meetingmind.org/auth - sign in / sign up
+- https://meetingmind.org/privacy - privacy policy
+- https://meetingmind.org/terms - terms of service
 
 ## Platforms
 
-- iOS (iOS 17+): https://apps.apple.com/us/app/meeting-mind/id6757317991
 - Android (Android 10+): https://play.google.com/store/apps/details?id=com.kreativekoala.meetingmind
 - Web app: https://meetingmind.org/auth
-- macOS and Windows desktop clients: https://github.com/tsushanth/SummaryAI/releases
 
 ## Pricing
 
 Meeting Mind is free. All features are included at no charge, subject to fair use and the per-file size and length limits in the terms (https://meetingmind.org/terms).
+
+## Recording consent
+
+You are responsible for telling people you record and for following the recording laws that apply to you.
 
 ## Company
 

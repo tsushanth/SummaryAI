@@ -51,6 +51,8 @@ export function useRecording(
     transcript: data?.transcript,
     summary: data?.summary,
     audioUrl: data?.audio_url,
+    summaryStatus: data?.summary_status,
+    summaryMinSeconds: data?.summary_min_seconds,
     isLoading,
     error,
     refresh: mutate,

@@ -21,6 +21,7 @@ import { summaryEmailRouter } from './summaryEmail.js';
 import searchRoutes from './search.js';
 import integrationsRoutes from './integrations.js';
 import statsRoutes from './stats.js';
+import { liveSegmentsRouter } from './liveSegments.js';
 
 const router = Router();
 
@@ -35,6 +36,10 @@ router.use('/api/attribution', attributionRoutes);
 
 // Calendar OAuth callback (no auth required - browser redirect)
 router.use('/api/calendar', calendarCallbackRouter);
+
+// Live STT segment sink (HMAC-signed by the live-stt service; disabled with 404 unless LIVE_STT_SHARED_SECRET is set).
+// The raw-body parser is mounted in index.ts ahead of express.json().
+router.use('/internal/live-segments', liveSegmentsRouter());
 
 // Internal worker routes (internal auth)
 router.use('/internal/worker', meetingsWorkerRouter);

@@ -98,4 +98,18 @@ describe('GET /api/recordings', () => {
     const { status } = await get('/api/recordings?page=2');
     expect(status).toBe(500);
   });
+
+  it("makes exactly one database query for a default (no params) request and keeps the response shape old clients read", async () => {
+    results.push({ data: [{ id: 'a' }, { id: 'b' }], error: null, count: 2 });
+    const { status, body } = await get('/api/recordings');
+    expect(status).toBe(200);
+    expect(calls).toHaveLength(1); // no per-row follow-up queries
+    expect(Object.keys(body).sort()).toEqual(['meta', 'recordings']);
+    expect(body.meta).toEqual({ page: 1, per_page: 20, total_count: 2, total_pages: 1 });
+  });
+
+  it('rejects page sizes above 50', async () => {
+    const { status } = await get('/api/recordings?per_page=500');
+    expect(status).toBe(400);
+  });
 });

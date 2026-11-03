@@ -58,6 +58,7 @@ async function generateInsightsForMeeting(meetingId: string, userId: string): Pr
     .select('*')
     .eq('meeting_id', meetingId)
     .eq('is_partial', false)
+    .eq('shadow', false)
     .order('created_at', { ascending: false })
     .limit(20);
 

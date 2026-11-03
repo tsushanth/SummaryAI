@@ -308,6 +308,8 @@ export interface RecallBotResponse {
   video_url?: string;
   audio_url?: string;
   transcript?: RecallTranscript[];
+  /** Set by RecallService.createBot (not by Recall) when the live-stt path is used. */
+  live_stt?: { ref: string; provider: 'soniox' | 'shadow' };
 }
 
 export interface RecallTranscript {

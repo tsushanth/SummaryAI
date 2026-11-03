@@ -3,6 +3,7 @@ package com.kreativekoala.summaryai.data.api
 import com.kreativekoala.summaryai.data.api.models.*
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -163,6 +164,26 @@ interface SummaryAIApi {
         @Path("id") id: String,
         @Body request: UpdateMeetingRequest
     ): MeetingResponse
+
+    @GET("api/meetings/transcription-languages")
+    suspend fun getTranscriptionLanguages(): TranscriptionLanguagesResponse
+
+    @PUT("api/meetings/transcription-languages/default")
+    suspend fun setDefaultTranscriptionLanguage(
+        @Body request: DefaultLanguageRequest
+    ): Response<ResponseBody>
+
+    /** Flat detail body (not wrapped in {meeting}); carries transcription_language and live_language. */
+    @GET("api/meetings/{id}")
+    suspend fun getMeetingDetail(
+        @Path("id") id: String
+    ): MeetingDetailDto
+
+    @POST("api/meetings/{id}/live-language")
+    suspend fun setLiveLanguage(
+        @Path("id") meetingId: String,
+        @Body request: LiveLanguageRequest
+    ): Response<ResponseBody>
 
     @GET("api/meetings/{id}/live-transcript")
     suspend fun getLiveTranscript(

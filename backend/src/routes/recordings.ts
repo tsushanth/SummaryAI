@@ -14,6 +14,8 @@ import { triggerProcessing } from '../services/processingService.js';
 import { SUMMARY_TEMPLATE_IDS } from '../services/summaryTemplates.js';
 import { normalizeActionItems } from '../services/summaryService.js';
 import { computeMeetingAnalytics } from '../services/meetingAnalytics.js';
+import { summaryStateFor, TOO_SHORT_CODE, NO_SPEECH_CODE } from '../services/shortRecordingGuard.js';
+import { getRecordingLimits } from '../config/recordingLimits.js';
 import questionsRouter from './questions.js';
 import { normalizeTags, createRateLimiter } from '../lib/shareToken.js';
 import {
@@ -406,6 +408,7 @@ router.get(
     }
 
     const response: GetRecordingResponse = { recording };
+    let hasSummary = false;
 
     // Fetch transcript if requested and available
     if (includeTranscript && ['transcribed', 'summarizing', 'completed'].includes(recording.status)) {
@@ -431,8 +434,23 @@ router.get(
       if (summary) {
         // Older rows stored action items with only `task`; clients read `title` or `task`.
         response.summary = { ...summary, action_items: normalizeActionItems(summary.action_items) };
+        hasSummary = true;
       }
+    } else if (
+      recording.status === 'completed' &&
+      (recording.error_code === TOO_SHORT_CODE || recording.error_code === NO_SPEECH_CODE)
+    ) {
+      // A short clip has no summary row unless the user regenerated one; only then is it 'ready'.
+      const { data: existing } = await supabaseAdmin
+        .from('summaries')
+        .select('id')
+        .eq('recording_id', recordingId)
+        .maybeSingle();
+      hasSummary = !!existing;
     }
+
+    // Additive fields (old clients ignore unknown keys): why there is, or is not, a summary.
+    Object.assign(response, summaryStateFor(recording, hasSummary, getRecordingLimits()));
 
     // Generate signed audio URL if recording is processed AND has an audio file
     // (recordings stitched from live_transcripts have no file_path; createSignedUrl

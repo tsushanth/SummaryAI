@@ -26,6 +26,8 @@ export interface Recording {
   file_path: string | null;
   status: RecordingStatus;
   error_message: string | null;
+  /** Machine code: TOO_SHORT / NO_SPEECH on a completed recording without a summary, FAILED_UPLOAD on an abandoned upload. */
+  error_code?: string | null;
   speaker_count: number | null;
   word_count: number | null;
   language: string | null;
@@ -160,6 +162,10 @@ export interface GetRecordingResponse {
   transcript?: Transcript;
   summary?: Summary;
   audio_url?: string;
+  /** Additive fields from the backend; absent on older deployments (the UI then falls back to recording.error_code). */
+  summary_status?: string;
+  summary_message?: string | null;
+  summary_min_seconds?: number;
 }
 
 export interface ListTodosResponse {

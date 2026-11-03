@@ -32,6 +32,15 @@ const envSchema = z.object({
   // subscriber-only summaries. See src/services/freeTier.ts.
   FREE_TIER_LEGACY_LIMITS: z.enum(['true', 'false']).default('false').transform((v) => v === 'true'),
 
+  // Meeting bot join announcement. Default false (OFF) until the owner approves the wording.
+  // When 'true', Recall posts BOT_ANNOUNCEMENT_MESSAGE to the meeting chat as soon as the bot joins
+  // (Recall create-bot field chat.on_bot_join; Zoom, Google Meet, Microsoft Teams only).
+  MEETING_BOT_ANNOUNCE: z.enum(['true', 'false']).default('false').transform((v) => v === 'true'),
+
+  // Account purge dry run. When 'true', DELETE /api/users/account only COUNTS what it would delete (storage objects,
+  // Recall bots, Twilio recordings, rows) and deletes nothing. For verifying a deploy; leave unset in normal operation.
+  ACCOUNT_PURGE_DRY_RUN: z.enum(['true', 'false']).default('false').transform((v) => v === 'true'),
+
   // Upload URL expiry (in seconds)
   UPLOAD_URL_EXPIRY_SECONDS: z.string().transform(Number).default('3600'),
 
@@ -72,9 +81,25 @@ const envSchema = z.object({
   // Encryption (for storing OAuth tokens)
   ENCRYPTION_KEY: z.string().optional(),
 
+  // Live transcription provider (see backend/LIVE_STT.md). Everything here is OFF by default.
+  // LIVE_STT_PROVIDER: 'recall' (default, Recall's built-in transcript) | 'soniox' (Recall raw audio -> mm-live-stt -> Soniox). Kept a
+  // plain string on purpose: an unknown value is treated as 'recall' (see lib/liveStt.ts) instead of crashing the boot.
+  LIVE_STT_PROVIDER: z.string().default('recall'),
+  // 'true' = keep Recall's transcript as the source of truth AND stream audio to mm-live-stt, whose segments are stored shadow=true.
+  LIVE_STT_SHADOW: z.string().default('false'),
+  // Public wss:// base URL of the mm-live-stt app (no path), e.g. wss://mm-live-stt.fly.dev
+  LIVE_STT_WS_URL: z.string().optional(),
+  // HMAC secret for the per-bot ingest token in the websocket URL (= the service's INGEST_TOKEN_SECRETS).
+  LIVE_STT_INGEST_SECRET: z.string().optional(),
+  // HMAC secret for POST /internal/live-segments (= the service's BACKEND_SINK_SECRET). Comma separated list allowed (rotation).
+  LIVE_STT_SHARED_SECRET: z.string().optional(),
+
   // Service URL (for internal worker callbacks)
   SERVICE_URL: z.string().optional(),
   INTERNAL_SECRET: z.string().optional(),
+  // Upper bound for the Supabase Auth /user call made on every authenticated request. Without it a stalled auth
+  // call holds the request open until the Fly proxy gives up with a 504.
+  AUTH_TIMEOUT_MS: z.string().transform(Number).default('8000'),
 
   // Twilio (Phone Calls)
   TWILIO_ACCOUNT_SID: z.string().optional(),

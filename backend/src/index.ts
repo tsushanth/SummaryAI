@@ -19,7 +19,9 @@ import { startLoopWatchdog, reportLoopInitFailure } from './lib/loopMonitor.js';
 import { startPipelineInvariantLoop } from './services/pipelineInvariants.js';
 import { testConnection } from './lib/supabase.js';
 import { flushLlmUsage } from './lib/llm.js';
+import { requestTiming, startRuntimeMonitor } from './lib/requestTiming.js';
 import routes from './routes/index.js';
+import { liveSegmentsBodyParser } from './routes/liveSegments.js';
 
 // Create Express app
 const app = express();
@@ -54,12 +56,17 @@ app.use(cors({
 // Public share tokens live in the URL path; never write them to access logs.
 morgan.token('url', (req) => redactShareToken((req as Request).originalUrl || req.url || ''));
 app.use(morgan(config.NODE_ENV === 'production' ? 'combined' : 'dev'));
+// Logs slow requests and connections closed before a response (what a Fly proxy 504 looks like from inside the app).
+app.use(requestTiming());
 
 // Body parsing
 // IMPORTANT: Stripe webhooks must receive raw body for signature verification
 // This must come BEFORE express.json() middleware
 app.use('/v1/webhooks/stripe', express.raw({ type: 'application/json' }));
 app.use('/webhooks/stripe', express.raw({ type: 'application/json' }));
+
+// live-stt segment sink: signed over the exact bytes, 512 KB cap. Must come BEFORE express.json(). Mounted at the root and under the API prefix.
+app.use(['/internal/live-segments', `/${config.API_VERSION}/internal/live-segments`], liveSegmentsBodyParser);
 
 // Recall webhooks are signed over the exact bytes sent, so keep them next to the parsed body (req.rawBody) for those routes only.
 app.use(express.json({
@@ -141,6 +148,7 @@ async function startServer(): Promise<void> {
     // process last died (e.g. previous deploy / Fly machine restart).
     import('./services/coachingService.js').then(m => m.recoverActiveSessions())
       .catch(e => console.error('[Coaching] recovery failed:', e));
+    startRuntimeMonitor();
     startLoopWatchdog();
     startPipelineInvariantLoop();
     // Backstop for the Recall bot.status_change webhook subscription gap:
@@ -159,6 +167,12 @@ async function startServer(): Promise<void> {
     // orphan once, otherwise marks it failed so the user sees a retry button.
     import('./services/orphanedProcessingRecovery.js').then(m => m.startOrphanedProcessingRecoveryLoop())
       .catch(e => { console.error('[OrphanRecovery] init failed:', e); reportLoopInitFailure('OrphanRecovery'); });
+    // Uploads created but never completed (0 s taps): status 'uploading' forever. Marks them failed; never deletes.
+    import('./services/abandonedUploadRecovery.js').then(m => m.startAbandonedUploadSweepLoop())
+      .catch(e => { console.error('[AbandonedUploads] init failed:', e); reportLoopInitFailure('AbandonedUploads'); });
+    // Finishes account deletions whose Recall/Twilio/storage cleanup failed the first time (ledger-driven, backoff).
+    import('./services/accountPurgeAdapters.js').then(m => m.startAccountPurgeRetryLoop())
+      .catch(e => { console.error('[AccountPurge] init failed:', e); reportLoopInitFailure('AccountPurgeRetry'); });
     // Backstop for scheduleBotJoin's in-memory setTimeout getting dropped by
     // a Fly.io machine restart between scheduling and join time.
     import('./services/botSchedulerService.js').then(m => m.startBotJoinReconcilerLoop())

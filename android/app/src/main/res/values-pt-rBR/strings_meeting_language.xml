@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meeting_language_label">Idioma da transcrição</string>
+    <string name="meeting_language_auto">Detectar automaticamente</string>
+    <string name="meeting_language_hint">A detecção automática funciona na maioria das reuniões. Escolha um idioma se a transcrição sair errada. Sua escolha é lembrada.</string>
+    <string name="meeting_language_dialog_title">Idioma da transcrição</string>
+    <string name="meeting_language_change">Alterar idioma</string>
+    <string name="meeting_language_active">Idioma: %1$s</string>
+    <string name="meeting_language_changed">Idioma da transcrição definido como %1$s</string>
+    <string name="meeting_language_change_note">Vale para a fala daqui em diante.</string>
+    <string name="meeting_language_switch_unavailable">Esta reunião não pode trocar de idioma enquanto está ao vivo</string>
+    <string name="meeting_language_switch_failed">Não foi possível alterar o idioma. Tente novamente.</string>
+    <string name="meeting_language_hint_auto_english_live">A detecção automática encontra o idioma para a transcrição final. As legendas ao vivo continuam em inglês, a menos que você escolha um idioma.</string>
+    <string name="meeting_language_hint_delayed">As legendas ao vivo neste idioma podem chegar com %1$s minutos de atraso. A transcrição final não é afetada.</string>
+    <string name="meeting_language_reason_fixed">O idioma ao vivo foi definido quando o bot entrou e não pode ser alterado durante esta reunião.</string>
+    <string name="meeting_language_reason_not_live">O idioma só pode ser alterado enquanto o bot está na reunião.</string>
+    <string name="meeting_language_switch_not_live">O bot não está na reunião agora, então o idioma não pode ser alterado.</string>
+    <string name="meeting_language_saved_not_live">%1$s salvo para a transcrição final, mas a transcrição ao vivo não pôde ser alterada agora.</string>
+</resources>

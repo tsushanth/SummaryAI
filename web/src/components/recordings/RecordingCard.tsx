@@ -76,7 +76,7 @@ export function RecordingCard({ recording }: { recording: Recording }) {
               </div>
             )}
           </div>
-          <StatusBadge status={recording.status} live={isLiveRecording(recording)} />
+          <StatusBadge status={recording.status} live={isLiveRecording(recording)} errorCode={recording.error_code} />
         </div>
       </Link>
       {deletable && (

@@ -3,7 +3,7 @@
  * API client for Recall.ai meeting bot service
  */
 
-import { reportProviderHttpFailure } from '../lib/alerts.js';
+import { reportProviderHttpFailure, reportAlert } from '../lib/alerts.js';
 import {
   RecallBotCreateRequest,
   RecallBotResponse,
@@ -14,10 +14,18 @@ import {
 import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
 import { triggerProcessing } from './processingService.js';
+import { buildIngestUrl, mintLiveSttRef, planLiveStt } from '../lib/liveStt.js';
 
 // Get region from config or default to us-west-2
 const RECALL_REGION = config.RECALL_REGION || 'us-west-2';
 const RECALL_API_BASE = `https://${RECALL_REGION}.recall.ai/api/v1`;
+
+/**
+ * Message the bot posts to the meeting chat when it joins (only if MEETING_BOT_ANNOUNCE=true).
+ * Plain ASCII, no em dashes, under Google Meet's 500 character chat limit.
+ */
+export const BOT_ANNOUNCEMENT_MESSAGE =
+  'MeetingMind is recording this meeting to make notes for the host. Tell the host if you do not want to be recorded.';
 
 /**
  * Recall.ai API Service
@@ -79,30 +87,67 @@ export class RecallService {
     // Enable real-time by default if SERVICE_URL is configured
     const enableRealtime = options?.enableRealtimeTranscript ?? !!config.SERVICE_URL;
 
+    // Live STT provider (backend/LIVE_STT.md). Default 'recall' leaves the request exactly as it was.
+    const plan = planLiveStt({
+      LIVE_STT_PROVIDER: config.LIVE_STT_PROVIDER,
+      LIVE_STT_SHADOW: config.LIVE_STT_SHADOW,
+      LIVE_STT_WS_URL: config.LIVE_STT_WS_URL,
+      LIVE_STT_INGEST_SECRET: config.LIVE_STT_INGEST_SECRET,
+      NODE_ENV: config.NODE_ENV,
+    });
+    if (plan.provider === 'recall' && plan.reason === 'misconfigured') {
+      // Fail safe: the bot still gets Recall's own transcript. Names only, never values.
+      console.error('[Recall] LIVE_STT requested but LIVE_STT_WS_URL (wss://...) or LIVE_STT_INGEST_SECRET is missing/invalid; using Recall transcript');
+      reportAlert('live_stt', 'LIVE_STT_MISCONFIGURED', {}, 60 * 60_000);
+    }
+    const liveStt = plan.provider === 'recall' ? undefined : { ref: mintLiveSttRef(), provider: plan.provider };
+    const wsEndpoint = plan.provider === 'recall' || !liveStt
+      ? undefined
+      : {
+          type: 'websocket',
+          url: buildIngestUrl(plan.wsBase, plan.ingestSecret, liveStt.ref),
+          events: ['audio_mixed_raw.data', 'participant_events.speech_on', 'participant_events.speech_off'],
+        };
+
     // Build the recording config with optional real-time endpoints
-    const recordingConfig: Record<string, unknown> = {
-      transcript: {
-        provider: {
-          recallai_streaming: {
-            // Use low latency mode for real-time, accuracy mode otherwise
-            mode: enableRealtime ? 'prioritize_low_latency' : 'prioritize_accuracy',
-            // Low latency mode only supports English
-            language_code: 'en',
+    let recordingConfig: Record<string, unknown>;
+    if (plan.provider === 'soniox' && wsEndpoint) {
+      // Soniox is the source of truth: no Recall transcript block (also drops the per-hour Recall transcript add-on).
+      recordingConfig = { audio_mixed_raw: {}, realtime_endpoints: [wsEndpoint] };
+      console.log('[Recall] Live STT = soniox, audio_mixed_raw websocket endpoint enabled');
+    } else {
+      recordingConfig = {
+        transcript: {
+          provider: {
+            recallai_streaming: {
+              // Use low latency mode for real-time, accuracy mode otherwise
+              mode: enableRealtime ? 'prioritize_low_latency' : 'prioritize_accuracy',
+              // Low latency mode only supports English
+              language_code: 'en',
+            },
           },
         },
-      },
-    };
+      };
 
-    // Add real-time webhook endpoint for live transcription
-    if (enableRealtime && config.SERVICE_URL) {
-      recordingConfig.realtime_endpoints = [
-        {
-          type: 'webhook',
-          url: `${config.SERVICE_URL}/v1/webhooks/recall/transcript`,
-          events: ['transcript.data', 'transcript.partial_data'],
-        },
-      ];
-      console.log(`[Recall] Real-time transcript enabled, webhook: ${config.SERVICE_URL}/v1/webhooks/recall/transcript`);
+      // Add real-time webhook endpoint for live transcription
+      if (enableRealtime && config.SERVICE_URL) {
+        recordingConfig.realtime_endpoints = [
+          {
+            type: 'webhook',
+            url: `${config.SERVICE_URL}/v1/webhooks/recall/transcript`,
+            events: ['transcript.data', 'transcript.partial_data'],
+          },
+        ];
+        console.log(`[Recall] Real-time transcript enabled, webhook: ${config.SERVICE_URL}/v1/webhooks/recall/transcript`);
+      }
+
+      if (plan.provider === 'shadow' && wsEndpoint) {
+        // Shadow: Recall's transcript stays the source of truth; the audio stream feeds mm-live-stt for an A/B comparison only.
+        recordingConfig.audio_mixed_raw = {};
+        const eps = (recordingConfig.realtime_endpoints as unknown[] | undefined) ?? [];
+        recordingConfig.realtime_endpoints = [...eps, wsEndpoint];
+        console.log('[Recall] Live STT shadow: audio_mixed_raw websocket endpoint added next to Recall transcript');
+      }
     }
 
     const payload: Record<string, unknown> = {
@@ -121,12 +166,26 @@ export class RecallService {
       payload.join_at = params.join_at;
     }
 
+    // Join announcement via Recall's automatic chat message (create-bot field `chat.on_bot_join`).
+    // Platforms Recall cannot chat on (Webex, GoTo) ignore it.
+    if (config.MEETING_BOT_ANNOUNCE) {
+      payload.chat = {
+        on_bot_join: {
+          send_to: 'everyone',
+          message: BOT_ANNOUNCEMENT_MESSAGE,
+        },
+      };
+    }
+
     console.log(`[Recall] Creating bot for meeting: ${params.meeting_url}`);
 
-    return this.request<RecallBotResponse>('/bot', {
+    const bot = await this.request<RecallBotResponse>('/bot', {
       method: 'POST',
       body: JSON.stringify(payload),
     });
+    // Callers store these on the bot_run (see liveSttBotRunColumns). Absent on the default path.
+    if (liveStt) bot.live_stt = liveStt;
+    return bot;
   }
 
   /**
@@ -147,6 +206,41 @@ export class RecallService {
   }
 
   /**
+   * Account purge: permanently delete all recording media Recall stores for a bot
+   * (POST /bot/{id}/delete_media/). Documented responses: 200 ok, 400 bot still in progress, 409 deletion already
+   * running. 404 (bot unknown / already purged) counts as done. 'in_progress' means "try again later".
+   * Direct fetch on purpose: the shared request() alerts on every non-2xx, and 400/404/409 are expected here.
+   */
+  static async deleteBotMedia(botId: string): Promise<'deleted' | 'not_found' | 'in_progress'> {
+    if (!/^[A-Za-z0-9_-]+$/.test(botId)) throw new Error('Invalid Recall bot id');
+    const response = await fetch(`${RECALL_API_BASE}/bot/${botId}/delete_media/`, {
+      method: 'POST',
+      headers: { Authorization: `Token ${this.apiKey}`, 'Content-Type': 'application/json' },
+    });
+    if (response.ok) return 'deleted';
+    if (response.status === 404) return 'not_found';
+    if (response.status === 400 || response.status === 409) return 'in_progress';
+    reportProviderHttpFailure('recall', response.status);
+    throw new Error(`Recall delete_media failed: ${response.status}`);
+  }
+
+  /**
+   * Account purge: best-effort stop. Cancels a bot that has not joined yet and asks a live bot to leave, so a deleted
+   * account's bot does not keep recording. Never throws: a bot that already finished answers 4xx.
+   */
+  static async stopBot(botId: string): Promise<void> {
+    if (!/^[A-Za-z0-9_-]+$/.test(botId)) return;
+    const headers = { Authorization: `Token ${this.apiKey}`, 'Content-Type': 'application/json' };
+    for (const [method, path] of [['DELETE', `/bot/${botId}`], ['POST', `/bot/${botId}/leave_call/`]] as const) {
+      try {
+        await fetch(`${RECALL_API_BASE}${path}`, { method, headers });
+      } catch {
+        /* best effort */
+      }
+    }
+  }
+
+  /**
    * Schedule a bot to join a meeting at a specific time
    */
   static async scheduleBot(
@@ -160,6 +254,14 @@ export class RecallService {
       join_at: joinAt.toISOString(),
     });
   }
+}
+
+/**
+ * Extra bot_runs columns for a bot created by createBot. `{}` on the default (recall) path, so the bot_runs insert is unchanged
+ * and works before migration 026 is applied.
+ */
+export function liveSttBotRunColumns(bot: Pick<RecallBotResponse, 'live_stt'>): { live_stt_ref?: string; live_stt_provider?: string } {
+  return bot.live_stt ? { live_stt_ref: bot.live_stt.ref, live_stt_provider: bot.live_stt.provider } : {};
 }
 
 /**

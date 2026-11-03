@@ -13,7 +13,7 @@ REPO_NAME="meeting-mind"
 
 # Environment variables
 NEXT_PUBLIC_SUPABASE_URL="https://mlofjzlmncgnhxbiuemf.supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sb2ZqemxtbmNnbmh4Yml1ZW1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyOTU1NjAsImV4cCI6MjA4Mjg3MTU2MH0.fUxgMcu1BNrsYneN5vSMFWxsv-rWIygCx-xn-Vmr0Ec"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="sb_publishable_z2oPrlsfqmjKzPHrXCyPxg_f7rOs8QJ"
 NEXT_PUBLIC_GOOGLE_CLIENT_ID="753424767416-54viqmpd45g10oohm7vug13o8tdhb8qp.apps.googleusercontent.com"
 NEXT_PUBLIC_API_URL="https://summary-ai-backend.fly.dev/v1"
 
