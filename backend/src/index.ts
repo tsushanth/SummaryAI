@@ -19,6 +19,7 @@ import { startLoopWatchdog, reportLoopInitFailure } from './lib/loopMonitor.js';
 import { startPipelineInvariantLoop } from './services/pipelineInvariants.js';
 import { testConnection } from './lib/supabase.js';
 import { flushLlmUsage } from './lib/llm.js';
+import { requestTiming, startRuntimeMonitor } from './lib/requestTiming.js';
 import routes from './routes/index.js';
 
 // Create Express app
@@ -54,6 +55,8 @@ app.use(cors({
 // Public share tokens live in the URL path; never write them to access logs.
 morgan.token('url', (req) => redactShareToken((req as Request).originalUrl || req.url || ''));
 app.use(morgan(config.NODE_ENV === 'production' ? 'combined' : 'dev'));
+// Logs slow requests and connections closed before a response (what a Fly proxy 504 looks like from inside the app).
+app.use(requestTiming());
 
 // Body parsing
 // IMPORTANT: Stripe webhooks must receive raw body for signature verification
@@ -141,6 +144,7 @@ async function startServer(): Promise<void> {
     // process last died (e.g. previous deploy / Fly machine restart).
     import('./services/coachingService.js').then(m => m.recoverActiveSessions())
       .catch(e => console.error('[Coaching] recovery failed:', e));
+    startRuntimeMonitor();
     startLoopWatchdog();
     startPipelineInvariantLoop();
     // Backstop for the Recall bot.status_change webhook subscription gap:

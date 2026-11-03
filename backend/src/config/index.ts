@@ -84,6 +84,9 @@ const envSchema = z.object({
   // Service URL (for internal worker callbacks)
   SERVICE_URL: z.string().optional(),
   INTERNAL_SECRET: z.string().optional(),
+  // Upper bound for the Supabase Auth /user call made on every authenticated request. Without it a stalled auth
+  // call holds the request open until the Fly proxy gives up with a 504.
+  AUTH_TIMEOUT_MS: z.string().transform(Number).default('8000'),
 
   // Twilio (Phone Calls)
   TWILIO_ACCOUNT_SID: z.string().optional(),
