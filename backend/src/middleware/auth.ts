@@ -8,6 +8,41 @@ import { createClient } from '@supabase/supabase-js';
 import { config } from '../config/index.js';
 import type { AuthenticatedUser, ErrorResponse } from '../types/api.js';
 
+/** Wraps fetch so a stalled request is aborted after `ms` instead of hanging until the proxy answers 504. */
+export function fetchWithTimeout(base: typeof fetch, ms: number): typeof fetch {
+  return ((input: any, init: any = {}) => {
+    const timeout = AbortSignal.timeout(ms);
+    const signal = init.signal ? AbortSignal.any([init.signal, timeout]) : timeout;
+    return base(input, { ...init, signal });
+  }) as typeof fetch;
+}
+
+/**
+ * True when Supabase Auth could not be reached or failed (network error, timeout, 5xx), as opposed to it
+ * answering that the token is invalid. Those must not be reported as 401: clients treat 401 as "signed out".
+ */
+export function isAuthUnavailable(error: any): boolean {
+  if (!error) return false;
+  if (error.name === 'AuthRetryableFetchError') return true;
+  return typeof error.status === 'number' && (error.status === 0 || error.status >= 500);
+}
+
+function authClient(token: string) {
+  return createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY, {
+    global: {
+      headers: { Authorization: `Bearer ${token}` },
+      fetch: fetchWithTimeout(fetch, config.AUTH_TIMEOUT_MS ?? 8000),
+    },
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
+
+function sendAuthUnavailable(res: Response): void {
+  res.status(503).json({
+    error: { code: 'AUTH_UNAVAILABLE', message: 'Authentication service temporarily unavailable. Please retry.' },
+  });
+}
+
 /**
  * Extracts the Bearer token from Authorization header
  */
@@ -44,23 +79,17 @@ export async function authenticate(
   }
 
   try {
-    // Create a Supabase client with the user's token
-    const supabase = createClient(
-      config.SUPABASE_URL,
-      config.SUPABASE_ANON_KEY,
-      {
-        global: {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      }
-    );
+    // Create a Supabase client with the user's token (fetch is bounded by AUTH_TIMEOUT_MS)
+    const supabase = authClient(token);
 
     // Verify the token by getting the user
     const { data: { user }, error } = await supabase.auth.getUser();
+
+    if (isAuthUnavailable(error)) {
+      console.warn(`[Auth] Supabase Auth unavailable for ${req.method} ${req.path}: ${error?.name} ${error?.message}`);
+      sendAuthUnavailable(res);
+      return;
+    }
 
     if (error || !user) {
       console.log(`[Auth] Token validation failed - Error: ${error?.message}, User: ${!!user}`);
@@ -112,21 +141,16 @@ export async function optionalAuth(
   }
 
   try {
-    const supabase = createClient(
-      config.SUPABASE_URL,
-      config.SUPABASE_ANON_KEY,
-      {
-        global: {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      }
-    );
+    const supabase = authClient(token);
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error } = await supabase.auth.getUser();
+
+    // An auth outage must not look like "no recordings": answer 503 instead of continuing as a guest.
+    if (isAuthUnavailable(error)) {
+      console.warn(`[Auth] Supabase Auth unavailable for ${req.method} ${req.path}: ${error?.name} ${error?.message}`);
+      sendAuthUnavailable(res);
+      return;
+    }
 
     if (user) {
       req.user = {
