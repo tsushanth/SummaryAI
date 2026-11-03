@@ -59,6 +59,7 @@ export async function fetchAllFinalizedSegments(meetingId: string): Promise<Live
       .select('segment_text, speaker_name, speaker_id, is_host, start_timestamp, end_timestamp')
       .eq('meeting_id', meetingId)
       .eq('is_partial', false)
+      .eq('shadow', false)
       .order('start_timestamp', { ascending: true })
       .range(offset, offset + PAGE_SIZE - 1);
     if (error) throw error;
@@ -115,6 +116,26 @@ export function stitchSegments(rows: LiveSegmentRow[]): {
 }
 
 /**
+ * bot_runs.live_stt_provider of the meeting's latest bot run, or null (default/recall, or the column does not exist yet because
+ * migration 026 is not applied). Never throws: a label must not block a stitch.
+ */
+async function liveSttProviderForMeeting(meetingId: string): Promise<string | null> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('bot_runs')
+      .select('live_stt_provider')
+      .eq('meeting_id', meetingId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) return null;
+    return (data as { live_stt_provider?: string | null } | null)?.live_stt_provider ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Stitch live_transcripts into a transcripts row + mark the recording complete.
  * Idempotent: if a transcript already exists for this recording, only the
  * recording status is touched.
@@ -143,6 +164,10 @@ export async function stitchStuckRecording(
   const result = stitchSegments(rows);
   if (!result.segments.length) return { stitched: false, reason: 'no_segments_after_stitch' };
 
+  // Which live source produced these rows. 'soniox' = the live-stt path (shadow runs stay recall_realtime: Recall is the source).
+  const liveProvider = await liveSttProviderForMeeting(meetingId);
+  const fromSoniox = liveProvider === 'soniox';
+
   const transcriptId = randomUUID();
   const { error: insErr } = await supabaseAdmin
     .from('transcripts')
@@ -154,8 +179,8 @@ export async function stitchStuckRecording(
       word_count: result.wordCount,
       speaker_count: result.speakerCount,
       language: 'en',
-      transcription_provider: 'recall_realtime',
-      transcription_model: 'recall_streaming',
+      transcription_provider: fromSoniox ? 'soniox_realtime' : 'recall_realtime',
+      transcription_model: fromSoniox ? 'soniox_streaming' : 'recall_streaming',
     });
   if (insErr) throw new Error(`transcript insert failed: ${insErr.message}`);
 

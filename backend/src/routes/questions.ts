@@ -79,6 +79,7 @@ router.post(
         .select('segment_text, speaker_name, start_timestamp, end_timestamp')
         .eq('meeting_id', meetingId)
         .eq('is_partial', false)
+        .eq('shadow', false)
         .order('start_timestamp', { ascending: true });
 
       if (liveTranscripts && liveTranscripts.length > 0) {
