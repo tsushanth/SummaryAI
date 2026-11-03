@@ -11,6 +11,7 @@ export interface MetricsSnapshot {
   reconnects: number;
   failovers: number;
   rollovers: number;
+  languageChanges: number;
   gaps: number;
   gapSeconds: number;
   invalidMessages: number;
@@ -26,7 +27,7 @@ export interface MetricsSnapshot {
 export class MeetingMetrics {
   private s: MetricsSnapshot = {
     state: 'connecting', audioSecondsIn: 0, audioSecondsSent: 0, segmentsOut: 0, segmentsFailed: 0, segmentsDropped: 0,
-    sinkRetries: 0, reconnects: 0, failovers: 0, rollovers: 0, gaps: 0, gapSeconds: 0, invalidMessages: 0, dedupedTokens: 0,
+    sinkRetries: 0, reconnects: 0, failovers: 0, rollovers: 0, languageChanges: 0, gaps: 0, gapSeconds: 0, invalidMessages: 0, dedupedTokens: 0,
     partialsSeen: 0, degraded: false, startedAt: Date.now(), lastAudioAt: null, lastSegmentAt: null,
   };
 

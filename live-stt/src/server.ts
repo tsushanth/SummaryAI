@@ -4,6 +4,8 @@ import type { Duplex } from 'node:stream';
 import { WebSocketServer, type WebSocket } from 'ws';
 import type { AlertHook } from './alerts.js';
 import { parseIngestUrl, verifyIngestToken } from './auth.js';
+import { parseControlBody, verifyControl } from './control.js';
+import { languageHints } from './languages.js';
 import { StreamLimiter } from './concurrency.js';
 import { SlidingWindowLimiter } from './rateLimit.js';
 import { parseRecallMessage } from './recall/protocol.js';
@@ -13,6 +15,10 @@ import type { SttEngine } from './stt/types.js';
 
 export interface ServerDeps {
   ingestSecrets: string[];
+  /** Secrets accepted for POST /control/language (backend -> service). Empty / unset = the route answers 404. */
+  controlSecrets?: string[];
+  /** Control requests per IP per minute (default 600). */
+  maxControlPerMin?: number;
   engine: SttEngine;
   fallbackEngine?: SttEngine | undefined;
   sink: SegmentSink;
@@ -39,6 +45,10 @@ interface Entry {
 }
 
 const MAX_PAYLOAD = 256 * 1024;
+const MAX_CONTROL_BODY = 2048;
+/** Language changes for a meeting whose audio has not connected yet are kept this long / this many at most. */
+const PENDING_LANG_TTL_MS = 60 * 60_000;
+const PENDING_LANG_MAX = 500;
 const PING_MS = 25_000;
 
 function refTag(ref: string): string {
@@ -58,6 +68,8 @@ export class IngestServer {
   /** Final metrics of the most recent meetings (bounded), for /healthz?detail=1 and post-mortems. */
   readonly closedMetrics: (Record<string, unknown> & { id: string })[] = [];
   private readonly attempts: SlidingWindowLimiter;
+  private readonly controlAttempts: SlidingWindowLimiter;
+  private readonly pendingLang = new Map<string, { language: string; at: number }>();
   private readonly failures: SlidingWindowLimiter;
   private readonly startedAt = Date.now();
   private unhandled = 0;
@@ -66,6 +78,7 @@ export class IngestServer {
     this.limiter = new StreamLimiter(d.maxStreams);
     this.attempts = new SlidingWindowLimiter({ max: d.maxUpgradesPerMin ?? 60, windowMs: 60_000 });
     this.failures = new SlidingWindowLimiter({ max: d.maxAuthFailuresPerMin ?? 8, windowMs: 60_000 });
+    this.controlAttempts = new SlidingWindowLimiter({ max: d.maxControlPerMin ?? 600, windowMs: 60_000 });
     this.wss = new WebSocketServer({ noServer: true, maxPayload: MAX_PAYLOAD });
     this.http = createHttpServer((req, res) => this.onHttp(req, res));
     this.http.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket as Duplex, head));
@@ -73,6 +86,75 @@ export class IngestServer {
 
   noteUnhandled(): void {
     this.unhandled++;
+  }
+
+  /** Queued language changes (tests / diagnostics). */
+  pendingLanguageCount(): number {
+    return this.pendingLang.size;
+  }
+
+  private queueLanguage(ref: string, language: string): void {
+    const t = Date.now();
+    this.pendingLang.delete(ref);
+    if (this.pendingLang.size >= PENDING_LANG_MAX) {
+      for (const [k, v] of this.pendingLang) if (t - v.at > PENDING_LANG_TTL_MS) this.pendingLang.delete(k);
+      // still full: drop the oldest (Map iterates in insertion order)
+      while (this.pendingLang.size >= PENDING_LANG_MAX) this.pendingLang.delete(this.pendingLang.keys().next().value as string);
+    }
+    this.pendingLang.set(ref, { language, at: t });
+  }
+
+  private takePendingLanguage(ref: string): string | null {
+    const v = this.pendingLang.get(ref);
+    if (!v) return null;
+    this.pendingLang.delete(ref);
+    return Date.now() - v.at <= PENDING_LANG_TTL_MS ? v.language : null;
+  }
+
+  /** POST /control/language: see ../../backend/LIVE_STT.md. 200 applied, 202 queued, 400, 401, 404 (disabled), 413, 429. */
+  private onControl(req: IncomingMessage, res: import('node:http').ServerResponse): void {
+    const send = (status: number, body: Record<string, unknown> = {}) => {
+      if (!res.headersSent) res.writeHead(status, { 'content-type': 'application/json' }).end(JSON.stringify(body));
+    };
+    const secrets = this.d.controlSecrets ?? [];
+    if (secrets.length === 0) { send(404); return; }
+    const ip = this.clientIp(req);
+    if (this.failures.isLimited(ip) || !this.controlAttempts.hit(ip)) { send(429); return; }
+    const chunks: Buffer[] = [];
+    let size = 0;
+    let tooBig = false;
+    req.on('data', (c: Buffer) => {
+      size += c.length;
+      if (size > MAX_CONTROL_BODY) { tooBig = true; return; }
+      chunks.push(c);
+    });
+    req.on('error', () => send(400));
+    req.on('end', () => {
+      try {
+        if (tooBig) { send(413); return; }
+        const raw = Buffer.concat(chunks).toString('utf8');
+        const h = (n: string) => { const v = req.headers[n]; return Array.isArray(v) ? v[0] : v; };
+        if (!verifyControl({ secrets, timestampSec: h('x-mm-timestamp'), signature: h('x-mm-signature'), rawBody: raw, nowSec: Math.floor(Date.now() / 1000) })) {
+          this.failures.hit(ip);
+          send(401);
+          return;
+        }
+        const body = parseControlBody(raw);
+        if (!body) { send(400); return; }
+        const entry = this.sessions.get(body.ref);
+        if (!entry || entry.closing) {
+          this.queueLanguage(body.ref, body.language);
+          this.d.log?.('language queued', { id: refTag(body.ref), language: body.language });
+          send(202, { applied: false, queued: true });
+          return;
+        }
+        const changed = entry.session.setLanguageHints(languageHints(body.language));
+        this.d.log?.('language set', { id: refTag(body.ref), language: body.language, changed });
+        send(200, { applied: true, changed });
+      } catch {
+        send(500);
+      }
+    });
   }
 
   listen(port: number, host = '0.0.0.0'): Promise<number> {
@@ -127,6 +209,7 @@ export class IngestServer {
       res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify(body));
       return;
     }
+    if (req.method === 'POST' && url.pathname === '/control/language') { this.onControl(req, res); return; }
     res.writeHead(404).end();
   }
 
@@ -148,9 +231,12 @@ export class IngestServer {
         reject(socket, 503, 'Service Unavailable');
         return;
       }
+      // Language for the first connection: a change queued before the audio arrived > the URL's lang > the service default.
+      const queued = this.takePendingLanguage(parsed.ref);
+      const hints = queued !== null ? languageHints(queued) : parsed.lang ? [parsed.lang] : (this.d.session?.languageHints ?? []);
       const session = new MeetingSession({
         ref: parsed.ref, engine: this.d.engine, fallbackEngine: this.d.fallbackEngine, sink: this.d.sink,
-        config: this.d.session, limiter: this.limiter, alert: this.d.alert, log: this.d.log,
+        config: { ...this.d.session, languageHints: hints }, limiter: this.limiter, alert: this.d.alert, log: this.d.log,
       });
       entry = { session, socket: null, graceTimer: null, pingTimer: null, closing: false };
       this.sessions.set(parsed.ref, entry);

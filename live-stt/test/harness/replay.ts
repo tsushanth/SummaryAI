@@ -19,6 +19,8 @@ const SECRET = 'replay-secret';
 const SINK_SECRET = 'replay-sink-secret';
 const REF = '11111111-2222-4333-8444-555555555555';
 const BOT = 'bot-replay-1';
+export const REPLAY_CONTROL_SECRET = 'replay-control-secret';
+export const REPLAY_REF = REF;
 
 export interface ReplayOptions {
   fixture: Fixture;
@@ -31,6 +33,10 @@ export interface ReplayOptions {
   /** speech_on lags the true start by this much (Recall's active-speaker events do). */
   speechOnLagMs?: number;
   backendFailFirst?: number;
+  /** Extra query string on the simulated Recall websocket URL, e.g. '&lang=fr'. */
+  ingestQuery?: string;
+  /** Run once when the simulated meeting reaches `atAudioMs` (e.g. POST /control/language). */
+  actions?: { atAudioMs: number; run: (ctx: { server: IngestServer; port: number; ref: string; controlSecret: string }) => Promise<void> | void }[];
   maxStreams?: number;
   sonioxEndpointDetection?: boolean;
   /** Real-engine config source. */
@@ -67,7 +73,7 @@ export interface ReplayReport {
   /** Median/p90 delay from the end of a segment's last word (audio time) to its arrival at the backend, in AUDIO seconds. */
   segmentDelayP50s: number;
   segmentDelayP90s: number;
-  fakeStreams?: { index: number; closedBy: string; processedMs: number; keepalives: number; sawApiKeyInFrame: boolean; sawBearerHeader: boolean }[];
+  fakeStreams?: { config: Record<string, unknown> | null; index: number; closedBy: string; processedMs: number; keepalives: number; sawApiKeyInFrame: boolean; sawBearerHeader: boolean }[];
 }
 
 const norm = (w: string) => w.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -99,7 +105,7 @@ export async function runReplay(o: ReplayOptions): Promise<ReplayReport> {
     onSocket: (ws) => sockets.push(ws),
   });
   const server = new IngestServer({
-    ingestSecrets: [SECRET], engine, sink: new HttpSink({ url: backend.url, secret: SINK_SECRET }),
+    ingestSecrets: [SECRET], controlSecrets: [REPLAY_CONTROL_SECRET], engine, sink: new HttpSink({ url: backend.url, secret: SINK_SECRET }),
     maxStreams: o.maxStreams ?? 3, maxSessions: 3, recallGraceMs: 300,
     session: { idleFlushMs: Math.max(200, Math.round(1500 / o.speed)), terms: ['Alice', 'Bob'], ...o.session },
   });
@@ -115,7 +121,7 @@ export async function runReplay(o: ReplayOptions): Promise<ReplayReport> {
   }, 50);
 
   // ------------------------------------------------------------------ simulated Recall bot
-  const ws = new WebSocket(`ws://127.0.0.1:${port}/ingest/${REF}/?token=${mintIngestToken(SECRET, REF)}`);
+  const ws = new WebSocket(`ws://127.0.0.1:${port}/ingest/${REF}/?token=${mintIngestToken(SECRET, REF)}${o.ingestQuery ?? ''}`);
   await new Promise<void>((resolve, reject) => { ws.once('open', () => resolve()); ws.once('error', reject); });
 
   const lag = o.speechOnLagMs ?? 300;
@@ -139,6 +145,8 @@ export async function runReplay(o: ReplayOptions): Promise<ReplayReport> {
   const sendWall: number[] = [];
   let ei = 0;
   let cut = false;
+  const pendingActions = [...(o.actions ?? [])].sort((a, b) => a.atAudioMs - b.atAudioMs);
+  const actionRuns: Promise<void>[] = [];
   for (let i = 0, off = 0; off < pcm.length; i++, off += CH) {
     const relMs = i * 200;
     while (ei < events.length && events[ei]!.atMs <= relMs) ws.send(speechMsg(events[ei++]!));
@@ -147,11 +155,16 @@ export async function runReplay(o: ReplayOptions): Promise<ReplayReport> {
       data: { data: { buffer: pcm.subarray(off, off + CH).toString('base64'), timestamp: { relative: relMs / 1000, absolute: new Date(relMs).toISOString() } }, bot: { id: BOT, metadata: {} } },
     }));
     sendWall.push(Date.now());
+    while (pendingActions.length && pendingActions[0]!.atAudioMs <= relMs) {
+      const a = pendingActions.shift()!;
+      actionRuns.push(Promise.resolve(a.run({ server, port, ref: REF, controlSecret: REPLAY_CONTROL_SECRET })).then(() => undefined));
+    }
     if (!cut && o.cutClientAtAudioMs !== undefined && relMs >= o.cutClientAtAudioMs && sockets.some((x) => x.readyState === WebSocket.OPEN)) { cut = true; sockets.filter((x) => x.readyState === WebSocket.OPEN)[0]!.terminate(); }
     const due = t0 + ((i + 1) * 200) / o.speed;
     const wait = due - Date.now();
     if (wait > 0) await new Promise((r) => setTimeout(r, wait));
   }
+  await Promise.all(actionRuns);
   ws.close();
 
   // Recall hangs up: the session closes after the grace period, finalizing the stream and draining the sink.
@@ -204,7 +217,7 @@ export async function runReplay(o: ReplayOptions): Promise<ReplayReport> {
     heapGrowthMb: (heapMax - heap0) / 1048576,
     unhandled, backendBadSignatures: backend.badSignatures, backendRequests: backend.requests,
     segmentDelayP50s: pct(delays, 0.5), segmentDelayP90s: pct(delays, 0.9),
-    fakeStreams: fake?.streams.map((s) => ({ index: s.index, closedBy: s.closedBy, processedMs: s.processedMs, keepalives: s.keepalives, sawApiKeyInFrame: s.sawApiKeyInFrame, sawBearerHeader: s.sawBearerHeader })),
+    fakeStreams: fake?.streams.map((s) => ({ config: s.config, index: s.index, closedBy: s.closedBy, processedMs: s.processedMs, keepalives: s.keepalives, sawApiKeyInFrame: s.sawApiKeyInFrame, sawBearerHeader: s.sawBearerHeader })),
   };
   await server.stop();
   await fake?.stop();

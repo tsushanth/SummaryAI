@@ -4,6 +4,8 @@ export interface ServiceConfig {
   port: number;
   /** Secrets accepted for ingest tokens (current first; list the previous one during rotation). */
   ingestSecrets: string[];
+  /** Secrets accepted for the backend's live language change call (default: BACKEND_SINK_SECRET). Empty = route disabled. */
+  controlSecrets: string[];
   sonioxApiKey: string;
   sonioxModel: string;
   sonioxUrl: string | undefined;
@@ -45,6 +47,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServiceConfig 
   return {
     port: int(env.PORT, 8080),
     ingestSecrets,
+    controlSecrets: (env.CONTROL_SECRETS ?? env.BACKEND_SINK_SECRET ?? '').split(',').map((x) => x.trim()).filter(Boolean),
     sonioxApiKey: env.SONIOX_API_KEY,
     sonioxModel: env.SONIOX_MODEL ?? 'stt-rt-v6',
     sonioxUrl: env.SONIOX_URL || undefined,

@@ -117,6 +117,7 @@ export class MeetingSession {
   botId: string | null = null;
 
   private readonly cfg: SessionConfig;
+  // cfg.languageHints is the only field that changes after construction (setLanguageHints).
   private readonly buffer: ReplayBuffer;
   private readonly segmenter: Segmenter;
   private readonly mapper: SpeakerMapper;
@@ -156,6 +157,44 @@ export class MeetingSession {
 
   setBotId(id: string): void {
     this.botId = id;
+  }
+
+  /**
+   * Change the Soniox language hints (the meeting's transcription language) while the meeting runs. Returns false when nothing
+   * changed. A running stream cannot be reconfigured, so it is replaced exactly like a reconnect: the old stream is closed WITHOUT
+   * finalizing (finalizing would force its guesses in the old language), and the new one opens with the new hints and replays the
+   * buffered audio from just before the old stream's final watermark. Words already final are kept; the not-yet-final tail is
+   * re-recognised in the new language. If no stream is open (not started, reconnecting, degraded) the next connect just uses the hints.
+   */
+  setLanguageHints(hints: string[]): boolean {
+    const next = [...hints];
+    const cur = this.cfg.languageHints;
+    if (next.length === cur.length && next.every((h, i) => h === cur[i])) return false;
+    this.cfg.languageHints = next;
+    this.metrics.add('languageChanges');
+    if (this.closed || this.closing || !this.started || this.stateV === 'degraded') return true;
+    this.dropPending();
+    const act = this.active;
+    if (!act) return true; // a reconnect is already scheduled: it reads cfg.languageHints when it opens
+    this.lastActive = act;
+    this.active = null;
+    act.state = 'closing'; // its close event is then ignored by onSlotClosed
+    try { act.conn?.close(); } catch { /* */ }
+    this.teardown(act);
+    this.setState('reconnecting');
+    this.connectActive(this.resumePoint());
+    return true;
+  }
+
+  private dropPending(): void {
+    const p = this.pending;
+    this.clearPromote();
+    if (this.rolloverRetryTimer) { clearTimeout(this.rolloverRetryTimer); this.rolloverRetryTimer = null; }
+    if (!p) return;
+    this.pending = null;
+    p.state = 'closing';
+    try { p.conn?.close(); } catch { /* */ }
+    this.teardown(p);
   }
 
   state(): SessionState {
