@@ -10,7 +10,7 @@ export default function TermsPage() {
     <div className="min-h-screen bg-background text-foreground py-16">
       <div className="max-w-[900px] mx-auto px-6">
         <h1 className="text-3xl md:text-4xl font-bold mb-2">Terms of Service</h1>
-        <p className="text-muted-foreground text-sm mb-12">Last updated: February 25, 2026</p>
+        <p className="text-muted-foreground text-sm mb-12">Last updated: 2026-11-03</p>
 
         <section className="mb-10">
           <h2 className="text-xl font-semibold mb-4">1. Agreement to Terms</h2>
@@ -79,19 +79,17 @@ export default function TermsPage() {
         </section>
 
         <section className="mb-10">
-          <h2 className="text-xl font-semibold mb-4">6. AI Services and Data Processing</h2>
+          <h2 className="text-xl font-semibold mb-4">6. Third-Party Services and Data Processing</h2>
           <p className="text-muted-foreground leading-relaxed mb-3">
-            Meeting Mind uses cloud-based AI services to provide transcription, summarization, action item extraction,
+            Meeting Mind uses cloud-based third-party services to provide transcription, summarization, action item extraction,
             and Q&amp;A features. By using these features, you acknowledge and consent to your content being processed
             by the third-party services identified in our{' '}
             <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>.
-            These services include Deepgram (transcription), OpenAI GPT-4 (summaries and Q&amp;A), Twilio (phone calls),
-            and Supabase (authentication and storage).
+            These services include Deepgram (transcription), Anthropic (summaries and Q&amp;A), Recall.ai (meeting bot),
+            Twilio (phone calls), and Supabase (authentication and storage).
           </p>
           <p className="text-muted-foreground leading-relaxed">
-            You may revoke this consent at any time in the app&apos;s Settings under Data &amp; Privacy, which will
-            prevent the app from sending your data to AI services. Without consent, AI-powered features
-            (transcription, summaries, and Q&amp;A) will be unavailable.
+            If you do not want your content processed this way, do not use the features that need it.
           </p>
         </section>
 

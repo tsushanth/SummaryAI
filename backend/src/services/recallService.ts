@@ -20,6 +20,13 @@ const RECALL_REGION = config.RECALL_REGION || 'us-west-2';
 const RECALL_API_BASE = `https://${RECALL_REGION}.recall.ai/api/v1`;
 
 /**
+ * Message the bot posts to the meeting chat when it joins (only if MEETING_BOT_ANNOUNCE=true).
+ * Plain ASCII, no em dashes, under Google Meet's 500 character chat limit.
+ */
+export const BOT_ANNOUNCEMENT_MESSAGE =
+  'MeetingMind is recording this meeting to make notes for the host. Tell the host if you do not want to be recorded.';
+
+/**
  * Recall.ai API Service
  */
 export class RecallService {
@@ -121,6 +128,17 @@ export class RecallService {
       payload.join_at = params.join_at;
     }
 
+    // Join announcement via Recall's automatic chat message (create-bot field `chat.on_bot_join`).
+    // Platforms Recall cannot chat on (Webex, GoTo) ignore it.
+    if (config.MEETING_BOT_ANNOUNCE) {
+      payload.chat = {
+        on_bot_join: {
+          send_to: 'everyone',
+          message: BOT_ANNOUNCEMENT_MESSAGE,
+        },
+      };
+    }
+
     console.log(`[Recall] Creating bot for meeting: ${params.meeting_url}`);
 
     return this.request<RecallBotResponse>('/bot', {
@@ -144,6 +162,41 @@ export class RecallService {
       method: 'DELETE',
     });
     console.log(`[Recall] Cancelled bot: ${botId}`);
+  }
+
+  /**
+   * Account purge: permanently delete all recording media Recall stores for a bot
+   * (POST /bot/{id}/delete_media/). Documented responses: 200 ok, 400 bot still in progress, 409 deletion already
+   * running. 404 (bot unknown / already purged) counts as done. 'in_progress' means "try again later".
+   * Direct fetch on purpose: the shared request() alerts on every non-2xx, and 400/404/409 are expected here.
+   */
+  static async deleteBotMedia(botId: string): Promise<'deleted' | 'not_found' | 'in_progress'> {
+    if (!/^[A-Za-z0-9_-]+$/.test(botId)) throw new Error('Invalid Recall bot id');
+    const response = await fetch(`${RECALL_API_BASE}/bot/${botId}/delete_media/`, {
+      method: 'POST',
+      headers: { Authorization: `Token ${this.apiKey}`, 'Content-Type': 'application/json' },
+    });
+    if (response.ok) return 'deleted';
+    if (response.status === 404) return 'not_found';
+    if (response.status === 400 || response.status === 409) return 'in_progress';
+    reportProviderHttpFailure('recall', response.status);
+    throw new Error(`Recall delete_media failed: ${response.status}`);
+  }
+
+  /**
+   * Account purge: best-effort stop. Cancels a bot that has not joined yet and asks a live bot to leave, so a deleted
+   * account's bot does not keep recording. Never throws: a bot that already finished answers 4xx.
+   */
+  static async stopBot(botId: string): Promise<void> {
+    if (!/^[A-Za-z0-9_-]+$/.test(botId)) return;
+    const headers = { Authorization: `Token ${this.apiKey}`, 'Content-Type': 'application/json' };
+    for (const [method, path] of [['DELETE', `/bot/${botId}`], ['POST', `/bot/${botId}/leave_call/`]] as const) {
+      try {
+        await fetch(`${RECALL_API_BASE}${path}`, { method, headers });
+      } catch {
+        /* best effort */
+      }
+    }
   }
 
   /**

@@ -163,6 +163,12 @@ async function startServer(): Promise<void> {
     // orphan once, otherwise marks it failed so the user sees a retry button.
     import('./services/orphanedProcessingRecovery.js').then(m => m.startOrphanedProcessingRecoveryLoop())
       .catch(e => { console.error('[OrphanRecovery] init failed:', e); reportLoopInitFailure('OrphanRecovery'); });
+    // Uploads created but never completed (0 s taps): status 'uploading' forever. Marks them failed; never deletes.
+    import('./services/abandonedUploadRecovery.js').then(m => m.startAbandonedUploadSweepLoop())
+      .catch(e => { console.error('[AbandonedUploads] init failed:', e); reportLoopInitFailure('AbandonedUploads'); });
+    // Finishes account deletions whose Recall/Twilio/storage cleanup failed the first time (ledger-driven, backoff).
+    import('./services/accountPurgeAdapters.js').then(m => m.startAccountPurgeRetryLoop())
+      .catch(e => { console.error('[AccountPurge] init failed:', e); reportLoopInitFailure('AccountPurgeRetry'); });
     // Backstop for scheduleBotJoin's in-memory setTimeout getting dropped by
     // a Fly.io machine restart between scheduling and join time.
     import('./services/botSchedulerService.js').then(m => m.startBotJoinReconcilerLoop())

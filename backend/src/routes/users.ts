@@ -6,6 +6,8 @@ import { Router, Request, Response } from 'express';
 import { authenticate } from '../middleware/auth.js';
 import { supabaseAdmin } from '../lib/supabase.js';
 import type { ErrorResponse } from '../types/api.js';
+import { runAccountPurge } from '../services/accountPurge.js';
+import { createPurgeDeps } from '../services/accountPurgeAdapters.js';
 
 const router = Router();
 
@@ -14,9 +16,20 @@ router.use(authenticate);
 
 /**
  * DELETE /api/users/account
- * Delete the current user's account and all associated data
+ * Delete the current user's account and everything stored for it: storage objects, Recall.ai meeting media, Twilio
+ * recordings, database rows, then the auth user (last). See services/accountPurge.ts for the order and failure policy.
+ *
+ * Responses (the clients only check that the call did not throw, and sign out afterwards):
+ *   200 { success: true, purge: { status: 'complete' } }          everything deleted
+ *   202 { success: true, purge: { status: 'pending_external' } }  account deleted; some provider cleanup is queued for retry
+ *   202 { success: true, purge: { status: 'in_progress' } }       another request for this user is already running
+ *   200 { success: true, purge: { status: 'dry_run', plan } }     ACCOUNT_PURGE_DRY_RUN=true: counted, NOTHING deleted
+ *   503 EXTERNAL_DELETE_FAILED                                    provider cleanup failed and no durable retry ledger exists;
+ *                                                                 the account is intact, retry the request
+ *   500 DELETE_FAILED                                             could not delete the auth user; safe to retry
+ * Only the authenticated user's own id is ever used; there is no way to name another user.
  */
-router.delete('/account', async (req: Request, res: Response<{ success: boolean } | ErrorResponse>) => {
+router.delete('/account', async (req: Request, res: Response) => {
   const userId = req.user?.id;
 
   if (!userId) {
@@ -25,90 +38,47 @@ router.delete('/account', async (req: Request, res: Response<{ success: boolean 
         code: 'UNAUTHORIZED',
         message: 'User not authenticated',
       },
-    });
+    } satisfies ErrorResponse);
     return;
   }
 
-  console.log(`[Users] Delete account request for user: ${userId}`);
+  console.log('[Users] Delete account request received');
 
   try {
-    // Delete user data from all tables first (in order of dependencies)
+    const result = await runAccountPurge(userId, createPurgeDeps());
+    const purge = { status: result.status, pending: result.pending, ...(result.plan ? { plan: result.plan } : {}) };
 
-    // 1. Delete todos
-    const { error: todosError } = await supabaseAdmin
-      .from('todos')
-      .delete()
-      .eq('user_id', userId);
-
-    if (todosError) {
-      console.warn(`[Users] Error deleting todos: ${todosError.message}`);
+    switch (result.status) {
+      case 'complete':
+      case 'dry_run':
+        res.status(200).json({ success: true, purge });
+        return;
+      case 'pending_external':
+      case 'in_progress':
+        res.status(202).json({ success: true, purge });
+        return;
+      case 'blocked':
+        res.status(503).json({
+          error: {
+            code: 'EXTERNAL_DELETE_FAILED',
+            message: 'Some of your data could not be removed from our processors yet. Your account was not deleted; please try again in a few minutes.',
+          },
+        } satisfies ErrorResponse);
+        return;
+      default:
+        res.status(500).json({
+          error: { code: 'DELETE_FAILED', message: 'Failed to delete account' },
+        } satisfies ErrorResponse);
+        return;
     }
-
-    // 2. Delete recordings (this may cascade to related data)
-    const { error: recordingsError } = await supabaseAdmin
-      .from('recordings')
-      .delete()
-      .eq('user_id', userId);
-
-    if (recordingsError) {
-      console.warn(`[Users] Error deleting recordings: ${recordingsError.message}`);
-    }
-
-    // 3. Delete calendar connections
-    const { error: calendarError } = await supabaseAdmin
-      .from('calendar_connections')
-      .delete()
-      .eq('user_id', userId);
-
-    if (calendarError) {
-      console.warn(`[Users] Error deleting calendar connections: ${calendarError.message}`);
-    }
-
-    // 4. Delete scheduled bots
-    const { error: botsError } = await supabaseAdmin
-      .from('scheduled_bots')
-      .delete()
-      .eq('user_id', userId);
-
-    if (botsError) {
-      console.warn(`[Users] Error deleting scheduled bots: ${botsError.message}`);
-    }
-
-    // 5. Delete profile
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .delete()
-      .eq('id', userId);
-
-    if (profileError) {
-      console.warn(`[Users] Error deleting profile: ${profileError.message}`);
-    }
-
-    // 6. Finally, delete the auth user using admin API
-    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId);
-
-    if (authError) {
-      console.error(`[Users] Error deleting auth user: ${authError.message}`);
-      res.status(500).json({
-        error: {
-          code: 'DELETE_FAILED',
-          message: `Failed to delete account: ${authError.message}`,
-        },
-      });
-      return;
-    }
-
-    console.log(`[Users] Successfully deleted account for user: ${userId}`);
-
-    res.status(200).json({ success: true });
   } catch (err) {
-    console.error('[Users] Delete account error:', err);
+    console.error('[Users] Delete account error:', err instanceof Error ? err.message : 'unknown');
     res.status(500).json({
       error: {
         code: 'SERVER_ERROR',
         message: 'An error occurred while deleting account',
       },
-    });
+    } satisfies ErrorResponse);
   }
 });
 
