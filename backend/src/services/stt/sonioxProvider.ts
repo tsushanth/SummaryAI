@@ -1,5 +1,8 @@
 /**
- * Soniox ASYNC transcription adapter (batch / final transcript path). Verified against docs.soniox.com on 2026-11-03:
+ * Soniox ASYNC transcription adapter (batch / final transcript path). Verified against docs.soniox.com AND live against
+ * the real API on 2026-11-03 (model stt-async-v6 accepted; an unknown model gives 400 invalid_request "requested model is not
+ * available"; recorded responses are in test/fixtures/stt/soniox-recorded-*). Real tokens also carry is_audio_event and
+ * translation_status (both null). audio_duration_ms is already present while the job is still queued:
  *   POST   https://api.soniox.com/v1/files                          multipart `file`            -> 201 { id, filename, size, ... }
  *   POST   https://api.soniox.com/v1/transcriptions                 JSON { model, file_id, ... } -> 201 { id, status }
  *   GET    https://api.soniox.com/v1/transcriptions/{id}            status queued|processing|completed|error, audio_duration_ms, error_type
@@ -113,6 +116,30 @@ export function mapSonioxTokens(rawTokens: SonioxToken[], audioDurationMs: numbe
   return { segments, fullText, wordCount: countWords(fullText), speakerCount, detectedLanguage: languageOf(tokens), durationSeconds };
 }
 
+/**
+ * Process-wide cap on in-flight Soniox transcriptions (upload to delete). The Soniox key may be shared with other
+ * products (VoxKey dictation uses the same account limits), so MeetingMind batch work must not flood it. Default 3,
+ * override with SONIOX_MAX_CONCURRENT. Extra jobs wait in a FIFO queue; the per-call timeout starts after the wait.
+ */
+const DEFAULT_MAX_CONCURRENT = 3;
+let activeJobs = 0;
+const waiters: Array<() => void> = [];
+const maxConcurrent = () => {
+  const n = Number(process.env.SONIOX_MAX_CONCURRENT);
+  return Number.isFinite(n) && n >= 1 ? Math.floor(n) : DEFAULT_MAX_CONCURRENT;
+};
+async function acquireSlot(): Promise<() => void> {
+  while (activeJobs >= maxConcurrent()) await new Promise<void>((r) => waiters.push(r));
+  activeJobs++;
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    activeJobs--;
+    waiters.shift()?.();
+  };
+}
+
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 export interface SonioxProviderOptions {
@@ -128,6 +155,15 @@ export function createSonioxProvider(o: SonioxProviderOptions = {}): SttProvider
   const pollIntervalMs = o.pollIntervalMs ?? 2000;
 
   async function transcribe(fileData: Blob, filePath: string, opts: SttOptions = {}): Promise<NormalizedTranscript> {
+    const release = await acquireSlot();
+    try {
+      return await transcribeUnlimited(fileData, filePath, opts);
+    } finally {
+      release();
+    }
+  }
+
+  async function transcribeUnlimited(fileData: Blob, filePath: string, opts: SttOptions = {}): Promise<NormalizedTranscript> {
     const apiKey = o.apiKey ?? process.env.SONIOX_API_KEY;
     if (!apiKey || !apiKey.trim()) throw new Error('SONIOX_API_KEY is not set');
     const model = o.model ?? process.env.SONIOX_ASYNC_MODEL ?? SONIOX_ASYNC_MODEL;

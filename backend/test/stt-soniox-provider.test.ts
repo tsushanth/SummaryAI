@@ -222,3 +222,28 @@ describe('mapSonioxTokens', () => {
     expect(r.detectedLanguage).toBe('zh');
   });
 });
+
+describe('concurrency cap (the Soniox key is shared with other products)', () => {
+  it('never has more than SONIOX_MAX_CONCURRENT transcriptions in flight in this process (default 3)', async () => {
+    let inFlight = 0;
+    let peak = 0;
+    overrides['POST /files'] = async () => { inFlight++; peak = Math.max(peak, inFlight); await new Promise((r) => setTimeout(r, 10)); return json({ id: FID }, 201); };
+    overrides[`DELETE /files/${FID}`] = () => { inFlight--; return { ok: true, status: 204, json: async () => ({}), text: async () => '' }; };
+    const p = mk();
+    const all = await Promise.all(Array.from({ length: 8 }, () => p.transcribe(blob(), 'a.m4a')));
+    expect(all).toHaveLength(8);
+    expect(peak).toBe(3);
+  });
+  it('SONIOX_MAX_CONCURRENT overrides the cap; a failed job releases its slot', async () => {
+    vi.stubEnv('SONIOX_MAX_CONCURRENT', '1');
+    let inFlight = 0;
+    let peak = 0;
+    let n = 0;
+    overrides['POST /files'] = async () => { inFlight++; peak = Math.max(peak, inFlight); await new Promise((r) => setTimeout(r, 5)); if (++n === 1) { inFlight--; return json({}, 500); } return json({ id: FID }, 201); };
+    overrides[`DELETE /files/${FID}`] = () => { inFlight--; return { ok: true, status: 204, json: async () => ({}), text: async () => '' }; };
+    const p = mk();
+    const res = await Promise.allSettled([p.transcribe(blob(), 'a.m4a'), p.transcribe(blob(), 'a.m4a'), p.transcribe(blob(), 'a.m4a')]);
+    expect(res.map((r) => r.status)).toEqual(['rejected', 'fulfilled', 'fulfilled']);
+    expect(peak).toBe(1);
+  });
+});
