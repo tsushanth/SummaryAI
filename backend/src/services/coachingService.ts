@@ -15,6 +15,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { instrumentAnthropic, withFeature } from '../lib/llm.js';
 import { config } from '../config/index.js';
 import { supabaseAdmin } from '../lib/supabase.js';
+import { reportAlert } from '../lib/alerts.js';
 import { getPersona, CoachingPersona } from './coachingPersonas.js';
 
 const REFUND_THRESHOLD_INSIGHTS = 3;
@@ -305,10 +306,12 @@ async function tick(sessionId: string, persona: CoachingPersona): Promise<void> 
   const lastSegment = segments[segments.length - 1];
   const offset = Math.floor(lastSegment?.end_timestamp ?? 0);
 
-  // Insert + emit
+  // Insert + emit. Count only rows that were actually persisted: the count drives the end-of-session
+  // auto-refund and the "insights delivered" figure, so it must not include rejected or failed rows.
+  let persisted = 0;
   for (const i of insights) {
     if (!isValidInsight(i)) continue;
-    const { data } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from('coaching_insights')
       .insert({
         session_id: sessionId,
@@ -319,16 +322,23 @@ async function tick(sessionId: string, persona: CoachingPersona): Promise<void> 
       })
       .select('*')
       .single();
-    if (data) {
-      const subs = subscribers.get(sessionId);
-      subs?.forEach(emit => emit('insight', data));
+    if (error || !data) {
+      // Never silent: a failing insert (grant/RLS change, constraint, outage) used to leave zero rows and no log line.
+      console.error(`[Coaching] insight insert failed for session ${sessionId}:`, error ?? 'no row returned');
+      reportAlert('coaching', 'INSIGHT_INSERT_FAILED', { code: (error as { code?: string } | null)?.code });
+      continue;
     }
+    persisted++;
+    const subs = subscribers.get(sessionId);
+    subs?.forEach(emit => emit('insight', data));
   }
+  console.log(`[Coaching] persisted ${persisted}/${insights.length} insights for session ${sessionId}`);
+  if (persisted === 0) return;
 
   // Bump insight_count
   await supabaseAdmin
     .from('coaching_sessions')
-    .update({ insight_count: session.insight_count + insights.length })
+    .update({ insight_count: session.insight_count + persisted })
     .eq('id', sessionId);
 }
 
