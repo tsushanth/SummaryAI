@@ -1,0 +1,46 @@
+# Gitleaks config for MeetingMind (tsushanth/SummaryAI).
+# Extends the default ruleset; allow-lists ONLY values that are public by design.
+# Never widen the allow-lists to cover service_role / sb_secret_ / provider keys.
+
+title = "MeetingMind gitleaks config"
+
+[extend]
+useDefault = true
+
+# Supabase new-style secret key (server only). Default rules do not know this prefix.
+[[rules]]
+id = "supabase-secret-key"
+description = "Supabase secret API key (sb_secret_...)"
+regex = '''sb_secret_[A-Za-z0-9_-]{16,}'''
+keywords = ["sb_secret_"]
+
+# Supabase legacy service_role JWT. The payload is base64url JSON containing "service_role";
+# the marker below is that string at the three possible base64 alignments. The anon key
+# (role "anon") does NOT match, so it can be allow-listed separately.
+[[rules]]
+id = "supabase-service-role-jwt"
+description = "Supabase legacy service_role JWT"
+regex = '''eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]*?(?:c2VydmljZV9yb2xl|NlcnZpY2Vfcm9s|ZXJ2aWNlX3Jv)[A-Za-z0-9_-]*\.[A-Za-z0-9_-]{20,}'''
+keywords = ["eyj"]
+
+# Allow-list 1: the legacy Supabase ANON key of project mlofjzlmncgnhxbiuemf.
+# Public by design (shipped in the web bundle, Android BuildConfig and iOS source). The regex
+# pins the JWT header plus the payload prefix {"iss":"supabase","ref":"mlof...","role":"anon"},
+# so a service_role token or a key for another project is still reported.
+# Remove this block once clients ship sb_publishable_ keys and the legacy keys are disabled.
+[[allowlists]]
+description = "Public-by-design Supabase anon JWT for this project"
+targetRules = ["jwt", "generic-api-key"]
+regexes = [
+  '''^eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sb2ZqemxtbmNnbmh4Yml1ZW1mIiwicm9sZSI6ImFub24i[A-Za-z0-9_\\/-]*\.[A-Za-z0-9_\\/=-]+$''',
+]
+
+# Allow-list 2: Firebase client config. API keys in these files are public by design
+# (restricted by package name / bundle id in the Google Cloud console).
+[[allowlists]]
+description = "Firebase client config files (public by design)"
+targetRules = ["gcp-api-key", "generic-api-key"]
+paths = [
+  '''^android/app/google-services\.json$''',
+  '''^ios/SummaryAI/GoogleService-Info\.plist$''',
+]
