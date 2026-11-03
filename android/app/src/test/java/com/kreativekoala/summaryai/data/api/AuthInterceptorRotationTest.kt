@@ -92,7 +92,7 @@ class AuthInterceptorRotationTest {
                 if (path.contains("grant_type=refresh_token")) {
                     refreshCalls.incrementAndGet()
                     if (dropRefresh) return MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AT_START)
-                    val token = Regex(""""refresh_token"\\s*:\\s*"([^"]+)"""").find(request.body.readUtf8())?.groupValues?.get(1) ?: ""
+                    val token = Regex(""""refresh_token"\s*:\s*"([^"]+)"""").find(request.body.readUtf8())?.groupValues?.get(1) ?: ""
                     synchronized(lock) {
                         if (revokeAll || token !in validRefresh) {
                             return MockResponse().setResponseCode(400).setHeader("Content-Type", "application/json")
@@ -151,6 +151,17 @@ class AuthInterceptorRotationTest {
 
     private fun ping(client: OkHttpClient): Int =
         client.newCall(Request.Builder().url(server.url("/api/ping")).build()).execute().use { it.code }
+
+    /** The 1.7.5 field failure: the client's own auto-refresh rotates the token behind the token store's back. */
+    @Test fun clientBackgroundRefreshDoesNotBreakTheInterceptor() {
+        val supabase = newClient(); signIn(supabase); val client = http(supabase)
+        runBlocking { supabase.auth.refreshCurrentSession() } // what supabase-kt's auto-refresh does an hour in
+        sim.expireAccess()
+        assertEquals(200, ping(client))
+        sim.expireAccess()
+        assertEquals(200, ping(client))
+        assertEquals(0, lostCount.get())
+    }
 
     @Test fun refreshCycleTwiceInARowSucceeds() {
         val supabase = newClient(); signIn(supabase); val client = http(supabase)
