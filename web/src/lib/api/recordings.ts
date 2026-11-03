@@ -1,3 +1,4 @@
+import { toCreateRecordingBody, normalizeCreateRecordingResponse } from '@/lib/createRecordingBody';
 import { apiClient } from './client';
 import { recordingsQueryString, type RecordingsQueryParams } from '@/lib/recordingsQuery';
 import type {
@@ -12,10 +13,11 @@ import type {
 export async function createRecording(
   data: CreateRecordingRequest
 ): Promise<CreateRecordingResponse> {
-  return apiClient<CreateRecordingResponse>('/api/recordings', {
+  const raw = await apiClient<unknown>('/api/recordings', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify(toCreateRecordingBody(data)),
   });
+  return normalizeCreateRecordingResponse(raw);
 }
 
 export async function uploadAudio(
