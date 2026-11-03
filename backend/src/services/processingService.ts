@@ -16,6 +16,7 @@ import { reportRecordingFailure } from '../lib/recordingFailure.js';
 import { reportAlert } from '../lib/alerts.js';
 import { getRecordingLimits } from '../config/recordingLimits.js';
 import { evaluateSummaryEligibility, countSpeechUnits } from './shortRecordingGuard.js';
+import { languageHintForRecording } from './meetingLanguage.js';
 import { transcribeAudio, isSttConfigured, getSttMode, type NormalizedTranscript, type TranscriptSegment } from './stt/index.js';
 
 export interface ProcessingJob {
@@ -126,7 +127,9 @@ async function processRecordingAsync(
       console.log(`[Processing] ${jobId}: PDF text extraction complete (${transcript.wordCount} words)`);
     } else if (isSttConfigured()) {
       // STT_PROVIDER=deepgram (default) | soniox | shadow, see ./stt/index.ts.
-      const stt = await transcribeAudio(fileData, recording.file_path, { recordingId });
+      // Language the user chose for the meeting this recording came from (none for uploads and for 'auto').
+      const languageHint = await languageHintForRecording(recording);
+      const stt = await transcribeAudio(fileData, recording.file_path, { recordingId, ...(languageHint ? { languageHints: [languageHint] } : {}) });
       transcript = stt.transcript;
       sttProvider = stt.provider;
       sttModel = stt.model;

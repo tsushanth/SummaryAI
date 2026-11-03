@@ -12,6 +12,8 @@ create-bot request body byte for byte). The separate `live-stt/` service is PR #
 | `LIVE_STT_WS_URL` | unset | Public base URL of the live-stt app, e.g. `wss://mm-live-stt.fly.dev` (no path; must be `wss://` in production). |
 | `LIVE_STT_INGEST_SECRET` | unset | HMAC secret for the per-bot URL token. Equals the service's `INGEST_TOKEN_SECRETS` (current secret first). |
 | `LIVE_STT_SHARED_SECRET` | unset | HMAC secret for `POST /internal/live-segments`. Equals the service's `BACKEND_SINK_SECRET`. Comma separated list accepted (rotation). Unset = the route answers 404. |
+| `LIVE_STT_CONTROL_SECRET` | first `LIVE_STT_SHARED_SECRET` | HMAC secret for the live language change call to the service (service `CONTROL_SECRETS`). |
+| `RECALL_AUTO_LANGUAGE` | unset | `detect` = `auto` meetings use Recall language detection (accuracy mode, live captions 3-10 min late). Anything else keeps English low latency. |
 | `LIVE_STT_RATE_LIMIT_PER_MIN` | 1200 | Per source IP, before the signature check. |
 | `LIVE_STT_REF_RATE_LIMIT_PER_MIN` | 240 | Per meeting ref, after the signature check (429 + `Retry-After`; the service retries). |
 
@@ -41,11 +43,79 @@ Use separate values for the two secrets.
 - Finalisation is unchanged: the end-of-meeting path (`bot.call_ended`, `recording.done`, `finalizeBotRecording`, Deepgram pass) does
   not read the live provider. `stuckMeetingRecovery` stitches `live_transcripts` for either provider; for `soniox` runs the stitched
   transcript row is labelled `soniox_realtime` / `soniox_streaming` (still `language: 'en'`, a pre-existing hard-code).
-- Language: Recall's low-latency mode forces English. With `soniox` the live path is language-auto (per-token language id in the
-  service); the stitched fallback row still says `en`.
+- Language: see "Transcription language" below. The stitched fallback transcript no longer hard-codes `en` (see there).
+
+## Transcription language (per meeting)
+
+A meeting can carry a transcription language: `auto` (default) or one of 35 languages. It is chosen when the meeting is added or the
+bot is sent, defaults to the user's saved default, and (Soniox path only) can be changed while the meeting is live.
+
+Supported list (BCP-47 primary subtag, the intersection of Recall `recallai_streaming` accuracy mode and Soniox, so one code is valid
+on every path; sources fetched 2026-11-03):
+`bg ca cs da de el en es et fi fr he hi hr hu id it ja ko lt lv ms nl no pl pt ro ru sk sv th tr uk vi zh`.
+Region/script subtags are accepted and dropped (`fr-CA` -> `fr`), legacy `iw/in/nb/nn` map to `he/id/no`; anything else is a 400.
+Soniox alone also supports af sq ar az eu be bn bs gl gu kn kk mk ml mr fa pa sr sl sw tl ta te ur cy (60 total); Recall does not,
+so they are NOT offered. Deepgram nova-2 (final transcript) supports all of the 35 except `he` and `hr`, which keep `detect_language`.
+
+| Path | Auto (default) | A chosen language | Change mid-meeting |
+|---|---|---|---|
+| Recall transcript (today) | unchanged body: `prioritize_low_latency` + `language_code: "en"` (live captions are English). Opt in with `RECALL_AUTO_LANGUAGE=detect` to use Recall detection (`language_code: "auto"`, accuracy mode) | `prioritize_accuracy` + `language_code: <code>` | NO. Fixed when the bot is created; Recall documents no way to change it. `POST /live-language` answers 409 `LIVE_LANGUAGE_FIXED` |
+| Soniox live (`LIVE_STT_PROVIDER=soniox`) | no hints, `enable_language_identification` on (per-token language id) | one `language_hints` entry (a bias, not a lock) | YES, see below |
+| Final transcript (Deepgram) | `detect_language=true` (unchanged) | `language=<code>` instead (retry once with detect on a 400) | the latest choice is used |
+| Final transcript (Soniox async) | identification on | `language_hints: [code]` | the latest choice is used |
+
+Recall constraints, verbatim from docs.recall.ai/docs/recallai-transcription: "When `mode` is set to `prioritize_low_latency`,
+`language_code` must be set to `en`. Do not set `language_code` to `auto` or any non-English language code" (other codes "will fail to
+transcribe"); `auto` (language detection and code switching) and every other language need `prioritize_accuracy`, whose realtime
+events are "typically delayed by 3-10 minutes". So on the Recall path choosing any non-English language trades live latency for
+correct language: live transcript, live insights and coaching arrive minutes late for that meeting. That is why `auto` stays English
+low-latency by default (switching every user to a 3-10 minute delay would break the live features), and why the UI says so.
+Not verified without a real Recall run: that the webhook handler needs no change for accuracy-mode payloads, and that `zh` covers the
+variants users expect.
+
+Storage (migration `027_transcription_language.sql`, **not applied; ask -af**): `meetings.transcription_language` (NULL = never chosen,
+follows the owner's default when the bot joins; `auto` = explicit) and `bot_runs.transcription_language` (what the bot actually
+used; NULL = auto). The user's default lives in `profiles.preferences.default_transcription_language` (no migration). The code works
+BEFORE the migration: columns are only written when a language is chosen, an insert/update that fails because the column is missing
+is retried without it (so bot_runs/meetings rows are never lost) and the API returns a `warning`; reads fall back to auto.
+
+API (all under `/api/meetings`, authenticated):
+- `GET /transcription-languages` -> `{ auto, default_language, languages: [{code,name,native}], live: { provider, can_change_during_meeting, english_only_low_latency, non_english_live_delay_minutes, auto_live_behaviour } }`
+- `PUT /transcription-languages/default {language}` -> `{ default_language }`
+- `POST /` (add meeting), `POST /join` (instant), `POST /:id/join-now`, `PATCH /:id`: optional `transcription_language`. Unknown -> 400.
+  Resolution at bot creation: request > the meeting's stored value (`auto` counts) > the user's default > auto. Scheduled and
+  calendar-synced meetings resolve when the bot joins.
+- `GET /:id` additionally returns `transcription_language` and `live_language: { language, can_change, reason: null|'not_live'|'provider_fixed', provider }`.
+- `POST /:id/live-language {language}`: 400 invalid; 404 not yours; 409 `MEETING_NOT_LIVE`; 409 `LIVE_LANGUAGE_FIXED` (Recall path);
+  200 `{ ok, language, live_applied, live_state?: 'applied'|'queued', message? }` on the Soniox path. `live_applied:false` means the
+  choice is saved (final transcript uses it) but the live service could not be reached.
+
+Soniox live mechanics: the initial language rides in the ingest URL (`...?token=<hex>&lang=es`, absent for auto; the token is still
+HMAC(secret, ref) only). A change is a signed call backend -> service `POST <LIVE_STT_WS_URL as https>/control/language`
+`{"v":1,"ref":"<live_stt_ref>","language":"es"|"auto"}` with `x-mm-timestamp` and `x-mm-signature: v1=hex(HMAC-SHA256(secret,
+"control.<ts>.<raw body>"))` (5 minute window; the `control.` prefix separates it from the segment-sink signature). Secret: backend
+`LIVE_STT_CONTROL_SECRET` (default: first `LIVE_STT_SHARED_SECRET`) = service `CONTROL_SECRETS` (default `BACKEND_SINK_SECRET`). The service
+closes the running Soniox stream without finalizing it, opens a new one with the new `language_hints` and replays the buffered audio
+from 1 s before the old stream's final watermark (15 s buffer, same code as a reconnect), so words already final are kept, the not
+yet final tail is re-recognised in the new language, nothing is lost or duplicated (replay test: 0.00% word loss, 100% audio
+coverage). If the meeting's audio has not connected yet the change is queued (202, 1 h, max 500 refs). Limits: the session lives in
+one Fly machine's memory; with more than one machine the call can hit the wrong one (it then queues on that machine and the live stream is not switched; the final transcript still gets the
+choice). `fly.toml` does not pin the app to one machine; at the current scale (3 streams) it normally runs one. A very rapid series of changes reopens the stream each
+time (rate limited at 600 control calls/min/IP).
+
+Final transcript: processing looks up the recording's meeting -> latest bot run (else meeting) language and passes it as a hint.
+One language per recording: for a meeting that genuinely mixes languages choose Auto-detect. Uploads and unknown values are auto.
+
+Stitched fallback (`stitchStuckRecording`): `transcripts.language` is the run's chosen language; with nothing chosen the Recall
+transcript really was English (`en`); for Soniox auto (or Recall detection) it is detected from the text (script, then stop words,
+default `en`) instead of the old hard-coded `en`.
 
 ## Rollout (nothing below has been done)
 
+0. Language feature: apply `supabase/migrations/027_transcription_language.sql` (ask -af; optional, the code works without it but a chosen
+   language is then ignored with a warning). The live language CHANGE needs the Soniox path (step 5) and the service redeployed with
+   the control route; until then the endpoint answers 409 `LIVE_LANGUAGE_FIXED`. Per-meeting language on the Recall path works as soon as
+   the backend is deployed.
 1. Apply `supabase/migrations/026_live_stt.sql` to the MeetingMind Supabase project FIRST. The new reader filters select on
    `shadow`; deploying the code before the migration makes live transcripts, insights and Q&A fall back to empty.
 2. Choose two random secrets. Set on `summary-ai-backend`: `LIVE_STT_SHARED_SECRET`, `LIVE_STT_INGEST_SECRET` (new secrets only,

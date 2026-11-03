@@ -93,6 +93,12 @@ const envSchema = z.object({
   LIVE_STT_INGEST_SECRET: z.string().optional(),
   // HMAC secret for POST /internal/live-segments (= the service's BACKEND_SINK_SECRET). Comma separated list allowed (rotation).
   LIVE_STT_SHARED_SECRET: z.string().optional(),
+  // HMAC secret for the backend -> mm-live-stt control call (live language change). Falls back to the first LIVE_STT_SHARED_SECRET.
+  // Equals the service's CONTROL_SECRETS (which itself defaults to BACKEND_SINK_SECRET).
+  LIVE_STT_CONTROL_SECRET: z.string().optional(),
+  // 'detect' = a meeting whose language is 'auto' uses Recall's own language detection (needs accuracy mode: live captions arrive
+  // minutes late). Default (anything else) keeps English low-latency live captions for 'auto'. See LIVE_STT.md.
+  RECALL_AUTO_LANGUAGE: z.string().default(''),
 
   // Service URL (for internal worker callbacks)
   SERVICE_URL: z.string().optional(),

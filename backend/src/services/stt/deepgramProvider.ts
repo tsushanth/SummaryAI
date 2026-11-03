@@ -5,11 +5,12 @@
 import { v4 as uuidv4 } from 'uuid';
 import { config } from '../../config/index.js';
 import { reportProviderFailure, reportProviderHttpFailure } from '../../lib/alerts.js';
+import { deepgramLanguageParam } from '../../lib/transcriptionLanguage.js';
 import { countWords, type NormalizedTranscript, type SttProvider, type TranscriptSegment } from './types.js';
 
 export const DEEPGRAM_MODEL = 'nova-2';
 
-async function transcribeWithDeepgram(audioData: Blob, filePath: string): Promise<NormalizedTranscript> {
+async function transcribeWithDeepgram(audioData: Blob, filePath: string, languageHint?: string): Promise<NormalizedTranscript> {
   const arrayBuffer = await audioData.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
@@ -17,20 +18,29 @@ async function transcribeWithDeepgram(audioData: Blob, filePath: string): Promis
   const ext = filePath.split('.').pop()?.toLowerCase() || 'm4a';
   const contentType = ext === 'wav' ? 'audio/wav' : ext === 'mp3' ? 'audio/mpeg' : 'audio/mp4';
 
-  // Call Deepgram API with detect_language enabled for auto-detection
-  let response: Response;
-  try {
-    response = await fetch(`https://api.deepgram.com/v1/listen?model=${DEEPGRAM_MODEL}&smart_format=true&diarize=true&paragraphs=true&utterances=true&detect_language=true`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Token ${config.DEEPGRAM_API_KEY}`,
-        'Content-Type': contentType,
-      },
-      body: buffer,
-    });
-  } catch (e) {
-    reportProviderFailure('deepgram', e);
-    throw e;
+  // Auto-detect by default. A language the user chose for the meeting (and nova-2 supports) is pinned instead; `language` and
+  // `detect_language` are mutually exclusive, so exactly one of them is sent.
+  const pinned = deepgramLanguageParam(languageHint);
+  const post = async (languageQuery: string): Promise<Response> => {
+    try {
+      return await fetch(`https://api.deepgram.com/v1/listen?model=${DEEPGRAM_MODEL}&smart_format=true&diarize=true&paragraphs=true&utterances=true&${languageQuery}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${config.DEEPGRAM_API_KEY}`,
+          'Content-Type': contentType,
+        },
+        body: buffer,
+      });
+    } catch (e) {
+      reportProviderFailure('deepgram', e);
+      throw e;
+    }
+  };
+  let response = await post(pinned ? `language=${pinned}` : 'detect_language=true');
+  if (pinned && response.status === 400) {
+    // Deepgram rejected the pinned language (list drift): the recording must still be transcribed, so fall back to detection.
+    console.warn('[Deepgram] pinned language rejected; retrying with detect_language');
+    response = await post('detect_language=true');
   }
 
   if (!response.ok) {
@@ -43,7 +53,7 @@ async function transcribeWithDeepgram(audioData: Blob, filePath: string): Promis
   const result = await response.json() as any;
 
   // Extract detected language from Deepgram response
-  const detectedLanguage = result.results?.channels?.[0]?.detected_language || 'en';
+  const detectedLanguage = result.results?.channels?.[0]?.detected_language || pinned || 'en';
 
   // Extract utterances/paragraphs as segments
   const utterances = result.results?.utterances || [];
@@ -76,5 +86,5 @@ async function transcribeWithDeepgram(audioData: Blob, filePath: string): Promis
 export const deepgramProvider: SttProvider = {
   name: 'deepgram',
   model: DEEPGRAM_MODEL,
-  transcribe: (fileData, filePath) => transcribeWithDeepgram(fileData, filePath),
+  transcribe: (fileData, filePath, opts) => transcribeWithDeepgram(fileData, filePath, opts?.languageHints?.[0]),
 };
