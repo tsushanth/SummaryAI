@@ -57,7 +57,7 @@ class AuthService @Inject constructor(
     // Supabase client
     private val supabase: SupabaseClient = createSupabaseClient(
         supabaseUrl = BuildConfig.SUPABASE_URL,
-        supabaseKey = BuildConfig.SUPABASE_ANON_KEY
+        supabaseKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY
     ) {
         install(Auth)
     }
