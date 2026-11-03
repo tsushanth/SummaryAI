@@ -1,0 +1,270 @@
+{
+ "id": "3f1b6c9e-0000-4000-8000-000000000001",
+ "text": "Hola a todos, gracias por venir. Vamos a revisar los objetivos del trimestre.Perfecto, yo empiezo con las ventas. Las cifras subieron un diez por ciento.",
+ "tokens": [
+  {
+   "text": "Hola",
+   "start_ms": 80,
+   "end_ms": 383,
+   "confidence": 0.99,
+   "speaker": "1",
+   "language": "es"
+  },
+  {
+   "text": " a",
+   "start_ms": 383,
+   "end_ms": 685,
+   "confidence": 0.97,
+   "speaker": "1",
+   "language": "es"
+  },
+  {
+   "text": " todos",
+   "start_ms": 685,
+   "end_ms": 988,
+   "confidence": 0.95,
+   "speaker": "1",
+   "language": "es"
+  },
+  {
+   "text": ",",
+   "start_ms": 988,
+   "end_ms": 1290,
+   "confidence": 0.98,
+   "speaker": "1",
+   "language": "es"
+  },
+  {
+   "text": " gracias",
+   "start_ms": 1290,
+   "end_ms": 1593,
+   "confidence": 0.99,
+   "speaker": "1",
+   "language": "es"
+  },
+  {
+   "text": " por",
+   "start_ms": 1593,
+   "end_ms": 1895,
+   "confidence": 0.97,
+   "speaker": "1",
+   "language": "es"
+  },
+  {
+   "text": " venir",
+   "start_ms": 1895,
+   "end_ms": 2198,
+   "confidence": 0.95,
+   "speaker": "1",
+   "language": "es"
+  },
+  {
+   "text": ".",
+   "start_ms": 2198,
+   "end_ms": 2500,
+   "confidence": 0.98,
+   "speaker": "1",
+   "language": "es"
+  },
+  {
+   "text": " Vamos",
+   "start_ms": 2900,
+   "end_ms": 3188,
+   "confidence": 0.99,
+   "speaker": "1",
+   "language": "es"
+  },
+  {
+   "text": " a",
+   "start_ms": 3188,
+   "end_ms": 3475,
+   "confidence": 0.97,
+   "speaker": "1",
+   "language": "es"
+  },
+  {
+   "text": " revisar",
+   "start_ms": 3475,
+   "end_ms": 3763,
+   "confidence": 0.95,
+   "speaker": "1",
+   "language": "es"
+  },
+  {
+   "text": " los",
+   "start_ms": 3763,
+   "end_ms": 4050,
+   "confidence": 0.98,
+   "speaker": "1",
+   "language": "es"
+  },
+  {
+   "text": " objet",
+   "start_ms": 4050,
+   "end_ms": 4194,
+   "confidence": 0.96,
+   "speaker": "1",
+   "language": "es"
+  },
+  {
+   "text": "ivos",
+   "start_ms": 4194,
+   "end_ms": 4338,
+   "confidence": 0.94,
+   "speaker": "1",
+   "language": "es"
+  },
+  {
+   "text": " del",
+   "start_ms": 4338,
+   "end_ms": 4625,
+   "confidence": 0.97,
+   "speaker": "1",
+   "language": "es"
+  },
+  {
+   "text": " trimestre",
+   "start_ms": 4625,
+   "end_ms": 4913,
+   "confidence": 0.95,
+   "speaker": "1",
+   "language": "es"
+  },
+  {
+   "text": ".",
+   "start_ms": 4913,
+   "end_ms": 5200,
+   "confidence": 0.98,
+   "speaker": "1",
+   "language": "es"
+  },
+  {
+   "text": "Perfecto",
+   "start_ms": 6000,
+   "end_ms": 6550,
+   "confidence": 0.99,
+   "speaker": "2",
+   "language": "es"
+  },
+  {
+   "text": ",",
+   "start_ms": 6550,
+   "end_ms": 7100,
+   "confidence": 0.97,
+   "speaker": "2",
+   "language": "es"
+  },
+  {
+   "text": " yo",
+   "start_ms": 7100,
+   "end_ms": 7650,
+   "confidence": 0.95,
+   "speaker": "2",
+   "language": "es"
+  },
+  {
+   "text": " empiezo",
+   "start_ms": 7650,
+   "end_ms": 8200,
+   "confidence": 0.98,
+   "speaker": "2",
+   "language": "es"
+  },
+  {
+   "text": " con",
+   "start_ms": 8200,
+   "end_ms": 8750,
+   "confidence": 0.99,
+   "speaker": "2",
+   "language": "es"
+  },
+  {
+   "text": " las",
+   "start_ms": 8750,
+   "end_ms": 9300,
+   "confidence": 0.97,
+   "speaker": "2",
+   "language": "es"
+  },
+  {
+   "text": " ventas",
+   "start_ms": 9300,
+   "end_ms": 9850,
+   "confidence": 0.95,
+   "speaker": "2",
+   "language": "es"
+  },
+  {
+   "text": ".",
+   "start_ms": 9850,
+   "end_ms": 10400,
+   "confidence": 0.98,
+   "speaker": "2",
+   "language": "es"
+  },
+  {
+   "text": " Las",
+   "start_ms": 13100,
+   "end_ms": 14188,
+   "confidence": 0.99,
+   "speaker": "2",
+   "language": "es"
+  },
+  {
+   "text": " cifras",
+   "start_ms": 14188,
+   "end_ms": 15275,
+   "confidence": 0.97,
+   "speaker": "2",
+   "language": "es"
+  },
+  {
+   "text": " subieron",
+   "start_ms": 15275,
+   "end_ms": 16363,
+   "confidence": 0.95,
+   "speaker": "2",
+   "language": "es"
+  },
+  {
+   "text": " un",
+   "start_ms": 16363,
+   "end_ms": 17450,
+   "confidence": 0.98,
+   "speaker": "2",
+   "language": "es"
+  },
+  {
+   "text": " diez",
+   "start_ms": 17450,
+   "end_ms": 18538,
+   "confidence": 0.99,
+   "speaker": "2",
+   "language": "es"
+  },
+  {
+   "text": " por",
+   "start_ms": 18538,
+   "end_ms": 19625,
+   "confidence": 0.97,
+   "speaker": "2",
+   "language": "es"
+  },
+  {
+   "text": " ciento",
+   "start_ms": 19625,
+   "end_ms": 20713,
+   "confidence": 0.95,
+   "speaker": "2",
+   "language": "es"
+  },
+  {
+   "text": ".",
+   "start_ms": 20713,
+   "end_ms": 21800,
+   "confidence": 0.98,
+   "speaker": "2",
+   "language": "es"
+  }
+ ]
+}
