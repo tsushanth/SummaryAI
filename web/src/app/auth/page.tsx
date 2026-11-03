@@ -1,6 +1,8 @@
 import { Suspense } from 'react';
 import { GoogleSignIn } from '@/components/auth/GoogleSignIn';
 import { EmailAuthSection } from '@/components/auth/EmailAuthSection';
+import { ActivationBeacon } from '@/components/ActivationBeacon';
+import { ActivationAuthWatch } from '@/components/auth/ActivationAuthWatch';
 import { RibbonMark } from '@/components/ui/ribbon-mark';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
@@ -8,6 +10,7 @@ import { Loader2 } from 'lucide-react';
 export default function AuthPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-4 py-10">
+      <ActivationBeacon page="auth" />
       <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 sm:p-8">
         <RibbonMark className="h-10 w-10" />
         <h1 className="mt-5 text-3xl font-semibold tracking-tight">Sign in to MeetingMind</h1>
@@ -22,6 +25,7 @@ export default function AuthPage() {
               </div>
             }
           >
+            <ActivationAuthWatch>
             <GoogleSignIn />
             <div className="flex items-center gap-3 text-xs uppercase tracking-wide text-muted-foreground" aria-hidden="true">
               <span className="h-px flex-1 bg-border" />
@@ -29,6 +33,7 @@ export default function AuthPage() {
               <span className="h-px flex-1 bg-border" />
             </div>
             <EmailAuthSection />
+            </ActivationAuthWatch>
           </Suspense>
           <p className="text-sm text-muted-foreground">
             By continuing, you agree to our{' '}

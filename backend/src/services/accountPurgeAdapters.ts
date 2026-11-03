@@ -45,6 +45,9 @@ export const USER_TABLES: { table: string; col: string }[] = [
   { table: 'scheduled_bots', col: 'user_id' },
   { table: 'user_integrations', col: 'user_id' },
   { table: 'folders', col: 'user_id' },
+  // First-party activation funnel. activation_events.user_id is NOT a foreign key, so it must be deleted explicitly.
+  { table: 'activation_events', col: 'user_id' },
+  { table: 'signup_attribution', col: 'user_id' },
   { table: 'profiles', col: 'id' },
 ];
 

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { RibbonMark } from '@/components/ui/ribbon-mark';
+import { ActivationBeacon } from '@/components/ActivationBeacon';
 import {
   ArrowUpRight,
   Sparkles,
@@ -97,6 +98,7 @@ function Shot({
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <ActivationBeacon page="landing" />
       {/* Navigation */}
       <nav aria-label="Primary" className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">

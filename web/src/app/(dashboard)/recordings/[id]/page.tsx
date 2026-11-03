@@ -76,6 +76,8 @@ import { SpeakerTimeline } from '@/components/recordings/VoiceRibbon';
 import { useRecordingAnalytics } from '@/hooks/useRecordingAnalytics';
 import { NoSummaryNotice } from '@/components/recordings/NoSummaryNotice';
 import { getSummaryView } from '@/lib/summaryState';
+import { summaryViewedState } from '@/lib/activation';
+import { track } from '@/lib/activationClient';
 
 type Tab = 'summary' | 'transcript' | 'qa';
 
@@ -95,6 +97,23 @@ export default function RecordingDetailPage() {
   const [seekRequest, setSeekRequest] = useState<SeekRequest | null>(null);
   const [isUpdatingSpeakers, setIsUpdatingSpeakers] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  // Activation funnel: the user saw a result (a summary, or the "too short / no speech" notice). Once per recording per tab session.
+  useEffect(() => {
+    if (!recording || activeTab !== 'summary' || isLoading) return;
+    const kind = getSummaryView({
+      status: recording.status, error_code: recording.error_code, hasSummary: !!summary,
+      summary_status: summaryStatus, summary_min_seconds: summaryMinSeconds,
+    }).kind;
+    const state = summaryViewedState(kind);
+    if (!state) return;
+    try {
+      const key = `mm_act_sv_${recording.id}`;
+      if (window.sessionStorage.getItem(key)) return;
+      window.sessionStorage.setItem(key, '1');
+    } catch { /* storage unusable: may emit twice, harmless */ }
+    track('summary_viewed', { state });
+  }, [recording, summary, summaryStatus, summaryMinSeconds, activeTab, isLoading]);
 
   const handleSeek = (time: number) => {
     // Moves the audio player; its timeupdate then keeps currentTime in sync
