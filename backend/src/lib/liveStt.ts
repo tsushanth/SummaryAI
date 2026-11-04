@@ -15,6 +15,8 @@ export type LiveSttProvider = 'recall' | 'soniox' | 'shadow';
 export interface LiveSttEnv {
   LIVE_STT_PROVIDER?: string | undefined;
   LIVE_STT_SHADOW?: string | undefined;
+  /** Comma separated user UUIDs allowed to be shadowed. Unset/empty = shadow is off for everyone (fails closed). */
+  LIVE_STT_SHADOW_USER_IDS?: string | undefined;
   LIVE_STT_WS_URL?: string | undefined;
   LIVE_STT_INGEST_SECRET?: string | undefined;
   NODE_ENV?: string | undefined;
@@ -28,10 +30,10 @@ export type LiveSttPlan =
  * Decide, per bot, which path to use. Anything that is not a complete, valid configuration yields `recall`, so a half-set
  * environment can never produce a bot with no transcript at all.
  */
-export function planLiveStt(env: LiveSttEnv): LiveSttPlan {
+export function planLiveStt(env: LiveSttEnv, userId?: string): LiveSttPlan {
   const wanted = (env.LIVE_STT_PROVIDER ?? 'recall').trim().toLowerCase();
   const provider: LiveSttProvider | null =
-    wanted === 'soniox' ? 'soniox' : env.LIVE_STT_SHADOW === 'true' ? 'shadow' : null;
+    wanted === 'soniox' ? 'soniox' : env.LIVE_STT_SHADOW === 'true' && isShadowAllowed(env.LIVE_STT_SHADOW_USER_IDS, userId) ? 'shadow' : null;
   // 'recall' (and any unknown value) without shadow is the unchanged default.
   if (!provider) return { provider: 'recall' };
 
@@ -40,6 +42,17 @@ export function planLiveStt(env: LiveSttEnv): LiveSttPlan {
   const okScheme = env.NODE_ENV === 'production' ? /^wss:\/\/[^/?#\s]+$/i.test(base) : /^wss?:\/\/[^/?#\s]+$/i.test(base);
   if (!secret || !okScheme) return { provider: 'recall', reason: 'misconfigured' };
   return { provider, wsBase: base, ingestSecret: secret };
+}
+
+/**
+ * Shadow streams a meeting's audio to a second speech vendor, so it is opt-in per USER, not just per deployment: only a user whose
+ * id is in LIVE_STT_SHADOW_USER_IDS is shadowed. Unset, empty, or a call without a user id = not shadowed (fails closed).
+ * Compared case-insensitively on the whole id. Does not apply to LIVE_STT_PROVIDER=soniox (that is a deliberate global switch).
+ */
+export function isShadowAllowed(allowList: string | undefined, userId: string | undefined): boolean {
+  const id = (userId ?? '').trim().toLowerCase();
+  if (!id) return false;
+  return parseSecretList(allowList).some((a) => a.toLowerCase() === id);
 }
 
 export function mintLiveSttRef(): string {

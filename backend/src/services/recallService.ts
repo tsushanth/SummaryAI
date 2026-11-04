@@ -102,10 +102,11 @@ export class RecallService {
     const plan = planLiveStt({
       LIVE_STT_PROVIDER: config.LIVE_STT_PROVIDER,
       LIVE_STT_SHADOW: config.LIVE_STT_SHADOW,
+      LIVE_STT_SHADOW_USER_IDS: config.LIVE_STT_SHADOW_USER_IDS,
       LIVE_STT_WS_URL: config.LIVE_STT_WS_URL,
       LIVE_STT_INGEST_SECRET: config.LIVE_STT_INGEST_SECRET,
       NODE_ENV: config.NODE_ENV,
-    });
+    }, params.user_id);
     if (plan.provider === 'recall' && plan.reason === 'misconfigured') {
       // Fail safe: the bot still gets Recall's own transcript. Names only, never values.
       console.error('[Recall] LIVE_STT requested but LIVE_STT_WS_URL (wss://...) or LIVE_STT_INGEST_SECRET is missing/invalid; using Recall transcript');

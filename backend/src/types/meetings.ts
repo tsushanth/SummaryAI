@@ -317,6 +317,8 @@ export interface SharingPreferencesResponse {
 
 export interface RecallBotCreateRequest {
   meeting_url: string;
+  /** Owner of the meeting. Only used to decide LIVE_STT_SHADOW_USER_IDS membership; never sent to Recall. */
+  user_id?: string;
   bot_name?: string;
   join_at?: string; // ISO 8601
   /** 'auto' | allow-listed code (lib/transcriptionLanguage.ts). Absent = auto. */
