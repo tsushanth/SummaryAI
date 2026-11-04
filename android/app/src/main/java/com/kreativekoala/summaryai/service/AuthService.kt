@@ -47,20 +47,14 @@ class AuthService @Inject constructor(
     @ApplicationContext private val context: Context,
     private val tokenManager: TokenManager,
     private val preferencesManager: PreferencesManager,
-    private val api: SummaryAIApi
+    private val api: SummaryAIApi,
+    private val supabase: SupabaseClient,
+    private val sessionEvents: com.kreativekoala.summaryai.data.auth.SessionEvents
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private val _authState = MutableStateFlow(AuthState())
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
-
-    // Supabase client
-    private val supabase: SupabaseClient = createSupabaseClient(
-        supabaseUrl = BuildConfig.SUPABASE_URL,
-        supabaseKey = BuildConfig.SUPABASE_ANON_KEY
-    ) {
-        install(Auth)
-    }
 
     // Google Sign-In client
     private val googleSignInClient: GoogleSignInClient by lazy {
@@ -72,10 +66,25 @@ class AuthService @Inject constructor(
     }
 
     init {
+        // The HTTP layer reports a session that can no longer be refreshed: go back to sign-in cleanly
+        scope.launch {
+            sessionEvents.sessionLost.collect { onSessionLost() }
+        }
         // Check for existing session on init
         scope.launch {
             checkExistingSession()
         }
+    }
+
+    /** The refresh token was rejected for good (tokens are already cleared): show sign-in instead of looping in 401s. */
+    private suspend fun onSessionLost() {
+        Log.w(TAG, "Session lost: returning to sign-in")
+        tokenManager.clearTokens()
+        _authState.value = AuthState(
+            isAuthenticated = false,
+            isLoading = false,
+            hasCompletedOnboarding = preferencesManager.hasCompletedOnboarding.first()
+        )
     }
 
     /**
@@ -86,6 +95,8 @@ class AuthService @Inject constructor(
         _authState.value = _authState.value.copy(isLoading = true)
 
         try {
+            // The client loads its saved session asynchronously; wait for that before looking at it.
+            kotlinx.coroutines.withTimeoutOrNull(5_000) { supabase.auth.awaitInitialization() }
             val hasCompletedOnboarding = preferencesManager.hasCompletedOnboarding.first()
             Log.i(TAG, "hasCompletedOnboarding: $hasCompletedOnboarding")
             Log.i(TAG, "tokenManager.isLoggedIn: ${tokenManager.isLoggedIn}, isTokenExpired: ${tokenManager.isTokenExpired}")
@@ -94,19 +105,9 @@ class AuthService @Inject constructor(
             if (tokenManager.isLoggedIn && !tokenManager.isTokenExpired) {
                 Log.i(TAG, "TokenManager has valid tokens, checking Supabase session...")
 
-                // Try to get/load the Supabase session
-                var session = supabase.auth.currentSessionOrNull()
-
-                // If Supabase doesn't have the session yet, try to restore it using the refresh token
-                if (session == null && tokenManager.refreshToken != null) {
-                    Log.i(TAG, "Supabase session null, trying to refresh using stored token...")
-                    try {
-                        session = supabase.auth.refreshSession(tokenManager.refreshToken!!)
-                        Log.i(TAG, "Session refreshed successfully")
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Failed to refresh session: ${e.message}")
-                    }
-                }
+                // The client's own session is the only source of truth. Our stored refresh token is a mirror that
+                // may already have been rotated, so it is never replayed to the server.
+                val session = supabase.auth.currentSessionOrNull()
 
                 if (session != null) {
                     // Sync tokens back to TokenManager to keep them fresh
@@ -294,6 +295,8 @@ class AuthService @Inject constructor(
         } catch (e: Exception) {
             // Ignore errors during sign out
         } finally {
+            // signOut() only drops the saved session when its network call succeeds; never leave one behind
+            try { supabase.auth.clearSession() } catch (_: Exception) {}
             tokenManager.clearTokens()
             _authState.value = AuthState(
                 isAuthenticated = false,

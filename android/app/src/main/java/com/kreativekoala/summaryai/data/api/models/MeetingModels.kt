@@ -31,7 +31,9 @@ data class MeetingDto(
     @SerializedName("auto_join") val autoJoin: Boolean? = null,
     val status: String,
     @SerializedName("recording_id") val recordingId: String? = null,
-    @SerializedName("join_url") val joinUrl: String? = null
+    @SerializedName("join_url") val joinUrl: String? = null,
+    /** Language the bot transcribes in ("auto" or a primary subtag). Absent on older backends. */
+    @SerializedName("transcription_language") val transcriptionLanguage: String? = null
 )
 
 // MARK: - Calendar Connection
@@ -48,20 +50,73 @@ data class CalendarConnectionDto(
 
 data class JoinMeetingRequest(
     @SerializedName("join_url") val joinUrl: String,
-    @SerializedName("bot_name") val botName: String? = null
+    @SerializedName("bot_name") val botName: String? = null,
+    /** Omitted (null) for Auto-detect so older backends see the same body as before. */
+    @SerializedName("transcription_language") val transcriptionLanguage: String? = null
 )
 
 data class ScheduleMeetingBotRequest(
     @SerializedName("meeting_id") val meetingId: String,
-    @SerializedName("auto_join") val autoJoin: Boolean = true
+    @SerializedName("auto_join") val autoJoin: Boolean = true,
+    @SerializedName("transcription_language") val transcriptionLanguage: String? = null
 )
 
 data class UpdateMeetingRequest(
     @SerializedName("auto_join") val autoJoin: Boolean? = null,
-    val title: String? = null
+    val title: String? = null,
+    @SerializedName("transcription_language") val transcriptionLanguage: String? = null
+)
+
+/** POST /api/meetings/:id/live-language. 409 means this meeting cannot switch language while live. */
+data class LiveLanguageRequest(
+    val language: String
+)
+
+/** PUT /api/meetings/transcription-languages/default */
+data class DefaultLanguageRequest(
+    val language: String
 )
 
 // MARK: - API Responses
+
+/** GET /api/meetings/transcription-languages */
+data class TranscriptionLanguagesResponse(
+    val auto: String? = null,
+    @SerializedName("default_language") val defaultLanguage: String? = null,
+    val languages: List<TranscriptionLanguageDto>? = null,
+    val live: LiveCapabilitiesDto? = null
+)
+
+data class TranscriptionLanguageDto(
+    val code: String,
+    val name: String? = null,
+    val native: String? = null
+)
+
+data class LiveCapabilitiesDto(
+    val provider: String? = null,
+    @SerializedName("can_change_during_meeting") val canChangeDuringMeeting: Boolean? = null,
+    @SerializedName("english_only_low_latency") val englishOnlyLowLatency: Boolean? = null,
+    @SerializedName("non_english_live_delay_minutes") val nonEnglishLiveDelayMinutes: String? = null,
+    @SerializedName("auto_live_behaviour") val autoLiveBehaviour: String? = null
+)
+
+/** GET /api/meetings/:id (flat body, unlike the list/PATCH responses). Only the language fields are read. */
+data class MeetingDetailDto(
+    val id: String? = null,
+    @SerializedName("transcription_language") val transcriptionLanguage: String? = null,
+    @SerializedName("live_language") val liveLanguage: LiveLanguageDto? = null
+)
+
+/**
+ * What the live transcript is doing now. [reason] is "not_live" or "provider_fixed" when [canChange] is false.
+ */
+data class LiveLanguageDto(
+    val language: String? = null,
+    @SerializedName("can_change") val canChange: Boolean? = null,
+    val reason: String? = null,
+    val provider: String? = null
+)
 
 data class ListMeetingsResponse(
     val items: List<MeetingDto>,

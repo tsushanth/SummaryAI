@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meeting_language_label">Ngôn ngữ phiên âm</string>
+    <string name="meeting_language_auto">Tự động phát hiện</string>
+    <string name="meeting_language_hint">Tự động phát hiện hoạt động tốt với hầu hết cuộc họp. Hãy chọn ngôn ngữ nếu bản phiên âm sai. Lựa chọn của bạn sẽ được ghi nhớ.</string>
+    <string name="meeting_language_dialog_title">Ngôn ngữ phiên âm</string>
+    <string name="meeting_language_change">Đổi ngôn ngữ</string>
+    <string name="meeting_language_active">Ngôn ngữ: %1$s</string>
+    <string name="meeting_language_changed">Đã đặt ngôn ngữ phiên âm là %1$s</string>
+    <string name="meeting_language_change_note">Áp dụng cho lời nói từ bây giờ.</string>
+    <string name="meeting_language_switch_unavailable">Cuộc họp này không thể đổi ngôn ngữ khi đang diễn ra trực tiếp</string>
+    <string name="meeting_language_switch_failed">Không thể đổi ngôn ngữ. Vui lòng thử lại.</string>
+    <string name="meeting_language_hint_auto_english_live">Tự động phát hiện sẽ tìm ngôn ngữ cho bản phiên âm cuối cùng. Phụ đề trực tiếp vẫn là tiếng Anh trừ khi bạn chọn ngôn ngữ.</string>
+    <string name="meeting_language_hint_delayed">Phụ đề trực tiếp ở ngôn ngữ này có thể đến trễ %1$s phút. Bản phiên âm cuối cùng không bị ảnh hưởng.</string>
+    <string name="meeting_language_reason_fixed">Ngôn ngữ trực tiếp được đặt khi bot tham gia và không thể đổi trong cuộc họp này.</string>
+    <string name="meeting_language_reason_not_live">Chỉ có thể đổi ngôn ngữ khi bot đang ở trong cuộc họp.</string>
+    <string name="meeting_language_switch_not_live">Bot hiện không ở trong cuộc họp nên không thể đổi ngôn ngữ.</string>
+    <string name="meeting_language_saved_not_live">Đã lưu %1$s cho bản phiên âm cuối cùng, nhưng chưa thể chuyển bản phiên âm trực tiếp lúc này.</string>
+</resources>

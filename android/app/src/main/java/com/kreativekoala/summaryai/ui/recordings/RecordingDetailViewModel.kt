@@ -10,6 +10,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.data.api.models.MeetingAnalyticsDto
 import com.kreativekoala.summaryai.data.repository.IntegrationsRepository
+import com.kreativekoala.summaryai.data.sample.SampleMeeting
 import com.kreativekoala.summaryai.data.repository.RecordingsRepository
 import com.kreativekoala.summaryai.domain.model.RecordingDetail
 import com.kreativekoala.summaryai.domain.model.RecordingStatus
@@ -325,6 +326,7 @@ class RecordingDetailViewModel @Inject constructor(
 
     /** Talk-time tile. Best effort: failures just hide the tile. */
     private fun loadAnalytics() {
+        if (SampleMeeting.isSample(recordingId)) return // local-only content: nothing to fetch
         viewModelScope.launch {
             integrationsRepository.analytics(recordingId).onSuccess { a ->
                 _uiState.value = _uiState.value.copy(analytics = a)

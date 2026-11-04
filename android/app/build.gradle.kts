@@ -31,8 +31,8 @@ android {
         applicationId = "com.kreativekoala.meetingmind"
         minSdk = 26
         targetSdk = 36
-        versionCode = 55
-        versionName = "1.7.2"
+        versionCode = 60
+        versionName = "1.7.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -41,7 +41,15 @@ android {
 
         // Build config fields
         buildConfigField("String", "SUPABASE_URL", "\"https://mlofjzlmncgnhxbiuemf.supabase.co\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sb2ZqemxtbmNnbmh4Yml1ZW1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyOTU1NjAsImV4cCI6MjA4Mjg3MTU2MH0.fUxgMcu1BNrsYneN5vSMFWxsv-rWIygCx-xn-Vmr0Ec\"")
+        // Supabase publishable key (sb_publishable_..., public by design; not a JWT). The legacy anon JWT is
+        // being retired, so the build refuses anything that is not a publishable key. Override with
+        // -PSUPABASE_PUBLISHABLE_KEY=... if the key is ever rotated.
+        val supabasePublishableKey = providers.gradleProperty("SUPABASE_PUBLISHABLE_KEY").orNull
+            ?: "sb_publishable_z2oPrlsfqmjKzPHrXCyPxg_f7rOs8QJ"
+        require(supabasePublishableKey.startsWith("sb_publishable_")) {
+            "SUPABASE_PUBLISHABLE_KEY must be a Supabase publishable key (sb_publishable_...), not a legacy JWT."
+        }
+        buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"$supabasePublishableKey\"")
         buildConfigField("String", "API_BASE_URL", "\"https://summary-ai-backend.fly.dev\"")
         // Google OAuth Web Client ID (from Google Cloud Console)
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"753424767416-54viqmpd45g10oohm7vug13o8tdhb8qp.apps.googleusercontent.com\"")
@@ -71,6 +79,11 @@ android {
 
     kotlinOptions {
         jvmTarget = "17"
+    }
+
+    testOptions {
+        // JVM unit tests call code that logs with android.util.Log
+        unitTests.isReturnDefaultValues = true
     }
 
     buildFeatures {
@@ -120,6 +133,8 @@ dependencies {
 
     // Unit tests
     testImplementation("junit:junit:4.13.2")
+    testImplementation("com.squareup.okhttp3:mockwebserver:5.0.0-alpha.14")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
 
     // Hilt
     implementation(libs.hilt.android)
@@ -170,6 +185,9 @@ dependencies {
     // Firebase Analytics (for Google Ads conversion tracking)
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     implementation("com.google.firebase:firebase-analytics")
+    // Play install referrer (utm_* capture). Already on the classpath transitively via the Facebook SDK (1.0);
+    // declared so the version is ours. ~20 KB, Google-published.
+    implementation("com.android.installreferrer:installreferrer:2.2")
 
     // TikTok Events SDK (install attribution & event tracking)
     implementation("com.github.tiktok:tiktok-business-android-sdk:1.6.0")

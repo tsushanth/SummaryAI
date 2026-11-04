@@ -54,13 +54,13 @@ import com.kreativekoala.summaryai.domain.model.RecordingStatus
 import com.kreativekoala.summaryai.ui.components.MmCard
 import com.kreativekoala.summaryai.ui.components.MmChip
 import com.kreativekoala.summaryai.ui.components.MmEmptyState
-import com.kreativekoala.summaryai.ui.components.MmStatusPill
 import com.kreativekoala.summaryai.ui.components.SkeletonCardList
 import com.kreativekoala.summaryai.ui.navigation.LocalTabReselection
 import com.kreativekoala.summaryai.ui.recordings.organize.DateRangePickerDialog
 import com.kreativekoala.summaryai.ui.recordings.organize.FolderManageSheet
 import com.kreativekoala.summaryai.ui.recordings.organize.FolderTagFilterRow
 import com.kreativekoala.summaryai.ui.recordings.organize.OrganizeSheet
+import com.kreativekoala.summaryai.data.sample.SampleMeeting
 import com.kreativekoala.summaryai.ui.recordings.organize.groupedRecordingItems
 import com.kreativekoala.summaryai.ui.theme.Green50
 import com.kreativekoala.summaryai.ui.theme.Orange50
@@ -229,11 +229,7 @@ fun RecordingsListScreen(
                             modifier = if (uiState.isRefreshing) Modifier.rotate(rotation) else Modifier
                         )
                     }
-                    // PRO badge
-                    MmStatusPill(
-                        text = stringResource(R.string.pro),
-                        modifier = Modifier.padding(end = 16.dp)
-                    )
+                    Spacer(modifier = Modifier.width(8.dp))
                 }
             )
         }
@@ -511,11 +507,13 @@ private fun RecordingCardIOS(
                     )
                 }
 
+                val isSample = SampleMeeting.isSample(recording.id)
                 DropdownMenu(
                     expanded = showMenu,
                     onDismissRequest = { showMenu = false }
                 ) {
-                    DropdownMenuItem(
+                    // The bundled sample is local-only: favorites and folders would call the server for a record it lacks.
+                    if (!isSample) DropdownMenuItem(
                         text = {
                             Text(if (recording.isFavorite) stringResource(R.string.remove_from_favorites) else stringResource(R.string.add_to_favorites))
                         },
@@ -531,7 +529,7 @@ private fun RecordingCardIOS(
                             )
                         }
                     )
-                    DropdownMenuItem(
+                    if (!isSample) DropdownMenuItem(
                         text = { Text("Folder and tags") },
                         onClick = {
                             showMenu = false

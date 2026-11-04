@@ -1,0 +1,1 @@
+Choose the transcription language for each meeting (or auto-detect), and change it during a live meeting where supported.

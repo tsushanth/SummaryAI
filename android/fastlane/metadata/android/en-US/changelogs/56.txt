@@ -1,0 +1,5 @@
+MeetingMind is free. Recording, transcripts, summaries, Q&A, the meeting bot, phone call recording and calendar sync no longer need a subscription.
+- Removed every upgrade screen, prompt and the PRO badge.
+- Join Meeting and Phone open directly.
+- Better reporting of upload and sign-in problems so we can fix them faster.
+The optional AI Coach add-on still uses its own credits.

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meeting_language_label">Idioma de la transcripción</string>
+    <string name="meeting_language_auto">Detectar automáticamente</string>
+    <string name="meeting_language_hint">La detección automática funciona en la mayoría de las reuniones. Elige un idioma si la transcripción sale mal. Se recuerda tu elección.</string>
+    <string name="meeting_language_dialog_title">Idioma de la transcripción</string>
+    <string name="meeting_language_change">Cambiar idioma</string>
+    <string name="meeting_language_active">Idioma: %1$s</string>
+    <string name="meeting_language_changed">Idioma de la transcripción cambiado a %1$s</string>
+    <string name="meeting_language_change_note">Se aplica al habla a partir de ahora.</string>
+    <string name="meeting_language_switch_unavailable">Esta reunión no puede cambiar de idioma mientras está en vivo</string>
+    <string name="meeting_language_switch_failed">No se pudo cambiar el idioma. Inténtalo de nuevo.</string>
+    <string name="meeting_language_hint_auto_english_live">La detección automática encuentra el idioma para la transcripción final. Los subtítulos en vivo siguen en inglés salvo que elijas un idioma.</string>
+    <string name="meeting_language_hint_delayed">Los subtítulos en vivo en este idioma pueden llegar con %1$s minutos de retraso. La transcripción final no se ve afectada.</string>
+    <string name="meeting_language_reason_fixed">El idioma en vivo se fijó cuando el bot se unió y no se puede cambiar durante esta reunión.</string>
+    <string name="meeting_language_reason_not_live">El idioma solo se puede cambiar mientras el bot está en la reunión.</string>
+    <string name="meeting_language_switch_not_live">El bot no está en la reunión ahora, así que no se puede cambiar el idioma.</string>
+    <string name="meeting_language_saved_not_live">Se guardó %1$s para la transcripción final, pero la transcripción en vivo no se pudo cambiar ahora.</string>
+</resources>

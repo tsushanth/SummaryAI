@@ -2,8 +2,11 @@ package com.kreativekoala.summaryai.ui.meetings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kreativekoala.summaryai.data.LanguageCatalog
+import com.kreativekoala.summaryai.data.MeetingLanguages
 import com.kreativekoala.summaryai.data.repository.CalendarRepository
 import com.kreativekoala.summaryai.data.repository.MeetingsRepository
+import com.kreativekoala.summaryai.data.repository.TranscriptionLanguagesRepository
 import com.kreativekoala.summaryai.domain.model.CalendarConnection
 import com.kreativekoala.summaryai.domain.model.Meeting
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,13 +22,15 @@ data class MeetingsUiState(
     val calendarConnections: List<CalendarConnection> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
-    val hasCalendarConnected: Boolean = false
+    val hasCalendarConnected: Boolean = false,
+    val languageCatalog: LanguageCatalog = LanguageCatalog.FALLBACK
 )
 
 @HiltViewModel
 class MeetingsViewModel @Inject constructor(
     private val meetingsRepository: MeetingsRepository,
-    private val calendarRepository: CalendarRepository
+    private val calendarRepository: CalendarRepository,
+    private val languagesRepository: TranscriptionLanguagesRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MeetingsUiState())
@@ -33,6 +38,9 @@ class MeetingsViewModel @Inject constructor(
 
     init {
         loadData()
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(languageCatalog = languagesRepository.refresh())
+        }
     }
 
     fun refresh() {
@@ -107,6 +115,37 @@ class MeetingsViewModel @Inject constructor(
                     _uiState.value = _uiState.value.copy(
                         upcomingMeetings = revertedMeetings,
                         error = "Failed to update: ${error.message}"
+                    )
+                }
+            )
+        }
+    }
+
+    /**
+     * Sets the transcription language of an upcoming (calendar) meeting via PATCH. "auto" is sent
+     * explicitly: it means "this meeting, auto-detect", not "follow my default".
+     */
+    fun setMeetingLanguage(meeting: Meeting, code: String) {
+        val chosen = MeetingLanguages.normalize(code)
+        if (!_uiState.value.languageCatalog.contains(chosen)) return
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                upcomingMeetings = _uiState.value.upcomingMeetings.map {
+                    if (it.id == meeting.id) it.copy(transcriptionLanguage = chosen) else it
+                }
+            )
+            meetingsRepository.updateMeeting(meeting.id, transcriptionLanguage = chosen).fold(
+                onSuccess = { updated ->
+                    _uiState.value = _uiState.value.copy(
+                        upcomingMeetings = _uiState.value.upcomingMeetings.map {
+                            if (it.id == meeting.id) updated.copy(transcriptionLanguage = updated.transcriptionLanguage ?: chosen) else it
+                        }
+                    )
+                },
+                onFailure = {
+                    _uiState.value = _uiState.value.copy(
+                        upcomingMeetings = _uiState.value.upcomingMeetings.map { if (it.id == meeting.id) meeting else it },
+                        error = "Failed to update: ${it.message}"
                     )
                 }
             )

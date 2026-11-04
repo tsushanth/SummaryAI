@@ -5,6 +5,9 @@ import com.kreativekoala.summaryai.data.api.ProgressRequestBody
 import com.kreativekoala.summaryai.data.api.SummaryAIApi
 import com.kreativekoala.summaryai.data.api.models.*
 import com.kreativekoala.summaryai.di.UploadClient
+import com.kreativekoala.summaryai.service.activation.Activation
+import com.kreativekoala.summaryai.data.sample.SampleMeeting
+import com.kreativekoala.summaryai.data.sample.SampleMeetingStore
 import com.kreativekoala.summaryai.domain.model.Recording
 import com.kreativekoala.summaryai.domain.model.RecordingDetail
 import com.kreativekoala.summaryai.domain.model.Summary
@@ -31,7 +34,8 @@ private const val TAG = "RecordingsRepository"
 @Singleton
 class RecordingsRepository @Inject constructor(
     private val api: SummaryAIApi,
-    @UploadClient private val uploadClient: OkHttpClient
+    @UploadClient private val uploadClient: OkHttpClient,
+    private val sampleStore: SampleMeetingStore
 ) {
     /**
      * Get paginated list of recordings
@@ -59,7 +63,16 @@ class RecordingsRepository @Inject constructor(
             response.recordings.forEachIndexed { index, recording ->
                 Log.d(TAG, "Recording[$index]: id=${recording.id}, title=${recording.title}, status=${recording.status}")
             }
-            Result.success(response.recordings.map { it.toDomain() })
+            Result.success(
+                SampleMeeting.mergeIntoList(
+                    loaded = response.recordings.map { it.toDomain() },
+                    page = page,
+                    status = status,
+                    filter = filter,
+                    visible = sampleStore.isVisible,
+                    createdAt = sampleStore.createdAt()
+                )
+            )
         } catch (e: Exception) {
             Log.e(TAG, "Failed to fetch recordings", e)
             Result.failure(e)
@@ -74,6 +87,7 @@ class RecordingsRepository @Inject constructor(
         includeTranscript: Boolean = false,
         includeSummary: Boolean = false
     ): Result<RecordingDetail> = withContext(Dispatchers.IO) {
+        if (SampleMeeting.isSample(id)) return@withContext Result.success(SampleMeeting.detail(sampleStore.createdAt()))
         try {
             val includes = mutableListOf<String>()
             if (includeTranscript) includes.add("transcript")
@@ -163,6 +177,11 @@ class RecordingsRepository @Inject constructor(
      * Delete a recording
      */
     suspend fun deleteRecording(id: String): Result<Unit> = withContext(Dispatchers.IO) {
+        if (SampleMeeting.isSample(id)) {
+            sampleStore.dismiss()
+            Activation.track { sampleDeleted() }
+            return@withContext Result.success(Unit)
+        }
         try {
             api.deleteRecording(id)
             Result.success(Unit)
@@ -178,6 +197,7 @@ class RecordingsRepository @Inject constructor(
         recordingId: String,
         question: String
     ): Result<String> = withContext(Dispatchers.IO) {
+        if (SampleMeeting.isSample(recordingId)) return@withContext Result.success(SampleMeeting.QA_LOCKED_MESSAGE)
         try {
             val response = api.askQuestion(recordingId, AskQuestionRequest(question))
             Result.success(response.answer)
@@ -193,6 +213,7 @@ class RecordingsRepository @Inject constructor(
         recordingId: String,
         speakerNames: Map<String, String>
     ): Result<Transcript> = withContext(Dispatchers.IO) {
+        if (SampleMeeting.isSample(recordingId)) return@withContext sampleReadOnly()
         try {
             val response = api.updateSpeakerNames(recordingId, UpdateSpeakerNamesRequest(speakerNames))
             Result.success(response.transcript.toDomain())
@@ -205,6 +226,7 @@ class RecordingsRepository @Inject constructor(
      * Toggle favorite status for a recording
      */
     suspend fun toggleFavorite(recordingId: String, isFavorite: Boolean): Result<Recording> = withContext(Dispatchers.IO) {
+        if (SampleMeeting.isSample(recordingId)) return@withContext sampleReadOnly()
         try {
             val response = api.updateRecording(recordingId, UpdateRecordingRequest(isFavorite = isFavorite))
             Result.success(response.recording.toDomain())
@@ -217,6 +239,7 @@ class RecordingsRepository @Inject constructor(
      * Rename a recording
      */
     suspend fun renameRecording(recordingId: String, title: String): Result<Recording> = withContext(Dispatchers.IO) {
+        if (SampleMeeting.isSample(recordingId)) return@withContext sampleReadOnly()
         try {
             val response = api.updateRecording(recordingId, UpdateRecordingRequest(title = title))
             Result.success(response.recording.toDomain())
@@ -229,6 +252,10 @@ class RecordingsRepository @Inject constructor(
      * Poll for recording status updates
      */
     fun pollRecordingStatus(recordingId: String, intervalMs: Long = 3000): Flow<Recording> = flow {
+        if (SampleMeeting.isSample(recordingId)) {
+            emit(SampleMeeting.recording(sampleStore.createdAt()))
+            return@flow
+        }
         while (true) {
             try {
                 val response = api.getRecording(recordingId)
@@ -246,6 +273,10 @@ class RecordingsRepository @Inject constructor(
         }
     }.flowOn(Dispatchers.IO)
 }
+
+/** The bundled sample is read-only: it is not a server record, so edits are refused locally. */
+private fun <T> sampleReadOnly(): Result<T> =
+    Result.failure(UnsupportedOperationException("The sample meeting cannot be edited"))
 
 // Extension functions to convert DTOs to domain models
 private fun RecordingDto.toDomain() = Recording(
