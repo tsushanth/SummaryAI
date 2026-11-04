@@ -114,6 +114,7 @@ npm run dev
 - [Data Models](DATA_MODELS.md) - Database schema and Swift models
 - [Processing Pipeline](PROCESSING_PIPELINE.md) - Transcription and summarization
 - [UX Design](UX_DESIGN.md) - Screen flows and UI specifications
+- [Web deploy](docs/web-deploy.md) - CI deploy of the web app to Fly, automatic rollback, manual rollback
 
 ## License
 

@@ -1,0 +1,165 @@
+name: Web deploy (Fly)
+
+# Deploys the MeetingMind web app (Fly app meeting-mind-web) when web/ changes on main.
+# The backend (summary-ai-backend) and the Android app are NOT deployed by this workflow.
+# See docs/web-deploy.md for the rollback logic and the one-step manual rollback.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      - ".github/workflows/web-deploy.yml"
+  workflow_dispatch:
+
+# One deploy at a time. A running deploy is never cancelled (a half-finished deploy would skip its watch and rollback).
+concurrency:
+  group: web-deploy-meeting-mind-web
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  FLY_APP: meeting-mind-web
+  WEB_URL: https://meeting-mind-web.fly.dev
+
+jobs:
+  deploy:
+    # workflow_dispatch can be started from any branch; only main may reach production.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "20" # matches web/Dockerfile (node:20-alpine)
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Web tests (a failure here means no deploy)
+        run: |
+          set -euo pipefail
+          npm --prefix web ci --ignore-scripts
+          npm --prefix web test
+
+      - name: Install flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@fc53c09e1bc3be6f54706524e3b82c4f462f77be # 1.5
+        with:
+          version: "0.4.123"
+
+      - name: Record the current release image (rollback target)
+        id: snapshot
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${FLY_API_TOKEN}" ]]; then
+            echo "::error::FLY_API_TOKEN secret is not set; refusing to deploy"
+            exit 1
+          fi
+          releases="$(flyctl releases -a "$FLY_APP" --image -j)"
+          prev="$(printf '%s' "$releases" | jq -r '[.[] | select(.Status == "complete" and ((.ImageRef // "") != ""))][0].ImageRef // empty')"
+          # Must look like this app's own registry image; anything else is not a safe rollback target.
+          if [[ ! "$prev" =~ ^registry\.fly\.io/${FLY_APP}:[A-Za-z0-9._-]+$ ]]; then
+            echo "::error::Could not read a valid previous release image (got '${prev}'); refusing to deploy without a rollback target"
+            exit 1
+          fi
+          echo "prev_image=${prev}" >> "$GITHUB_OUTPUT"
+          echo "Rollback target: ${prev}"
+          {
+            echo "### Web deploy"
+            echo "- Rollback target (previous release image): \`${prev}\`"
+            echo "- Commit: \`${GITHUB_SHA}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Baseline health (informational)
+        run: |
+          set -euo pipefail
+          if bash .github/scripts/web-health.sh "$WEB_URL"; then
+            echo "Baseline: healthy before deploy"
+          else
+            echo "::warning::Site was already unhealthy before this deploy"
+          fi
+
+      - name: Mark deploy started
+        id: mark
+        run: echo "started=true" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to Fly
+        timeout-minutes: 20
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          flyctl deploy web -a "$FLY_APP" --remote-only
+
+      - name: Watch health (settle 90 s, then 5 checks 30 s apart, 2 consecutive failures = unhealthy)
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          sleep 90
+          total=5
+          consecutive=0
+          ever_ok=0
+          for i in $(seq 1 "$total"); do
+            echo "--- check ${i}/${total}"
+            if bash .github/scripts/web-health.sh "$WEB_URL"; then
+              ever_ok=1
+              consecutive=0
+            else
+              consecutive=$((consecutive + 1))
+            fi
+            if (( consecutive >= 2 )); then
+              echo "::error::Unhealthy: ${consecutive} consecutive failed checks (check ${i}/${total})"
+              exit 1
+            fi
+            if (( i < total )); then
+              sleep 30
+            fi
+          done
+          if (( ever_ok == 0 )); then
+            echo "::error::Never healthy during the watch window"
+            exit 1
+          fi
+          echo "Healthy for the whole watch window"
+          echo "- Result: deployed and healthy" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Roll back to the previous release image
+        # Runs only if the deploy had started and any later step failed (never for a test failure or a failed snapshot).
+        if: failure() && steps.mark.outputs.started == 'true'
+        timeout-minutes: 20
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          PREV_IMAGE: ${{ steps.snapshot.outputs.prev_image }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$PREV_IMAGE" =~ ^registry\.fly\.io/${FLY_APP}:[A-Za-z0-9._-]+$ ]]; then
+            echo "::error::No valid rollback image recorded; ROLLBACK NOT DONE, fix manually (see docs/web-deploy.md)"
+            exit 1
+          fi
+          echo "Rolling back to ${PREV_IMAGE}"
+          if ! flyctl deploy -a "$FLY_APP" --image "$PREV_IMAGE"; then
+            echo "::error::ROLLBACK COMMAND FAILED; the site may be unhealthy, fix manually (see docs/web-deploy.md)"
+            echo "- Result: deploy unhealthy, ROLLBACK FAILED" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          for attempt in 1 2 3 4 5; do
+            sleep 20
+            if bash .github/scripts/web-health.sh "$WEB_URL"; then
+              echo "::error::Deploy was unhealthy and has been ROLLED BACK to ${PREV_IMAGE}; the site is healthy again"
+              echo "- Result: deploy unhealthy, rolled back to \`${PREV_IMAGE}\` (healthy after rollback)" >> "$GITHUB_STEP_SUMMARY"
+              # The job stays failed (an earlier step failed), which is what triggers the GitHub failure email.
+              exit 1
+            fi
+            echo "Still unhealthy after rollback (attempt ${attempt}/5)"
+          done
+          echo "::error::ROLLED BACK but the site is STILL UNHEALTHY; manual action required"
+          echo "- Result: rolled back but still unhealthy, MANUAL ACTION REQUIRED" >> "$GITHUB_STEP_SUMMARY"
+          exit 1
