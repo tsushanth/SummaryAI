@@ -77,7 +77,7 @@ export default function RecordingsPage() {
         <EmptyState
           icon={<Mic />}
           title="No recordings yet"
-          message="Record a meeting, upload an audio file, or connect your calendar so calls arrive on their own. Each one becomes a transcript, a summary and a list of what people agreed to do."
+          message="Record a meeting, upload an audio file, or connect your calendar so calls arrive on their own. Each one becomes a transcript, a summary and a list of what people agreed to do. A one-minute recording is enough to see your first summary."
           action={
             <Link href="/recordings/new">
               <Button>
