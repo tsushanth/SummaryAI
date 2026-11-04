@@ -39,7 +39,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: "20" # matches web/Dockerfile (node:20-alpine)
+          node-version: "22" # the web tests import .ts files directly, which needs Node >= 22.18 (type stripping); the deployed image still builds on node:20-alpine
           cache: npm
           cache-dependency-path: web/package-lock.json
 
