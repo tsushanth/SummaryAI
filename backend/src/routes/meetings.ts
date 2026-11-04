@@ -355,6 +355,7 @@ router.post(
     try {
       // Create bot via Recall.ai immediately
       const bot = await RecallService.createBot({
+        user_id: userId,
         meeting_url: join_url,
         bot_name: bot_name || 'Meeting Mind',
         transcription_language: language,
@@ -632,6 +633,7 @@ router.post(
 
     // Create bot via Recall.ai
     const bot = await RecallService.createBot({
+      user_id: userId,
       meeting_url: meeting.join_url,
       bot_name: 'Meeting Mind',
       transcription_language: language,
@@ -982,6 +984,7 @@ meetingsWorkerRouter.post(
 
       // Create bot via Recall.ai
       const bot = await RecallService.createBot({
+        user_id: userId,
         meeting_url: meeting.join_url,
         bot_name: 'Meeting Mind',
         transcription_language: language,

@@ -7,7 +7,7 @@ process.env.SUPABASE_ANON_KEY ??= 'dummy';
 process.env.SUPABASE_SERVICE_ROLE_KEY ??= 'dummy';
 process.env.RECALL_API_KEY = 'recall-test-key';
 
-const KEYS = ['LIVE_STT_PROVIDER', 'LIVE_STT_SHADOW', 'LIVE_STT_WS_URL', 'LIVE_STT_INGEST_SECRET', 'SERVICE_URL', 'MEETING_BOT_ANNOUNCE', 'RECALL_AUTO_LANGUAGE'] as const;
+const KEYS = ['LIVE_STT_PROVIDER', 'LIVE_STT_SHADOW', 'LIVE_STT_SHADOW_USER_IDS', 'LIVE_STT_WS_URL', 'LIVE_STT_INGEST_SECRET', 'SERVICE_URL', 'MEETING_BOT_ANNOUNCE', 'RECALL_AUTO_LANGUAGE'] as const;
 const saved: Record<string, string | undefined> = {};
 
 async function load(env: Partial<Record<(typeof KEYS)[number], string>> = {}) {
@@ -98,8 +98,8 @@ describe('Soniox live path carries the language in the ingest URL', () => {
     expect(sent[0].recording_config).not.toHaveProperty('transcript');
   });
   it('shadow: Recall transcript uses the language and the audio endpoint gets the hint too', async () => {
-    const { RecallService } = await load({ ...SVC, LIVE_STT_SHADOW: 'true', ...SOL });
-    await RecallService.createBot({ meeting_url: 'u', transcription_language: 'fr' });
+    const { RecallService } = await load({ ...SVC, LIVE_STT_SHADOW: 'true', LIVE_STT_SHADOW_USER_IDS: 'user-owner', ...SOL });
+    await RecallService.createBot({ meeting_url: 'u', user_id: 'user-owner', transcription_language: 'fr' });
     expect(provider()).toEqual({ mode: 'prioritize_accuracy', language_code: 'fr' });
     const eps = sent[0].recording_config.realtime_endpoints;
     expect(eps[1].url).toMatch(/&lang=fr$/);

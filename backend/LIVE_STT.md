@@ -9,6 +9,7 @@ create-bot request body byte for byte). The separate `live-stt/` service is PR #
 |---|---|---|
 | `LIVE_STT_PROVIDER` | `recall` | `recall` = Recall's own transcript (today). `soniox` = no Recall transcript block; Recall streams mixed raw audio to the live-stt service. Any other value is treated as `recall`. |
 | `LIVE_STT_SHADOW` | unset | Exactly `true` = keep Recall's transcript as the source of truth AND stream audio to live-stt; its segments are stored with `shadow=true` and ignored by every reader. Ignored when `LIVE_STT_PROVIDER=soniox`. |
+| `LIVE_STT_SHADOW_USER_IDS` | unset | Comma separated user UUIDs. Shadow only applies to bots created for these users; unset/empty/no user id = shadow OFF for everyone, even with `LIVE_STT_SHADOW=true` (shadow sends meeting audio to a second speech vendor, so it is opt-in per user). Does not affect `LIVE_STT_PROVIDER=soniox`. |
 | `LIVE_STT_WS_URL` | unset | Public base URL of the live-stt app, e.g. `wss://mm-live-stt.fly.dev` (no path; must be `wss://` in production). |
 | `LIVE_STT_INGEST_SECRET` | unset | HMAC secret for the per-bot URL token. Equals the service's `INGEST_TOKEN_SECRETS` (current secret first). |
 | `LIVE_STT_SHARED_SECRET` | unset | HMAC secret for `POST /internal/live-segments`. Equals the service's `BACKEND_SINK_SECRET`. Comma separated list accepted (rotation). Unset = the route answers 404. |
@@ -122,7 +123,7 @@ default `en`) instead of the old hard-coded `en`.
    never overwrite existing ones). Deploy the backend (no behaviour change yet).
 3. Deploy the `mm-live-stt` app (PR #34) with `INGEST_TOKEN_SECRETS` = ingest secret, `BACKEND_SINK_SECRET` = shared secret,
    `BACKEND_SINK_URL` = `https://summary-ai-backend.fly.dev/internal/live-segments`, `SONIOX_API_KEY`.
-4. Shadow first: set `LIVE_STT_WS_URL` and `LIVE_STT_SHADOW=true`. Run one real meeting. Compare `live_transcripts` rows with
+4. Shadow first: set `LIVE_STT_WS_URL`, `LIVE_STT_SHADOW_USER_IDS=<test user uuid(s)>` and `LIVE_STT_SHADOW=true` (without the allowlist nobody is shadowed). Run one real meeting. Compare `live_transcripts` rows with
    `shadow = true` against `shadow = false` for that `meeting_id`; users see no change.
 5. Switch: set `LIVE_STT_PROVIDER=soniox` (applies to the next bot; a running bot keeps its config). Unset `LIVE_STT_SHADOW`.
 6. Deploys of the backend do not drop live audio (it goes to the separate app). Deploys of `mm-live-stt` do (Recall retries 30 x 3 s).

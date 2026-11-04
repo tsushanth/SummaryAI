@@ -87,6 +87,8 @@ const envSchema = z.object({
   LIVE_STT_PROVIDER: z.string().default('recall'),
   // 'true' = keep Recall's transcript as the source of truth AND stream audio to mm-live-stt, whose segments are stored shadow=true.
   LIVE_STT_SHADOW: z.string().default('false'),
+  // Comma separated user UUIDs whose meetings may be shadowed. Unset/empty = shadow is OFF for everyone even when LIVE_STT_SHADOW=true.
+  LIVE_STT_SHADOW_USER_IDS: z.string().optional(),
   // Public wss:// base URL of the mm-live-stt app (no path), e.g. wss://mm-live-stt.fly.dev
   LIVE_STT_WS_URL: z.string().optional(),
   // HMAC secret for the per-bot ingest token in the websocket URL (= the service's INGEST_TOKEN_SECRETS).
