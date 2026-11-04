@@ -2,7 +2,9 @@ package com.kreativekoala.summaryai.data.repository
 
 import android.util.Log
 import com.kreativekoala.summaryai.data.api.ProgressRequestBody
+import com.kreativekoala.summaryai.data.api.RetryingUploader
 import com.kreativekoala.summaryai.data.api.SummaryAIApi
+import com.kreativekoala.summaryai.data.api.UploadDiagnostics
 import com.kreativekoala.summaryai.data.api.models.*
 import com.kreativekoala.summaryai.di.UploadClient
 import com.kreativekoala.summaryai.service.activation.Activation
@@ -22,6 +24,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
+import retrofit2.HttpException
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -113,8 +116,9 @@ class RecordingsRepository @Inject constructor(
         onProgress: (Float) -> Unit = {}
     ): Result<Recording> = withContext(Dispatchers.IO) {
         var stage = "create"
+        var putDiagnostics: UploadDiagnostics? = null
+        val fileSize = audioFile.length()
         try {
-            val fileSize = audioFile.length()
             Log.d(TAG, "Creating recording - title: $title, duration: $durationSeconds, size: $fileSize")
 
             // Step 1: Create recording and get upload URL
@@ -144,9 +148,15 @@ class RecordingsRepository @Inject constructor(
                 .put(body)
                 .build()
 
-            val uploadResponse = uploadClient.newCall(request).execute()
-            if (!uploadResponse.isSuccessful) {
-                throw Exception("Upload failed: ${uploadResponse.code}")
+            val uploader = RetryingUploader(uploadClient) { d ->
+                putDiagnostics = d
+                // Host and numbers only, never the URL (it carries the signed token).
+                Log.w(TAG, "Upload attempt failed: ${d.toLogLine()}")
+            }
+            uploader.execute(request, fileSize).use { uploadResponse ->
+                if (!uploadResponse.isSuccessful) {
+                    throw Exception("Upload failed: ${uploadResponse.code}")
+                }
             }
 
             // Step 3: Complete upload
@@ -166,11 +176,37 @@ class RecordingsRepository @Inject constructor(
                     flow = "recording_upload",
                     t = e,
                     message = "Recording upload failed at $stage: ${e.javaClass.simpleName}",
-                    context = mapOf("stage" to stage),
+                    context = failureContext(stage, e, putDiagnostics, fileSize),
                 )
             }
             Result.failure(e)
         }
+    }
+
+    /**
+     * Context sent with a final upload failure. The storage PUT carries the diagnostics of its last attempt; an
+     * API call that failed with an HTTP error (create / complete) carries the same fields from its response.
+     */
+    private fun failureContext(
+        stage: String,
+        e: Exception,
+        putDiagnostics: UploadDiagnostics?,
+        bytes: Long,
+    ): Map<String, String> {
+        val diagnostics = when {
+            stage == "storage_put" -> putDiagnostics
+            e is HttpException -> e.response()?.raw()?.let { raw ->
+                UploadDiagnostics.fromResponse(
+                    stage = stage,
+                    attempt = 1,
+                    response = raw,
+                    durationMs = (raw.receivedResponseAtMillis - raw.sentRequestAtMillis).coerceAtLeast(0),
+                    bytes = bytes,
+                )
+            }
+            else -> null
+        }
+        return diagnostics?.toContext() ?: mapOf("stage" to stage)
     }
 
     /**

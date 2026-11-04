@@ -20,6 +20,9 @@ class ProgressRequestBody(
 
     override fun contentType(): MediaType? = delegate.contentType()
     override fun contentLength(): Long = delegate.contentLength()
+    // Keep the delegate's replay semantics visible so a retry can tell a file body from a one-shot stream.
+    override fun isOneShot(): Boolean = delegate.isOneShot()
+    override fun isDuplex(): Boolean = delegate.isDuplex()
 
     override fun writeTo(sink: BufferedSink) {
         val total = contentLength().takeIf { it > 0L } ?: -1L
