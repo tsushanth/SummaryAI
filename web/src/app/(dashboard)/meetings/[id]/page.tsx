@@ -24,6 +24,7 @@ import { LiveTranscriptViewer } from '@/components/meetings/LiveTranscriptViewer
 import { AIInsightsPanel } from '@/components/meetings/AIInsightsPanel';
 import { LiveLanguageControl } from '@/components/meetings/LiveLanguageControl';
 import { cn } from '@/lib/utils/cn';
+import { meetingFailureReason } from '@/lib/meetingFailure';
 import type { Meeting, MeetingStatus, MeetingPlatform } from '@/types/api';
 
 type Tab = 'transcript' | 'insights';
@@ -134,6 +135,7 @@ export default function MeetingDetailPage() {
 
   // Check if meeting is currently recording
   const isLive = meeting?.status === 'bot_in_meeting';
+  const failureReason = meeting ? meetingFailureReason(meeting) : null;
 
   // Fetch live transcript and insights
   const { transcript, insights, isLoading: isLiveDataLoading } = useLiveMeeting(
@@ -209,6 +211,12 @@ export default function MeetingDetailPage() {
           </div>
         </div>
       </div>
+
+      {failureReason && (
+        <div className="border-b border-border bg-destructive/10 px-4 py-3 text-sm text-foreground" role="alert">
+          {failureReason}
+        </div>
+      )}
 
       {/* Live toggle and tabs */}
       {isLive && (

@@ -6,6 +6,7 @@ import { Video, ExternalLink, Loader2, Radio } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import type { Meeting, MeetingPlatform, MeetingStatus } from '@/types/api';
 import Link from 'next/link';
+import { meetingFailureReason } from '@/lib/meetingFailure';
 
 interface MeetingCardProps {
   meeting: Meeting;
@@ -142,6 +143,7 @@ export function MeetingCard({
   const handleToggle = async () => {
     await onToggleAutoJoin(meeting.id, !meeting.auto_join);
   };
+  const failureReason = meetingFailureReason(meeting);
 
   return (
     <Card className="p-4">
@@ -180,6 +182,20 @@ export function MeetingCard({
                 </Link>
               )}
             </div>
+            {failureReason ? (
+              <p className="mt-2 text-xs text-muted-foreground max-w-md truncate" title={failureReason}>
+                {failureReason}
+              </p>
+            ) : (
+              meeting.status === 'failed' && (
+                <Link
+                  href={`/meetings/${meeting.id}`}
+                  className="mt-2 inline-block text-xs text-primary hover:underline"
+                >
+                  See details
+                </Link>
+              )
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2">
