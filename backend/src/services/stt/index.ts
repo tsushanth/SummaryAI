@@ -1,9 +1,12 @@
 /**
  * STT provider selection for the batch / final transcript path.
  *
- *   STT_PROVIDER=deepgram (default; unknown values too)  Deepgram only. Production behaviour before this change.
+ *   STT_PROVIDER=deepgram (default; unknown values too)  Deepgram only. Production behaviour before this change. An unknown
+ *                                                         value logs one warning per distinct value and uses Deepgram.
  *   STT_PROVIDER=soniox                                   Soniox async; on error/empty falls back to Deepgram when
  *                                                         STT_FALLBACK_TO_DEEPGRAM != 'false' and a Deepgram key exists.
+ *   STT_PROVIDER=readaloud                                Self-hosted Whisper worker (candidate, off unless READALOUD_STT_URL and
+ *                                                         READALOUD_STT_TOKEN are both set). Same fallback rules as soniox.
  *   STT_PROVIDER=shadow                                   Deepgram result is used. Soniox is ALSO called in the background
  *                                                         (concurrently, with a timeout) and one metrics-only row is written
  *                                                         to stt_shadow_runs. A shadow failure never reaches the user path.
@@ -16,13 +19,14 @@ import { config } from '../../config/index.js';
 import { classifyProviderError, reportAlert } from '../../lib/alerts.js';
 import { deepgramProvider } from './deepgramProvider.js';
 import { sonioxProvider } from './sonioxProvider.js';
+import { isReadaloudConfigured, readaloudProvider } from './readaloudProvider.js';
 import { supabaseShadowStore, type ShadowRunRow, type ShadowStatus, type ShadowStore } from './shadow.js';
 import { normalizedWer } from './wer.js';
 import type { NormalizedTranscript, SttOptions, SttProvider } from './types.js';
 
 export type { NormalizedTranscript, SttOptions, SttProvider, TranscriptSegment } from './types.js';
 
-export type SttMode = 'deepgram' | 'soniox' | 'shadow';
+export type SttMode = 'deepgram' | 'soniox' | 'readaloud' | 'shadow';
 
 export interface SttRunOptions extends SttOptions {
   /** Only used to label the shadow row. */
@@ -37,6 +41,7 @@ export interface SttResult {
 export interface SttDeps {
   deepgram: SttProvider;
   soniox: SttProvider;
+  readaloud: SttProvider;
   shadowStore: ShadowStore;
   env: NodeJS.ProcessEnv;
   random: () => number;
@@ -44,9 +49,16 @@ export interface SttDeps {
 
 const DEFAULT_SHADOW_TIMEOUT_MS = 15 * 60_000;
 
+const warnedUnknownModes = new Set<string>();
+
 export function getSttMode(env: NodeJS.ProcessEnv = process.env): SttMode {
   const v = String(env.STT_PROVIDER ?? '').trim().toLowerCase();
-  return v === 'soniox' || v === 'shadow' ? v : 'deepgram';
+  if (v === 'soniox' || v === 'readaloud' || v === 'shadow') return v;
+  if (v && v !== 'deepgram' && !warnedUnknownModes.has(v)) {
+    warnedUnknownModes.add(v);
+    console.warn(`[STT] unknown STT_PROVIDER "${v.slice(0, 40)}"; using deepgram`);
+  }
+  return 'deepgram';
 }
 
 const hasSonioxKey = (env: NodeJS.ProcessEnv) => !!env.SONIOX_API_KEY && env.SONIOX_API_KEY.trim().length > 0;
@@ -55,7 +67,9 @@ const fallbackEnabled = (env: NodeJS.ProcessEnv) => String(env.STT_FALLBACK_TO_D
 /** Can a real transcription be attempted? When false the caller uses the mock transcript (existing no-key behaviour). */
 export function isSttConfigured(env: NodeJS.ProcessEnv = process.env): boolean {
   const deepgram = !!config.DEEPGRAM_API_KEY;
-  if (getSttMode(env) === 'soniox') return hasSonioxKey(env) || (fallbackEnabled(env) && deepgram);
+  const mode = getSttMode(env);
+  if (mode === 'soniox') return hasSonioxKey(env) || (fallbackEnabled(env) && deepgram);
+  if (mode === 'readaloud') return isReadaloudConfigured(env) || (fallbackEnabled(env) && deepgram);
   return deepgram;
 }
 
@@ -74,27 +88,37 @@ export async function transcribeAudio(
   runOpts: SttRunOptions = {},
   overrides: Partial<SttDeps> = {}
 ): Promise<SttResult> {
-  const d: SttDeps = { deepgram: deepgramProvider, soniox: sonioxProvider, shadowStore: supabaseShadowStore, env: process.env, random: Math.random, ...overrides };
+  const d: SttDeps = { deepgram: deepgramProvider, soniox: sonioxProvider, readaloud: readaloudProvider, shadowStore: supabaseShadowStore, env: process.env, random: Math.random, ...overrides };
   const { recordingId, ...opts } = runOpts;
   const mode = getSttMode(d.env);
 
-  if (mode === 'soniox') return transcribeWithSoniox(d, fileData, filePath, opts);
+  if (mode === 'soniox') return transcribeWithCandidate(d, { provider: d.soniox, configured: hasSonioxKey(d.env), alert: 'SONIOX_TO_DEEPGRAM', missing: 'SONIOX_API_KEY is not set' }, fileData, filePath, opts);
+  if (mode === 'readaloud') return transcribeWithCandidate(d, { provider: d.readaloud, configured: isReadaloudConfigured(d.env), alert: 'READALOUD_TO_DEEPGRAM', missing: 'READALOUD_STT_URL / READALOUD_STT_TOKEN are not set' }, fileData, filePath, opts);
   if (mode === 'shadow') return transcribeWithShadow(d, fileData, filePath, opts, recordingId);
   return toResult(d.deepgram, await d.deepgram.transcribe(fileData, filePath, opts));
 }
 
-async function transcribeWithSoniox(d: SttDeps, fileData: Blob, filePath: string, opts: SttOptions): Promise<SttResult> {
+interface Candidate {
+  provider: SttProvider;
+  configured: boolean;
+  /** provider_fallback alert code. */
+  alert: string;
+  missing: string;
+}
+
+/** A non-default provider with Deepgram as the fallback (error, empty result, or missing configuration). */
+async function transcribeWithCandidate(d: SttDeps, c: Candidate, fileData: Blob, filePath: string, opts: SttOptions): Promise<SttResult> {
   let reason: 'no_key' | 'error' | 'empty';
   let failure: unknown;
   let emptyResult: NormalizedTranscript | undefined;
 
-  if (!hasSonioxKey(d.env)) {
+  if (!c.configured) {
     reason = 'no_key';
-    failure = new Error('SONIOX_API_KEY is not set');
+    failure = new Error(c.missing);
   } else {
     try {
-      const t = await d.soniox.transcribe(fileData, filePath, opts);
-      if (!isEmpty(t)) return toResult(d.soniox, t);
+      const t = await c.provider.transcribe(fileData, filePath, opts);
+      if (!isEmpty(t)) return toResult(c.provider, t);
       reason = 'empty';
       emptyResult = t;
     } catch (e) {
@@ -104,11 +128,11 @@ async function transcribeWithSoniox(d: SttDeps, fileData: Blob, filePath: string
   }
 
   if (!(fallbackEnabled(d.env) && config.DEEPGRAM_API_KEY)) {
-    if (emptyResult) return toResult(d.soniox, emptyResult); // genuinely silent audio: a valid, empty transcript
+    if (emptyResult) return toResult(c.provider, emptyResult); // genuinely silent audio: a valid, empty transcript
     throw failure;
   }
-  reportAlert('provider_fallback', 'SONIOX_TO_DEEPGRAM', { reason, class: failure ? classifyProviderError(failure) : undefined });
-  console.warn(`[STT] soniox ${reason}; falling back to deepgram`);
+  reportAlert('provider_fallback', c.alert, { reason, class: failure ? classifyProviderError(failure) : undefined });
+  console.warn(`[STT] ${c.provider.name} ${reason}; falling back to deepgram`);
   return toResult(d.deepgram, await d.deepgram.transcribe(fileData, filePath, opts));
 }
 
