@@ -13,6 +13,10 @@
 import { supabaseAdmin } from '../lib/supabase.js';
 import { reportAlert } from '../lib/alerts.js';
 import { registerLoop, runLoopPass, reportLoopScanError } from '../lib/loopMonitor.js';
+import { NO_SPEECH_CODE, TOO_SHORT_CODE } from './shortRecordingGuard.js';
+
+/** error_codes of recordings that finish 'completed' without a summaries row by design. */
+const INTENTIONALLY_SUMMARYLESS: string[] = [NO_SPEECH_CODE, TOO_SHORT_CODE];
 
 export const INVARIANT_INTERVAL_MS = 30 * 60_000;
 const REALERT_MS = 6 * 3600_000;
@@ -61,15 +65,23 @@ export async function checkPipelineInvariants(now: number = Date.now()): Promise
   else if (n >= 5 && f / n >= 0.5) fire('HIGH_FAILURE_RATE_24H', f, { created: n, completed: c, failed: f });
 
   // Completed recordings with no summary row (summary insert silently skipped, or deleted by a retry that never finished).
+  // Recordings the short-recording guard completed on purpose (NO_SPEECH / TOO_SHORT: transcript kept, no LLM call, no
+  // summaries row, see shortRecordingGuard.ts) are expected to have no summary. Counting them made this alert fire every
+  // 30 minutes for as long as such a recording stayed inside the 24 h window. Skipped in SQL (so they cannot fill the
+  // 500-row page) and again below. PostgREST's `not.in` drops NULLs, hence the explicit `is.null`.
   const done = await supabaseAdmin
     .from('recordings')
-    .select('id')
+    .select('id, error_code')
     .eq('status', 'completed')
+    .or(`error_code.is.null,error_code.not.in.(${INTENTIONALLY_SUMMARYLESS.join(',')})`)
     .gte('processed_at', iso(24 * HOUR))
     .lt('processed_at', iso(15 * 60_000))
     .limit(500);
-  if (!done.error && done.data && done.data.length > 0) {
-    const ids = done.data.map((r: { id: string }) => r.id);
+  const candidates = (done.data ?? []).filter(
+    (r: { id: string; error_code?: string | null }) => !INTENTIONALLY_SUMMARYLESS.includes(r.error_code ?? ''),
+  );
+  if (!done.error && candidates.length > 0) {
+    const ids = candidates.map((r: { id: string }) => r.id);
     const sums = await supabaseAdmin.from('summaries').select('recording_id').in('recording_id', ids);
     if (!sums.error) {
       const have = new Set((sums.data ?? []).map((s: { recording_id: string }) => s.recording_id));
