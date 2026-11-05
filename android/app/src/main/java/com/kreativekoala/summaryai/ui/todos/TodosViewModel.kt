@@ -63,6 +63,27 @@ class TodosViewModel @Inject constructor(
         )
     }
 
+    /** Opens the add dialog filled from a spoken draft the user chose to edit. Saving goes through the normal create path. */
+    fun showDialogForDraft(title: String, assignee: String?, dueDate: String?, priority: String) {
+        _uiState.value = _uiState.value.copy(
+            showAddDialog = true,
+            newTodoTitle = title,
+            newTodoNotes = "",
+            newTodoPriority = when (priority.lowercase()) {
+                "high" -> TodoPriority.HIGH
+                "medium" -> TodoPriority.MEDIUM
+                "low" -> TodoPriority.LOW
+                else -> TodoPriority.NONE
+            },
+            newTodoAssignee = assignee.orEmpty(),
+            newTodoDueDate = dueDate?.take(10).orEmpty(),
+            editingTodoId = null
+        )
+    }
+
+    /** Reloads the list (used after a hands-free change). */
+    fun refresh() = loadTodos()
+
     fun showEditDialog(todo: Todo) {
         _uiState.value = _uiState.value.copy(
             showAddDialog = true,

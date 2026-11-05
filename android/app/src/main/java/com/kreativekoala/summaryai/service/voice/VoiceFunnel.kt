@@ -12,7 +12,7 @@ import com.kreativekoala.summaryai.service.activation.FirebaseActivationSink
  * a transcript, a title, a name, an email or a free-text answer, is dropped before it reaches the sink. No audio, no
  * recognised text, no user id.
  *
- * Nothing calls this yet: it is the instrumentation the voice screens will use, so the funnel exists from the first build.
+ * Used by the hands-free session and its entry button, which are off unless the build flag and the server both allow them.
  */
 object VoiceEvents {
     // Pre-use: was the entry point visible, and did anyone tap it (the denominator for everything after).

@@ -25,6 +25,7 @@ import com.kreativekoala.summaryai.ui.components.MmEmptyState
 import com.kreativekoala.summaryai.ui.components.MmStatusPill
 import com.kreativekoala.summaryai.ui.components.SkeletonCardList
 import com.kreativekoala.summaryai.domain.model.TodoPriority
+import com.kreativekoala.summaryai.ui.voice.VoiceEntryButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,6 +50,13 @@ fun TodosScreen(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.todos)) },
+                actions = {
+                    // Draws nothing unless the hands-free feature is on for this build and account.
+                    VoiceEntryButton(
+                        onEditDraft = { d -> viewModel.showDialogForDraft(d.title, d.assignee, d.dueDate, d.priority) },
+                        onSaved = viewModel::refresh
+                    )
+                },
                 navigationIcon = {
                     if (onBack != null) {
                         IconButton(onClick = onBack) {
