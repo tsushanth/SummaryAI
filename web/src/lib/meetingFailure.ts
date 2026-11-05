@@ -3,10 +3,13 @@
  *
  * When the monthly meeting-bot allowance is used up, the backend closes the scheduled meeting as failed and stores
  * error_message (error code BOT_MONTHLY_CAP_REACHED, "...The bot is available again on YYYY-MM-DD (UTC)..."). That case is
- * shown as one friendly sentence with the reset date in the user's locale; any other message is shown as stored.
+ * shown as one friendly sentence with the reset date in the user's locale; any other failed meeting gets a generic sentence
+ * (the stored text can contain raw provider errors and is not shown).
  */
 
 export const BOT_MONTHLY_CAP_REACHED = 'BOT_MONTHLY_CAP_REACHED';
+
+export const GENERIC_FAILURE = 'The meeting bot could not join this meeting.';
 
 const CAP_TEXT = /meeting-bot minutes for this month/i;
 const RESET_DATE = /available again on (\d{4}-\d{2}-\d{2})/i;
@@ -37,5 +40,6 @@ export function meetingFailureReason(
   const message = meeting.error_message?.trim();
   if (!message) return null;
   if (isBotCapMessage(message)) return botCapMessage(message.match(RESET_DATE)?.[1], locale);
-  return message;
+  // Other messages can hold raw text from the meeting provider or our own errors, so they are never shown as stored.
+  return GENERIC_FAILURE;
 }

@@ -6,6 +6,7 @@ import {
   meetingFailureReason,
   formatResetDate,
   isBotCapMessage,
+  GENERIC_FAILURE,
   BOT_MONTHLY_CAP_REACHED,
 } from '../src/lib/meetingFailure.ts';
 
@@ -45,8 +46,12 @@ test('a cap message without a readable date falls back to "the start of next mon
   assert.equal(formatResetDate(null), null);
 });
 
-test('any other failure reason is shown as stored', () => {
-  assert.equal(meetingFailureReason({ status: 'failed', error_message: '  Failed to start bot ' }), 'Failed to start bot');
+test('any other failure gets the generic sentence and the stored text is never shown', () => {
+  assert.equal(meetingFailureReason({ status: 'failed', error_message: '  Failed to start bot ' }), GENERIC_FAILURE);
+  const raw = 'Recall API error: 400 - {"detail":"internal provider text"}';
+  const shown = meetingFailureReason({ status: 'failed', error_message: raw });
+  assert.equal(shown, GENERIC_FAILURE);
+  assert.ok(!shown.includes('Recall') && !shown.includes('400'));
 });
 
 test('nothing is shown when the meeting did not fail or no reason was recorded', () => {
