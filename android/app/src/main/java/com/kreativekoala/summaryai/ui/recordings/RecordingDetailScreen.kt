@@ -86,6 +86,10 @@ fun RecordingDetailScreen(
                     }
                 },
                 actions = {
+                    // Spoken debrief of this meeting; draws nothing unless the hands-free feature is on.
+                    detail?.takeIf { !isSample && it.summary != null }?.let {
+                        com.kreativekoala.summaryai.ui.voice.VoiceEntryButton(recordingId = recordingId)
+                    }
                     detail?.recording?.takeUnless { isSample }?.let { rec ->
                         com.kreativekoala.summaryai.ui.recordings.organize.StarAction(rec.id, rec.isFavorite)
                     }
