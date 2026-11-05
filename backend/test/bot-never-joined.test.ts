@@ -13,7 +13,7 @@ vi.mock('../src/lib/supabase.js', () => ({
   supabaseAdmin: {
     from: (t: string) => {
       const q: any = {};
-      for (const m of ['select', 'in', 'lt', 'gte', 'eq', 'limit']) q[m] = (...args: any[]) => { calls.push({ table: t, op: m, args }); return q; };
+      for (const m of ['select', 'in', 'lt', 'gte', 'eq', 'limit', 'or']) q[m] = (...args: any[]) => { calls.push({ table: t, op: m, args }); return q; };
       q.update = (patch: any) => { updates.push({ table: t, patch }); return q; };
       q.maybeSingle = () => Promise.resolve(data[t + ':one'] ?? { data: null, error: null });
       q.then = (res: any, rej: any) => Promise.resolve(data[t] ?? { data: [], count: 0, error: null }).then(res, rej);
