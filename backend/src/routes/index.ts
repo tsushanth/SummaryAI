@@ -22,6 +22,7 @@ import searchRoutes from './search.js';
 import integrationsRoutes from './integrations.js';
 import statsRoutes from './stats.js';
 import { liveSegmentsRouter } from './liveSegments.js';
+import voiceToolsRoutes from './voiceTools.js';
 
 const router = Router();
 
@@ -64,5 +65,7 @@ router.use('/api/subscriptions', subscriptionsRoutes);
 router.use('/api/coaching', coachingRoutes);
 router.use('/api/integrations', integrationsRoutes);
 router.use('/api/stats', statsRoutes);
+// Assistant tools over the caller's own meetings. 404 unless VOICE_TOOLS_ENABLED=true and the user is allow-listed.
+router.use('/api/voice-tools', voiceToolsRoutes);
 
 export default router;
