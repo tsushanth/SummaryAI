@@ -61,76 +61,45 @@ describe('verifyRecallWebhook', () => {
   });
 });
 
-describe('Recall routes over HTTP (phase 1: accept + log, but legacy rejections stay)', () => {
+describe('Recall routes over HTTP (phase 2: enforced)', () => {
   let server: Server | undefined;
-  const alerts: string[] = [];
-  const botRun = { id: 'br1', meeting_id: 'm1', user_id: 'u1' };
-
   async function start() {
     vi.resetModules();
     process.env.RECALL_WEBHOOK_SECRET = SECRET;
-    vi.doMock('../src/lib/alerts.js', async (orig) => ({ ...(await orig<any>()), reportAlert: (flow: string, code: string) => { alerts.push(`${flow}:${code}`); return true; } }));
+    vi.doMock('../src/lib/alerts.js', async (orig) => ({ ...(await orig<any>()), reportAlert: () => true }));
     vi.doMock('../src/lib/supabase.js', () => {
       const chain: any = { select: () => chain, eq: () => chain, single: async () => ({ data: null, error: { message: 'none' } }), insert: async () => ({ error: null }) };
       return { supabaseAdmin: { from: () => chain } };
     });
     const { default: router } = await import('../src/routes/webhooks.js');
     const app = express();
-    // same raw-body capture as src/index.ts
     app.use(express.json({ verify: (req, _res, buf) => { if ((req as any).originalUrl.includes('/webhooks/recall')) (req as any).rawBody = buf; } }));
     app.use('/v1/webhooks', router);
     await new Promise<void>((r) => (server = app.listen(0, '127.0.0.1', r)));
     return `http://127.0.0.1:${(server!.address() as AddressInfo).port}`;
   }
   const post = (base: string, path: string, raw: string, headers: Record<string, string> = {}) =>
-    fetch(base + path, { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: raw });
+    fetch(base + path, { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: raw }).then((r) => r.status);
   const nowSig = (raw: string) => { const t = String(Math.floor(Date.now() / 1000)); return { 'webhook-id': 'msg_1', 'webhook-timestamp': t, 'webhook-signature': sig('msg_1', t, raw) }; };
 
-  beforeEach(() => { alerts.length = 0; vi.spyOn(console, 'log').mockImplementation(() => {}); vi.spyOn(console, 'warn').mockImplementation(() => {}); vi.spyOn(console, 'error').mockImplementation(() => {}); });
+  beforeEach(() => { vi.spyOn(console, 'log').mockImplementation(() => {}); vi.spyOn(console, 'warn').mockImplementation(() => {}); vi.spyOn(console, 'error').mockImplementation(() => {}); });
   afterEach(async () => { vi.restoreAllMocks(); vi.doUnmock('../src/lib/alerts.js'); vi.doUnmock('../src/lib/supabase.js'); await new Promise((r) => (server ? server.close(() => r(null)) : r(null))); server = undefined; });
 
-  it('transcript route: unsigned request is still accepted in phase 1 but logged as unverified and alerted', async () => {
-    const base = await start();
-    const raw = JSON.stringify({ event: 'ignored.event' });
-    const res = await post(base, '/v1/webhooks/recall/transcript', raw);
-    expect(res.status).toBe(200);
-    const lines = vi.mocked(console.log).mock.calls.map((c) => String(c[0])).filter((l) => l.includes('"event":"webhook_auth"'));
-    expect(JSON.parse(lines[0]!)).toMatchObject({ provider: 'recall', route: '/webhooks/recall/transcript', outcome: 'unverified_accepted', reason: 'no_signature_headers', signatureHeaders: 'none' });
-    expect(alerts).toContain('webhook_auth_recall:NO_SIGNATURE_HEADERS');
-  });
-
-  it('transcript route: a correctly signed delivery is logged ok (proof that phase 1 saw real signed traffic) and verified against RAW bytes', async () => {
-    const base = await start();
-    const raw = '{"event":"ignored.event",  "data":{}}'; // deliberately odd spacing: JSON.stringify(req.body) would not reproduce it
-    const res = await post(base, '/v1/webhooks/recall/transcript', raw, nowSig(raw));
-    expect(res.status).toBe(200);
-    const lines = vi.mocked(console.log).mock.calls.map((c) => String(c[0])).filter((l) => l.includes('"event":"webhook_auth"'));
-    expect(JSON.parse(lines[0]!)).toMatchObject({ outcome: 'ok', scheme: 'webhook' });
-    expect(alerts).toEqual([]);
-  });
-
-  it('/recall: unsigned still reaches the handler (404 bot-run-not-found from the mocked DB, not 401) and is logged unverified', async () => {
+  it('unsigned, forged and stale requests are 401 on both routes; nothing reaches the handlers', async () => {
     const base = await start();
     const raw = JSON.stringify({ event: 'bot.done', data: { bot_id: 'b1' } });
-    const res = await post(base, '/v1/webhooks/recall', raw);
-    expect(res.status).toBe(404);
-    expect(alerts).toContain('webhook_auth_recall:NO_SIGNATURE_HEADERS');
+    for (const path of ['/v1/webhooks/recall', '/v1/webhooks/recall/transcript']) {
+      expect(await post(base, path, raw)).toBe(401);
+      expect(await post(base, path, raw, { 'svix-id': 'm', 'svix-timestamp': String(Math.floor(Date.now() / 1000)), 'svix-signature': 'v1,' + 'A'.repeat(44) })).toBe(401);
+      const old = String(Math.floor(Date.now() / 1000) - 3600);
+      expect(await post(base, path, raw, { 'webhook-id': 'm', 'webhook-timestamp': old, 'webhook-signature': sig('m', old, raw) })).toBe(401);
+    }
   });
-
-  it('/recall: svix-* headers that fail BOTH the new and the legacy check are still rejected with 401 (no loosening)', async () => {
-    const base = await start();
-    const raw = JSON.stringify({ event: 'bot.done', data: { bot_id: 'b1' } });
-    const t = String(Math.floor(Date.now() / 1000));
-    const res = await post(base, '/v1/webhooks/recall', raw, { 'svix-id': 'msg_1', 'svix-timestamp': t, 'svix-signature': 'v1,' + 'A'.repeat(44) });
-    expect(res.status).toBe(401);
-  });
-
-  it('/recall: a correctly signed delivery verifies even when JSON re-serialisation would differ', async () => {
+  it('correctly signed deliveries reach the handlers (404 bot run not found from the mocked DB; transcript ignores the event with 200)', async () => {
     const base = await start();
     const raw = '{"event": "bot.done",  "data": {"bot_id": "b1"}}';
-    const res = await post(base, '/v1/webhooks/recall', raw, nowSig(raw));
-    expect(res.status).toBe(404); // reached the handler; bot run not found in the mock
-    const lines = vi.mocked(console.log).mock.calls.map((c) => String(c[0])).filter((l) => l.includes('"event":"webhook_auth"'));
-    expect(JSON.parse(lines[0]!)).toMatchObject({ outcome: 'ok' });
+    expect(await post(base, '/v1/webhooks/recall', raw, nowSig(raw))).toBe(404);
+    const raw2 = '{"event": "ignored.event"}';
+    expect(await post(base, '/v1/webhooks/recall/transcript', raw2, nowSig(raw2))).toBe(200);
   });
 });
