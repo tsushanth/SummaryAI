@@ -270,6 +270,8 @@ export interface Meeting {
   recording_id: string | null;
   source: MeetingSource;
   bot_id: string | null;
+  /** Why the meeting failed (status 'failed'). Returned by GET /api/meetings/:id. */
+  error_message?: string | null;
   created_at: string;
   updated_at: string;
   /** 'auto' or a language code. Returned by GET /api/meetings/:id. */
