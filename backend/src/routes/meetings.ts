@@ -51,6 +51,7 @@ import {
   LiveInsightType,
 } from '../types/meetings.js';
 import { getLiveInsights } from '../services/liveInsightsService.js';
+import { enforceBotMonthlyCap, BOT_CAP_ERROR_CODE } from '../services/botUsageCap.js';
 
 const router = Router();
 
@@ -329,6 +330,9 @@ router.post(
       return;
     }
 
+    // Monthly bot allowance. Checked before anything is created so a refused request leaves no meeting row behind.
+    const botLimits = await enforceBotMonthlyCap(userId);
+
     // Generate a title if not provided
     const meetingTitle = title || `${platform.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} Meeting`;
 
@@ -359,7 +363,7 @@ router.post(
         meeting_url: join_url,
         bot_name: bot_name || 'Meeting Mind',
         transcription_language: language,
-      });
+      }, botLimits);
 
       // Create a pending recording so it shows up in recordings list immediately
       const { data: pendingRecording, error: recordingError } = await supabaseAdmin
@@ -622,6 +626,9 @@ router.post(
       throw Errors.unprocessable('Bot is already active or meeting completed');
     }
 
+    // Monthly bot allowance (before the scheduled bot is cancelled, so a refused request changes nothing).
+    const botLimits = await enforceBotMonthlyCap(userId);
+
     // Cancel any scheduled bot
     await cancelScheduledBot(meetingId);
 
@@ -637,7 +644,7 @@ router.post(
       meeting_url: meeting.join_url,
       bot_name: 'Meeting Mind',
       transcription_language: language,
-    });
+    }, botLimits);
 
     // Create bot run record
     await insertWithOptionalColumn(supabaseAdmin.from('bot_runs'), {
@@ -978,6 +985,22 @@ meetingsWorkerRouter.post(
       return;
     }
 
+    // Monthly bot allowance. A scheduled join that is over the cap is closed out as failed with the reason (no retry: the cap
+    // only resets next month) and answered 200 so the scheduler does not treat it as a transient error.
+    let botLimits: { maxDurationSeconds?: number };
+    try {
+      botLimits = await enforceBotMonthlyCap(meeting.user_id ?? userId);
+    } catch (capError) {
+      if (!(capError instanceof AppError) || capError.code !== BOT_CAP_ERROR_CODE) throw capError;
+      await markJobFailed(meetingId, capError.code);
+      await supabaseAdmin
+        .from('meetings')
+        .update({ status: 'failed', error_message: capError.message })
+        .eq('id', meetingId);
+      res.json({ ok: true, skipped: true, reason: BOT_CAP_ERROR_CODE });
+      return;
+    }
+
     try {
       // Scheduled / calendar meetings: the meeting's own choice, else the owner's saved default, else auto.
       const language = await resolveBotLanguage({ meetingValue: meeting.transcription_language, userId });
@@ -988,7 +1011,7 @@ meetingsWorkerRouter.post(
         meeting_url: meeting.join_url,
         bot_name: 'Meeting Mind',
         transcription_language: language,
-      });
+      }, botLimits);
 
       // Create a pending recording so it shows up in recordings list immediately
       const { data: pendingRecording, error: recordingError } = await supabaseAdmin
