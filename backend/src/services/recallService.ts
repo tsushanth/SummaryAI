@@ -15,6 +15,7 @@ import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
 import { triggerProcessing } from './processingService.js';
 import { buildIngestUrl, mintLiveSttRef, planLiveStt } from '../lib/liveStt.js';
+import { planVoiceAssistant } from './voiceAssistant/recallIntegration.js';
 import { isMissingColumn } from './meetingLanguage.js';
 import {
   languageToStore,
@@ -159,6 +160,20 @@ export class RecallService {
       }
     }
 
+    // In-meeting voice assistant (docs/VOICE_ASSISTANT.md). Null (and a bot exactly as before) unless the flags and the user's
+    // preference allow it and Recall's own real-time transcript is the live source.
+    const assistant = await planVoiceAssistant({
+      userId: params.user_id,
+      serviceUrl: config.SERVICE_URL,
+      internalSecret: config.INTERNAL_SECRET,
+      realtimeRecallTranscript: enableRealtime && plan.provider !== 'soniox',
+    });
+    if (assistant) {
+      const eps = (recordingConfig.realtime_endpoints as unknown[] | undefined) ?? [];
+      recordingConfig.realtime_endpoints = [...eps, assistant.endpoint];
+      console.log('[Recall] Voice assistant endpoint added');
+    }
+
     const payload: Record<string, unknown> = {
       meeting_url: params.meeting_url,
       bot_name: params.bot_name || 'Meeting Mind',
@@ -186,6 +201,8 @@ export class RecallService {
       };
     }
 
+    if (assistant?.automaticAudioOutput) payload.automatic_audio_output = assistant.automaticAudioOutput;
+
     console.log(`[Recall] Creating bot for meeting: ${params.meeting_url}`);
 
     const bot = await this.request<RecallBotResponse>('/bot', {
@@ -195,6 +212,19 @@ export class RecallService {
     // Callers store these on the bot_run (see liveSttBotRunColumns). Absent on the default path.
     if (liveStt) bot.live_stt = liveStt;
     return bot;
+  }
+
+  /** Play an MP3 (base64) into the call through the bot. Used by the in-meeting voice assistant. */
+  static async outputAudio(botId: string, mp3Base64: string): Promise<void> {
+    await this.request(`/bot/${botId}/output_audio/`, {
+      method: 'POST',
+      body: JSON.stringify({ kind: 'mp3', b64_data: mp3Base64 }),
+    });
+  }
+
+  /** Stop whatever the bot is currently playing (barge-in). */
+  static async stopOutputAudio(botId: string): Promise<void> {
+    await this.request(`/bot/${botId}/output_audio/`, { method: 'DELETE' });
   }
 
   /**
