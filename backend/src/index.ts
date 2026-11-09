@@ -139,6 +139,10 @@ async function startServer(): Promise<void> {
   app.listen(config.PORT, () => {
     console.log(`✅ Server running on port ${config.PORT}`);
     console.log(`📍 API available at http://localhost:${config.PORT}/${config.API_VERSION}`);
+    import('./services/voiceAssistant/config.js').then((m) => {
+      const c = m.loadVoiceAssistantConfig();
+      console.log(`[VoiceAssistant] mode=${c.mode} killed=${c.killed} (docs/VOICE_ASSISTANT.md)`);
+    }).catch(() => undefined);
     // Local testing against a real database must not start the recovery loops (they act on real users' meetings and bots).
     if (process.env.DISABLE_BACKGROUND_LOOPS === '1') {
       console.log('[startup] DISABLE_BACKGROUND_LOOPS=1: coaching recovery, stuck-meeting and bot reconcilers not started');
@@ -196,6 +200,11 @@ process.on('SIGTERM', () => {
   console.log('SIGTERM received. Shutting down gracefully...');
   // Send pending Claude usage rows first (capped at 2.5 s), then exit exactly as before.
   void flushLlmUsage(2500).finally(() => process.exit(0));
+});
+
+// Voice assistant: push the day's gauges once more on the way out (best effort; the main handler above still exits).
+process.on('SIGTERM', () => {
+  void import('./services/voiceAssistant/runtime.js').then((m) => m.voiceMetrics.flush()).catch(() => undefined);
 });
 
 // Start the server
