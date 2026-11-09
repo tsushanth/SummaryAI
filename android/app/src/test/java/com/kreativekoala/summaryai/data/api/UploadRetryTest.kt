@@ -8,6 +8,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.internal.http2.ConnectionShutdownException
+import okhttp3.internal.http2.ErrorCode
+import okhttp3.internal.http2.StreamResetException
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.SocketPolicy
@@ -20,11 +23,19 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.io.EOFException
 import java.io.IOException
 import java.io.InterruptedIOException
+import java.net.ConnectException
+import java.net.ProtocolException
 import java.net.SocketException
 import java.net.SocketTimeoutException
+import java.net.UnknownHostException
+import java.security.cert.CertificateException
+import java.util.concurrent.CancellationException
 import java.util.concurrent.TimeUnit
+import javax.net.ssl.SSLHandshakeException
+import javax.net.ssl.SSLPeerUnverifiedException
 
 class UploadRetryTest {
 
@@ -73,14 +84,79 @@ class UploadRetryTest {
         listOf(200, 400, 401, 403, 404, 408, 409, 413, 429, 500, 501).forEach { assertFalse("$it", p.isRetryableStatus(it)) }
     }
 
-    @Test fun `timeouts are retryable, other IO failures are not`() {
+    @Test fun `timeouts are retryable, unrelated IO failures are not`() {
         val p = UploadRetryPolicy()
         assertTrue(p.isRetryableFailure(SocketTimeoutException("Read timed out")))
         assertTrue(p.isRetryableFailure(InterruptedIOException("timeout")))
         assertTrue(p.isRetryableFailure(IOException("wrapped", SocketTimeoutException("x"))))
-        assertFalse(p.isRetryableFailure(SocketException("Connection reset")))
         assertFalse(p.isRetryableFailure(IOException("Canceled")))
+        assertFalse(p.isRetryableFailure(IOException("disk full")))
         assertFalse(p.isRetryableFailure(InterruptedIOException("interrupted")))
+    }
+
+    @Test fun `transient connection-level failures are retryable`() {
+        val p = UploadRetryPolicy()
+        val retryable = mapOf<String, IOException>(
+            "ProtocolException" to ProtocolException("unexpected end of stream"),
+            "SocketException reset" to SocketException("Connection reset"),
+            "SocketException broken pipe" to SocketException("Broken pipe"),
+            "SocketException abort" to SocketException("Software caused connection abort"),
+            "ConnectException" to ConnectException("Failed to connect"),
+            "EOFException" to EOFException("\\n not found: limit=0"),
+            "StreamResetException" to StreamResetException(ErrorCode.INTERNAL_ERROR),
+            "ConnectionShutdownException" to ConnectionShutdownException(),
+        )
+        retryable.forEach { (name, e) -> assertTrue(name, p.isRetryableFailure(e)) }
+    }
+
+    @Test fun `OkHttp exception types are matched by simple name`() {
+        // Guards the name-based match used so an OkHttp upgrade that moves or hides these classes cannot break the build.
+        assertEquals("StreamResetException", StreamResetException(ErrorCode.CANCEL).javaClass.simpleName)
+        assertEquals("ConnectionShutdownException", ConnectionShutdownException().javaClass.simpleName)
+        class StreamResetException : IOException("stream was reset: CANCEL")
+        assertTrue(UploadRetryPolicy().isRetryableFailure(StreamResetException()))
+    }
+
+    @Test fun `unknown host, certificate errors, cancellation and interrupts are never retried`() {
+        val p = UploadRetryPolicy()
+        val notRetryable = mapOf<String, Throwable>(
+            "UnknownHostException" to UnknownHostException("abc.supabase.co"),
+            "SSLPeerUnverifiedException" to SSLPeerUnverifiedException("Hostname not verified"),
+            "CertificateException" to CertificateException("expired"),
+            "SSLHandshakeException with cert cause" to SSLHandshakeException("PKIX failed").also { it.initCause(CertificateException("x")) },
+            "Canceled" to IOException("Canceled"),
+            "interrupted, not a timeout" to InterruptedIOException("interrupted"),
+            "CancellationException cause" to IOException("wrapped", CancellationException("job cancelled")),
+        )
+        notRetryable.forEach { (name, e) -> assertFalse(name, p.isRetryableFailure(e as? IOException ?: IOException("wrapped", e))) }
+    }
+
+    @Test fun `a never-retry cause wins over a retryable one in the same chain`() {
+        val p = UploadRetryPolicy()
+        assertFalse(p.isRetryableFailure(SocketException("Connection reset").also { it.initCause(UnknownHostException("h")) }))
+        assertFalse(p.isRetryableFailure(IOException("outer", SSLPeerUnverifiedException("bad cert").also { it.initCause(SocketException("reset")) })))
+    }
+
+    @Test fun `retryable cause nested up to 4 deep is found, deeper is not`() {
+        val p = UploadRetryPolicy()
+        val reset = SocketException("Connection reset")
+        val depth4 = IOException("a", IOException("b", IOException("c", reset)))      // reset is 4th in the chain
+        val depth5 = IOException("a", IOException("b", IOException("c", IOException("d", reset))))
+        assertTrue(p.isRetryableFailure(depth4))
+        assertFalse(p.isRetryableFailure(depth5))
+        assertTrue(p.isRetryableFailure(IOException("wrapper", ProtocolException("unexpected end of stream"))))
+        assertTrue(p.isRetryableFailure(IOException("wrapper", IOException("inner", EOFException()))))
+    }
+
+    @Test fun `an interrupted thread is never retried even for a retryable exception`() {
+        val p = UploadRetryPolicy()
+        Thread.currentThread().interrupt()
+        try {
+            assertFalse(p.isRetryableFailure(SocketException("Connection reset")))
+            assertFalse(p.isRetryableFailure(SocketTimeoutException("Read timed out")))
+        } finally {
+            Thread.interrupted() // clear the flag for other tests
+        }
     }
 
     @Test fun `delays are 1s then 3s with bounded jitter`() {
@@ -171,12 +247,65 @@ class UploadRetryTest {
         assertEquals(3, server.requestCount)
     }
 
-    @Test fun `connection reset is not retried`() {
+    @Test fun `connection dropped at start is retried then succeeds`() {
         server.enqueue(MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AT_START))
-        val thrown = runCatching { run(putRequest()) }.exceptionOrNull()
-        assertTrue(thrown is IOException)
+        server.enqueue(MockResponse().setResponseCode(200))
+        assertEquals(200, run(putRequest()).code)
+        assertEquals(2, server.requestCount)
+        assertEquals(listOf(1000L), sleeps)
+        assertNull(diagnostics.single().status)
+        assertNotNull(diagnostics.single().errorClass)
+    }
+
+    @Test fun `connection closed after the body without a response is retried and the retry re-sends the whole body`() {
+        val big = "x".repeat(2_000_000)
+        server.enqueue(MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AFTER_REQUEST))
+        server.enqueue(MockResponse().setResponseCode(200))
+        val client = OkHttpClient.Builder().retryOnConnectionFailure(false).build()
+        assertEquals(200, run(putRequest(big.toRequestBody("audio/mp4".toMediaType())), uploader(client)).code)
+        assertEquals(2, server.requestCount)
+        assertEquals(listOf(1000L), sleeps)
+        // OkHttp reports this as IOException("unexpected end of stream ...") with an EOFException cause, so this
+        // also covers the nested-cause path end to end.
+        assertNull(diagnostics.single().status)
+        repeat(2) { assertEquals(big.length, server.takeRequest().body.readUtf8().length) }
+    }
+
+    @Test fun `persistent connection drop throws the original IOException after 3 attempts`() {
+        val client = OkHttpClient.Builder().retryOnConnectionFailure(false).build()
+        repeat(3) { server.enqueue(MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AT_START)) }
+        val thrown = runCatching { run(putRequest(), uploader(client)) }.exceptionOrNull()
+        assertTrue("was $thrown", thrown is IOException)
+        assertEquals(3, server.requestCount)
+        assertEquals(listOf(1000L, 3000L), sleeps)
+        assertEquals(listOf(1, 2, 3), diagnostics.map { it.attempt })
+    }
+
+    @Test fun `a one-shot body is not retried after a connection drop`() {
+        val client = OkHttpClient.Builder().retryOnConnectionFailure(false).build()
+        server.enqueue(MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AT_START))
+        server.enqueue(MockResponse().setResponseCode(200))
+        val thrown = runCatching { run(putRequest(oneShotBody()), uploader(client)) }.exceptionOrNull()
+        assertTrue("was $thrown", thrown is IOException)
         assertEquals(1, server.requestCount)
         assertTrue(sleeps.isEmpty())
+    }
+
+    @Test fun `a POST is not retried after a connection drop`() {
+        val client = OkHttpClient.Builder().retryOnConnectionFailure(false).build()
+        server.enqueue(MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AT_START))
+        val post = Request.Builder().url(server.url("/x")).post("a".toRequestBody()).build()
+        assertTrue(runCatching { run(post, uploader(client)) }.exceptionOrNull() is IOException)
+        assertEquals(1, server.requestCount)
+        assertTrue(sleeps.isEmpty())
+    }
+
+    @Test fun `unknown host is not retried`() {
+        val request = Request.Builder().url("http://no-such-host.invalid/x").put("a".toRequestBody()).build()
+        val thrown = runCatching { run(request) }.exceptionOrNull()
+        assertTrue("was $thrown", thrown is java.net.UnknownHostException)
+        assertTrue(sleeps.isEmpty())
+        assertEquals(1, diagnostics.size)
     }
 
     @Test fun `one-shot body gets a single attempt even on 504`() {
