@@ -55,6 +55,8 @@ export class FakeDb {
       delete: () => { op = 'delete'; return q; },
       eq: (c: string, v: any) => { filters.push((r) => r[c] === v); return q; },
       in: (c: string, vs: any[]) => { filters.push((r) => vs.includes(r[c])); return q; },
+      gte: (c: string, v: any) => { filters.push((r) => r[c] != null && r[c] >= v); return q; },
+      lt: (c: string, v: any) => { filters.push((r) => r[c] != null && r[c] < v); return q; },
       order: (c: string, o?: { ascending?: boolean }) => { orderBy = { col: c, asc: o?.ascending !== false }; return q; },
       limit: (n: number) => { lim = n; return q; },
       single: () => { one = 'single'; return Promise.resolve(exec()); },

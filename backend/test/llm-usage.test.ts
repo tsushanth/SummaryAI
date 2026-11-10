@@ -131,6 +131,7 @@ describe('source guard', () => {
       'services/intelligenceService.ts': ['intelligence', 'voice_debrief'],
       'services/coachingService.ts': ['coaching'],
       'services/liveInsightsService.ts': ['live_insights', 'live_insights', 'live_insights', 'live_insights'],
+      'services/voiceAssistant/agent.ts': ['voice_assistant'],
     };
     const seen = new Set<string>();
     for (const file of walk(root)) {

@@ -1,0 +1,1 @@
+Recording uploads now retry automatically after a brief network or server hiccup instead of failing.

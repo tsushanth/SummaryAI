@@ -14,6 +14,18 @@ export function isMissingColumn(error: { code?: string; message?: string } | nul
   return (error.code === '42703' || error.code === 'PGRST204') && String(error.message ?? '').includes(column);
 }
 
+/**
+ * bot_runs.live_stt_fallback (migration 030) is remembered as missing for a few minutes after the database says so, so a database
+ * without it pays no extra failing query per read, and applying the migration takes effect without restarting the machines.
+ */
+const FALLBACK_COLUMN_RECHECK_MS = 5 * 60_000;
+let fallbackColumnMissingAt = 0;
+export function markFallbackColumnMissing(nowMs = Date.now()): void { fallbackColumnMissingAt = nowMs; }
+export function clearFallbackColumnMissing(): void { fallbackColumnMissingAt = 0; }
+export function fallbackColumnKnownMissing(nowMs = Date.now()): boolean {
+  return fallbackColumnMissingAt > 0 && nowMs - fallbackColumnMissingAt < FALLBACK_COLUMN_RECHECK_MS;
+}
+
 export async function getUserDefaultLanguage(userId: string): Promise<string> {
   try {
     const { data } = await supabaseAdmin.from('profiles').select('preferences').eq('id', userId).maybeSingle();
@@ -48,20 +60,27 @@ export interface RunLanguageInfo {
   live_stt_ref: string | null;
   live_stt_provider: string | null;
   transcription_language: string | null;
+  /** bot_runs.live_stt_fallback (migration 030); null when never switched or the column does not exist yet. */
+  live_stt_fallback: unknown;
 }
 
 /** Latest bot run of a meeting with the columns this feature needs, tolerant of columns that do not exist yet. */
 export async function getLatestRunInfo(meetingId: string, opts: { activeOnly?: boolean } = {}): Promise<RunLanguageInfo | null> {
   const attempts = [
+    'id, status, live_stt_ref, live_stt_provider, transcription_language, live_stt_fallback',
     'id, status, live_stt_ref, live_stt_provider, transcription_language',
     'id, status, live_stt_ref, live_stt_provider',
     'id, status',
   ];
   for (const cols of attempts) {
+    if (cols.includes('live_stt_fallback') && fallbackColumnKnownMissing()) continue;
     let q = supabaseAdmin.from('bot_runs').select(cols).eq('meeting_id', meetingId);
     if (opts.activeOnly) q = q.in('status', ACTIVE_BOT_STATUSES);
     const { data, error } = await q.order('created_at', { ascending: false }).limit(1).maybeSingle();
-    if (error) continue;
+    if (error) {
+      if (isMissingColumn(error, 'live_stt_fallback')) markFallbackColumnMissing();
+      continue;
+    }
     if (!data) return null;
     const d = data as unknown as Partial<RunLanguageInfo> & { id: string; status: string };
     return {
@@ -70,6 +89,7 @@ export async function getLatestRunInfo(meetingId: string, opts: { activeOnly?: b
       live_stt_ref: d.live_stt_ref ?? null,
       live_stt_provider: d.live_stt_provider ?? null,
       transcription_language: d.transcription_language ?? null,
+      live_stt_fallback: (d as { live_stt_fallback?: unknown }).live_stt_fallback ?? null,
     };
   }
   return null;

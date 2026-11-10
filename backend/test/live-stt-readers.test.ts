@@ -25,13 +25,16 @@ describe('live_transcripts readers exclude shadow rows', () => {
   const reads = found.filter((f) => /\.select\(/.test(f.chain) && !/\.(insert|upsert)\(/.test(f.chain));
   const writes = found.filter((f) => /\.(insert|upsert)\(/.test(f.chain));
 
-  it('finds the five known readers and the two writers', () => {
+  it('finds the six known readers and the two writers', () => {
     expect(reads.map((r) => r.file).sort()).toEqual([
-      'routes/meetings.ts', 'routes/questions.ts', 'services/coachingService.ts', 'services/liveInsightsService.ts', 'services/stuckMeetingRecovery.ts',
+      'lib/liveSttFallback.ts', 'lib/liveSttFallback.ts', 'routes/meetings.ts', 'routes/questions.ts', 'services/coachingService.ts', 'services/liveInsightsService.ts', 'services/stuckMeetingRecovery.ts', 'services/voiceAssistant/runtime.ts',
     ]);
     expect(writes.map((r) => r.file).sort()).toEqual(['routes/liveSegments.ts', 'routes/webhooks.ts']);
   });
   it.each(reads.map((r) => [r.file, r] as const))('%s filters shadow=false', (_f, r) => {
+    // The one deliberate exception: the fallback module probes for HIDDEN standby rows (shadow = true, no source_key).
+    const probesHidden = r.file === 'lib/liveSttFallback.ts' && /\.eq\('shadow', true\)\s*\.is\('source_key', null\)/.test(r.chain.replace(/\n\s*/g, ''));
+    if (probesHidden) return;
     expect(r.chain).toMatch(/\.eq\('shadow', false\)/);
     expect(r.chain).toMatch(/\.eq\('is_partial', false\)/);
   });

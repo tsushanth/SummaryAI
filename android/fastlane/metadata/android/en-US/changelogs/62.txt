@@ -1,0 +1,1 @@
+Recording uploads now recover from more kinds of dropped connections instead of failing.

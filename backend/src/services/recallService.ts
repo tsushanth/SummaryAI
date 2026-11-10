@@ -14,7 +14,10 @@ import {
 import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
 import { triggerProcessing } from './processingService.js';
-import { buildIngestUrl, mintLiveSttRef, planLiveStt } from '../lib/liveStt.js';
+import { buildIngestUrl, liveSttEnvFrom, mintLiveSttRef, planLiveStt } from '../lib/liveStt.js';
+import { assertAdmitted, sonioxHasCapacity } from '../lib/liveSttAdmission.js';
+import { inc, logEvent } from '../lib/liveSttMetrics.js';
+import { planVoiceAssistant } from './voiceAssistant/recallIntegration.js';
 import { isMissingColumn } from './meetingLanguage.js';
 import {
   languageToStore,
@@ -89,7 +92,7 @@ export class RecallService {
    */
   static async createBot(
     params: RecallBotCreateRequest,
-    options?: { enableRealtimeTranscript?: boolean }
+    options?: { enableRealtimeTranscript?: boolean; maxDurationSeconds?: number }
   ): Promise<RecallBotResponse> {
     // Enable real-time by default if SERVICE_URL is configured
     const enableRealtime = options?.enableRealtimeTranscript ?? !!config.SERVICE_URL;
@@ -98,15 +101,26 @@ export class RecallService {
     // them before this point, and a bad value must never become a bot that fails to start.
     const language = normalizeTranscriptionLanguage(params.transcription_language) ?? 'auto';
 
+    // Spend / hours guardrails (backend/LIVE_STT.md "Guardrails"). Every one is off unless its env var is set: with none set this
+    // is a no-op and makes no query.
+    await assertAdmitted(params.user_id);
+
     // Live STT provider (backend/LIVE_STT.md). Default 'recall' leaves the request exactly as it was.
-    const plan = planLiveStt({
-      LIVE_STT_PROVIDER: config.LIVE_STT_PROVIDER,
-      LIVE_STT_SHADOW: config.LIVE_STT_SHADOW,
-      LIVE_STT_SHADOW_USER_IDS: config.LIVE_STT_SHADOW_USER_IDS,
-      LIVE_STT_WS_URL: config.LIVE_STT_WS_URL,
-      LIVE_STT_INGEST_SECRET: config.LIVE_STT_INGEST_SECRET,
-      NODE_ENV: config.NODE_ENV,
-    }, params.user_id);
+    let plan = planLiveStt(liveSttEnvFrom(config as unknown as Record<string, unknown>), params.user_id);
+    if (plan.provider === 'soniox') {
+      // The live-stt service holds a few concurrent streams. A meeting that would not get one is created as a normal
+      // Recall-transcript bot, so it always has a live transcript. A failed count also answers "no room" (see sonioxHasCapacity).
+      const cap = await sonioxHasCapacity();
+      if (!cap.ok) {
+        inc('live_stt_capacity_redirect');
+        logEvent('capacity_redirect', { active: cap.active ?? -1 });
+        plan = { provider: 'recall' };
+      } else {
+        inc('live_stt_provider_selected', { provider: 'soniox', selection: plan.selection });
+      }
+    }
+    if (plan.provider === 'recall') inc('live_stt_provider_selected', { provider: 'recall' });
+    else if (plan.provider === 'shadow') inc('live_stt_provider_selected', { provider: 'shadow' });
     if (plan.provider === 'recall' && plan.reason === 'misconfigured') {
       // Fail safe: the bot still gets Recall's own transcript. Names only, never values.
       console.error('[Recall] LIVE_STT requested but LIVE_STT_WS_URL (wss://...) or LIVE_STT_INGEST_SECRET is missing/invalid; using Recall transcript');
@@ -123,7 +137,11 @@ export class RecallService {
 
     // Build the recording config with optional real-time endpoints
     let recordingConfig: Record<string, unknown>;
-    if (plan.provider === 'soniox' && wsEndpoint) {
+    const hotStandby = plan.provider === 'soniox' && plan.standby && enableRealtime && !!config.SERVICE_URL;
+    if (plan.provider === 'soniox' && plan.standby && !hotStandby) {
+      console.warn('[Recall] LIVE_STT_RECALL_HOT_STANDBY needs SERVICE_URL (Recall transcript webhook); creating a Soniox-only bot');
+    }
+    if (plan.provider === 'soniox' && wsEndpoint && !hotStandby) {
       // Soniox is the source of truth: no Recall transcript block (also drops the per-hour Recall transcript add-on).
       recordingConfig = { audio_mixed_raw: {}, realtime_endpoints: [wsEndpoint] };
       console.log('[Recall] Live STT = soniox, audio_mixed_raw websocket endpoint enabled');
@@ -150,22 +168,43 @@ export class RecallService {
         console.log(`[Recall] Real-time transcript enabled, webhook: ${config.SERVICE_URL}/v1/webhooks/recall/transcript`);
       }
 
-      if (plan.provider === 'shadow' && wsEndpoint) {
+      if ((plan.provider === 'shadow' || hotStandby) && wsEndpoint) {
         // Shadow: Recall's transcript stays the source of truth; the audio stream feeds mm-live-stt for an A/B comparison only.
+        // Hot standby: Soniox is the source of truth and Recall's transcript is stored hidden until a failure switches to it.
         recordingConfig.audio_mixed_raw = {};
         const eps = (recordingConfig.realtime_endpoints as unknown[] | undefined) ?? [];
         recordingConfig.realtime_endpoints = [...eps, wsEndpoint];
-        console.log('[Recall] Live STT shadow: audio_mixed_raw websocket endpoint added next to Recall transcript');
+        console.log(`[Recall] Live STT ${hotStandby ? 'soniox with Recall hot standby' : 'shadow'}: audio_mixed_raw websocket endpoint added next to Recall transcript`);
       }
+    }
+
+    // In-meeting voice assistant (docs/VOICE_ASSISTANT.md). Null (and a bot exactly as before) unless the flags and the user's
+    // preference allow it and Recall's own real-time transcript is the live source.
+    const assistant = await planVoiceAssistant({
+      userId: params.user_id,
+      serviceUrl: config.SERVICE_URL,
+      internalSecret: config.INTERNAL_SECRET,
+      realtimeRecallTranscript: enableRealtime && plan.provider !== 'soniox',
+    });
+    if (assistant) {
+      const eps = (recordingConfig.realtime_endpoints as unknown[] | undefined) ?? [];
+      recordingConfig.realtime_endpoints = [...eps, assistant.endpoint];
+      console.log('[Recall] Voice assistant endpoint added');
     }
 
     const payload: Record<string, unknown> = {
       meeting_url: params.meeting_url,
       bot_name: params.bot_name || 'Meeting Mind',
-      automatic_leave: params.automatic_leave || {
-        waiting_room_timeout: 600, // 10 minutes
-        noone_joined_timeout: 300, // 5 minutes
-        everyone_left_timeout: 30, // 30 seconds
+      automatic_leave: {
+        ...(params.automatic_leave || {
+          waiting_room_timeout: 600, // 10 minutes
+          noone_joined_timeout: 300, // 5 minutes
+          everyone_left_timeout: 30, // 30 seconds
+        }),
+        // Maximum session length (monthly cap). Only present when the caller passes a limit, so the default request is unchanged.
+        ...(options?.maxDurationSeconds && options.maxDurationSeconds > 0
+          ? { in_call_recording_timeout: Math.floor(options.maxDurationSeconds) }
+          : {}),
       },
       recording_config: recordingConfig,
     };
@@ -186,6 +225,8 @@ export class RecallService {
       };
     }
 
+    if (assistant?.automaticAudioOutput) payload.automatic_audio_output = assistant.automaticAudioOutput;
+
     console.log(`[Recall] Creating bot for meeting: ${params.meeting_url}`);
 
     const bot = await this.request<RecallBotResponse>('/bot', {
@@ -195,6 +236,19 @@ export class RecallService {
     // Callers store these on the bot_run (see liveSttBotRunColumns). Absent on the default path.
     if (liveStt) bot.live_stt = liveStt;
     return bot;
+  }
+
+  /** Play an MP3 (base64) into the call through the bot. Used by the in-meeting voice assistant. */
+  static async outputAudio(botId: string, mp3Base64: string): Promise<void> {
+    await this.request(`/bot/${botId}/output_audio/`, {
+      method: 'POST',
+      body: JSON.stringify({ kind: 'mp3', b64_data: mp3Base64 }),
+    });
+  }
+
+  /** Stop whatever the bot is currently playing (barge-in). */
+  static async stopOutputAudio(botId: string): Promise<void> {
+    await this.request(`/bot/${botId}/output_audio/`, { method: 'DELETE' });
   }
 
   /**

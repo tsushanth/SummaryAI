@@ -129,10 +129,17 @@ async function processRecordingAsync(
       if (config.DEEPGRAM_API_KEY) { sttProvider = 'deepgram'; sttModel = 'nova-2'; }
       console.log(`[Processing] ${jobId}: PDF text extraction complete (${transcript.wordCount} words)`);
     } else if (isSttConfigured()) {
-      // STT_PROVIDER=deepgram (default) | soniox | shadow, see ./stt/index.ts.
+      // STT_PROVIDER=deepgram (default) | soniox | readaloud | shadow, see ./stt/index.ts.
       // Language the user chose for the meeting this recording came from (none for uploads and for 'auto').
       const languageHint = await languageHintForRecording(recording);
-      const stt = await transcribeAudio(fileData, recording.file_path, { recordingId, ...(languageHint ? { languageHints: [languageHint] } : {}) });
+      // userId: the recording owner (shadow comparison is opt-in per user). durationHintSeconds: lets a candidate with a length limit decline.
+      const knownSeconds = Number(recording.duration_seconds);
+      const stt = await transcribeAudio(fileData, recording.file_path, {
+        recordingId,
+        userId: recording.user_id ?? userId,
+        ...(Number.isFinite(knownSeconds) && knownSeconds > 0 ? { durationHintSeconds: knownSeconds } : {}),
+        ...(languageHint ? { languageHints: [languageHint] } : {}),
+      });
       transcript = stt.transcript;
       sttProvider = stt.provider;
       sttModel = stt.model;

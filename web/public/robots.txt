@@ -49,3 +49,5 @@ Disallow: /share/
 User-agent: Bytespider
 Allow: /
 Disallow: /share/
+
+Sitemap: https://meetingmind.org/sitemap.xml

@@ -7,6 +7,14 @@ process.env.SUPABASE_ANON_KEY ??= 'dummy';
 process.env.SUPABASE_SERVICE_ROLE_KEY ??= 'dummy';
 process.env.RECALL_API_KEY = 'recall-test-key';
 
+// createBot now counts concurrent Soniox bots (capacity check) through supabaseAdmin: answer "none running".
+vi.mock('../src/lib/supabase.js', () => {
+  const q: any = {};
+  for (const m of ['select', 'eq', 'in', 'gte', 'limit']) q[m] = () => q;
+  q.then = (res: any) => Promise.resolve({ data: [], error: null }).then(res);
+  return { supabaseAdmin: { from: () => q } };
+});
+
 const KEYS = ['LIVE_STT_PROVIDER', 'LIVE_STT_SHADOW', 'LIVE_STT_SHADOW_USER_IDS', 'LIVE_STT_WS_URL', 'LIVE_STT_INGEST_SECRET', 'SERVICE_URL', 'MEETING_BOT_ANNOUNCE', 'RECALL_AUTO_LANGUAGE'] as const;
 const saved: Record<string, string | undefined> = {};
 
