@@ -42,7 +42,14 @@ export interface ManagerDeps {
   metrics: VoiceMetrics;
 }
 
-interface Entry { session: VoiceSession; ctx: BotContext; owner: OwnerIdentity; ownerName: string | null; preference: boolean | undefined }
+interface Entry {
+  session: VoiceSession; ctx: BotContext; owner: OwnerIdentity; ownerName: string | null; preference: boolean | undefined;
+  /** Participants Recall has named (lowercased name -> email / host flag): the live-stt payload carries a name only. */
+  known: Map<string, { email: string | null; isHost: boolean }>;
+}
+
+/** One final segment of the live-stt stream (POST /internal/live-segments), reduced to what the assistant needs. */
+export interface LiveSegment { text: string; speakerName: string | null; isHost: boolean }
 
 export class VoiceAssistantManager {
   private sessions = new Map<string, Entry>();
@@ -69,7 +76,32 @@ export class VoiceAssistantManager {
 
     const text = (t.words ?? []).map((w) => w.text).join(' ');
     const speaker: Speaker = { name: t.participant?.name ?? null, email: t.participant?.email ?? null, isHost: !!t.participant?.is_host };
+    if (speaker.name && (speaker.email || speaker.isHost)) entry.known.set(speaker.name.trim().toLowerCase(), { email: speaker.email ?? null, isHost: !!speaker.isHost });
     await entry.session.onTranscript({ speaker, text, partial: payload.event === 'transcript.partial_data' });
+    return { handled: true };
+  }
+
+  /**
+   * Final segments of the live-stt (Soniox) stream of one bot, in order. Used only when VOICE_ASSISTANT_WAKE_SOURCE=live_stt and
+   * the bot has a live-stt stream; otherwise nothing happens (no lookup, no session), so the default path is untouched.
+   * Same session object and caps as the Recall path. The speaker is resolved to an email / host flag from what Recall has said
+   * about the same name, because the live-stt payload has neither an email nor a reliable host flag.
+   */
+  async handleLive(recallBotId: string, segments: LiveSegment[]): Promise<{ handled: boolean; reason?: string }> {
+    const cfg = this.d.getConfig();
+    if (cfg.killed || cfg.mode === 'off') return { handled: false, reason: cfg.killed ? 'killed' : 'mode_off' };
+    if (cfg.wakeSource !== 'live_stt') return { handled: false, reason: 'wake_source_recall' };
+    if (!recallBotId) return { handled: false, reason: 'bad_event' };
+    this.sweep();
+    const entry = await this.entryFor(recallBotId);
+    if (!entry) return { handled: false, reason: 'not_enabled' };
+    if (!entry.ctx.liveStt) return { handled: false, reason: 'no_live_stream' };
+    for (const s of segments) {
+      const name = s.speakerName?.trim() || null;
+      const k = name ? entry.known.get(name.toLowerCase()) : undefined;
+      const speaker: Speaker = { name, email: k?.email ?? null, isHost: s.isHost || !!k?.isHost };
+      await entry.session.onTranscript({ speaker, text: s.text, partial: false, source: 'live_stt' });
+    }
     return { handled: true };
   }
 
@@ -97,7 +129,7 @@ export class VoiceAssistantManager {
       const [owner, seed] = await Promise.all([this.d.loadOwner(ctx.userId), this.d.loadSeed(ctx.meetingId, ctx.userId)]);
       const data = this.d.dataFor(ctx.userId); // bound to the bot run's user, nothing else
       const ownerName = owner.names[0] ?? null;
-      const entry: Entry = { ctx, owner, ownerName, preference, session: null as unknown as VoiceSession };
+      const entry: Entry = { ctx, owner, ownerName, preference, known: new Map(), session: null as unknown as VoiceSession };
       const deps: SessionDeps = {
         userId: ctx.userId,
         meetingId: ctx.meetingId,
@@ -115,6 +147,7 @@ export class VoiceAssistantManager {
         stop: () => this.d.stop(botId),
         metrics: this.d.metrics,
         introPlayed: this.d.getConfig().intro,
+        hasLiveStream: !!ctx.liveStt,
       };
       entry.session = new VoiceSession(deps);
       entry.session.seed(seed);

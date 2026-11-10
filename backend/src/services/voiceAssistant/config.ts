@@ -11,18 +11,25 @@
  *   VOICE_ASSISTANT_MODE              off (default) | opt_in | all
  *       opt_in = profiles.preferences.voice_assistant === true, or the user id is in VOICE_ASSISTANT_USER_IDS
  *       all    = every user who has not opted out
+ *   VOICE_ASSISTANT_WAKE_SOURCE       recall (default) | live_stt
+ *       live_stt = for a bot that has a live-stt stream (LIVE_STT_SHADOW user or LIVE_STT_PROVIDER=soniox), the wake phrase and the
+ *       question come from that stream's final segments; Recall's events then only supply barge-in signals. Other bots: unchanged.
  */
 
 export type VoiceAssistantMode = 'off' | 'opt_in' | 'all';
 /** Who may make the assistant read from PAST meetings. The live meeting is always answerable for any participant. */
 export type HistoryPolicy = 'owner' | 'owner_email' | 'anyone' | 'off';
 export type TtsProviderName = 'deepgram' | 'openai';
+/** Which transcript stream may start a question: Recall's real-time transcript (default) or the live-stt (Soniox) segments. */
+export type WakeSource = 'recall' | 'live_stt';
 
 export interface VoiceAssistantConfig {
   mode: VoiceAssistantMode;
   killed: boolean;
   userIds: Set<string>;
   historyPolicy: HistoryPolicy;
+  /** Only has an effect for a bot that has a live-stt stream (shadow or soniox); every other bot always uses Recall. */
+  wakeSource: WakeSource;
   maxQuestionsPerMeeting: number;
   maxQuestionsPerUserPerDay: number;
   /** Hard cap on the SPOKEN answer, in characters (about 35 words at 450). */
@@ -63,6 +70,10 @@ function parsePolicy(v: string | undefined): HistoryPolicy {
   return m === 'owner_email' || m === 'anyone' || m === 'off' ? m : 'owner';
 }
 
+function parseWakeSource(v: string | undefined): WakeSource {
+  return (v ?? 'recall').trim().toLowerCase() === 'live_stt' ? 'live_stt' : 'recall';
+}
+
 export function loadVoiceAssistantConfig(env: NodeJS.ProcessEnv = process.env): VoiceAssistantConfig {
   const provider = (env.VOICE_ASSISTANT_TTS_PROVIDER ?? 'deepgram').trim().toLowerCase();
   return {
@@ -70,6 +81,7 @@ export function loadVoiceAssistantConfig(env: NodeJS.ProcessEnv = process.env): 
     killed: truthy(env.VOICE_ASSISTANT_KILL),
     userIds: new Set((env.VOICE_ASSISTANT_USER_IDS ?? '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean)),
     historyPolicy: parsePolicy(env.VOICE_ASSISTANT_HISTORY_POLICY),
+    wakeSource: parseWakeSource(env.VOICE_ASSISTANT_WAKE_SOURCE),
     maxQuestionsPerMeeting: Math.floor(posNumber(env.VOICE_ASSISTANT_MAX_QUESTIONS_PER_MEETING, 15, 200)),
     maxQuestionsPerUserPerDay: Math.floor(posNumber(env.VOICE_ASSISTANT_MAX_QUESTIONS_PER_USER_DAY, 40, 1000)),
     maxAnswerChars: Math.floor(posNumber(env.VOICE_ASSISTANT_MAX_ANSWER_CHARS, 450, 1000)),

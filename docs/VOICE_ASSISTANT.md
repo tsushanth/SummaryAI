@@ -23,6 +23,7 @@ Server side only: no Android, iOS or web client change is needed. Code: `backend
 | `VOICE_ASSISTANT_KILL` | unset | `1`/`true` = global kill switch. New bots get no assistant, a running one goes silent on its next event and stops any audio. |
 | `VOICE_ASSISTANT_USER_IDS` | unset | comma separated user UUIDs for `opt_in` mode |
 | `VOICE_ASSISTANT_HISTORY_POLICY` | `owner` | who may use past meetings: `owner` (email or name match), `owner_email` (email only), `anyone` (not recommended), `off` (live meeting only) |
+| `VOICE_ASSISTANT_WAKE_SOURCE` | `recall` | `recall` (Recall's real-time transcript, as before) or `live_stt` (see Wake source below). Has no effect on a bot without a live-stt stream. |
 | `VOICE_ASSISTANT_MAX_QUESTIONS_PER_MEETING` | `15` | then it says once that it reached its limit |
 | `VOICE_ASSISTANT_MAX_QUESTIONS_PER_USER_DAY` | `40` | per user per UTC day, across meetings |
 | `VOICE_ASSISTANT_MAX_ANSWER_CHARS` | `450` | cap on the spoken answer |
@@ -36,6 +37,24 @@ Server side only: no Android, iOS or web client change is needed. Code: `backend
 A user can opt out (or in) themselves: `PUT /api/voice-assistant {"enabled": false}` (authenticated, writes `profiles.preferences.voice_assistant`; `false` wins in every mode, `GET` shows the effective state). No client uses it yet; it exists so support can flip a user and a client can add a toggle later. A bot only gets the assistant if the flags allow it **when the bot is created**; the kill switch also applies to bots already in a meeting.
 
 Requirements already in production: `RECALL_API_KEY`, `INTERNAL_SECRET` (signs the assistant webhook URL), `SERVICE_URL`, `DEEPGRAM_API_KEY` (TTS), `ANTHROPIC_API_KEY`. If `INTERNAL_SECRET` or `SERVICE_URL` is missing the bot is created without the assistant. It also needs Recall's own real-time transcript (the default; not the `LIVE_STT_PROVIDER=soniox` path).
+
+## Wake source: Recall or the live-stt (Soniox) stream
+
+Recall's real-time transcript runs in low-latency mode (accuracy mode would delay it by minutes, and low-latency mode takes no key terms), and it mishears or drops the start of an utterance, which is exactly where the wake phrase is. In a live test with three wake questions, Recall's stream recognised one: it heard "meeting my invading we decided in my" for one, and for another it dropped the leading words, with its final arriving about 5 s after speech end. The Soniox stream (live-stt service, `backend/LIVE_STT.md`) got all three right, and its finals arrived about 1 s after speech end.
+
+With `VOICE_ASSISTANT_WAKE_SOURCE=live_stt`, a bot that has a live-stt stream (bot run with `live_stt_provider` `shadow` or `soniox`) takes its wake phrase and question from that stream:
+
+- Final segments that `POST /internal/live-segments` has just stored are handed to the same assistant session as Recall events (same caps, echo guard, kill switch, owner rules). Only newly inserted segments are forwarded, so the live-stt service's retries cannot ask twice. The forward is fire-and-forget: it can never slow down or fail the sink, and nothing is logged about its content.
+- Recall's finals for that bot are then ignored (no wake, no question, no second answer, no second metrics). Recall's partials are still used as barge-in signals: someone else talking over the answer, or a stop word, stops the audio. The asker's own late Recall partials, which trail the live-stt stream by several seconds, are never a barge-in.
+- live-stt splits one spoken question into several finals ("Meeting mind, what" / "did we decide in my" / "last meeting with Prajni?"). The assistant keeps the first words after the wake phrase, and a question that does not end in punctuation waits 1.2 s for the rest of the same speaker's finals. The wait is counted in the answer-time metrics.
+- Speaker identity: the live-stt payload has a speaker name and a host flag but no email. The assistant fills in the email (and host flag) from what Recall has reported for the same name earlier in the meeting. With `HISTORY_POLICY=owner_email` and no email seen yet, history is denied (fails closed); the default `owner` policy matches on the name.
+- Fallback: a bot without a live-stt stream uses Recall exactly as before. If a live-stt stream goes quiet (three Recall finals in a row with no live-stt final in between), Recall finals are accepted again until live-stt delivers, and the same wake phrase reported by both streams within 15 s is acted on once.
+
+How to enable: set `VOICE_ASSISTANT_WAKE_SOURCE=live_stt` (a normal secret change, restarts the machine). Nothing else changes. It only does something for bots that already have a live-stt stream, i.e. users in `LIVE_STT_SHADOW_USER_IDS` (with `LIVE_STT_SHADOW=true`) or everyone when `LIVE_STT_PROVIDER=soniox`. Revert by unsetting it (or `recall`).
+
+Cost: no new Soniox spend for users who are already shadowed, since their audio is already being streamed and transcribed; the assistant only reads the segments that are already stored. The flag does not enable live-stt for anyone. Extending live-stt to all users is a separate spend decision (Soniox per audio hour for every meeting, plus the live-stt service capacity); do not make it just to turn this on. For a `LIVE_STT_PROVIDER=soniox` bot (no Recall transcript at all) the assistant is not wired in at bot creation (no intro, no Recall real-time endpoint), so with this flag it can answer, but it has no Recall partials for barge-in; live-stt stop words and new questions still interrupt.
+
+Known limits: segment text is whatever Soniox heard, with no confidence; a stream replayed after a long outage could carry an old question (the answer is dropped after `VOICE_ASSISTANT_STALE_MS` counted from arrival, not from when it was spoken); the live-stt speaker name comes from Recall's speech events, so a renamed or shared-mic participant can be misattributed as with Recall.
 
 ## TTS (server side)
 
