@@ -32,6 +32,19 @@ import {
   RECORDING_MINIMUM_HINT,
 } from '@/lib/newRecordingForm';
 
+import { track } from '@/lib/activationClient';
+import { isFirstRecording, markFirstRecordingDone } from '@/lib/activation';
+
+// Activation funnel (no-ops unless NEXT_PUBLIC_ACTIVATION_EVENTS=1). "First" = the recordings list showed an empty account.
+const firstRecording = () => { try { return isFirstRecording(window.localStorage); } catch { return false; } };
+function trackRecordingDone(mode: 'record' | 'upload', durationS?: number) {
+  const first = firstRecording();
+  if (first) {
+    track('first_recording_done', { mode, ...(durationS !== undefined ? { duration_s: durationS } : {}) });
+    try { markFirstRecordingDone(window.localStorage); } catch { /* storage unusable */ }
+  }
+}
+
 type InputMode = 'record' | 'upload';
 
 export default function NewRecordingPage() {
@@ -81,6 +94,8 @@ export default function NewRecordingPage() {
 
   const handleFileSelect = useCallback((file: File) => {
     setSelectedFile(file);
+    track('upload_chosen');
+    if (firstRecording()) track('first_recording_started', { mode: 'upload' });
     // Auto-fill title from filename if empty
     if (!title) {
       const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
@@ -126,6 +141,7 @@ export default function NewRecordingPage() {
           }
         );
         pendingIdRef.current = null;
+        trackRecordingDone('record', recorder.duration);
         router.push(`/recordings/${recordingId}`);
         return;
       }
@@ -158,6 +174,7 @@ export default function NewRecordingPage() {
       await completeUpload(recording.id);
 
       // Navigate to recording detail page
+      trackRecordingDone('upload');
       router.push(`/recordings/${recording.id}`);
     } catch (error) {
       console.error('Error creating recording:', error);
@@ -277,7 +294,11 @@ export default function NewRecordingPage() {
                   isPaused={recorder.isPaused}
                   duration={recorder.duration}
                   error={recorder.error}
-                  onStart={recorder.startRecording}
+                  onStart={() => {
+                    track('record_clicked');
+                    if (firstRecording()) track('first_recording_started', { mode: 'record' });
+                    return recorder.startRecording();
+                  }}
                   onStop={recorder.stopRecording}
                   onPause={recorder.pauseRecording}
                   onResume={recorder.resumeRecording}
