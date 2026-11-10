@@ -38,7 +38,7 @@ describe('filler filter: language aware', () => {
     ['Eh.', 'en'],        // not in the English list (Canadian tag, not a hesitation)
     ['はい', 'ja'], ['うん', 'ja'], ['ええ', 'ja'], // yes
     ['嗯', 'zh'],         // mostly "yes/uh-huh"
-    ['응', 'ko'],         // yes
+    ['응', 'ko'], ['어.', 'ko'], // yes / informal yeah
     ['Sí.', 'es'], ['Oui.', 'fr'], ['Ja.', 'de'], ['Nein.', 'de'], ['Да.', 'ru'], ['Нет.', 'ru'], ['No.', 'pl'], ['Ну.', 'ru'],
     ['Este.', 'es'],
   ])('keeps %j in %s', (t, lang) => { expect(isFillerText(t, lang, cfg)).toBe(false); });

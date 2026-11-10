@@ -14,6 +14,18 @@ export function isMissingColumn(error: { code?: string; message?: string } | nul
   return (error.code === '42703' || error.code === 'PGRST204') && String(error.message ?? '').includes(column);
 }
 
+/**
+ * bot_runs.live_stt_fallback (migration 030) is remembered as missing for a few minutes after the database says so, so a database
+ * without it pays no extra failing query per read, and applying the migration takes effect without restarting the machines.
+ */
+const FALLBACK_COLUMN_RECHECK_MS = 5 * 60_000;
+let fallbackColumnMissingAt = 0;
+export function markFallbackColumnMissing(nowMs = Date.now()): void { fallbackColumnMissingAt = nowMs; }
+export function clearFallbackColumnMissing(): void { fallbackColumnMissingAt = 0; }
+export function fallbackColumnKnownMissing(nowMs = Date.now()): boolean {
+  return fallbackColumnMissingAt > 0 && nowMs - fallbackColumnMissingAt < FALLBACK_COLUMN_RECHECK_MS;
+}
+
 export async function getUserDefaultLanguage(userId: string): Promise<string> {
   try {
     const { data } = await supabaseAdmin.from('profiles').select('preferences').eq('id', userId).maybeSingle();
@@ -61,10 +73,14 @@ export async function getLatestRunInfo(meetingId: string, opts: { activeOnly?: b
     'id, status',
   ];
   for (const cols of attempts) {
+    if (cols.includes('live_stt_fallback') && fallbackColumnKnownMissing()) continue;
     let q = supabaseAdmin.from('bot_runs').select(cols).eq('meeting_id', meetingId);
     if (opts.activeOnly) q = q.in('status', ACTIVE_BOT_STATUSES);
     const { data, error } = await q.order('created_at', { ascending: false }).limit(1).maybeSingle();
-    if (error) continue;
+    if (error) {
+      if (isMissingColumn(error, 'live_stt_fallback')) markFallbackColumnMissing();
+      continue;
+    }
     if (!data) return null;
     const d = data as unknown as Partial<RunLanguageInfo> & { id: string; status: string };
     return {

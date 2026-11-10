@@ -181,7 +181,8 @@ What happens in each mode:
 - State lives in `bot_runs.live_stt_fallback` (migration 030, jsonb: active, mode, switched_at_sec, reason, retries_used, last 8
   events; no text, no ids). Everything is decided from the database, so any Fly machine can act. The switch is idempotent.
   Without migration 030 the code still runs: reports answer `fallback: unsupported`, an alert `LIVE_STT_FALLBACK_MIGRATION_MISSING`
-  is raised once an hour and Soniox simply stays the source.
+  is raised once an hour and Soniox simply stays the source. A missing column is remembered for 5 minutes only, so applying migration
+  030 takes effect without a restart.
 
 Service contract (the service does not send these yet, see "Service changes needed"): `POST /internal/live-segments` with the usual
 signature and body `{"v":1,"ref":...,"sessionId":...,"event":{"type":"stream_fatal"|"stream_degraded","reason":"auth"|"connect"|"closed"|"rate_limit"|"error"|"degraded"|"capacity","code":429?}}`

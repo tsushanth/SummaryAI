@@ -37,7 +37,7 @@ function norm(token: string): string {
 const UNIVERSAL = /^(?:h?m+|m+h+m*|mh?m+)$/u;
 
 /** Per-language hesitation sounds (primary BCP-47 subtag). Deliberately excludes anything that is also a real answer or word in the
- *  language: ja うん/ええ/はい, zh 嗯, ko 응, th อืม, German "er"/"um", Spanish "este", Polish "no", Russian "ну". */
+ *  language: ja うん/ええ/はい, zh 嗯, ko 응 and 어, th อืม, German "er"/"um", Spanish "este", Polish "no", Russian "ну". */
 const BY_LANG: Record<string, string[]> = {
   en: ['uh', 'um', 'uhm', 'er', 'erm', 'err', 'ehm'],
   de: ['äh', 'ähm', 'äm', 'öh', 'ehm', 'ahm'],
@@ -68,7 +68,7 @@ const BY_LANG: Record<string, string[]> = {
   vi: ['ừm', 'ờm', 'ưm'],
   ja: ['えー', 'えーと', 'えっと', 'あのー', 'あの', 'うーん', 'んー', 'ええと'],
   zh: ['呃', '额', '呃呃', '唔'],
-  ko: ['음', '어', '으음', '어어'],
+  ko: ['음', '으음'], // not 어: it is also the informal "yeah"
   th: ['เอ่อ'],
   ca: ['eh', 'ehm', 'em'],
   et: ['ee', 'eee', 'öö'],

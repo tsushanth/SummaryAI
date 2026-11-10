@@ -26,7 +26,7 @@
  * Nothing here logs or stores transcript text, names or user ids.
  */
 import { supabaseAdmin } from './supabase.js';
-import { isMissingColumn } from '../services/meetingLanguage.js';
+import { clearFallbackColumnMissing, fallbackColumnKnownMissing, isMissingColumn, markFallbackColumnMissing } from '../services/meetingLanguage.js';
 import { reportAlert } from './alerts.js';
 import { inc, logEvent, refTag } from './liveSttMetrics.js';
 
@@ -145,14 +145,14 @@ export interface LiveRun {
   created_at?: string | null;
 }
 
-let columnMissing = false;
+// Remembered for a few minutes only (see meetingLanguage.ts), so applying migration 030 needs no restart.
 /** Test hook. */
-export function resetFallbackColumnFlag(): void { columnMissing = false; }
-export function fallbackColumnIsMissing(): boolean { return columnMissing; }
+export function resetFallbackColumnFlag(): void { clearFallbackColumnMissing(); }
+export function fallbackColumnIsMissing(): boolean { return fallbackColumnKnownMissing(); }
 
 function noteMissingColumn(): void {
-  if (!columnMissing) {
-    columnMissing = true;
+  if (!fallbackColumnKnownMissing()) {
+    markFallbackColumnMissing();
     console.error('[LiveStt] bot_runs.live_stt_fallback is missing (migration 030 not applied): automatic fallback is unavailable');
     reportAlert('live_stt', 'LIVE_STT_FALLBACK_MIGRATION_MISSING', {}, 60 * 60_000);
   }
@@ -162,7 +162,7 @@ function noteMissingColumn(): void {
 /** Select a bot run tolerating a database without migration 030 (and 026). `by` = the filter column. */
 export async function selectLiveRun(by: 'live_stt_ref' | 'recall_bot_id', value: string, extra = ''): Promise<{ data: (LiveRun & Record<string, unknown>) | null; error: boolean }> {
   const base = `id, meeting_id, user_id, live_stt_provider${extra ? `, ${extra}` : ''}`;
-  const attempts = columnMissing
+  const attempts = fallbackColumnKnownMissing()
     ? [`${base}, joined_at`, base]
     : [`${base}, live_stt_fallback, joined_at`, `${base}, joined_at`, base];
   for (const cols of attempts) {
@@ -219,7 +219,7 @@ export async function declareStreamFailure(
   reason: FallbackReason,
   opts: { standby: boolean; source: 'event' | 'watchdog' | 'recall_evidence'; queueInsights?: (meetingId: string, userId: string) => Promise<void> }
 ): Promise<SwitchResult> {
-  if (columnMissing || !fallbackConfigFrom().enabled) return 'unsupported';
+  if (fallbackColumnKnownMissing() || !fallbackConfigFrom().enabled) return 'unsupported';
   const state = parseFallbackState(run.live_stt_fallback);
   if (state?.active) return 'already';
   const last = await lastVisibleSoniox(run.id);
@@ -236,7 +236,7 @@ export async function declareStreamFailure(
     retries_used: state?.retries_used ?? 0,
     events: pushEvent(state, { t: now, kind: 'switch', reason, at_sec: at }),
   };
-  if (!(await writeState(run.id, next))) return columnMissing ? 'unsupported' : 'error';
+  if (!(await writeState(run.id, next))) return fallbackColumnKnownMissing() ? 'unsupported' : 'error';
 
   if (mode === 'recall') {
     const { error } = await supabaseAdmin
@@ -318,7 +318,7 @@ export async function handleStreamEvent(
  */
 export async function sweepNoSegments(deps: { nowMs?: number; cfg?: FallbackConfig } = {}): Promise<number> {
   const cfg = deps.cfg ?? fallbackConfigFrom();
-  if (columnMissing || !cfg.enabled) return 0;
+  if (fallbackColumnKnownMissing() || !cfg.enabled) return 0;
   const now = deps.nowMs ?? Date.now();
   const since = new Date(now - 6 * 3600_000).toISOString();
   const { data, error } = await supabaseAdmin
