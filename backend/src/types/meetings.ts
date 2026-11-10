@@ -282,6 +282,9 @@ export interface MeetingDetailResponse {
   transcription_language: string;
   /** What the live transcript is doing right now, and whether POST /:id/live-language can change it. */
   live_language: LiveLanguageState;
+  /** Soniox-primary runs that had a stream failure only. 'unavailable' = the live transcript stopped (the final transcript still
+   *  comes after the meeting); 'recall_fallback' = it continues from Recall's transcript from switched_at_sec on. */
+  live_transcript?: { status: 'ok' | 'unavailable' | 'recall_fallback'; reason: string; switched_at_sec: number };
 }
 
 export interface LiveLanguageState {

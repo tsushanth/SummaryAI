@@ -9,6 +9,16 @@ const nextConfig = {
     // Public share pages: never cached, indexed, or leaked via Referer (the token is in the URL).
     return [
       {
+        // Baseline hardening for every page. Listed first so the more specific rules below can override a key.
+        source: '/:path*',
+        headers: [
+          { key: 'Strict-Transport-Security', value: 'max-age=15552000' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Content-Security-Policy', value: "object-src 'none'; base-uri 'self'; frame-ancestors 'self'" },
+        ],
+      },
+      {
         source: '/share/:path*',
         headers: [
           { key: 'Cache-Control', value: 'no-store' },

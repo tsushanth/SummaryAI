@@ -16,8 +16,19 @@ const serif = Newsreader({
 });
 
 export const metadata: Metadata = {
-  title: 'Meeting Mind',
-  description: 'AI-powered meeting transcription and summarization',
+  metadataBase: new URL('https://meetingmind.org'),
+  title: 'Meeting Mind: AI meeting notes, summaries and action items',
+  description:
+    'Free AI meeting notes for Android and the web. Record or join a call, get a transcript, a summary and who owes what, and ask questions across your meetings.',
+  openGraph: {
+    title: 'Meeting Mind: AI meeting notes, summaries and action items',
+    description:
+      'Free AI meeting notes for Android and the web. Transcripts, summaries, action items and answers across your meetings.',
+    siteName: 'Meeting Mind',
+    type: 'website',
+    url: '/',
+  },
+  twitter: { card: 'summary' },
   icons: {
     icon: '/favicon.png',
     apple: '/favicon.png',
