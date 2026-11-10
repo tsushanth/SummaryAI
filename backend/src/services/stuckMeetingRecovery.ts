@@ -19,6 +19,8 @@ import type { BotRun, Meeting } from '../types/meetings.js';
 import { registerLoop, runLoopPass, reportLoopScanError } from '../lib/loopMonitor.js';
 import { reportAlert } from '../lib/alerts.js';
 import { stitchedLanguage } from '../lib/transcriptionLanguage.js';
+import { liveTranscriptIsIncomplete, parseFallbackState } from '../lib/liveSttFallback.js';
+import { inc } from '../lib/liveSttMetrics.js';
 import { getLatestRunInfo } from './meetingLanguage.js';
 
 const SCAN_INTERVAL_MS = 5 * 60 * 1000;        // 5 min
@@ -147,10 +149,17 @@ export async function stitchStuckRecording(
   if (!result.segments.length) return { stitched: false, reason: 'no_segments_after_stitch' };
 
   // Which live source produced these rows. 'soniox' = the live-stt path (shadow runs stay recall_realtime: Recall is the source).
-  // getLatestRunInfo never throws and tolerates databases without migrations 026/027 (a label must not block a stitch).
+  // getLatestRunInfo never throws and tolerates databases without migrations 026/027/030 (a label must not block a stitch).
   const runInfo = await getLatestRunInfo(meetingId);
   const liveProvider = runInfo?.live_stt_provider ?? null;
   const fromSoniox = liveProvider === 'soniox';
+  const fallbackState = fromSoniox ? parseFallbackState(runInfo?.live_stt_fallback) : null;
+  if (liveTranscriptIsIncomplete(fallbackState)) {
+    // The live stream had an outage: these rows have a hole. Do not save them as the transcript; the final pass reads the recording.
+    inc('live_stt_stitch_skipped_incomplete');
+    return { stitched: false, reason: 'live_incomplete' };
+  }
+  const fromRecallFallback = fallbackState?.mode === 'recall';
 
   const transcriptId = randomUUID();
   const { error: insErr } = await supabaseAdmin
@@ -168,8 +177,8 @@ export async function stitchStuckRecording(
         fullText: result.fullText,
         recallAutoDetect: process.env.RECALL_AUTO_LANGUAGE === 'detect',
       }),
-      transcription_provider: fromSoniox ? 'soniox_realtime' : 'recall_realtime',
-      transcription_model: fromSoniox ? 'soniox_streaming' : 'recall_streaming',
+      transcription_provider: fromRecallFallback ? 'soniox_recall_fallback' : fromSoniox ? 'soniox_realtime' : 'recall_realtime',
+      transcription_model: fromRecallFallback ? 'soniox_then_recall_streaming' : fromSoniox ? 'soniox_streaming' : 'recall_streaming',
     });
   if (insErr) throw new Error(`transcript insert failed: ${insErr.message}`);
 

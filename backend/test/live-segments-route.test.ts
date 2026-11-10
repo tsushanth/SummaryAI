@@ -44,7 +44,7 @@ vi.mock('../src/lib/supabase.js', () => ({
                 for (const r of rows) {
                   if (state.stored.has(r.source_key)) continue; // ON CONFLICT DO NOTHING
                   state.stored.set(r.source_key, r);
-                  inserted.push({ id: `id-${state.stored.size}` });
+                  inserted.push({ id: `id-${state.stored.size}`, source_key: r.source_key });
                 }
                 return { data: inserted, error: null };
               }),
@@ -56,6 +56,8 @@ vi.mock('../src/lib/supabase.js', () => ({
     }),
   },
 }));
+const handleLive = vi.fn(async (_botId: string, _segments: any[]) => ({ handled: true }));
+vi.mock('../src/services/voiceAssistant/manager.js', () => ({ getVoiceAssistantManager: () => ({ handleLive }) }));
 const queueInsightGeneration = vi.fn(async () => {});
 vi.mock('../src/services/liveInsightsService.js', () => ({ queueInsightGeneration }));
 
@@ -414,5 +416,53 @@ describe('logging', () => {
     await post(payload([seg(2)]), { secret: 'bad-secret-value' });
     const all = logs.join('\n');
     for (const s of ['CONFIDENTIAL-PHRASE', 'Zebediah', SECRET, 'bad-secret-value', 'v1=']) expect(all).not.toContain(s);
+  });
+});
+
+describe('voice assistant wake source (VOICE_ASSISTANT_WAKE_SOURCE=live_stt)', () => {
+  const settle = () => new Promise((r) => setTimeout(r, 30));
+  let saved: string | undefined;
+  beforeEach(() => { saved = process.env.VOICE_ASSISTANT_WAKE_SOURCE; handleLive.mockClear(); });
+  afterEach(() => { if (saved === undefined) delete process.env.VOICE_ASSISTANT_WAKE_SOURCE; else process.env.VOICE_ASSISTANT_WAKE_SOURCE = saved; });
+
+  it('default: nothing is forwarded to the assistant', async () => {
+    delete process.env.VOICE_ASSISTANT_WAKE_SOURCE;
+    await start();
+    expect((await post(payload([seg(0)]))).status).toBe(200);
+    await settle();
+    expect(handleLive).not.toHaveBeenCalled();
+  });
+
+  it('live_stt: newly stored segments go to the assistant of the Recall bot, in seq order; a retried batch is not forwarded again', async () => {
+    process.env.VOICE_ASSISTANT_WAKE_SOURCE = 'live_stt';
+    await start();
+    const body = payload([seg(1, { segment_text: 'second', speaker_name: 'Ada', is_host: true }), seg(0, { segment_text: 'first', speaker_name: '' })]);
+    expect((await post(body)).body).toMatchObject({ inserted: 2 });
+    await vi.waitFor(() => expect(handleLive).toHaveBeenCalledTimes(1));
+    expect(handleLive).toHaveBeenCalledWith('recall-bot-1', [
+      { text: 'first', speakerName: null, isHost: false },
+      { text: 'second', speakerName: 'Ada', isHost: true },
+    ]);
+    expect((await post(body)).body).toMatchObject({ inserted: 0, duplicates: 2 });
+    await settle();
+    expect(handleLive).toHaveBeenCalledTimes(1);
+    // a partial overlap forwards only the new one
+    expect((await post(payload([seg(1), seg(2, { segment_text: 'third' })]))).body).toMatchObject({ inserted: 1 });
+    await vi.waitFor(() => expect(handleLive).toHaveBeenCalledTimes(2));
+    expect((handleLive.mock.calls[1] as any[])[1].map((x: any) => x.text)).toEqual(['third']);
+  });
+
+  it('live_stt: a bot run without a stored Recall bot id is skipped, and an assistant failure never fails the sink', async () => {
+    process.env.VOICE_ASSISTANT_WAKE_SOURCE = 'live_stt';
+    await start();
+    state.botRun = { ...state.botRun, recall_bot_id: null };
+    expect((await post(payload([seg(0)]))).status).toBe(200);
+    await settle();
+    expect(handleLive).not.toHaveBeenCalled();
+    state.botRun = { ...state.botRun, recall_bot_id: 'recall-bot-1' };
+    handleLive.mockRejectedValueOnce(new Error('boom'));
+    expect((await post(payload([seg(5)]))).status).toBe(200);
+    await settle();
+    expect(handleLive).toHaveBeenCalledTimes(1);
   });
 });

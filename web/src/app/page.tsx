@@ -1,5 +1,7 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { RibbonMark } from '@/components/ui/ribbon-mark';
+import { ActivationBeacon } from '@/components/ActivationBeacon';
 import {
   ArrowUpRight,
   Sparkles,
@@ -94,9 +96,14 @@ function Shot({
   );
 }
 
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <ActivationBeacon page="landing" />
       {/* Navigation */}
       <nav aria-label="Primary" className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
@@ -309,6 +316,7 @@ export default function LandingPage() {
             <a href="#pricing" className="rounded-sm hover:text-foreground">Free</a>
             <Link href="/privacy" className="rounded-sm hover:text-foreground">Privacy</Link>
             <Link href="/terms" className="rounded-sm hover:text-foreground">Terms</Link>
+            <Link href="/delete-account" className="rounded-sm hover:text-foreground">Delete account</Link>
           </div>
           <p>&copy; {new Date().getFullYear()} MeetingMind</p>
         </div>

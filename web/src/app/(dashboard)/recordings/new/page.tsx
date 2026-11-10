@@ -25,12 +25,36 @@ import { cn } from '@/lib/utils/cn';
 import { OUTPUT_LANGUAGES, outputLanguageParam } from '@/lib/outputLanguages';
 import { readAudioDuration, sanitizeDurationSeconds } from '@/lib/recordingDuration';
 
+import {
+  defaultRecordingTitle,
+  resolveRecordingTitle,
+  submitBlockedReason,
+  RECORDING_MINIMUM_HINT,
+} from '@/lib/newRecordingForm';
+
+import { track } from '@/lib/activationClient';
+import { isFirstRecording, markFirstRecordingDone } from '@/lib/activation';
+
+// Activation funnel (no-ops unless NEXT_PUBLIC_ACTIVATION_EVENTS=1). "First" = the recordings list showed an empty account.
+const firstRecording = () => { try { return isFirstRecording(window.localStorage); } catch { return false; } };
+function trackRecordingDone(mode: 'record' | 'upload', durationS?: number) {
+  const first = firstRecording();
+  if (first) {
+    track('first_recording_done', { mode, ...(durationS !== undefined ? { duration_s: durationS } : {}) });
+    try { markFirstRecordingDone(window.localStorage); } catch { /* storage unusable */ }
+  }
+}
+
 type InputMode = 'record' | 'upload';
 
 export default function NewRecordingPage() {
   const router = useRouter();
   const [mode, setMode] = useState<InputMode>('record');
   const [title, setTitle] = useState('');
+  // Filled after mount (local time; avoids a server/client text mismatch). Used when the title box is left blank.
+  const [fallbackTitle, setFallbackTitle] = useState('');
+  useEffect(() => setFallbackTitle(defaultRecordingTitle()), []);
+  const effectiveTitle = resolveRecordingTitle(title, fallbackTitle);
   const [outputLanguage, setOutputLanguage] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -70,6 +94,8 @@ export default function NewRecordingPage() {
 
   const handleFileSelect = useCallback((file: File) => {
     setSelectedFile(file);
+    track('upload_chosen');
+    if (firstRecording()) track('first_recording_started', { mode: 'upload' });
     // Auto-fill title from filename if empty
     if (!title) {
       const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
@@ -82,11 +108,6 @@ export default function NewRecordingPage() {
 
     if (!audioBlob) {
       setSubmitError('Please record or upload an audio file');
-      return;
-    }
-
-    if (!title.trim()) {
-      setSubmitError('Please enter a title for this recording');
       return;
     }
 
@@ -106,7 +127,7 @@ export default function NewRecordingPage() {
         const durationSeconds = recorder.recordedSeconds ?? (await readAudioDuration(audioBlob));
         const { recordingId } = await uploadWithPersistence(
           createIndexedDbStore(),
-          { id, title: title.trim(), blob: audioBlob, fileName, contentType, fileSize: audioBlob.size, durationSeconds, createdAt: Date.now(), outputLanguage: outputLanguageParam(outputLanguage) },
+          { id, title: effectiveTitle, blob: audioBlob, fileName, contentType, fileSize: audioBlob.size, durationSeconds, createdAt: Date.now(), outputLanguage: outputLanguageParam(outputLanguage) },
           {
             create: async (req) => {
               const { recording, upload_info } = await createRecording(req);
@@ -120,6 +141,7 @@ export default function NewRecordingPage() {
           }
         );
         pendingIdRef.current = null;
+        trackRecordingDone('record', recorder.duration);
         router.push(`/recordings/${recordingId}`);
         return;
       }
@@ -133,7 +155,7 @@ export default function NewRecordingPage() {
 
       // Step 1: Create recording in backend (gets signed upload URL)
       const { recording, upload_info } = await createRecording({
-        title: title.trim(),
+        title: effectiveTitle,
         file_name: fileName,
         content_type: contentType,
         file_size: fileSize,
@@ -152,6 +174,7 @@ export default function NewRecordingPage() {
       await completeUpload(recording.id);
 
       // Navigate to recording detail page
+      trackRecordingDone('upload');
       router.push(`/recordings/${recording.id}`);
     } catch (error) {
       console.error('Error creating recording:', error);
@@ -160,11 +183,9 @@ export default function NewRecordingPage() {
     }
   };
 
-  const canSubmit =
-    title.trim() &&
-    ((mode === 'record' && recorder.audioBlob) ||
-      (mode === 'upload' && selectedFile)) &&
-    !isSubmitting;
+  const hasAudio = mode === 'record' ? !!recorder.audioBlob && !recorder.isRecording : !!selectedFile;
+  const canSubmit = hasAudio && !isSubmitting;
+  const blockedReason = submitBlockedReason({ mode, hasAudio, isRecording: recorder.isRecording, isSubmitting });
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
@@ -196,11 +217,14 @@ export default function NewRecordingPage() {
           </CardHeader>
           <CardContent>
             <Input
-              placeholder="Enter a title for your recording"
+              placeholder={fallbackTitle || 'Enter a title for your recording'}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               disabled={isSubmitting}
             />
+            <p className="mt-2 text-xs text-muted-foreground">
+              Optional. Leave it blank to use &quot;{effectiveTitle}&quot;.
+            </p>
           </CardContent>
         </Card>
 
@@ -270,11 +294,16 @@ export default function NewRecordingPage() {
                   isPaused={recorder.isPaused}
                   duration={recorder.duration}
                   error={recorder.error}
-                  onStart={recorder.startRecording}
+                  onStart={() => {
+                    track('record_clicked');
+                    if (firstRecording()) track('first_recording_started', { mode: 'record' });
+                    return recorder.startRecording();
+                  }}
                   onStop={recorder.stopRecording}
                   onPause={recorder.pauseRecording}
                   onResume={recorder.resumeRecording}
                 />
+                <p className="text-xs text-muted-foreground">{RECORDING_MINIMUM_HINT}</p>
                 {recorder.audioBlob && !recorder.isRecording && (
                   <div className="p-4 bg-success/10 border border-success/30 rounded-lg">
                     <p className="text-sm text-success">
@@ -327,6 +356,11 @@ export default function NewRecordingPage() {
             'Create Recording'
           )}
         </Button>
+        {blockedReason && (
+          <p role="status" className="-mt-3 text-center text-sm text-muted-foreground">
+            {blockedReason}
+          </p>
+        )}
       </div>
     </div>
   );

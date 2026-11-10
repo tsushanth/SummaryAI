@@ -3,6 +3,7 @@
 import useSWR from 'swr';
 import { getRecordings, getRecording } from '@/lib/api/recordings';
 import type { RecordingsQueryParams } from '@/lib/recordingsQuery';
+import { isInProgressStatus } from '@/lib/recordingStatus';
 
 export function useRecordings(params?: RecordingsQueryParams) {
   const { data, error, isLoading, mutate } = useSWR(
@@ -32,13 +33,8 @@ export function useRecording(
     () => getRecording(id!, include),
     {
       refreshInterval: (data) => {
-        // Poll more frequently if still processing
-        const status = data?.recording?.status;
-        if (
-          status === 'transcribing' ||
-          status === 'summarizing' ||
-          status === 'uploaded'
-        ) {
+        // Poll more frequently while the recording is still moving through the pipeline (every non-terminal status)
+        if (isInProgressStatus(data?.recording?.status)) {
           return 5000;
         }
         return 0;

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRecordings } from '@/hooks/useRecordings';
+import { observeRecordingsList } from '@/lib/activation';
 import { RecordingCard } from '@/components/recordings/RecordingCard';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -19,6 +20,12 @@ export default function RecordingsPage() {
   const params = filtersToParams(filters);
   const isFiltered = Object.keys(params).length > 0;
   const { recordings, isLoading, error } = useRecordings({ per_page: 50, ...params });
+
+  // Activation funnel: lets /recordings/new know whether this is the user's first recording (no extra API call).
+  useEffect(() => {
+    if (isLoading || error) return;
+    try { observeRecordingsList(window.localStorage, recordings.length, isFiltered); } catch { /* storage unusable */ }
+  }, [isLoading, error, recordings.length, isFiltered]);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-8 sm:py-8">
