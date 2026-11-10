@@ -19,6 +19,7 @@
 import { supabaseAdmin } from './supabase.js';
 import { reportAlert } from './alerts.js';
 import { AppError } from '../middleware/errorHandler.js';
+import { runSeconds } from '../services/botUsageCap.js';
 import { inc, logEvent } from './liveSttMetrics.js';
 
 export const BOT_HOUR_USD = 0.5;
@@ -103,13 +104,11 @@ interface RunRow {
   created_at: string;
 }
 
-/** Hours a run has used: joined..left span, else elapsed time if still in the call, else duration_seconds, else 0. */
+/** Hours a run has used: joined..left span, else elapsed time if still in the call, else duration_seconds, else 0. One shared computation with the monthly allowance (runSeconds); a stale in-call run is charged the 6 h ceiling here (spend estimate). */
 export function runHours(r: Pick<RunRow, 'status' | 'duration_seconds' | 'joined_at' | 'left_at'>, nowMs: number): number {
-  const j = r.joined_at ? Date.parse(r.joined_at) : NaN;
-  const l = r.left_at ? Date.parse(r.left_at) : NaN;
-  if (Number.isFinite(j) && Number.isFinite(l) && l >= j) return (l - j) / 3_600_000;
-  if (Number.isFinite(j) && ACTIVE.includes(r.status)) return Math.min(STALE_HOURS, Math.max(0, (nowMs - j) / 3_600_000));
-  return r.duration_seconds && r.duration_seconds > 0 ? r.duration_seconds / 3600 : 0;
+  // runSeconds treats a run that never joined as zero (right for the allowance); for spend a known duration still counts.
+  if (!r.joined_at) return r.duration_seconds && r.duration_seconds > 0 ? r.duration_seconds / 3600 : 0;
+  return runSeconds(r, new Date(nowMs), STALE_HOURS * 60, 'ceiling') / 3600;
 }
 
 export function runCostUsd(hours: number, provider: string | null, hotStandby: boolean): number {

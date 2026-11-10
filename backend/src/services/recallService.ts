@@ -92,7 +92,7 @@ export class RecallService {
    */
   static async createBot(
     params: RecallBotCreateRequest,
-    options?: { enableRealtimeTranscript?: boolean }
+    options?: { enableRealtimeTranscript?: boolean; maxDurationSeconds?: number }
   ): Promise<RecallBotResponse> {
     // Enable real-time by default if SERVICE_URL is configured
     const enableRealtime = options?.enableRealtimeTranscript ?? !!config.SERVICE_URL;
@@ -195,10 +195,16 @@ export class RecallService {
     const payload: Record<string, unknown> = {
       meeting_url: params.meeting_url,
       bot_name: params.bot_name || 'Meeting Mind',
-      automatic_leave: params.automatic_leave || {
-        waiting_room_timeout: 600, // 10 minutes
-        noone_joined_timeout: 300, // 5 minutes
-        everyone_left_timeout: 30, // 30 seconds
+      automatic_leave: {
+        ...(params.automatic_leave || {
+          waiting_room_timeout: 600, // 10 minutes
+          noone_joined_timeout: 300, // 5 minutes
+          everyone_left_timeout: 30, // 30 seconds
+        }),
+        // Maximum session length (monthly cap). Only present when the caller passes a limit, so the default request is unchanged.
+        ...(options?.maxDurationSeconds && options.maxDurationSeconds > 0
+          ? { in_call_recording_timeout: Math.floor(options.maxDurationSeconds) }
+          : {}),
       },
       recording_config: recordingConfig,
     };
