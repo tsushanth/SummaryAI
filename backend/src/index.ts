@@ -143,6 +143,8 @@ async function startServer(): Promise<void> {
       const c = m.loadVoiceAssistantConfig();
       console.log(`[VoiceAssistant] mode=${c.mode} killed=${c.killed} (docs/VOICE_ASSISTANT.md)`);
     }).catch(() => undefined);
+    // Rollup line for the live transcription counters (logs only when something changed; see LIVE_STT.md).
+    import('./lib/liveSttMetrics.js').then((m) => m.startLiveSttMetricsLog()).catch(() => undefined);
     // Local testing against a real database must not start the recovery loops (they act on real users' meetings and bots).
     if (process.env.DISABLE_BACKGROUND_LOOPS === '1') {
       console.log('[startup] DISABLE_BACKGROUND_LOOPS=1: coaching recovery, stuck-meeting and bot reconcilers not started');
@@ -153,6 +155,10 @@ async function startServer(): Promise<void> {
     import('./services/coachingService.js').then(m => m.recoverActiveSessions())
       .catch(e => console.error('[Coaching] recovery failed:', e));
     startRuntimeMonitor();
+    // Soniox stream watchdog: only when Soniox can be selected at all (LIVE_STT_PROVIDER is soniox or auto). Default: not started.
+    if (['soniox', 'auto'].includes(config.LIVE_STT_PROVIDER.trim().toLowerCase())) {
+      import('./lib/liveSttFallback.js').then((m) => m.startLiveSttWatchdogLoop()).catch((e) => console.error('[LiveStt] watchdog init failed:', e));
+    }
     startLoopWatchdog();
     startPipelineInvariantLoop();
     // Backstop for the Recall bot.status_change webhook subscription gap:

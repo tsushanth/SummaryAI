@@ -9,11 +9,20 @@
  * Nothing here logs or returns secret material.
  */
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
+import { liveSttProviderFor, type LiveSttChoiceReason } from './liveSttSelect.js';
 
 export type LiveSttProvider = 'recall' | 'soniox' | 'shadow';
 
 export interface LiveSttEnv {
+  /** recall (default) | soniox | auto. See liveSttSelect.ts. */
   LIVE_STT_PROVIDER?: string | undefined;
+  /** Only read when LIVE_STT_PROVIDER=auto. */
+  LIVE_STT_SONIOX_USER_IDS?: string | undefined;
+  LIVE_STT_SONIOX_PERCENT?: string | number | undefined;
+  /** off | false | 0 | no = no automatic fallback handling at all (events and watchdog ignored, no hot standby). Default on. */
+  LIVE_STT_FALLBACK?: string | undefined;
+  /** true = keep Recall's transcript running hidden next to Soniox so a failure can switch to it. Allowlist-selected users only. */
+  LIVE_STT_RECALL_HOT_STANDBY?: string | undefined;
   LIVE_STT_SHADOW?: string | undefined;
   /** Comma separated user UUIDs allowed to be shadowed. Unset/empty = shadow is off for everyone (fails closed). */
   LIVE_STT_SHADOW_USER_IDS?: string | undefined;
@@ -24,16 +33,30 @@ export interface LiveSttEnv {
 
 export type LiveSttPlan =
   | { provider: 'recall'; reason?: 'misconfigured' }
-  | { provider: 'soniox' | 'shadow'; wsBase: string; ingestSecret: string };
+  | { provider: 'shadow'; wsBase: string; ingestSecret: string }
+  | {
+      provider: 'soniox';
+      wsBase: string;
+      ingestSecret: string;
+      /** Recall's own transcript also runs, hidden, so the meeting can switch to it (LIVE_STT_RECALL_HOT_STANDBY, allowlist only). */
+      standby: boolean;
+      /** Why this user was selected (allowlist, percent, all). Counters and logs only. */
+      selection: LiveSttChoiceReason;
+    };
+
+/** LIVE_STT_FALLBACK: on unless explicitly off. */
+export function isFallbackEnabled(v: string | undefined): boolean {
+  return !['off', 'false', '0', 'no'].includes((v ?? '').trim().toLowerCase());
+}
 
 /**
  * Decide, per bot, which path to use. Anything that is not a complete, valid configuration yields `recall`, so a half-set
  * environment can never produce a bot with no transcript at all.
  */
 export function planLiveStt(env: LiveSttEnv, userId?: string): LiveSttPlan {
-  const wanted = (env.LIVE_STT_PROVIDER ?? 'recall').trim().toLowerCase();
+  const choice = liveSttProviderFor(userId, env);
   const provider: LiveSttProvider | null =
-    wanted === 'soniox' ? 'soniox' : env.LIVE_STT_SHADOW === 'true' && isShadowAllowed(env.LIVE_STT_SHADOW_USER_IDS, userId) ? 'shadow' : null;
+    choice.provider === 'soniox' ? 'soniox' : env.LIVE_STT_SHADOW === 'true' && isShadowAllowed(env.LIVE_STT_SHADOW_USER_IDS, userId) ? 'shadow' : null;
   // 'recall' (and any unknown value) without shadow is the unchanged default.
   if (!provider) return { provider: 'recall' };
 
@@ -41,13 +64,18 @@ export function planLiveStt(env: LiveSttEnv, userId?: string): LiveSttPlan {
   const base = (env.LIVE_STT_WS_URL ?? '').trim().replace(/\/+$/, '');
   const okScheme = env.NODE_ENV === 'production' ? /^wss:\/\/[^/?#\s]+$/i.test(base) : /^wss?:\/\/[^/?#\s]+$/i.test(base);
   if (!secret || !okScheme) return { provider: 'recall', reason: 'misconfigured' };
+  if (provider === 'soniox') {
+    const hot = ['true', 'on', '1', 'yes'].includes((env.LIVE_STT_RECALL_HOT_STANDBY ?? '').trim().toLowerCase());
+    const standby = hot && isFallbackEnabled(env.LIVE_STT_FALLBACK) && choice.reason === 'allowlist';
+    return { provider, wsBase: base, ingestSecret: secret, standby, selection: choice.reason };
+  }
   return { provider, wsBase: base, ingestSecret: secret };
 }
 
 /**
  * Shadow streams a meeting's audio to a second speech vendor, so it is opt-in per USER, not just per deployment: only a user whose
  * id is in LIVE_STT_SHADOW_USER_IDS is shadowed. Unset, empty, or a call without a user id = not shadowed (fails closed).
- * Compared case-insensitively on the whole id. Does not apply to LIVE_STT_PROVIDER=soniox (that is a deliberate global switch).
+ * Compared case-insensitively on the whole id. Does not apply to a user who is selected for Soniox primary (liveSttProviderFor).
  */
 export function isShadowAllowed(allowList: string | undefined, userId: string | undefined): boolean {
   const id = (userId ?? '').trim().toLowerCase();
@@ -114,4 +142,21 @@ export function verifyLiveSegments(opts: {
 
 export function parseSecretList(v: string | undefined): string[] {
   return (v ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+}
+
+/** The LiveSttEnv slice of the validated app config (keeps createBot and the routes from each listing the variables by hand). */
+export function liveSttEnvFrom(c: Record<string, unknown>): LiveSttEnv {
+  const str = (k: string): string | undefined => (typeof c[k] === 'string' ? (c[k] as string) : undefined);
+  return {
+    LIVE_STT_PROVIDER: str('LIVE_STT_PROVIDER'),
+    LIVE_STT_SONIOX_USER_IDS: str('LIVE_STT_SONIOX_USER_IDS'),
+    LIVE_STT_SONIOX_PERCENT: str('LIVE_STT_SONIOX_PERCENT'),
+    LIVE_STT_FALLBACK: str('LIVE_STT_FALLBACK'),
+    LIVE_STT_RECALL_HOT_STANDBY: str('LIVE_STT_RECALL_HOT_STANDBY'),
+    LIVE_STT_SHADOW: str('LIVE_STT_SHADOW'),
+    LIVE_STT_SHADOW_USER_IDS: str('LIVE_STT_SHADOW_USER_IDS'),
+    LIVE_STT_WS_URL: str('LIVE_STT_WS_URL'),
+    LIVE_STT_INGEST_SECRET: str('LIVE_STT_INGEST_SECRET'),
+    NODE_ENV: str('NODE_ENV'),
+  };
 }
