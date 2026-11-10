@@ -22,6 +22,7 @@ import { getMeeting } from '@/lib/api/meetings';
 import { useLiveMeeting } from '@/hooks/useLiveTranscript';
 import { LiveTranscriptViewer } from '@/components/meetings/LiveTranscriptViewer';
 import { AIInsightsPanel } from '@/components/meetings/AIInsightsPanel';
+import { LiveLanguageControl } from '@/components/meetings/LiveLanguageControl';
 import { cn } from '@/lib/utils/cn';
 import type { Meeting, MeetingStatus, MeetingPlatform } from '@/types/api';
 
@@ -264,6 +265,9 @@ export default function MeetingDetailPage() {
                 />
               </button>
             </label>
+          </div>
+          <div className="mt-3 border-t border-border pt-3">
+            <LiveLanguageControl meetingId={id} state={meeting.live_language} onChanged={() => refreshMeeting()} />
           </div>
         </div>
       )}

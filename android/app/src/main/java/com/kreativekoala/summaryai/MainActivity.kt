@@ -23,6 +23,9 @@ import com.kreativekoala.summaryai.data.preferences.ThemeMode
 import com.kreativekoala.summaryai.data.preferences.ThemePreferences
 import com.kreativekoala.summaryai.service.AuthService
 import com.kreativekoala.summaryai.service.BillingManager
+import com.kreativekoala.summaryai.data.sample.SampleMeetingStore
+import com.kreativekoala.summaryai.ui.onboarding.FirstRunRouting
+import com.kreativekoala.summaryai.ui.onboarding.FirstRunState
 import com.kreativekoala.summaryai.ui.navigation.MeetingMindNavGraph
 import com.kreativekoala.summaryai.ui.theme.MeetingMindTheme
 import com.kreativekoala.ratingkit.RatingKit
@@ -36,6 +39,8 @@ class MainActivity : AppCompatActivity() {
     @Inject lateinit var authService: AuthService
     @Inject lateinit var themePreferences: ThemePreferences
     @Inject lateinit var billingManager: BillingManager
+    @Inject lateinit var firstRunState: FirstRunState
+    @Inject lateinit var sampleMeetingStore: SampleMeetingStore
 
     private var startRecordingRequested by mutableStateOf(false)
 
@@ -112,6 +117,13 @@ class MainActivity : AppCompatActivity() {
                         MeetingMindNavGraph(
                             isAuthenticated = authState.isAuthenticated,
                             hasCompletedOnboarding = authState.hasCompletedOnboarding,
+                            emailMissing = FirstRunRouting.emailMissing(authState.user?.email),
+                            onFirstRunStarted = {
+                                // Order matters: the Record screen reads these as soon as onboarding flips to done.
+                                firstRunState.begin()
+                                sampleMeetingStore.seed()
+                                lifecycleScope.launch { authService.setOnboardingCompleted() }
+                            },
                             startRecordingRequested = startRecordingRequested,
                             onStartRecordingHandled = { startRecordingRequested = false }
                         )

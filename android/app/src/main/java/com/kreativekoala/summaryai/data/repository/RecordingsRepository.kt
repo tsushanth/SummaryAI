@@ -2,9 +2,14 @@ package com.kreativekoala.summaryai.data.repository
 
 import android.util.Log
 import com.kreativekoala.summaryai.data.api.ProgressRequestBody
+import com.kreativekoala.summaryai.data.api.RetryingUploader
 import com.kreativekoala.summaryai.data.api.SummaryAIApi
+import com.kreativekoala.summaryai.data.api.UploadDiagnostics
 import com.kreativekoala.summaryai.data.api.models.*
 import com.kreativekoala.summaryai.di.UploadClient
+import com.kreativekoala.summaryai.service.activation.Activation
+import com.kreativekoala.summaryai.data.sample.SampleMeeting
+import com.kreativekoala.summaryai.data.sample.SampleMeetingStore
 import com.kreativekoala.summaryai.domain.model.Recording
 import com.kreativekoala.summaryai.domain.model.RecordingDetail
 import com.kreativekoala.summaryai.domain.model.Summary
@@ -19,6 +24,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
+import retrofit2.HttpException
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -31,7 +37,8 @@ private const val TAG = "RecordingsRepository"
 @Singleton
 class RecordingsRepository @Inject constructor(
     private val api: SummaryAIApi,
-    @UploadClient private val uploadClient: OkHttpClient
+    @UploadClient private val uploadClient: OkHttpClient,
+    private val sampleStore: SampleMeetingStore
 ) {
     /**
      * Get paginated list of recordings
@@ -59,7 +66,16 @@ class RecordingsRepository @Inject constructor(
             response.recordings.forEachIndexed { index, recording ->
                 Log.d(TAG, "Recording[$index]: id=${recording.id}, title=${recording.title}, status=${recording.status}")
             }
-            Result.success(response.recordings.map { it.toDomain() })
+            Result.success(
+                SampleMeeting.mergeIntoList(
+                    loaded = response.recordings.map { it.toDomain() },
+                    page = page,
+                    status = status,
+                    filter = filter,
+                    visible = sampleStore.isVisible,
+                    createdAt = sampleStore.createdAt()
+                )
+            )
         } catch (e: Exception) {
             Log.e(TAG, "Failed to fetch recordings", e)
             Result.failure(e)
@@ -74,6 +90,7 @@ class RecordingsRepository @Inject constructor(
         includeTranscript: Boolean = false,
         includeSummary: Boolean = false
     ): Result<RecordingDetail> = withContext(Dispatchers.IO) {
+        if (SampleMeeting.isSample(id)) return@withContext Result.success(SampleMeeting.detail(sampleStore.createdAt()))
         try {
             val includes = mutableListOf<String>()
             if (includeTranscript) includes.add("transcript")
@@ -99,8 +116,9 @@ class RecordingsRepository @Inject constructor(
         onProgress: (Float) -> Unit = {}
     ): Result<Recording> = withContext(Dispatchers.IO) {
         var stage = "create"
+        var putDiagnostics: UploadDiagnostics? = null
+        val fileSize = audioFile.length()
         try {
-            val fileSize = audioFile.length()
             Log.d(TAG, "Creating recording - title: $title, duration: $durationSeconds, size: $fileSize")
 
             // Step 1: Create recording and get upload URL
@@ -130,9 +148,15 @@ class RecordingsRepository @Inject constructor(
                 .put(body)
                 .build()
 
-            val uploadResponse = uploadClient.newCall(request).execute()
-            if (!uploadResponse.isSuccessful) {
-                throw Exception("Upload failed: ${uploadResponse.code}")
+            val uploader = RetryingUploader(uploadClient) { d ->
+                putDiagnostics = d
+                // Host and numbers only, never the URL (it carries the signed token).
+                Log.w(TAG, "Upload attempt failed: ${d.toLogLine()}")
+            }
+            uploader.execute(request, fileSize).use { uploadResponse ->
+                if (!uploadResponse.isSuccessful) {
+                    throw Exception("Upload failed: ${uploadResponse.code}")
+                }
             }
 
             // Step 3: Complete upload
@@ -152,7 +176,7 @@ class RecordingsRepository @Inject constructor(
                     flow = "recording_upload",
                     t = e,
                     message = "Recording upload failed at $stage: ${e.javaClass.simpleName}",
-                    context = mapOf("stage" to stage),
+                    context = failureContext(stage, e, putDiagnostics, fileSize),
                 )
             }
             Result.failure(e)
@@ -160,9 +184,40 @@ class RecordingsRepository @Inject constructor(
     }
 
     /**
+     * Context sent with a final upload failure. The storage PUT carries the diagnostics of its last attempt; an
+     * API call that failed with an HTTP error (create / complete) carries the same fields from its response.
+     */
+    private fun failureContext(
+        stage: String,
+        e: Exception,
+        putDiagnostics: UploadDiagnostics?,
+        bytes: Long,
+    ): Map<String, String> {
+        val diagnostics = when {
+            stage == "storage_put" -> putDiagnostics
+            e is HttpException -> e.response()?.raw()?.let { raw ->
+                UploadDiagnostics.fromResponse(
+                    stage = stage,
+                    attempt = 1,
+                    response = raw,
+                    durationMs = (raw.receivedResponseAtMillis - raw.sentRequestAtMillis).coerceAtLeast(0),
+                    bytes = bytes,
+                )
+            }
+            else -> null
+        }
+        return diagnostics?.toContext() ?: mapOf("stage" to stage)
+    }
+
+    /**
      * Delete a recording
      */
     suspend fun deleteRecording(id: String): Result<Unit> = withContext(Dispatchers.IO) {
+        if (SampleMeeting.isSample(id)) {
+            sampleStore.dismiss()
+            Activation.track { sampleDeleted() }
+            return@withContext Result.success(Unit)
+        }
         try {
             api.deleteRecording(id)
             Result.success(Unit)
@@ -178,6 +233,7 @@ class RecordingsRepository @Inject constructor(
         recordingId: String,
         question: String
     ): Result<String> = withContext(Dispatchers.IO) {
+        if (SampleMeeting.isSample(recordingId)) return@withContext Result.success(SampleMeeting.QA_LOCKED_MESSAGE)
         try {
             val response = api.askQuestion(recordingId, AskQuestionRequest(question))
             Result.success(response.answer)
@@ -193,6 +249,7 @@ class RecordingsRepository @Inject constructor(
         recordingId: String,
         speakerNames: Map<String, String>
     ): Result<Transcript> = withContext(Dispatchers.IO) {
+        if (SampleMeeting.isSample(recordingId)) return@withContext sampleReadOnly()
         try {
             val response = api.updateSpeakerNames(recordingId, UpdateSpeakerNamesRequest(speakerNames))
             Result.success(response.transcript.toDomain())
@@ -205,6 +262,7 @@ class RecordingsRepository @Inject constructor(
      * Toggle favorite status for a recording
      */
     suspend fun toggleFavorite(recordingId: String, isFavorite: Boolean): Result<Recording> = withContext(Dispatchers.IO) {
+        if (SampleMeeting.isSample(recordingId)) return@withContext sampleReadOnly()
         try {
             val response = api.updateRecording(recordingId, UpdateRecordingRequest(isFavorite = isFavorite))
             Result.success(response.recording.toDomain())
@@ -217,6 +275,7 @@ class RecordingsRepository @Inject constructor(
      * Rename a recording
      */
     suspend fun renameRecording(recordingId: String, title: String): Result<Recording> = withContext(Dispatchers.IO) {
+        if (SampleMeeting.isSample(recordingId)) return@withContext sampleReadOnly()
         try {
             val response = api.updateRecording(recordingId, UpdateRecordingRequest(title = title))
             Result.success(response.recording.toDomain())
@@ -229,6 +288,10 @@ class RecordingsRepository @Inject constructor(
      * Poll for recording status updates
      */
     fun pollRecordingStatus(recordingId: String, intervalMs: Long = 3000): Flow<Recording> = flow {
+        if (SampleMeeting.isSample(recordingId)) {
+            emit(SampleMeeting.recording(sampleStore.createdAt()))
+            return@flow
+        }
         while (true) {
             try {
                 val response = api.getRecording(recordingId)
@@ -246,6 +309,10 @@ class RecordingsRepository @Inject constructor(
         }
     }.flowOn(Dispatchers.IO)
 }
+
+/** The bundled sample is read-only: it is not a server record, so edits are refused locally. */
+private fun <T> sampleReadOnly(): Result<T> =
+    Result.failure(UnsupportedOperationException("The sample meeting cannot be edited"))
 
 // Extension functions to convert DTOs to domain models
 private fun RecordingDto.toDomain() = Recording(

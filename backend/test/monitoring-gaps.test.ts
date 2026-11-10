@@ -12,7 +12,7 @@ vi.mock('../src/lib/supabase.js', () => ({
   supabaseAdmin: {
     from: (t: string) => {
       const q: any = {};
-      for (const m of ['select', 'in', 'lt', 'gte', 'eq', 'limit']) q[m] = () => q;
+      for (const m of ['select', 'in', 'lt', 'gte', 'eq', 'limit', 'or']) q[m] = () => q;
       q.then = (res: any, rej: any) => Promise.resolve(table[t] ?? { data: [], count: 0, error: null }).then(res, rej);
       return q;
     },

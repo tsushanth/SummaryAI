@@ -18,6 +18,10 @@ import { reportRecordingFailureById, botFailureCode } from '../lib/recordingFail
 import type { BotRun, Meeting } from '../types/meetings.js';
 import { registerLoop, runLoopPass, reportLoopScanError } from '../lib/loopMonitor.js';
 import { reportAlert } from '../lib/alerts.js';
+import { stitchedLanguage } from '../lib/transcriptionLanguage.js';
+import { liveTranscriptIsIncomplete, parseFallbackState } from '../lib/liveSttFallback.js';
+import { inc } from '../lib/liveSttMetrics.js';
+import { getLatestRunInfo } from './meetingLanguage.js';
 
 const SCAN_INTERVAL_MS = 5 * 60 * 1000;        // 5 min
 const MIN_AGE_MS       = 10 * 60 * 1000;       // only touch recordings >10 min old
@@ -116,26 +120,6 @@ export function stitchSegments(rows: LiveSegmentRow[]): {
 }
 
 /**
- * bot_runs.live_stt_provider of the meeting's latest bot run, or null (default/recall, or the column does not exist yet because
- * migration 026 is not applied). Never throws: a label must not block a stitch.
- */
-async function liveSttProviderForMeeting(meetingId: string): Promise<string | null> {
-  try {
-    const { data, error } = await supabaseAdmin
-      .from('bot_runs')
-      .select('live_stt_provider')
-      .eq('meeting_id', meetingId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (error) return null;
-    return (data as { live_stt_provider?: string | null } | null)?.live_stt_provider ?? null;
-  } catch {
-    return null;
-  }
-}
-
-/**
  * Stitch live_transcripts into a transcripts row + mark the recording complete.
  * Idempotent: if a transcript already exists for this recording, only the
  * recording status is touched.
@@ -165,8 +149,17 @@ export async function stitchStuckRecording(
   if (!result.segments.length) return { stitched: false, reason: 'no_segments_after_stitch' };
 
   // Which live source produced these rows. 'soniox' = the live-stt path (shadow runs stay recall_realtime: Recall is the source).
-  const liveProvider = await liveSttProviderForMeeting(meetingId);
+  // getLatestRunInfo never throws and tolerates databases without migrations 026/027/030 (a label must not block a stitch).
+  const runInfo = await getLatestRunInfo(meetingId);
+  const liveProvider = runInfo?.live_stt_provider ?? null;
   const fromSoniox = liveProvider === 'soniox';
+  const fallbackState = fromSoniox ? parseFallbackState(runInfo?.live_stt_fallback) : null;
+  if (liveTranscriptIsIncomplete(fallbackState)) {
+    // The live stream had an outage: these rows have a hole. Do not save them as the transcript; the final pass reads the recording.
+    inc('live_stt_stitch_skipped_incomplete');
+    return { stitched: false, reason: 'live_incomplete' };
+  }
+  const fromRecallFallback = fallbackState?.mode === 'recall';
 
   const transcriptId = randomUUID();
   const { error: insErr } = await supabaseAdmin
@@ -178,9 +171,14 @@ export async function stitchStuckRecording(
       segments: result.segments,
       word_count: result.wordCount,
       speaker_count: result.speakerCount,
-      language: 'en',
-      transcription_provider: fromSoniox ? 'soniox_realtime' : 'recall_realtime',
-      transcription_model: fromSoniox ? 'soniox_streaming' : 'recall_streaming',
+      language: stitchedLanguage({
+        explicit: runInfo?.transcription_language,
+        provider: liveProvider,
+        fullText: result.fullText,
+        recallAutoDetect: process.env.RECALL_AUTO_LANGUAGE === 'detect',
+      }),
+      transcription_provider: fromRecallFallback ? 'soniox_recall_fallback' : fromSoniox ? 'soniox_realtime' : 'recall_realtime',
+      transcription_model: fromRecallFallback ? 'soniox_then_recall_streaming' : fromSoniox ? 'soniox_streaming' : 'recall_streaming',
     });
   if (insErr) throw new Error(`transcript insert failed: ${insErr.message}`);
 

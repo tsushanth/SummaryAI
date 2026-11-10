@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meeting_language_label">Bahasa transkripsi</string>
+    <string name="meeting_language_auto">Deteksi otomatis</string>
+    <string name="meeting_language_hint">Deteksi otomatis bekerja untuk sebagian besar rapat. Pilih bahasa jika transkrip tidak sesuai. Pilihan Anda diingat.</string>
+    <string name="meeting_language_dialog_title">Bahasa transkripsi</string>
+    <string name="meeting_language_change">Ganti bahasa</string>
+    <string name="meeting_language_active">Bahasa: %1$s</string>
+    <string name="meeting_language_changed">Bahasa transkripsi diatur ke %1$s</string>
+    <string name="meeting_language_change_note">Berlaku untuk ucapan mulai sekarang.</string>
+    <string name="meeting_language_switch_unavailable">Rapat ini tidak dapat mengganti bahasa saat berlangsung</string>
+    <string name="meeting_language_switch_failed">Tidak dapat mengganti bahasa. Silakan coba lagi.</string>
+    <string name="meeting_language_hint_auto_english_live">Deteksi otomatis menemukan bahasa untuk transkrip akhir. Teks langsung tetap dalam bahasa Inggris kecuali Anda memilih bahasa.</string>
+    <string name="meeting_language_hint_delayed">Teks langsung dalam bahasa ini bisa terlambat %1$s menit. Transkrip akhir tidak terpengaruh.</string>
+    <string name="meeting_language_reason_fixed">Bahasa langsung ditetapkan saat bot bergabung dan tidak dapat diubah selama rapat ini.</string>
+    <string name="meeting_language_reason_not_live">Bahasa hanya dapat diubah saat bot berada di rapat.</string>
+    <string name="meeting_language_switch_not_live">Bot sedang tidak berada di rapat, sehingga bahasa tidak dapat diubah.</string>
+    <string name="meeting_language_saved_not_live">%1$s disimpan untuk transkrip akhir, tetapi transkrip langsung belum dapat diganti saat ini.</string>
+</resources>

@@ -21,6 +21,8 @@ import { grantCredits } from '../services/coachingService.js';
 import { TwilioService } from '../services/twilioService.js';
 import { reportAlert } from '../lib/alerts.js';
 import { alertWebhookFailure, alertPaymentFailure } from '../services/alertingService.js';
+import { checkRecallEvidence, parseFallbackState, recallIsVisible, selectLiveRun } from '../lib/liveSttFallback.js';
+import { inc } from '../lib/liveSttMetrics.js';
 
 const router = Router();
 
@@ -566,12 +568,9 @@ router.post('/recall/transcript', async (req: Request, res: Response) => {
   console.log(`[Webhook] Real-time transcript event: ${event}, bot: ${botId}, words: ${transcriptData.words?.length || 0}`);
 
   try {
-    // Find bot_run by recall_bot_id
-    const { data: botRun, error: botError } = await supabaseAdmin
-      .from('bot_runs')
-      .select('id, meeting_id, user_id')
-      .eq('recall_bot_id', botId)
-      .single();
+    // Find bot_run by recall_bot_id (also reads the live-stt provider and fallback state, tolerating databases without them)
+    const { data: botRun, error: botErr } = await selectLiveRun('recall_bot_id', botId);
+    const botError = botErr || !botRun;
 
     if (botError || !botRun) {
       console.error(`[Webhook] Bot run not found for Recall bot ${botId}`);
@@ -591,6 +590,11 @@ router.post('/recall/transcript', async (req: Request, res: Response) => {
     // Get participant/speaker info from the new format
     const participant = transcriptData.participant;
 
+    // A Soniox-primary run only receives Recall transcript events when a hot standby is on. Those rows are stored hidden
+    // (shadow = true) until a failure switches the meeting to them (lib/liveSttFallback.ts). Every other run is unchanged.
+    const standbyRun = botRun.live_stt_provider === 'soniox';
+    const standbyHidden = standbyRun && !recallIsVisible(parseFallbackState(botRun.live_stt_fallback));
+
     // Insert live transcript segment
     const { error: insertError } = await supabaseAdmin
       .from('live_transcripts')
@@ -606,6 +610,7 @@ router.post('/recall/transcript', async (req: Request, res: Response) => {
         end_timestamp: endTimestamp,
         words: words,
         is_partial: event === 'transcript.partial_data',
+        ...(standbyHidden ? { shadow: true } : {}),
       });
 
     if (insertError) {
@@ -613,6 +618,19 @@ router.post('/recall/transcript', async (req: Request, res: Response) => {
       res.status(500).json({ error: 'Failed to store transcript' });
       return;
     }
+
+    if (standbyHidden) {
+      // Hidden standby row: no insights. Final rows with real words are evidence about whether Soniox is keeping up.
+      inc('live_stt_segments_stored', { provider: 'recall', hidden: 1 });
+      if (event === 'transcript.data' && words.length > 0) {
+        try {
+          await checkRecallEvidence(botRun, { endSec: endTimestamp, words: words.length }, { queueInsights: queueInsightGeneration });
+        } catch { console.error('[Webhook] live-stt evidence check failed'); }
+      }
+      res.json({ ok: true });
+      return;
+    }
+    if (standbyRun) inc('live_stt_segments_stored', { provider: 'recall', hidden: 0 });
 
     // For final (non-partial) transcripts, queue AI insight generation
     if (event === 'transcript.data' && segmentText.length > 0) {

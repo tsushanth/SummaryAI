@@ -1,11 +1,14 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
+import { RecordingClock, sanitizeDurationSeconds } from '@/lib/recordingDuration';
 
 interface AudioRecorderState {
   isRecording: boolean;
   isPaused: boolean;
   duration: number;
+  /** Final active recording time in whole seconds (pauses excluded), set when recording stops; undefined if implausible. */
+  recordedSeconds: number | undefined;
   audioBlob: Blob | null;
   error: string | null;
 }
@@ -15,6 +18,7 @@ export function useAudioRecorder() {
     isRecording: false,
     isPaused: false,
     duration: 0,
+    recordedSeconds: undefined,
     audioBlob: null,
     error: null,
   });
@@ -22,7 +26,7 @@ export function useAudioRecorder() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const startTimeRef = useRef<number>(0);
+  const clockRef = useRef<RecordingClock>(new RecordingClock());
 
   const startRecording = useCallback(async () => {
     try {
@@ -47,19 +51,20 @@ export function useAudioRecorder() {
         const blob = new Blob(chunksRef.current, {
           type: mediaRecorder.mimeType,
         });
-        setState((prev) => ({ ...prev, audioBlob: blob }));
+        clockRef.current.stop();
+        setState((prev) => ({ ...prev, audioBlob: blob, recordedSeconds: sanitizeDurationSeconds(clockRef.current.seconds()) }));
 
         // Stop all tracks
         stream.getTracks().forEach((track) => track.stop());
       };
 
       mediaRecorder.start(1000);
-      startTimeRef.current = Date.now();
+      clockRef.current.start();
 
       timerRef.current = setInterval(() => {
         setState((prev) => ({
           ...prev,
-          duration: Math.floor((Date.now() - startTimeRef.current) / 1000),
+          duration: clockRef.current.seconds(),
         }));
       }, 1000);
 
@@ -67,6 +72,7 @@ export function useAudioRecorder() {
         isRecording: true,
         isPaused: false,
         duration: 0,
+        recordedSeconds: undefined,
         audioBlob: null,
         error: null,
       });
@@ -80,6 +86,7 @@ export function useAudioRecorder() {
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && state.isRecording) {
+      clockRef.current.stop();
       mediaRecorderRef.current.stop();
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -90,6 +97,7 @@ export function useAudioRecorder() {
 
   const pauseRecording = useCallback(() => {
     if (mediaRecorderRef.current && state.isRecording && !state.isPaused) {
+      clockRef.current.pause();
       mediaRecorderRef.current.pause();
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -101,10 +109,11 @@ export function useAudioRecorder() {
   const resumeRecording = useCallback(() => {
     if (mediaRecorderRef.current && state.isRecording && state.isPaused) {
       mediaRecorderRef.current.resume();
+      clockRef.current.resume();
       timerRef.current = setInterval(() => {
         setState((prev) => ({
           ...prev,
-          duration: prev.duration + 1,
+          duration: clockRef.current.seconds(),
         }));
       }, 1000);
       setState((prev) => ({ ...prev, isPaused: false }));
@@ -115,10 +124,12 @@ export function useAudioRecorder() {
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
+    clockRef.current.reset();
     setState({
       isRecording: false,
       isPaused: false,
       duration: 0,
+      recordedSeconds: undefined,
       audioBlob: null,
       error: null,
     });

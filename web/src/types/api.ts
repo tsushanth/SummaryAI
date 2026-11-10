@@ -133,6 +133,8 @@ export interface CreateRecordingRequest {
   file_name: string;
   content_type: string;
   file_size: number;
+  /** Measured length in whole seconds (recorder clock or audio metadata); omitted when unknown. */
+  duration_seconds?: number;
   recording_type?: RecordingType;
   /** Language code for the summary (see lib/outputLanguages.ts); omit to follow the recording's language. */
   output_language?: string;
@@ -270,6 +272,39 @@ export interface Meeting {
   bot_id: string | null;
   created_at: string;
   updated_at: string;
+  /** 'auto' or a language code. Returned by GET /api/meetings/:id. */
+  transcription_language?: string;
+  /** Returned by GET /api/meetings/:id: what the live transcript is doing and whether its language can be changed now. */
+  live_language?: LiveLanguageState;
+}
+
+export interface LiveLanguageState {
+  language: string;
+  can_change: boolean;
+  reason: 'not_live' | 'provider_fixed' | null;
+  provider: string;
+}
+
+export interface TranscriptionLanguagesResponse {
+  auto: 'auto';
+  default_language: string;
+  languages: { code: string; name: string; native: string }[];
+  live: {
+    provider: 'recall' | 'soniox';
+    can_change_during_meeting: boolean;
+    english_only_low_latency: boolean;
+    non_english_live_delay_minutes: string | null;
+    auto_live_behaviour: 'english_low_latency' | 'detect_delayed' | 'detect';
+  };
+}
+
+export interface LiveLanguageResponse {
+  ok: boolean;
+  language: string;
+  /** False = saved for the final transcript but the live transcript could not be switched. */
+  live_applied: boolean;
+  live_state?: 'applied' | 'queued';
+  message?: string;
 }
 
 export interface ListMeetingsResponse {
@@ -284,6 +319,8 @@ export interface CreateMeetingRequest {
   scheduled_end?: string;
   auto_join?: boolean;
   join_offset_minutes?: number;
+  /** 'auto' | language code. */
+  transcription_language?: string;
 }
 
 export interface CreateMeetingResponse {
@@ -294,6 +331,7 @@ export interface CreateMeetingResponse {
 export interface UpdateMeetingRequest {
   auto_join?: boolean;
   title?: string;
+  transcription_language?: string;
 }
 
 export interface UpdateMeetingResponse {

@@ -34,6 +34,14 @@ export interface SttOptions {
   languageHints?: string[];
   /** Hard wall-clock limit for the whole call. */
   timeoutMs?: number;
+  /** Recording length in seconds when the caller knows it (client-reported, may be wrong). Only used by providers with a length limit, to skip inputs they cannot take. */
+  durationHintSeconds?: number;
+  /**
+   * Long inputs that must be split into parts: speaker numbering cannot be matched across parts. By default a provider that
+   * splits refuses to merge a multi-speaker result (the caller then uses another provider). When true it returns a result whose
+   * speaker indexes are unique per part (never merged across parts); only for metrics-only runs whose transcript no user sees.
+   */
+  allowChunkLocalSpeakers?: boolean;
 }
 
 export interface SttProvider {
@@ -42,6 +50,11 @@ export interface SttProvider {
   /** Stored in transcripts.transcription_model. */
   readonly model: string;
   transcribe(fileData: Blob, filePath: string, opts?: SttOptions): Promise<NormalizedTranscript>;
+  /**
+   * Optional. Returns a reason when this provider cannot take this input at all (nothing is sent anywhere), otherwise null.
+   * Never throws: an inspection failure is "no objection".
+   */
+  precheck?(fileData: Blob, filePath: string, opts?: SttOptions): Promise<string | null>;
 }
 
 /** Whitespace word count, identical to the original Deepgram path (the short-recording guard adds its own CJK rule). */

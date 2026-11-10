@@ -56,7 +56,9 @@ data class Meeting(
     val status: MeetingStatus,
     val botStatus: BotStatus?,
     val autoJoin: Boolean,
-    val recordingId: String?
+    val recordingId: String?,
+    /** "auto" or a primary subtag; null when the backend does not report it. */
+    val transcriptionLanguage: String? = null
 ) {
     val hasBot: Boolean
         get() = botStatus != null

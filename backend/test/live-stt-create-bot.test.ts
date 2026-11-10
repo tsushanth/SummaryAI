@@ -7,7 +7,15 @@ process.env.SUPABASE_ANON_KEY ??= 'dummy';
 process.env.SUPABASE_SERVICE_ROLE_KEY ??= 'dummy';
 process.env.RECALL_API_KEY = 'recall-test-key';
 
-const KEYS = ['LIVE_STT_PROVIDER', 'LIVE_STT_SHADOW', 'LIVE_STT_WS_URL', 'LIVE_STT_INGEST_SECRET', 'LIVE_STT_SHARED_SECRET', 'SERVICE_URL', 'MEETING_BOT_ANNOUNCE'] as const;
+// createBot now counts concurrent Soniox bots (capacity check) through supabaseAdmin: answer "none running".
+vi.mock('../src/lib/supabase.js', () => {
+  const q: any = {};
+  for (const m of ['select', 'eq', 'in', 'gte', 'limit']) q[m] = () => q;
+  q.then = (res: any) => Promise.resolve({ data: [], error: null }).then(res);
+  return { supabaseAdmin: { from: () => q } };
+});
+
+const KEYS = ['LIVE_STT_PROVIDER', 'LIVE_STT_SHADOW', 'LIVE_STT_SHADOW_USER_IDS', 'LIVE_STT_WS_URL', 'LIVE_STT_INGEST_SECRET', 'LIVE_STT_SHARED_SECRET', 'SERVICE_URL', 'MEETING_BOT_ANNOUNCE'] as const;
 const saved: Record<string, string | undefined> = {};
 
 async function load(env: Partial<Record<(typeof KEYS)[number], string>> = {}) {
@@ -126,10 +134,14 @@ describe('createBot with LIVE_STT_PROVIDER=soniox', () => {
   });
 });
 
-describe('createBot with LIVE_STT_SHADOW=true (provider recall)', () => {
+const OWNER = '11111111-1111-4111-8111-111111111111';
+const OTHER = '22222222-2222-4222-8222-222222222222';
+const SHADOW_ON = { LIVE_STT_SHADOW: 'true', LIVE_STT_SHADOW_USER_IDS: OWNER, ...SOL };
+
+describe('createBot with LIVE_STT_SHADOW=true (provider recall), allow-listed user', () => {
   it('keeps Recall\'s transcript + webhook exactly as today and appends the audio websocket endpoint', async () => {
-    const { RecallService, liveSttBotRunColumns } = await load({ SERVICE_URL: 'https://svc.example', LIVE_STT_SHADOW: 'true', ...SOL });
-    const bot = await RecallService.createBot({ meeting_url: 'u' });
+    const { RecallService, liveSttBotRunColumns } = await load({ SERVICE_URL: 'https://svc.example', ...SHADOW_ON });
+    const bot = await RecallService.createBot({ meeting_url: 'u', user_id: OWNER });
     const rc = sent[0].recording_config;
     expect(rc.transcript).toEqual({ provider: { recallai_streaming: { mode: 'prioritize_low_latency', language_code: 'en' } } });
     expect(rc.audio_mixed_raw).toEqual({});
@@ -139,21 +151,73 @@ describe('createBot with LIVE_STT_SHADOW=true (provider recall)', () => {
     expect(bot.live_stt!.provider).toBe('shadow');
     expect(liveSttBotRunColumns(bot)).toEqual({ live_stt_ref: bot.live_stt!.ref, live_stt_provider: 'shadow' });
   });
+  it('the user id is never sent to Recall', async () => {
+    const { RecallService } = await load({ SERVICE_URL: 'https://svc.example', ...SHADOW_ON });
+    await RecallService.createBot({ meeting_url: 'u', user_id: OWNER });
+    expect(raw[0]).not.toContain(OWNER);
+  });
+  it('matches case-insensitively and inside a comma separated list with spaces', async () => {
+    const { RecallService } = await load({ ...SHADOW_ON, LIVE_STT_SHADOW_USER_IDS: ` ${OTHER} , ${OWNER.toUpperCase()} ` });
+    const bot = await RecallService.createBot({ meeting_url: 'u', user_id: OWNER });
+    expect(bot.live_stt!.provider).toBe('shadow');
+  });
   it('shadow misconfigured: request identical to default, no columns', async () => {
-    const { RecallService, liveSttBotRunColumns } = await load({ SERVICE_URL: 'https://svc.example', LIVE_STT_SHADOW: 'true' });
-    const bot = await RecallService.createBot({ meeting_url: 'u' });
+    const { RecallService, liveSttBotRunColumns } = await load({ SERVICE_URL: 'https://svc.example', LIVE_STT_SHADOW: 'true', LIVE_STT_SHADOW_USER_IDS: OWNER });
+    const bot = await RecallService.createBot({ meeting_url: 'u', user_id: OWNER });
     expect(JSON.stringify(sent[0])).not.toContain('audio_mixed_raw');
     expect(liveSttBotRunColumns(bot)).toEqual({});
   });
   it('is ignored when the provider is soniox (soniox is already the source of truth)', async () => {
-    const { RecallService } = await load({ LIVE_STT_PROVIDER: 'soniox', LIVE_STT_SHADOW: 'true', ...SOL });
-    const bot = await RecallService.createBot({ meeting_url: 'u' });
+    const { RecallService } = await load({ LIVE_STT_PROVIDER: 'soniox', ...SHADOW_ON });
+    const bot = await RecallService.createBot({ meeting_url: 'u', user_id: OWNER });
     expect(bot.live_stt!.provider).toBe('soniox');
     expect(sent[0].recording_config).not.toHaveProperty('transcript');
   });
   it('only the exact string true turns it on', async () => {
-    const { RecallService } = await load({ LIVE_STT_SHADOW: 'yes', ...SOL });
-    await RecallService.createBot({ meeting_url: 'u' });
+    const { RecallService } = await load({ ...SHADOW_ON, LIVE_STT_SHADOW: 'yes' });
+    await RecallService.createBot({ meeting_url: 'u', user_id: OWNER });
     expect(JSON.stringify(sent[0])).not.toContain('audio_mixed_raw');
+  });
+});
+
+describe('shadow is owner-only: LIVE_STT_SHADOW_USER_IDS is the allowlist (other users\' audio never leaves for Soniox)', () => {
+  const DEFAULT_BODY = async (env: Record<string, string>, params: Record<string, unknown>) => {
+    const { RecallService, liveSttBotRunColumns } = await load({ SERVICE_URL: 'https://svc.example', ...env });
+    const bot = await RecallService.createBot({ meeting_url: 'https://zoom.us/j/1', ...params } as any);
+    return { raw: raw[raw.length - 1], bot, cols: liveSttBotRunColumns(bot) };
+  };
+  it('SHADOW=true with the allowlist unset: no bot is shadowed (fails closed), body identical to default', async () => {
+    const base = await DEFAULT_BODY({}, { user_id: OWNER });
+    const r = await DEFAULT_BODY({ LIVE_STT_SHADOW: 'true', ...SOL }, { user_id: OWNER });
+    expect(r.raw).toBe(base.raw);
+    expect(r.cols).toEqual({});
+    expect(r.bot).not.toHaveProperty('live_stt');
+  });
+  it('SHADOW=true with an empty or blank allowlist: nobody is shadowed', async () => {
+    for (const ids of ['', '   ', ' , ,']) {
+      const r = await DEFAULT_BODY({ LIVE_STT_SHADOW: 'true', LIVE_STT_SHADOW_USER_IDS: ids, ...SOL }, { user_id: OWNER });
+      expect(r.raw).not.toContain('audio_mixed_raw');
+      expect(r.cols).toEqual({});
+    }
+  });
+  it('a user who is not on the allowlist is not shadowed, body identical to default', async () => {
+    const base = await DEFAULT_BODY({}, { user_id: OTHER });
+    const r = await DEFAULT_BODY(SHADOW_ON, { user_id: OTHER });
+    expect(r.raw).toBe(base.raw);
+    expect(r.cols).toEqual({});
+  });
+  it('a call without a user id (scheduleBot, future callers) is never shadowed', async () => {
+    const r = await DEFAULT_BODY(SHADOW_ON, {});
+    expect(r.raw).not.toContain('audio_mixed_raw');
+    expect(r.cols).toEqual({});
+  });
+  it('a non-matching user id that merely contains an allowed id is not shadowed', async () => {
+    const r = await DEFAULT_BODY(SHADOW_ON, { user_id: OWNER + '0' });
+    expect(r.raw).not.toContain('audio_mixed_raw');
+  });
+  it('does not raise LIVE_STT_MISCONFIGURED for a user who is simply not allow-listed', async () => {
+    const errSpy = console.error as unknown as ReturnType<typeof vi.fn>;
+    await DEFAULT_BODY(SHADOW_ON, { user_id: OTHER });
+    expect(errSpy.mock.calls.flat().join(' ')).not.toContain('LIVE_STT requested');
   });
 });

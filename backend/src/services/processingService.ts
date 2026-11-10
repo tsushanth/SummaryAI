@@ -8,6 +8,7 @@ import { config } from '../config/index.js';
 import { v4 as uuidv4 } from 'uuid';
 import Anthropic from '@anthropic-ai/sdk';
 import { dispatchRecordingCompleted } from './integrationsService.js';
+import { storeMeasuredDuration } from './recordingDuration.js';
 import { instrumentAnthropic, withFeature } from '../lib/llm.js';
 import { normalizeActionItems, type ParsedSummary } from './summaryService.js';
 import { generateSummary, type CompleteFn } from './summaryGeneration.js';
@@ -16,6 +17,7 @@ import { reportRecordingFailure } from '../lib/recordingFailure.js';
 import { reportAlert } from '../lib/alerts.js';
 import { getRecordingLimits } from '../config/recordingLimits.js';
 import { evaluateSummaryEligibility, countSpeechUnits } from './shortRecordingGuard.js';
+import { languageHintForRecording } from './meetingLanguage.js';
 import { transcribeAudio, isSttConfigured, getSttMode, type NormalizedTranscript, type TranscriptSegment } from './stt/index.js';
 
 export interface ProcessingJob {
@@ -117,6 +119,8 @@ async function processRecordingAsync(
     let transcript: TranscriptionResult;
     let sttProvider = 'mock';
     let sttModel = 'mock';
+    // Length measured by the real provider (never the mock's made-up one, never a document's).
+    let measuredSeconds: number | null = null;
 
     if (isPdf) {
       // Extract text from PDF
@@ -125,11 +129,21 @@ async function processRecordingAsync(
       if (config.DEEPGRAM_API_KEY) { sttProvider = 'deepgram'; sttModel = 'nova-2'; }
       console.log(`[Processing] ${jobId}: PDF text extraction complete (${transcript.wordCount} words)`);
     } else if (isSttConfigured()) {
-      // STT_PROVIDER=deepgram (default) | soniox | shadow, see ./stt/index.ts.
-      const stt = await transcribeAudio(fileData, recording.file_path, { recordingId });
+      // STT_PROVIDER=deepgram (default) | soniox | readaloud | shadow, see ./stt/index.ts.
+      // Language the user chose for the meeting this recording came from (none for uploads and for 'auto').
+      const languageHint = await languageHintForRecording(recording);
+      // userId: the recording owner (shadow comparison is opt-in per user). durationHintSeconds: lets a candidate with a length limit decline.
+      const knownSeconds = Number(recording.duration_seconds);
+      const stt = await transcribeAudio(fileData, recording.file_path, {
+        recordingId,
+        userId: recording.user_id ?? userId,
+        ...(Number.isFinite(knownSeconds) && knownSeconds > 0 ? { durationHintSeconds: knownSeconds } : {}),
+        ...(languageHint ? { languageHints: [languageHint] } : {}),
+      });
       transcript = stt.transcript;
       sttProvider = stt.provider;
       sttModel = stt.model;
+      measuredSeconds = transcript.durationSeconds ?? null;
     } else {
       const soniox = getSttMode() === 'soniox';
       console.warn(`[Processing] ${jobId}: No ${soniox ? 'speech-to-text' : 'Deepgram'} API key, using mock transcription`);
@@ -158,6 +172,10 @@ async function processRecordingAsync(
     if (transcriptError) {
       throw new Error(`Failed to store transcript: ${transcriptError.message}`);
     }
+
+    // The page shows recordings.duration_seconds as the length; clients that sent none (the web app) left it NULL.
+    // Fill it from the provider's measurement; never overwrites a client-reported value.
+    await storeMeasuredDuration(recordingId, measuredSeconds, recording.duration_seconds);
 
     // Step 5: Update status to transcribed
     await updateStatus(recordingId, 'transcribed');

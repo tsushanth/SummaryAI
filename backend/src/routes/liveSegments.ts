@@ -19,6 +19,10 @@ import { supabaseAdmin } from '../lib/supabase.js';
 import { queueInsightGeneration } from '../services/liveInsightsService.js';
 import { createRateLimiter } from '../lib/shareToken.js';
 import { parseSecretList, verifyLiveSegments, signLiveSegments } from '../lib/liveStt.js';
+import { loadVoiceAssistantConfig } from '../services/voiceAssistant/config.js';
+import { fillerConfigFrom, filterFillerSegments } from '../lib/liveSttFiller.js';
+import { FALLBACK_REASONS, handleStreamEvent, noteSegmentsResumed, parseFallbackState, recallIsVisible, selectLiveRun, type FallbackReason } from '../lib/liveSttFallback.js';
+import { inc, observeMs, refTag } from '../lib/liveSttMetrics.js';
 
 export { signLiveSegments };
 
@@ -52,16 +56,31 @@ const segmentSchema = z
   .strict()
   .refine((s) => s.end_timestamp >= s.start_timestamp);
 
+/**
+ * Stream health report from the service (no transcript content). `stream_fatal`: the stream cannot work (auth, bad config).
+ * `stream_degraded`: the service exhausted its own bounded reconnect / failover window. Either one declares the failure.
+ */
+const eventSchema = z
+  .object({
+    type: z.enum(['stream_degraded', 'stream_fatal']),
+    reason: z.enum(FALLBACK_REASONS as unknown as [FallbackReason, ...FallbackReason[]]),
+    code: z.number().int().min(0).max(999).optional(),
+  })
+  .strict();
+
 const bodySchema = z
   .object({
     v: z.literal(1),
     botId: z.string().max(128).nullish(),
     ref: z.string().regex(/^[A-Za-z0-9_-]{8,64}$/),
     sessionId: z.string().min(1).max(128),
-    segments: z.array(segmentSchema).min(1).max(MAX_SEGMENTS),
+    segments: z.array(segmentSchema).min(1).max(MAX_SEGMENTS).optional(),
+    event: eventSchema.optional(),
   })
   .strict()
-  .refine((b) => new Set(b.segments.map((s) => s.key)).size === b.segments.length);
+  // Exactly one of segments / event.
+  .refine((b) => (b.segments ? !b.event : !!b.event))
+  .refine((b) => !b.segments || new Set(b.segments.map((s) => s.key)).size === b.segments.length);
 
 function intEnv(name: string, d: number): number {
   const n = Number(process.env[name]);
@@ -119,11 +138,8 @@ export function liveSegmentsRouter(opts: { nowSec?: () => number } = {}): Router
       }
 
       // Look up by live_stt_ref, not recall_bot_id: recall_bot_id is only stored after Recall answers the create call.
-      const { data: botRun, error: botError } = await supabaseAdmin
-        .from('bot_runs')
-        .select('id, meeting_id, user_id, live_stt_provider')
-        .eq('live_stt_ref', body.ref)
-        .maybeSingle();
+      // Tolerates a database without migration 030 (live_stt_fallback): the fallback state is then simply absent.
+      const { data: botRun, error: botError } = await selectLiveRun('live_stt_ref', body.ref, 'recall_bot_id');
       if (botError) {
         console.error(`${TAG} bot run lookup failed`);
         return fail(res, 500, 'INTERNAL', 'Lookup failed');
@@ -135,7 +151,35 @@ export function liveSegmentsRouter(opts: { nowSec?: () => number } = {}): Router
       const shadow = provider === 'shadow';
       const ns = shadow ? 'shadow' : 'live';
 
-      const rows = body.segments.map((s) => ({
+      if (body.event) {
+        // Health report. Only a Soniox-primary run can fall back; shadow runs have nothing to switch.
+        if (shadow) { res.json({ ok: true, ignored: true }); return; }
+        const r = await handleStreamEvent(botRun, { type: body.event.type, reason: body.event.reason }, { queueInsights: queueInsightGeneration });
+        res.json({ ok: true, fallback: r });
+        return;
+      }
+      type Seg = { key: string; seq: number; segment_text: string; speaker_id: string; speaker_name: string; is_host: boolean; start_timestamp: number; end_timestamp: number; words: unknown[]; language?: string | null };
+      const segments = body.segments as unknown as Seg[];
+      const state = parseFallbackState(botRun.live_stt_fallback);
+      // After a switch to Recall the Soniox rows are kept (never lost) but hidden, so nothing is shown twice.
+      const hiddenByFallback = !shadow && recallIsVisible(state);
+
+      // Filler filter: Soniox-primary rows only (shadow rows and Recall rows are stored exactly as received).
+      let toStore = segments;
+      let filtered = 0;
+      if (!shadow) {
+        const f = filterFillerSegments(segments, fillerConfigFrom(), null);
+        toStore = f.kept;
+        filtered = f.dropped.length;
+        for (const [lang, n] of Object.entries(f.droppedByLang)) inc('live_stt_filler_dropped', { lang }, n);
+      }
+      if (toStore.length === 0) {
+        res.json({ ok: true, inserted: 0, duplicates: 0, filtered });
+        return;
+      }
+      const recorded = toStore;
+
+      const rows = recorded.map((s) => ({
         meeting_id: botRun.meeting_id,
         bot_run_id: botRun.id,
         user_id: botRun.user_id,
@@ -148,22 +192,22 @@ export function liveSegmentsRouter(opts: { nowSec?: () => number } = {}): Router
         words: s.words,
         is_partial: false,
         source_key: `${ns}:${body.ref}:${s.key}`,
-        shadow,
+        shadow: shadow || hiddenByFallback,
       }));
 
       // ON CONFLICT (source_key) DO NOTHING: retries and replays never duplicate. `.select()` returns only the rows inserted.
       const { data: inserted, error: insertError } = await supabaseAdmin
         .from('live_transcripts')
         .upsert(rows, { onConflict: 'source_key', ignoreDuplicates: true })
-        .select('id');
+        .select('id, source_key');
       if (insertError) {
         console.error(`${TAG} insert failed`);
         return fail(res, 500, 'INTERNAL', 'Failed to store segments');
       }
       const insertedCount = inserted?.length ?? 0;
 
-      // Shadow rows never trigger insights (that would double the LLM spend and duplicate the user-visible insights).
-      if (!shadow && insertedCount > 0) {
+      // Shadow and hidden rows never trigger insights (that would double the LLM spend and duplicate the user-visible insights).
+      if (!shadow && !hiddenByFallback && insertedCount > 0) {
         try {
           await queueInsightGeneration(botRun.meeting_id, botRun.user_id);
         } catch {
@@ -171,8 +215,35 @@ export function liveSegmentsRouter(opts: { nowSec?: () => number } = {}): Router
         }
       }
 
-      console.log(`${TAG} ref=${body.ref.slice(0, 8)} shadow=${shadow} inserted=${insertedCount} duplicates=${rows.length - insertedCount}`);
-      res.json({ ok: true, inserted: insertedCount, duplicates: rows.length - insertedCount });
+      // In-meeting voice assistant, only when it is told to take its wake phrase from this stream. Newly stored segments only (a
+      // retried batch must not ask twice), never awaited (the assistant must not slow down or fail the sink), nothing logged.
+      const recallBotId = (botRun as { recall_bot_id?: string | null }).recall_bot_id;
+      if (insertedCount > 0 && !hiddenByFallback && recallBotId && loadVoiceAssistantConfig().wakeSource === 'live_stt') {
+        const stored = new Set((inserted ?? []).map((r: { source_key?: string }) => r.source_key));
+        const fresh = recorded
+          .filter((s) => stored.has(`${ns}:${body.ref}:${s.key}`))
+          .sort((a, b) => a.seq - b.seq)
+          .map((s) => ({ text: s.segment_text, speakerName: s.speaker_name || null, isHost: s.is_host }));
+        void import('../services/voiceAssistant/manager.js')
+          .then((m) => m.getVoiceAssistantManager().handleLive(recallBotId, fresh))
+          .catch(() => console.error(`${TAG} voice assistant forward failed`));
+      }
+
+      // Telemetry (counts and timings only, never text).
+      const provider2 = shadow ? 'shadow' : 'soniox';
+      inc('live_stt_segments_stored', { provider: provider2, hidden: hiddenByFallback ? 1 : 0 }, insertedCount);
+      if (insertedCount > 0 && !shadow) {
+        const joined = botRun.joined_at ? Date.parse(botRun.joined_at) : NaN;
+        const lastEnd = Math.max(...recorded.map((s) => s.end_timestamp));
+        if (Number.isFinite(joined)) observeMs('live_stt_segment_lag', Date.now() - joined - lastEnd * 1000, { provider: 'soniox' });
+        // Segments are flowing again after a declared outage (default mode): one automatic return to ok.
+        if (!hiddenByFallback) {
+          try { await noteSegmentsResumed(botRun); } catch { console.error(`${TAG} recovery bookkeeping failed`); }
+        }
+      }
+
+      console.log(`${TAG} ref=${refTag(body.ref)} shadow=${shadow} inserted=${insertedCount} duplicates=${rows.length - insertedCount} filtered=${filtered}`);
+      res.json({ ok: true, inserted: insertedCount, duplicates: rows.length - insertedCount, ...(filtered ? { filtered } : {}) });
     } catch {
       console.error(`${TAG} unexpected error`);
       if (!res.headersSent) fail(res, 500, 'INTERNAL', 'Internal error');

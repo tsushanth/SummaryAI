@@ -45,7 +45,7 @@ vi.mock('../src/services/processingService.js', () => ({
 vi.mock('../src/lib/failureReporter.js', () => ({ reportFailure: (...a: any[]) => reportFailure(...a) }));
 
 const {
-  recoverOrphanedProcessing, INTERRUPTED_MESSAGE, ORPHAN_MIN_AGE_MS,
+  recoverOrphanedProcessing, INTERRUPTED_MESSAGE, ORPHAN_MIN_AGE_MS, MAX_ACTIVE_JOBS_FOR_RETRY,
 } = await import('../src/services/orphanedProcessingRecovery.js');
 
 const NOW = Date.parse('2026-10-29T12:00:00Z');
@@ -165,7 +165,7 @@ describe('recoverOrphanedProcessing', () => {
     expect(reportFailure).not.toHaveBeenCalled();
   });
 
-  it('skips a recording whose job is active in this process; defers retries while any job is active', async () => {
+  it('skips a recording whose job is active in this process; the old orphan is still failed', async () => {
     scanRows = [row('ffffffff-6666'), row('gggggggg-7777', { created_at: iso(5 * DAY) })];
     activeIds.add('ffffffff-6666');
     await recoverOrphanedProcessing(NOW);
@@ -173,12 +173,45 @@ describe('recoverOrphanedProcessing', () => {
     // the old one is still failed (cheap, safe); the active one is untouched
     expect(updates()).toHaveLength(1);
     expect(updates()[0].filters.id).toBe('gggggggg-7777');
+  });
 
-    ops.length = 0;
+  it('a busy process with UNRELATED active jobs still retries the orphan (regression: pipeline_invariant)', async () => {
     scanRows = [row('hhhhhhhh-8888')];
-    activeIds.clear(); activeIds.add('some-other-job');
+    activeIds.add('unrelated-job-1'); activeIds.add('unrelated-job-2'); // below MAX_ACTIVE_JOBS_FOR_RETRY
+    await recoverOrphanedProcessing(NOW);
+    expect(triggerProcessing).toHaveBeenCalledTimes(1);
+    expect(triggerProcessing.mock.calls[0][0]).toBe('hhhhhhhh-8888');
+    expect(order).toEqual(['update:RECOVERY_RETRY_1', 'delete:transcripts', 'delete:summaries', 'trigger:hhhhhhhh-8888']);
+  });
+
+  it('defers the retry (no claim, no trigger) once the process is at the active-job ceiling', async () => {
+    scanRows = [row('hhhhhhhh-8888')];
+    for (let i = 0; i < MAX_ACTIVE_JOBS_FOR_RETRY; i++) activeIds.add(`unrelated-${i}`);
     await recoverOrphanedProcessing(NOW);
     expect(ops).toHaveLength(0);
+    expect(triggerProcessing).not.toHaveBeenCalled();
+  });
+
+  it('the same recording already active is never retried twice, and a second retry waits for the first', async () => {
+    triggerProcessing.mockImplementationOnce(async (id: string) => { activeIds.add(id); order.push(`trigger:${id}`); return { id: 'job' }; });
+    scanRows = [row('kkkkkkkk-1111'), row('llllllll-2222')];
+    await recoverOrphanedProcessing(NOW);
+    expect(triggerProcessing).toHaveBeenCalledTimes(1); // one re-trigger per pass
+    expect(triggerProcessing.mock.calls[0][0]).toBe('kkkkkkkk-1111');
+
+    // Next pass: kkkk still active (job running, row not yet bumped in this fake) -> skipped, not re-triggered;
+    // llll must wait because a recovery-started retry is still in flight (MAX_CONCURRENT_RETRIES).
+    ops.length = 0; order.length = 0; triggerProcessing.mockClear();
+    await recoverOrphanedProcessing(NOW + 5 * MIN);
+    expect(triggerProcessing).not.toHaveBeenCalled();
+    expect(ops).toHaveLength(0);
+
+    // The first retry finishes: the next orphan is retried.
+    activeIds.delete('kkkkkkkk-1111');
+    scanRows = [row('llllllll-2222')];
+    await recoverOrphanedProcessing(NOW + 10 * MIN);
+    expect(triggerProcessing).toHaveBeenCalledTimes(1);
+    expect(triggerProcessing.mock.calls[0][0]).toBe('llllllll-2222');
   });
 });
 

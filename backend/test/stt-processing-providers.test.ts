@@ -102,7 +102,7 @@ describe('STT_PROVIDER=soniox through the processing job', () => {
 });
 
 describe('STT_PROVIDER=shadow through the processing job', () => {
-  beforeEach(() => vi.stubEnv('STT_PROVIDER', 'shadow'));
+  beforeEach(() => { vi.stubEnv('STT_PROVIDER', 'shadow'); vi.stubEnv('STT_SHADOW_USER_IDS', 'user-1'); });
 
   it('stores the Deepgram transcript and one metrics-only stt_shadow_runs row', async () => {
     await runJob();
@@ -119,6 +119,23 @@ describe('STT_PROVIDER=shadow through the processing job', () => {
     expect(transcriptRow().transcription_provider).toBe('deepgram');
     expect(recordingUpdates.some((u) => u.status === 'failed')).toBe(false);
     expect(inserts.find((i) => i.table === 'stt_shadow_runs')!.row).toMatchObject({ status: 'shadow_error', error_class: 'SERVER' });
+  });
+});
+
+describe('STT_PROVIDER=shadow is opt-in per user through the processing job', () => {
+  beforeEach(() => vi.stubEnv('STT_PROVIDER', 'shadow'));
+
+  it('no allow-list: the owner audio goes to Deepgram only, nothing is sent to the second vendor and no row is written', async () => {
+    await runJob();
+    expect(urls.some((u) => u.includes('soniox'))).toBe(false);
+    expect(inserts.some((i) => i.table === 'stt_shadow_runs')).toBe(false);
+    expect(transcriptRow().transcription_provider).toBe('deepgram');
+  });
+  it('allow-list that does not include the recording owner: same', async () => {
+    vi.stubEnv('STT_SHADOW_USER_IDS', 'someone-else, another');
+    await runJob();
+    expect(urls.some((u) => u.includes('soniox'))).toBe(false);
+    expect(inserts.some((i) => i.table === 'stt_shadow_runs')).toBe(false);
   });
 });
 

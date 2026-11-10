@@ -164,6 +164,20 @@ object FirebaseAnalyticsHelper {
         logEvent("search_performed")
     }
 
+    /** Generic scalar-param event (used by the activation funnel). Unsupported value types are dropped. */
+    fun logCustom(name: String, params: Map<String, Any>) {
+        val bundle = Bundle()
+        params.forEach { (k, v) ->
+            when (v) {
+                is String -> bundle.putString(k, v)
+                is Int -> bundle.putLong(k, v.toLong())
+                is Long -> bundle.putLong(k, v)
+                is Boolean -> bundle.putLong(k, if (v) 1L else 0L) // Firebase has no boolean param type
+            }
+        }
+        logEvent(name, bundle)
+    }
+
     // Core Logging
 
     private fun logEvent(eventName: String, params: Bundle? = null) {

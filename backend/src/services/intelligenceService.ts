@@ -31,6 +31,20 @@ export async function completeText(opts: {
   return response.content[0]?.type === 'text' ? response.content[0].text : '';
 }
 
+/** Structured meeting debrief (decisions + actions). Own spend label so it can be watched and capped separately. */
+export async function completeDebriefText(opts: { system: string; user: string; model?: string; maxTokens?: number }): Promise<string> {
+  if (!config.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY is not configured');
+  if (!client) client = instrumentAnthropic(new Anthropic({ apiKey: config.ANTHROPIC_API_KEY }));
+  const anthropic = client;
+  const response = await withFeature('voice_debrief', () => anthropic.messages.create({
+    model: opts.model ?? config.SUMMARY_MODEL,
+    max_tokens: opts.maxTokens ?? 1500,
+    system: opts.system,
+    messages: [{ role: 'user', content: opts.user }],
+  }));
+  return response.content[0]?.type === 'text' ? response.content[0].text : '';
+}
+
 export function extractJson(text: string): any | null {
   try {
     const m = text.match(/```(?:json)?\s*([\s\S]*?)```/) || text.match(/\{[\s\S]*\}/);

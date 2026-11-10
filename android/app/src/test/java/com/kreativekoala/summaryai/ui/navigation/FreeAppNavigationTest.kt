@@ -47,4 +47,9 @@ class FreeAppNavigationTest {
         assertFalse(settings.contains("PaywallPreview"))
         assertFalse(source("ui/recordings/RecordingDetailScreen.kt").contains("onUpgradeClick"))
     }
+
+    @Test fun noProBadgeOnTheRecordingsList() {
+        val list = source("ui/recordings/RecordingsListScreen.kt")
+        assertFalse(list.contains("R.string.pro"))
+    }
 }

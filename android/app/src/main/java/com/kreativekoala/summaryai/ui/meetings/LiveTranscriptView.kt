@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.summaryai.R
+import com.kreativekoala.summaryai.data.LanguageCatalog
 import com.kreativekoala.summaryai.domain.model.LiveTranscriptSegment
 import com.kreativekoala.summaryai.ui.coaching.ActiveCoachingSession
 import com.kreativekoala.summaryai.ui.coaching.CoachingLivePanel
@@ -76,7 +77,40 @@ fun LiveTranscriptView(
         }
     }
 
-    Column(modifier = modifier.fillMaxSize()) {
+    var showLanguageDialog by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val notice = uiState.languageNotice
+    val catalog = uiState.languageCatalog
+    val noticeText = when (notice) {
+        is LanguageNotice.Changed -> stringResource(R.string.meeting_language_changed, meetingLanguageLabel(notice.language, catalog))
+        is LanguageNotice.SavedNotLive -> stringResource(R.string.meeting_language_saved_not_live, meetingLanguageLabel(notice.language, catalog))
+        LanguageNotice.NotSwitchable -> stringResource(R.string.meeting_language_switch_unavailable)
+        LanguageNotice.NotLive -> stringResource(R.string.meeting_language_switch_not_live)
+        LanguageNotice.Failed -> stringResource(R.string.meeting_language_switch_failed)
+        null -> null
+    }
+    LaunchedEffect(notice) {
+        if (noticeText != null) {
+            snackbarHostState.showSnackbar(noticeText)
+            viewModel.clearLanguageNotice()
+        }
+    }
+
+    if (showLanguageDialog) {
+        MeetingLanguageDialog(
+            selected = uiState.activeLanguage,
+            catalog = catalog,
+            note = stringResource(R.string.meeting_language_change_note),
+            onSelect = {
+                showLanguageDialog = false
+                viewModel.changeLanguage(it)
+            },
+            onDismiss = { showLanguageDialog = false }
+        )
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize()) {
         // AI Coach live panel — only when a session is active for this meeting.
         if (hasCoachingSession) {
             CoachingLivePanel(
@@ -88,6 +122,16 @@ fun LiveTranscriptView(
 
         // Live indicator
         LiveIndicator()
+
+        // Active transcription language + change action
+        LanguageBar(
+            activeLanguage = uiState.activeLanguage,
+            catalog = catalog,
+            canChange = uiState.canChangeLanguage,
+            blockedReason = uiState.languageBlockedReason,
+            isChanging = uiState.isChangingLanguage,
+            onChange = { showLanguageDialog = true }
+        )
 
         if (uiState.segments.isEmpty() && !uiState.isLoading) {
             // Empty state
@@ -132,6 +176,57 @@ fun LiveTranscriptView(
                     )
                 }
             }
+        }
+    }
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier = Modifier.align(Alignment.BottomCenter)
+    )
+    }
+}
+
+@Composable
+private fun LanguageBar(
+    activeLanguage: String,
+    catalog: LanguageCatalog,
+    canChange: Boolean,
+    blockedReason: String?,
+    isChanging: Boolean,
+    onChange: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.meeting_language_active, meetingLanguageLabel(activeLanguage, catalog)),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f)
+            )
+            // Only offered when the backend says this meeting can switch now.
+            if (canChange) {
+                TextButton(onClick = onChange, enabled = !isChanging) {
+                    if (isChanging) {
+                        CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    Text(stringResource(R.string.meeting_language_change))
+                }
+            }
+        }
+        val note = when {
+            !canChange && blockedReason == "not_live" -> stringResource(R.string.meeting_language_reason_not_live)
+            !canChange -> stringResource(R.string.meeting_language_reason_fixed)
+            catalog.liveCaptionsDelayed(activeLanguage) ->
+                stringResource(R.string.meeting_language_hint_delayed, catalog.delayMinutes ?: "3-10")
+            else -> null
+        }
+        if (note != null) {
+            Text(
+                text = note,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
         }
     }
 }

@@ -13,6 +13,8 @@ import com.kreativekoala.summaryai.service.AudioRecordingService
 import com.kreativekoala.summaryai.service.LiveSpeechRecognizer
 import com.kreativekoala.summaryai.service.RecordingState
 import com.kreativekoala.summaryai.service.UploadState
+import com.kreativekoala.summaryai.service.activation.Activation
+import com.kreativekoala.summaryai.ui.onboarding.FirstRunState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
@@ -31,24 +33,29 @@ data class RecordingUiState(
     val error: String? = null,
     val liveTranscribeEnabled: Boolean = false,
     val liveTranscript: String = "",
-    val liveTranscribeError: String? = null
+    val liveTranscribeError: String? = null,
+    /** Brand-new user who has not started a recording yet: the Record screen shows its one-line prompt. */
+    val firstRun: Boolean = false
 )
 
 @HiltViewModel
 class RecordingViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val tokenManager: TokenManager,
-    private val liveSpeech: LiveSpeechRecognizer
+    private val liveSpeech: LiveSpeechRecognizer,
+    private val firstRunState: FirstRunState
 ) : ViewModel() {
 
     private val isDemoMode: Boolean
         get() = tokenManager.userId?.startsWith("demo-user-") == true
 
-    private val _uiState = MutableStateFlow(RecordingUiState())
+    private val _uiState = MutableStateFlow(RecordingUiState(firstRun = firstRunState.active))
     val uiState: StateFlow<RecordingUiState> = _uiState.asStateFlow()
 
     private var recordingService: AudioRecordingService? = null
     private var isBound = false
+    /** Set by a record tap; consumed when the service actually reports recording (a failed start never counts). */
+    private var startRequested = false
     private var recordingObserverJob: Job? = null
     private var uploadObserverJob: Job? = null
 
@@ -61,6 +68,11 @@ class RecordingViewModel @Inject constructor(
             recordingObserverJob?.cancel()
             recordingObserverJob = viewModelScope.launch {
                 recordingService?.recordingState?.collect { state ->
+                    if (state.isRecording && startRequested) {
+                        startRequested = false
+                        Activation.track { recordingStarted() }
+                        firstRunState.finish()
+                    }
                     _uiState.value = _uiState.value.copy(recordingState = state)
                     syncLiveTranscribe()
                 }
@@ -80,6 +92,11 @@ class RecordingViewModel @Inject constructor(
 
     init {
         bindService()
+        viewModelScope.launch {
+            firstRunState.activeFlow.collect { active ->
+                _uiState.value = _uiState.value.copy(firstRun = active)
+            }
+        }
         // Mirror live-speech state into the UI.
         viewModelScope.launch {
             liveSpeech.transcript.collect { text ->
@@ -118,7 +135,13 @@ class RecordingViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(title = title)
     }
 
+    /** The user tapped a record button (funnel event only; the caller then starts or requests permission). */
+    fun onRecordTapped() {
+        Activation.track { recordTapped() }
+    }
+
     fun startRecording() {
+        startRequested = true
         val intent = Intent(context, AudioRecordingService::class.java).apply {
             action = AudioRecordingService.ACTION_START
         }
@@ -159,6 +182,7 @@ class RecordingViewModel @Inject constructor(
 
         val outputFile = service.stopRecording()
         if (outputFile != null && outputFile.exists()) {
+            Activation.track { recordingFinished(duration) }
             // Hand off to the service so the upload survives Activity death.
             service.startUpload(outputFile, title, duration)
         } else {
@@ -177,11 +201,21 @@ class RecordingViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(error = null)
     }
 
+    /** Last finished upload the screen already navigated to; ignored so Back from the detail does not bounce forward again. */
+    private var handledUploadId: String? = null
+
+    /** The screen opened the finished recording; forget it so returning to Record shows the idle screen. */
+    fun onUploadedRecordingHandled(recordingId: String) {
+        handledUploadId = recordingId
+        _uiState.value = _uiState.value.copy(uploadedRecordingId = null)
+    }
+
     private fun applyUploadState(state: UploadState) {
+        val incomingId = state.uploadedRecordingId?.takeIf { it != handledUploadId }
         _uiState.value = _uiState.value.copy(
             isUploading = state.isUploading,
             uploadProgress = state.progress,
-            uploadedRecordingId = state.uploadedRecordingId ?: _uiState.value.uploadedRecordingId,
+            uploadedRecordingId = incomingId ?: _uiState.value.uploadedRecordingId,
             error = state.error ?: _uiState.value.error
         )
     }

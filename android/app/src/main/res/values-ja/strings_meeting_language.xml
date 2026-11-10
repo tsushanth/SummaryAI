@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meeting_language_label">文字起こしの言語</string>
+    <string name="meeting_language_auto">自動検出</string>
+    <string name="meeting_language_hint">ほとんどの会議では自動検出で問題ありません。文字起こしが合わない場合は言語を選んでください。選択は記憶されます。</string>
+    <string name="meeting_language_dialog_title">文字起こしの言語</string>
+    <string name="meeting_language_change">言語を変更</string>
+    <string name="meeting_language_active">言語: %1$s</string>
+    <string name="meeting_language_changed">文字起こしの言語を%1$sに変更しました</string>
+    <string name="meeting_language_change_note">今後の発言に適用されます。</string>
+    <string name="meeting_language_switch_unavailable">この会議はライブ中に言語を切り替えられません</string>
+    <string name="meeting_language_switch_failed">言語を変更できませんでした。もう一度お試しください。</string>
+    <string name="meeting_language_hint_auto_english_live">自動検出は最終的な文字起こしの言語を判定します。言語を選ばない限り、ライブ字幕は英語のままです。</string>
+    <string name="meeting_language_hint_delayed">この言語のライブ字幕は%1$s分遅れて届くことがあります。最終的な文字起こしには影響しません。</string>
+    <string name="meeting_language_reason_fixed">ライブの言語はボットの参加時に決まり、この会議中は変更できません。</string>
+    <string name="meeting_language_reason_not_live">言語を変更できるのは、ボットが会議に参加している間だけです。</string>
+    <string name="meeting_language_switch_not_live">ボットは現在会議に参加していないため、言語を変更できません。</string>
+    <string name="meeting_language_saved_not_live">最終的な文字起こしには%1$sを保存しましたが、ライブの文字起こしは今は切り替えられませんでした。</string>
+</resources>
