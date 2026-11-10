@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Meeting bot monthly allowance reached. English only for now; other locales fall back to these. -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="error_bot_cap_reached">You have used this month\'s meeting bot time. It resets on %1$s. You can still record meetings yourself.</string>
+    <string name="error_bot_cap_reached_no_date">You have used this month\'s meeting bot time. It resets at the start of next month. You can still record meetings yourself.</string>
+</resources>

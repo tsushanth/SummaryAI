@@ -9,8 +9,10 @@ import com.kreativekoala.summaryai.data.LanguageCatalog
 import com.kreativekoala.summaryai.data.MeetingLanguages
 import com.kreativekoala.summaryai.data.api.coaching.CoachingPersonaKey
 import com.kreativekoala.summaryai.data.local.PreferencesManager
+import com.kreativekoala.summaryai.data.repository.BotCapReachedException
 import com.kreativekoala.summaryai.data.repository.CoachingRepository
 import com.kreativekoala.summaryai.data.repository.MeetingsRepository
+import com.kreativekoala.summaryai.data.repository.buildBotCapMessage
 import com.kreativekoala.summaryai.data.repository.TranscriptionLanguagesRepository
 import com.kreativekoala.summaryai.service.BillingManager
 import com.kreativekoala.summaryai.ui.coaching.ActiveCoachingSession
@@ -149,7 +151,16 @@ class JoinMeetingViewModel @Inject constructor(
                 onFailure = { error ->
                     _uiState.value = _uiState.value.copy(
                         isJoining = false,
-                        error = error.message ?: context.getString(R.string.error_join_meeting_failed)
+                        error = if (error is BotCapReachedException) {
+                            buildBotCapMessage(
+                                resetsAt = error.resetsAt,
+                                locale = java.util.Locale.getDefault(),
+                                withDate = { date -> context.getString(R.string.error_bot_cap_reached, date) },
+                                withoutDate = { context.getString(R.string.error_bot_cap_reached_no_date) }
+                            )
+                        } else {
+                            error.message ?: context.getString(R.string.error_join_meeting_failed)
+                        }
                     )
                 }
             )
