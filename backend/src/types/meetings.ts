@@ -334,6 +334,8 @@ export interface RecallBotCreateRequest {
     waiting_room_timeout?: number;
     noone_joined_timeout?: number;
     everyone_left_timeout?: number;
+    /** Seconds of recording after which Recall removes the bot (maximum session length). Absent = no limit. */
+    in_call_recording_timeout?: number;
   };
 }
 

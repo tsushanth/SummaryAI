@@ -14,6 +14,7 @@ import webhooksRoutes from './webhooks.js';
 import phoneRoutes from './phone.js';
 import subscriptionsRoutes from './subscriptions.js';
 import attributionRoutes from './attribution.js';
+import activationRoutes from './activation.js';
 import coachingRoutes from './coaching.js';
 import { foldersRouter, tagsRouter } from './folders.js';
 import { recordingSharesRouter, publicSharesRouter } from './shares.js';
@@ -22,6 +23,7 @@ import searchRoutes from './search.js';
 import integrationsRoutes from './integrations.js';
 import statsRoutes from './stats.js';
 import { liveSegmentsRouter } from './liveSegments.js';
+import voiceToolsRoutes from './voiceTools.js';
 import { voiceAssistantWebhookRouter, voiceAssistantInternalRouter, voiceAssistantUserRouter } from './voiceAssistant.js';
 
 const router = Router();
@@ -37,6 +39,9 @@ router.use('/webhooks', webhooksRoutes);
 
 // Attribution (no auth required - called from iOS before sign-in)
 router.use('/api/attribution', attributionRoutes);
+
+// Activation funnel (flag ACTIVATION_EVENTS_ENABLED, off by default; events are anonymous, attribution authenticates itself)
+router.use('/api/activation', activationRoutes);
 
 // Calendar OAuth callback (no auth required - browser redirect)
 router.use('/api/calendar', calendarCallbackRouter);
@@ -71,6 +76,8 @@ router.use('/api/subscriptions', subscriptionsRoutes);
 router.use('/api/coaching', coachingRoutes);
 router.use('/api/integrations', integrationsRoutes);
 router.use('/api/stats', statsRoutes);
+// Assistant tools over the caller's own meetings. 404 unless VOICE_TOOLS_ENABLED=true and the user is allow-listed.
+router.use('/api/voice-tools', voiceToolsRoutes);
 router.use('/api/voice-assistant', voiceAssistantUserRouter);
 
 export default router;

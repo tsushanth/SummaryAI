@@ -132,10 +132,10 @@ describe('STT_PROVIDER=soniox', () => {
 });
 
 describe('STT_PROVIDER=shadow', () => {
-  beforeEach(() => { env.STT_PROVIDER = 'shadow'; });
+  beforeEach(() => { env.STT_PROVIDER = 'shadow'; env.STT_SHADOW_USER_IDS = 'user-1'; });
 
   it('returns the Deepgram result and writes one metrics-only comparison row', async () => {
-    const r = await stt.transcribeAudio(blob, 'u/a.m4a', { recordingId: 'rec-1' }, deps());
+    const r = await stt.transcribeAudio(blob, 'u/a.m4a', { recordingId: 'rec-1', userId: 'user-1' }, deps());
     expect(r).toEqual({ transcript: dgT, provider: 'deepgram', model: 'nova-2' });
     await stt.flushShadowRuns();
     expect(rows).toHaveLength(1);
@@ -153,7 +153,7 @@ describe('STT_PROVIDER=shadow', () => {
     expect(typeof rows[0].shadow_latency_ms).toBe('number');
   });
   it('the row and the log line carry no transcript text', async () => {
-    await stt.transcribeAudio(blob, 'u/a.m4a', { recordingId: 'rec-1' }, deps());
+    await stt.transcribeAudio(blob, 'u/a.m4a', { recordingId: 'rec-1', userId: 'user-1' }, deps());
     await stt.flushShadowRuns();
     expect(JSON.stringify(rows)).not.toMatch(/SECRET|quick|brown|u\/a\.m4a/);
     const logged = (console.log as any).mock.calls.map((c: any[]) => c.join(' ')).join('\n');
@@ -161,7 +161,7 @@ describe('STT_PROVIDER=shadow', () => {
     expect(logged).not.toMatch(/SECRET|quick|brown/);
   });
   it('row keys are a closed whitelist of counts/metrics', async () => {
-    await stt.transcribeAudio(blob, 'a.m4a', { recordingId: 'rec-1' }, deps());
+    await stt.transcribeAudio(blob, 'a.m4a', { recordingId: 'rec-1', userId: 'user-1' }, deps());
     await stt.flushShadowRuns();
     expect(Object.keys(rows[0]).sort()).toEqual([
       'error_class', 'primary_duration_seconds', 'primary_language', 'primary_latency_ms', 'primary_model', 'primary_provider',
@@ -172,7 +172,7 @@ describe('STT_PROVIDER=shadow', () => {
   it('Soniox runs concurrently with Deepgram (started before the primary finishes)', async () => {
     let release!: () => void;
     dg.transcribe.mockImplementation(() => new Promise((res) => { release = () => res(dgT); }));
-    const p = stt.transcribeAudio(blob, 'a.m4a', {}, deps());
+    const p = stt.transcribeAudio(blob, 'a.m4a', { userId: 'user-1' }, deps());
     await vi.waitFor(() => expect(sx.transcribe).toHaveBeenCalled());
     release();
     await p;
@@ -180,7 +180,7 @@ describe('STT_PROVIDER=shadow', () => {
   });
   it('a Soniox failure never affects the user path; row status shadow_error with the error class', async () => {
     sx.transcribe.mockRejectedValue(Object.assign(new Error('Soniox API error: 429'), { status: 429 }));
-    const r = await stt.transcribeAudio(blob, 'a.m4a', { recordingId: 'rec-1' }, deps());
+    const r = await stt.transcribeAudio(blob, 'a.m4a', { recordingId: 'rec-1', userId: 'user-1' }, deps());
     expect(r.provider).toBe('deepgram');
     await stt.flushShadowRuns();
     expect(rows[0]).toMatchObject({ status: 'shadow_error', error_class: 'RATE_LIMIT', shadow_word_count: null, wer_vs_primary: null, primary_word_count: 10 });
@@ -189,7 +189,7 @@ describe('STT_PROVIDER=shadow', () => {
     env.STT_SHADOW_TIMEOUT_MS = '30';
     sx.transcribe.mockImplementation(() => new Promise(() => {}));
     const t0 = Date.now();
-    await stt.transcribeAudio(blob, 'a.m4a', { recordingId: 'rec-1' }, deps());
+    await stt.transcribeAudio(blob, 'a.m4a', { recordingId: 'rec-1', userId: 'user-1' }, deps());
     expect(Date.now() - t0).toBeLessThan(25);
     await stt.flushShadowRuns();
     expect(rows[0]).toMatchObject({ status: 'shadow_timeout', error_class: 'TIMEOUT' });
@@ -197,50 +197,50 @@ describe('STT_PROVIDER=shadow', () => {
   });
   it('an empty Soniox result is recorded as shadow_empty with no WER', async () => {
     sx.transcribe.mockResolvedValue(mkT({ fullText: '', wordCount: 0, segments: [] }));
-    await stt.transcribeAudio(blob, 'a.m4a', { recordingId: 'r' }, deps());
+    await stt.transcribeAudio(blob, 'a.m4a', { recordingId: 'r', userId: 'user-1' }, deps());
     await stt.flushShadowRuns();
     expect(rows[0]).toMatchObject({ status: 'shadow_empty', shadow_word_count: 0, wer_vs_primary: null });
   });
   it('a failing row insert is logged, never thrown', async () => {
     store.insert.mockRejectedValue(new Error('relation "stt_shadow_runs" does not exist'));
-    await expect(stt.transcribeAudio(blob, 'a.m4a', {}, deps())).resolves.toMatchObject({ provider: 'deepgram' });
+    await expect(stt.transcribeAudio(blob, 'a.m4a', { userId: 'user-1' }, deps())).resolves.toMatchObject({ provider: 'deepgram' });
     await expect(stt.flushShadowRuns()).resolves.toBeUndefined();
   });
   it('without a Soniox key nothing is sent anywhere', async () => {
     delete env.SONIOX_API_KEY;
-    await stt.transcribeAudio(blob, 'a.m4a', {}, deps());
+    await stt.transcribeAudio(blob, 'a.m4a', { userId: 'user-1' }, deps());
     await stt.flushShadowRuns();
     expect(sx.transcribe).not.toHaveBeenCalled();
     expect(rows).toHaveLength(0);
   });
   it('if the primary (Deepgram) fails, the error propagates and no row is written', async () => {
     dg.transcribe.mockRejectedValue(new Error('Deepgram API error: 500'));
-    await expect(stt.transcribeAudio(blob, 'a.m4a', {}, deps())).rejects.toThrow('Deepgram API error');
+    await expect(stt.transcribeAudio(blob, 'a.m4a', { userId: 'user-1' }, deps())).rejects.toThrow('Deepgram API error');
     await stt.flushShadowRuns();
     expect(rows).toHaveLength(0);
   });
   it('STT_SHADOW_SAMPLE_RATE: 0 sends no audio; 1 sends all; rate is compared with random()', async () => {
     env.STT_SHADOW_SAMPLE_RATE = '0';
-    await stt.transcribeAudio(blob, 'a.m4a', {}, deps());
+    await stt.transcribeAudio(blob, 'a.m4a', { userId: 'user-1' }, deps());
     expect(sx.transcribe).not.toHaveBeenCalled();
     env.STT_SHADOW_SAMPLE_RATE = '0.4'; // random() = 0.5 -> skipped
-    await stt.transcribeAudio(blob, 'a.m4a', {}, deps());
+    await stt.transcribeAudio(blob, 'a.m4a', { userId: 'user-1' }, deps());
     expect(sx.transcribe).not.toHaveBeenCalled();
     env.STT_SHADOW_SAMPLE_RATE = '0.6'; // sampled
-    await stt.transcribeAudio(blob, 'a.m4a', {}, deps());
+    await stt.transcribeAudio(blob, 'a.m4a', { userId: 'user-1' }, deps());
     await stt.flushShadowRuns();
     expect(sx.transcribe).toHaveBeenCalledTimes(1);
   });
   it('STT_SHADOW_MAX_RUNS caps the number of shadowed recordings using the table count', async () => {
     env.STT_SHADOW_MAX_RUNS = '2';
-    for (let i = 0; i < 4; i++) { await stt.transcribeAudio(blob, 'a.m4a', { recordingId: `r${i}` }, deps()); await stt.flushShadowRuns(); }
+    for (let i = 0; i < 4; i++) { await stt.transcribeAudio(blob, 'a.m4a', { recordingId: `r${i}`, userId: 'user-1' }, deps()); await stt.flushShadowRuns(); }
     expect(rows).toHaveLength(2);
     expect(sx.transcribe).toHaveBeenCalledTimes(2);
   });
   it('if the table cannot be read (migration not applied) while a cap is set, no audio is sent', async () => {
     env.STT_SHADOW_MAX_RUNS = '5';
     store.count.mockRejectedValue(new Error('relation does not exist'));
-    await stt.transcribeAudio(blob, 'a.m4a', {}, deps());
+    await stt.transcribeAudio(blob, 'a.m4a', { userId: 'user-1' }, deps());
     await stt.flushShadowRuns();
     expect(sx.transcribe).not.toHaveBeenCalled();
   });

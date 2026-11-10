@@ -37,6 +37,16 @@ const envSchema = z.object({
   // (Recall create-bot field chat.on_bot_join; Zoom, Google Meet, Microsoft Teams only).
   MEETING_BOT_ANNOUNCE: z.enum(['true', 'false']).default('false').transform((v) => v === 'true'),
 
+  // Monthly meeting-bot allowance per user (calendar month, UTC). Kept as plain strings on purpose: a missing, zero, negative or
+  // non-numeric value falls back to the default instead of crashing the boot or disabling the cap (see services/botUsageCap.ts).
+  BOT_FREE_MONTHLY_CAP_MINUTES: z.string().optional(),
+  // Comma separated user UUIDs that are never capped (owner and test accounts).
+  BOT_CAP_EXEMPT_USER_IDS: z.string().optional(),
+  // Longest single bot session in minutes (ceiling for the per-session limit). Invalid/unset = default.
+  BOT_MAX_SESSION_MINUTES: z.string().optional(),
+  // 'off' stops the per-session limit being sent to Recall (kill switch); the monthly cap check is unaffected.
+  BOT_SESSION_LIMIT: z.string().optional(),
+
   // Account purge dry run. When 'true', DELETE /api/users/account only COUNTS what it would delete (storage objects,
   // Recall bots, Twilio recordings, rows) and deletes nothing. For verifying a deploy; leave unset in normal operation.
   ACCOUNT_PURGE_DRY_RUN: z.enum(['true', 'false']).default('false').transform((v) => v === 'true'),
@@ -110,6 +120,13 @@ const envSchema = z.object({
   // 'detect' = a meeting whose language is 'auto' uses Recall's own language detection (needs accuracy mode: live captions arrive
   // minutes late). Default (anything else) keeps English low-latency live captions for 'auto'. See LIVE_STT.md.
   RECALL_AUTO_LANGUAGE: z.string().default(''),
+
+  // Assistant tools over the caller's own meetings (routes/voiceTools.ts). Everything here is OFF by default and fails closed:
+  // VOICE_TOOLS_ENABLED must be 'true', VOICE_TOOLS_SECRET (signs action drafts) must be set, and the user must be listed in
+  // VOICE_TOOLS_USER_IDS (comma separated UUIDs, or '*' for everyone). When off the routes answer 404.
+  VOICE_TOOLS_ENABLED: z.string().default('false'),
+  VOICE_TOOLS_USER_IDS: z.string().optional(),
+  VOICE_TOOLS_SECRET: z.string().optional(),
 
   // Service URL (for internal worker callbacks)
   SERVICE_URL: z.string().optional(),
