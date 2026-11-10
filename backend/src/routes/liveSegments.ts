@@ -19,6 +19,7 @@ import { supabaseAdmin } from '../lib/supabase.js';
 import { queueInsightGeneration } from '../services/liveInsightsService.js';
 import { createRateLimiter } from '../lib/shareToken.js';
 import { parseSecretList, verifyLiveSegments, signLiveSegments } from '../lib/liveStt.js';
+import { loadVoiceAssistantConfig } from '../services/voiceAssistant/config.js';
 
 export { signLiveSegments };
 
@@ -121,7 +122,7 @@ export function liveSegmentsRouter(opts: { nowSec?: () => number } = {}): Router
       // Look up by live_stt_ref, not recall_bot_id: recall_bot_id is only stored after Recall answers the create call.
       const { data: botRun, error: botError } = await supabaseAdmin
         .from('bot_runs')
-        .select('id, meeting_id, user_id, live_stt_provider')
+        .select('id, meeting_id, user_id, live_stt_provider, recall_bot_id')
         .eq('live_stt_ref', body.ref)
         .maybeSingle();
       if (botError) {
@@ -155,7 +156,7 @@ export function liveSegmentsRouter(opts: { nowSec?: () => number } = {}): Router
       const { data: inserted, error: insertError } = await supabaseAdmin
         .from('live_transcripts')
         .upsert(rows, { onConflict: 'source_key', ignoreDuplicates: true })
-        .select('id');
+        .select('id, source_key');
       if (insertError) {
         console.error(`${TAG} insert failed`);
         return fail(res, 500, 'INTERNAL', 'Failed to store segments');
@@ -169,6 +170,20 @@ export function liveSegmentsRouter(opts: { nowSec?: () => number } = {}): Router
         } catch {
           console.error(`${TAG} failed to queue insight generation`);
         }
+      }
+
+      // In-meeting voice assistant, only when it is told to take its wake phrase from this stream. Newly stored segments only (a
+      // retried batch must not ask twice), never awaited (the assistant must not slow down or fail the sink), nothing logged.
+      const recallBotId = (botRun as { recall_bot_id?: string | null }).recall_bot_id;
+      if (insertedCount > 0 && recallBotId && loadVoiceAssistantConfig().wakeSource === 'live_stt') {
+        const stored = new Set((inserted ?? []).map((r: { source_key?: string }) => r.source_key));
+        const fresh = body.segments
+          .filter((s) => stored.has(`${ns}:${body.ref}:${s.key}`))
+          .sort((a, b) => a.seq - b.seq)
+          .map((s) => ({ text: s.segment_text, speakerName: s.speaker_name || null, isHost: s.is_host }));
+        void import('../services/voiceAssistant/manager.js')
+          .then((m) => m.getVoiceAssistantManager().handleLive(recallBotId, fresh))
+          .catch(() => console.error(`${TAG} voice assistant forward failed`));
       }
 
       console.log(`${TAG} ref=${body.ref.slice(0, 8)} shadow=${shadow} inserted=${insertedCount} duplicates=${rows.length - insertedCount}`);

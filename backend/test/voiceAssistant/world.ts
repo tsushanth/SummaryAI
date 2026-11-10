@@ -18,7 +18,7 @@ export function answerOf(text: string, extra: Partial<AgentResult> = {}): AgentR
   return { text, found: true, tools: ['get_live_meeting'], llmMs: 700, usd: 0.002, inputTokens: 1500, outputTokens: 40, ...extra };
 }
 
-export function makeWorld(env: Record<string, string> = {}, opts: { introPlayed?: boolean; answer?: SessionDeps['answer'] } = {}) {
+export function makeWorld(env: Record<string, string> = {}, opts: { introPlayed?: boolean; answer?: SessionDeps['answer']; hasLiveStream?: boolean; sleep?: SessionDeps['sleep'] } = {}) {
   let t = 1_800_000_000_000;
   const cfgEnv = { VOICE_ASSISTANT_MODE: 'all', ...env };
   const cfg = (): VoiceAssistantConfig => loadVoiceAssistantConfig(cfgEnv as NodeJS.ProcessEnv);
@@ -45,7 +45,7 @@ export function makeWorld(env: Record<string, string> = {}, opts: { introPlayed?
   };
   const deps: SessionDeps = {
     userId: 'user-A', meetingId: 'meeting-1', botName: 'Meeting Mind', cfg, now: () => t,
-    sleep: async (ms) => { t += ms; },
+    sleep: opts.sleep ?? (async (ms) => { t += ms; }),
     enabled: () => cfg().mode !== 'off' && !cfg().killed,
     isOwner: (s) => s.name === OWNER.name || s.email === OWNER.email,
     isOwnerEmailMatch: (s) => s.email === OWNER.email,
@@ -56,15 +56,21 @@ export function makeWorld(env: Record<string, string> = {}, opts: { introPlayed?
     stop: async () => { if (w.failStop) throw new Error('stop failed'); stops.push(t); },
     metrics,
     introPlayed: opts.introPlayed ?? false,
+    hasLiveStream: opts.hasLiveStream ?? false,
   };
   const session = new VoiceSession(deps);
   const say = async (speaker: { name: string | null; email?: string | null; isHost?: boolean }, text: string, partial = false) => {
     await new Promise((r) => setImmediate(r)); // let the cached fixed phrases (cue) resolve
     await session.onTranscript({ speaker, text, partial });
   };
+  /** One event of the live-stt (Soniox) stream. Same speaker shape as say(); always a final unless `partial`. */
+  const sayLive = async (speaker: { name: string | null; email?: string | null; isHost?: boolean }, text: string) => {
+    await new Promise((r) => setImmediate(r));
+    await session.onTranscript({ speaker, text, partial: false, source: 'live_stt' });
+  };
   const spokenTexts = () => plays.map((p) => p.b64.replace(/^(say|phrase):/, ''));
   const types = () => events.map((e) => e.type);
-  return Object.assign(w, { session, say, spokenTexts, types, deps, cfg });
+  return Object.assign(w, { session, say, sayLive, spokenTexts, types, deps, cfg });
 }
 
 /** n valid MPEG-1 Layer III frames, 128 kbps, 44.1 kHz (417 bytes each, 26.12 ms each). */

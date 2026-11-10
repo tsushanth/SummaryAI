@@ -8,7 +8,8 @@ import { supabaseEventStore, pushUsageToWorker, VoiceMetrics } from './metrics.j
 import { cachedPhrases, createSynthesizer } from './tts.js';
 import type { OwnerIdentity } from './wake.js';
 
-export interface BotContext { botRunId: string; meetingId: string; userId: string }
+/** `liveStt`: the bot run has a live-stt stream (bot_runs.live_stt_provider is soniox or shadow). */
+export interface BotContext { botRunId: string; meetingId: string; userId: string; liveStt?: boolean }
 
 
 export const getConfig = () => loadVoiceAssistantConfig();
@@ -18,9 +19,10 @@ export const synth = createSynthesizer(getConfig);
 export const phraseAudio = cachedPhrases(synth, getConfig);
 
 export async function lookupBotRun(recallBotId: string): Promise<BotContext | null> {
-  const { data, error } = await supabaseAdmin.from('bot_runs').select('id, meeting_id, user_id').eq('recall_bot_id', recallBotId).maybeSingle();
+  const { data, error } = await supabaseAdmin.from('bot_runs').select('id, meeting_id, user_id, live_stt_provider').eq('recall_bot_id', recallBotId).maybeSingle();
   if (error || !data) return null;
-  return { botRunId: (data as any).id, meetingId: (data as any).meeting_id, userId: (data as any).user_id };
+  const provider = (data as any).live_stt_provider;
+  return { botRunId: (data as any).id, meetingId: (data as any).meeting_id, userId: (data as any).user_id, liveStt: provider === 'soniox' || provider === 'shadow' };
 }
 
 export async function loadVoicePreference(userId: string): Promise<boolean | undefined> {

@@ -46,12 +46,16 @@ export interface SessionDeps {
   metrics: SessionMetrics;
   /** The bot plays INTRO_TEXT when it joins; its echo must not be mistaken for a participant. */
   introPlayed: boolean;
+  /** This bot run has a live-stt (Soniox) stream, so VOICE_ASSISTANT_WAKE_SOURCE=live_stt can apply to it. Default false. */
+  hasLiveStream?: boolean;
 }
 
 export interface TranscriptEvent {
   speaker: Speaker;
   text: string;
   partial: boolean;
+  /** Which stream produced the event. Default 'recall'. */
+  source?: 'recall' | 'live_stt';
 }
 
 interface Line { at: number; speaker: string; text: string }
@@ -63,6 +67,17 @@ const SLACK_MS = 500;
 const ASKER_GRACE_MS = 3000;
 const RAPID_FIRE_COUNT = 4;
 const RAPID_FIRE_WINDOW_MS = 15_000;
+/**
+ * Wake source = live_stt. Recall's low-latency stream trails the live-stt stream by several seconds, so a Recall event about the
+ * asker's own words can arrive after the answer has started: it is never a barge-in within this window of the question.
+ */
+const RECALL_LAG_MS = 15_000;
+/** Recall finals in a row, with no live-stt final in between, after which the live-stt stream is treated as down. */
+const STALL_AFTER = 3;
+/** A wake phrase seen on one stream is not acted on again when the other stream reports it within this window. */
+const CROSS_SOURCE_WAKE_MS = 15_000;
+/** live-stt splits one question into several finals; an unfinished question waits this long for the rest. */
+const COALESCE_MS = 1200;
 
 export class VoiceSession {
   private readonly d: SessionDeps;
@@ -72,7 +87,11 @@ export class VoiceSession {
   /** Who asked the current question and when: the asker finishing their own sentence is not a barge-in. */
   private asker: { name: string; at: number } | null = null;
   private playingUntil = 0;
-  private pending: { speaker: string; until: number } | null = null;
+  private pending: { speaker: string; until: number; prefix?: string } | null = null;
+  /** live-stt only: continuation segments of the question that has just started. */
+  private hold: { speaker: string; parts: string[] } | null = null;
+  private recallFinalsSinceLive = 0;
+  private lastWake: { source: 'recall' | 'live_stt'; at: number } | null = null;
   private questions = 0;
   private recent: Array<{ q: string; a: string }> = [];
   private spoken: Array<{ text: string; at: number }> = [];
@@ -135,41 +154,63 @@ export class VoiceSession {
       return;
     }
     if (this.disabled) return;
+    const source = ev.source ?? 'recall';
+    const liveMode = !!this.d.hasLiveStream && this.d.cfg().wakeSource === 'live_stt';
+    if (source === 'live_stt' && !liveMode) return;
     if (this.isBot(ev.speaker.name)) return; // the bot's own words, as Recall labels them
+
+    // wake source live_stt: a Recall final is a late duplicate of what the live-stt stream already delivered (it neither wakes nor
+    // asks nor interrupts, and is not counted again), unless the live-stt stream has gone quiet while Recall keeps hearing speech.
+    const demoted = liveMode && source === 'recall' && !ev.partial;
 
     // Echo guard: the bot's voice returns through the meeting audio and is transcribed like a participant.
     if (this.looksLikeEcho(text, now)) {
-      if (!ev.partial) this.d.metrics.record({ type: 'echo_suppressed', userId: this.d.userId, meetingId: this.d.meetingId });
+      if (!ev.partial && !demoted) this.d.metrics.record({ type: 'echo_suppressed', userId: this.d.userId, meetingId: this.d.meetingId });
       return;
     }
+    if (liveMode && source === 'live_stt') this.recallFinalsSinceLive = 0;
+    if (demoted && ++this.recallFinalsSinceLive < STALL_AFTER) return;
+    // From here: every event in the default mode, live-stt finals, Recall partials (barge-in signals only) and, when the live-stt
+    // stream is down, Recall finals as the fallback.
+    const lagging = liveMode && source === 'recall' && ev.partial;
 
     const wake = detectWake(text);
     const nWords = wordCount(text);
     // Barge-in: a stop word, someone talking over the bot (3+ words), or a new wake phrase while it is thinking.
-    const askerContinuing = !!this.asker && this.asker.name === (ev.speaker.name ?? '') && now - this.asker.at < ASKER_GRACE_MS;
-    if ((speaking || this.busy) && (STOP_RE.test(text) || (speaking && nWords >= 3 && !askerContinuing) || (!ev.partial && this.busy && !!wake))) {
+    const sameAsker = !!this.asker && (this.asker.name === (ev.speaker.name ?? '') || (lagging && this.asker.name === ''));
+    const askerContinuing = sameAsker && now - this.asker!.at < (lagging ? RECALL_LAG_MS : ASKER_GRACE_MS);
+    const crossSourceWake = !ev.partial && !!wake && !!this.lastWake && this.lastWake.source !== source && now - this.lastWake.at < CROSS_SOURCE_WAKE_MS;
+    if (crossSourceWake) return;
+    if ((speaking || this.busy) && ((STOP_RE.test(text) && !(lagging && askerContinuing)) || (speaking && nWords >= 3 && !askerContinuing) || (!ev.partial && this.busy && !!wake))) {
       await this.bargeIn(speaking ? 'speaking' : 'thinking', speaking);
     }
     if (ev.partial) return;
 
     this.lines.push({ at: now, speaker: ev.speaker.name || 'Someone', text });
     if (this.lines.length > 400) this.lines.splice(0, this.lines.length - 400);
-    if (this.busy) return;
+    const speakerKey = ev.speaker.name ?? '';
+    if (this.busy) {
+      // live-stt only: the rest of a question that was split into several finals.
+      if (source === 'live_stt' && this.hold && this.hold.speaker === speakerKey && !wake) this.hold.parts.push(text);
+      return;
+    }
 
     if (isStopRequest(text) && !wake) return; // a bare "stop" is not a question
-    const speakerKey = ev.speaker.name ?? '';
     if (this.pending && this.pending.speaker === speakerKey && now < this.pending.until && !wake) {
+      const prefix = this.pending.prefix;
       this.pending = null;
-      this.begin(text, ev.speaker);
+      this.begin(prefix ? `${prefix} ${text}` : text, ev.speaker, source);
       return;
     }
     if (!wake) return;
 
     this.d.metrics.record({ type: 'wake', userId: this.d.userId, meetingId: this.d.meetingId });
+    this.lastWake = { source, at: now };
     const q = wake.question;
     if (q && isStopRequest(q)) return; // "Meeting Mind, never mind"
-    if (wordCount(q) >= 3) this.begin(q, ev.speaker);
-    else this.pending = { speaker: speakerKey, until: now + PENDING_WINDOW_MS }; // wake phrase alone: the question comes next
+    if (wordCount(q) >= 3) this.begin(q, ev.speaker, source);
+    // wake phrase alone (or one or two words of it): the question comes next. Only the live-stt path keeps the first words.
+    else this.pending = { speaker: speakerKey, until: now + PENDING_WINDOW_MS, prefix: source === 'live_stt' && q ? q : undefined };
   }
 
   private async bargeIn(phase: 'speaking' | 'thinking', wasSpeaking: boolean): Promise<void> {
@@ -183,22 +224,34 @@ export class VoiceSession {
     }
   }
 
-  private begin(question: string, speaker: Speaker): void {
+  private begin(question: string, speaker: Speaker, source: 'recall' | 'live_stt' = 'recall'): void {
     // Claim the session synchronously so a second wake phrase arriving while caps are being checked cannot start a second answer.
     this.busy = true;
     this.asker = { name: speaker.name ?? '', at: this.d.now() };
     const g = ++this.gen;
+    // live-stt: a question that does not end in punctuation may still be continued by the next segment of the same speaker.
+    const hold = source === 'live_stt' && !/[?.!]["')\]]*\s*$/.test(question) ? { speaker: speaker.name ?? '', parts: [] as string[] } : null;
+    this.hold = hold;
     // Not serialized: an older answer that is still thinking must never hold up a newer question (it is dropped when it returns).
-    const p: Promise<void> = this.handleQuestion(question.slice(0, 300), speaker, g)
+    const p: Promise<void> = this.handleQuestion(question, speaker, g, hold)
       .catch(() => undefined)
-      .finally(() => { if (g === this.gen) this.busy = false; this.active.delete(p); });
+      .finally(() => { if (g === this.gen) this.busy = false; if (this.hold === hold) this.hold = null; this.active.delete(p); });
     this.active.add(p);
   }
 
-  private async handleQuestion(question: string, speaker: Speaker, g: number): Promise<void> {
+  private async handleQuestion(first: string, speaker: Speaker, g: number, hold: { parts: string[] } | null): Promise<void> {
     const { d } = this;
     const cfg = d.cfg();
     const base = { userId: d.userId, meetingId: d.meetingId };
+    const arrived = d.now();
+    let question = first;
+    if (hold) {
+      await d.sleep(COALESCE_MS);
+      if (g !== this.gen) return; // interrupted while waiting for the rest of the question
+      question = [first, ...hold.parts].join(' ');
+      if (this.hold === hold) this.hold = null;
+    }
+    question = question.slice(0, 300);
     let now = d.now();
 
     // Caps. The global spend breaker and the per-user day cap are persisted through the metrics store (hydrate).
@@ -215,7 +268,7 @@ export class VoiceSession {
     if (g !== this.gen) return; // interrupted while the caps were being checked
     this.questions++;
     d.metrics.record({ type: 'question', ...base });
-    const t0 = now;
+    const t0 = arrived;
 
     const allowHistory = cfg.historyPolicy === 'off' ? false
       : cfg.historyPolicy === 'anyone' ? true
