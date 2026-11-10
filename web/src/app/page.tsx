@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { RibbonMark } from '@/components/ui/ribbon-mark';
 import {
@@ -93,6 +94,10 @@ function Shot({
     </picture>
   );
 }
+
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
 
 export default function LandingPage() {
   return (
@@ -309,6 +314,7 @@ export default function LandingPage() {
             <a href="#pricing" className="rounded-sm hover:text-foreground">Free</a>
             <Link href="/privacy" className="rounded-sm hover:text-foreground">Privacy</Link>
             <Link href="/terms" className="rounded-sm hover:text-foreground">Terms</Link>
+            <Link href="/delete-account" className="rounded-sm hover:text-foreground">Delete account</Link>
           </div>
           <p>&copy; {new Date().getFullYear()} MeetingMind</p>
         </div>
