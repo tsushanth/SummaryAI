@@ -168,6 +168,12 @@ describe('checkBotMonthlyCap', () => {
       db.seed('bot_runs', { user_id: U, status: 'recording', joined_at: new Date(NOW.getTime() - minutes(300)).toISOString(), left_at: null });
       expect((await cap.checkBotMonthlyCap(U, NOW)).usedMinutes).toBe(0);
     });
+    it('runSeconds is the one shared computation: a stale in-call run is free for the allowance, the ceiling for spend estimates', () => {
+      const row = { status: 'recording', joined_at: new Date(NOW.getTime() - minutes(600)).toISOString(), left_at: null, duration_seconds: null };
+      expect(cap.runSeconds(row, NOW, 240)).toBe(0);
+      expect(cap.runSeconds(row, NOW, 240, 'ceiling')).toBe(240 * 60);
+      expect(cap.runSeconds({ ...row, joined_at: new Date(NOW.getTime() - minutes(30)).toISOString() }, NOW, 240, 'ceiling')).toBe(30 * 60);
+    });
     it('joined, no left_at, finished: falls back to duration_seconds', async () => {
       db.seed('bot_runs', { user_id: U, status: 'failed', joined_at: iso('2026-11-02T10:00:00Z'), left_at: null, duration_seconds: 20 * 60 });
       expect((await cap.checkBotMonthlyCap(U, NOW)).usedMinutes).toBe(20);

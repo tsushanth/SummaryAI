@@ -144,8 +144,9 @@ Provider choice is made once per bot, when it is created (a running bot keeps it
 
 Guardrail cost model (estimates from `bot_runs`, not an invoice; vendor list prices as of 2026-11): 0.50 USD per bot hour, plus 0.12 Soniox, plus 0.15 when Recall's
 transcript is on (Recall path, shadow, hot standby). Hours = joined..left, or elapsed (capped 6 h) for a bot still in the call, else
-`duration_seconds`. Lookup failures fail open (bot allowed, alert `GUARD_LOOKUP_FAILED`). They overlap with the monthly allowance in
-PR #61 (`BOT_FREE_MONTHLY_CAP_MINUTES`, default ON there); unify the usage computation after it merges. A refusal inside
+`duration_seconds`. Lookup failures fail open (bot allowed, alert `GUARD_LOOKUP_FAILED`). They overlap with the monthly allowance
+(`BOT_FREE_MONTHLY_CAP_MINUTES`, on by default, `services/botUsageCap.ts`); both use the same run-time computation (`runSeconds`), the
+guardrails charging a stale in-call run the 6 h ceiling and the allowance charging it nothing. A refusal inside
 `POST /api/meetings/join` keeps its code (the generic "failed to dispatch" is only for other errors); the worker path treats it like
 any bot creation failure.
 

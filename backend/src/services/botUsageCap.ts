@@ -76,8 +76,18 @@ export interface BotRunUsageRow {
 
 const IN_CALL_STATUSES = ['in_call', 'recording'];
 
-/** Seconds of bot time one run is charged for. See the file header for the rules. */
-export function runSeconds(row: BotRunUsageRow, now: Date, ceilingMinutes: number): number {
+/**
+ * Seconds of bot time one run is charged for. See the file header for the rules. This is the single usage computation: the
+ * live-stt spend/hours guardrails (lib/liveSttAdmission.ts) call it too.
+ * `staleCharge` decides what an in-call run older than the ceiling (a lost webhook) costs: 'none' (default, used for the user's
+ * allowance: never bill a user for our missing webhook) or 'ceiling' (spend estimates: assume the worst, charge the ceiling).
+ */
+export function runSeconds(
+  row: BotRunUsageRow,
+  now: Date,
+  ceilingMinutes: number,
+  staleCharge: 'none' | 'ceiling' = 'none'
+): number {
   if (!row.joined_at) return 0;
   const joined = Date.parse(row.joined_at);
   if (!Number.isFinite(joined)) return 0;
@@ -90,6 +100,7 @@ export function runSeconds(row: BotRunUsageRow, now: Date, ceilingMinutes: numbe
   if (row.status && IN_CALL_STATUSES.includes(row.status)) {
     const elapsed = (now.getTime() - joined) / 1000;
     if (elapsed >= 0 && elapsed <= ceilingMinutes * 60) return elapsed;
+    if (elapsed > ceilingMinutes * 60 && staleCharge === 'ceiling') return ceilingMinutes * 60;
   }
   return fallback;
 }
