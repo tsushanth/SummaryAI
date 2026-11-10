@@ -1,13 +1,11 @@
 'use client'
 
 import { useEffect } from 'react'
+import { isIgnorableWebFailure } from '@/lib/failureNoise'
 
 const ENDPOINT = 'https://app-failure-reporter.t-sushanth.workers.dev/v1/report'
 const KEY = 'afr_a60112f598c3f7206a8ecb8866dc22c3'
 const MAX_PER_PAGE_LOAD = 10
-
-// Noise that is not an app failure: cross-origin opaque errors, browser quirks, offline users, extensions.
-const IGNORE = [/^Script error\.?$/i, /ResizeObserver loop/i, /Failed to fetch/i, /Load failed/i, /NetworkError/i, /AbortError/i, /chrome-extension:|moz-extension:|safari-extension:/i]
 
 let sent = 0
 
@@ -17,7 +15,7 @@ export function reportWebFailure(flow: string, err: unknown, extra: Record<strin
     if (/^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)) return
     const e = err instanceof Error ? err : new Error(typeof err === 'string' ? err : 'non-error rejection')
     const text = `${e.message}\n${e.stack ?? ''}`
-    if (IGNORE.some((re) => re.test(text))) return
+    if (isIgnorableWebFailure(text, navigator.userAgent)) return
     sent++
     fetch(ENDPOINT, {
       method: 'POST',
