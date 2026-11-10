@@ -4,6 +4,7 @@ import android.app.Application
 import com.kreativekoala.summaryai.service.FacebookSDKHelper
 import com.kreativekoala.summaryai.service.FirebaseAnalyticsHelper
 import com.kreativekoala.summaryai.service.TikTokHelper
+import com.kreativekoala.summaryai.service.activation.ActivationBootstrap
 import com.kreativekoala.paywallkit.manager.ExperimentManager
 import com.kreativekoala.paywallkit.manager.PaywallManager
 import com.kreativekoala.paywallkit.manager.PromoCodeManager
@@ -28,6 +29,9 @@ class MeetingMindApplication : Application() {
 
         // Initialize Firebase Analytics for Google Ads conversion tracking
         FirebaseAnalyticsHelper.initialize(this)
+
+        // Activation funnel events + Play install referrer (first open only).
+        ActivationBootstrap.init(this)
 
         // Initialize TikTok Events SDK for install attribution
         TikTokHelper.initialize(this)

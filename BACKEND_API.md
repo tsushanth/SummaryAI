@@ -1561,3 +1561,16 @@ All routes except `GET /api/public/shares/:token` require `Authorization: Bearer
 - Rate limiting is **per process, in memory**: 60 req/min per client IP plus 300 req/min per token. With N Fly machines the effective cap is N times that, and counters reset on deploy. The 256-bit token space, not the limiter, is what prevents enumeration. A shared store (Supabase/Redis) is not implemented.
 - The web page fetches this API server-side, so by default every web viewer shares the web machine's IP bucket. To bucket by real viewer IP, set the same random `SHARE_PROXY_SECRET` on both `meeting-mind-web` and `summary-ai-backend`; the page then forwards `X-Share-Client-IP` and `X-Share-Proxy-Secret`, and the API honors them only when the secret matches. Without it behavior is unchanged.
 - A recording can have at most 50 unrevoked links. Deleting a recording cascades and removes its links.
+
+## In-meeting voice assistant
+
+Full description, flags, metrics, rollback and live-test checklist: `docs/VOICE_ASSISTANT.md`.
+
+| Method | Path | Auth | Notes |
+|--------|------|------|-------|
+| POST | `/webhooks/recall-assistant?vt=<token>` | URL token (HMAC of `INTERNAL_SECRET`) or Recall signature; 401 otherwise | Recall real-time `transcript.data` / `transcript.partial_data` for bots created with the assistant endpoint |
+| GET | `/internal/voice-assistant/rollup?days=7` | `x-internal-secret` (`INTERNAL_SECRET`, fails closed) | daily roll-up: wakes, questions, answered, no-answer, failures by type, barge-ins, p50/p95 latency, cost estimate |
+| GET | `/api/voice-assistant` | user | `{ enabled, reason, preference, mode }` effective state for the caller |
+| PUT | `/api/voice-assistant` | user | body `{ enabled: boolean }`, writes `profiles.preferences.voice_assistant` (`false` wins in every mode) |
+
+Env vars: `VOICE_ASSISTANT_MODE` (`off` default, `opt_in`, `all`), `VOICE_ASSISTANT_KILL`, and the caps listed in the docs file.

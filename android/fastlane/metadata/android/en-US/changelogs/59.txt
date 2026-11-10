@@ -1,0 +1,1 @@
+Fixes a sign-in session problem: the app now stays signed in and keeps working after an hour of use instead of showing errors until it was reopened.

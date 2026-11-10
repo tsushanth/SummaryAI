@@ -1,0 +1,23 @@
+{
+  "metadata": { "request_id": "fixture-0001", "duration": 21.84, "channels": 1, "models": ["nova-2"] },
+  "results": {
+    "channels": [
+      {
+        "detected_language": "es",
+        "language_confidence": 0.97,
+        "alternatives": [
+          {
+            "transcript": "Hola a todos, gracias por venir. Vamos a revisar los objetivos del trimestre. Perfecto, yo empiezo con las ventas. Las cifras subieron un diez por ciento.",
+            "confidence": 0.98,
+            "words": []
+          }
+        ]
+      }
+    ],
+    "utterances": [
+      { "start": 0.08, "end": 5.2, "confidence": 0.97, "channel": 0, "transcript": "Hola a todos, gracias por venir. Vamos a revisar los objetivos del trimestre.", "speaker": 0, "id": "u-1" },
+      { "start": 6.0, "end": 10.4, "confidence": 0.95, "channel": 0, "transcript": "Perfecto, yo empiezo con las ventas.", "speaker": 1, "id": "u-2" },
+      { "start": 11.1, "end": 21.8, "confidence": 0, "channel": 0, "transcript": "Las cifras subieron un diez por ciento.", "speaker": 1, "id": "u-3" }
+    ]
+  }
+}

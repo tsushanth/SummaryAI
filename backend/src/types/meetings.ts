@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod';
+import { TranscriptionLanguageSchema } from '../lib/transcriptionLanguage.js';
 
 // ============================================
 // Enums/Types
@@ -109,6 +110,8 @@ export interface Meeting {
   status: MeetingStatus;
   recording_id: string | null;
   error_message: string | null;
+  /** Migration 027. NULL / absent = auto. */
+  transcription_language?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -171,12 +174,15 @@ export const CreateManualMeetingSchema = z.object({
   scheduled_end: z.string().datetime().optional(),
   auto_join: z.boolean().default(false),
   join_offset_minutes: z.number().int().min(0).max(15).default(1),
+  /** 'auto' | allow-listed code (lib/transcriptionLanguage.ts). Absent = the user's default, else auto. */
+  transcription_language: TranscriptionLanguageSchema.optional(),
 });
 
 export const UpdateMeetingSchema = z.object({
   title: z.string().min(1).max(500).optional(),
   auto_join: z.boolean().optional(),
   join_offset_minutes: z.number().int().min(0).max(15).optional(),
+  transcription_language: TranscriptionLanguageSchema.optional(),
 });
 
 export const ListMeetingsSchema = z.object({
@@ -201,6 +207,19 @@ export const InstantJoinSchema = z.object({
   join_url: z.string().url(),
   bot_name: z.string().min(1).max(100).optional(),
   title: z.string().min(1).max(500).optional(),
+  transcription_language: TranscriptionLanguageSchema.optional(),
+});
+
+export const JoinNowSchema = z.object({
+  transcription_language: TranscriptionLanguageSchema.optional(),
+});
+
+export const LiveLanguageSchema = z.object({
+  language: TranscriptionLanguageSchema,
+});
+
+export const DefaultLanguageSchema = z.object({
+  language: TranscriptionLanguageSchema,
 });
 
 // ============================================
@@ -259,6 +278,24 @@ export interface MeetingDetailResponse {
   bot_run: BotRunResponse | null;
   error_message: string | null;
   created_at: string;
+  /** 'auto' or the language chosen for this meeting. */
+  transcription_language: string;
+  /** What the live transcript is doing right now, and whether POST /:id/live-language can change it. */
+  live_language: LiveLanguageState;
+  /** Soniox-primary runs that had a stream failure only. 'unavailable' = the live transcript stopped (the final transcript still
+   *  comes after the meeting); 'recall_fallback' = it continues from Recall's transcript from switched_at_sec on. */
+  live_transcript?: { status: 'ok' | 'unavailable' | 'recall_fallback'; reason: string; switched_at_sec: number };
+}
+
+export interface LiveLanguageState {
+  /** Language the live transcript was started with / was last switched to ('auto' or a code). */
+  language: string;
+  /** True only while a bot is in the call AND the live provider can switch languages mid-meeting (soniox). */
+  can_change: boolean;
+  /** Why not, for the UI: 'not_live' | 'provider_fixed'. null when can_change. */
+  reason: 'not_live' | 'provider_fixed' | null;
+  /** 'recall' | 'soniox' | 'shadow'. */
+  provider: string;
 }
 
 export interface CalendarConnectResponse {
@@ -283,8 +320,12 @@ export interface SharingPreferencesResponse {
 
 export interface RecallBotCreateRequest {
   meeting_url: string;
+  /** Owner of the meeting. Only used to decide LIVE_STT_SHADOW_USER_IDS membership; never sent to Recall. */
+  user_id?: string;
   bot_name?: string;
   join_at?: string; // ISO 8601
+  /** 'auto' | allow-listed code (lib/transcriptionLanguage.ts). Absent = auto. */
+  transcription_language?: string;
   transcription_options?: {
     provider?: 'recall' | 'assembly_ai' | 'deepgram';
   };
@@ -293,6 +334,8 @@ export interface RecallBotCreateRequest {
     waiting_room_timeout?: number;
     noone_joined_timeout?: number;
     everyone_left_timeout?: number;
+    /** Seconds of recording after which Recall removes the bot (maximum session length). Absent = no limit. */
+    in_call_recording_timeout?: number;
   };
 }
 
@@ -308,6 +351,8 @@ export interface RecallBotResponse {
   video_url?: string;
   audio_url?: string;
   transcript?: RecallTranscript[];
+  /** Set by RecallService.createBot (not by Recall) when the live-stt path is used. */
+  live_stt?: { ref: string; provider: 'soniox' | 'shadow' };
 }
 
 export interface RecallTranscript {

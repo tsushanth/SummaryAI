@@ -19,7 +19,9 @@ import { startLoopWatchdog, reportLoopInitFailure } from './lib/loopMonitor.js';
 import { startPipelineInvariantLoop } from './services/pipelineInvariants.js';
 import { testConnection } from './lib/supabase.js';
 import { flushLlmUsage } from './lib/llm.js';
+import { requestTiming, startRuntimeMonitor } from './lib/requestTiming.js';
 import routes from './routes/index.js';
+import { liveSegmentsBodyParser } from './routes/liveSegments.js';
 
 // Create Express app
 const app = express();
@@ -54,12 +56,17 @@ app.use(cors({
 // Public share tokens live in the URL path; never write them to access logs.
 morgan.token('url', (req) => redactShareToken((req as Request).originalUrl || req.url || ''));
 app.use(morgan(config.NODE_ENV === 'production' ? 'combined' : 'dev'));
+// Logs slow requests and connections closed before a response (what a Fly proxy 504 looks like from inside the app).
+app.use(requestTiming());
 
 // Body parsing
 // IMPORTANT: Stripe webhooks must receive raw body for signature verification
 // This must come BEFORE express.json() middleware
 app.use('/v1/webhooks/stripe', express.raw({ type: 'application/json' }));
 app.use('/webhooks/stripe', express.raw({ type: 'application/json' }));
+
+// live-stt segment sink: signed over the exact bytes, 512 KB cap. Must come BEFORE express.json(). Mounted at the root and under the API prefix.
+app.use(['/internal/live-segments', `/${config.API_VERSION}/internal/live-segments`], liveSegmentsBodyParser);
 
 // Recall webhooks are signed over the exact bytes sent, so keep them next to the parsed body (req.rawBody) for those routes only.
 app.use(express.json({
@@ -132,6 +139,12 @@ async function startServer(): Promise<void> {
   app.listen(config.PORT, () => {
     console.log(`✅ Server running on port ${config.PORT}`);
     console.log(`📍 API available at http://localhost:${config.PORT}/${config.API_VERSION}`);
+    import('./services/voiceAssistant/config.js').then((m) => {
+      const c = m.loadVoiceAssistantConfig();
+      console.log(`[VoiceAssistant] mode=${c.mode} killed=${c.killed} (docs/VOICE_ASSISTANT.md)`);
+    }).catch(() => undefined);
+    // Rollup line for the live transcription counters (logs only when something changed; see LIVE_STT.md).
+    import('./lib/liveSttMetrics.js').then((m) => m.startLiveSttMetricsLog()).catch(() => undefined);
     // Local testing against a real database must not start the recovery loops (they act on real users' meetings and bots).
     if (process.env.DISABLE_BACKGROUND_LOOPS === '1') {
       console.log('[startup] DISABLE_BACKGROUND_LOOPS=1: coaching recovery, stuck-meeting and bot reconcilers not started');
@@ -141,6 +154,11 @@ async function startServer(): Promise<void> {
     // process last died (e.g. previous deploy / Fly machine restart).
     import('./services/coachingService.js').then(m => m.recoverActiveSessions())
       .catch(e => console.error('[Coaching] recovery failed:', e));
+    startRuntimeMonitor();
+    // Soniox stream watchdog: only when Soniox can be selected at all (LIVE_STT_PROVIDER is soniox or auto). Default: not started.
+    if (['soniox', 'auto'].includes(config.LIVE_STT_PROVIDER.trim().toLowerCase())) {
+      import('./lib/liveSttFallback.js').then((m) => m.startLiveSttWatchdogLoop()).catch((e) => console.error('[LiveStt] watchdog init failed:', e));
+    }
     startLoopWatchdog();
     startPipelineInvariantLoop();
     // Backstop for the Recall bot.status_change webhook subscription gap:
@@ -188,6 +206,11 @@ process.on('SIGTERM', () => {
   console.log('SIGTERM received. Shutting down gracefully...');
   // Send pending Claude usage rows first (capped at 2.5 s), then exit exactly as before.
   void flushLlmUsage(2500).finally(() => process.exit(0));
+});
+
+// Voice assistant: push the day's gauges once more on the way out (best effort; the main handler above still exits).
+process.on('SIGTERM', () => {
+  void import('./services/voiceAssistant/runtime.js').then((m) => m.voiceMetrics.flush()).catch(() => undefined);
 });
 
 // Start the server

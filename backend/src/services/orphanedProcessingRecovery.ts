@@ -17,8 +17,13 @@
  *     machine cannot double-process;
  *   - at most MAX_ORPHANS_PER_PASS orphans per pass, and at most ONE re-trigger per pass
  *     (triggerProcessing returns immediately and the job runs in the background, so a second
- *     retry would run concurrently with the first); no retry while any job is active in this process;
- *   - a recording whose job is active in this process is never touched.
+ *     retry would run concurrently with the first);
+ *   - a recording whose job is active in this process is never touched;
+ *   - a retry is deferred only for a memory reason, never merely because SOME job is running: the finalize
+ *     path buffers whole recordings (fly.toml: 2 GB machine), so we allow at most MAX_CONCURRENT_RETRIES
+ *     recovery-started retries in flight (1) and no retry while MAX_ACTIVE_JOBS_FOR_RETRY (3) or more jobs of any
+ *     kind are active. Before this, `active.size > 0` deferred every retry whenever the process was continuously
+ *     busy, so genuine orphans aged past the 3 h STUCK_RECORDINGS invariant and raised pipeline_invariant.
  */
 
 import { supabaseAdmin } from '../lib/supabase.js';
@@ -31,12 +36,19 @@ export const ORPHAN_SCAN_INTERVAL_MS = 5 * 60 * 1000;   // 5 min
 export const ORPHAN_MIN_AGE_MS       = 45 * 60 * 1000;  // legit processing takes minutes, even for multi-hour audio
 export const ORPHAN_MAX_RETRY_AGE_MS = 24 * 60 * 60 * 1000;
 export const MAX_ORPHANS_PER_PASS    = 2;
+/** Recovery-started retries allowed to run at once in this process (each buffers a whole recording in memory). */
+export const MAX_CONCURRENT_RETRIES  = 1;
+/** Retries wait while this many jobs (any kind) are already active, to protect the 2 GB machine. */
+export const MAX_ACTIVE_JOBS_FOR_RETRY = 3;
 export const RETRY_MARKER_PREFIX     = 'RECOVERY_RETRY_';
 export const RETRY_MARKER            = `${RETRY_MARKER_PREFIX}1`;
 export const INTERRUPTED_CODE        = 'PROCESSING_INTERRUPTED';
 export const INTERRUPTED_MESSAGE     = 'Processing was interrupted by a server restart. Tap retry to process it again.';
 const ORPHAN_STATUSES = ['transcribing', 'summarizing', 'transcribed', 'uploaded'];
 const TAG = '[OrphanRecovery]';
+
+// Recordings this mechanism re-triggered; pruned against the live active set on every pass.
+const retriesInFlight = new Set<string>();
 
 interface OrphanRow {
   id: string;
@@ -71,6 +83,7 @@ export async function recoverOrphanedProcessing(now: number = Date.now()): Promi
   if (!data?.length) return;
 
   const active = getActiveProcessingIds();
+  for (const id of retriesInFlight) if (!active.has(id)) retriesInFlight.delete(id);
   let handled = 0;
 
   for (const r of data as OrphanRow[]) {
@@ -89,9 +102,10 @@ export async function recoverOrphanedProcessing(now: number = Date.now()): Promi
 
     try {
       if (canRetry) {
-        // One re-trigger per pass, and never alongside another job in this process.
-        if (active.size > 0) {
-          console.log(`${TAG} ${tag} decision=defer_retry_other_job_active`);
+        // One re-trigger per pass. This recording itself is not active (checked above); other unrelated jobs
+        // do not block it, only the memory caps do.
+        if (retriesInFlight.size >= MAX_CONCURRENT_RETRIES || active.size >= MAX_ACTIVE_JOBS_FOR_RETRY) {
+          console.log(`${TAG} ${tag} decision=defer_retry_capacity retries_in_flight=${retriesInFlight.size} active=${active.size}`);
           continue;
         }
         handled++;
@@ -105,7 +119,13 @@ export async function recoverOrphanedProcessing(now: number = Date.now()): Promi
         await supabaseAdmin.from('summaries').delete().eq('recording_id', r.id);
         console.log(`${TAG} ${tag} decision=retry marker=${RETRY_MARKER}`);
         reportRecordingRetry(meta(r));
-        await triggerProcessing(r.id, r.user_id);
+        retriesInFlight.add(r.id);
+        try {
+          await triggerProcessing(r.id, r.user_id);
+        } catch (e) {
+          retriesInFlight.delete(r.id);
+          throw e;
+        }
         break; // one re-trigger per pass
       }
 

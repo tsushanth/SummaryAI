@@ -128,9 +128,10 @@ describe('source guard', () => {
     const expected: Record<string, string[]> = {
       'services/processingService.ts': ['pdf_extract', 'summary_chunk', 'summary_merge', 'summary'],
       'services/llmService.ts': ['qa'],
-      'services/intelligenceService.ts': ['intelligence'],
+      'services/intelligenceService.ts': ['intelligence', 'voice_debrief'],
       'services/coachingService.ts': ['coaching'],
       'services/liveInsightsService.ts': ['live_insights', 'live_insights', 'live_insights', 'live_insights'],
+      'services/voiceAssistant/agent.ts': ['voice_assistant'],
     };
     const seen = new Set<string>();
     for (const file of walk(root)) {

@@ -8,14 +8,17 @@ import { config } from '../config/index.js';
 import { v4 as uuidv4 } from 'uuid';
 import Anthropic from '@anthropic-ai/sdk';
 import { dispatchRecordingCompleted } from './integrationsService.js';
+import { storeMeasuredDuration } from './recordingDuration.js';
 import { instrumentAnthropic, withFeature } from '../lib/llm.js';
 import { normalizeActionItems, type ParsedSummary } from './summaryService.js';
 import { generateSummary, type CompleteFn } from './summaryGeneration.js';
 import { resolveSummaryTemplate } from './summaryTemplates.js';
 import { reportRecordingFailure } from '../lib/recordingFailure.js';
-import { reportAlert, reportProviderFailure, reportProviderHttpFailure } from '../lib/alerts.js';
+import { reportAlert } from '../lib/alerts.js';
 import { getRecordingLimits } from '../config/recordingLimits.js';
 import { evaluateSummaryEligibility, countSpeechUnits } from './shortRecordingGuard.js';
+import { languageHintForRecording } from './meetingLanguage.js';
+import { transcribeAudio, isSttConfigured, getSttMode, type NormalizedTranscript, type TranscriptSegment } from './stt/index.js';
 
 export interface ProcessingJob {
   id: string;
@@ -25,25 +28,8 @@ export interface ProcessingJob {
   created_at: Date;
 }
 
-interface TranscriptSegment {
-  id: string;
-  speaker_label: string;
-  speaker_index: number;
-  text: string;
-  start_time: number;
-  end_time: number;
-  confidence: number;
-}
-
-interface TranscriptionResult {
-  segments: TranscriptSegment[];
-  fullText: string;
-  wordCount: number;
-  speakerCount: number;
-  detectedLanguage: string;
-  /** Audio length as measured by the transcription provider; absent for PDFs and when the provider omits it. */
-  durationSeconds?: number | null;
-}
+/** The shape every STT provider returns (see ./stt/types.ts). */
+type TranscriptionResult = NormalizedTranscript;
 
 // Recordings whose processing job is running inside THIS Node process right now.
 // The orphan-recovery pass uses it to avoid touching a job that is merely slow.
@@ -131,17 +117,38 @@ async function processRecordingAsync(
 
     // Step 3: Process based on file type
     let transcript: TranscriptionResult;
+    let sttProvider = 'mock';
+    let sttModel = 'mock';
+    // Length measured by the real provider (never the mock's made-up one, never a document's).
+    let measuredSeconds: number | null = null;
 
     if (isPdf) {
       // Extract text from PDF
       transcript = await extractTextFromPdf(fileData);
+      // Legacy label, kept as-is so this refactor changes no stored values (nothing reads it).
+      if (config.DEEPGRAM_API_KEY) { sttProvider = 'deepgram'; sttModel = 'nova-2'; }
       console.log(`[Processing] ${jobId}: PDF text extraction complete (${transcript.wordCount} words)`);
-    } else if (config.DEEPGRAM_API_KEY) {
-      transcript = await transcribeWithDeepgram(fileData, recording.file_path);
+    } else if (isSttConfigured()) {
+      // STT_PROVIDER=deepgram (default) | soniox | readaloud | shadow, see ./stt/index.ts.
+      // Language the user chose for the meeting this recording came from (none for uploads and for 'auto').
+      const languageHint = await languageHintForRecording(recording);
+      // userId: the recording owner (shadow comparison is opt-in per user). durationHintSeconds: lets a candidate with a length limit decline.
+      const knownSeconds = Number(recording.duration_seconds);
+      const stt = await transcribeAudio(fileData, recording.file_path, {
+        recordingId,
+        userId: recording.user_id ?? userId,
+        ...(Number.isFinite(knownSeconds) && knownSeconds > 0 ? { durationHintSeconds: knownSeconds } : {}),
+        ...(languageHint ? { languageHints: [languageHint] } : {}),
+      });
+      transcript = stt.transcript;
+      sttProvider = stt.provider;
+      sttModel = stt.model;
+      measuredSeconds = transcript.durationSeconds ?? null;
     } else {
-      console.warn(`[Processing] ${jobId}: No Deepgram API key, using mock transcription`);
+      const soniox = getSttMode() === 'soniox';
+      console.warn(`[Processing] ${jobId}: No ${soniox ? 'speech-to-text' : 'Deepgram'} API key, using mock transcription`);
       // A real user's recording would get a FAKE transcript and a 'completed' status.
-      if (process.env.NODE_ENV === 'production') reportAlert('provider_unavailable', 'DEEPGRAM_KEY_MISSING', { provider: 'deepgram' });
+      if (process.env.NODE_ENV === 'production') reportAlert('provider_unavailable', soniox ? 'STT_KEY_MISSING' : 'DEEPGRAM_KEY_MISSING', { provider: soniox ? 'soniox' : 'deepgram' });
       transcript = createMockTranscript(recording.duration_seconds || 60);
     }
 
@@ -158,13 +165,17 @@ async function processRecordingAsync(
         word_count: transcript.wordCount,
         speaker_count: transcript.speakerCount,
         language: transcript.detectedLanguage,
-        transcription_provider: config.DEEPGRAM_API_KEY ? 'deepgram' : 'mock',
-        transcription_model: config.DEEPGRAM_API_KEY ? 'nova-2' : 'mock',
+        transcription_provider: sttProvider,
+        transcription_model: sttModel,
       });
 
     if (transcriptError) {
       throw new Error(`Failed to store transcript: ${transcriptError.message}`);
     }
+
+    // The page shows recordings.duration_seconds as the length; clients that sent none (the web app) left it NULL.
+    // Fill it from the provider's measurement; never overwrites a client-reported value.
+    await storeMeasuredDuration(recordingId, measuredSeconds, recording.duration_seconds);
 
     // Step 5: Update status to transcribed
     await updateStatus(recordingId, 'transcribed');
@@ -310,76 +321,6 @@ async function processRecordingAsync(
       reportAlert('recording_failure_cause', 'MARK_FAILED_WRITE_FAILED');
     }
   }
-}
-
-/**
- * Transcribe audio using Deepgram API
- */
-async function transcribeWithDeepgram(
-  audioData: Blob,
-  filePath: string
-): Promise<TranscriptionResult> {
-  const arrayBuffer = await audioData.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-
-  // Determine content type from file extension
-  const ext = filePath.split('.').pop()?.toLowerCase() || 'm4a';
-  const contentType = ext === 'wav' ? 'audio/wav' : ext === 'mp3' ? 'audio/mpeg' : 'audio/mp4';
-
-  // Call Deepgram API with detect_language enabled for auto-detection
-  let response: Response;
-  try {
-    response = await fetch('https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true&diarize=true&paragraphs=true&utterances=true&detect_language=true', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Token ${config.DEEPGRAM_API_KEY}`,
-        'Content-Type': contentType,
-      },
-      body: buffer,
-    });
-  } catch (e) {
-    reportProviderFailure('deepgram', e);
-    throw e;
-  }
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    // A rejected key or exhausted credit fails EVERY recording: classified here into one provider-wide alert.
-    reportProviderHttpFailure('deepgram', response.status);
-    throw new Error(`Deepgram API error: ${response.status} - ${errorText}`);
-  }
-
-  const result = await response.json() as any;
-
-  // Extract detected language from Deepgram response
-  const detectedLanguage = result.results?.channels?.[0]?.detected_language || 'en';
-
-  // Extract utterances/paragraphs as segments
-  const utterances = result.results?.utterances || [];
-  const segments: TranscriptSegment[] = utterances.map((u: any, index: number) => ({
-    id: uuidv4(),
-    speaker_label: `Speaker ${u.speaker || 0}`,
-    speaker_index: u.speaker || 0,
-    text: u.transcript || '',
-    start_time: u.start || 0,
-    end_time: u.end || 0,
-    confidence: u.confidence || 0.9,
-  }));
-
-  // Extract full transcript
-  const fullText = result.results?.channels?.[0]?.alternatives?.[0]?.transcript || '';
-
-  // Count words
-  const wordCount = fullText.split(/\s+/).filter((w: string) => w.length > 0).length;
-
-  // Count unique speakers
-  const speakers = new Set(segments.map((s: TranscriptSegment) => s.speaker_index));
-  const speakerCount = Math.max(1, speakers.size);
-
-  const rawDuration = Number(result.metadata?.duration);
-  const durationSeconds = Number.isFinite(rawDuration) && rawDuration > 0 ? rawDuration : null;
-
-  return { segments, fullText, wordCount, speakerCount, detectedLanguage, durationSeconds };
 }
 
 /**

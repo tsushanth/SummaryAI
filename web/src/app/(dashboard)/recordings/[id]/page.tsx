@@ -19,6 +19,7 @@ import { DeleteRecordingDialog } from '@/components/recordings/DeleteRecordingDi
 import { Button } from '@/components/ui/button';
 import { canDeleteRecording } from '@/lib/recordingDelete';
 import { formatDuration, formatDate } from '@/lib/utils/audio';
+import { hasKnownDuration } from '@/lib/recordingDuration';
 import {
   ArrowLeft,
   Clock,
@@ -200,11 +201,14 @@ export default function RecordingDetailPage() {
                 <dt className="sr-only">Recorded</dt>
                 <dd>{formatDate(recording.created_at)}</dd>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Clock className="h-4 w-4" aria-hidden="true" />
-                <dt className="sr-only">Length</dt>
-                <dd>{isLive ? 'In progress' : formatDuration(recording.duration_seconds)}</dd>
-              </div>
+              {/* Unknown length (older web recordings that never stored one): hide it rather than print 0:00. */}
+              {(isLive || hasKnownDuration(recording.duration_seconds)) && (
+                <div className="flex items-center gap-1.5">
+                  <Clock className="h-4 w-4" aria-hidden="true" />
+                  <dt className="sr-only">Length</dt>
+                  <dd>{isLive ? 'In progress' : formatDuration(recording.duration_seconds)}</dd>
+                </div>
+              )}
               {recording.word_count ? (
                 <div className="flex items-center gap-1.5">
                   <FileText className="h-4 w-4" aria-hidden="true" />

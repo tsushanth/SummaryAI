@@ -8,6 +8,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { useSubscription, useCustomerPortal } from '@/hooks/useSubscription';
 import Link from 'next/link';
 import { DefaultTemplateCard } from '@/components/settings/DefaultTemplateCard';
+import { DefaultLanguageCard } from '@/components/settings/DefaultLanguageCard';
 
 export default function SettingsPage() {
   const { user, signOut, loading } = useAuth();
@@ -37,6 +38,7 @@ export default function SettingsPage() {
 
       <div className="space-y-6">
         <DefaultTemplateCard />
+        <DefaultLanguageCard />
 
         {/* Billing: only for people who subscribed on the web (Stripe) before MeetingMind became free */}
         {!subscriptionLoading && hasStripeBilling && (

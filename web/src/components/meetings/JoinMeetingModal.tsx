@@ -1,9 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import useSWR from 'swr';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { X, Link as LinkIcon, Loader2, Calendar, Clock } from 'lucide-react';
+import { getTranscriptionLanguages, setDefaultTranscriptionLanguage } from '@/lib/api/meetings';
+import { languageChoiceHint, normalizeChoice } from '@/lib/transcriptionLanguages';
+import { LanguageSelect } from './LanguageSelect';
 import type { CreateMeetingRequest } from '@/types/api';
 
 interface JoinMeetingModalProps {
@@ -76,6 +80,13 @@ export function JoinMeetingModal({
   const [time, setTime] = useState(defaults.time);
   const [autoJoin, setAutoJoin] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // null = untouched: follow the saved default (which may still be loading). A pick in this form overrides it.
+  const [pickedLanguage, setPickedLanguage] = useState<string | null>(null);
+  const { data: languages, mutate: refreshLanguages } = useSWR(isOpen ? 'transcription-languages' : null, getTranscriptionLanguages, {
+    revalidateOnFocus: false,
+  });
+  const savedDefault = normalizeChoice(languages?.default_language);
+  const language = pickedLanguage ?? savedDefault;
 
   if (!isOpen) return null;
 
@@ -110,7 +121,13 @@ export function JoinMeetingModal({
         join_url: normalizedUrl,
         scheduled_start,
         auto_join: autoJoin,
+        transcription_language: language,
       });
+      // Remember the choice as the default for the next meeting (best effort: the meeting itself is already added).
+      if (language !== savedDefault) {
+        setDefaultTranscriptionLanguage(language).then(() => refreshLanguages(), () => undefined);
+      }
+      setPickedLanguage(null);
       // Reset form
       setUrl('');
       setTitle('');
@@ -131,6 +148,7 @@ export function JoinMeetingModal({
     setDate(newDefaults.date);
     setTime(newDefaults.time);
     setAutoJoin(true);
+    setPickedLanguage(null);
     setError(null);
     onClose();
   };
@@ -239,6 +257,16 @@ export function JoinMeetingModal({
                 </div>
               </div>
             </div>
+
+            <LanguageSelect
+              label="Spoken language"
+              value={language}
+              onChange={(c) => { setPickedLanguage(c); setError(null); }}
+              description={
+                languageChoiceHint(language, languages?.live) ??
+                (language === 'auto' ? 'Detected automatically. Choose a language if everyone speaks the same one.' : 'Remembered as your default for new meetings.')
+              }
+            />
 
             <div className="flex items-center gap-2">
               <input

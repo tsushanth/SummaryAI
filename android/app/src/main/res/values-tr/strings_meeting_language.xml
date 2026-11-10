@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meeting_language_label">Transkripsiyon dili</string>
+    <string name="meeting_language_auto">Otomatik algıla</string>
+    <string name="meeting_language_hint">Otomatik algılama çoğu toplantıda işe yarar. Transkript hatalıysa bir dil seçin. Seçiminiz hatırlanır.</string>
+    <string name="meeting_language_dialog_title">Transkripsiyon dili</string>
+    <string name="meeting_language_change">Dili değiştir</string>
+    <string name="meeting_language_active">Dil: %1$s</string>
+    <string name="meeting_language_changed">Transkripsiyon dili %1$s olarak ayarlandı</string>
+    <string name="meeting_language_change_note">Bundan sonraki konuşmalara uygulanır.</string>
+    <string name="meeting_language_switch_unavailable">Bu toplantı canlıyken dil değiştiremez</string>
+    <string name="meeting_language_switch_failed">Dil değiştirilemedi. Lütfen tekrar deneyin.</string>
+    <string name="meeting_language_hint_auto_english_live">Otomatik algılama, nihai transkript için dili bulur. Dil seçmediğiniz sürece canlı altyazılar İngilizce kalır.</string>
+    <string name="meeting_language_hint_delayed">Bu dildeki canlı altyazılar %1$s dakika gecikmeyle gelebilir. Nihai transkript etkilenmez.</string>
+    <string name="meeting_language_reason_fixed">Canlı dil, bot katıldığında belirlendi ve bu toplantı sırasında değiştirilemez.</string>
+    <string name="meeting_language_reason_not_live">Dil yalnızca bot toplantıdayken değiştirilebilir.</string>
+    <string name="meeting_language_switch_not_live">Bot şu anda toplantıda değil, bu yüzden dil değiştirilemiyor.</string>
+    <string name="meeting_language_saved_not_live">%1$s nihai transkript için kaydedildi, ancak canlı transkript şu anda değiştirilemedi.</string>
+</resources>

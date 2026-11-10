@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meeting_language_label">لغة النسخ</string>
+    <string name="meeting_language_auto">الكشف التلقائي</string>
+    <string name="meeting_language_hint">يعمل الكشف التلقائي في معظم الاجتماعات. اختر لغة إذا كان النص غير صحيح. سيتم تذكّر اختيارك.</string>
+    <string name="meeting_language_dialog_title">لغة النسخ</string>
+    <string name="meeting_language_change">تغيير اللغة</string>
+    <string name="meeting_language_active">اللغة: %1$s</string>
+    <string name="meeting_language_changed">تم ضبط لغة النسخ على %1$s</string>
+    <string name="meeting_language_change_note">ينطبق على الكلام من الآن فصاعدًا.</string>
+    <string name="meeting_language_switch_unavailable">لا يمكن لهذا الاجتماع تغيير اللغة أثناء البث المباشر</string>
+    <string name="meeting_language_switch_failed">تعذّر تغيير اللغة. حاول مرة أخرى.</string>
+    <string name="meeting_language_hint_auto_english_live">يحدد الكشف التلقائي اللغة للنص النهائي. تبقى الترجمة المباشرة بالإنجليزية ما لم تختر لغة.</string>
+    <string name="meeting_language_hint_delayed">قد تصل الترجمة المباشرة بهذه اللغة متأخرة بمقدار %1$s دقيقة. لا يتأثر النص النهائي.</string>
+    <string name="meeting_language_reason_fixed">تم تحديد اللغة المباشرة عند انضمام الروبوت ولا يمكن تغييرها أثناء هذا الاجتماع.</string>
+    <string name="meeting_language_reason_not_live">لا يمكن تغيير اللغة إلا أثناء وجود الروبوت في الاجتماع.</string>
+    <string name="meeting_language_switch_not_live">الروبوت ليس في الاجتماع الآن، لذا لا يمكن تغيير اللغة.</string>
+    <string name="meeting_language_saved_not_live">تم حفظ %1$s للنص النهائي، لكن تعذّر تبديل النص المباشر الآن.</string>
+</resources>

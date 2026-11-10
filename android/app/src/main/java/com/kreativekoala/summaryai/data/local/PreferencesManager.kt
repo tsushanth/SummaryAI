@@ -5,7 +5,9 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.kreativekoala.summaryai.data.MeetingLanguages
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,6 +23,9 @@ class PreferencesManager @Inject constructor(
         private val KEY_HAS_COMPLETED_ONBOARDING = booleanPreferencesKey("has_completed_onboarding")
         private val KEY_LAST_SYNC_TIME = stringPreferencesKey("last_sync_time")
         private val KEY_PREFERRED_LANGUAGE = stringPreferencesKey("preferred_language")
+        private val KEY_MEETING_LANGUAGE = stringPreferencesKey("meeting_transcription_language")
+        private val KEY_LANGUAGE_CATALOG_CACHE = stringPreferencesKey("transcription_languages_cache")
+        private val KEY_LAST_JOINED_LANGUAGE = stringPreferencesKey("last_joined_meeting_language")
         private val KEY_AUTO_JOIN_MEETINGS = booleanPreferencesKey("auto_join_meetings")
         private val KEY_NOTIFICATION_ENABLED = booleanPreferencesKey("notification_enabled")
         private val KEY_DARK_MODE = stringPreferencesKey("dark_mode") // "system", "light", "dark"
@@ -57,6 +62,39 @@ class PreferencesManager @Inject constructor(
         dataStore.edit { preferences ->
             preferences[KEY_PREFERRED_LANGUAGE] = language
         }
+    }
+
+    // Default transcription language for meetings ("auto" or a primary subtag), remembered
+    // from the last choice on Join Meeting.
+    val meetingLanguage: Flow<String> = dataStore.data.map { preferences ->
+        MeetingLanguages.normalize(preferences[KEY_MEETING_LANGUAGE])
+    }
+
+    suspend fun setMeetingLanguage(language: String) {
+        dataStore.edit { preferences ->
+            preferences[KEY_MEETING_LANGUAGE] = MeetingLanguages.normalize(language)
+        }
+    }
+
+    // Last good GET /api/meetings/transcription-languages body, so the picker has the full list offline.
+    suspend fun languageCatalogCache(): String? = dataStore.data.first()[KEY_LANGUAGE_CATALOG_CACHE]
+
+    suspend fun setLanguageCatalogCache(json: String) {
+        dataStore.edit { preferences -> preferences[KEY_LANGUAGE_CATALOG_CACHE] = json }
+    }
+
+    // Language a meeting was last started or switched to from this device, so the live screen can
+    // show it when the backend does not report one. Stored as "meetingId|language".
+    suspend fun setLastMeetingLanguage(meetingId: String, language: String) {
+        dataStore.edit { preferences ->
+            preferences[KEY_LAST_JOINED_LANGUAGE] = "$meetingId|${MeetingLanguages.normalize(language)}"
+        }
+    }
+
+    fun lastMeetingLanguageFor(meetingId: String): Flow<String?> = dataStore.data.map { preferences ->
+        val stored = preferences[KEY_LAST_JOINED_LANGUAGE] ?: return@map null
+        val id = stored.substringBefore('|')
+        if (id == meetingId) stored.substringAfter('|', "").takeIf { it.isNotEmpty() } else null
     }
 
     // Auto-join meetings

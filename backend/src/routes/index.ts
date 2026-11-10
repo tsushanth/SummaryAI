@@ -21,11 +21,17 @@ import { summaryEmailRouter } from './summaryEmail.js';
 import searchRoutes from './search.js';
 import integrationsRoutes from './integrations.js';
 import statsRoutes from './stats.js';
+import { liveSegmentsRouter } from './liveSegments.js';
+import voiceToolsRoutes from './voiceTools.js';
+import { voiceAssistantWebhookRouter, voiceAssistantInternalRouter, voiceAssistantUserRouter } from './voiceAssistant.js';
 
 const router = Router();
 
 // Health checks (no auth required)
 router.use('/health', healthRoutes);
+
+// In-meeting voice assistant transcript webhook (URL token or Recall signature; fails closed). Mounted before /webhooks.
+router.use('/webhooks/recall-assistant', voiceAssistantWebhookRouter);
 
 // Webhooks (no auth required - verified by signature)
 router.use('/webhooks', webhooksRoutes);
@@ -35,6 +41,13 @@ router.use('/api/attribution', attributionRoutes);
 
 // Calendar OAuth callback (no auth required - browser redirect)
 router.use('/api/calendar', calendarCallbackRouter);
+
+// Live STT segment sink (HMAC-signed by the live-stt service; disabled with 404 unless LIVE_STT_SHARED_SECRET is set).
+// The raw-body parser is mounted in index.ts ahead of express.json().
+router.use('/internal/live-segments', liveSegmentsRouter());
+
+// Voice assistant roll-up for the owner (x-internal-secret, fails closed)
+router.use('/internal/voice-assistant', voiceAssistantInternalRouter);
 
 // Internal worker routes (internal auth)
 router.use('/internal/worker', meetingsWorkerRouter);
@@ -59,5 +72,8 @@ router.use('/api/subscriptions', subscriptionsRoutes);
 router.use('/api/coaching', coachingRoutes);
 router.use('/api/integrations', integrationsRoutes);
 router.use('/api/stats', statsRoutes);
+// Assistant tools over the caller's own meetings. 404 unless VOICE_TOOLS_ENABLED=true and the user is allow-listed.
+router.use('/api/voice-tools', voiceToolsRoutes);
+router.use('/api/voice-assistant', voiceAssistantUserRouter);
 
 export default router;

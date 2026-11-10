@@ -5,7 +5,26 @@
 
 import { Router, Request, Response } from 'express';
 import { supabaseAdmin } from '../lib/supabase.js';
-import { RecallService, detectPlatform } from '../services/recallService.js';
+import {
+  RecallService,
+  detectPlatform,
+  liveSttBotRunColumns,
+  insertWithOptionalColumn,
+  transcriptionLanguageColumns,
+} from '../services/recallService.js';
+import {
+  ACTIVE_BOT_STATUSES,
+  getLatestRunInfo,
+  getUserDefaultLanguage,
+  isMissingColumn,
+  resolveBotLanguage,
+  setUserDefaultLanguage,
+} from '../services/meetingLanguage.js';
+import { notifyLiveLanguage } from '../lib/liveSttControl.js';
+import { liveSttEnvFrom, planLiveStt } from '../lib/liveStt.js';
+import { liveStatusOf, parseFallbackState } from '../lib/liveSttFallback.js';
+import { config } from '../config/index.js';
+import { AUTO_LANGUAGE, TRANSCRIPTION_LANGUAGES, normalizeTranscriptionLanguage } from '../lib/transcriptionLanguage.js';
 import {
   scheduleBotJoin,
   cancelScheduledBot,
@@ -13,13 +32,17 @@ import {
   markJobFailed,
 } from '../services/botSchedulerService.js';
 import { authenticate, optionalAuth, internalAuth } from '../middleware/auth.js';
-import { asyncHandler, Errors } from '../middleware/errorHandler.js';
+import { AppError, asyncHandler, Errors } from '../middleware/errorHandler.js';
 import {
   CreateManualMeetingSchema,
   UpdateMeetingSchema,
   ListMeetingsSchema,
   BotJoinWorkerSchema,
   InstantJoinSchema,
+  JoinNowSchema,
+  LiveLanguageSchema,
+  DefaultLanguageSchema,
+  LiveLanguageState,
   MeetingListResponse,
   MeetingDetailResponse,
   BotRunResponse,
@@ -29,8 +52,74 @@ import {
   LiveInsightType,
 } from '../types/meetings.js';
 import { getLiveInsights } from '../services/liveInsightsService.js';
+import { enforceBotMonthlyCap, BOT_CAP_ERROR_CODE } from '../services/botUsageCap.js';
 
 const router = Router();
+
+/**
+ * Insert a meetings row. If it carries transcription_language and migration 027 is not applied yet, the meeting is still created
+ * (without the language) and `languageDropped` tells the caller.
+ */
+async function insertMeetingRow(row: Record<string, unknown>) {
+  const run = (r: Record<string, unknown>) => supabaseAdmin.from('meetings').insert(r).select().single();
+  let res = await run(row);
+  let languageDropped = false;
+  if (res.error && 'transcription_language' in row && isMissingColumn(res.error, 'transcription_language')) {
+    const { transcription_language: _dropped, ...rest } = row;
+    res = await run(rest);
+    languageDropped = true;
+  }
+  return { ...res, languageDropped };
+}
+
+const LANGUAGE_NOT_SAVED_WARNING =
+  'The transcription language could not be saved yet and will be ignored for this meeting. Auto-detect will be used.';
+
+/**
+ * GET /api/meetings/transcription-languages
+ * The languages a meeting can be transcribed in, the caller's saved default, and what the live transcript can do right now.
+ */
+router.get(
+  '/transcription-languages',
+  authenticate,
+  asyncHandler(async (req: Request, res: Response) => {
+    // Per user (LIVE_STT_PROVIDER=auto can select some users and not others). Shadow is not passed on: it is not a user-facing path.
+    const plan = planLiveStt({ ...liveSttEnvFrom(config as unknown as Record<string, unknown>), LIVE_STT_SHADOW: undefined }, req.user!.id);
+    const soniox = plan.provider === 'soniox';
+    res.json({
+      auto: AUTO_LANGUAGE,
+      default_language: await getUserDefaultLanguage(req.user!.id),
+      languages: TRANSCRIPTION_LANGUAGES.map(({ code, name, native }) => ({ code, name, native })),
+      live: {
+        provider: soniox ? 'soniox' : 'recall',
+        can_change_during_meeting: soniox,
+        // Recall: only English is low latency. Any other language (or Recall's own detection) arrives 3-10 minutes late.
+        english_only_low_latency: !soniox,
+        non_english_live_delay_minutes: soniox ? null : '3-10',
+        auto_live_behaviour: soniox ? 'detect' : config.RECALL_AUTO_LANGUAGE === 'detect' ? 'detect_delayed' : 'english_low_latency',
+      },
+    });
+  })
+);
+
+/**
+ * PUT /api/meetings/transcription-languages/default
+ * Save the caller's default meeting language ('auto' removes it).
+ */
+router.put(
+  '/transcription-languages/default',
+  authenticate,
+  asyncHandler(async (req: Request, res: Response) => {
+    const parsed = DefaultLanguageSchema.safeParse(req.body);
+    if (!parsed.success) throw Errors.badRequest('Unsupported transcription language');
+    try {
+      await setUserDefaultLanguage(req.user!.id, parsed.data.language);
+    } catch {
+      throw Errors.internal('Failed to save default language');
+    }
+    res.json({ default_language: parsed.data.language });
+  })
+);
 
 /**
  * GET /api/meetings
@@ -129,28 +218,27 @@ router.post(
       scheduled_end,
       auto_join,
       join_offset_minutes,
+      transcription_language,
     } = parsed.data;
 
     // Detect platform from URL
     const platform = detectPlatform(join_url);
 
-    // Create meeting
-    const { data: meeting, error } = await supabaseAdmin
-      .from('meetings')
-      .insert({
-        user_id: userId,
-        source: 'manual',
-        title,
-        platform,
-        join_url,
-        scheduled_start,
-        scheduled_end: scheduled_end || null,
-        auto_join,
-        join_offset_minutes,
-        status: auto_join ? 'bot_queued' : 'scheduled',
-      })
-      .select()
-      .single();
+    // Create meeting. An explicit choice (including 'auto') is stored as given; nothing chosen stores nothing and follows the
+    // owner's default when the bot joins.
+    const { data: meeting, error, languageDropped } = await insertMeetingRow({
+      user_id: userId,
+      source: 'manual',
+      title,
+      platform,
+      join_url,
+      scheduled_start,
+      scheduled_end: scheduled_end || null,
+      auto_join,
+      join_offset_minutes,
+      status: auto_join ? 'bot_queued' : 'scheduled',
+      ...(transcription_language ? { transcription_language } : {}),
+    });
 
     if (error) {
       throw error;
@@ -178,7 +266,10 @@ router.post(
 
     console.log(`[Meetings] Created meeting ${meeting.id} for user ${userId}`);
 
-    res.status(201).json({ meeting, warning: scheduleWarning });
+    res.status(201).json({
+      meeting,
+      warning: scheduleWarning ?? (languageDropped ? LANGUAGE_NOT_SAVED_WARNING : undefined),
+    });
   })
 );
 
@@ -198,6 +289,7 @@ router.post(
     }
 
     const { join_url, bot_name, title } = parsed.data;
+    const language = await resolveBotLanguage({ explicit: parsed.data.transcription_language, userId });
 
     // Detect platform from URL
     const platform = detectPlatform(join_url);
@@ -234,26 +326,26 @@ router.post(
       return;
     }
 
+    // Monthly bot allowance. Checked before anything is created so a refused request leaves no meeting row behind.
+    const botLimits = await enforceBotMonthlyCap(userId);
+
     // Generate a title if not provided
     const meetingTitle = title || `${platform.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} Meeting`;
 
     // Create meeting with immediate start time
     const now = new Date().toISOString();
-    const { data: meeting, error: createError } = await supabaseAdmin
-      .from('meetings')
-      .insert({
-        user_id: userId,
-        source: 'manual',
-        title: meetingTitle,
-        platform,
-        join_url,
-        scheduled_start: now,
-        scheduled_end: null,
-        auto_join: true,
-        status: 'bot_joining',
-      })
-      .select()
-      .single();
+    const { data: meeting, error: createError } = await insertMeetingRow({
+      user_id: userId,
+      source: 'manual',
+      title: meetingTitle,
+      platform,
+      join_url,
+      scheduled_start: now,
+      scheduled_end: null,
+      auto_join: true,
+      status: 'bot_joining',
+      ...transcriptionLanguageColumns(language),
+    });
 
     if (createError) {
       console.error('[Meetings] Failed to create meeting:', createError);
@@ -263,9 +355,11 @@ router.post(
     try {
       // Create bot via Recall.ai immediately
       const bot = await RecallService.createBot({
+        user_id: userId,
         meeting_url: join_url,
         bot_name: bot_name || 'Meeting Mind',
-      });
+        transcription_language: language,
+      }, botLimits);
 
       // Create a pending recording so it shows up in recordings list immediately
       const { data: pendingRecording, error: recordingError } = await supabaseAdmin
@@ -291,13 +385,15 @@ router.post(
       }
 
       // Create bot run record
-      await supabaseAdmin.from('bot_runs').insert({
+      await insertWithOptionalColumn(supabaseAdmin.from('bot_runs'), {
         meeting_id: meeting.id,
         user_id: userId,
         recall_bot_id: bot.id,
+        ...liveSttBotRunColumns(bot),
+        ...transcriptionLanguageColumns(language),
         status: 'joining',
         join_requested_at: now,
-      });
+      }, 'transcription_language');
 
       console.log(`[Meetings] Instant join: created meeting ${meeting.id} with bot ${bot.id}, pending recording ${pendingRecording?.id}`);
 
@@ -325,6 +421,8 @@ router.post(
         })
         .eq('id', meeting.id);
 
+      // A guardrail refusal (backend/LIVE_STT.md "Guardrails") keeps its own code and message.
+      if (botError instanceof AppError) throw botError;
       throw Errors.internal('Failed to dispatch bot to meeting');
     }
   })
@@ -372,6 +470,23 @@ router.get(
         }
       : null;
 
+    const runInfo = await getLatestRunInfo(meetingId);
+    const language = runInfo
+      ? normalizeTranscriptionLanguage(runInfo.transcription_language) ?? AUTO_LANGUAGE
+      : normalizeTranscriptionLanguage(meeting.transcription_language) ?? AUTO_LANGUAGE;
+    const active = !!runInfo && ACTIVE_BOT_STATUSES.includes(runInfo.status);
+    const runProvider = runInfo?.live_stt_provider ?? 'recall';
+    const liveLanguage: LiveLanguageState = {
+      language,
+      can_change: active && runProvider === 'soniox',
+      reason: !active ? 'not_live' : runProvider === 'soniox' ? null : 'provider_fixed',
+      provider: runProvider,
+    };
+
+    // Only for Soniox-primary runs: whether the live transcript is fine, was replaced by Recall's, or is unavailable (the final
+    // transcript still comes after the meeting).
+    const liveState = runProvider === 'soniox' ? parseFallbackState(runInfo?.live_stt_fallback) : null;
+
     const response: MeetingDetailResponse = {
       id: meeting.id,
       title: meeting.title,
@@ -389,6 +504,9 @@ router.get(
       bot_run: botRunResponse,
       error_message: meeting.error_message,
       created_at: meeting.created_at,
+      transcription_language: language,
+      live_language: liveLanguage,
+      ...(liveState ? { live_transcript: { status: liveStatusOf(liveState), reason: liveState.reason, switched_at_sec: liveState.switched_at_sec } } : {}),
     };
 
     res.json(response);
@@ -464,19 +582,21 @@ router.patch(
       }
     }
 
-    const { data: updated, error: updateError } = await supabaseAdmin
-      .from('meetings')
-      .update(updates)
-      .eq('id', meetingId)
-      .eq('user_id', userId)
-      .select()
-      .single();
+    let languageDropped = false;
+    const doUpdate = (u: Partial<Meeting>) =>
+      supabaseAdmin.from('meetings').update(u).eq('id', meetingId).eq('user_id', userId).select().single();
+    let { data: updated, error: updateError } = await doUpdate(updates);
+    if (updateError && 'transcription_language' in updates && isMissingColumn(updateError, 'transcription_language')) {
+      const { transcription_language: _dropped, ...rest } = updates;
+      languageDropped = true;
+      ({ data: updated, error: updateError } = await doUpdate(rest));
+    }
 
     if (updateError) {
       throw updateError;
     }
 
-    res.json({ meeting: updated });
+    res.json({ meeting: updated, ...(languageDropped ? { warning: LANGUAGE_NOT_SAVED_WARNING } : {}) });
   })
 );
 
@@ -490,6 +610,8 @@ router.post(
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
     const meetingId = req.params.id;
+    const joinNow = JoinNowSchema.safeParse(req.body ?? {});
+    if (!joinNow.success) throw Errors.badRequest('Unsupported transcription language');
 
     const { data: meeting, error: fetchError } = await supabaseAdmin
       .from('meetings')
@@ -507,23 +629,36 @@ router.post(
       throw Errors.unprocessable('Bot is already active or meeting completed');
     }
 
+    // Monthly bot allowance (before the scheduled bot is cancelled, so a refused request changes nothing).
+    const botLimits = await enforceBotMonthlyCap(userId);
+
     // Cancel any scheduled bot
     await cancelScheduledBot(meetingId);
 
-    // Create bot via Recall.ai
-    const bot = await RecallService.createBot({
-      meeting_url: meeting.join_url,
-      bot_name: 'Meeting Mind',
+    const language = await resolveBotLanguage({
+      explicit: joinNow.data.transcription_language,
+      meetingValue: meeting.transcription_language,
+      userId,
     });
 
+    // Create bot via Recall.ai
+    const bot = await RecallService.createBot({
+      user_id: userId,
+      meeting_url: meeting.join_url,
+      bot_name: 'Meeting Mind',
+      transcription_language: language,
+    }, botLimits);
+
     // Create bot run record
-    await supabaseAdmin.from('bot_runs').insert({
+    await insertWithOptionalColumn(supabaseAdmin.from('bot_runs'), {
       meeting_id: meetingId,
       user_id: userId,
       recall_bot_id: bot.id,
+      ...liveSttBotRunColumns(bot),
+      ...transcriptionLanguageColumns(language),
       status: 'joining',
       join_requested_at: new Date().toISOString(),
-    });
+    }, 'transcription_language');
 
     // Update meeting status
     await supabaseAdmin
@@ -534,6 +669,67 @@ router.post(
     console.log(`[Meetings] Started bot ${bot.id} for meeting ${meetingId}`);
 
     res.json({ ok: true, bot_id: bot.id });
+  })
+);
+
+/**
+ * POST /api/meetings/:id/live-language  { language: 'auto' | code }
+ * Change the live transcript's language while the bot is in the meeting.
+ *  - Soniox live path: saves the choice (used by the final transcript too) and tells mm-live-stt to reopen the stream with the new
+ *    hints; the service replays the last seconds of buffered audio so nothing is lost.
+ *  - Recall transcript path (today's default): 409 LIVE_LANGUAGE_FIXED. Recall's recallai_streaming language is fixed when the bot
+ *    is created and Recall documents no way to change it afterwards.
+ */
+router.post(
+  '/:id/live-language',
+  authenticate,
+  asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+    const meetingId = req.params.id;
+    const parsed = LiveLanguageSchema.safeParse(req.body);
+    if (!parsed.success) throw Errors.badRequest('Unsupported transcription language');
+    const language = parsed.data.language;
+
+    const { data: meeting } = await supabaseAdmin
+      .from('meetings')
+      .select('id')
+      .eq('id', meetingId)
+      .eq('user_id', userId)
+      .single();
+    if (!meeting) throw Errors.notFound('Meeting');
+
+    const run = await getLatestRunInfo(meetingId, { activeOnly: true });
+    if (!run) {
+      throw new AppError(409, 'MEETING_NOT_LIVE', 'The meeting is not being recorded right now, so the live language cannot be changed.');
+    }
+    if (run.live_stt_provider !== 'soniox' || !run.live_stt_ref) {
+      throw new AppError(
+        409,
+        'LIVE_LANGUAGE_FIXED',
+        'The live transcript language cannot be changed during a meeting. It was set when the bot joined. The final transcript still detects the language automatically.',
+        { language: normalizeTranscriptionLanguage(run.transcription_language) ?? AUTO_LANGUAGE }
+      );
+    }
+
+    // Persist first (the final transcript uses it too), tolerating a database without migration 027.
+    const stored = transcriptionLanguageColumns(language).transcription_language ?? null;
+    for (const [table, id, value] of [['bot_runs', run.id, stored], ['meetings', meetingId, language]] as const) {
+      const { error } = await supabaseAdmin.from(table).update({ transcription_language: value }).eq('id', id);
+      if (error && !isMissingColumn(error, 'transcription_language')) throw Errors.internal('Failed to save the language');
+    }
+
+    const result = await notifyLiveLanguage(run.live_stt_ref, language);
+    if (!result.ok) {
+      console.warn(`[Meetings] live language change not delivered (${result.reason})`);
+      res.json({
+        ok: true,
+        language,
+        live_applied: false,
+        message: 'Saved for the final transcript, but the live transcript could not be switched right now.',
+      });
+      return;
+    }
+    res.json({ ok: true, language, live_applied: true, live_state: result.state });
   })
 );
 
@@ -567,6 +763,7 @@ router.get(
       .select('*')
       .eq('meeting_id', meetingId)
       .eq('is_partial', false) // Only return final transcripts by default
+      .eq('shadow', false) // never show shadow-run (A/B comparison) rows
       .order('start_timestamp', { ascending: true });
 
     // Filter by timestamp if provided
@@ -628,7 +825,7 @@ router.get(
       word_count: stitched.wordCount,
       speaker_count: stitched.speakerCount,
       duration_seconds: stitched.durationSec,
-      source: 'recall_realtime',
+      source: 'recall_realtime', // unchanged field value for existing clients; the rows may come from the live-stt service
     });
   })
 );
@@ -791,12 +988,33 @@ meetingsWorkerRouter.post(
       return;
     }
 
+    // Monthly bot allowance. A scheduled join that is over the cap is closed out as failed with the reason (no retry: the cap
+    // only resets next month) and answered 200 so the scheduler does not treat it as a transient error.
+    let botLimits: { maxDurationSeconds?: number };
     try {
+      botLimits = await enforceBotMonthlyCap(meeting.user_id ?? userId);
+    } catch (capError) {
+      if (!(capError instanceof AppError) || capError.code !== BOT_CAP_ERROR_CODE) throw capError;
+      await markJobFailed(meetingId, capError.code);
+      await supabaseAdmin
+        .from('meetings')
+        .update({ status: 'failed', error_message: capError.message })
+        .eq('id', meetingId);
+      res.json({ ok: true, skipped: true, reason: BOT_CAP_ERROR_CODE });
+      return;
+    }
+
+    try {
+      // Scheduled / calendar meetings: the meeting's own choice, else the owner's saved default, else auto.
+      const language = await resolveBotLanguage({ meetingValue: meeting.transcription_language, userId });
+
       // Create bot via Recall.ai
       const bot = await RecallService.createBot({
+        user_id: userId,
         meeting_url: meeting.join_url,
         bot_name: 'Meeting Mind',
-      });
+        transcription_language: language,
+      }, botLimits);
 
       // Create a pending recording so it shows up in recordings list immediately
       const { data: pendingRecording, error: recordingError } = await supabaseAdmin
@@ -818,13 +1036,15 @@ meetingsWorkerRouter.post(
       }
 
       // Create bot run record
-      await supabaseAdmin.from('bot_runs').insert({
+      await insertWithOptionalColumn(supabaseAdmin.from('bot_runs'), {
         meeting_id: meetingId,
         user_id: userId,
         recall_bot_id: bot.id,
+        ...liveSttBotRunColumns(bot),
+        ...transcriptionLanguageColumns(language),
         status: 'joining',
         join_requested_at: new Date().toISOString(),
-      });
+      }, 'transcription_language');
 
       // Update meeting status and link to pending recording
       await supabaseAdmin

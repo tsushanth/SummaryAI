@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { formatDuration, formatRelativeDate } from '@/lib/utils/audio';
+import { hasKnownDuration } from '@/lib/recordingDuration';
 import { StatusBadge, isLiveRecording } from './StatusBadge';
 import { VoiceSwatches } from './VoiceRibbon';
 import type { Recording } from '@/types/api';
@@ -52,10 +53,12 @@ export function RecordingCard({ recording }: { recording: Recording }) {
                 <dt className="sr-only">Recorded</dt>
                 <dd>{formatRelativeDate(recording.created_at)}</dd>
               </div>
-              <div className="flex gap-1">
-                <dt className="sr-only">Length</dt>
-                <dd>{isLiveRecording(recording) ? 'In progress' : formatDuration(recording.duration_seconds)}</dd>
-              </div>
+              {(isLiveRecording(recording) || hasKnownDuration(recording.duration_seconds)) && (
+                <div className="flex gap-1">
+                  <dt className="sr-only">Length</dt>
+                  <dd>{isLiveRecording(recording) ? 'In progress' : formatDuration(recording.duration_seconds)}</dd>
+                </div>
+              )}
               {recording.word_count ? (
                 <div className="flex gap-1">
                   <dd>{recording.word_count.toLocaleString()}</dd>

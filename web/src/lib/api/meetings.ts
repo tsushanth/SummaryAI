@@ -9,6 +9,8 @@ import type {
   LiveTranscriptResponse,
   LiveInsightsResponse,
   LiveInsightType,
+  LiveLanguageResponse,
+  TranscriptionLanguagesResponse,
 } from '@/types/api';
 
 export async function getMeetings(params?: {
@@ -30,8 +32,30 @@ export async function getMeetings(params?: {
 }
 
 export async function getMeeting(id: string): Promise<Meeting> {
-  const response = await apiClient<{ meeting: Meeting }>(`/api/meetings/${id}`);
-  return response.meeting;
+  // GET /api/meetings/:id answers with the meeting object itself; older code expected { meeting }. Accept both.
+  const response = await apiClient<Meeting | { meeting: Meeting }>(`/api/meetings/${id}`);
+  return 'meeting' in response && response.meeting ? response.meeting : (response as Meeting);
+}
+
+export function getTranscriptionLanguages(): Promise<TranscriptionLanguagesResponse> {
+  return apiClient<TranscriptionLanguagesResponse>('/api/meetings/transcription-languages');
+}
+
+/** Saves the user's default meeting language ('auto' clears it). */
+export async function setDefaultTranscriptionLanguage(language: string): Promise<string> {
+  const res = await apiClient<{ default_language: string }>('/api/meetings/transcription-languages/default', {
+    method: 'PUT',
+    body: JSON.stringify({ language }),
+  });
+  return res.default_language;
+}
+
+/** Change the live transcript language while the meeting is recorded. 409 (ApiError) when it cannot be changed. */
+export function setLiveLanguage(meetingId: string, language: string): Promise<LiveLanguageResponse> {
+  return apiClient<LiveLanguageResponse>(`/api/meetings/${meetingId}/live-language`, {
+    method: 'POST',
+    body: JSON.stringify({ language }),
+  });
 }
 
 export async function createMeeting(
