@@ -121,6 +121,13 @@ const envSchema = z.object({
   // minutes late). Default (anything else) keeps English low-latency live captions for 'auto'. See LIVE_STT.md.
   RECALL_AUTO_LANGUAGE: z.string().default(''),
 
+  // Assistant tools over the caller's own meetings (routes/voiceTools.ts). Everything here is OFF by default and fails closed:
+  // VOICE_TOOLS_ENABLED must be 'true', VOICE_TOOLS_SECRET (signs action drafts) must be set, and the user must be listed in
+  // VOICE_TOOLS_USER_IDS (comma separated UUIDs, or '*' for everyone). When off the routes answer 404.
+  VOICE_TOOLS_ENABLED: z.string().default('false'),
+  VOICE_TOOLS_USER_IDS: z.string().optional(),
+  VOICE_TOOLS_SECRET: z.string().optional(),
+
   // Service URL (for internal worker callbacks)
   SERVICE_URL: z.string().optional(),
   INTERNAL_SECRET: z.string().optional(),
