@@ -21,7 +21,8 @@ import {
   setUserDefaultLanguage,
 } from '../services/meetingLanguage.js';
 import { notifyLiveLanguage } from '../lib/liveSttControl.js';
-import { planLiveStt } from '../lib/liveStt.js';
+import { liveSttEnvFrom, planLiveStt } from '../lib/liveStt.js';
+import { liveStatusOf, parseFallbackState } from '../lib/liveSttFallback.js';
 import { config } from '../config/index.js';
 import { AUTO_LANGUAGE, TRANSCRIPTION_LANGUAGES, normalizeTranscriptionLanguage } from '../lib/transcriptionLanguage.js';
 import {
@@ -81,13 +82,8 @@ router.get(
   '/transcription-languages',
   authenticate,
   asyncHandler(async (req: Request, res: Response) => {
-    const plan = planLiveStt({
-      LIVE_STT_PROVIDER: config.LIVE_STT_PROVIDER,
-      LIVE_STT_SHADOW: config.LIVE_STT_SHADOW,
-      LIVE_STT_WS_URL: config.LIVE_STT_WS_URL,
-      LIVE_STT_INGEST_SECRET: config.LIVE_STT_INGEST_SECRET,
-      NODE_ENV: config.NODE_ENV,
-    });
+    // Per user (LIVE_STT_PROVIDER=auto can select some users and not others). Shadow is not passed on: it is not a user-facing path.
+    const plan = planLiveStt({ ...liveSttEnvFrom(config as unknown as Record<string, unknown>), LIVE_STT_SHADOW: undefined }, req.user!.id);
     const soniox = plan.provider === 'soniox';
     res.json({
       auto: AUTO_LANGUAGE,
@@ -421,6 +417,8 @@ router.post(
         })
         .eq('id', meeting.id);
 
+      // A guardrail refusal (backend/LIVE_STT.md "Guardrails") keeps its own code and message.
+      if (botError instanceof AppError) throw botError;
       throw Errors.internal('Failed to dispatch bot to meeting');
     }
   })
@@ -481,6 +479,10 @@ router.get(
       provider: runProvider,
     };
 
+    // Only for Soniox-primary runs: whether the live transcript is fine, was replaced by Recall's, or is unavailable (the final
+    // transcript still comes after the meeting).
+    const liveState = runProvider === 'soniox' ? parseFallbackState(runInfo?.live_stt_fallback) : null;
+
     const response: MeetingDetailResponse = {
       id: meeting.id,
       title: meeting.title,
@@ -500,6 +502,7 @@ router.get(
       created_at: meeting.created_at,
       transcription_language: language,
       live_language: liveLanguage,
+      ...(liveState ? { live_transcript: { status: liveStatusOf(liveState), reason: liveState.reason, switched_at_sec: liveState.switched_at_sec } } : {}),
     };
 
     res.json(response);

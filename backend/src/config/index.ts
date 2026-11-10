@@ -82,9 +82,18 @@ const envSchema = z.object({
   ENCRYPTION_KEY: z.string().optional(),
 
   // Live transcription provider (see backend/LIVE_STT.md). Everything here is OFF by default.
-  // LIVE_STT_PROVIDER: 'recall' (default, Recall's built-in transcript) | 'soniox' (Recall raw audio -> mm-live-stt -> Soniox). Kept a
+  // LIVE_STT_PROVIDER: 'recall' (default, Recall's built-in transcript) | 'soniox' (Recall raw audio -> mm-live-stt -> Soniox) | 'auto' (per user: allowlist / percentage). Kept a
   // plain string on purpose: an unknown value is treated as 'recall' (see lib/liveStt.ts) instead of crashing the boot.
   LIVE_STT_PROVIDER: z.string().default('recall'),
+  // Only read when LIVE_STT_PROVIDER=auto: comma separated user UUIDs that get Soniox, and the share (0-100) of all other users that
+  // get it (stable per user). 'recall' is the instant rollback and overrides both. See lib/liveSttSelect.ts.
+  LIVE_STT_SONIOX_USER_IDS: z.string().optional(),
+  LIVE_STT_SONIOX_PERCENT: z.string().optional(),
+  // 'off' = ignore stream-failure reports and skip the watchdog (no automatic fallback handling). Default on.
+  LIVE_STT_FALLBACK: z.string().optional(),
+  // 'true' = Soniox-primary meetings of ALLOWLISTED users also run Recall's transcript, hidden, so a failure can switch to it
+  // (+0.15 USD/h on those meetings). Default off: the cheap fallback marks the live transcript unavailable and the final pass runs.
+  LIVE_STT_RECALL_HOT_STANDBY: z.string().optional(),
   // 'true' = keep Recall's transcript as the source of truth AND stream audio to mm-live-stt, whose segments are stored shadow=true.
   LIVE_STT_SHADOW: z.string().default('false'),
   // Comma separated user UUIDs whose meetings may be shadowed. Unset/empty = shadow is OFF for everyone even when LIVE_STT_SHADOW=true.

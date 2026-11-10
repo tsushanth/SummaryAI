@@ -48,11 +48,14 @@ export interface RunLanguageInfo {
   live_stt_ref: string | null;
   live_stt_provider: string | null;
   transcription_language: string | null;
+  /** bot_runs.live_stt_fallback (migration 030); null when never switched or the column does not exist yet. */
+  live_stt_fallback: unknown;
 }
 
 /** Latest bot run of a meeting with the columns this feature needs, tolerant of columns that do not exist yet. */
 export async function getLatestRunInfo(meetingId: string, opts: { activeOnly?: boolean } = {}): Promise<RunLanguageInfo | null> {
   const attempts = [
+    'id, status, live_stt_ref, live_stt_provider, transcription_language, live_stt_fallback',
     'id, status, live_stt_ref, live_stt_provider, transcription_language',
     'id, status, live_stt_ref, live_stt_provider',
     'id, status',
@@ -70,6 +73,7 @@ export async function getLatestRunInfo(meetingId: string, opts: { activeOnly?: b
       live_stt_ref: d.live_stt_ref ?? null,
       live_stt_provider: d.live_stt_provider ?? null,
       transcription_language: d.transcription_language ?? null,
+      live_stt_fallback: (d as { live_stt_fallback?: unknown }).live_stt_fallback ?? null,
     };
   }
   return null;
