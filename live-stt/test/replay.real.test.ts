@@ -4,7 +4,7 @@ import { ensureFixture } from './harness/fixture.js';
 import { runReplay } from './harness/replay.js';
 
 /**
- * OPT-IN: runs the replay harness against the REAL Soniox realtime API (about 2.2 minutes of audio, roughly $0.005).
+ * OPT-IN: runs the replay harness against the REAL Soniox realtime API (about 2.2 minutes of audio).
  *   REAL_SONIOX=1 npm test -- test/replay.real.test.ts
  * The key comes from SONIOX_API_KEY or a local file named by SONIOX_ENV_FILE, into process.env only (scripts/loadKey.ts). Audio is our own `say` fixture.
  * Skipped by default so `npm test` never touches the network.

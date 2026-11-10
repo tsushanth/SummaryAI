@@ -13,7 +13,7 @@ segments to the backend. Status: skeleton, tested against a fake Soniox and (opt
     npm install
     npm test                                  unit + integration + replay harness (fake Soniox, no network, no keys)
     npm run replay                            60 s two-voice replay with an injected disconnect, prints a report
-    REAL_SONIOX=1 npm test -- test/replay.real.test.ts      opt-in real Soniox run (cents); needs SONIOX_API_KEY in the environment or SONIOX_ENV_FILE=<path to a local .env>; never printed
+    REAL_SONIOX=1 npm test -- test/replay.real.test.ts      opt-in real Soniox run; needs SONIOX_API_KEY in the environment or SONIOX_ENV_FILE=<path to a local .env>; never printed
     npx tsx scripts/probe-real.ts english|multilang|keepalive|concurrency|header   real-API probes
 
 ## Configuration (environment only; no secrets in files)

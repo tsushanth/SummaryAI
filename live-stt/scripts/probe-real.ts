@@ -1,5 +1,5 @@
 /**
- * Opt-in probe against the REAL Soniox realtime API (costs about $0.12 per audio hour; a run is cents).
+ * Opt-in probe against the REAL Soniox realtime API (a short run).
  * Streams only audio we generate ourselves with `say` (test/.fixtures), never a user recording.
  * Prints measurements and the SHAPE of the messages; never prints the key, the config frame, or request headers.
  *
