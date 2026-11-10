@@ -107,6 +107,34 @@ interface SummaryAIApi {
         @Path("id") id: String
     ): Response<Unit>
 
+    // MARK: - Hands-free tools (server answers 404 while the feature is off for the account)
+
+    @GET("api/voice-tools/date")
+    suspend fun voiceDate(@Query("tz") timeZone: String): com.kreativekoala.summaryai.service.voice.DateDto
+
+    @GET("api/voice-tools/actions")
+    suspend fun voiceActions(
+        @Query("status") status: String,
+        @Query("assignee") assignee: String?,
+        @Query("limit") limit: Int
+    ): com.kreativekoala.summaryai.service.voice.ActionsResponseDto
+
+    @POST("api/voice-tools/actions/draft")
+    suspend fun voiceDraftAction(
+        @Body request: com.kreativekoala.summaryai.service.voice.DraftRequestDto
+    ): com.kreativekoala.summaryai.service.voice.DraftResponseDto
+
+    @POST("api/voice-tools/actions")
+    suspend fun voiceCommitAction(
+        @Body request: com.kreativekoala.summaryai.service.voice.CommitRequestDto
+    ): com.kreativekoala.summaryai.service.voice.CommitResponseDto
+
+    @POST("api/voice-tools/meetings/{id}/debrief")
+    suspend fun voiceDebrief(
+        @Path("id") id: String,
+        @Query("tz") timeZone: String
+    ): com.kreativekoala.summaryai.service.voice.DebriefResponseDto
+
     // MARK: - Intelligence (templates, regenerate, follow-up email, action items, chat)
 
     @GET("api/summary-templates")

@@ -51,6 +51,10 @@ android {
         }
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"$supabasePublishableKey\"")
         buildConfigField("String", "API_BASE_URL", "\"https://summary-ai-backend.fly.dev\"")
+        // Hands-free actions (spoken action items and debrief). Off unless the build is made with -PvoiceActions=true;
+        // the server must also have the feature switched on for the account before any entry point is shown.
+        val voiceActions = providers.gradleProperty("voiceActions").orNull?.lowercase() == "true"
+        buildConfigField("boolean", "VOICE_ACTIONS_ENABLED", voiceActions.toString())
         // Google OAuth Web Client ID (from Google Cloud Console)
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"753424767416-54viqmpd45g10oohm7vug13o8tdhb8qp.apps.googleusercontent.com\"")
     }
