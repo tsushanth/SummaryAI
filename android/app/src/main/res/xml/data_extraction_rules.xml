@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12+ (android:dataExtractionRules): cloud backup AND device-to-device transfer.
+  Credentials must never leave the device, so the same files are excluded in both sections.
+  See res/xml/backup_rules.xml for what each file holds. Keep the two files in sync.
+  The device-transfer section has no <include>, so everything else keeps transferring as before.
+-->
 <data-extraction-rules>
     <cloud-backup>
         <include domain="sharedpref" path="."/>
         <exclude domain="sharedpref" path="encrypted_prefs.xml"/>
+        <exclude domain="sharedpref" path="com.kreativekoala.meetingmind_preferences.xml"/>
     </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="encrypted_prefs.xml"/>
+        <exclude domain="sharedpref" path="com.kreativekoala.meetingmind_preferences.xml"/>
+    </device-transfer>
 </data-extraction-rules>

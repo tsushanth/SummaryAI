@@ -1,9 +1,12 @@
 package com.kreativekoala.summaryai.di
 
+import android.content.Context
 import com.kreativekoala.summaryai.BuildConfig
+import com.kreativekoala.summaryai.data.auth.EncryptedSessionManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
@@ -19,10 +22,13 @@ import javax.inject.Singleton
 object SupabaseModule {
     @Provides
     @Singleton
-    fun provideSupabaseClient(): SupabaseClient = createSupabaseClient(
+    fun provideSupabaseClient(@ApplicationContext context: Context): SupabaseClient = createSupabaseClient(
         supabaseUrl = BuildConfig.SUPABASE_URL,
         supabaseKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY
     ) {
-        install(Auth)
+        install(Auth) {
+            // The session (access + refresh token, email) lives in the encrypted store, never in clear text.
+            sessionManager = EncryptedSessionManager.create(context)
+        }
     }
 }

@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Auto Backup (Android 11 and lower, android:fullBackupContent).
+  Credentials must never leave the device:
+   - encrypted_prefs.xml        EncryptedSharedPreferences: API token mirror and the Supabase session.
+                                Its Keystore key is not backed up, so a restored copy is unreadable anyway.
+   - <applicationId>_preferences.xml  the default SharedPreferences file, where supabase-kt's stock session
+                                manager used to keep the session in clear text (pre 1.7.10 installs).
+  Keep res/xml/data_extraction_rules.xml (Android 12+) in sync.
+-->
 <full-backup-content>
     <include domain="sharedpref" path="."/>
     <exclude domain="sharedpref" path="encrypted_prefs.xml"/>
+    <exclude domain="sharedpref" path="com.kreativekoala.meetingmind_preferences.xml"/>
 </full-backup-content>

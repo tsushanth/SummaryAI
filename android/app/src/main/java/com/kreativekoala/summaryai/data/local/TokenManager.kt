@@ -1,67 +1,74 @@
 package com.kreativekoala.summaryai.data.local
 
-import com.kreativekoala.summaryai.FailureReporter
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
+import android.util.Log
+import com.kreativekoala.summaryai.FailureReporter
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Secure token storage using EncryptedSharedPreferences
+ * Token storage on the app's encrypted store ([SecurePrefs]). Storage failures (e.g. a lost Keystore key) read as
+ * "signed out" and drop writes; they never throw. Tokens are never logged.
  */
 @Singleton
-class TokenManager @Inject constructor(
-    @ApplicationContext private val context: Context
-) : TokenStorage {
-    private val masterKey = MasterKey.Builder(context)
-        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-        .build()
+class TokenManager(private val prefs: SharedPreferences) : TokenStorage {
 
-    private val encryptedPrefs: SharedPreferences = EncryptedSharedPreferences.create(
-        context,
-        "encrypted_prefs",
-        masterKey,
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-    )
+    @Inject
+    constructor(@ApplicationContext context: Context) : this(SecurePrefs.get(context))
 
     companion object {
-        private const val KEY_ACCESS_TOKEN = "access_token"
-        private const val KEY_REFRESH_TOKEN = "refresh_token"
-        private const val KEY_TOKEN_EXPIRY = "token_expiry"
-        private const val KEY_USER_ID = "user_id"
+        private const val TAG = "TokenManager"
+        internal const val KEY_ACCESS_TOKEN = "access_token"
+        internal const val KEY_REFRESH_TOKEN = "refresh_token"
+        internal const val KEY_TOKEN_EXPIRY = "token_expiry"
+        internal const val KEY_USER_ID = "user_id"
     }
 
     init {
         // A report sent before the user signs in again (e.g. a startup crash) should still say who it affected.
-        FailureReporter.setUser(encryptedPrefs.getString(KEY_USER_ID, null))
+        FailureReporter.setUser(readString(KEY_USER_ID))
+    }
+
+    private fun readString(key: String): String? = try {
+        prefs.getString(key, null)
+    } catch (e: Exception) {
+        Log.w(TAG, "Token store unreadable (${e.javaClass.simpleName})")
+        null
+    }
+
+    private fun readLong(key: String): Long = try {
+        prefs.getLong(key, 0L)
+    } catch (e: Exception) {
+        Log.w(TAG, "Token store unreadable (${e.javaClass.simpleName})")
+        0L
+    }
+
+    private fun write(block: SharedPreferences.Editor.() -> Unit) {
+        try {
+            prefs.edit().apply(block).apply()
+        } catch (e: Exception) {
+            Log.w(TAG, "Token store not writable (${e.javaClass.simpleName})")
+        }
     }
 
     override var accessToken: String?
-        get() = encryptedPrefs.getString(KEY_ACCESS_TOKEN, null)
-        set(value) {
-            encryptedPrefs.edit().putString(KEY_ACCESS_TOKEN, value).apply()
-        }
+        get() = readString(KEY_ACCESS_TOKEN)
+        set(value) = write { putString(KEY_ACCESS_TOKEN, value) }
 
     override var refreshToken: String?
-        get() = encryptedPrefs.getString(KEY_REFRESH_TOKEN, null)
-        set(value) {
-            encryptedPrefs.edit().putString(KEY_REFRESH_TOKEN, value).apply()
-        }
+        get() = readString(KEY_REFRESH_TOKEN)
+        set(value) = write { putString(KEY_REFRESH_TOKEN, value) }
 
     override var tokenExpiry: Long
-        get() = encryptedPrefs.getLong(KEY_TOKEN_EXPIRY, 0L)
-        set(value) {
-            encryptedPrefs.edit().putLong(KEY_TOKEN_EXPIRY, value).apply()
-        }
+        get() = readLong(KEY_TOKEN_EXPIRY)
+        set(value) = write { putLong(KEY_TOKEN_EXPIRY, value) }
 
     override var userId: String?
-        get() = encryptedPrefs.getString(KEY_USER_ID, null)
+        get() = readString(KEY_USER_ID)
         set(value) {
-            encryptedPrefs.edit().putString(KEY_USER_ID, value).apply()
+            write { putString(KEY_USER_ID, value) }
             FailureReporter.setUser(value)
         }
 
@@ -79,12 +86,12 @@ class TokenManager @Inject constructor(
     }
 
     override fun clearTokens() {
-        encryptedPrefs.edit()
-            .remove(KEY_ACCESS_TOKEN)
-            .remove(KEY_REFRESH_TOKEN)
-            .remove(KEY_TOKEN_EXPIRY)
-            .remove(KEY_USER_ID)
-            .apply()
+        write {
+            remove(KEY_ACCESS_TOKEN)
+            remove(KEY_REFRESH_TOKEN)
+            remove(KEY_TOKEN_EXPIRY)
+            remove(KEY_USER_ID)
+        }
         FailureReporter.setUser(null)
     }
 }
