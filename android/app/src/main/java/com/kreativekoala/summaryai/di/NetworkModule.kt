@@ -36,6 +36,10 @@ object NetworkModule {
     @Singleton
     fun provideLoggingInterceptor(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor().apply {
+            // Debug BODY logging must never print credentials.
+            redactHeader("Authorization")
+            redactHeader("apikey")
+            redactHeader("Cookie")
             level = if (BuildConfig.DEBUG) {
                 HttpLoggingInterceptor.Level.BODY
             } else {
