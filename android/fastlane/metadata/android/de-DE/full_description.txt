@@ -1,53 +1,21 @@
-Meeting Mind - KI-Meeting-Rekorder und Transkription
+Meeting Mind: kostenlose KI-Meeting-Notizen
 
-Verändern Sie die Art und Weise, wie Sie jedes Meeting, jede Vorlesung und jedes Gespräch festhalten und in Erinnerung behalten. Meeting Mind nutzt fortschrittliche KI, um Ihre Audioaufnahmen aufzuzeichnen, zu transkribieren und zusammenzufassen, damit Ihnen nie wieder wichtige Details entgehen.
+Nimm ein Meeting, eine Vorlesung oder ein Telefongespräch auf und erhalte ein Transkript, eine Zusammenfassung und eine Liste mit Aufgaben. Meeting Mind ist kostenlos: keine Karte und kein Abo.
 
-HAUPTFUNKTIONEN
+WAS DU TUN KANNST
+- Nimm vor Ort mit dem Mikrofon deines Telefons auf.
+- Führe Anrufe aus der App und lasse sie aufnehmen und transkribieren.
+- Schicke den Meeting-Mind-Bot in ein Zoom-, Google-Meet- oder Microsoft-Teams-Meeting. Der Bot tritt als sichtbarer Teilnehmer mit dem Namen Meeting Mind bei.
+- Erhalte für jede Aufnahme eine Zusammenfassung, die wichtigsten Punkte und Aufgaben.
+- Durchsuche deine Aufnahmen und stelle Fragen zu einem Meeting.
+- Nutze die Web-App unter meetingmind.org mit demselben Konto. Dort kannst du auch Audiodateien hochladen, die du bereits hast.
 
-Sofortige Transkription
-Nehmen Sie jedes Meeting, jede Vorlesung oder jedes Gespräch auf und erhalten Sie präzise Transkriptionen mit modernster KI. Unterstützung für mehrere Sprecher mit automatischer Sprechererkennung.
+AI COACH
+Das Live-Coaching von AI Coach in Meetings mit dem Bot ist optional und verbraucht separate Guthaben. Alles andere oben ist kostenlos.
 
-Intelligente Zusammenfassungen
-Keine Zeit, lange Transkripte durchzulesen? Erhalten Sie prägnante, KI-generierte Zusammenfassungen, die die wichtigsten Punkte, Entscheidungen und bedeutenden Momente erfassen.
+GUT ZU WISSEN
+- Du bist dafür verantwortlich, andere über die Aufnahme zu informieren und die Aufnahmegesetze deines Standorts einzuhalten. Manche Orte verlangen die Zustimmung aller.
+- Sehr kurze Aufnahmen erhalten keine Zusammenfassung. Sprich etwas länger oder lade längeres Audio in der Web-App hoch.
+- Aufnahmen werden von den KI- und Transkriptionsdiensten verarbeitet, die in unserer Datenschutzerklärung aufgeführt sind.
 
-Aufgaben und To-Dos
-Vergessen Sie nie wieder Nachfassaktionen. Meeting Mind extrahiert automatisch Aufgaben und To-Dos aus Ihren Gesprächen und hilft Ihnen, Ihre Verpflichtungen im Blick zu behalten.
-
-Durchsuchbares Archiv
-Alle Ihre Aufnahmen sind organisiert und durchsuchbar. Finden Sie schnell jene wichtige Besprechung von vor Wochen, indem Sie die Transkripte durchsuchen.
-
-Überall Aufnehmen
-Nutzen Sie Meeting Mind für Geschäftsmeetings und Teamgespräche, Vorlesungen und Kurse, Interviews und Beratungen, persönliche Sprachnotizen und Telefonate.
-
-Geräteübergreifende Synchronisierung
-Ihre Aufnahmen und Transkripte werden sicher in der Cloud synchronisiert und sind von jedem Gerät aus zugänglich.
-
-SO FUNKTIONIERT ES
-
-Tippen Sie, um die Aufnahme zu starten
-Meeting Mind erfasst Audio in hoher Qualität
-Die KI verarbeitet und transkribiert Ihre Aufnahme
-Überprüfen Sie Ihre Transkription, Zusammenfassung und Aufgaben
-Suchen und referenzieren Sie jederzeit
-
-WARUM MEETING MIND?
-
-Zeit Sparen - Hören Sie auf, manuell Notizen zu machen. Konzentrieren Sie sich auf das Gespräch, während Meeting Mind alles erfasst.
-
-Kein Detail Verpassen - Wichtige Entscheidungen, Namen, Daten und Zusagen werden alle erfasst und sind durchsuchbar.
-
-Organisiert Bleiben - Alle Ihre Aufnahmen an einem Ort, nach Datum sortiert und leicht durchsuchbar.
-
-Produktivität Steigern - Die automatische Aufgabenextraktion hält Sie verantwortlich und auf Kurs.
-
-DATENSCHUTZ UND SICHERHEIT
-
-Ihre Aufnahmen werden verschlüsselt und sicher gespeichert. Wir nehmen Ihre Privatsphäre ernst - Ihre Daten gehören Ihnen.
-
-ABONNEMENT
-
-Meeting Mind Pro schaltet unbegrenzte Aufnahmen, erweiterte KI-Funktionen und bevorzugte Verarbeitung frei. Starten Sie mit einer kostenlosen Testversion, um die volle Leistung der KI-gestützten Meeting-Erfassung zu erleben.
-
-Laden Sie Meeting Mind noch heute herunter und verpassen Sie nie wieder ein wichtiges Detail aus Ihren Meetings, Vorlesungen oder Gesprächen.
-
-Fragen oder Feedback? Kontaktieren Sie uns unter support@kreativekoala.llc
+Fragen oder Feedback: support@kreativekoala.llc
