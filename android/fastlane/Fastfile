@@ -1,6 +1,12 @@
 default_platform(:android)
 
 platform :android do
+  # Listing text and images are NOT uploaded from this repo. The live Play listing is edited
+  # through the Play API / Play Console, and fastlane/metadata is only a mirror of it (see the
+  # README there). fastlane supply uploads metadata, images and screenshots unless each one is
+  # skipped, so every upload_to_play_store call below keeps skip_upload_metadata,
+  # skip_upload_images and skip_upload_screenshots true, except the guarded screenshots lane.
+  # Release notes (changelogs) have their own flag, skip_upload_changelogs, and are unaffected.
   lane :deploy do
     upload_to_play_store(
       track: "production",
@@ -13,10 +19,19 @@ platform :android do
     )
   end
 
-  # Push only the en-US phone screenshots (and any other listing assets in
-  # fastlane/metadata/android/<locale>/images/) without touching the AAB.
-  # Use this lane for screenshot-only updates — no app version bump needed.
+  # Push the listing images in fastlane/metadata/android/<locale>/images/ to Play without
+  # touching the AAB (screenshot updates need no app version bump).
+  #
+  # GUARDED: this is the only lane that writes listing images from this repo, and it REPLACES
+  # what is live. en-US/images also holds icon.png and featureGraphic.png, which this lane
+  # pushes too. It refuses to run unless ALLOW_LISTING_IMAGE_UPLOAD=1 is set, so it cannot
+  # overwrite the live listing by accident. Check the repo images are what you want live, then:
+  #   ALLOW_LISTING_IMAGE_UPLOAD=1 fastlane screenshots
+  # Listing text stays skipped here (skip_upload_metadata true) on purpose.
   lane :screenshots do
+    unless ENV["ALLOW_LISTING_IMAGE_UPLOAD"] == "1"
+      UI.user_error!("The screenshots lane replaces the LIVE Play listing images with the files in fastlane/metadata/android/*/images. Set ALLOW_LISTING_IMAGE_UPLOAD=1 to confirm that is what you want.")
+    end
     upload_to_play_store(
       track: "production",
       skip_upload_apk: true,
