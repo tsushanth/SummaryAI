@@ -1,53 +1,21 @@
-Meeting Mind - Grabadora de Reuniones con IA y Transcripción
+Meeting Mind: notas de reuniones con IA gratis
 
-Transforma la manera en que capturas y recuerdas cada reunión, clase y conversación. Meeting Mind utiliza inteligencia artificial avanzada para grabar, transcribir y resumir tu audio, para que nunca más te pierdas detalles importantes.
+Graba una reunión, una clase o una llamada y obtén una transcripción, un resumen y una lista de tareas. Meeting Mind es gratis: sin tarjeta y sin suscripción.
 
-FUNCIONES PRINCIPALES
+QUÉ PUEDES HACER
+- Graba en persona con el micrófono del teléfono.
+- Haz llamadas desde la app y haz que se graben y se transcriban.
+- Envía el bot de Meeting Mind a una reunión de Zoom, Google Meet o Microsoft Teams. El bot se une como un participante visible llamado Meeting Mind.
+- Obtén un resumen, los puntos clave y las tareas de cada grabación.
+- Busca en tus grabaciones y haz preguntas sobre una reunión.
+- Usa la app web en meetingmind.org con la misma cuenta. Allí también puedes subir archivos de audio que ya tengas.
 
-Transcripción Instantánea
-Graba cualquier reunión, clase o conversación y obtén transcripciones precisas con IA de última generación. Compatible con múltiples hablantes y detección automática de interlocutores.
+AI COACH
+El coaching en directo de AI Coach durante las reuniones con el bot es opcional y usa créditos aparte. Todo lo demás de arriba es gratis.
 
-Resúmenes Inteligentes
-¿No tienes tiempo para leer transcripciones extensas? Obtén resúmenes concisos generados por IA que capturan los puntos clave, decisiones y momentos importantes.
+CONVIENE SABER
+- Eres responsable de avisar a las personas de que estás grabando y de cumplir las leyes de grabación de tu zona. En algunos lugares se exige el consentimiento de todos.
+- Las grabaciones muy cortas no reciben resumen. Habla un poco más o sube un audio más largo en la app web.
+- Las grabaciones las procesan los servicios de IA y de transcripción que se indican en nuestra política de privacidad.
 
-Tareas Pendientes
-No vuelvas a olvidar los seguimientos. Meeting Mind extrae automáticamente las tareas y pendientes de tus conversaciones, ayudándote a cumplir con tus compromisos.
-
-Archivo con Búsqueda
-Todas tus grabaciones están organizadas y son fáciles de buscar. Encuentra rápidamente esa conversación importante de hace semanas buscando en las transcripciones.
-
-Graba en Cualquier Lugar
-Usa Meeting Mind para reuniones de trabajo y llamadas de equipo, clases y conferencias, entrevistas y consultas, notas de voz personales y llamadas telefónicas.
-
-Sincronización Entre Dispositivos
-Tus grabaciones y transcripciones se sincronizan de forma segura en la nube, accesibles desde cualquier dispositivo.
-
-CÓMO FUNCIONA
-
-Toca para comenzar a grabar
-Meeting Mind captura audio de alta calidad
-La IA procesa y transcribe tu grabación
-Revisa tu transcripción, resumen y tareas pendientes
-Busca y consulta en cualquier momento
-
-¿POR QUÉ MEETING MIND?
-
-Ahorra Tiempo - Deja de tomar notas manualmente. Concéntrate en la conversación mientras Meeting Mind captura todo.
-
-No Te Pierdas Detalles - Decisiones importantes, nombres, fechas y compromisos quedan capturados y son fáciles de buscar.
-
-Mantente Organizado - Todas tus grabaciones en un solo lugar, organizadas por fecha y fáciles de buscar.
-
-Aumenta Tu Productividad - La extracción automática de tareas te mantiene al día y en control.
-
-PRIVACIDAD Y SEGURIDAD
-
-Tus grabaciones están cifradas y almacenadas de forma segura. Nos tomamos tu privacidad muy en serio: tus datos te pertenecen.
-
-SUSCRIPCIÓN
-
-Meeting Mind Pro desbloquea grabaciones ilimitadas, funciones avanzadas de IA y procesamiento prioritario. Comienza con una prueba gratuita para experimentar todo el poder de la captura de reuniones asistida por IA.
-
-Descarga Meeting Mind hoy y no vuelvas a perder un detalle importante de tus reuniones, clases o conversaciones.
-
-¿Preguntas o comentarios? Contáctanos en support@kreativekoala.llc
+¿Preguntas o comentarios? support@kreativekoala.llc

@@ -1,46 +1,21 @@
-Meeting Mind - Registratore di Riunioni e Trascrizione con IA
+Meeting Mind: appunti AI gratis per le riunioni
 
-Trasforma il modo in cui catturi e ricordi ogni riunione, lezione e conversazione. Meeting Mind utilizza un'intelligenza artificiale avanzata per registrare, trascrivere e riassumere il tuo audio, così non perderai mai più dettagli importanti.
+Registra una riunione, una lezione o una telefonata e ricevi una trascrizione, un riassunto e un elenco di azioni da fare. Meeting Mind è gratuito: niente carta e nessun abbonamento.
 
-FUNZIONALITA' PRINCIPALI
+COSA PUOI FARE
+- Registra di persona con il microfono del telefono.
+- Fai telefonate dall'app e falle registrare e trascrivere.
+- Invia il bot di Meeting Mind a una riunione su Zoom, Google Meet o Microsoft Teams. Il bot entra come partecipante visibile con il nome Meeting Mind.
+- Ricevi un riassunto, i punti chiave e le azioni da fare per ogni registrazione.
+- Cerca tra le tue registrazioni e fai domande su una riunione.
+- Usa l'app web su meetingmind.org con lo stesso account. Lì puoi anche caricare i file audio che hai già.
 
-Trascrizione Istantanea
-Registra qualsiasi riunione, lezione o conversazione e ottieni trascrizioni accurate grazie all'IA all'avanguardia. Supporto per più interlocutori con rilevamento automatico dei parlanti.
+AI COACH
+Il coaching dal vivo di AI Coach durante le riunioni con il bot è facoltativo e usa crediti separati. Tutto il resto qui sopra è gratuito.
 
-Riassunti Intelligenti
-Non hai tempo di leggere trascrizioni lunghe? Ottieni riassunti concisi generati dall'IA che catturano i punti chiave, le decisioni e i momenti importanti.
+DA SAPERE
+- Sei tu a dover avvisare le persone che stai registrando e a rispettare le leggi sulle registrazioni del luogo in cui ti trovi. In alcuni luoghi serve il consenso di tutti.
+- Le registrazioni molto brevi non ricevono un riassunto. Parla un po' di più oppure carica un audio più lungo nell'app web.
+- Le registrazioni vengono elaborate dai servizi di AI e di trascrizione elencati nella nostra informativa sulla privacy.
 
-Attività da Svolgere
-Non dimenticare mai più i follow-up. Meeting Mind estrae automaticamente le attività e le cose da fare dalle tue conversazioni, aiutandoti a tenere sotto controllo i tuoi impegni.
-
-Archivio Ricercabile
-Tutte le tue registrazioni sono organizzate e ricercabili. Trova rapidamente quella discussione importante di settimane fa cercando nelle trascrizioni.
-
-Registra Ovunque
-Usa Meeting Mind per riunioni di lavoro e chiamate di gruppo, lezioni e corsi, colloqui e consulenze, memo vocali personali e telefonate.
-
-Sincronizzazione tra Dispositivi
-Le tue registrazioni e trascrizioni si sincronizzano in modo sicuro nel cloud, accessibili da qualsiasi dispositivo.
-
-COME FUNZIONA
-Tocca per avviare la registrazione
-Meeting Mind cattura audio di alta qualità
-L'IA elabora e trascrive la tua registrazione
-Rivedi la trascrizione, il riassunto e le attività
-Cerca e consulta in qualsiasi momento
-
-PERCHE' MEETING MIND?
-Risparmia Tempo - Smetti di prendere appunti a mano. Concentrati sulla conversazione mentre Meeting Mind cattura tutto.
-Non Perdere Dettagli - Decisioni importanti, nomi, date e impegni vengono tutti catturati e sono ricercabili.
-Resta Organizzato - Tutte le tue registrazioni in un unico posto, organizzate per data e facilmente ricercabili.
-Aumenta la Produttività - L'estrazione automatica delle attività ti mantiene responsabile e in carreggiata.
-
-PRIVACY E SICUREZZA
-Le tue registrazioni sono crittografate e archiviate in modo sicuro. Prendiamo sul serio la tua privacy: i tuoi dati appartengono a te.
-
-ABBONAMENTO
-Meeting Mind Pro sblocca registrazioni illimitate, funzionalità IA avanzate ed elaborazione prioritaria. Inizia con una prova gratuita per scoprire tutta la potenza della cattura delle riunioni assistita dall'IA.
-
-Scarica Meeting Mind oggi e non perdere mai più un dettaglio importante dalle tue riunioni, lezioni o conversazioni.
-
-Domande o feedback? Contattaci all'indirizzo support@kreativekoala.llc
+Domande o feedback: support@kreativekoala.llc
