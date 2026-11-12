@@ -2,6 +2,7 @@ package com.kreativekoala.summaryai.data.auth
 
 import android.content.SharedPreferences
 import com.kreativekoala.summaryai.testutil.FakeSharedPreferences
+import com.kreativekoala.summaryai.BuildConfig
 import com.russhwolf.settings.SharedPreferencesSettings
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.gotrue.Auth
@@ -47,9 +48,30 @@ class EncryptedSessionManagerTest {
         manager = EncryptedSessionManager(secure, legacy)
     }
 
-    /** Writes the session exactly the way supabase-kt's stock manager did (clear text, key "session", default prefs file). */
+    /** The key the stock manager really used on 1.7.9 devices (observed on a device: sb-<project>-supabase-co-session). */
+    private val realKey = "sb-mlofjzlmncgnhxbiuemf-supabase-co-session"
+
+    /**
+     * Writes the session exactly the way the app's stock supabase-kt manager did on 1.7.9: clear text, in the default
+     * prefs file, through the library's own SettingsSessionManager under the library's real key.
+     */
     private fun writeLegacy(s: UserSession) = runBlocking {
-        SettingsSessionManager(SharedPreferencesSettings(legacy)).saveSession(s)
+        SettingsSessionManager(SharedPreferencesSettings(legacy), realKey).saveSession(s)
+    }
+
+    /** What a very old install (or the library before it renamed the entry) holds: the plain key "session". */
+    private fun writeVeryOldLegacy(s: UserSession) = runBlocking {
+        SettingsSessionManager(SharedPreferencesSettings(legacy), EncryptedSessionManager.LEGACY_KEY).saveSession(s)
+    }
+
+    /** True when ANY clear-text session entry is left in the default prefs file. */
+    private fun plaintextLeft(): Boolean =
+        legacy.contains(realKey) || legacy.contains(EncryptedSessionManager.LEGACY_KEY) ||
+            legacy.all.keys.any { it.endsWith("-session") || it == "session" }
+
+    @Test fun libraryKeyMatchesTheKeyObservedOnDevice() {
+        assertEquals(realKey, EncryptedSessionManager.libraryKeyFor(BuildConfig.SUPABASE_URL))
+        assertEquals(realKey, EncryptedSessionManager.libraryKeyFor("mlofjzlmncgnhxbiuemf.supabase.co/"))
     }
 
     private fun assertSame(expected: UserSession, actual: UserSession?) {
@@ -77,33 +99,65 @@ class EncryptedSessionManagerTest {
         manager.saveSession(session)
         manager.deleteSession()
         assertFalse(secure.contains(EncryptedSessionManager.SECURE_KEY))
-        assertFalse(legacy.contains(EncryptedSessionManager.LEGACY_KEY))
+        assertFalse(plaintextLeft())
         assertNull(manager.loadSession())
     }
 
     @Test fun migratesAClearTextSessionAndWipesIt() = runBlocking {
         writeLegacy(session)
-        assertTrue(legacy.contains(EncryptedSessionManager.LEGACY_KEY))
+        assertTrue(legacy.contains(realKey))
 
         val loaded = manager.loadSession()
 
         assertSame(session, loaded) // the user stays signed in
         assertTrue("now in the encrypted store", secure.contains(EncryptedSessionManager.SECURE_KEY))
-        assertFalse("clear-text copy wiped", legacy.contains(EncryptedSessionManager.LEGACY_KEY))
+        assertFalse("clear-text copy wiped", plaintextLeft())
         assertSame(session, manager.loadSession()) // and the second launch reads the encrypted copy
+    }
+
+    @Test fun migratesASessionHeldUnderTheVeryOldPlainKey() = runBlocking {
+        writeVeryOldLegacy(session)
+        assertTrue(legacy.contains(EncryptedSessionManager.LEGACY_KEY))
+        assertSame(session, manager.loadSession())
+        assertTrue(secure.contains(EncryptedSessionManager.SECURE_KEY))
+        assertFalse(plaintextLeft())
+    }
+
+    @Test fun wipesBothClearTextKeysAfterMigrating() = runBlocking {
+        writeLegacy(session)
+        writeVeryOldLegacy(session)
+        assertTrue(legacy.contains(realKey) && legacy.contains(EncryptedSessionManager.LEGACY_KEY))
+        assertSame(session, manager.loadSession())
+        assertFalse("sb-... entry wiped", legacy.contains(realKey))
+        assertFalse("plain entry wiped", legacy.contains(EncryptedSessionManager.LEGACY_KEY))
+        assertFalse(plaintextLeft())
+    }
+
+    @Test fun anUnreadableLibraryEntryDoesNotHideAReadablePlainOne() = runBlocking {
+        legacy.edit().putString(realKey, "not json").commit()
+        writeVeryOldLegacy(session)
+        assertSame(session, manager.loadSession())
+        assertFalse(plaintextLeft())
+    }
+
+    @Test fun savingNeverLeavesAClearTextCopyBehind() = runBlocking {
+        writeLegacy(session)
+        manager.saveSession(session)
+        assertFalse(plaintextLeft())
+        assertTrue(secure.contains(EncryptedSessionManager.SECURE_KEY))
     }
 
     @Test fun leftoverClearTextCopyIsRemovedWhenEncryptedOneExists() = runBlocking {
         manager.saveSession(session)
-        legacy.edit().putString(EncryptedSessionManager.LEGACY_KEY, "{\"stale\":true}").commit()
+        legacy.edit().putString(realKey, "{\"stale\":true}").commit()
         assertSame(session, manager.loadSession())
-        assertFalse(legacy.contains(EncryptedSessionManager.LEGACY_KEY))
+        assertFalse(plaintextLeft())
     }
 
     @Test fun unreadableClearTextSessionMeansSignedOutAndIsWiped() = runBlocking {
-        legacy.edit().putString(EncryptedSessionManager.LEGACY_KEY, "not json").commit()
+        legacy.edit().putString(realKey, "not json").commit()
         assertNull(manager.loadSession())
-        assertFalse(legacy.contains(EncryptedSessionManager.LEGACY_KEY))
+        assertFalse(plaintextLeft())
         assertFalse(secure.contains(EncryptedSessionManager.SECURE_KEY))
     }
 
@@ -132,10 +186,10 @@ class EncryptedSessionManagerTest {
         writeLegacy(session)
         val broken = EncryptedSessionManager(BrokenPrefs(), legacy)
         assertSame(session, broken.loadSession())
-        assertTrue("kept so the next launch can finish the migration", legacy.contains(EncryptedSessionManager.LEGACY_KEY))
+        assertTrue("kept so the next launch can finish the migration", legacy.contains(realKey))
         // next launch, store healthy again
         assertSame(session, EncryptedSessionManager(secure, legacy).loadSession())
-        assertFalse(legacy.contains(EncryptedSessionManager.LEGACY_KEY))
+        assertFalse(plaintextLeft())
     }
 
     @Test fun brokenLegacyFileIsNotACrash() = runBlocking {
@@ -161,7 +215,7 @@ class EncryptedSessionManagerTest {
         }
         runBlocking { withTimeout(10_000) { client.auth.awaitInitialization() } }
         assertSame(session, client.auth.currentSessionOrNull())
-        assertFalse(legacy.contains(EncryptedSessionManager.LEGACY_KEY))
+        assertFalse(plaintextLeft())
         assertTrue(secure.contains(EncryptedSessionManager.SECURE_KEY))
         runBlocking { client.auth.clearSession() }
         assertFalse(secure.contains(EncryptedSessionManager.SECURE_KEY))
