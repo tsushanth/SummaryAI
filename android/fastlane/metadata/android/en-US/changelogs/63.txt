@@ -1,0 +1,1 @@
+If you reach your monthly meeting bot time, the app now tells you when it resets. Your sign-in is also stored more securely on this device.
