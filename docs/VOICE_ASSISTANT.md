@@ -2,7 +2,7 @@
 
 The Meeting Mind bot that joins a call can answer spoken questions. Someone says **"Meeting Mind, ..."** and the bot answers out loud, from the live meeting and, for the account owner only, from that owner's past meetings.
 
-Server side only: no Android, iOS or web client change is needed. Code: `backend/src/services/voiceAssistant/`, routes in `backend/src/routes/voiceAssistant.ts`, migration `backend/supabase/migrations/029_voice_assistant_events.sql` (optional, not applied by the PR).
+Server side plus an on/off switch for the user: Android (Settings > "Voice assistant in meetings", `android/.../ui/settings/VoiceAssistantSetting.kt`) and the web dashboard (Settings > "Voice assistant in meetings", `web/src/components/settings/VoiceAssistantCard.tsx`). Both read and write the `/api/voice-assistant` endpoint below. There is no iOS switch. Code: `backend/src/services/voiceAssistant/`, routes in `backend/src/routes/voiceAssistant.ts`, migration `backend/supabase/migrations/029_voice_assistant_events.sql` (optional, not applied by the PR).
 
 ## Behaviour
 
@@ -34,7 +34,7 @@ Server side only: no Android, iOS or web client change is needed. Code: `backend
 | `VOICE_ASSISTANT_TTS_PROVIDER` / `_TTS_VOICE` / `_TTS_USD_PER_1K_CHARS` | `deepgram` / `aura-asteria-en` / `0.015` | see TTS below; the price is only for the cost estimate |
 | `VOICE_ASSISTANT_INTRO` / `VOICE_ASSISTANT_CUE` | on / on | the join intro, the "Let me check." cue |
 
-A user can opt out (or in) themselves: `PUT /api/voice-assistant {"enabled": false}` (authenticated, writes `profiles.preferences.voice_assistant`; `false` wins in every mode, `GET` shows the effective state). No client uses it yet; it exists so support can flip a user and a client can add a toggle later. A bot only gets the assistant if the flags allow it **when the bot is created**; the kill switch also applies to bots already in a meeting.
+A user can opt out (or in) themselves: `PUT /api/voice-assistant {"enabled": false}` (authenticated, writes `profiles.preferences.voice_assistant`; `false` wins in every mode, `GET` shows the effective state `{enabled, reason, preference, mode}`; `PUT` takes `{"enabled": boolean}` (anything else is a 400) and returns the same shape). The Android app and the web dashboard use it for the user-facing switch; support can also flip a user with it. A bot only gets the assistant if the flags allow it **when the bot is created**, so turning the switch ON takes effect from the next meeting's bot (a bot already in a meeting that was created without the assistant stays without it). Turning it OFF also silences a bot that is already in a meeting: a running session re-reads the preference at most every 15 s (`PREFERENCE_REFRESH_MS`), and the kill switch applies to running bots immediately.
 
 Requirements already in production: `RECALL_API_KEY`, `INTERNAL_SECRET` (signs the assistant webhook URL), `SERVICE_URL`, `DEEPGRAM_API_KEY` (TTS), `ANTHROPIC_API_KEY`. If `INTERNAL_SECRET` or `SERVICE_URL` is missing the bot is created without the assistant. It also needs Recall's own real-time transcript (the default; not the `LIVE_STT_PROVIDER=soniox` path).
 

@@ -9,6 +9,7 @@ import { useSubscription, useCustomerPortal } from '@/hooks/useSubscription';
 import Link from 'next/link';
 import { DefaultTemplateCard } from '@/components/settings/DefaultTemplateCard';
 import { DefaultLanguageCard } from '@/components/settings/DefaultLanguageCard';
+import { VoiceAssistantCard } from '@/components/settings/VoiceAssistantCard';
 
 export default function SettingsPage() {
   const { user, signOut, loading } = useAuth();
@@ -37,6 +38,7 @@ export default function SettingsPage() {
       </div>
 
       <div className="space-y-6">
+        <VoiceAssistantCard />
         <DefaultTemplateCard />
         <DefaultLanguageCard />
 
