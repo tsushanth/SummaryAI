@@ -5,7 +5,7 @@ Registra una riunione, una lezione o una telefonata e ricevi una trascrizione, u
 COSA PUOI FARE
 - Registra di persona con il microfono del telefono.
 - Fai telefonate dall'app e falle registrare e trascrivere.
-- Invia il bot di Meeting Mind a una riunione su Zoom, Google Meet o Microsoft Teams. Il bot entra come partecipante visibile con il nome Meeting Mind.
+- Invia il bot di Meeting Mind a una riunione su Zoom, Google Meet o Microsoft Teams. Il bot entra come partecipante visibile con il nome Meeting Mind. Il tempo del bot ha un limite mensile.
 - Ricevi un riassunto, i punti chiave e le azioni da fare per ogni registrazione.
 - Cerca tra le tue registrazioni e fai domande su una riunione.
 - Usa l'app web su meetingmind.org con lo stesso account. Lì puoi anche caricare i file audio che hai già.

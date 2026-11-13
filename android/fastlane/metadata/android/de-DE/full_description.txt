@@ -5,7 +5,7 @@ Nimm ein Meeting, eine Vorlesung oder ein Telefongespräch auf und erhalte ein T
 WAS DU TUN KANNST
 - Nimm vor Ort mit dem Mikrofon deines Telefons auf.
 - Führe Anrufe aus der App und lasse sie aufnehmen und transkribieren.
-- Schicke den Meeting-Mind-Bot in ein Zoom-, Google-Meet- oder Microsoft-Teams-Meeting. Der Bot tritt als sichtbarer Teilnehmer mit dem Namen Meeting Mind bei.
+- Schicke den Meeting-Mind-Bot in ein Zoom-, Google-Meet- oder Microsoft-Teams-Meeting. Der Bot tritt als sichtbarer Teilnehmer mit dem Namen Meeting Mind bei. Die Bot-Zeit ist pro Monat begrenzt.
 - Erhalte für jede Aufnahme eine Zusammenfassung, die wichtigsten Punkte und Aufgaben.
 - Durchsuche deine Aufnahmen und stelle Fragen zu einem Meeting.
 - Nutze die Web-App unter meetingmind.org mit demselben Konto. Dort kannst du auch Audiodateien hochladen, die du bereits hast.

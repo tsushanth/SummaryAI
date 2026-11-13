@@ -5,7 +5,7 @@ Graba una reunión, una clase o una llamada y obtén una transcripción, un resu
 QUÉ PUEDES HACER
 - Graba en persona con el micrófono del teléfono.
 - Haz llamadas desde la app y haz que se graben y se transcriban.
-- Envía el bot de Meeting Mind a una reunión de Zoom, Google Meet o Microsoft Teams. El bot se une como un participante visible llamado Meeting Mind.
+- Envía el bot de Meeting Mind a una reunión de Zoom, Google Meet o Microsoft Teams. El bot se une como un participante visible llamado Meeting Mind. El tiempo del bot tiene un límite mensual.
 - Obtén un resumen, los puntos clave y las tareas de cada grabación.
 - Busca en tus grabaciones y haz preguntas sobre una reunión.
 - Usa la app web en meetingmind.org con la misma cuenta. Allí también puedes subir archivos de audio que ya tengas.
