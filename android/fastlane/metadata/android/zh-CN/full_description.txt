@@ -5,7 +5,7 @@ Meeting Mind：免费 AI 会议笔记
 你可以做什么
 - 用手机麦克风进行现场录音。
 - 在应用内拨打电话，并录音和转写。
-- 派出 Meeting Mind 机器人加入 Zoom、Google Meet 或 Microsoft Teams 会议。机器人会以名为 Meeting Mind 的可见参会者身份加入。
+- 派出 Meeting Mind 机器人加入 Zoom、Google Meet 或 Microsoft Teams 会议。机器人会以名为 Meeting Mind 的可见参会者身份加入。机器人的使用时长每月有上限。
 - 为每段录音获得摘要、要点和待办事项。
 - 搜索你的录音，并就某次会议提问。
 - 用同一个账户使用网页版 meetingmind.org。你也可以在那里上传已有的音频文件。

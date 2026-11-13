@@ -5,7 +5,7 @@ Record a meeting, a lecture or a phone call and get a transcript, a summary and 
 WHAT YOU CAN DO
 - Record in person with your phone's microphone.
 - Make phone calls from the app and have them recorded and transcribed.
-- Send the Meeting Mind bot to a Zoom, Google Meet or Microsoft Teams meeting. The bot joins as a visible participant named Meeting Mind.
+- Send the Meeting Mind bot to a Zoom, Google Meet or Microsoft Teams meeting. The bot joins as a visible participant named Meeting Mind. Bot time has a monthly limit.
 - Get a summary, key points and action items for each recording.
 - Search your recordings and ask questions about a meeting.
 - Use the web app at meetingmind.org with the same account. You can also upload audio files you already have there.

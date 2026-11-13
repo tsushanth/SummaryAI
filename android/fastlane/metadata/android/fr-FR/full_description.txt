@@ -5,7 +5,7 @@ Enregistrez une réunion, un cours ou un appel téléphonique et obtenez une tra
 CE QUE VOUS POUVEZ FAIRE
 - Enregistrez en personne avec le micro de votre téléphone.
 - Passez des appels depuis l'application et faites-les enregistrer et transcrire.
-- Envoyez le bot Meeting Mind dans une réunion Zoom, Google Meet ou Microsoft Teams. Le bot rejoint la réunion comme un participant visible nommé Meeting Mind.
+- Envoyez le bot Meeting Mind dans une réunion Zoom, Google Meet ou Microsoft Teams. Le bot rejoint la réunion comme un participant visible nommé Meeting Mind. Le temps du bot est limité chaque mois.
 - Obtenez un résumé, les points clés et les tâches de chaque enregistrement.
 - Recherchez dans vos enregistrements et posez des questions sur une réunion.
 - Utilisez l'application web sur meetingmind.org avec le même compte. Vous pouvez aussi y importer des fichiers audio que vous avez déjà.
