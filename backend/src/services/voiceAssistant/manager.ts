@@ -22,6 +22,8 @@ import { isOwnerSpeaker, type OwnerIdentity, type Speaker } from './wake.js';
 export const BOT_NAME = 'Meeting Mind';
 const IDLE_MS = 30 * 60_000;
 const NEGATIVE_CACHE_MS = 5 * 60_000;
+/** A running session re-reads the user's opt-out at most this often, so the in-app switch also works mid-meeting. */
+export const PREFERENCE_REFRESH_MS = 15_000;
 
 
 /** Everything the manager needs from the outside. Production implementations below; tests pass fakes. */
@@ -44,6 +46,8 @@ export interface ManagerDeps {
 
 interface Entry {
   session: VoiceSession; ctx: BotContext; owner: OwnerIdentity; ownerName: string | null; preference: boolean | undefined;
+  /** When `preference` was last read (ms). */
+  preferenceAt: number;
   /** Participants Recall has named (lowercased name -> email / host flag): the live-stt payload carries a name only. */
   known: Map<string, { email: string | null; isHost: boolean }>;
 }
@@ -73,6 +77,7 @@ export class VoiceAssistantManager {
 
     const entry = await this.entryFor(botId);
     if (!entry) return { handled: false, reason: 'not_enabled' };
+    await this.refreshPreference(entry);
 
     const text = (t.words ?? []).map((w) => w.text).join(' ');
     const speaker: Speaker = { name: t.participant?.name ?? null, email: t.participant?.email ?? null, isHost: !!t.participant?.is_host };
@@ -96,6 +101,7 @@ export class VoiceAssistantManager {
     const entry = await this.entryFor(recallBotId);
     if (!entry) return { handled: false, reason: 'not_enabled' };
     if (!entry.ctx.liveStt) return { handled: false, reason: 'no_live_stream' };
+    await this.refreshPreference(entry);
     for (const s of segments) {
       const name = s.speakerName?.trim() || null;
       const k = name ? entry.known.get(name.toLowerCase()) : undefined;
@@ -103,6 +109,17 @@ export class VoiceAssistantManager {
       await entry.session.onTranscript({ speaker, text: s.text, partial: false, source: 'live_stt' });
     }
     return { handled: true };
+  }
+
+  /**
+   * Re-read profiles.preferences.voice_assistant for a running session (at most every PREFERENCE_REFRESH_MS), so a user who flips the
+   * in-app switch during a meeting gets silence on the next event (and can turn it back on). A failed read keeps the last value.
+   */
+  private async refreshPreference(entry: Entry): Promise<void> {
+    const now = this.d.now();
+    if (now - entry.preferenceAt < PREFERENCE_REFRESH_MS) return;
+    entry.preferenceAt = now; // also throttles retries after a failure
+    try { entry.preference = await this.d.loadPreference(entry.ctx.userId); } catch { /* keep the last known value */ }
   }
 
   private async entryFor(botId: string): Promise<Entry | null> {
@@ -129,7 +146,7 @@ export class VoiceAssistantManager {
       const [owner, seed] = await Promise.all([this.d.loadOwner(ctx.userId), this.d.loadSeed(ctx.meetingId, ctx.userId)]);
       const data = this.d.dataFor(ctx.userId); // bound to the bot run's user, nothing else
       const ownerName = owner.names[0] ?? null;
-      const entry: Entry = { ctx, owner, ownerName, preference, known: new Map(), session: null as unknown as VoiceSession };
+      const entry: Entry = { ctx, owner, ownerName, preference, preferenceAt: this.d.now(), known: new Map(), session: null as unknown as VoiceSession };
       const deps: SessionDeps = {
         userId: ctx.userId,
         meetingId: ctx.meetingId,
@@ -137,7 +154,7 @@ export class VoiceAssistantManager {
         cfg: this.d.getConfig,
         now: this.d.now,
         sleep: this.d.sleep,
-        enabled: () => decideEnabled(this.d.getConfig(), ctx.userId, preference).enabled,
+        enabled: () => decideEnabled(this.d.getConfig(), ctx.userId, entry.preference).enabled,
         isOwner: (s) => isOwnerSpeaker(s, owner, false),
         isOwnerEmailMatch: (s) => isOwnerSpeaker(s, owner, true),
         answer: (input) => this.d.answerer({ ...input, ownerName, data }),

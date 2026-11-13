@@ -242,6 +242,16 @@ interface SummaryAIApi {
     @POST("api/calendar/sync")
     suspend fun syncCalendar(): Response<Unit>
 
+    // MARK: - In-meeting voice assistant (docs/VOICE_ASSISTANT.md)
+
+    @GET("api/voice-assistant")
+    suspend fun getVoiceAssistant(): VoiceAssistantResponse
+
+    @PUT("api/voice-assistant")
+    suspend fun setVoiceAssistant(
+        @Body request: VoiceAssistantRequest
+    ): VoiceAssistantResponse
+
     // MARK: - Integrations
 
     @GET("api/integrations")

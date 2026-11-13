@@ -99,6 +99,9 @@ fun SettingsScreen(
                 }
             }
 
+            // In-meeting voice assistant on/off
+            VoiceAssistantSection()
+
             // Appearance Section
             SettingsSection(title = stringResource(R.string.appearance)) {
                 ThemeSelector(
