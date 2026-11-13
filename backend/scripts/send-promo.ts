@@ -13,6 +13,12 @@
  *  - SUPABASE_URL          — project URL
  *  - SUPABASE_SERVICE_ROLE_KEY — service role key
  *  - PLAY_KEY_FILE         — path to GCP service account JSON (optional, skips Play offer step if missing)
+ *  - UNSUB_SECRET          — signs the one-click unsubscribe link in every email (macOS Keychain: service
+ *                            UNSUB_SECRET, account unsubscribe). The run aborts without it: no unsigned sends.
+ *  - SUPPRESSION_SUPABASE_URL / SUPPRESSION_SUPABASE_SERVICE_KEY — optional; the project holding
+ *                            public.outreach_suppressions (defaults to SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY,
+ *                            which is the SummaryAI project). Everyone in that table is skipped; if it cannot be
+ *                            read, nothing is sent.
  *
  * Usage:
  *   export RESEND_API_KEY=re_xxxx
@@ -29,7 +35,8 @@
 import * as fs from "fs";
 import * as path from "path";
 import { createClient } from "@supabase/supabase-js";
-import { sendEmail } from "../src/lib/email.js";
+import { Resend } from "resend";
+import { fromAddress } from "../src/lib/email.js";
 import * as dotenv from "dotenv";
 
 dotenv.config({ path: path.join(__dirname, "../.env") });
@@ -49,6 +56,12 @@ const PLAY_KEY_FILE =
 
 const SUPABASE_URL = process.env.SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+// Signed unsubscribe + suppression helpers (ESM, loaded lazily because this script runs as CommonJS under tsx).
+type PromoMail = typeof import("./lib/promo-mail.mjs");
+type Unsub = typeof import("./lib/unsubscribe.mjs");
+let promoMail: PromoMail;
+let suppressed: Set<string> = new Set();
 
 const redeemUrl = `https://play.google.com/redeem?code=${OFFER_ID}`;
 
@@ -605,9 +618,22 @@ async function sendBatch(
     return;
   }
 
+  // Drop unsubscribed/suppressed addresses and Apple private-relay addresses before anything is built or sent.
+  const filtered = promoMail.filterRecipients(users, suppressed);
+  users = filtered.allowed as Profile[];
+  log(
+    `${template}: ${filtered.counts.candidates} candidates, ${filtered.counts.suppressed} suppressed, ` +
+      `${filtered.counts.relay} Apple relay, ${filtered.counts.no_email} without email`
+  );
+  if (users.length === 0) {
+    log(`No sendable users for ${template}. Skipping.`);
+    return;
+  }
+
   log(
     `Sending ${template} to ${users.length} users${DRY_RUN ? " (DRY RUN)" : ""}…`
   );
+  const resend = DRY_RUN ? null : new Resend(process.env.RESEND_API_KEY);
 
   let sent = 0;
   let failed = 0;
@@ -615,25 +641,29 @@ async function sendBatch(
   for (const user of users) {
     if (!user.email) continue;
 
+    // Footer + List-Unsubscribe headers. Throws if UNSUB_SECRET is missing, so nothing goes out unsigned.
+    const message = promoMail.buildPromoMessage({
+      from: fromAddress("meetingmind"),
+      to: user.email,
+      subject,
+      html: buildHtml(user.display_name),
+    });
+
     if (DRY_RUN) {
-      log(`[DRY RUN] Would send ${template} → ${user.email}`);
+      log(`[DRY RUN] Would send ${template} (unsubscribe link + headers attached)`);
       sent++;
       continue;
     }
 
     try {
-      await sendEmail({
-        app: "meetingmind",
-        to: user.email,
-        subject,
-        html: buildHtml(user.display_name),
-      });
+      const { error } = await resend!.emails.send(message);
+      if (error) throw new Error(error.message);
       await recordSend(user.id, user.email, template);
       sent++;
-      log(`Sent ${template} → ${user.email}`);
+      log(`Sent ${template}`);
     } catch (err: any) {
       failed++;
-      log(`FAILED ${template} → ${user.email}: ${err?.message}`);
+      log(`FAILED ${template}: ${err?.message}`);
     }
 
     // ~2 req/s to stay within Resend rate limits
@@ -649,6 +679,15 @@ async function main() {
   requireEnv("RESEND_API_KEY");
   requireEnv("SUPABASE_URL");
   requireEnv("SUPABASE_SERVICE_ROLE_KEY");
+  requireEnv("UNSUB_SECRET");
+
+  promoMail = await import("./lib/promo-mail.mjs");
+  const unsub: Unsub = await import("./lib/unsubscribe.mjs");
+  // Fail closed: if the suppression table cannot be read this throws and nothing is sent.
+  suppressed = await unsub.loadSuppressions({
+    supabaseUrl: process.env.SUPPRESSION_SUPABASE_URL ?? SUPABASE_URL,
+    serviceKey: process.env.SUPPRESSION_SUPABASE_SERVICE_KEY ?? SUPABASE_SERVICE_ROLE_KEY,
+  });
 
   log("=== Meeting Mind Email Drip Sequence ===");
   log(`Offer ID: ${OFFER_ID}`);
