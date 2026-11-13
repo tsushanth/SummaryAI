@@ -18,6 +18,9 @@ set -e
 RESEND_API_KEY="${RESEND_API_KEY:?Set RESEND_API_KEY}"
 SUPABASE_URL="${SUPABASE_URL:?Set SUPABASE_URL}"
 SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY:?Set SUPABASE_SERVICE_ROLE_KEY}"
+# Signs the one-click unsubscribe link in every email; send-promo.ts refuses to run without it.
+# Keychain on the owner's Mac: service UNSUB_SECRET, account unsubscribe. Never commit it.
+UNSUB_SECRET="${UNSUB_SECRET:?Set UNSUB_SECRET}"
 REPO_DIR="${REPO_DIR:-/opt/meetingmind}"
 # ─────────────────────────────────────────────────────────────
 
@@ -29,6 +32,7 @@ set -e
 export RESEND_API_KEY="$RESEND_API_KEY"
 export SUPABASE_URL="$SUPABASE_URL"
 export SUPABASE_SERVICE_ROLE_KEY="$SUPABASE_SERVICE_ROLE_KEY"
+export UNSUB_SECRET="$UNSUB_SECRET"
 export SKIP_PLAY=true
 
 cd "$REPO_DIR/backend"
