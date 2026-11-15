@@ -60,7 +60,7 @@ function escapeLiteral(s: string): string {
 
 function ruWake(extra: string[]): RegExp {
   const extras = extra.map(escapeLiteral);
-  const phrase = [`${RU_MEETING}[\\s-]+${RU_MIND}`, 'мит[\\s-]?инг', ...extras].join('|');
+  const phrase = [`${RU_MEETING}[\\s-]+${RU_MIND}`, 'мит[\\s-]инг', ...extras].join('|');
   return new RegExp(`^\\s*${RU_FILLER}(?:${phrase})${NOT_LETTER_AFTER}[\\s,.:;!?-]*(.*)$`, 'isu');
 }
 
@@ -160,7 +160,7 @@ const RU: LanguagePack = {
   },
   wake: ruWake,
   stop: new RegExp(`${NOT_LETTER_BEFORE}(стоп|хватит|отмена|отменить|отставить|замолчи|замолчите|молчи|тихо|достаточно|не надо|не нужно|забудь|неважно|не важно)${NOT_LETTER_AFTER}`, 'iu'),
-  wakeAnywhere: new RegExp(`${NOT_LETTER_BEFORE}(?:${RU_MEETING}[\\s-]+${RU_MIND}|мит[\\s-]?инг)${NOT_LETTER_AFTER}`, 'giu'),
+  wakeAnywhere: new RegExp(`${NOT_LETTER_BEFORE}(?:${RU_MEETING}[\\s-]+${RU_MIND}|мит[\\s-]инг)${NOT_LETTER_AFTER}`, 'giu'),
   defaultVoice: 'aria',
   spellNumbers: spellNumbersRu,
 };

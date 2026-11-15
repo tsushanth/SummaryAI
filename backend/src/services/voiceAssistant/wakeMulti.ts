@@ -73,6 +73,8 @@ export function unicodeTokens(s: string): string[] {
     .replace(/[^\p{L}\p{N}\s']/gu, ' ').split(/\s+/).filter(Boolean);
 }
 
+const latinOf = (token: string): string => [...token].map((c) => TRANSLIT[c] ?? c).join('');
+
 /** Latin spelling of a Cyrillic word, then consonant skeleton: "митинг", "meeting" and "mitting" all become "mtng". */
 function skeleton(token: string): string {
   const latin = [...token].map((c) => TRANSLIT[c] ?? c).join('');
@@ -102,6 +104,8 @@ export function tokensMatch(a: string, b: string): boolean {
   const ca = isCyrillic(a);
   const cb = isCyrillic(b);
   if (ca !== cb) {
+    // Exact transliteration also counts for short words ("вы" / "vy", "в" / "v").
+    if (latinOf(ca ? a : b) === (ca ? b : a)) return true;
     const sa = skeleton(a);
     const sb = skeleton(b);
     return sa.length >= 3 && sa === sb;

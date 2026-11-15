@@ -43,7 +43,7 @@ export function splitForSpeech(text: string, max = CHUNK_CHARS): string[] {
       const win = rest.slice(0, max + 1);
       let cut = Math.max(win.lastIndexOf(', '), win.lastIndexOf('; '), win.lastIndexOf(': '), win.lastIndexOf(' - '));
       if (cut < max * 0.4) cut = win.lastIndexOf(' ');
-      if (cut <= 0) cut = max; // one very long word
+      if (cut <= 0) cut = max - 1; // one very long word
       out.push(rest.slice(0, cut + 1).trim());
       rest = rest.slice(cut + 1).trim();
     }
