@@ -18,6 +18,8 @@ import type { SpeechAudio } from './tts.js';
 import { APOLOGY_TEXT, CUE_TEXT, INTRO_TEXT, LIMIT_TEXT } from './tts.js';
 import type { VaEvent } from './metrics.js';
 import { cleanSpoken, detectWake, isEchoOf, isStopRequest, STOP_RE, wordCount, type Speaker } from './wake.js';
+import { decideLanguage, digitSafeText, getLanguagePack, isNonEnglishConfigured, isSupportedLanguage, LanguageTracker, stripWakePhraseFor, unsupportedLanguageText, type LangDecision } from './languages.js';
+import { detectWakeMulti, isEchoOfMulti, isStopRequestMulti, isStopWordMulti } from './wakeMulti.js';
 
 export interface SessionMetrics {
   record(e: Omit<VaEvent, 'at'> & { at?: number }): void;
@@ -37,10 +39,10 @@ export interface SessionDeps {
   enabled: () => boolean;
   isOwner: (s: Speaker) => boolean;
   isOwnerEmailMatch: (s: Speaker) => boolean;
-  answer: (input: Pick<AgentInput, 'question' | 'speakerName' | 'allowHistory' | 'recent' | 'liveText' | 'signal'>) => Promise<AgentResult>;
-  synth: (text: string) => Promise<SpeechAudio>;
+  answer: (input: Pick<AgentInput, 'question' | 'speakerName' | 'allowHistory' | 'recent' | 'liveText' | 'signal' | 'language'>) => Promise<AgentResult>;
+  synth: (text: string, language?: string) => Promise<SpeechAudio>;
   /** Fixed phrases, cached for the life of the process. */
-  phrase: (text: string) => Promise<SpeechAudio>;
+  phrase: (text: string, language?: string) => Promise<SpeechAudio>;
   play: (b64: string) => Promise<void>;
   stop: () => Promise<void>;
   metrics: SessionMetrics;
@@ -48,6 +50,16 @@ export interface SessionDeps {
   introPlayed: boolean;
   /** This bot run has a live-stt (Soniox) stream, so VOICE_ASSISTANT_WAKE_SOURCE=live_stt can apply to it. Default false. */
   hasLiveStream?: boolean;
+  /** Multilingual mode only: this bot's transcript IS the live-stt (Soniox) stream, there is no Recall transcript. */
+  livePrimary?: boolean;
+  /** Multilingual mode only: the meeting language chosen in settings ('auto' / null = none). */
+  configuredLanguage?: string | null;
+  /** Multilingual mode only: is speech available for this language right now (key present, no recent "no credits")? Default: yes. */
+  ttsAvailable?: (language: string) => boolean;
+  /** Optional text fallback when speech is unavailable. Not wired in production (the bot has no chat-posting call). */
+  postChat?: (text: string) => Promise<void>;
+  /** Typed, text-free events for the multilingual mode (language_unsupported, tts_unavailable). Default: one JSON log line. */
+  log?: (type: string, fields: Record<string, string | number | boolean>) => void;
 }
 
 export interface TranscriptEvent {
@@ -56,6 +68,8 @@ export interface TranscriptEvent {
   partial: boolean;
   /** Which stream produced the event. Default 'recall'. */
   source?: 'recall' | 'live_stt';
+  /** Language tag the live-stt stream put on this segment (multilingual mode only). */
+  language?: string | null;
 }
 
 interface Line { at: number; speaker: string; text: string }
@@ -100,6 +114,12 @@ export class VoiceSession {
   private disabled: string | null = null;
   private active = new Set<Promise<void>>();
   private cueAudio: SpeechAudio | null = null;
+  // Multilingual mode (all of this is inert while cfg().multilingual is false).
+  private readonly langs = new LanguageTracker();
+  private readonly cueByLang = new Map<string, SpeechAudio>();
+  private readonly warmed = new Set<string>();
+  private readonly unsupportedSaid = new Set<string>();
+  private readonly ttsOffLogged = new Set<string>();
   lastEventAt: number;
 
   constructor(deps: SessionDeps) {
@@ -109,6 +129,22 @@ export class VoiceSession {
     // Warm the fixed phrases now so the cue is instant when it is needed.
     if (deps.cfg().cue) deps.phrase(CUE_TEXT).then((a) => { this.cueAudio = a; }).catch(() => { /* no cue; answers still work */ });
     deps.phrase(APOLOGY_TEXT).catch(() => undefined);
+    if (deps.cfg().multilingual && isNonEnglishConfigured(deps.configuredLanguage) && isSupportedLanguage(deps.cfg(), deps.configuredLanguage!.toLowerCase())) this.warmLanguage(deps.configuredLanguage!.toLowerCase());
+  }
+
+  /** Render the fixed lines of a language ahead of time so the cue is instant (a failure just means no cue). */
+  private warmLanguage(lang: string): void {
+    const pack = getLanguagePack(lang);
+    if (!pack || this.warmed.has(lang)) return;
+    this.warmed.add(lang);
+    if (this.d.cfg().cue) this.d.phrase(pack.strings.cue, lang).then((a) => { this.cueByLang.set(lang, a); }).catch(() => this.warmed.delete(lang));
+    this.d.phrase(pack.strings.apology, lang).catch(() => undefined);
+  }
+
+  private logMl(type: string, fields: Record<string, string | number | boolean> = {}): void {
+    const base = { userId: this.d.userId, meetingId: this.d.meetingId, ...fields };
+    if (this.d.log) this.d.log(type, base);
+    else console.log(JSON.stringify({ event: 'voice_assistant_ml', type, ...base }));
   }
 
   /** Resolves when no answer is being produced (tests and shutdown). */
@@ -135,7 +171,8 @@ export class VoiceSession {
 
   private looksLikeEcho(text: string, now: number): boolean {
     this.spoken = this.spoken.filter((s) => now - s.at < ECHO_MEMORY_MS);
-    return this.spoken.some((s) => isEchoOf(text, s.text));
+    const ml = this.d.cfg().multilingual;
+    return this.spoken.some((s) => (ml ? isEchoOfMulti(text, s.text) : isEchoOf(text, s.text)));
   }
 
   private remember(text: string): void { this.spoken.push({ text, at: this.d.now() }); }
@@ -155,7 +192,11 @@ export class VoiceSession {
     }
     if (this.disabled) return;
     const source = ev.source ?? 'recall';
-    const liveMode = !!this.d.hasLiveStream && this.d.cfg().wakeSource === 'live_stt';
+    const cfg0 = this.d.cfg();
+    const ml = cfg0.multilingual;
+    // Multilingual mode: a bot whose transcript is the live-stt stream, or whose meeting language is not English (Recall's live
+    // transcript is English only and arrives minutes late otherwise), takes its wake phrase from the live-stt stream.
+    const liveMode = !!this.d.hasLiveStream && (cfg0.wakeSource === 'live_stt' || (ml && (!!this.d.livePrimary || isNonEnglishConfigured(this.d.configuredLanguage))));
     if (source === 'live_stt' && !liveMode) return;
     if (this.isBot(ev.speaker.name)) return; // the bot's own words, as Recall labels them
 
@@ -168,20 +209,21 @@ export class VoiceSession {
       if (!ev.partial && !demoted) this.d.metrics.record({ type: 'echo_suppressed', userId: this.d.userId, meetingId: this.d.meetingId });
       return;
     }
+    if (ml && source === 'live_stt' && !ev.partial) this.langs.observe(ev.language);
     if (liveMode && source === 'live_stt') this.recallFinalsSinceLive = 0;
     if (demoted && ++this.recallFinalsSinceLive < STALL_AFTER) return;
     // From here: every event in the default mode, live-stt finals, Recall partials (barge-in signals only) and, when the live-stt
     // stream is down, Recall finals as the fallback.
     const lagging = liveMode && source === 'recall' && ev.partial;
 
-    const wake = detectWake(text);
+    const wake = ml ? detectWakeMulti(text, cfg0) : detectWake(text);
     const nWords = wordCount(text);
     // Barge-in: a stop word, someone talking over the bot (3+ words), or a new wake phrase while it is thinking.
     const sameAsker = !!this.asker && (this.asker.name === (ev.speaker.name ?? '') || (lagging && this.asker.name === ''));
     const askerContinuing = sameAsker && now - this.asker!.at < (lagging ? RECALL_LAG_MS : ASKER_GRACE_MS);
     const crossSourceWake = !ev.partial && !!wake && !!this.lastWake && this.lastWake.source !== source && now - this.lastWake.at < CROSS_SOURCE_WAKE_MS;
     if (crossSourceWake) return;
-    if ((speaking || this.busy) && ((STOP_RE.test(text) && !(lagging && askerContinuing)) || (speaking && nWords >= 3 && !askerContinuing) || (!ev.partial && this.busy && !!wake))) {
+    if ((speaking || this.busy) && (((ml ? isStopWordMulti(text, cfg0) : STOP_RE.test(text)) && !(lagging && askerContinuing)) || (speaking && nWords >= 3 && !askerContinuing) || (!ev.partial && this.busy && !!wake))) {
       await this.bargeIn(speaking ? 'speaking' : 'thinking', speaking);
     }
     if (ev.partial) return;
@@ -195,11 +237,11 @@ export class VoiceSession {
       return;
     }
 
-    if (isStopRequest(text) && !wake) return; // a bare "stop" is not a question
+    if ((ml ? isStopRequestMulti(text, cfg0) : isStopRequest(text)) && !wake) return; // a bare "stop" is not a question
     if (this.pending && this.pending.speaker === speakerKey && now < this.pending.until && !wake) {
       const prefix = this.pending.prefix;
       this.pending = null;
-      this.begin(prefix ? `${prefix} ${text}` : text, ev.speaker, source);
+      this.begin(prefix ? `${prefix} ${text}` : text, ev.speaker, source, ev.language);
       return;
     }
     if (!wake) return;
@@ -207,8 +249,8 @@ export class VoiceSession {
     this.d.metrics.record({ type: 'wake', userId: this.d.userId, meetingId: this.d.meetingId });
     this.lastWake = { source, at: now };
     const q = wake.question;
-    if (q && isStopRequest(q)) return; // "Meeting Mind, never mind"
-    if (wordCount(q) >= 3) this.begin(q, ev.speaker, source);
+    if (q && (ml ? isStopRequestMulti(q, cfg0) : isStopRequest(q))) return; // "Meeting Mind, never mind"
+    if (wordCount(q) >= 3) this.begin(q, ev.speaker, source, ev.language);
     // wake phrase alone (or one or two words of it): the question comes next. Only the live-stt path keeps the first words.
     else this.pending = { speaker: speakerKey, until: now + PENDING_WINDOW_MS, prefix: source === 'live_stt' && q ? q : undefined };
   }
@@ -224,7 +266,7 @@ export class VoiceSession {
     }
   }
 
-  private begin(question: string, speaker: Speaker, source: 'recall' | 'live_stt' = 'recall'): void {
+  private begin(question: string, speaker: Speaker, source: 'recall' | 'live_stt' = 'recall', tag?: string | null): void {
     // Claim the session synchronously so a second wake phrase arriving while caps are being checked cannot start a second answer.
     this.busy = true;
     this.asker = { name: speaker.name ?? '', at: this.d.now() };
@@ -233,13 +275,16 @@ export class VoiceSession {
     const hold = source === 'live_stt' && !/[?.!]["')\]]*\s*$/.test(question) ? { speaker: speaker.name ?? '', parts: [] as string[] } : null;
     this.hold = hold;
     // Not serialized: an older answer that is still thinking must never hold up a newer question (it is dropped when it returns).
-    const p: Promise<void> = this.handleQuestion(question, speaker, g, hold)
+    const decision = this.d.cfg().multilingual
+      ? decideLanguage({ text: question, tag, dominant: this.langs.dominant(), configured: this.d.configuredLanguage })
+      : null;
+    const p: Promise<void> = this.handleQuestion(question, speaker, g, hold, decision)
       .catch(() => undefined)
       .finally(() => { if (g === this.gen) this.busy = false; if (this.hold === hold) this.hold = null; this.active.delete(p); });
     this.active.add(p);
   }
 
-  private async handleQuestion(first: string, speaker: Speaker, g: number, hold: { parts: string[] } | null): Promise<void> {
+  private async handleQuestion(first: string, speaker: Speaker, g: number, hold: { parts: string[] } | null, decision: LangDecision | null = null): Promise<void> {
     const { d } = this;
     const cfg = d.cfg();
     const base = { userId: d.userId, meetingId: d.meetingId };
@@ -254,11 +299,24 @@ export class VoiceSession {
     question = question.slice(0, 300);
     let now = d.now();
 
+    // Which language to answer in. Below the confidence threshold the assistant behaves as the English one always has.
+    let lang = 'en';
+    if (decision && decision.confident && decision.code !== 'en') {
+      if (!isSupportedLanguage(cfg, decision.code)) { await this.sayUnsupportedOnce(decision.code); return; }
+      lang = decision.code;
+      if (d.ttsAvailable && !d.ttsAvailable(lang)) {
+        if (!this.ttsOffLogged.has(lang)) { this.ttsOffLogged.add(lang); this.logMl('tts_unavailable', { language: lang }); }
+        return;
+      }
+      this.warmLanguage(lang);
+    }
+    const strings = lang === 'en' ? null : getLanguagePack(lang)!.strings;
+
     // Caps. The global spend breaker and the per-user day cap are persisted through the metrics store (hydrate).
     await d.metrics.hydrate();
     if (d.metrics.spendUsd() >= cfg.dailySpendCapUsd) { d.metrics.record({ type: 'cap_hit', ...base, detail: 'spend' }); return; }
-    if (this.questions >= cfg.maxQuestionsPerMeeting) { d.metrics.record({ type: 'cap_hit', ...base, detail: 'meeting' }); await this.sayLimitOnce(); return; }
-    if (d.metrics.userQuestionsToday(d.userId) >= cfg.maxQuestionsPerUserPerDay) { d.metrics.record({ type: 'cap_hit', ...base, detail: 'user_day' }); await this.sayLimitOnce(); return; }
+    if (this.questions >= cfg.maxQuestionsPerMeeting) { d.metrics.record({ type: 'cap_hit', ...base, detail: 'meeting' }); await this.sayLimitOnce(lang); return; }
+    if (d.metrics.userQuestionsToday(d.userId) >= cfg.maxQuestionsPerUserPerDay) { d.metrics.record({ type: 'cap_hit', ...base, detail: 'user_day' }); await this.sayLimitOnce(lang); return; }
 
     // Self-trigger breaker: a bot that keeps answering itself must stop on its own.
     this.starts = this.starts.filter((t) => now - t < RAPID_FIRE_WINDOW_MS);
@@ -281,11 +339,11 @@ export class VoiceSession {
     let cueEnd = 0;
     try {
       // Instant cue, so the question is not met with dead air while the answer is worked out.
-      if (cfg.cue && this.cueAudio) {
-        const cue = this.cueAudio;
+      const cue = lang === 'en' ? this.cueAudio : this.cueByLang.get(lang) ?? null;
+      if (cfg.cue && cue) {
         cueEnd = d.now() + cue.seconds * 1000;
         this.playingUntil = cueEnd + SLACK_MS;
-        this.remember(CUE_TEXT);
+        this.remember(strings ? strings.cue : CUE_TEXT);
         try {
           await d.play(cue.b64);
           firstAudioMs = d.now() - t0;
@@ -301,25 +359,34 @@ export class VoiceSession {
         result = await d.answer({
           question, speakerName: speaker.name ?? '', allowHistory, recent: this.recent,
           liveText: (m) => this.liveText(m), signal: ac.signal,
+          ...(lang !== 'en' ? { language: lang } : {}),
         });
       } catch (err) {
         clearTimeout(timer);
         if (g !== this.gen) return; // superseded or interrupted: not a failure
         const timedOut = ac.signal.aborted || /abort|timeout/i.test(String((err as Error)?.name ?? '') + String((err as Error)?.message ?? ''));
         d.metrics.record({ type: 'failed', ...base, failure: timedOut ? 'timeout' : 'llm' });
-        if (cueEnd) await this.apologize(g);
+        if (cueEnd) await this.apologize(g, lang);
         return;
       }
       clearTimeout(timer);
 
-      const spoken = cleanSpoken(result.text, cfg.maxAnswerChars);
-      if (!spoken) { d.metrics.record({ type: 'failed', ...base, failure: 'internal', llmUsd: result.usd }); if (cueEnd) await this.apologize(g); return; }
+      // Non-English: no digits and no wake phrase of that language reach the speech engine.
+      const spoken = lang === 'en'
+        ? cleanSpoken(result.text, cfg.maxAnswerChars)
+        : cleanSpoken(stripWakePhraseFor(digitSafeText(result.text, lang, cfg), lang), cfg.maxAnswerChars);
+      if (!spoken) { d.metrics.record({ type: 'failed', ...base, failure: 'internal', llmUsd: result.usd }); if (cueEnd) await this.apologize(g, lang); return; }
       if (g !== this.gen) { d.metrics.record({ type: 'stale_dropped', ...base, detail: 'superseded', llmUsd: result.usd }); return; }
       if (d.now() - t0 > cfg.staleAnswerMs) { d.metrics.record({ type: 'stale_dropped', ...base, detail: 'age', llmUsd: result.usd }); return; }
 
       let audio: SpeechAudio;
-      try { audio = await d.synth(spoken); } catch {
-        if (g === this.gen) d.metrics.record({ type: 'failed', ...base, failure: 'tts', llmUsd: result.usd });
+      try { audio = lang === 'en' ? await d.synth(spoken) : await d.synth(spoken, lang); } catch (err) {
+        const kind = lang === 'en' ? undefined : (err as { kind?: string })?.kind;
+        if (g === this.gen) d.metrics.record({ type: 'failed', ...base, failure: 'tts', llmUsd: result.usd, ...(kind ? { detail: kind } : {}) });
+        if (kind === 'no_credits' || kind === 'no_key') {
+          if (!this.ttsOffLogged.has(lang)) { this.ttsOffLogged.add(lang); this.logMl('tts_unavailable', { language: lang, kind }); }
+          if (d.postChat) await d.postChat(spoken).catch(() => undefined);
+        }
         return;
       }
       if (g !== this.gen) { d.metrics.record({ type: 'stale_dropped', ...base, detail: 'superseded', llmUsd: result.usd, ttsUsd: audio.usd }); return; }
@@ -343,29 +410,46 @@ export class VoiceSession {
       d.metrics.record({
         type: 'answered', ...base, ttfaMs: firstAudioMs ?? answerMs, answerMs, llmMs: result.llmMs, ttsMs: audio.ms,
         llmUsd: result.usd, ttsUsd: audio.usd, found: result.found, ownerSpeaker, tools: result.tools.length, chars: spoken.length,
+        ...(lang !== 'en' ? { detail: lang } : {}),
       });
     } catch {
       if (g === this.gen) d.metrics.record({ type: 'failed', ...base, failure: 'internal' });
     }
   }
 
-  private async apologize(g: number): Promise<void> {
+  private async apologize(g: number, lang = 'en'): Promise<void> {
     try {
-      const a = await this.d.phrase(APOLOGY_TEXT);
+      const text = lang === 'en' ? APOLOGY_TEXT : getLanguagePack(lang)!.strings.apology;
+      const a = lang === 'en' ? await this.d.phrase(text) : await this.d.phrase(text, lang);
       if (g !== this.gen) return;
       this.playingUntil = this.d.now() + a.seconds * 1000 + SLACK_MS;
-      this.remember(APOLOGY_TEXT);
+      this.remember(text);
       await this.d.play(a.b64);
     } catch { /* silence is acceptable when even the apology cannot be played */ }
   }
 
-  private async sayLimitOnce(): Promise<void> {
+  private async sayLimitOnce(lang = 'en'): Promise<void> {
     if (this.limitNoticeSent) return;
     this.limitNoticeSent = true;
     try {
-      const a = await this.d.phrase(LIMIT_TEXT);
+      const text = lang === 'en' ? LIMIT_TEXT : getLanguagePack(lang)!.strings.limit;
+      const a = lang === 'en' ? await this.d.phrase(text) : await this.d.phrase(text, lang);
       this.playingUntil = this.d.now() + a.seconds * 1000 + SLACK_MS;
-      this.remember(LIMIT_TEXT);
+      this.remember(text);
+      await this.d.play(a.b64);
+    } catch { /* best effort */ }
+  }
+
+  /** A language outside the supported set was clearly used: say so once per language and meeting, in English, no model call. */
+  private async sayUnsupportedOnce(code: string): Promise<void> {
+    if (this.unsupportedSaid.has(code)) return;
+    this.unsupportedSaid.add(code);
+    this.logMl('language_unsupported', { language: code });
+    try {
+      const text = unsupportedLanguageText(this.d.cfg());
+      const a = await this.d.phrase(text);
+      this.playingUntil = this.d.now() + a.seconds * 1000 + SLACK_MS;
+      this.remember(text);
       await this.d.play(a.b64);
     } catch { /* best effort */ }
   }
