@@ -9,7 +9,11 @@ import { cachedPhrases, createSynthesizer } from './tts.js';
 import type { OwnerIdentity } from './wake.js';
 
 /** `liveStt`: the bot run has a live-stt stream (bot_runs.live_stt_provider is soniox or shadow). */
-export interface BotContext { botRunId: string; meetingId: string; userId: string; liveStt?: boolean }
+export interface BotContext {
+  botRunId: string; meetingId: string; userId: string; liveStt?: boolean;
+  /** The live-stt (Soniox) stream is this bot's only transcript (bot_runs.live_stt_provider = 'soniox'). */
+  livePrimary?: boolean;
+}
 
 
 export const getConfig = () => loadVoiceAssistantConfig();
@@ -22,7 +26,20 @@ export async function lookupBotRun(recallBotId: string): Promise<BotContext | nu
   const { data, error } = await supabaseAdmin.from('bot_runs').select('id, meeting_id, user_id, live_stt_provider').eq('recall_bot_id', recallBotId).maybeSingle();
   if (error || !data) return null;
   const provider = (data as any).live_stt_provider;
-  return { botRunId: (data as any).id, meetingId: (data as any).meeting_id, userId: (data as any).user_id, liveStt: provider === 'soniox' || provider === 'shadow' };
+  return { botRunId: (data as any).id, meetingId: (data as any).meeting_id, userId: (data as any).user_id, liveStt: provider === 'soniox' || provider === 'shadow', livePrimary: provider === 'soniox' };
+}
+
+/**
+ * The meeting language chosen in settings for this bot run ('auto' / unset = null). A separate query on purpose: the column comes
+ * from migration 027 and the lookup above must keep working on a database without it. Any failure answers null.
+ */
+export async function lookupBotLanguage(recallBotId: string): Promise<string | null> {
+  try {
+    const { data, error } = await supabaseAdmin.from('bot_runs').select('transcription_language').eq('recall_bot_id', recallBotId).maybeSingle();
+    if (error || !data) return null;
+    const v = String((data as any).transcription_language ?? '').trim().toLowerCase();
+    return v && v !== 'auto' ? v : null;
+  } catch { return null; }
 }
 
 export async function loadVoicePreference(userId: string): Promise<boolean | undefined> {

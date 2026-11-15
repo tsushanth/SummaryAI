@@ -185,8 +185,10 @@ export class RecallService {
       serviceUrl: config.SERVICE_URL,
       internalSecret: config.INTERNAL_SECRET,
       realtimeRecallTranscript: enableRealtime && plan.provider !== 'soniox',
+      liveStreamProvider: plan.provider,
+      meetingLanguage: language,
     });
-    if (assistant) {
+    if (assistant?.endpoint) {
       const eps = (recordingConfig.realtime_endpoints as unknown[] | undefined) ?? [];
       recordingConfig.realtime_endpoints = [...eps, assistant.endpoint];
       console.log('[Recall] Voice assistant endpoint added');

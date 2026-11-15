@@ -13,11 +13,12 @@ import type { RecallTranscriptWebhookPayload } from '../../types/meetings.js';
 import { createAnswerer, type AnswerFn } from './agent.js';
 import { decideEnabled, type VoiceAssistantConfig } from './config.js';
 import { supabaseVoiceData, type VoiceData } from './data.js';
-import { getConfig, lookupBotRun, loadVoicePreference, loadOwnerIdentity, loadLiveSeed, phraseAudio, synth, voiceMetrics, type BotContext } from './runtime.js';
+import { getConfig, lookupBotRun, lookupBotLanguage, loadVoicePreference, loadOwnerIdentity, loadLiveSeed, phraseAudio, synth, voiceMetrics, type BotContext } from './runtime.js';
 import type { VoiceMetrics } from './metrics.js';
 import { VoiceSession, type SessionDeps } from './session.js';
 import type { SpeechAudio, Synthesize } from './tts.js';
 import { isOwnerSpeaker, type OwnerIdentity, type Speaker } from './wake.js';
+import { readAloudAvailable } from './readaloudTts.js';
 
 export const BOT_NAME = 'Meeting Mind';
 const IDLE_MS = 30 * 60_000;
@@ -32,6 +33,10 @@ export interface ManagerDeps {
   now: () => number;
   sleep: (ms: number) => Promise<void>;
   lookupBot: (recallBotId: string) => Promise<BotContext | null>;
+  /** Multilingual mode only: the meeting language chosen in settings (null = none). Optional, a missing one means null. */
+  lookupLanguage?: (recallBotId: string) => Promise<string | null>;
+  /** Multilingual mode only: can speech be produced for this language right now? Optional, a missing one means yes. */
+  ttsAvailable?: (language: string) => boolean;
   loadPreference: (userId: string) => Promise<boolean | undefined>;
   loadOwner: (userId: string) => Promise<OwnerIdentity>;
   loadSeed: (meetingId: string, userId: string) => Promise<Array<{ at: number; speaker: string; text: string }>>;
@@ -53,7 +58,7 @@ interface Entry {
 }
 
 /** One final segment of the live-stt stream (POST /internal/live-segments), reduced to what the assistant needs. */
-export interface LiveSegment { text: string; speakerName: string | null; isHost: boolean }
+export interface LiveSegment { text: string; speakerName: string | null; isHost: boolean; /** Language tag of the segment (multilingual mode only). */ language?: string | null }
 
 export class VoiceAssistantManager {
   private sessions = new Map<string, Entry>();
@@ -95,18 +100,21 @@ export class VoiceAssistantManager {
   async handleLive(recallBotId: string, segments: LiveSegment[]): Promise<{ handled: boolean; reason?: string }> {
     const cfg = this.d.getConfig();
     if (cfg.killed || cfg.mode === 'off') return { handled: false, reason: cfg.killed ? 'killed' : 'mode_off' };
-    if (cfg.wakeSource !== 'live_stt') return { handled: false, reason: 'wake_source_recall' };
+    // Default: only with VOICE_ASSISTANT_WAKE_SOURCE=live_stt, and then nothing happens before this line (no lookup, no session).
+    // Multilingual mode also listens to a Soniox-primary bot, whose only transcript is this stream.
+    if (cfg.wakeSource !== 'live_stt' && !cfg.multilingual) return { handled: false, reason: 'wake_source_recall' };
     if (!recallBotId) return { handled: false, reason: 'bad_event' };
     this.sweep();
     const entry = await this.entryFor(recallBotId);
     if (!entry) return { handled: false, reason: 'not_enabled' };
     if (!entry.ctx.liveStt) return { handled: false, reason: 'no_live_stream' };
+    if (cfg.wakeSource !== 'live_stt' && !entry.ctx.livePrimary) return { handled: false, reason: 'wake_source_recall' };
     await this.refreshPreference(entry);
     for (const s of segments) {
       const name = s.speakerName?.trim() || null;
       const k = name ? entry.known.get(name.toLowerCase()) : undefined;
       const speaker: Speaker = { name, email: k?.email ?? null, isHost: s.isHost || !!k?.isHost };
-      await entry.session.onTranscript({ speaker, text: s.text, partial: false, source: 'live_stt' });
+      await entry.session.onTranscript({ speaker, text: s.text, partial: false, source: 'live_stt', ...(s.language ? { language: s.language } : {}) });
     }
     return { handled: true };
   }
@@ -143,7 +151,12 @@ export class VoiceAssistantManager {
       const decision = decideEnabled(this.d.getConfig(), ctx.userId, preference);
       if (!decision.enabled) { this.negative.set(botId, this.d.now()); return null; }
 
-      const [owner, seed] = await Promise.all([this.d.loadOwner(ctx.userId), this.d.loadSeed(ctx.meetingId, ctx.userId)]);
+      const ml = this.d.getConfig().multilingual;
+      const [owner, seed, language] = await Promise.all([
+        this.d.loadOwner(ctx.userId),
+        this.d.loadSeed(ctx.meetingId, ctx.userId),
+        ml && this.d.lookupLanguage ? this.d.lookupLanguage(botId).catch(() => null) : Promise.resolve(null),
+      ]);
       const data = this.d.dataFor(ctx.userId); // bound to the bot run's user, nothing else
       const ownerName = owner.names[0] ?? null;
       const entry: Entry = { ctx, owner, ownerName, preference, preferenceAt: this.d.now(), known: new Map(), session: null as unknown as VoiceSession };
@@ -165,6 +178,7 @@ export class VoiceAssistantManager {
         metrics: this.d.metrics,
         introPlayed: this.d.getConfig().intro,
         hasLiveStream: !!ctx.liveStt,
+        ...(ml ? { livePrimary: !!ctx.livePrimary, configuredLanguage: language, ...(this.d.ttsAvailable ? { ttsAvailable: this.d.ttsAvailable } : {}) } : {}),
       };
       entry.session = new VoiceSession(deps);
       entry.session.seed(seed);
@@ -197,6 +211,8 @@ export function getVoiceAssistantManager(): VoiceAssistantManager {
       now: Date.now,
       sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
       lookupBot: lookupBotRun,
+      lookupLanguage: lookupBotLanguage,
+      ttsAvailable: () => readAloudAvailable(),
       loadPreference: loadVoicePreference,
       loadOwner: loadOwnerIdentity,
       loadSeed: loadLiveSeed,
