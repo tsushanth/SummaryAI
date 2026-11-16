@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="weekly_stats_title">Ultimele 7 zile</string>
+    <string name="weekly_stats_meetings">Întâlniri</string>
+    <string name="weekly_stats_hours">Ore înregistrate</string>
+    <string name="weekly_stats_action_items">Sarcini</string>
+</resources>

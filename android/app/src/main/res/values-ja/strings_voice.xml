@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">音声で追加・質問</string>
+    <string name="voice_entry_debrief">振り返りを聞く</string>
+    <string name="voice_sheet_title">ハンズフリー</string>
+    <string name="voice_listening">聞き取り中…</string>
+    <string name="voice_working">少々お待ちください…</string>
+    <string name="voice_speaking">読み上げ中…</string>
+    <string name="voice_heard_label">認識した内容</string>
+    <string name="voice_save">保存</string>
+    <string name="voice_edit">編集</string>
+    <string name="voice_cancel">キャンセル</string>
+    <string name="voice_undo">元に戻す</string>
+    <string name="voice_close">完了</string>
+    <string name="voice_add_to_calendar">カレンダーに追加</string>
+    <string name="voice_email_this">メールで送る</string>
+    <string name="voice_outward_note">カレンダーまたはメールアプリが開きます。そちらでタップするまで何も送信されません。</string>
+    <string name="voice_consent_title">音声を使いますか?</string>
+    <string name="voice_consent_body">音声は、お使いのスマートフォンの音声認識によってテキストに変換されます。多くのスマートフォンではデバイス上で処理されますが、そうでない場合はGoogleのサービスが音声を処理することがあります。MeetingMindは音声を保存しません。「はい」と答えるか「保存」をタップするまで、リストには何も保存されません。</string>
+    <string name="voice_consent_accept">続ける</string>
+    <string name="voice_consent_decline">今はしない</string>
+    <string name="voice_try_hint">例:「金曜日までに資料を送るアクションアイテムを追加」「未完了のアクションは?」「予算の項目を完了にして」</string>
+    <string name="voice_no_calendar_app">カレンダーアプリが見つかりません。</string>
+    <string name="voice_no_mail_app">メールアプリが見つかりません。</string>
+</resources>

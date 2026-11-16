@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="ui_action_items">Åtgärdspunkter</string>
+    <string name="ui_notes">Anteckningar</string>
+    <string name="ui_loading">Läser in</string>
+    <string name="ui_transcript_jump_to">Hoppa till %1$s</string>
+    <string name="ui_transcript_speaker_line">%1$s vid %2$s: %3$s</string>
+    <string name="ui_speakers_label">Talare</string>
+    <string name="ui_no_recordings_title">Inga inspelningar än</string>
+    <string name="ui_no_results_title">Inga matchande inspelningar</string>
+    <string name="ui_clear_search">Rensa sökningen</string>
+    <string name="ui_detailed_summary">Detaljerad sammanfattning</string>
+</resources>

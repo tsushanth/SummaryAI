@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">Rakam 30 saat apa-apa sahaja, walaupun anda sendiri yang bercakap, dan lihat ringkasan anda muncul.</string>
+    <string name="first_run_mic_note">Kami hanya menggunakan mikrofon semasa anda merakam.</string>
+    <string name="first_run_record">Ketik untuk merakam</string>
+    <string name="first_run_see_sample">Atau lihat contoh mesyuarat dahulu</string>
+    <string name="sample_cta_title">Sekarang cuba mesyuarat anda</string>
+    <string name="sample_cta_button">Rakam mesyuarat anda</string>
+    <string name="sample_chat_locked">Rakam mesyuarat anda sendiri untuk bertanya soalan tentangnya.</string>
+    <string name="sample_badge">Contoh, rekaan</string>
+</resources>

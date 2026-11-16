@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="edit">Editează</string>
+    <string name="save">Salvează</string>
+    <string name="copy">Copiază</string>
+    <string name="todo_assignee">Responsabil (opțional)</string>
+    <string name="todo_due_date">Termen limită (opțional)</string>
+    <string name="todo_due_date_pick">Alege data</string>
+    <string name="todo_due_date_clear">Șterge data</string>
+    <string name="todo_due_chip">Termen %1$s</string>
+    <string name="summary_template_title">Stilul rezumatului</string>
+    <string name="summary_template_current">Curent: %1$s</string>
+    <string name="summary_template_not_set">Nesetat (se folosește stilul tău implicit)</string>
+    <string name="summary_template_regenerate">Regenerează rezumatul</string>
+    <string name="summary_template_regenerating">Se regenerează…</string>
+    <string name="summary_template_confirm_title">Regenerezi rezumatul?</string>
+    <string name="summary_template_confirm_message">Astfel, rezumatul actual, punctele cheie și sarcinile vor fi înlocuite cu o versiune nouă în stilul %1$s. Acțiunea nu poate fi anulată.</string>
+    <string name="summary_template_regenerate_confirm">Regenerează</string>
+    <string name="summary_template_failed">Nu s-a putut regenera rezumatul</string>
+    <string name="summary_template_done">Rezumat regenerat</string>
+    <string name="summary_template_load_failed">Nu s-au putut încărca stilurile de rezumat</string>
+    <string name="followup_email">Redactează e-mail de urmărire</string>
+    <string name="followup_email_title">E-mail de urmărire</string>
+    <string name="followup_email_subject">Subiect</string>
+    <string name="followup_email_body">Conținut</string>
+    <string name="followup_email_drafting">Se redactează…</string>
+    <string name="followup_email_failed">Nu s-a putut redacta e-mailul</string>
+    <string name="followup_email_copied">E-mail copiat</string>
+    <string name="followup_email_send">Trimite</string>
+    <string name="followup_email_no_app">Nu a fost găsită nicio aplicație de e-mail</string>
+    <string name="action_items_to_todos">Adaugă la sarcinile mele</string>
+    <string name="action_items_to_todos_adding">Se adaugă…</string>
+    <string name="action_items_to_todos_added">%1$d adăugate la sarcinile tale</string>
+    <string name="action_items_to_todos_added_skipped">%1$d adăugate la sarcinile tale (%2$d existau deja)</string>
+    <string name="action_items_to_todos_none_new">Toate sarcinile din întâlnire sunt deja în lista ta de sarcini</string>
+    <string name="action_items_to_todos_failed">Nu s-au putut adăuga sarcinile în lista de sarcini</string>
+    <string name="chat_all_meetings">Întreabă în toate întâlnirile</string>
+    <string name="chat_all_meetings_title">Întreabă-ți întâlnirile</string>
+    <string name="chat_all_meetings_placeholder">ex.: Ce am decis în legătură cu prețurile?</string>
+    <string name="chat_all_meetings_empty_title">Întreabă în toate întâlnirile tale</string>
+    <string name="chat_all_meetings_empty_message">Răspunsurile provin din rezumatele și transcrierile tale, cu linkuri către întâlnirile din care provin.</string>
+    <string name="chat_all_meetings_sources">Surse</string>
+    <string name="chat_all_meetings_failed">Nu s-a putut obține un răspuns. Încearcă din nou.</string>
+    <string name="chat_all_meetings_send">Trimite</string>
+    <string name="settings_default_template">Stilul implicit al rezumatului</string>
+    <string name="settings_default_template_hint">Se folosește pentru înregistrările noi, cu excepția cazului în care alegi un stil pentru una anume</string>
+</resources>

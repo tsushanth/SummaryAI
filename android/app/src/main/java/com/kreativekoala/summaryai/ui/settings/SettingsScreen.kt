@@ -513,7 +513,8 @@ private fun ThemeOption(
 /** Languages offered in the in-app picker: the shipped resource folders. Same set as xml/locales_config.xml. */
 internal val SUPPORTED_LANGUAGE_TAGS = listOf(
     "en", "es", "fr", "de", "ja", "zh-CN", "ko", "pt-BR", "it", "hi",
-    "ar", "id", "ms", "nl", "pl", "ru", "th", "tl", "tr", "vi"
+    "ar", "id", "ms", "nl", "pl", "ru", "th", "tl", "tr", "vi",
+    "cs", "el", "fi", "hu", "ro", "sv", "uk"
 )
 
 /** The language's own name, for example "Deutsch" or "Русский". */

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="meeting_language_label">Az átírás nyelve</string>
+    <string name="meeting_language_auto">Automatikus felismerés</string>
+    <string name="meeting_language_hint">Az automatikus felismerés a legtöbb megbeszélésnél működik. Válassz nyelvet, ha az átirat hibásan készül el. A választásodat megjegyezzük.</string>
+    <string name="meeting_language_dialog_title">Az átírás nyelve</string>
+    <string name="meeting_language_change">Nyelv módosítása</string>
+    <string name="meeting_language_active">Nyelv: %1$s</string>
+    <string name="meeting_language_changed">Az átírás nyelve: %1$s</string>
+    <string name="meeting_language_change_note">A mostantól elhangzó beszédre vonatkozik.</string>
+    <string name="meeting_language_switch_unavailable">Ennek a megbeszélésnek a nyelve élő közvetítés közben nem váltható</string>
+    <string name="meeting_language_switch_failed">A nyelvet nem sikerült módosítani. Kérlek, próbáld újra.</string>
+    <string name="meeting_language_hint_auto_english_live">Az automatikus felismerés megkeresi a nyelvet a végleges átirathoz. Az élő feliratok angolul maradnak, hacsak nem választasz nyelvet.</string>
+    <string name="meeting_language_hint_delayed">Az ezen a nyelven megjelenő élő feliratok %1$s percet késhetnek. A végleges átiratot ez nem érinti.</string>
+    <string name="meeting_language_reason_fixed">Az élő nyelv a bot csatlakozásakor lett beállítva, és ennek a megbeszélésnek a során nem módosítható.</string>
+    <string name="meeting_language_reason_not_live">A nyelv csak akkor módosítható, amíg a bot a megbeszélésen van.</string>
+    <string name="meeting_language_switch_not_live">A bot jelenleg nincs a megbeszélésen, ezért a nyelv nem módosítható.</string>
+    <string name="meeting_language_saved_not_live">%1$s elmentve a végleges átirathoz, de az élő átiratot most nem sikerült átváltani.</string>
+</resources>

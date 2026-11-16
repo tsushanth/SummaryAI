@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">Rekam 30 detik apa saja, bahkan hanya Anda yang berbicara, lalu lihat ringkasan Anda muncul.</string>
+    <string name="first_run_mic_note">Kami hanya menggunakan mikrofon saat Anda merekam.</string>
+    <string name="first_run_record">Ketuk untuk merekam</string>
+    <string name="first_run_see_sample">Atau lihat contoh rapat dulu</string>
+    <string name="sample_cta_title">Sekarang coba rapat Anda</string>
+    <string name="sample_cta_button">Rekam rapat Anda</string>
+    <string name="sample_chat_locked">Rekam rapat Anda sendiri untuk mengajukan pertanyaan tentangnya.</string>
+    <string name="sample_badge">Contoh, fiktif</string>
+</resources>

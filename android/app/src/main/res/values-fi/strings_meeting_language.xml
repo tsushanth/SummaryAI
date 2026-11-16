@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="meeting_language_label">Litterointikieli</string>
+    <string name="meeting_language_auto">Tunnista automaattisesti</string>
+    <string name="meeting_language_hint">Automaattinen tunnistus toimii useimmissa kokouksissa. Valitse kieli, jos litteraatti on virheellinen. Valintasi muistetaan.</string>
+    <string name="meeting_language_dialog_title">Litterointikieli</string>
+    <string name="meeting_language_change">Vaihda kieli</string>
+    <string name="meeting_language_active">Kieli: %1$s</string>
+    <string name="meeting_language_changed">Litterointikieleksi asetettu: %1$s</string>
+    <string name="meeting_language_change_note">Koskee puhetta tästä eteenpäin.</string>
+    <string name="meeting_language_switch_unavailable">Tämän kokouksen kieltä ei voi vaihtaa live-tilassa</string>
+    <string name="meeting_language_switch_failed">Kielen vaihtaminen epäonnistui. Yritä uudelleen.</string>
+    <string name="meeting_language_hint_auto_english_live">Automaattinen tunnistus löytää kielen lopullista litteraattia varten. Live-tekstitykset pysyvät englanniksi, ellet valitse kieltä.</string>
+    <string name="meeting_language_hint_delayed">Live-tekstitykset tällä kielellä voivat saapua %1$s minuuttia myöhässä. Lopullinen litteraatti ei vaikuta tähän.</string>
+    <string name="meeting_language_reason_fixed">Live-kieli asetettiin botin liittyessä, eikä sitä voi vaihtaa tämän kokouksen aikana.</string>
+    <string name="meeting_language_reason_not_live">Kielen voi vaihtaa vain, kun botti on kokouksessa.</string>
+    <string name="meeting_language_switch_not_live">Botti ei ole tällä hetkellä kokouksessa, joten kieltä ei voi vaihtaa.</string>
+    <string name="meeting_language_saved_not_live">Kieli %1$s tallennettiin lopullista litteraattia varten, mutta live-litteraatin kieltä ei voitu vaihtaa juuri nyt.</string>
+</resources>

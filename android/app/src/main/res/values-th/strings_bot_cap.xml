@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="error_bot_cap_reached">คุณใช้เวลาของบอทประชุมในเดือนนี้หมดแล้ว โควตาจะรีเซ็ตในวันที่ %1$s คุณยังบันทึกการประชุมด้วยตัวเองได้</string>
+    <string name="error_bot_cap_reached_no_date">คุณใช้เวลาของบอทประชุมในเดือนนี้หมดแล้ว โควตาจะรีเซ็ตเมื่อต้นเดือนหน้า คุณยังบันทึกการประชุมด้วยตัวเองได้</string>
+</resources>

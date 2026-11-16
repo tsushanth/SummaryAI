@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">Ajouter ou demander à la voix</string>
+    <string name="voice_entry_debrief">Écouter le débrief</string>
+    <string name="voice_sheet_title">Mains libres</string>
+    <string name="voice_listening">À l’écoute…</string>
+    <string name="voice_working">Un instant…</string>
+    <string name="voice_speaking">Parle…</string>
+    <string name="voice_heard_label">J’ai entendu</string>
+    <string name="voice_save">Enregistrer</string>
+    <string name="voice_edit">Modifier</string>
+    <string name="voice_cancel">Annuler</string>
+    <string name="voice_undo">Annuler</string>
+    <string name="voice_close">Terminé</string>
+    <string name="voice_add_to_calendar">Ajouter à l’agenda</string>
+    <string name="voice_email_this">Envoyer par e-mail</string>
+    <string name="voice_outward_note">Ouvre ton appli d’agenda ou de messagerie. Rien n’est envoyé tant que tu n’appuies pas là-bas.</string>
+    <string name="voice_consent_title">Utiliser ta voix ?</string>
+    <string name="voice_consent_body">La reconnaissance vocale de ton téléphone transforme la parole en texte. Sur de nombreux téléphones, cela se fait sur l’appareil ; sur d’autres, le service de Google peut traiter l’audio. MeetingMind ne conserve pas l’audio. Rien n’est enregistré dans ta liste tant que tu n’as pas dit oui ou appuyé sur Enregistrer.</string>
+    <string name="voice_consent_accept">Continuer</string>
+    <string name="voice_consent_decline">Pas maintenant</string>
+    <string name="voice_try_hint">Essaie : « ajoute une action pour envoyer la présentation d’ici vendredi », « quelles sont mes actions en cours ? » ou « marque le point budget comme terminé ».</string>
+    <string name="voice_no_calendar_app">Aucune appli d’agenda trouvée.</string>
+    <string name="voice_no_mail_app">Aucune appli de messagerie trouvée.</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="error_bot_cap_reached">Bạn đã dùng hết thời gian bot cuộc họp của tháng này. Thời gian sẽ được đặt lại vào %1$s. Bạn vẫn có thể tự ghi âm cuộc họp.</string>
+    <string name="error_bot_cap_reached_no_date">Bạn đã dùng hết thời gian bot cuộc họp của tháng này. Thời gian sẽ được đặt lại vào đầu tháng sau. Bạn vẫn có thể tự ghi âm cuộc họp.</string>
+</resources>

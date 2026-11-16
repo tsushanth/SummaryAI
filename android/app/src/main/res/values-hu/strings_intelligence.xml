@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="edit">Szerkesztés</string>
+    <string name="save">Mentés</string>
+    <string name="copy">Másolás</string>
+    <string name="todo_assignee">Felelős (nem kötelező)</string>
+    <string name="todo_due_date">Határidő (nem kötelező)</string>
+    <string name="todo_due_date_pick">Dátum kiválasztása</string>
+    <string name="todo_due_date_clear">Dátum törlése</string>
+    <string name="todo_due_chip">Határidő: %1$s</string>
+    <string name="summary_template_title">Összefoglaló stílusa</string>
+    <string name="summary_template_current">Jelenlegi: %1$s</string>
+    <string name="summary_template_not_set">Nincs megadva (az alapértelmezettet használja)</string>
+    <string name="summary_template_regenerate">Összefoglaló újragenerálása</string>
+    <string name="summary_template_regenerating">Újragenerálás…</string>
+    <string name="summary_template_confirm_title">Újragenerálod az összefoglalót?</string>
+    <string name="summary_template_confirm_message">Ez lecseréli a jelenlegi összefoglalót, fő pontokat és teendőket egy új, %1$s verzióra. Ez nem vonható vissza.</string>
+    <string name="summary_template_regenerate_confirm">Újragenerálás</string>
+    <string name="summary_template_failed">Az összefoglalót nem sikerült újragenerálni</string>
+    <string name="summary_template_done">Az összefoglaló újragenerálva</string>
+    <string name="summary_template_load_failed">Az összefoglaló stílusokat nem sikerült betölteni</string>
+    <string name="followup_email">Utókövető e-mail megfogalmazása</string>
+    <string name="followup_email_title">Utókövető e-mail</string>
+    <string name="followup_email_subject">Tárgy</string>
+    <string name="followup_email_body">Szöveg</string>
+    <string name="followup_email_drafting">Megfogalmazás…</string>
+    <string name="followup_email_failed">Az e-mailt nem sikerült megfogalmazni</string>
+    <string name="followup_email_copied">E-mail kimásolva</string>
+    <string name="followup_email_send">Küldés</string>
+    <string name="followup_email_no_app">Nem található e-mail-alkalmazás</string>
+    <string name="action_items_to_todos">Hozzáadás a teendőimhez</string>
+    <string name="action_items_to_todos_adding">Hozzáadás…</string>
+    <string name="action_items_to_todos_added">%1$d hozzáadva a teendőidhez</string>
+    <string name="action_items_to_todos_added_skipped">%1$d hozzáadva a teendőidhez (%2$d már szerepelt)</string>
+    <string name="action_items_to_todos_none_new">Minden teendő már szerepel a teendőid között</string>
+    <string name="action_items_to_todos_failed">A teendőket nem sikerült hozzáadni</string>
+    <string name="chat_all_meetings">Kérdezés az összes megbeszélésről</string>
+    <string name="chat_all_meetings_title">Kérdezz a megbeszéléseidről</string>
+    <string name="chat_all_meetings_placeholder">pl. Mit döntöttünk az árazásról?</string>
+    <string name="chat_all_meetings_empty_title">Kérdezz az összes megbeszélésedről</string>
+    <string name="chat_all_meetings_empty_message">A válaszok az összefoglalóidból és átirataidból származnak, hivatkozásokkal azokra a megbeszélésekre, amelyekből erednek.</string>
+    <string name="chat_all_meetings_sources">Források</string>
+    <string name="chat_all_meetings_failed">Nem sikerült választ kapni. Próbáld újra.</string>
+    <string name="chat_all_meetings_send">Küldés</string>
+    <string name="settings_default_template">Alapértelmezett összefoglaló stílus</string>
+    <string name="settings_default_template_hint">Az új felvételekhez használatos, hacsak nem választasz stílust egy adott felvételhez</string>
+</resources>

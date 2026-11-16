@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">Додати або запитати голосом</string>
+    <string name="voice_entry_debrief">Прослухати розбір</string>
+    <string name="voice_sheet_title">Без рук</string>
+    <string name="voice_listening">Слухаю…</string>
+    <string name="voice_working">Одну мить…</string>
+    <string name="voice_speaking">Говорю…</string>
+    <string name="voice_heard_label">Розпізнано</string>
+    <string name="voice_save">Зберегти</string>
+    <string name="voice_edit">Редагувати</string>
+    <string name="voice_cancel">Скасувати</string>
+    <string name="voice_undo">Скасувати дію</string>
+    <string name="voice_close">Готово</string>
+    <string name="voice_add_to_calendar">Додати до календаря</string>
+    <string name="voice_email_this">Надіслати поштою</string>
+    <string name="voice_outward_note">Відкриє ваш календар або поштовий застосунок. Нічого не надсилається, доки ви не торкнетеся там.</string>
+    <string name="voice_consent_title">Використовувати голос?</string>
+    <string name="voice_consent_body">Мовлення перетворюється на текст за допомогою розпізнавання мовлення вашого телефона. На багатьох телефонах це відбувається на пристрої; на інших звук може обробляти сервіс Google. MeetingMind не зберігає звук. Нічого не буде збережено у вашому списку, доки ви не скажете «так» або не торкнетеся «Зберегти».</string>
+    <string name="voice_consent_accept">Продовжити</string>
+    <string name="voice_consent_decline">Не зараз</string>
+    <string name="voice_try_hint">Спробуйте: «додайте завдання надіслати презентацію до п’ятниці», «які в мене невиконані завдання» або «позначте пункт про бюджет виконаним».</string>
+    <string name="voice_no_calendar_app">Не знайдено календар.</string>
+    <string name="voice_no_mail_app">Не знайдено поштовий застосунок.</string>
+</resources>

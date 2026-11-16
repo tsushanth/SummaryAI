@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="error_bot_cap_reached">Ai folosit timpul botului de întâlnire pentru luna aceasta. Se resetează pe %1$s. Poți în continuare să înregistrezi întâlniri singur.</string>
+    <string name="error_bot_cap_reached_no_date">Ai folosit timpul botului de întâlnire pentru luna aceasta. Se resetează la începutul lunii viitoare. Poți în continuare să înregistrezi întâlniri singur.</string>
+</resources>

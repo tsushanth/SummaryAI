@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">Ηχογράφησε 30 δευτερόλεπτα οτιδήποτε, ακόμη και απλώς εσένα να μιλάς, και δες την περίληψή σου να εμφανίζεται.</string>
+    <string name="first_run_mic_note">Χρησιμοποιούμε το μικρόφωνο μόνο όταν ηχογραφείς.</string>
+    <string name="first_run_record">Πάτα για ηχογράφηση</string>
+    <string name="first_run_see_sample">Ή δες πρώτα μια σύσκεψη-δείγμα</string>
+    <string name="sample_cta_title">Τώρα δοκίμασε τη δική σου</string>
+    <string name="sample_cta_button">Ηχογράφησε τη δική σου</string>
+    <string name="sample_chat_locked">Ηχογράφησε τη δική σου σύσκεψη για να κάνεις ερωτήσεις γι\' αυτήν.</string>
+    <string name="sample_badge">Δείγμα, φανταστικό</string>
+</resources>

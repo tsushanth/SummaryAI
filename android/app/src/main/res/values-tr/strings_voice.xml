@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">Sesle ekle veya sor</string>
+    <string name="voice_entry_debrief">Değerlendirmeyi dinle</string>
+    <string name="voice_sheet_title">Eller serbest</string>
+    <string name="voice_listening">Dinleniyor…</string>
+    <string name="voice_working">Bir saniye…</string>
+    <string name="voice_speaking">Konuşuyor…</string>
+    <string name="voice_heard_label">Anladığım</string>
+    <string name="voice_save">Kaydet</string>
+    <string name="voice_edit">Düzenle</string>
+    <string name="voice_cancel">İptal</string>
+    <string name="voice_undo">Geri al</string>
+    <string name="voice_close">Bitti</string>
+    <string name="voice_add_to_calendar">Takvime ekle</string>
+    <string name="voice_email_this">E-postayla gönder</string>
+    <string name="voice_outward_note">Takvim veya e-posta uygulamanı açar. Orada dokunana kadar hiçbir şey gönderilmez.</string>
+    <string name="voice_consent_title">Sesini kullanalım mı?</string>
+    <string name="voice_consent_body">Konuşma, telefonunun konuşma tanıma özelliğiyle metne dönüştürülür. Birçok telefonda bu işlem cihaz üzerinde yapılır; diğerlerinde sesi Google\'ın hizmeti işleyebilir. MeetingMind sesi saklamaz. Sen evet demeden veya Kaydet\'e dokunmadan listene hiçbir şey kaydedilmez.</string>
+    <string name="voice_consent_accept">Devam et</string>
+    <string name="voice_consent_decline">Şimdi değil</string>
+    <string name="voice_try_hint">Şunu dene: “Cuma gününe kadar sunumu gönderme eylem maddesi ekle”, “açık eylemlerim neler” veya “bütçe maddesini tamamlandı olarak işaretle”.</string>
+    <string name="voice_no_calendar_app">Takvim uygulaması bulunamadı.</string>
+    <string name="voice_no_mail_app">E-posta uygulaması bulunamadı.</string>
+</resources>

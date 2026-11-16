@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="error_bot_cap_reached">今月のミーティングボットの利用時間を使い切りました。%1$sにリセットされます。ミーティングを自分で録音することは引き続き可能です。</string>
+    <string name="error_bot_cap_reached_no_date">今月のミーティングボットの利用時間を使い切りました。来月の初めにリセットされます。ミーティングを自分で録音することは引き続き可能です。</string>
+</resources>

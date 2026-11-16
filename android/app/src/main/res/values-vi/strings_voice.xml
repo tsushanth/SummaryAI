@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">Thêm hoặc hỏi bằng giọng nói</string>
+    <string name="voice_entry_debrief">Nghe tổng kết</string>
+    <string name="voice_sheet_title">Rảnh tay</string>
+    <string name="voice_listening">Đang nghe…</string>
+    <string name="voice_working">Chờ một chút…</string>
+    <string name="voice_speaking">Đang nói…</string>
+    <string name="voice_heard_label">Tôi đã nghe</string>
+    <string name="voice_save">Lưu</string>
+    <string name="voice_edit">Sửa</string>
+    <string name="voice_cancel">Hủy</string>
+    <string name="voice_undo">Hoàn tác</string>
+    <string name="voice_close">Xong</string>
+    <string name="voice_add_to_calendar">Thêm vào lịch</string>
+    <string name="voice_email_this">Gửi email nội dung này</string>
+    <string name="voice_outward_note">Mở ứng dụng lịch hoặc thư của bạn. Sẽ không có gì được gửi cho đến khi bạn nhấn ở đó.</string>
+    <string name="voice_consent_title">Dùng giọng nói của bạn?</string>
+    <string name="voice_consent_body">Giọng nói được chuyển thành văn bản bằng tính năng nhận dạng giọng nói của điện thoại. Trên nhiều điện thoại, việc này diễn ra ngay trên thiết bị; trên một số máy khác, dịch vụ của Google có thể xử lý âm thanh. MeetingMind không lưu âm thanh. Sẽ không có gì được lưu vào danh sách của bạn cho đến khi bạn đồng ý hoặc nhấn Lưu.</string>
+    <string name="voice_consent_accept">Tiếp tục</string>
+    <string name="voice_consent_decline">Để sau</string>
+    <string name="voice_try_hint">Hãy thử: “thêm một việc cần làm là gửi bản trình bày trước thứ Sáu”, “các việc đang mở của tôi là gì” hoặc “đánh dấu mục ngân sách là xong”.</string>
+    <string name="voice_no_calendar_app">Không tìm thấy ứng dụng lịch.</string>
+    <string name="voice_no_mail_app">Không tìm thấy ứng dụng thư.</string>
+</resources>

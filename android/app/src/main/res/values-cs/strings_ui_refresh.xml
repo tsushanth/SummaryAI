@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="ui_action_items">Úkoly</string>
+    <string name="ui_notes">Poznámky</string>
+    <string name="ui_loading">Načítání</string>
+    <string name="ui_transcript_jump_to">Přejít na %1$s</string>
+    <string name="ui_transcript_speaker_line">%1$s v %2$s: %3$s</string>
+    <string name="ui_speakers_label">Mluvčí</string>
+    <string name="ui_no_recordings_title">Zatím žádné nahrávky</string>
+    <string name="ui_no_results_title">Žádné odpovídající nahrávky</string>
+    <string name="ui_clear_search">Vymazat hledání</string>
+    <string name="ui_detailed_summary">Podrobné shrnutí</string>
+</resources>

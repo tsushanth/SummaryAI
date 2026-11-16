@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">Πρόσθεσε ή ρώτα με φωνή</string>
+    <string name="voice_entry_debrief">Ακρόαση απολογισμού</string>
+    <string name="voice_sheet_title">Χωρίς χέρια</string>
+    <string name="voice_listening">Ακρόαση…</string>
+    <string name="voice_working">Ένα λεπτό…</string>
+    <string name="voice_speaking">Ομιλία…</string>
+    <string name="voice_heard_label">Άκουσα</string>
+    <string name="voice_save">Αποθήκευση</string>
+    <string name="voice_edit">Επεξεργασία</string>
+    <string name="voice_cancel">Ακύρωση</string>
+    <string name="voice_undo">Αναίρεση</string>
+    <string name="voice_close">Τέλος</string>
+    <string name="voice_add_to_calendar">Προσθήκη στο ημερολόγιο</string>
+    <string name="voice_email_this">Αποστολή με email</string>
+    <string name="voice_outward_note">Ανοίγει το ημερολόγιο ή την εφαρμογή email σου. Δεν στέλνεται τίποτα μέχρι να πατήσεις εκεί.</string>
+    <string name="voice_consent_title">Χρήση της φωνής σου;</string>
+    <string name="voice_consent_body">Η ομιλία μετατρέπεται σε κείμενο από την αναγνώριση ομιλίας του τηλεφώνου σου. Σε πολλά τηλέφωνα αυτό γίνεται στη συσκευή· σε άλλα, η υπηρεσία της Google μπορεί να επεξεργάζεται τον ήχο. Το MeetingMind δεν διατηρεί τον ήχο. Τίποτα δεν αποθηκεύεται στη λίστα σου μέχρι να πεις «ναι» ή να πατήσεις Αποθήκευση.</string>
+    <string name="voice_consent_accept">Συνέχεια</string>
+    <string name="voice_consent_decline">Όχι τώρα</string>
+    <string name="voice_try_hint">Δοκίμασε: «πρόσθεσε μια ενέργεια για να στείλω την παρουσίαση μέχρι την Παρασκευή», «ποιες είναι οι ανοιχτές ενέργειές μου» ή «σημείωσε το θέμα του προϋπολογισμού ως ολοκληρωμένο».</string>
+    <string name="voice_no_calendar_app">Δεν βρέθηκε εφαρμογή ημερολογίου.</string>
+    <string name="voice_no_mail_app">Δεν βρέθηκε εφαρμογή email.</string>
+</resources>

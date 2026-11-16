@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">음성으로 추가하거나 질문하기</string>
+    <string name="voice_entry_debrief">브리핑 듣기</string>
+    <string name="voice_sheet_title">핸즈프리</string>
+    <string name="voice_listening">듣고 있어요…</string>
+    <string name="voice_working">잠시만요…</string>
+    <string name="voice_speaking">말하는 중…</string>
+    <string name="voice_heard_label">들은 내용</string>
+    <string name="voice_save">저장</string>
+    <string name="voice_edit">수정</string>
+    <string name="voice_cancel">취소</string>
+    <string name="voice_undo">실행 취소</string>
+    <string name="voice_close">완료</string>
+    <string name="voice_add_to_calendar">캘린더에 추가</string>
+    <string name="voice_email_this">이메일로 보내기</string>
+    <string name="voice_outward_note">캘린더 또는 메일 앱이 열려요. 거기서 탭하기 전에는 아무것도 전송되지 않아요.</string>
+    <string name="voice_consent_title">음성을 사용할까요?</string>
+    <string name="voice_consent_body">음성은 휴대전화의 음성 인식으로 텍스트로 변환돼요. 많은 휴대전화에서는 기기 내에서 처리되지만, 그렇지 않은 경우 Google 서비스가 오디오를 처리할 수 있어요. MeetingMind는 오디오를 보관하지 않아요. \'네\'라고 말하거나 저장을 탭하기 전에는 목록에 아무것도 저장되지 않아요.</string>
+    <string name="voice_consent_accept">계속</string>
+    <string name="voice_consent_decline">나중에</string>
+    <string name="voice_try_hint">예: \"금요일까지 자료 보내기 액션 아이템 추가해 줘\", \"내 미완료 액션이 뭐야\", \"예산 항목 완료로 표시해 줘\".</string>
+    <string name="voice_no_calendar_app">캘린더 앱을 찾을 수 없어요.</string>
+    <string name="voice_no_mail_app">메일 앱을 찾을 수 없어요.</string>
+</resources>

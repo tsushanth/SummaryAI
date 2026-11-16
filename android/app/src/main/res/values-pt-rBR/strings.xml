@@ -238,4 +238,12 @@
     <string name="no_recordings_in_filter_subtitle">Nenhuma gravação corresponde ainda. Selecione Todas para ver tudo.</string>
     <string name="summary_no_speech">Nenhuma fala foi detectada nesta gravação, então não há nada para resumir.</string>
     <string name="error_load_recording_failed">Não foi possível carregar esta gravação. Verifique sua conexão e tente novamente.</string>
+
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_assistant_section">Bot de reunião</string>
+    <string name="voice_assistant_title">Assistente de voz nas reuniões</string>
+    <string name="voice_assistant_hint">Quando ativado, o bot de reunião responde a perguntas em voz alta quando alguém diz “Meeting Mind, ...”. Desative para manter o bot em silêncio.</string>
+    <string name="voice_assistant_load_error">Não foi possível carregar esta configuração. Verifique sua conexão.</string>
+    <string name="voice_assistant_save_error">Não foi possível salvar sua alteração. Verifique sua conexão e tente novamente.</string>
+    <string name="onboarding_transcribe_desc">Obtenha transcrições precisas com identificação de falantes em mais de 30 idiomas</string>
 </resources>

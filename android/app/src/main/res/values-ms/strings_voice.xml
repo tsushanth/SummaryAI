@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">Tambah atau tanya dengan suara</string>
+    <string name="voice_entry_debrief">Dengar taklimat balas</string>
+    <string name="voice_sheet_title">Tanpa tangan</string>
+    <string name="voice_listening">Mendengar…</string>
+    <string name="voice_working">Sebentar…</string>
+    <string name="voice_speaking">Bercakap…</string>
+    <string name="voice_heard_label">Yang saya dengar</string>
+    <string name="voice_save">Simpan</string>
+    <string name="voice_edit">Edit</string>
+    <string name="voice_cancel">Batal</string>
+    <string name="voice_undo">Buat asal</string>
+    <string name="voice_close">Selesai</string>
+    <string name="voice_add_to_calendar">Tambah ke kalendar</string>
+    <string name="voice_email_this">E-melkan ini</string>
+    <string name="voice_outward_note">Membuka aplikasi kalendar atau mel anda. Tiada apa dihantar sehingga anda mengetik di sana.</string>
+    <string name="voice_consent_title">Gunakan suara anda?</string>
+    <string name="voice_consent_body">Pertuturan ditukar kepada teks oleh pengecaman pertuturan telefon anda. Pada banyak telefon, ini berlaku pada peranti; pada telefon lain, perkhidmatan Google mungkin memproses audio. MeetingMind tidak menyimpan audio. Tiada apa disimpan ke senarai anda sehingga anda berkata ya atau mengetik Simpan.</string>
+    <string name="voice_consent_accept">Teruskan</string>
+    <string name="voice_consent_decline">Bukan sekarang</string>
+    <string name="voice_try_hint">Cuba: “tambah item tindakan untuk menghantar deck sebelum Jumaat”, “apakah tindakan saya yang masih terbuka”, atau “tandakan item bajet sebagai selesai”.</string>
+    <string name="voice_no_calendar_app">Tiada aplikasi kalendar ditemui.</string>
+    <string name="voice_no_mail_app">Tiada aplikasi mel ditemui.</string>
+</resources>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">Lägg till eller fråga med rösten</string>
+    <string name="voice_entry_debrief">Hör genomgång</string>
+    <string name="voice_sheet_title">Handsfree</string>
+    <string name="voice_listening">Lyssnar…</string>
+    <string name="voice_working">Ett ögonblick…</string>
+    <string name="voice_speaking">Talar…</string>
+    <string name="voice_heard_label">Jag hörde</string>
+    <string name="voice_save">Spara</string>
+    <string name="voice_edit">Redigera</string>
+    <string name="voice_cancel">Avbryt</string>
+    <string name="voice_undo">Ångra</string>
+    <string name="voice_close">Klar</string>
+    <string name="voice_add_to_calendar">Lägg till i kalendern</string>
+    <string name="voice_email_this">Mejla detta</string>
+    <string name="voice_outward_note">Öppnar din kalender- eller e-postapp. Inget skickas förrän du trycker där.</string>
+    <string name="voice_consent_title">Använda din röst?</string>
+    <string name="voice_consent_body">Tal omvandlas till text av telefonens taligenkänning. På många telefoner sker det på enheten, på andra kan Googles tjänst behandla ljudet. MeetingMind sparar inte ljudet. Inget sparas i din lista förrän du säger ja eller trycker på Spara.</string>
+    <string name="voice_consent_accept">Fortsätt</string>
+    <string name="voice_consent_decline">Inte nu</string>
+    <string name="voice_try_hint">Prova: ”lägg till en åtgärdspunkt om att skicka presentationen senast på fredag”, ”vilka är mina öppna åtgärder” eller ”markera budgetpunkten som klar”.</string>
+    <string name="voice_no_calendar_app">Ingen kalenderapp hittades.</string>
+    <string name="voice_no_mail_app">Ingen e-postapp hittades.</string>
+</resources>

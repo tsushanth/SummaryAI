@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit">Editar</string>
+    <string name="save">Salvar</string>
+    <string name="copy">Copiar</string>
+    <string name="todo_assignee">Responsável (opcional)</string>
+    <string name="todo_due_date">Data de vencimento (opcional)</string>
+    <string name="todo_due_date_pick">Escolher data</string>
+    <string name="todo_due_date_clear">Limpar data</string>
+    <string name="todo_due_chip">Vence %1$s</string>
+    <string name="summary_template_title">Estilo do resumo</string>
+    <string name="summary_template_current">Atual: %1$s</string>
+    <string name="summary_template_not_set">Não definido (usa seu padrão)</string>
+    <string name="summary_template_regenerate">Gerar resumo novamente</string>
+    <string name="summary_template_regenerating">Gerando novamente…</string>
+    <string name="summary_template_confirm_title">Gerar o resumo novamente?</string>
+    <string name="summary_template_confirm_message">Isso substitui o resumo, os pontos principais e os itens de ação atuais por uma nova versão no estilo %1$s. Esta ação não pode ser desfeita.</string>
+    <string name="summary_template_regenerate_confirm">Gerar novamente</string>
+    <string name="summary_template_failed">Não foi possível gerar o resumo novamente</string>
+    <string name="summary_template_done">Resumo gerado novamente</string>
+    <string name="summary_template_load_failed">Não foi possível carregar os estilos de resumo</string>
+    <string name="followup_email">Redigir e-mail de acompanhamento</string>
+    <string name="followup_email_title">E-mail de acompanhamento</string>
+    <string name="followup_email_subject">Assunto</string>
+    <string name="followup_email_body">Corpo</string>
+    <string name="followup_email_drafting">Redigindo…</string>
+    <string name="followup_email_failed">Não foi possível redigir o e-mail</string>
+    <string name="followup_email_copied">E-mail copiado</string>
+    <string name="followup_email_send">Enviar</string>
+    <string name="followup_email_no_app">Nenhum app de e-mail encontrado</string>
+    <string name="action_items_to_todos">Adicionar às minhas tarefas</string>
+    <string name="action_items_to_todos_adding">Adicionando…</string>
+    <string name="action_items_to_todos_added">%1$d adicionado(s) às suas tarefas</string>
+    <string name="action_items_to_todos_added_skipped">%1$d adicionado(s) às suas tarefas (%2$d já estava(m) lá)</string>
+    <string name="action_items_to_todos_none_new">Todos os itens de ação já estão nas suas tarefas</string>
+    <string name="action_items_to_todos_failed">Não foi possível adicionar os itens de ação às tarefas</string>
+    <string name="chat_all_meetings">Pergunte sobre todas as reuniões</string>
+    <string name="chat_all_meetings_title">Pergunte às suas reuniões</string>
+    <string name="chat_all_meetings_placeholder">ex.: O que decidimos sobre os preços?</string>
+    <string name="chat_all_meetings_empty_title">Pergunte sobre todas as suas reuniões</string>
+    <string name="chat_all_meetings_empty_message">As respostas vêm dos seus resumos e transcrições, com links para as reuniões de origem.</string>
+    <string name="chat_all_meetings_sources">Fontes</string>
+    <string name="chat_all_meetings_failed">Não foi possível obter uma resposta. Tente novamente.</string>
+    <string name="chat_all_meetings_send">Enviar</string>
+    <string name="settings_default_template">Estilo de resumo padrão</string>
+    <string name="settings_default_template_hint">Usado nas novas gravações, a menos que você escolha um estilo para uma específica</string>
+</resources>

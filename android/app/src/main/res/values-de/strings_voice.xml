@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">Per Sprache hinzufügen oder fragen</string>
+    <string name="voice_entry_debrief">Rückblick anhören</string>
+    <string name="voice_sheet_title">Freisprechen</string>
+    <string name="voice_listening">Hört zu …</string>
+    <string name="voice_working">Einen Moment …</string>
+    <string name="voice_speaking">Spricht …</string>
+    <string name="voice_heard_label">Ich habe verstanden</string>
+    <string name="voice_save">Speichern</string>
+    <string name="voice_edit">Bearbeiten</string>
+    <string name="voice_cancel">Abbrechen</string>
+    <string name="voice_undo">Rückgängig</string>
+    <string name="voice_close">Fertig</string>
+    <string name="voice_add_to_calendar">Zum Kalender hinzufügen</string>
+    <string name="voice_email_this">Per E-Mail senden</string>
+    <string name="voice_outward_note">Öffnet deine Kalender- oder Mail-App. Es wird nichts gesendet, bis du dort tippst.</string>
+    <string name="voice_consent_title">Stimme verwenden?</string>
+    <string name="voice_consent_body">Die Spracherkennung deines Handys wandelt Sprache in Text um. Auf vielen Handys geschieht das auf dem Gerät, auf anderen verarbeitet möglicherweise der Dienst von Google das Audio. MeetingMind speichert das Audio nicht. In deiner Liste wird nichts gespeichert, bis du Ja sagst oder auf „Speichern“ tippst.</string>
+    <string name="voice_consent_accept">Weiter</string>
+    <string name="voice_consent_decline">Nicht jetzt</string>
+    <string name="voice_try_hint">Probiere: „Füge eine Aufgabe hinzu, bis Freitag die Präsentation zu senden“, „Was sind meine offenen Aufgaben?“ oder „Markiere den Budgetpunkt als erledigt“.</string>
+    <string name="voice_no_calendar_app">Keine Kalender-App gefunden.</string>
+    <string name="voice_no_mail_app">Keine Mail-App gefunden.</string>
+</resources>

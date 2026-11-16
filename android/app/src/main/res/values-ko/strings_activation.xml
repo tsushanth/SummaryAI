@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">아무거나 30초 동안 녹음해 보세요. 혼자 말하는 것도 괜찮아요. 요약이 나타나는 걸 확인할 수 있어요.</string>
+    <string name="first_run_mic_note">마이크는 녹음하는 동안에만 사용해요.</string>
+    <string name="first_run_record">탭하여 녹음</string>
+    <string name="first_run_see_sample">또는 먼저 샘플 미팅 보기</string>
+    <string name="sample_cta_title">이제 직접 해 보세요</string>
+    <string name="sample_cta_button">직접 녹음하기</string>
+    <string name="sample_chat_locked">내 미팅을 녹음하면 그 내용에 대해 질문할 수 있어요.</string>
+    <string name="sample_badge">샘플(가상)</string>
+</resources>

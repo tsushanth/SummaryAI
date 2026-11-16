@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="ui_action_items">Завдання</string>
+    <string name="ui_notes">Нотатки</string>
+    <string name="ui_loading">Завантаження</string>
+    <string name="ui_transcript_jump_to">Перейти до %1$s</string>
+    <string name="ui_transcript_speaker_line">%1$s (%2$s): %3$s</string>
+    <string name="ui_speakers_label">Мовці</string>
+    <string name="ui_no_recordings_title">Записів ще немає</string>
+    <string name="ui_no_results_title">Немає відповідних записів</string>
+    <string name="ui_clear_search">Очистити пошук</string>
+    <string name="ui_detailed_summary">Докладний підсумок</string>
+</resources>

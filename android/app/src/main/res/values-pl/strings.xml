@@ -274,4 +274,12 @@
     <string name="no_recordings_in_filter_subtitle">Żadne nagranie jeszcze nie pasuje. Wybierz Wszystkie, aby zobaczyć wszystko.</string>
     <string name="summary_no_speech">W tym nagraniu nie wykryto mowy, więc nie ma czego podsumować.</string>
     <string name="error_load_recording_failed">Nie udało się wczytać tego nagrania. Sprawdź połączenie i spróbuj ponownie.</string>
+
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_assistant_section">Bot spotkań</string>
+    <string name="voice_assistant_title">Asystent głosowy na spotkaniach</string>
+    <string name="voice_assistant_hint">Gdy ta opcja jest włączona, bot spotkań odpowiada na pytania na głos, gdy ktoś powie „Meeting Mind, ...”. Wyłącz, aby bot milczał.</string>
+    <string name="voice_assistant_load_error">Nie udało się wczytać tego ustawienia. Sprawdź połączenie.</string>
+    <string name="voice_assistant_save_error">Nie udało się zapisać zmiany. Sprawdź połączenie i spróbuj ponownie.</string>
+    <string name="onboarding_transcribe_desc">Uzyskuj dokładne transkrypcje z rozpoznawaniem mówców w ponad 30 językach</string>
 </resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="error_bot_cap_reached">Você usou todo o tempo do bot de reunião deste mês. Ele é renovado em %1$s. Você ainda pode gravar reuniões por conta própria.</string>
+    <string name="error_bot_cap_reached_no_date">Você usou todo o tempo do bot de reunião deste mês. Ele é renovado no início do próximo mês. Você ainda pode gravar reuniões por conta própria.</string>
+</resources>

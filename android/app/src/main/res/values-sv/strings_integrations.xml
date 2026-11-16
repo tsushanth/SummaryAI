@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="integrations_title">Skicka sammanfattningar vidare</string>
+    <string name="integrations_desc">När varje möte har bearbetats kan MeetingMind skicka sammanfattningen och åtgärdspunkterna till en webhook, Slack eller Notion. Hemligheter lagras krypterade och visas aldrig igen.</string>
+    <string name="integration_webhook">Webhook</string>
+    <string name="integration_webhook_url">Webhook-URL (https)</string>
+    <string name="integration_webhook_secret">Signeringshemlighet (valfritt)</string>
+    <string name="integration_slack">Slack</string>
+    <string name="integration_slack_url">URL för Slacks inkommande webhook</string>
+    <string name="integration_notion">Notion</string>
+    <string name="integration_notion_token">Integrationstoken för Notion</string>
+    <string name="integration_notion_database">Databas-ID för Notion</string>
+    <string name="integration_connected">Ansluten</string>
+    <string name="integration_last_delivery">Senaste leverans: %1$s</string>
+    <string name="integration_leave_to_keep">Ange ett nytt värde för att ersätta</string>
+    <string name="integration_save">Spara</string>
+    <string name="integration_test">Skicka test</string>
+    <string name="integration_remove">Ta bort</string>
+    <string name="integrations_saved">Sparat.</string>
+    <string name="integrations_removed">Borttaget.</string>
+    <string name="integrations_test_delivered">Testet levererades.</string>
+    <string name="integrations_test_failed">Testet misslyckades.</string>
+    <string name="integrations_load_failed">Det gick inte att läsa in integrationerna.</string>
+    <string name="integrations_save_failed">Det gick inte att spara.</string>
+    <string name="integrations_remove_failed">Det gick inte att ta bort.</string>
+    <string name="integrations_message_with_detail">%1$s %2$s</string>
+    <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
+    <string name="tile_record_label">Spela in möte</string>
+    <string name="widget_record_label">Spela in</string>
+    <string name="widget_description">Starta en inspelning från startskärmen</string>
+    <string name="analytics_title">Taltid</string>
+    <string name="analytics_questions">Frågor: %1$d</string>
+    <string name="analytics_words">Ord: %1$d</string>
+    <string name="analytics_longest_monologue">Längsta monolog: %1$s (%2$s)</string>
+</resources>

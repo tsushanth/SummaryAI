@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="error_bot_cap_reached">Anda telah menggunakan seluruh waktu bot rapat bulan ini. Waktu ini direset pada %1$s. Anda tetap dapat merekam rapat sendiri.</string>
+    <string name="error_bot_cap_reached_no_date">Anda telah menggunakan seluruh waktu bot rapat bulan ini. Waktu ini direset di awal bulan depan. Anda tetap dapat merekam rapat sendiri.</string>
+</resources>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">Přidat nebo se zeptat hlasem</string>
+    <string name="voice_entry_debrief">Poslechnout shrnutí</string>
+    <string name="voice_sheet_title">Bez rukou</string>
+    <string name="voice_listening">Poslouchám…</string>
+    <string name="voice_working">Okamžik…</string>
+    <string name="voice_speaking">Mluvím…</string>
+    <string name="voice_heard_label">Slyšeno</string>
+    <string name="voice_save">Uložit</string>
+    <string name="voice_edit">Upravit</string>
+    <string name="voice_cancel">Zrušit</string>
+    <string name="voice_undo">Vrátit zpět</string>
+    <string name="voice_close">Hotovo</string>
+    <string name="voice_add_to_calendar">Přidat do kalendáře</string>
+    <string name="voice_email_this">Poslat e-mailem</string>
+    <string name="voice_outward_note">Otevře se tvůj kalendář nebo e-mailová aplikace. Nic se neodešle, dokud tam neklepneš.</string>
+    <string name="voice_consent_title">Chceš používat hlas?</string>
+    <string name="voice_consent_body">Řeč se převádí na text pomocí rozpoznávání řeči ve tvém telefonu. V mnoha telefonech to probíhá přímo v zařízení, v jiných může zvuk zpracovat služba Google. MeetingMind zvuk neukládá. Nic se neuloží do tvého seznamu, dokud neřekneš ano nebo neklepneš na Uložit.</string>
+    <string name="voice_consent_accept">Pokračovat</string>
+    <string name="voice_consent_decline">Teď ne</string>
+    <string name="voice_try_hint">Zkus: „přidej úkol odeslat prezentaci do pátku“, „jaké mám otevřené úkoly“ nebo „označ položku rozpočtu jako hotovou“.</string>
+    <string name="voice_no_calendar_app">Nebyla nalezena žádná aplikace kalendáře.</string>
+    <string name="voice_no_mail_app">Nebyla nalezena žádná e-mailová aplikace.</string>
+</resources>

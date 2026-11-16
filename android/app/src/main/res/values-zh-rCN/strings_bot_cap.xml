@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="error_bot_cap_reached">您本月的会议机器人时长已用完，将于 %1$s 重置。您仍然可以自己录制会议。</string>
+    <string name="error_bot_cap_reached_no_date">您本月的会议机器人时长已用完，将于下月初重置。您仍然可以自己录制会议。</string>
+</resources>

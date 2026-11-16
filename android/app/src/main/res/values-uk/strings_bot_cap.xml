@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="error_bot_cap_reached">Ви використали час бота для зустрічей на цей місяць. Він оновиться %1$s. Ви все одно можете записувати зустрічі самостійно.</string>
+    <string name="error_bot_cap_reached_no_date">Ви використали час бота для зустрічей на цей місяць. Він оновиться на початку наступного місяця. Ви все одно можете записувати зустрічі самостійно.</string>
+</resources>

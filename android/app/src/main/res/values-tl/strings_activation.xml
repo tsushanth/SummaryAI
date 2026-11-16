@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">Mag-record ng 30 segundo ng kahit ano, kahit ikaw lang ang nagsasalita, at panoorin ang paglabas ng iyong buod.</string>
+    <string name="first_run_mic_note">Ginagamit lang namin ang mikropono habang nagre-record ka.</string>
+    <string name="first_run_record">I-tap para mag-record</string>
+    <string name="first_run_see_sample">O tingnan muna ang isang sample na pulong</string>
+    <string name="sample_cta_title">Subukan naman ang sa iyo</string>
+    <string name="sample_cta_button">Mag-record ng sarili mo</string>
+    <string name="sample_chat_locked">Mag-record ng sarili mong pulong para makapagtanong tungkol dito.</string>
+    <string name="sample_badge">Sample, kathang-isip</string>
+</resources>

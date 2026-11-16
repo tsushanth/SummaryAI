@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">Tambah atau tanya dengan suara</string>
+    <string name="voice_entry_debrief">Dengarkan debrief</string>
+    <string name="voice_sheet_title">Bebas tangan</string>
+    <string name="voice_listening">Mendengarkan…</string>
+    <string name="voice_working">Sebentar…</string>
+    <string name="voice_speaking">Berbicara…</string>
+    <string name="voice_heard_label">Yang saya dengar</string>
+    <string name="voice_save">Simpan</string>
+    <string name="voice_edit">Edit</string>
+    <string name="voice_cancel">Batal</string>
+    <string name="voice_undo">Urungkan</string>
+    <string name="voice_close">Selesai</string>
+    <string name="voice_add_to_calendar">Tambah ke kalender</string>
+    <string name="voice_email_this">Kirim lewat email</string>
+    <string name="voice_outward_note">Membuka aplikasi kalender atau email Anda. Tidak ada yang dikirim sampai Anda mengetuk di sana.</string>
+    <string name="voice_consent_title">Gunakan suara Anda?</string>
+    <string name="voice_consent_body">Ucapan diubah menjadi teks oleh pengenalan suara di ponsel Anda. Di banyak ponsel, proses ini berlangsung di perangkat; di ponsel lain, layanan Google dapat memproses audionya. MeetingMind tidak menyimpan audionya. Tidak ada yang disimpan ke daftar Anda sampai Anda berkata ya atau mengetuk Simpan.</string>
+    <string name="voice_consent_accept">Lanjutkan</string>
+    <string name="voice_consent_decline">Nanti saja</string>
+    <string name="voice_try_hint">Coba: “tambahkan item tindakan untuk mengirim deck sebelum Jumat”, “apa saja tindakan saya yang masih terbuka”, atau “tandai item anggaran selesai”.</string>
+    <string name="voice_no_calendar_app">Aplikasi kalender tidak ditemukan.</string>
+    <string name="voice_no_mail_app">Aplikasi email tidak ditemukan.</string>
+</resources>

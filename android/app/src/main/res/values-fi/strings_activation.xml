@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">Tallenna 30 sekuntia mitä tahansa, vaikka vain oma puheesi, ja katso yhteenvetosi ilmestyvän.</string>
+    <string name="first_run_mic_note">Käytämme mikrofonia vain, kun tallennat.</string>
+    <string name="first_run_record">Tallenna napauttamalla</string>
+    <string name="first_run_see_sample">Tai katso ensin esimerkkikokous</string>
+    <string name="sample_cta_title">Kokeile nyt omaasi</string>
+    <string name="sample_cta_button">Tallenna oma</string>
+    <string name="sample_chat_locked">Tallenna oma kokouksesi, niin voit esittää siitä kysymyksiä.</string>
+    <string name="sample_badge">Esimerkki, fiktiivinen</string>
+</resources>

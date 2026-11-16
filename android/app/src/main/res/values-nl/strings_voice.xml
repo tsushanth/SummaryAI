@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">Toevoegen of vragen met spraak</string>
+    <string name="voice_entry_debrief">Debrief beluisteren</string>
+    <string name="voice_sheet_title">Handsfree</string>
+    <string name="voice_listening">Luisteren…</string>
+    <string name="voice_working">Een moment…</string>
+    <string name="voice_speaking">Spreken…</string>
+    <string name="voice_heard_label">Ik hoorde</string>
+    <string name="voice_save">Opslaan</string>
+    <string name="voice_edit">Bewerken</string>
+    <string name="voice_cancel">Annuleren</string>
+    <string name="voice_undo">Ongedaan maken</string>
+    <string name="voice_close">Klaar</string>
+    <string name="voice_add_to_calendar">Toevoegen aan agenda</string>
+    <string name="voice_email_this">Dit mailen</string>
+    <string name="voice_outward_note">Opent je agenda- of mail-app. Er wordt niets verzonden totdat je daar tikt.</string>
+    <string name="voice_consent_title">Je stem gebruiken?</string>
+    <string name="voice_consent_body">Spraak wordt door de spraakherkenning van je telefoon omgezet in tekst. Op veel telefoons gebeurt dit op het apparaat zelf; op andere kan de service van Google de audio verwerken. MeetingMind bewaart de audio niet. Er wordt niets in je lijst opgeslagen totdat je ja zegt of op Opslaan tikt.</string>
+    <string name="voice_consent_accept">Doorgaan</string>
+    <string name="voice_consent_decline">Niet nu</string>
+    <string name="voice_try_hint">Probeer: “voeg een actiepunt toe om vrijdag de presentatie te sturen”, “wat zijn mijn openstaande actiepunten” of “markeer het budgetpunt als gedaan”.</string>
+    <string name="voice_no_calendar_app">Geen agenda-app gevonden.</string>
+    <string name="voice_no_mail_app">Geen mail-app gevonden.</string>
+</resources>

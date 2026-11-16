@@ -274,4 +274,12 @@
     <string name="no_recordings_in_filter_subtitle">Er zijn nog geen opnames die hierbij passen. Kies Alles om alles te zien.</string>
     <string name="summary_no_speech">In deze opname is geen spraak gedetecteerd, dus er valt niets samen te vatten.</string>
     <string name="error_load_recording_failed">Deze opname kon niet worden geladen. Controleer je verbinding en probeer het opnieuw.</string>
+
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_assistant_section">Vergaderbot</string>
+    <string name="voice_assistant_title">Spraakassistent in vergaderingen</string>
+    <string name="voice_assistant_hint">Als dit aanstaat, beantwoordt de vergaderbot vragen hardop zodra iemand “Meeting Mind, ...” zegt. Zet het uit om de bot stil te houden.</string>
+    <string name="voice_assistant_load_error">Deze instelling kon niet worden geladen. Controleer je verbinding.</string>
+    <string name="voice_assistant_save_error">Je wijziging kon niet worden opgeslagen. Controleer je verbinding en probeer het opnieuw.</string>
+    <string name="onboarding_transcribe_desc">Krijg nauwkeurige transcripten met sprekeridentificatie in meer dan 30 talen</string>
 </resources>

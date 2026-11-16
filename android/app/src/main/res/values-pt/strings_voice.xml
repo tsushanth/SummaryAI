@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">Adicionar ou perguntar por voz</string>
+    <string name="voice_entry_debrief">Ouvir debrief</string>
+    <string name="voice_sheet_title">Mãos livres</string>
+    <string name="voice_listening">Ouvindo…</string>
+    <string name="voice_working">Um momento…</string>
+    <string name="voice_speaking">Falando…</string>
+    <string name="voice_heard_label">Eu ouvi</string>
+    <string name="voice_save">Salvar</string>
+    <string name="voice_edit">Editar</string>
+    <string name="voice_cancel">Cancelar</string>
+    <string name="voice_undo">Desfazer</string>
+    <string name="voice_close">Concluir</string>
+    <string name="voice_add_to_calendar">Adicionar à agenda</string>
+    <string name="voice_email_this">Enviar por e-mail</string>
+    <string name="voice_outward_note">Abre seu app de agenda ou de e-mail. Nada é enviado até você tocar lá.</string>
+    <string name="voice_consent_title">Usar sua voz?</string>
+    <string name="voice_consent_body">A fala é transformada em texto pelo reconhecimento de fala do seu smartphone. Em muitos aparelhos isso acontece no próprio dispositivo; em outros, o serviço do Google pode processar o áudio. O MeetingMind não guarda o áudio. Nada é salvo na sua lista até você dizer sim ou tocar em Salvar.</string>
+    <string name="voice_consent_accept">Continuar</string>
+    <string name="voice_consent_decline">Agora não</string>
+    <string name="voice_try_hint">Experimente: “adicione um item de ação para enviar a apresentação até sexta”, “quais são meus itens de ação em aberto” ou “marque o item do orçamento como concluído”.</string>
+    <string name="voice_no_calendar_app">Nenhum app de agenda encontrado.</string>
+    <string name="voice_no_mail_app">Nenhum app de e-mail encontrado.</string>
+</resources>

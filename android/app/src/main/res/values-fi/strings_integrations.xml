@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="integrations_title">Lähetä yhteenvedot muualle</string>
+    <string name="integrations_desc">Kun kokous on käsitelty, MeetingMind voi lähettää yhteenvedon ja toimenpiteet webhookiin, Slackiin tai Notioniin. Salaisuudet tallennetaan salattuina, eikä niitä näytetä enää uudelleen.</string>
+    <string name="integration_webhook">Webhook</string>
+    <string name="integration_webhook_url">Webhook-URL (https)</string>
+    <string name="integration_webhook_secret">Allekirjoitusavain (valinnainen)</string>
+    <string name="integration_slack">Slack</string>
+    <string name="integration_slack_url">Slackin saapuvan webhookin URL</string>
+    <string name="integration_notion">Notion</string>
+    <string name="integration_notion_token">Notion-integraation tunnus</string>
+    <string name="integration_notion_database">Notion-tietokannan tunnus</string>
+    <string name="integration_connected">Yhdistetty</string>
+    <string name="integration_last_delivery">Viimeisin toimitus: %1$s</string>
+    <string name="integration_leave_to_keep">Korvaa antamalla uusi arvo</string>
+    <string name="integration_save">Tallenna</string>
+    <string name="integration_test">Lähetä testi</string>
+    <string name="integration_remove">Poista</string>
+    <string name="integrations_saved">Tallennettu.</string>
+    <string name="integrations_removed">Poistettu.</string>
+    <string name="integrations_test_delivered">Testi toimitettu.</string>
+    <string name="integrations_test_failed">Testi epäonnistui.</string>
+    <string name="integrations_load_failed">Integraatioiden lataaminen epäonnistui.</string>
+    <string name="integrations_save_failed">Tallentaminen epäonnistui.</string>
+    <string name="integrations_remove_failed">Poistaminen epäonnistui.</string>
+    <string name="integrations_message_with_detail">%1$s %2$s</string>
+    <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
+    <string name="tile_record_label">Tallenna kokous</string>
+    <string name="widget_record_label">Tallenna</string>
+    <string name="widget_description">Aloita tallennus aloitusnäytöltä</string>
+    <string name="analytics_title">Puheaika</string>
+    <string name="analytics_questions">Kysymyksiä: %1$d</string>
+    <string name="analytics_words">Sanoja: %1$d</string>
+    <string name="analytics_longest_monologue">Pisin yhtäjaksoinen puheenvuoro: %1$s (%2$s)</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="meeting_language_label">Γλώσσα απομαγνητοφώνησης</string>
+    <string name="meeting_language_auto">Αυτόματος εντοπισμός</string>
+    <string name="meeting_language_hint">Ο αυτόματος εντοπισμός λειτουργεί στις περισσότερες συσκέψεις. Επίλεξε γλώσσα αν η απομαγνητοφώνηση βγει λάθος. Η επιλογή σου αποθηκεύεται.</string>
+    <string name="meeting_language_dialog_title">Γλώσσα απομαγνητοφώνησης</string>
+    <string name="meeting_language_change">Αλλαγή γλώσσας</string>
+    <string name="meeting_language_active">Γλώσσα: %1$s</string>
+    <string name="meeting_language_changed">Η γλώσσα απομαγνητοφώνησης ορίστηκε σε %1$s</string>
+    <string name="meeting_language_change_note">Ισχύει για την ομιλία από τώρα και στο εξής.</string>
+    <string name="meeting_language_switch_unavailable">Αυτή η σύσκεψη δεν μπορεί να αλλάξει γλώσσα ενώ είναι ζωντανή</string>
+    <string name="meeting_language_switch_failed">Δεν ήταν δυνατή η αλλαγή της γλώσσας. Δοκίμασε ξανά.</string>
+    <string name="meeting_language_hint_auto_english_live">Ο αυτόματος εντοπισμός βρίσκει τη γλώσσα για την τελική απομαγνητοφώνηση. Οι ζωντανοί υπότιτλοι παραμένουν στα αγγλικά εκτός αν επιλέξεις γλώσσα.</string>
+    <string name="meeting_language_hint_delayed">Οι ζωντανοί υπότιτλοι σε αυτήν τη γλώσσα μπορεί να καθυστερούν έως και %1$s λεπτά. Η τελική απομαγνητοφώνηση δεν επηρεάζεται.</string>
+    <string name="meeting_language_reason_fixed">Η γλώσσα των ζωντανών υπότιτλων ορίστηκε όταν συμμετείχε το bot και δεν μπορεί να αλλάξει κατά τη διάρκεια αυτής της σύσκεψης.</string>
+    <string name="meeting_language_reason_not_live">Η γλώσσα μπορεί να αλλάξει μόνο όταν το bot βρίσκεται στη σύσκεψη.</string>
+    <string name="meeting_language_switch_not_live">Το bot δεν βρίσκεται αυτή τη στιγμή στη σύσκεψη, επομένως η γλώσσα δεν μπορεί να αλλάξει.</string>
+    <string name="meeting_language_saved_not_live">Αποθηκεύτηκε η γλώσσα %1$s για την τελική απομαγνητοφώνηση, αλλά η ζωντανή απομαγνητοφώνηση δεν μπόρεσε να αλλάξει αυτή τη στιγμή.</string>
+</resources>

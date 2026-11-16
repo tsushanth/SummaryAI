@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="error_bot_cap_reached">Je hebt de vergaderbottijd van deze maand opgebruikt. Die wordt op %1$s opnieuw ingesteld. Je kunt nog steeds zelf vergaderingen opnemen.</string>
+    <string name="error_bot_cap_reached_no_date">Je hebt de vergaderbottijd van deze maand opgebruikt. Die wordt aan het begin van volgende maand opnieuw ingesteld. Je kunt nog steeds zelf vergaderingen opnemen.</string>
+</resources>

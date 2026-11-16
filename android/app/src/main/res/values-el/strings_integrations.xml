@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="integrations_title">Αποστολή περιλήψεων αλλού</string>
+    <string name="integrations_desc">Αφού επεξεργαστεί κάθε σύσκεψη, το MeetingMind μπορεί να στείλει την περίληψη και τις ενέργειες σε webhook, Slack ή Notion. Τα μυστικά κλειδιά αποθηκεύονται κρυπτογραφημένα και δεν εμφανίζονται ξανά.</string>
+    <string name="integration_webhook">Webhook</string>
+    <string name="integration_webhook_url">URL webhook (https)</string>
+    <string name="integration_webhook_secret">Μυστικό υπογραφής (προαιρετικό)</string>
+    <string name="integration_slack">Slack</string>
+    <string name="integration_slack_url">URL εισερχόμενου webhook του Slack</string>
+    <string name="integration_notion">Notion</string>
+    <string name="integration_notion_token">Διακριτικό ενσωμάτωσης Notion</string>
+    <string name="integration_notion_database">Αναγνωριστικό βάσης δεδομένων Notion</string>
+    <string name="integration_connected">Συνδεδεμένο</string>
+    <string name="integration_last_delivery">Τελευταία παράδοση: %1$s</string>
+    <string name="integration_leave_to_keep">Εισήγαγε νέα τιμή για αντικατάσταση</string>
+    <string name="integration_save">Αποθήκευση</string>
+    <string name="integration_test">Αποστολή δοκιμής</string>
+    <string name="integration_remove">Αφαίρεση</string>
+    <string name="integrations_saved">Αποθηκεύτηκε.</string>
+    <string name="integrations_removed">Αφαιρέθηκε.</string>
+    <string name="integrations_test_delivered">Η δοκιμή παραδόθηκε.</string>
+    <string name="integrations_test_failed">Η δοκιμή απέτυχε.</string>
+    <string name="integrations_load_failed">Δεν ήταν δυνατή η φόρτωση των ενσωματώσεων.</string>
+    <string name="integrations_save_failed">Δεν ήταν δυνατή η αποθήκευση.</string>
+    <string name="integrations_remove_failed">Δεν ήταν δυνατή η αφαίρεση.</string>
+    <string name="integrations_message_with_detail">%1$s %2$s</string>
+    <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
+    <string name="tile_record_label">Ηχογράφηση σύσκεψης</string>
+    <string name="widget_record_label">Ηχογράφηση</string>
+    <string name="widget_description">Ξεκίνα μια ηχογράφηση από την αρχική οθόνη σου</string>
+    <string name="analytics_title">Χρόνος ομιλίας</string>
+    <string name="analytics_questions">Ερωτήσεις: %1$d</string>
+    <string name="analytics_words">Λέξεις: %1$d</string>
+    <string name="analytics_longest_monologue">Μεγαλύτερος μονόλογος: %1$s (%2$s)</string>
+</resources>
