@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">बोलकर जोड़ें या पूछें</string>
+    <string name="voice_entry_debrief">डीब्रीफ़ सुनें</string>
+    <string name="voice_sheet_title">हैंड्स-फ़्री</string>
+    <string name="voice_listening">सुन रहा है…</string>
+    <string name="voice_working">एक पल…</string>
+    <string name="voice_speaking">बोल रहा है…</string>
+    <string name="voice_heard_label">मैंने सुना</string>
+    <string name="voice_save">सहेजें</string>
+    <string name="voice_edit">बदलें</string>
+    <string name="voice_cancel">रद्द करें</string>
+    <string name="voice_undo">पूर्ववत करें</string>
+    <string name="voice_close">हो गया</string>
+    <string name="voice_add_to_calendar">कैलेंडर में जोड़ें</string>
+    <string name="voice_email_this">इसे ईमेल करें</string>
+    <string name="voice_outward_note">आपका कैलेंडर या मेल ऐप खुलता है। जब तक आप वहाँ टैप नहीं करते, कुछ भी नहीं भेजा जाता।</string>
+    <string name="voice_consent_title">अपनी आवाज़ का उपयोग करें?</string>
+    <string name="voice_consent_body">आपके फ़ोन की स्पीच रिकग्निशन आपकी बोली को टेक्स्ट में बदलती है। कई फ़ोन पर यह डिवाइस पर ही होता है; अन्य पर Google की सेवा ऑडियो को प्रोसेस कर सकती है। MeetingMind ऑडियो को नहीं रखता। जब तक आप हाँ नहीं कहते या सहेजें पर टैप नहीं करते, आपकी सूची में कुछ भी सहेजा नहीं जाता।</string>
+    <string name="voice_consent_accept">जारी रखें</string>
+    <string name="voice_consent_decline">अभी नहीं</string>
+    <string name="voice_try_hint">आज़माएँ: \"शुक्रवार तक डेक भेजने का एक एक्शन आइटम जोड़ो\", \"मेरे खुले एक्शन आइटम कौन-से हैं\", या \"बजट वाला आइटम पूरा हुआ चिह्नित करो\"।</string>
+    <string name="voice_no_calendar_app">कोई कैलेंडर ऐप नहीं मिला।</string>
+    <string name="voice_no_mail_app">कोई मेल ऐप नहीं मिला।</string>
+</resources>

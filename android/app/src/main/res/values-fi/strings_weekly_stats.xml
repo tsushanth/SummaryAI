@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="weekly_stats_title">Viimeiset 7 päivää</string>
+    <string name="weekly_stats_meetings">Kokoukset</string>
+    <string name="weekly_stats_hours">Tallennetut tunnit</string>
+    <string name="weekly_stats_action_items">Toimenpiteet</string>
+</resources>

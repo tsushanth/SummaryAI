@@ -202,7 +202,6 @@
     <string name="onboarding_recording_title">何でも録音</string>
     <string name="onboarding_recording_desc">会議、講義、インタビュー、あらゆる会話をクリアな音質でキャプチャ</string>
     <string name="onboarding_transcribe_title">AI搭載の文字起こし</string>
-    <string name="onboarding_transcribe_desc">120以上の言語で話者識別付きの正確な文字起こしを取得</string>
     <string name="onboarding_summary_title">スマート要約</string>
     <string name="onboarding_summary_desc">AIが要点とアクションアイテムを含む簡潔な要約を生成</string>
     <string name="onboarding_qa_title">質問する</string>
@@ -239,4 +238,12 @@
     <string name="no_recordings_in_filter_subtitle">一致する録音はまだありません。「すべて」を選択すると全件が表示されます。</string>
     <string name="summary_no_speech">この録音から音声が検出されなかったため、要約する内容がありません。</string>
     <string name="error_load_recording_failed">この録音を読み込めませんでした。接続を確認して、もう一度お試しください。</string>
+
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_assistant_section">ミーティングボット</string>
+    <string name="voice_assistant_title">ミーティング中の音声アシスタント</string>
+    <string name="voice_assistant_hint">オンにすると、誰かが「Meeting Mind、…」と話しかけたときに、ミーティングボットが声で質問に答えます。ボットを静かにしておくにはオフにしてください。</string>
+    <string name="voice_assistant_load_error">この設定を読み込めませんでした。接続を確認してください。</string>
+    <string name="voice_assistant_save_error">変更を保存できませんでした。接続を確認して、もう一度お試しください。</string>
+    <string name="onboarding_transcribe_desc">30以上の言語で、話者を識別した正確な文字起こしを取得できます</string>
 </resources>

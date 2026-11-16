@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">Dodawaj lub pytaj głosem</string>
+    <string name="voice_entry_debrief">Posłuchaj podsumowania spotkania</string>
+    <string name="voice_sheet_title">Bez użycia rąk</string>
+    <string name="voice_listening">Słucham…</string>
+    <string name="voice_working">Chwileczkę…</string>
+    <string name="voice_speaking">Mówię…</string>
+    <string name="voice_heard_label">Usłyszałem(-am)</string>
+    <string name="voice_save">Zapisz</string>
+    <string name="voice_edit">Edytuj</string>
+    <string name="voice_cancel">Anuluj</string>
+    <string name="voice_undo">Cofnij</string>
+    <string name="voice_close">Gotowe</string>
+    <string name="voice_add_to_calendar">Dodaj do kalendarza</string>
+    <string name="voice_email_this">Wyślij e-mailem</string>
+    <string name="voice_outward_note">Otwiera Twój kalendarz lub aplikację pocztową. Nic nie zostanie wysłane, dopóki tam nie stukniesz.</string>
+    <string name="voice_consent_title">Użyć Twojego głosu?</string>
+    <string name="voice_consent_body">Mowa jest zamieniana na tekst przez rozpoznawanie mowy w Twoim telefonie. W wielu telefonach odbywa się to na urządzeniu; w innych dźwięk może być przetwarzany przez usługę Google. MeetingMind nie przechowuje dźwięku. Nic nie zostanie zapisane na Twojej liście, dopóki nie powiesz „tak” lub nie stukniesz Zapisz.</string>
+    <string name="voice_consent_accept">Kontynuuj</string>
+    <string name="voice_consent_decline">Nie teraz</string>
+    <string name="voice_try_hint">Spróbuj: „dodaj zadanie: wysłać prezentację do piątku”, „jakie mam otwarte zadania” lub „oznacz pozycję budżetu jako zrobioną”.</string>
+    <string name="voice_no_calendar_app">Nie znaleziono aplikacji kalendarza.</string>
+    <string name="voice_no_mail_app">Nie znaleziono aplikacji pocztowej.</string>
+</resources>

@@ -230,7 +230,6 @@
     <string name="onboarding_recording_title">Rekam Apa Saja</string>
     <string name="onboarding_recording_desc">Rekam rapat, kuliah, wawancara, atau percakapan apa pun dengan audio jernih</string>
     <string name="onboarding_transcribe_title">Transkripsi Bertenaga AI</string>
-    <string name="onboarding_transcribe_desc">Dapatkan transkrip akurat dengan identifikasi pembicara dalam lebih dari 120 bahasa</string>
     <string name="onboarding_summary_title">Ringkasan Cerdas</string>
     <string name="onboarding_summary_desc">AI menghasilkan ringkasan singkat dengan poin penting dan tugas</string>
     <string name="onboarding_qa_title">Ajukan Pertanyaan</string>
@@ -275,4 +274,12 @@
     <string name="no_recordings_in_filter_subtitle">Belum ada rekaman yang cocok. Pilih Semua untuk melihat semuanya.</string>
     <string name="summary_no_speech">Tidak ada ucapan yang terdeteksi dalam rekaman ini, jadi tidak ada yang bisa diringkas.</string>
     <string name="error_load_recording_failed">Tidak dapat memuat rekaman ini. Periksa koneksi Anda dan coba lagi.</string>
+
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_assistant_section">Bot rapat</string>
+    <string name="voice_assistant_title">Asisten suara dalam rapat</string>
+    <string name="voice_assistant_hint">Saat aktif, bot rapat menjawab pertanyaan dengan suara ketika seseorang berkata \'Meeting Mind, ...\'. Nonaktifkan agar bot tetap diam.</string>
+    <string name="voice_assistant_load_error">Tidak dapat memuat pengaturan ini. Periksa koneksi Anda.</string>
+    <string name="voice_assistant_save_error">Tidak dapat menyimpan perubahan Anda. Periksa koneksi Anda dan coba lagi.</string>
+    <string name="onboarding_transcribe_desc">Dapatkan transkrip akurat dengan identifikasi pembicara dalam lebih dari 30 bahasa</string>
 </resources>

@@ -230,7 +230,6 @@
     <string name="onboarding_recording_title">บันทึกทุกอย่าง</string>
     <string name="onboarding_recording_desc">บันทึกการประชุม บรรยาย สัมภาษณ์ หรือบทสนทนาใดๆ ด้วยเสียงที่คมชัด</string>
     <string name="onboarding_transcribe_title">การถอดเสียงด้วย AI</string>
-    <string name="onboarding_transcribe_desc">รับบทถอดเสียงที่แม่นยำพร้อมระบุผู้พูดในกว่า 120 ภาษา</string>
     <string name="onboarding_summary_title">สรุปอัจฉริยะ</string>
     <string name="onboarding_summary_desc">AI สร้างสรุปที่กระชับพร้อมประเด็นสำคัญและรายการสิ่งที่ต้องทำ</string>
     <string name="onboarding_qa_title">ถามคำถาม</string>
@@ -275,4 +274,12 @@
     <string name="no_recordings_in_filter_subtitle">ยังไม่มีการบันทึกที่ตรงกัน เลือก “ทั้งหมด” เพื่อดูทุกรายการ</string>
     <string name="summary_no_speech">ไม่พบเสียงพูดในการบันทึกนี้ จึงไม่มีเนื้อหาให้สรุป</string>
     <string name="error_load_recording_failed">ไม่สามารถโหลดการบันทึกนี้ได้ ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง</string>
+
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_assistant_section">บอทประชุม</string>
+    <string name="voice_assistant_title">ผู้ช่วยเสียงในการประชุม</string>
+    <string name="voice_assistant_hint">เมื่อเปิดใช้งาน บอทประชุมจะตอบคำถามด้วยเสียงเมื่อมีคนพูดว่า \'Meeting Mind, ...\' ปิดไว้หากต้องการให้บอทเงียบ</string>
+    <string name="voice_assistant_load_error">โหลดการตั้งค่านี้ไม่ได้ โปรดตรวจสอบการเชื่อมต่อของคุณ</string>
+    <string name="voice_assistant_save_error">บันทึกการเปลี่ยนแปลงของคุณไม่ได้ โปรดตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง</string>
+    <string name="onboarding_transcribe_desc">ได้ข้อความถอดเสียงที่แม่นยำพร้อมระบุตัวผู้พูดในกว่า 30 ภาษา</string>
 </resources>

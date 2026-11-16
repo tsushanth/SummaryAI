@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="error_bot_cap_reached">이번 달 미팅 봇 이용 시간을 모두 사용했어요. %1$s에 초기화돼요. 미팅을 직접 녹음하는 것은 계속 할 수 있어요.</string>
+    <string name="error_bot_cap_reached_no_date">이번 달 미팅 봇 이용 시간을 모두 사용했어요. 다음 달 초에 초기화돼요. 미팅을 직접 녹음하는 것은 계속 할 수 있어요.</string>
+</resources>

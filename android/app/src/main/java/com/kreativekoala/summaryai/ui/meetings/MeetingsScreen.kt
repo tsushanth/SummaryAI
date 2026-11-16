@@ -1,5 +1,6 @@
 package com.kreativekoala.summaryai.ui.meetings
 
+import com.kreativekoala.summaryai.util.LocaleDates
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -347,9 +348,8 @@ private fun formatMeetingTime(dateString: String?): String {
     if (dateString == null) return stringResource(R.string.now)
     return try {
         val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
-        val outputFormat = SimpleDateFormat("EEE, MMM d 'at' h:mm a", Locale.US)
         val date = inputFormat.parse(dateString)
-        date?.let { outputFormat.format(it) } ?: dateString
+        date?.let { LocaleDates.weekdayMonthDayTime(it) } ?: dateString
     } catch (e: Exception) {
         dateString
     }

@@ -230,7 +230,6 @@
     <string name="onboarding_recording_title">Rakam Apa Sahaja</string>
     <string name="onboarding_recording_desc">Rakam mesyuarat, kuliah, temu bual, atau sebarang perbualan dengan audio yang jernih</string>
     <string name="onboarding_transcribe_title">Transkripsi Berkuasa AI</string>
-    <string name="onboarding_transcribe_desc">Dapatkan transkrip tepat dengan pengenalpastian penutur dalam lebih 120 bahasa</string>
     <string name="onboarding_summary_title">Ringkasan Pintar</string>
     <string name="onboarding_summary_desc">AI menjana ringkasan padat dengan perkara utama dan tugasan</string>
     <string name="onboarding_qa_title">Tanya Soalan</string>
@@ -275,4 +274,12 @@
     <string name="no_recordings_in_filter_subtitle">Belum ada rakaman yang sepadan. Pilih Semua untuk melihat semuanya.</string>
     <string name="summary_no_speech">Tiada pertuturan dikesan dalam rakaman ini, jadi tiada apa yang perlu diringkaskan.</string>
     <string name="error_load_recording_failed">Tidak dapat memuatkan rakaman ini. Semak sambungan anda dan cuba lagi.</string>
+
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_assistant_section">Bot mesyuarat</string>
+    <string name="voice_assistant_title">Pembantu suara dalam mesyuarat</string>
+    <string name="voice_assistant_hint">Apabila dihidupkan, bot mesyuarat menjawab soalan dengan kuat apabila seseorang berkata \'Meeting Mind, ...\'. Matikan untuk memastikan bot kekal senyap.</string>
+    <string name="voice_assistant_load_error">Tidak dapat memuatkan tetapan ini. Semak sambungan anda.</string>
+    <string name="voice_assistant_save_error">Tidak dapat menyimpan perubahan anda. Semak sambungan anda dan cuba lagi.</string>
+    <string name="onboarding_transcribe_desc">Dapatkan transkrip yang tepat dengan pengecaman penutur dalam lebih 30 bahasa</string>
 </resources>

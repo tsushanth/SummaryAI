@@ -202,7 +202,6 @@
     <string name="onboarding_recording_title">Registra Qualsiasi Cosa</string>
     <string name="onboarding_recording_desc">Cattura riunioni, lezioni, interviste o qualsiasi conversazione con audio cristallino</string>
     <string name="onboarding_transcribe_title">Trascrizione con IA</string>
-    <string name="onboarding_transcribe_desc">Ottieni trascrizioni accurate con identificazione dei parlanti in oltre 120 lingue</string>
     <string name="onboarding_summary_title">Riassunti Intelligenti</string>
     <string name="onboarding_summary_desc">L\'IA genera riassunti concisi con punti chiave e attività</string>
     <string name="onboarding_qa_title">Fai Domande</string>
@@ -239,4 +238,12 @@
     <string name="no_recordings_in_filter_subtitle">Nessuna registrazione corrisponde per ora. Seleziona Tutte per vedere tutto.</string>
     <string name="summary_no_speech">In questa registrazione non è stato rilevato alcun parlato, quindi non c\'è niente da riassumere.</string>
     <string name="error_load_recording_failed">Impossibile caricare questa registrazione. Controlla la connessione e riprova.</string>
+
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_assistant_section">Bot per le riunioni</string>
+    <string name="voice_assistant_title">Assistente vocale nelle riunioni</string>
+    <string name="voice_assistant_hint">Se attivo, il bot della riunione risponde a voce alle domande quando qualcuno dice \'Meeting Mind, ...\'. Disattivalo per mantenere il bot in silenzio.</string>
+    <string name="voice_assistant_load_error">Impossibile caricare questa impostazione. Controlla la connessione.</string>
+    <string name="voice_assistant_save_error">Impossibile salvare la modifica. Controlla la connessione e riprova.</string>
+    <string name="onboarding_transcribe_desc">Ottieni trascrizioni accurate con identificazione dei parlanti in più di 30 lingue</string>
 </resources>

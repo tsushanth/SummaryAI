@@ -1,5 +1,7 @@
 package com.kreativekoala.summaryai.ui.phone
 
+import com.kreativekoala.summaryai.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -88,7 +90,7 @@ internal fun ActiveCallSheet(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        "Recording",
+                        stringResource(R.string.recording_fallback),
                         color = MaterialTheme.colorScheme.error,
                         fontWeight = FontWeight.Bold
                     )
@@ -195,13 +197,13 @@ internal fun ActiveCallSheet(
                     ) {
                         Icon(
                             Icons.Default.CallEnd,
-                            contentDescription = "End Call",
+                            contentDescription = stringResource(R.string.ui_end_call),
                             modifier = Modifier.size(32.dp),
                             tint = Color.White
                         )
                     }
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("End Call", style = MaterialTheme.typography.labelSmall)
+                    Text(stringResource(R.string.ui_end_call), style = MaterialTheme.typography.labelSmall)
                 }
 
                 // Speaker button

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">Magdagdag o magtanong gamit ang boses</string>
+    <string name="voice_entry_debrief">Pakinggan ang debrief</string>
+    <string name="voice_sheet_title">Hands-free</string>
+    <string name="voice_listening">Nakikinig…</string>
+    <string name="voice_working">Sandali lang…</string>
+    <string name="voice_speaking">Nagsasalita…</string>
+    <string name="voice_heard_label">Narinig ko</string>
+    <string name="voice_save">I-save</string>
+    <string name="voice_edit">I-edit</string>
+    <string name="voice_cancel">Kanselahin</string>
+    <string name="voice_undo">I-undo</string>
+    <string name="voice_close">Tapos na</string>
+    <string name="voice_add_to_calendar">Idagdag sa kalendaryo</string>
+    <string name="voice_email_this">I-email ito</string>
+    <string name="voice_outward_note">Bubuksan ang iyong kalendaryo o mail app. Walang ipapadala hangga\'t hindi ka nagta-tap doon.</string>
+    <string name="voice_consent_title">Gagamitin ang boses mo?</string>
+    <string name="voice_consent_body">Ginagawang teksto ng speech recognition ng telepono mo ang iyong pagsasalita. Sa maraming telepono, nangyayari ito sa mismong device; sa iba, maaaring iproseso ng serbisyo ng Google ang audio. Hindi iniingatan ng MeetingMind ang audio. Walang ise-save sa iyong listahan hangga\'t hindi ka nagsasabi ng oo o nagta-tap ng I-save.</string>
+    <string name="voice_consent_accept">Magpatuloy</string>
+    <string name="voice_consent_decline">Hindi muna</string>
+    <string name="voice_try_hint">Subukan: \"magdagdag ng action item para ipadala ang deck sa Biyernes\", \"ano ang mga bukas kong action\", o \"markahang tapos na ang item sa budget\".</string>
+    <string name="voice_no_calendar_app">Walang nakitang calendar app.</string>
+    <string name="voice_no_mail_app">Walang nakitang mail app.</string>
+</resources>

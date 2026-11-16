@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">कुछ भी 30 सेकंड रिकॉर्ड करें, चाहे आप सिर्फ़ बोल ही रहे हों, और अपना सारांश बनते देखें।</string>
+    <string name="first_run_mic_note">हम माइक्रोफ़ोन का उपयोग सिर्फ़ तभी करते हैं जब आप रिकॉर्ड कर रहे हों।</string>
+    <string name="first_run_record">रिकॉर्ड करने के लिए टैप करें</string>
+    <string name="first_run_see_sample">या पहले एक नमूना मीटिंग देखें</string>
+    <string name="sample_cta_title">अब अपनी मीटिंग आज़माएँ</string>
+    <string name="sample_cta_button">अपनी रिकॉर्ड करें</string>
+    <string name="sample_chat_locked">इसके बारे में सवाल पूछने के लिए अपनी मीटिंग रिकॉर्ड करें।</string>
+    <string name="sample_badge">नमूना, काल्पनिक</string>
+</resources>

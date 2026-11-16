@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="error_bot_cap_reached">Du hast die Meeting-Bot-Zeit dieses Monats aufgebraucht. Sie wird am %1$s zurückgesetzt. Meetings kannst du weiterhin selbst aufnehmen.</string>
+    <string name="error_bot_cap_reached_no_date">Du hast die Meeting-Bot-Zeit dieses Monats aufgebraucht. Sie wird zu Beginn des nächsten Monats zurückgesetzt. Meetings kannst du weiterhin selbst aufnehmen.</string>
+</resources>

@@ -1,5 +1,7 @@
 package com.kreativekoala.summaryai.ui.coaching
 
+import com.kreativekoala.summaryai.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -50,7 +52,7 @@ fun CoachingLivePanel(
         ) {
             Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = accent)
             Spacer(Modifier.width(8.dp))
-            Text("AI Coach", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.ui_ai_coach), style = MaterialTheme.typography.titleSmall)
             Spacer(Modifier.width(8.dp))
             if (isActive) {
                 Box(Modifier.size(6.dp).clip(CircleShape).background(Color(0xFF22C55E)))
@@ -69,7 +71,7 @@ fun CoachingLivePanel(
                 HorizontalDivider()
                 if (insights.isEmpty()) {
                     Text(
-                        "Listening for tactical moments…",
+                        stringResource(R.string.ui_listening_for_tactical_moments),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(16.dp),

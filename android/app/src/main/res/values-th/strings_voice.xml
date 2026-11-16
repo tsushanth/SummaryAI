@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">เพิ่มหรือถามด้วยเสียง</string>
+    <string name="voice_entry_debrief">ฟังสรุปหลังประชุม</string>
+    <string name="voice_sheet_title">แฮนด์ฟรี</string>
+    <string name="voice_listening">กำลังฟัง…</string>
+    <string name="voice_working">สักครู่…</string>
+    <string name="voice_speaking">กำลังพูด…</string>
+    <string name="voice_heard_label">ที่ฉันได้ยิน</string>
+    <string name="voice_save">บันทึก</string>
+    <string name="voice_edit">แก้ไข</string>
+    <string name="voice_cancel">ยกเลิก</string>
+    <string name="voice_undo">เลิกทำ</string>
+    <string name="voice_close">เสร็จสิ้น</string>
+    <string name="voice_add_to_calendar">เพิ่มลงในปฏิทิน</string>
+    <string name="voice_email_this">ส่งอีเมลเรื่องนี้</string>
+    <string name="voice_outward_note">จะเปิดแอปปฏิทินหรืออีเมลของคุณ ระบบจะไม่ส่งอะไรออกไปจนกว่าคุณจะแตะที่นั่น</string>
+    <string name="voice_consent_title">ใช้เสียงของคุณหรือไม่</string>
+    <string name="voice_consent_body">คำพูดจะถูกแปลงเป็นข้อความโดยระบบรู้จำเสียงของโทรศัพท์คุณ ในโทรศัพท์หลายรุ่นจะประมวลผลบนอุปกรณ์ ส่วนรุ่นอื่นอาจใช้บริการของ Google ประมวลผลเสียง MeetingMind ไม่เก็บเสียงไว้ จะไม่มีอะไรถูกบันทึกลงในรายการของคุณจนกว่าคุณจะพูดว่าใช่หรือแตะบันทึก</string>
+    <string name="voice_consent_accept">ดำเนินการต่อ</string>
+    <string name="voice_consent_decline">ไว้ก่อน</string>
+    <string name="voice_try_hint">ลองพูดว่า “เพิ่มรายการงานให้ส่งสไลด์ภายในวันศุกร์” “ฉันมีงานค้างอะไรบ้าง” หรือ “ทำเครื่องหมายรายการงบประมาณว่าเสร็จแล้ว”</string>
+    <string name="voice_no_calendar_app">ไม่พบแอปปฏิทิน</string>
+    <string name="voice_no_mail_app">ไม่พบแอปอีเมล</string>
+</resources>

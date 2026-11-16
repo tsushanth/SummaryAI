@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="error_bot_cap_reached">Έχεις χρησιμοποιήσει τον χρόνο του bot σύσκεψης για αυτόν τον μήνα. Ανανεώνεται στις %1$s. Μπορείς να συνεχίσεις να ηχογραφείς συσκέψεις μόνος σου.</string>
+    <string name="error_bot_cap_reached_no_date">Έχεις χρησιμοποιήσει τον χρόνο του bot σύσκεψης για αυτόν τον μήνα. Ανανεώνεται στην αρχή του επόμενου μήνα. Μπορείς να συνεχίσεις να ηχογραφείς συσκέψεις μόνος σου.</string>
+</resources>

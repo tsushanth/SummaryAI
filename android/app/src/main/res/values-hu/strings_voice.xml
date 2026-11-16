@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">Hozzáadás vagy kérdezés hangon</string>
+    <string name="voice_entry_debrief">Összegzés meghallgatása</string>
+    <string name="voice_sheet_title">Kéz nélkül</string>
+    <string name="voice_listening">Hallgatom…</string>
+    <string name="voice_working">Egy pillanat…</string>
+    <string name="voice_speaking">Beszélek…</string>
+    <string name="voice_heard_label">Ezt hallottam</string>
+    <string name="voice_save">Mentés</string>
+    <string name="voice_edit">Szerkesztés</string>
+    <string name="voice_cancel">Mégse</string>
+    <string name="voice_undo">Visszavonás</string>
+    <string name="voice_close">Kész</string>
+    <string name="voice_add_to_calendar">Hozzáadás a naptárhoz</string>
+    <string name="voice_email_this">Küldés e-mailben</string>
+    <string name="voice_outward_note">Megnyitja a naptár- vagy levelezőalkalmazást. Semmi sem kerül elküldésre, amíg ott nem koppintasz.</string>
+    <string name="voice_consent_title">Használod a hangodat?</string>
+    <string name="voice_consent_body">A beszédet a telefon beszédfelismerése alakítja szöveggé. Sok telefonon ez az eszközön történik; máshol a Google szolgáltatása dolgozhatja fel a hangot. A MeetingMind nem őrzi meg a hangot. Semmi sem kerül mentésre a listádba, amíg igent nem mondasz, vagy a Mentés gombra nem koppintasz.</string>
+    <string name="voice_consent_accept">Tovább</string>
+    <string name="voice_consent_decline">Most nem</string>
+    <string name="voice_try_hint">Próbáld ki: „adj hozzá egy teendőt: a prezentáció elküldése péntekig”, „melyek a nyitott teendőim”, vagy „jelöld késznek a költségvetési tételt”.</string>
+    <string name="voice_no_calendar_app">Nem található naptáralkalmazás.</string>
+    <string name="voice_no_mail_app">Nem található levelezőalkalmazás.</string>
+</resources>

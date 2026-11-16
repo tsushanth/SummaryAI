@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="error_bot_cap_reached">Anda telah menggunakan semua masa bot mesyuarat bulan ini. Ia ditetapkan semula pada %1$s. Anda masih boleh merakam mesyuarat sendiri.</string>
+    <string name="error_bot_cap_reached_no_date">Anda telah menggunakan semua masa bot mesyuarat bulan ini. Ia ditetapkan semula pada awal bulan depan. Anda masih boleh merakam mesyuarat sendiri.</string>
+</resources>

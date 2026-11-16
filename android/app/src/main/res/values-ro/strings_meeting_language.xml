@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="meeting_language_label">Limba transcrierii</string>
+    <string name="meeting_language_auto">Detectare automată</string>
+    <string name="meeting_language_hint">Detectarea automată funcționează pentru majoritatea întâlnirilor. Alege o limbă dacă transcrierea iese greșit. Alegerea ta este reținută.</string>
+    <string name="meeting_language_dialog_title">Limba transcrierii</string>
+    <string name="meeting_language_change">Schimbă limba</string>
+    <string name="meeting_language_active">Limbă: %1$s</string>
+    <string name="meeting_language_changed">Limba transcrierii a fost setată la %1$s</string>
+    <string name="meeting_language_change_note">Se aplică vorbirii de acum înainte.</string>
+    <string name="meeting_language_switch_unavailable">Această întâlnire nu poate schimba limba în timpul transmisiei live</string>
+    <string name="meeting_language_switch_failed">Nu s-a putut schimba limba. Încearcă din nou.</string>
+    <string name="meeting_language_hint_auto_english_live">Detectarea automată găsește limba pentru transcrierea finală. Subtitrările live rămân în engleză, cu excepția cazului în care alegi o limbă.</string>
+    <string name="meeting_language_hint_delayed">Subtitrările live în această limbă pot ajunge cu %1$s minute întârziere. Transcrierea finală nu este afectată.</string>
+    <string name="meeting_language_reason_fixed">Limba live a fost setată când botul a intrat în întâlnire și nu poate fi schimbată pe durata acestei întâlniri.</string>
+    <string name="meeting_language_reason_not_live">Limba poate fi schimbată doar cât timp botul este în întâlnire.</string>
+    <string name="meeting_language_switch_not_live">Botul nu este în întâlnire acum, așa că limba nu poate fi schimbată.</string>
+    <string name="meeting_language_saved_not_live">%1$s a fost salvată pentru transcrierea finală, dar transcrierea live nu a putut fi comutată acum.</string>
+</resources>

@@ -230,7 +230,6 @@
     <string name="onboarding_recording_title">سجّل أي شيء</string>
     <string name="onboarding_recording_desc">التقط الاجتماعات والمحاضرات والمقابلات أو أي محادثة بصوت واضح تماماً</string>
     <string name="onboarding_transcribe_title">تفريغ بالذكاء الاصطناعي</string>
-    <string name="onboarding_transcribe_desc">احصل على نصوص دقيقة مع تحديد المتحدثين بأكثر من 120 لغة</string>
     <string name="onboarding_summary_title">ملخصات ذكية</string>
     <string name="onboarding_summary_desc">يُنشئ الذكاء الاصطناعي ملخصات موجزة مع النقاط الرئيسية والمهام</string>
     <string name="onboarding_qa_title">اطرح أسئلة</string>
@@ -275,4 +274,12 @@
     <string name="no_recordings_in_filter_subtitle">لا توجد تسجيلات مطابقة بعد. اختر «الكل» لعرض كل شيء.</string>
     <string name="summary_no_speech">لم يتم اكتشاف أي كلام في هذا التسجيل، لذا لا يوجد ما يمكن تلخيصه.</string>
     <string name="error_load_recording_failed">تعذّر تحميل هذا التسجيل. تحقق من اتصالك وحاول مرة أخرى.</string>
+
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_assistant_section">بوت الاجتماعات</string>
+    <string name="voice_assistant_title">المساعد الصوتي في الاجتماعات</string>
+    <string name="voice_assistant_hint">عند التفعيل، يجيب بوت الاجتماعات عن الأسئلة بصوت مسموع عندما يقول أحدهم «Meeting Mind، ...». أوقف التفعيل ليبقى البوت صامتًا.</string>
+    <string name="voice_assistant_load_error">تعذّر تحميل هذا الإعداد. تحقق من اتصالك.</string>
+    <string name="voice_assistant_save_error">تعذّر حفظ التغيير. تحقق من اتصالك وحاول مرة أخرى.</string>
+    <string name="onboarding_transcribe_desc">احصل على نصوص دقيقة مع تحديد المتحدثين بأكثر من 30 لغة</string>
 </resources>

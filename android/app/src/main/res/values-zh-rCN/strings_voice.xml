@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">语音添加或提问</string>
+    <string name="voice_entry_debrief">收听总结</string>
+    <string name="voice_sheet_title">免提</string>
+    <string name="voice_listening">正在聆听…</string>
+    <string name="voice_working">请稍候…</string>
+    <string name="voice_speaking">正在播报…</string>
+    <string name="voice_heard_label">我听到的是</string>
+    <string name="voice_save">保存</string>
+    <string name="voice_edit">编辑</string>
+    <string name="voice_cancel">取消</string>
+    <string name="voice_undo">撤销</string>
+    <string name="voice_close">完成</string>
+    <string name="voice_add_to_calendar">添加到日历</string>
+    <string name="voice_email_this">通过邮件发送</string>
+    <string name="voice_outward_note">将打开您的日历或邮件应用。在那里点按之前不会发送任何内容。</string>
+    <string name="voice_consent_title">使用语音？</string>
+    <string name="voice_consent_body">语音由您手机的语音识别功能转换为文字。在许多手机上，这一过程在设备上完成；在其他手机上，Google 的服务可能会处理音频。MeetingMind 不会保留音频。在您说“好”或点按“保存”之前，不会向您的列表保存任何内容。</string>
+    <string name="voice_consent_accept">继续</string>
+    <string name="voice_consent_decline">暂不</string>
+    <string name="voice_try_hint">试试说：“添加一个待办事项，周五前发送演示文稿”“我有哪些未完成的待办事项”或“把预算那项标记为完成”。</string>
+    <string name="voice_no_calendar_app">未找到日历应用。</string>
+    <string name="voice_no_mail_app">未找到邮件应用。</string>
+</resources>

@@ -1,5 +1,7 @@
 package com.kreativekoala.summaryai.ui.recordings.organize
 
+import com.kreativekoala.summaryai.R
+import androidx.compose.ui.res.stringResource
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.clickable
@@ -65,7 +67,7 @@ fun PublicLinkSheet(
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 24.dp)
         ) {
-            Text("Public link", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.ui_public_link), style = MaterialTheme.typography.titleMedium)
             Text(
                 "Anyone with the link can read the summary" +
                     (if (includeTranscript) " and transcript" else "") + ". You can revoke it at any time.",
@@ -75,11 +77,11 @@ fun PublicLinkSheet(
             )
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Include full transcript", modifier = Modifier.weight(1f))
+                Text(stringResource(R.string.ui_include_full_transcript), modifier = Modifier.weight(1f))
                 Switch(checked = includeTranscript, onCheckedChange = { includeTranscript = it })
             }
 
-            Text("Expires", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp))
+            Text(stringResource(R.string.ui_expires), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp))
             listOf<Pair<String, Int?>>("In 1 day" to 1, "In 7 days" to 7, "In 30 days" to 30, "Never" to null)
                 .forEach { (label, days) ->
                     Row(
@@ -96,7 +98,7 @@ fun PublicLinkSheet(
                 onClick = { viewModel.create(recordingId, includeTranscript, expiresInDays) },
                 enabled = !state.busy,
                 modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-            ) { Text("Create link") }
+            ) { Text(stringResource(R.string.ui_create_link)) }
 
             state.created?.let { created ->
                 Text(
@@ -104,7 +106,7 @@ fun PublicLinkSheet(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(top = 12.dp),
                 )
-                TextButton(onClick = { shareUrl(context, created.url) }) { Text("Share link") }
+                TextButton(onClick = { shareUrl(context, created.url) }) { Text(stringResource(R.string.ui_share_link)) }
             }
 
             state.error?.let {
@@ -113,7 +115,7 @@ fun PublicLinkSheet(
 
             if (state.shares.isNotEmpty()) {
                 HorizontalDivider(Modifier.padding(vertical = 12.dp))
-                Text("Active links", style = MaterialTheme.typography.titleSmall)
+                Text(stringResource(R.string.ui_active_links), style = MaterialTheme.typography.titleSmall)
                 state.shares.forEach { s ->
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Text(
@@ -127,7 +129,7 @@ fun PublicLinkSheet(
                         TextButton(
                             onClick = { viewModel.revoke(recordingId, s.id) },
                             enabled = !state.busy,
-                        ) { Text("Revoke", color = MaterialTheme.colorScheme.error) }
+                        ) { Text(stringResource(R.string.ui_revoke), color = MaterialTheme.colorScheme.error) }
                     }
                 }
             }

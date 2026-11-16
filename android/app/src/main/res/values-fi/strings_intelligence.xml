@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="edit">Muokkaa</string>
+    <string name="save">Tallenna</string>
+    <string name="copy">Kopioi</string>
+    <string name="todo_assignee">Vastuuhenkilö (valinnainen)</string>
+    <string name="todo_due_date">Eräpäivä (valinnainen)</string>
+    <string name="todo_due_date_pick">Valitse päivä</string>
+    <string name="todo_due_date_clear">Tyhjennä päivä</string>
+    <string name="todo_due_chip">Eräpäivä %1$s</string>
+    <string name="summary_template_title">Yhteenvedon tyyli</string>
+    <string name="summary_template_current">Nykyinen: %1$s</string>
+    <string name="summary_template_not_set">Ei asetettu (käyttää oletustasi)</string>
+    <string name="summary_template_regenerate">Luo yhteenveto uudelleen</string>
+    <string name="summary_template_regenerating">Luodaan uudelleen…</string>
+    <string name="summary_template_confirm_title">Luodaanko yhteenveto uudelleen?</string>
+    <string name="summary_template_confirm_message">Tämä korvaa nykyisen yhteenvedon, pääkohdat ja toimenpiteet uudella versiolla (%1$s). Tätä ei voi kumota.</string>
+    <string name="summary_template_regenerate_confirm">Luo uudelleen</string>
+    <string name="summary_template_failed">Yhteenvetoa ei voitu luoda uudelleen</string>
+    <string name="summary_template_done">Yhteenveto luotu uudelleen</string>
+    <string name="summary_template_load_failed">Yhteenvetotyylien lataaminen epäonnistui</string>
+    <string name="followup_email">Luonnostele seurantasähköposti</string>
+    <string name="followup_email_title">Seurantasähköposti</string>
+    <string name="followup_email_subject">Aihe</string>
+    <string name="followup_email_body">Viesti</string>
+    <string name="followup_email_drafting">Luonnostellaan…</string>
+    <string name="followup_email_failed">Sähköpostia ei voitu luonnostella</string>
+    <string name="followup_email_copied">Sähköposti kopioitu</string>
+    <string name="followup_email_send">Lähetä</string>
+    <string name="followup_email_no_app">Sähköpostisovellusta ei löytynyt</string>
+    <string name="action_items_to_todos">Lisää tehtävälistaani</string>
+    <string name="action_items_to_todos_adding">Lisätään…</string>
+    <string name="action_items_to_todos_added">%1$d lisätty tehtävälistaasi</string>
+    <string name="action_items_to_todos_added_skipped">%1$d lisätty tehtävälistaasi (%2$d oli jo siellä)</string>
+    <string name="action_items_to_todos_none_new">Kaikki toimenpiteet ovat jo tehtävälistallasi</string>
+    <string name="action_items_to_todos_failed">Toimenpiteiden lisääminen tehtävälistalle epäonnistui</string>
+    <string name="chat_all_meetings">Kysy kaikista kokouksista</string>
+    <string name="chat_all_meetings_title">Kysy kokouksistasi</string>
+    <string name="chat_all_meetings_placeholder">esim. Mitä päätimme hinnoittelusta?</string>
+    <string name="chat_all_meetings_empty_title">Kysy kaikista kokouksistasi</string>
+    <string name="chat_all_meetings_empty_message">Vastaukset perustuvat yhteenvetoihisi ja litteraatteihisi, ja mukana on linkit kokouksiin, joista ne ovat peräisin.</string>
+    <string name="chat_all_meetings_sources">Lähteet</string>
+    <string name="chat_all_meetings_failed">Vastausta ei saatu. Yritä uudelleen.</string>
+    <string name="chat_all_meetings_send">Lähetä</string>
+    <string name="settings_default_template">Yhteenvedon oletustyyli</string>
+    <string name="settings_default_template_hint">Käytetään uusissa tallenteissa, ellet valitse tyyliä tietylle tallenteelle</string>
+</resources>

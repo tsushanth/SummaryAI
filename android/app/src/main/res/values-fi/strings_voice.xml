@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">Lisää tai kysy äänellä</string>
+    <string name="voice_entry_debrief">Kuuntele kooste</string>
+    <string name="voice_sheet_title">Handsfree</string>
+    <string name="voice_listening">Kuunnellaan…</string>
+    <string name="voice_working">Hetki…</string>
+    <string name="voice_speaking">Puhutaan…</string>
+    <string name="voice_heard_label">Kuulin</string>
+    <string name="voice_save">Tallenna</string>
+    <string name="voice_edit">Muokkaa</string>
+    <string name="voice_cancel">Peruuta</string>
+    <string name="voice_undo">Kumoa</string>
+    <string name="voice_close">Valmis</string>
+    <string name="voice_add_to_calendar">Lisää kalenteriin</string>
+    <string name="voice_email_this">Lähetä sähköpostilla</string>
+    <string name="voice_outward_note">Avaa kalenteri- tai sähköpostisovelluksesi. Mitään ei lähetetä, ennen kuin napautat siellä.</string>
+    <string name="voice_consent_title">Käytetäänkö ääntäsi?</string>
+    <string name="voice_consent_body">Puhelimesi puheentunnistus muuntaa puheen tekstiksi. Monissa puhelimissa tämä tapahtuu laitteella, mutta joissakin Googlen palvelu voi käsitellä ääntä. MeetingMind ei säilytä ääntä. Listallesi ei tallenneta mitään, ennen kuin sanot kyllä tai napautat Tallenna.</string>
+    <string name="voice_consent_accept">Jatka</string>
+    <string name="voice_consent_decline">Ei nyt</string>
+    <string name="voice_try_hint">Kokeile: ”lisää toimenpide: lähetä esitys perjantaihin mennessä”, ”mitkä ovat avoimet toimenpiteeni” tai ”merkitse budjettikohta tehdyksi”.</string>
+    <string name="voice_no_calendar_app">Kalenterisovellusta ei löytynyt.</string>
+    <string name="voice_no_mail_app">Sähköpostisovellusta ei löytynyt.</string>
+</resources>

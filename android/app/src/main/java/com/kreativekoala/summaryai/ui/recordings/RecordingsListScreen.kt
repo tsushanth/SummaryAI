@@ -1,5 +1,6 @@
 package com.kreativekoala.summaryai.ui.recordings
 
+import com.kreativekoala.summaryai.util.LocaleDates
 import android.util.Log
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
@@ -530,7 +531,7 @@ private fun RecordingCardIOS(
                         }
                     )
                     if (!isSample) DropdownMenuItem(
-                        text = { Text("Folder and tags") },
+                        text = { Text(stringResource(R.string.ui_folder_and_tags)) },
                         onClick = {
                             showMenu = false
                             onOrganize()
@@ -681,9 +682,8 @@ private fun StatusBadge(status: RecordingStatus) {
 private fun formatDate(dateString: String): String {
     return try {
         val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
-        val outputFormat = SimpleDateFormat("MMM d, yyyy", Locale.US)
         val date = inputFormat.parse(dateString)
-        date?.let { outputFormat.format(it) } ?: dateString
+        date?.let { LocaleDates.dateMedium(it) } ?: dateString
     } catch (e: Exception) {
         dateString
     }
@@ -692,9 +692,8 @@ private fun formatDate(dateString: String): String {
 private fun formatDateIOS(dateString: String): String {
     return try {
         val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
-        val outputFormat = SimpleDateFormat("MMM d", Locale.US)
         val date = inputFormat.parse(dateString)
-        date?.let { outputFormat.format(it) } ?: dateString
+        date?.let { LocaleDates.monthDay(it) } ?: dateString
     } catch (e: Exception) {
         dateString
     }
@@ -726,7 +725,7 @@ private fun PendingUploadsBanner(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Tap retry to upload — they're saved on your device.",
+                text = stringResource(R.string.ui_tap_retry_to_upload_they),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onErrorContainer
             )
@@ -753,10 +752,10 @@ private fun PendingUploadsBanner(
                         )
                     }
                     TextButton(onClick = { onDiscard(item) }) {
-                        Text("Discard")
+                        Text(stringResource(R.string.ui_discard))
                     }
                     TextButton(onClick = { onRetry(item) }) {
-                        Text("Retry")
+                        Text(stringResource(R.string.retry))
                     }
                 }
             }

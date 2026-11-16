@@ -230,7 +230,6 @@
     <string name="onboarding_recording_title">Her Şeyi Kaydedin</string>
     <string name="onboarding_recording_desc">Toplantıları, dersleri, röportajları veya herhangi bir konuşmayı kristal netliğinde sesle kaydedin</string>
     <string name="onboarding_transcribe_title">Yapay Zeka Destekli Transkripsiyon</string>
-    <string name="onboarding_transcribe_desc">120\'den fazla dilde konuşmacı tanımlama ile doğru transkriptler alın</string>
     <string name="onboarding_summary_title">Akıllı Özetler</string>
     <string name="onboarding_summary_desc">Yapay zeka önemli noktalar ve görevlerle özlü özetler oluşturur</string>
     <string name="onboarding_qa_title">Soru Sorun</string>
@@ -275,4 +274,12 @@
     <string name="no_recordings_in_filter_subtitle">Henüz eşleşen kayıt yok. Her şeyi görmek için Tümü\'nü seçin.</string>
     <string name="summary_no_speech">Bu kayıtta konuşma algılanmadı, bu nedenle özetlenecek bir şey yok.</string>
     <string name="error_load_recording_failed">Bu kayıt yüklenemedi. Bağlantınızı kontrol edip tekrar deneyin.</string>
+
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_assistant_section">Toplantı botu</string>
+    <string name="voice_assistant_title">Toplantılarda sesli asistan</string>
+    <string name="voice_assistant_hint">Açıkken, biri “Meeting Mind, ...” dediğinde toplantı botu soruları sesli olarak yanıtlar. Botun sessiz kalması için kapat.</string>
+    <string name="voice_assistant_load_error">Bu ayar yüklenemedi. Bağlantını kontrol et.</string>
+    <string name="voice_assistant_save_error">Değişikliğin kaydedilemedi. Bağlantını kontrol edip tekrar dene.</string>
+    <string name="onboarding_transcribe_desc">30\'dan fazla dilde konuşmacı tanımayla doğru dökümler al</string>
 </resources>

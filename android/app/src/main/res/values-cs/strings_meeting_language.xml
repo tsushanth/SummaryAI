@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="meeting_language_label">Jazyk přepisu</string>
+    <string name="meeting_language_auto">Rozpoznat automaticky</string>
+    <string name="meeting_language_hint">Automatické rozpoznání funguje u většiny schůzek. Pokud je přepis špatný, vyber jazyk. Tvoje volba se zapamatuje.</string>
+    <string name="meeting_language_dialog_title">Jazyk přepisu</string>
+    <string name="meeting_language_change">Změnit jazyk</string>
+    <string name="meeting_language_active">Jazyk: %1$s</string>
+    <string name="meeting_language_changed">Jazyk přepisu nastaven na %1$s</string>
+    <string name="meeting_language_change_note">Platí pro řeč od teď.</string>
+    <string name="meeting_language_switch_unavailable">U této schůzky nelze během živého přenosu přepnout jazyk</string>
+    <string name="meeting_language_switch_failed">Jazyk se nepodařilo změnit. Zkus to prosím znovu.</string>
+    <string name="meeting_language_hint_auto_english_live">Automatické rozpoznání najde jazyk pro konečný přepis. Živé titulky zůstanou v angličtině, dokud nevybereš jazyk.</string>
+    <string name="meeting_language_hint_delayed">Živé titulky v tomto jazyce mohou přijít se zpožděním %1$s min. Konečný přepis to neovlivní.</string>
+    <string name="meeting_language_reason_fixed">Živý jazyk byl nastaven při připojení bota a během této schůzky ho nelze změnit.</string>
+    <string name="meeting_language_reason_not_live">Jazyk lze změnit, jen když je bot na schůzce.</string>
+    <string name="meeting_language_switch_not_live">Bot teď na schůzce není, takže jazyk nelze změnit.</string>
+    <string name="meeting_language_saved_not_live">Jazyk %1$s byl uložen pro konečný přepis, ale živý přepis se teď nepodařilo přepnout.</string>
+</resources>

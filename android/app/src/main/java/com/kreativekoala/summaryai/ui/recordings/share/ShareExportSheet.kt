@@ -1,5 +1,7 @@
 package com.kreativekoala.summaryai.ui.recordings.share
 
+import com.kreativekoala.summaryai.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -113,7 +115,7 @@ fun ShareExportSheet(
     ) {
         Column(Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
             Text(
-                text = "Share or Export",
+                text = stringResource(R.string.ui_share_or_export),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
             )
@@ -180,7 +182,7 @@ fun ShareExportSheet(
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    "Share or export with just a tap!",
+                    stringResource(R.string.ui_share_or_export_with_just),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

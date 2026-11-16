@@ -1,5 +1,7 @@
 package com.kreativekoala.summaryai.ui.phone
 
+import com.kreativekoala.summaryai.R
+import androidx.compose.ui.res.stringResource
 import android.Manifest
 import android.content.Intent
 import android.net.Uri
@@ -82,7 +84,7 @@ fun PhoneScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Phone",
+                        text = stringResource(R.string.phone),
                         style = MaterialTheme.typography.headlineMedium
                     )
                 }
@@ -102,12 +104,12 @@ fun PhoneScreen(
                 Tab(
                     selected = uiState.selectedTab == PhoneTab.CALLS,
                     onClick = { viewModel.selectTab(PhoneTab.CALLS) },
-                    text = { Text("Calls") }
+                    text = { Text(stringResource(R.string.calls)) }
                 )
                 Tab(
                     selected = uiState.selectedTab == PhoneTab.DIALER,
                     onClick = { viewModel.selectTab(PhoneTab.DIALER) },
-                    text = { Text("Dialer") }
+                    text = { Text(stringResource(R.string.dialer)) }
                 )
             }
 

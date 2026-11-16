@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="integrations_title">Trimite rezumatele în altă parte</string>
+    <string name="integrations_desc">După procesarea fiecărei întâlniri, MeetingMind poate trimite rezumatul și sarcinile către un webhook, Slack sau Notion. Secretele sunt stocate criptat și nu mai sunt afișate niciodată.</string>
+    <string name="integration_webhook">Webhook</string>
+    <string name="integration_webhook_url">URL webhook (https)</string>
+    <string name="integration_webhook_secret">Secret de semnare (opțional)</string>
+    <string name="integration_slack">Slack</string>
+    <string name="integration_slack_url">URL webhook de intrare Slack</string>
+    <string name="integration_notion">Notion</string>
+    <string name="integration_notion_token">Token de integrare Notion</string>
+    <string name="integration_notion_database">ID-ul bazei de date Notion</string>
+    <string name="integration_connected">Conectat</string>
+    <string name="integration_last_delivery">Ultima livrare: %1$s</string>
+    <string name="integration_leave_to_keep">Introdu o valoare nouă pentru a o înlocui</string>
+    <string name="integration_save">Salvează</string>
+    <string name="integration_test">Trimite un test</string>
+    <string name="integration_remove">Elimină</string>
+    <string name="integrations_saved">Salvat.</string>
+    <string name="integrations_removed">Eliminat.</string>
+    <string name="integrations_test_delivered">Test livrat.</string>
+    <string name="integrations_test_failed">Testul a eșuat.</string>
+    <string name="integrations_load_failed">Nu s-au putut încărca integrările.</string>
+    <string name="integrations_save_failed">Nu s-a putut salva.</string>
+    <string name="integrations_remove_failed">Nu s-a putut elimina.</string>
+    <string name="integrations_message_with_detail">%1$s %2$s</string>
+    <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
+    <string name="tile_record_label">Înregistrează întâlnirea</string>
+    <string name="widget_record_label">Înregistrează</string>
+    <string name="widget_description">Începe o înregistrare de pe ecranul principal</string>
+    <string name="analytics_title">Timp de vorbire</string>
+    <string name="analytics_questions">Întrebări: %1$d</string>
+    <string name="analytics_words">Cuvinte: %1$d</string>
+    <string name="analytics_longest_monologue">Cel mai lung monolog: %1$s (%2$s)</string>
+</resources>

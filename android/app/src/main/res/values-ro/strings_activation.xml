@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">Înregistrează 30 de secunde din orice, chiar și doar pe tine vorbind, și urmărește cum apare rezumatul.</string>
+    <string name="first_run_mic_note">Folosim microfonul doar cât timp înregistrezi.</string>
+    <string name="first_run_record">Atinge pentru a înregistra</string>
+    <string name="first_run_see_sample">Sau vezi mai întâi un exemplu de întâlnire</string>
+    <string name="sample_cta_title">Acum încearcă cu a ta</string>
+    <string name="sample_cta_button">Înregistrează-ți propria întâlnire</string>
+    <string name="sample_chat_locked">Înregistrează-ți propria întâlnire pentru a pune întrebări despre ea.</string>
+    <string name="sample_badge">Exemplu, fictiv</string>
+</resources>

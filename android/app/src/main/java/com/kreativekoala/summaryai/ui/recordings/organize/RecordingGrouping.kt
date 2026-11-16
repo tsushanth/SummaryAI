@@ -51,7 +51,7 @@ fun groupRecordingsByDate(
             d == today.minusDays(1) -> "Yesterday"
             !d.isBefore(weekStart) -> "This week"
             d.year == today.year && d.month == today.month -> "This month"
-            else -> "${d.month.getDisplayName(TextStyle.FULL, Locale.US)} ${d.year}"
+            else -> "${d.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${d.year}"
         }
         buckets.getOrPut(label) { mutableListOf() } += r
     }

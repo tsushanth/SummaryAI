@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="error_bot_cap_reached">Tu as utilisé tout le temps de bot de réunion de ce mois-ci. Il est réinitialisé le %1$s. Tu peux toujours enregistrer tes réunions toi-même.</string>
+    <string name="error_bot_cap_reached_no_date">Tu as utilisé tout le temps de bot de réunion de ce mois-ci. Il est réinitialisé au début du mois prochain. Tu peux toujours enregistrer tes réunions toi-même.</string>
+</resources>

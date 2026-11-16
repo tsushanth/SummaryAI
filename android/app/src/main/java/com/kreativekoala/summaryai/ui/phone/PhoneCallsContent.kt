@@ -1,5 +1,7 @@
 package com.kreativekoala.summaryai.ui.phone
 
+import com.kreativekoala.summaryai.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -140,7 +142,7 @@ internal fun PhoneCallCard(
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "Recording",
+                                text = stringResource(R.string.recording_fallback),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.error
                             )
@@ -168,7 +170,7 @@ internal fun PhoneCallCard(
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Recording", style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.recording_fallback), style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
@@ -181,7 +183,7 @@ internal fun PhoneCallCard(
                 ) {
                     Icon(
                         Icons.Default.Phone,
-                        contentDescription = "Call",
+                        contentDescription = stringResource(R.string.ui_call),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }

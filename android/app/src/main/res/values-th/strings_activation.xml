@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">บันทึกเสียงสัก 30 วินาที จะพูดอะไรก็ได้ แม้แต่เสียงของคุณเอง แล้วดูสรุปของคุณปรากฏขึ้น</string>
+    <string name="first_run_mic_note">เราใช้ไมโครโฟนเฉพาะตอนที่คุณกำลังบันทึกเท่านั้น</string>
+    <string name="first_run_record">แตะเพื่อบันทึก</string>
+    <string name="first_run_see_sample">หรือดูตัวอย่างการประชุมก่อน</string>
+    <string name="sample_cta_title">ถึงตาคุณลองบ้าง</string>
+    <string name="sample_cta_button">บันทึกการประชุมของคุณเอง</string>
+    <string name="sample_chat_locked">บันทึกการประชุมของคุณเองเพื่อถามคำถามเกี่ยวกับการประชุมนั้น</string>
+    <string name="sample_badge">ตัวอย่าง เรื่องสมมติ</string>
+</resources>

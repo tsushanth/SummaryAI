@@ -53,7 +53,7 @@
     <string name="add_to_favorites">添加到收藏</string>
     <string name="remove_from_favorites">从收藏中移除</string>
     <string name="delete_recording">删除录音</string>
-    <string name="delete_recording_confirm">确定要删除"%s"吗？此操作无法撤销。</string>
+    <string name="delete_recording_confirm">确定要删除“%s”吗？此操作无法撤销。</string>
     <string name="failed">失败</string>
     <string name="refresh">刷新</string>
     <string name="transcript">转录文本</string>
@@ -202,7 +202,6 @@
     <string name="onboarding_recording_title">录制一切</string>
     <string name="onboarding_recording_desc">以清晰的音质捕捉会议、讲座、访谈或任何对话</string>
     <string name="onboarding_transcribe_title">AI驱动的转录</string>
-    <string name="onboarding_transcribe_desc">获取支持120多种语言的带说话人识别的准确转录</string>
     <string name="onboarding_summary_title">智能摘要</string>
     <string name="onboarding_summary_desc">AI生成包含要点和行动事项的简洁摘要</string>
     <string name="onboarding_qa_title">提问</string>
@@ -214,7 +213,7 @@
     <string name="search_prompt">搜索您的录音</string>
     <string name="search_hint">按标题、转录内容或主题搜索</string>
     <string name="no_results">未找到结果</string>
-    <string name="no_results_for_query">没有与"%s"匹配的录音</string>
+    <string name="no_results_for_query">没有与“%s”匹配的录音</string>
     <string name="calls">通话</string>
     <string name="dialer">拨号器</string>
     <string name="waiting_for_transcript">等待转录…</string>
@@ -239,4 +238,12 @@
     <string name="no_recordings_in_filter_subtitle">暂无符合条件的录音。选择“全部”可查看所有录音。</string>
     <string name="summary_no_speech">此录音中未检测到语音，因此没有可摘要的内容。</string>
     <string name="error_load_recording_failed">无法加载此录音。请检查网络连接后重试。</string>
+
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_assistant_section">会议机器人</string>
+    <string name="voice_assistant_title">会议中的语音助手</string>
+    <string name="voice_assistant_hint">开启后，当有人说“Meeting Mind，……”时，会议机器人会大声回答问题。关闭则让机器人保持静音。</string>
+    <string name="voice_assistant_load_error">无法加载此设置。请检查网络连接。</string>
+    <string name="voice_assistant_save_error">无法保存您的更改。请检查网络连接后重试。</string>
+    <string name="onboarding_transcribe_desc">支持 30 多种语言，获得带说话人识别的准确转写文本</string>
 </resources>

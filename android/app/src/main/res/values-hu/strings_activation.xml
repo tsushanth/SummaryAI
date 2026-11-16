@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">Vegyél fel 30 másodpercet bármiről, akár csak magadról, és nézd, ahogy megjelenik az összefoglalód.</string>
+    <string name="first_run_mic_note">A mikrofont csak akkor használjuk, amikor felveszel.</string>
+    <string name="first_run_record">Koppints a felvételhez</string>
+    <string name="first_run_see_sample">Vagy nézz meg előbb egy mintamegbeszélést</string>
+    <string name="sample_cta_title">Most próbáld ki a sajátodat</string>
+    <string name="sample_cta_button">Saját felvétel</string>
+    <string name="sample_chat_locked">Rögzítsd a saját megbeszélésedet, hogy kérdezhess róla.</string>
+    <string name="sample_badge">Minta, kitalált</string>
+</resources>

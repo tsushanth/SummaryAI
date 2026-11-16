@@ -1,5 +1,7 @@
 package com.kreativekoala.summaryai.ui.phone
 
+import com.kreativekoala.summaryai.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -59,7 +61,7 @@ internal fun SettingsContent(
                         tint = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.width(12.dp))
-                    Text("Add Phone Number", fontWeight = FontWeight.Medium)
+                    Text(stringResource(R.string.ui_add_phone_number), fontWeight = FontWeight.Medium)
                 }
             }
         }
@@ -88,7 +90,7 @@ internal fun SettingsContent(
                             )
                             phone.verifiedAt?.let {
                                 Text(
-                                    text = "Verified",
+                                    text = stringResource(R.string.ui_verified),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -98,7 +100,7 @@ internal fun SettingsContent(
                         if (selectedPhone?.id == phone.id) {
                             Icon(
                                 Icons.Default.CheckCircle,
-                                contentDescription = "Selected",
+                                contentDescription = stringResource(R.string.selected),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -106,7 +108,7 @@ internal fun SettingsContent(
                         IconButton(onClick = { onPhoneDelete(phone) }) {
                             Icon(
                                 Icons.Default.Delete,
-                                contentDescription = "Delete",
+                                contentDescription = stringResource(R.string.delete),
                                 tint = MaterialTheme.colorScheme.error
                             )
                         }
@@ -129,7 +131,7 @@ internal fun SettingsContent(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "Phone calls are placed through your verified number. Recordings are transcribed and saved to your recordings.",
+                        text = stringResource(R.string.ui_phone_calls_are_placed_through),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -145,17 +147,17 @@ internal fun SettingsContent(
                 showVerificationDialog = false
                 onReset()
             },
-            title = { Text("Verify Phone Number") },
+            title = { Text(stringResource(R.string.ui_verify_phone_number)) },
             text = {
                 Column {
                     when (verificationState) {
                         VerificationState.IDLE, VerificationState.SENDING_CODE -> {
-                            Text("Enter your phone number to receive a verification code.")
+                            Text(stringResource(R.string.ui_enter_your_phone_number_to))
                             Spacer(modifier = Modifier.height(16.dp))
                             OutlinedTextField(
                                 value = verificationPhoneNumber,
                                 onValueChange = onPhoneNumberChange,
-                                label = { Text("Phone number") },
+                                label = { Text(stringResource(R.string.ui_phone_number)) },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -166,7 +168,7 @@ internal fun SettingsContent(
                             OutlinedTextField(
                                 value = verificationCode,
                                 onValueChange = onCodeChange,
-                                label = { Text("Verification code") },
+                                label = { Text(stringResource(R.string.ui_verification_code)) },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -183,7 +185,7 @@ internal fun SettingsContent(
                                     modifier = Modifier.size(48.dp)
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
-                                Text("Phone verified successfully!")
+                                Text(stringResource(R.string.ui_phone_verified_successfully))
                             }
                         }
                         VerificationState.ERROR -> {
@@ -202,7 +204,7 @@ internal fun SettingsContent(
                             onClick = onSendCode,
                             enabled = verificationPhoneNumber.isNotBlank()
                         ) {
-                            Text("Send Code")
+                            Text(stringResource(R.string.ui_send_code))
                         }
                     }
                     VerificationState.SENDING_CODE -> {
@@ -213,7 +215,7 @@ internal fun SettingsContent(
                             onClick = onVerify,
                             enabled = verificationCode.length == 6
                         ) {
-                            Text("Verify")
+                            Text(stringResource(R.string.ui_verify))
                         }
                     }
                     VerificationState.VERIFYING -> {
@@ -224,12 +226,12 @@ internal fun SettingsContent(
                             showVerificationDialog = false
                             onReset()
                         }) {
-                            Text("Done")
+                            Text(stringResource(R.string.voice_close))
                         }
                     }
                     VerificationState.ERROR -> {
                         Button(onClick = onReset) {
-                            Text("Try Again")
+                            Text(stringResource(R.string.ui_try_again))
                         }
                     }
                 }
@@ -240,7 +242,7 @@ internal fun SettingsContent(
                         showVerificationDialog = false
                         onReset()
                     }) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.cancel))
                     }
                 }
             }

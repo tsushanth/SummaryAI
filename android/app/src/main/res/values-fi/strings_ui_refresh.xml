@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="ui_action_items">Toimenpiteet</string>
+    <string name="ui_notes">Muistiinpanot</string>
+    <string name="ui_loading">Ladataan</string>
+    <string name="ui_transcript_jump_to">Siirry kohtaan %1$s</string>
+    <string name="ui_transcript_speaker_line">%1$s kohdassa %2$s: %3$s</string>
+    <string name="ui_speakers_label">Puhujat</string>
+    <string name="ui_no_recordings_title">Ei vielä tallenteita</string>
+    <string name="ui_no_results_title">Ei vastaavia tallenteita</string>
+    <string name="ui_clear_search">Tyhjennä haku</string>
+    <string name="ui_detailed_summary">Yksityiskohtainen yhteenveto</string>
+</resources>

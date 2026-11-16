@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">Запишіть 30 секунд будь-чого, навіть просто власну мову, і подивіться, як з’явиться ваш підсумок.</string>
+    <string name="first_run_mic_note">Ми використовуємо мікрофон лише під час запису.</string>
+    <string name="first_run_record">Торкніться, щоб записати</string>
+    <string name="first_run_see_sample">Або спершу перегляньте приклад зустрічі</string>
+    <string name="sample_cta_title">Тепер спробуйте свою</string>
+    <string name="sample_cta_button">Записати свою зустріч</string>
+    <string name="sample_chat_locked">Запишіть власну зустріч, щоб ставити запитання про неї.</string>
+    <string name="sample_badge">Приклад, вигаданий</string>
+</resources>

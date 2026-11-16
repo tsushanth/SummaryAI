@@ -202,7 +202,6 @@
     <string name="onboarding_recording_title">Enregistrez N\'importe Quoi</string>
     <string name="onboarding_recording_desc">Capturez des réunions, des cours, des entretiens ou toute conversation avec un audio cristallin</string>
     <string name="onboarding_transcribe_title">Transcription par IA</string>
-    <string name="onboarding_transcribe_desc">Obtenez des transcriptions précises avec identification des locuteurs dans plus de 120 langues</string>
     <string name="onboarding_summary_title">Résumés Intelligents</string>
     <string name="onboarding_summary_desc">L\'IA génère des résumés concis avec les points clés et les tâches à faire</string>
     <string name="onboarding_qa_title">Posez des Questions</string>
@@ -239,4 +238,12 @@
     <string name="no_recordings_in_filter_subtitle">Aucun enregistrement ne correspond pour l\'instant. Sélectionnez Tout pour tout afficher.</string>
     <string name="summary_no_speech">Aucune voix n\'a été détectée dans cet enregistrement, il n\'y a donc rien à résumer.</string>
     <string name="error_load_recording_failed">Impossible de charger cet enregistrement. Vérifiez votre connexion et réessayez.</string>
+
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_assistant_section">Bot de réunion</string>
+    <string name="voice_assistant_title">Assistant vocal en réunion</string>
+    <string name="voice_assistant_hint">Lorsque cette option est activée, le bot de réunion répond à voix haute quand quelqu’un dit « Meeting Mind, … ». Désactive-la pour que le bot reste silencieux.</string>
+    <string name="voice_assistant_load_error">Impossible de charger ce réglage. Vérifie ta connexion.</string>
+    <string name="voice_assistant_save_error">Impossible d’enregistrer ta modification. Vérifie ta connexion et réessaie.</string>
+    <string name="onboarding_transcribe_desc">Obtiens des transcriptions précises avec identification des intervenants dans plus de 30 langues</string>
 </resources>

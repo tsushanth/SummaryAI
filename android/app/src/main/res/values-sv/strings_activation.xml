@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">Spela in 30 sekunder av vad som helst, även bara dig själv som pratar, och se din sammanfattning dyka upp.</string>
+    <string name="first_run_mic_note">Vi använder bara mikrofonen medan du spelar in.</string>
+    <string name="first_run_record">Tryck för att spela in</string>
+    <string name="first_run_see_sample">Eller se ett exempelmöte först</string>
+    <string name="sample_cta_title">Prova nu med ditt eget</string>
+    <string name="sample_cta_button">Spela in ditt eget</string>
+    <string name="sample_chat_locked">Spela in ditt eget möte för att ställa frågor om det.</string>
+    <string name="sample_badge">Exempel, fiktivt</string>
+</resources>

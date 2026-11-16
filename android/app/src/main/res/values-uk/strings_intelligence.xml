@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="edit">Редагувати</string>
+    <string name="save">Зберегти</string>
+    <string name="copy">Копіювати</string>
+    <string name="todo_assignee">Виконавець (необов’язково)</string>
+    <string name="todo_due_date">Термін (необов’язково)</string>
+    <string name="todo_due_date_pick">Вибрати дату</string>
+    <string name="todo_due_date_clear">Очистити дату</string>
+    <string name="todo_due_chip">Термін: %1$s</string>
+    <string name="summary_template_title">Стиль підсумку</string>
+    <string name="summary_template_current">Поточний: %1$s</string>
+    <string name="summary_template_not_set">Не вибрано (використовується стандартний)</string>
+    <string name="summary_template_regenerate">Створити підсумок знову</string>
+    <string name="summary_template_regenerating">Створюється знову…</string>
+    <string name="summary_template_confirm_title">Створити підсумок знову?</string>
+    <string name="summary_template_confirm_message">Поточний підсумок, ключові моменти та завдання буде замінено новою версією (%1$s). Цю дію не можна скасувати.</string>
+    <string name="summary_template_regenerate_confirm">Створити знову</string>
+    <string name="summary_template_failed">Не вдалося створити підсумок знову</string>
+    <string name="summary_template_done">Підсумок створено знову</string>
+    <string name="summary_template_load_failed">Не вдалося завантажити стилі підсумків</string>
+    <string name="followup_email">Підготувати лист-продовження</string>
+    <string name="followup_email_title">Лист-продовження</string>
+    <string name="followup_email_subject">Тема</string>
+    <string name="followup_email_body">Текст листа</string>
+    <string name="followup_email_drafting">Створюється чернетка…</string>
+    <string name="followup_email_failed">Не вдалося підготувати лист</string>
+    <string name="followup_email_copied">Лист скопійовано</string>
+    <string name="followup_email_send">Надіслати</string>
+    <string name="followup_email_no_app">Не знайдено поштовий застосунок</string>
+    <string name="action_items_to_todos">Додати до моїх завдань</string>
+    <string name="action_items_to_todos_adding">Додається…</string>
+    <string name="action_items_to_todos_added">Додано до ваших завдань: %1$d</string>
+    <string name="action_items_to_todos_added_skipped">Додано до ваших завдань: %1$d (ще %2$d уже є)</string>
+    <string name="action_items_to_todos_none_new">Усі завдання вже є у ваших завданнях</string>
+    <string name="action_items_to_todos_failed">Не вдалося додати завдання до ваших завдань</string>
+    <string name="chat_all_meetings">Запитати по всіх зустрічах</string>
+    <string name="chat_all_meetings_title">Запитайте свої зустрічі</string>
+    <string name="chat_all_meetings_placeholder">напр., Що ми вирішили щодо цін?</string>
+    <string name="chat_all_meetings_empty_title">Запитуйте по всіх своїх зустрічах</string>
+    <string name="chat_all_meetings_empty_message">Відповіді формуються на основі ваших підсумків і транскрипцій, із посиланнями на зустрічі, з яких вони взяті.</string>
+    <string name="chat_all_meetings_sources">Джерела</string>
+    <string name="chat_all_meetings_failed">Не вдалося отримати відповідь. Спробуйте ще раз.</string>
+    <string name="chat_all_meetings_send">Надіслати</string>
+    <string name="settings_default_template">Стандартний стиль підсумку</string>
+    <string name="settings_default_template_hint">Використовується для нових записів, якщо ви не виберете стиль для конкретного</string>
+</resources>

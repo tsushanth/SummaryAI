@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">Nahraj 30 sekund čehokoli, klidně jen sebe, jak mluvíš, a sleduj, jak se objeví tvé shrnutí.</string>
+    <string name="first_run_mic_note">Mikrofon používáme, jen když nahráváš.</string>
+    <string name="first_run_record">Klepni a nahrávej</string>
+    <string name="first_run_see_sample">Nebo se nejdřív podívej na ukázkovou schůzku</string>
+    <string name="sample_cta_title">Teď zkus svou</string>
+    <string name="sample_cta_button">Nahrát vlastní</string>
+    <string name="sample_chat_locked">Nahraj vlastní schůzku a ptej se na ni.</string>
+    <string name="sample_badge">Ukázka, smyšlená</string>
+</resources>

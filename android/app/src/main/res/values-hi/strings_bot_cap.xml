@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="error_bot_cap_reached">आप इस महीने का मीटिंग बॉट समय इस्तेमाल कर चुके हैं। यह %1$s को रीसेट होगा। आप फिर भी मीटिंग खुद रिकॉर्ड कर सकते हैं।</string>
+    <string name="error_bot_cap_reached_no_date">आप इस महीने का मीटिंग बॉट समय इस्तेमाल कर चुके हैं। यह अगले महीने की शुरुआत में रीसेट होगा। आप फिर भी मीटिंग खुद रिकॉर्ड कर सकते हैं।</string>
+</resources>

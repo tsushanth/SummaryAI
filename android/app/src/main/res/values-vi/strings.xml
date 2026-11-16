@@ -230,7 +230,6 @@
     <string name="onboarding_recording_title">Ghi âm mọi thứ</string>
     <string name="onboarding_recording_desc">Ghi lại cuộc họp, bài giảng, phỏng vấn hoặc bất kỳ cuộc trò chuyện nào với âm thanh trong trẻo</string>
     <string name="onboarding_transcribe_title">Phiên âm bằng AI</string>
-    <string name="onboarding_transcribe_desc">Nhận bản phiên âm chính xác với nhận diện người nói bằng hơn 120 ngôn ngữ</string>
     <string name="onboarding_summary_title">Tóm tắt thông minh</string>
     <string name="onboarding_summary_desc">AI tạo bản tóm tắt ngắn gọn với các điểm chính và công việc cần làm</string>
     <string name="onboarding_qa_title">Đặt câu hỏi</string>
@@ -275,4 +274,12 @@
     <string name="no_recordings_in_filter_subtitle">Chưa có bản ghi nào phù hợp. Chọn Tất cả để xem mọi thứ.</string>
     <string name="summary_no_speech">Không phát hiện giọng nói trong bản ghi này nên không có gì để tóm tắt.</string>
     <string name="error_load_recording_failed">Không thể tải bản ghi này. Hãy kiểm tra kết nối và thử lại.</string>
+
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_assistant_section">Bot cuộc họp</string>
+    <string name="voice_assistant_title">Trợ lý giọng nói trong cuộc họp</string>
+    <string name="voice_assistant_hint">Khi bật, bot cuộc họp sẽ trả lời câu hỏi thành tiếng mỗi khi có người nói “Meeting Mind, ...”. Hãy tắt để bot giữ im lặng.</string>
+    <string name="voice_assistant_load_error">Không thể tải cài đặt này. Hãy kiểm tra kết nối của bạn.</string>
+    <string name="voice_assistant_save_error">Không thể lưu thay đổi của bạn. Hãy kiểm tra kết nối rồi thử lại.</string>
+    <string name="onboarding_transcribe_desc">Nhận bản chép lời chính xác kèm nhận diện người nói bằng hơn 30 ngôn ngữ</string>
 </resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">Hãy ghi âm 30 giây bất kỳ nội dung nào, kể cả chỉ là bạn đang nói, rồi xem bản tóm tắt xuất hiện.</string>
+    <string name="first_run_mic_note">Chúng tôi chỉ dùng micro khi bạn đang ghi âm.</string>
+    <string name="first_run_record">Nhấn để ghi âm</string>
+    <string name="first_run_see_sample">Hoặc xem trước một cuộc họp mẫu</string>
+    <string name="sample_cta_title">Giờ hãy thử với của bạn</string>
+    <string name="sample_cta_button">Ghi âm của riêng bạn</string>
+    <string name="sample_chat_locked">Hãy ghi âm cuộc họp của chính bạn để đặt câu hỏi về cuộc họp đó.</string>
+    <string name="sample_badge">Mẫu, hư cấu</string>
+</resources>

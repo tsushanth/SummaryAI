@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="meeting_language_label">Мова транскрибування</string>
+    <string name="meeting_language_auto">Визначати автоматично</string>
+    <string name="meeting_language_hint">Автоматичне визначення підходить для більшості зустрічей. Виберіть мову, якщо транскрипція виходить неправильною. Ваш вибір запам’ятовується.</string>
+    <string name="meeting_language_dialog_title">Мова транскрибування</string>
+    <string name="meeting_language_change">Змінити мову</string>
+    <string name="meeting_language_active">Мова: %1$s</string>
+    <string name="meeting_language_changed">Мову транскрибування змінено на %1$s</string>
+    <string name="meeting_language_change_note">Застосовується до мовлення відтепер.</string>
+    <string name="meeting_language_switch_unavailable">Під час цієї зустрічі наживо змінити мову не можна</string>
+    <string name="meeting_language_switch_failed">Не вдалося змінити мову. Спробуйте ще раз.</string>
+    <string name="meeting_language_hint_auto_english_live">Автоматичне визначення знаходить мову для підсумкової транскрипції. Живі субтитри залишаються англійською, доки ви не виберете мову.</string>
+    <string name="meeting_language_hint_delayed">Живі субтитри цією мовою можуть надходити із запізненням на %1$s хв. Підсумкової транскрипції це не стосується.</string>
+    <string name="meeting_language_reason_fixed">Мову для живої транскрипції задано, коли бот приєднався, і її не можна змінити під час цієї зустрічі.</string>
+    <string name="meeting_language_reason_not_live">Мову можна змінити лише тоді, коли бот перебуває на зустрічі.</string>
+    <string name="meeting_language_switch_not_live">Бота зараз немає на зустрічі, тому змінити мову не можна.</string>
+    <string name="meeting_language_saved_not_live">Для підсумкової транскрипції збережено мову: %1$s, але живу транскрипцію зараз перемкнути не вдалося.</string>
+</resources>

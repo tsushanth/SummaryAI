@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="ui_action_items">Ενέργειες</string>
+    <string name="ui_notes">Σημειώσεις</string>
+    <string name="ui_loading">Φόρτωση</string>
+    <string name="ui_transcript_jump_to">Μετάβαση στο %1$s</string>
+    <string name="ui_transcript_speaker_line">%1$s, %2$s: %3$s</string>
+    <string name="ui_speakers_label">Ομιλητές</string>
+    <string name="ui_no_recordings_title">Δεν υπάρχουν ακόμη ηχογραφήσεις</string>
+    <string name="ui_no_results_title">Δεν υπάρχουν ηχογραφήσεις που να ταιριάζουν</string>
+    <string name="ui_clear_search">Εκκαθάριση αναζήτησης</string>
+    <string name="ui_detailed_summary">Αναλυτική περίληψη</string>
+</resources>

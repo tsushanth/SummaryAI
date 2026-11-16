@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">Añadir o preguntar por voz</string>
+    <string name="voice_entry_debrief">Escuchar el resumen</string>
+    <string name="voice_sheet_title">Manos libres</string>
+    <string name="voice_listening">Escuchando…</string>
+    <string name="voice_working">Un momento…</string>
+    <string name="voice_speaking">Hablando…</string>
+    <string name="voice_heard_label">He oído</string>
+    <string name="voice_save">Guardar</string>
+    <string name="voice_edit">Editar</string>
+    <string name="voice_cancel">Cancelar</string>
+    <string name="voice_undo">Deshacer</string>
+    <string name="voice_close">Listo</string>
+    <string name="voice_add_to_calendar">Añadir al calendario</string>
+    <string name="voice_email_this">Enviar por correo</string>
+    <string name="voice_outward_note">Abre tu calendario o tu aplicación de correo. No se envía nada hasta que toques allí.</string>
+    <string name="voice_consent_title">¿Usar tu voz?</string>
+    <string name="voice_consent_body">El reconocimiento de voz de tu teléfono convierte la voz en texto. En muchos teléfonos esto ocurre en el dispositivo; en otros, el servicio de Google puede procesar el audio. MeetingMind no conserva el audio. No se guarda nada en tu lista hasta que digas que sí o toques Guardar.</string>
+    <string name="voice_consent_accept">Continuar</string>
+    <string name="voice_consent_decline">Ahora no</string>
+    <string name="voice_try_hint">Prueba: «añade una tarea para enviar la presentación el viernes», «cuáles son mis tareas abiertas» o «marca como hecha la partida del presupuesto».</string>
+    <string name="voice_no_calendar_app">No se encontró ninguna aplicación de calendario.</string>
+    <string name="voice_no_mail_app">No se encontró ninguna aplicación de correo.</string>
+</resources>

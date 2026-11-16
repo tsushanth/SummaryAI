@@ -1,5 +1,7 @@
 package com.kreativekoala.summaryai.ui.recordings.organize
 
+import com.kreativekoala.summaryai.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -73,7 +75,7 @@ fun OrganizeSheet(
                 .padding(bottom = 24.dp)
         ) {
             Text(
-                "Folder",
+                stringResource(R.string.ui_folder),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             )
@@ -94,7 +96,7 @@ fun OrganizeSheet(
                 OutlinedTextField(
                     value = newFolder,
                     onValueChange = { newFolder = it.take(60) },
-                    label = { Text("New folder") },
+                    label = { Text(stringResource(R.string.ui_new_folder)) },
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                 )
@@ -105,13 +107,13 @@ fun OrganizeSheet(
                         newFolder = ""
                         viewModel.createFolderAndMove(recording.id, name, onChanged)
                     },
-                ) { Text("Create") }
+                ) { Text(stringResource(R.string.ui_create)) }
             }
 
             HorizontalDivider(Modifier.padding(vertical = 12.dp))
 
             Text(
-                "Tags",
+                stringResource(R.string.ui_tags),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
             )
@@ -145,11 +147,11 @@ fun OrganizeSheet(
                 OutlinedTextField(
                     value = newTag,
                     onValueChange = { newTag = it.take(40) },
-                    label = { Text("Add tag") },
+                    label = { Text(stringResource(R.string.ui_add_tag)) },
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(enabled = newTag.isNotBlank() && !state.busy, onClick = { addTag() }) { Text("Add") }
+                TextButton(enabled = newTag.isNotBlank() && !state.busy, onClick = { addTag() }) { Text(stringResource(R.string.add)) }
             }
 
             state.error?.let {
@@ -160,7 +162,7 @@ fun OrganizeSheet(
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
             }
-            TextButton(onClick = onDismiss, modifier = Modifier.padding(horizontal = 8.dp)) { Text("Done") }
+            TextButton(onClick = onDismiss, modifier = Modifier.padding(horizontal = 8.dp)) { Text(stringResource(R.string.voice_close)) }
         }
     }
 }

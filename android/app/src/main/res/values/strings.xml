@@ -241,7 +241,7 @@
     <string name="onboarding_recording_title">Record Anything</string>
     <string name="onboarding_recording_desc">Capture meetings, lectures, interviews, or any conversation with crystal-clear audio</string>
     <string name="onboarding_transcribe_title">AI-Powered Transcription</string>
-    <string name="onboarding_transcribe_desc">Get accurate transcripts with speaker identification in over 120 languages</string>
+    <string name="onboarding_transcribe_desc">Get accurate transcripts with speaker identification in more than 30 languages</string>
     <string name="onboarding_summary_title">Smart Summaries</string>
     <string name="onboarding_summary_desc">AI generates concise summaries with key points and action items</string>
     <string name="onboarding_qa_title">Ask Questions</string>

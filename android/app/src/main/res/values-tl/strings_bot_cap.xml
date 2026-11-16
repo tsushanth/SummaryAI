@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="error_bot_cap_reached">Naubos mo na ang oras ng bot sa pulong ngayong buwan. Magre-reset ito sa %1$s. Maaari ka pa ring mag-record ng mga pulong nang mag-isa.</string>
+    <string name="error_bot_cap_reached_no_date">Naubos mo na ang oras ng bot sa pulong ngayong buwan. Magre-reset ito sa simula ng susunod na buwan. Maaari ka pa ring mag-record ng mga pulong nang mag-isa.</string>
+</resources>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="integrations_title">Enviar resumos para outros apps</string>
+    <string name="integrations_desc">Depois que cada reunião é processada, o MeetingMind pode enviar o resumo e os itens de ação para um webhook, o Slack ou o Notion. Os segredos são armazenados criptografados e nunca são exibidos novamente.</string>
+    <string name="integration_webhook">Webhook</string>
+    <string name="integration_webhook_url">URL do webhook (https)</string>
+    <string name="integration_webhook_secret">Segredo de assinatura (opcional)</string>
+    <string name="integration_slack">Slack</string>
+    <string name="integration_slack_url">URL do webhook de entrada do Slack</string>
+    <string name="integration_notion">Notion</string>
+    <string name="integration_notion_token">Token de integração do Notion</string>
+    <string name="integration_notion_database">ID do banco de dados do Notion</string>
+    <string name="integration_connected">Conectado</string>
+    <string name="integration_last_delivery">Último envio: %1$s</string>
+    <string name="integration_leave_to_keep">Digite um novo valor para substituir</string>
+    <string name="integration_save">Salvar</string>
+    <string name="integration_test">Enviar teste</string>
+    <string name="integration_remove">Remover</string>
+    <string name="integrations_saved">Salvo.</string>
+    <string name="integrations_removed">Removido.</string>
+    <string name="integrations_test_delivered">Teste enviado.</string>
+    <string name="integrations_test_failed">O teste falhou.</string>
+    <string name="integrations_load_failed">Não foi possível carregar as integrações.</string>
+    <string name="integrations_save_failed">Não foi possível salvar.</string>
+    <string name="integrations_remove_failed">Não foi possível remover.</string>
+    <string name="integrations_message_with_detail">%1$s %2$s</string>
+    <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
+    <string name="tile_record_label">Gravar reunião</string>
+    <string name="widget_record_label">Gravar</string>
+    <string name="widget_description">Inicie uma gravação pela tela inicial</string>
+    <string name="analytics_title">Tempo de fala</string>
+    <string name="analytics_questions">Perguntas: %1$d</string>
+    <string name="analytics_words">Palavras: %1$d</string>
+    <string name="analytics_longest_monologue">Monólogo mais longo: %1$s (%2$s)</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">Nimm 30 Sekunden von irgendetwas auf, sogar nur dich selbst beim Sprechen, und sieh zu, wie deine Zusammenfassung erscheint.</string>
+    <string name="first_run_mic_note">Wir nutzen das Mikrofon nur, während du aufnimmst.</string>
+    <string name="first_run_record">Zum Aufnehmen tippen</string>
+    <string name="first_run_see_sample">Oder sieh dir zuerst ein Beispiel-Meeting an</string>
+    <string name="sample_cta_title">Jetzt du</string>
+    <string name="sample_cta_button">Eigene aufnehmen</string>
+    <string name="sample_chat_locked">Nimm dein eigenes Meeting auf, um Fragen dazu zu stellen.</string>
+    <string name="sample_badge">Beispiel, fiktiv</string>
+</resources>

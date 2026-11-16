@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">Добавить или спросить голосом</string>
+    <string name="voice_entry_debrief">Прослушать итоги</string>
+    <string name="voice_sheet_title">Без рук</string>
+    <string name="voice_listening">Слушаю…</string>
+    <string name="voice_working">Одну минуту…</string>
+    <string name="voice_speaking">Говорю…</string>
+    <string name="voice_heard_label">Я услышал</string>
+    <string name="voice_save">Сохранить</string>
+    <string name="voice_edit">Изменить</string>
+    <string name="voice_cancel">Отмена</string>
+    <string name="voice_undo">Отменить</string>
+    <string name="voice_close">Готово</string>
+    <string name="voice_add_to_calendar">Добавить в календарь</string>
+    <string name="voice_email_this">Отправить по почте</string>
+    <string name="voice_outward_note">Открывает приложение календаря или почты. Ничего не отправляется, пока вы не нажмёте там кнопку.</string>
+    <string name="voice_consent_title">Использовать голос?</string>
+    <string name="voice_consent_body">Речь преобразуется в текст распознаванием речи вашего телефона. На многих телефонах это происходит на устройстве, на других звук может обрабатывать сервис Google. MeetingMind не хранит звук. Ничего не добавляется в ваш список, пока вы не скажете «да» или не нажмёте «Сохранить».</string>
+    <string name="voice_consent_accept">Продолжить</string>
+    <string name="voice_consent_decline">Не сейчас</string>
+    <string name="voice_try_hint">Попробуйте: «добавь задачу отправить презентацию до пятницы», «какие у меня открытые задачи» или «отметь пункт про бюджет выполненным».</string>
+    <string name="voice_no_calendar_app">Приложение календаря не найдено.</string>
+    <string name="voice_no_mail_app">Почтовое приложение не найдено.</string>
+</resources>

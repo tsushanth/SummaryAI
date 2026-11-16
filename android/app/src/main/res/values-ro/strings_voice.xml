@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">Adaugă sau întreabă prin voce</string>
+    <string name="voice_entry_debrief">Ascultă rezumatul</string>
+    <string name="voice_sheet_title">Fără mâini</string>
+    <string name="voice_listening">Se ascultă…</string>
+    <string name="voice_working">Un moment…</string>
+    <string name="voice_speaking">Se vorbește…</string>
+    <string name="voice_heard_label">Am auzit</string>
+    <string name="voice_save">Salvează</string>
+    <string name="voice_edit">Editează</string>
+    <string name="voice_cancel">Anulează</string>
+    <string name="voice_undo">Anulează acțiunea</string>
+    <string name="voice_close">Gata</string>
+    <string name="voice_add_to_calendar">Adaugă în calendar</string>
+    <string name="voice_email_this">Trimite prin e-mail</string>
+    <string name="voice_outward_note">Deschide aplicația de calendar sau de e-mail. Nu se trimite nimic până nu atingi acolo.</string>
+    <string name="voice_consent_title">Folosești vocea?</string>
+    <string name="voice_consent_body">Vorbirea este transformată în text de recunoașterea vocală a telefonului tău. Pe multe telefoane aceasta are loc pe dispozitiv; pe altele, serviciul Google poate procesa sunetul. MeetingMind nu păstrează sunetul. Nimic nu este salvat în lista ta până nu spui da sau atingi Salvează.</string>
+    <string name="voice_consent_accept">Continuă</string>
+    <string name="voice_consent_decline">Nu acum</string>
+    <string name="voice_try_hint">Încearcă: „adaugă o sarcină: trimite prezentarea până vineri”, „care sunt sarcinile mele deschise” sau „marchează ca finalizată sarcina cu bugetul”.</string>
+    <string name="voice_no_calendar_app">Nu a fost găsită nicio aplicație de calendar.</string>
+    <string name="voice_no_mail_app">Nu a fost găsită nicio aplicație de e-mail.</string>
+</resources>

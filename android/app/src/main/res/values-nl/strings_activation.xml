@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">Neem 30 seconden van iets op, zelfs als je alleen zelf praat, en zie je samenvatting verschijnen.</string>
+    <string name="first_run_mic_note">We gebruiken de microfoon alleen terwijl je opneemt.</string>
+    <string name="first_run_record">Tik om op te nemen</string>
+    <string name="first_run_see_sample">Of bekijk eerst een voorbeeldvergadering</string>
+    <string name="sample_cta_title">Probeer nu je eigen vergadering</string>
+    <string name="sample_cta_button">Neem je eigen op</string>
+    <string name="sample_chat_locked">Neem je eigen vergadering op om er vragen over te stellen.</string>
+    <string name="sample_badge">Voorbeeld, fictief</string>
+</resources>

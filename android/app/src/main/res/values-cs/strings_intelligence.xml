@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="edit">Upravit</string>
+    <string name="save">Uložit</string>
+    <string name="copy">Kopírovat</string>
+    <string name="todo_assignee">Přiřazeno (volitelné)</string>
+    <string name="todo_due_date">Termín (volitelné)</string>
+    <string name="todo_due_date_pick">Vybrat datum</string>
+    <string name="todo_due_date_clear">Vymazat datum</string>
+    <string name="todo_due_chip">Termín: %1$s</string>
+    <string name="summary_template_title">Styl shrnutí</string>
+    <string name="summary_template_current">Aktuální: %1$s</string>
+    <string name="summary_template_not_set">Nenastaveno (použije se výchozí)</string>
+    <string name="summary_template_regenerate">Vytvořit shrnutí znovu</string>
+    <string name="summary_template_regenerating">Vytváření znovu…</string>
+    <string name="summary_template_confirm_title">Vytvořit shrnutí znovu?</string>
+    <string name="summary_template_confirm_message">Tím se současné shrnutí, hlavní body a úkoly nahradí novou verzí ve stylu %1$s. Tuto akci nelze vrátit zpět.</string>
+    <string name="summary_template_regenerate_confirm">Vytvořit znovu</string>
+    <string name="summary_template_failed">Shrnutí se nepodařilo vytvořit znovu</string>
+    <string name="summary_template_done">Shrnutí bylo vytvořeno znovu</string>
+    <string name="summary_template_load_failed">Styly shrnutí se nepodařilo načíst</string>
+    <string name="followup_email">Napsat navazující e-mail</string>
+    <string name="followup_email_title">Navazující e-mail</string>
+    <string name="followup_email_subject">Předmět</string>
+    <string name="followup_email_body">Text</string>
+    <string name="followup_email_drafting">Psaní konceptu…</string>
+    <string name="followup_email_failed">E-mail se nepodařilo napsat</string>
+    <string name="followup_email_copied">E-mail byl zkopírován</string>
+    <string name="followup_email_send">Odeslat</string>
+    <string name="followup_email_no_app">Nebyla nalezena žádná e-mailová aplikace</string>
+    <string name="action_items_to_todos">Přidat do mých úkolů</string>
+    <string name="action_items_to_todos_adding">Přidávání…</string>
+    <string name="action_items_to_todos_added">Přidáno do tvých úkolů: %1$d</string>
+    <string name="action_items_to_todos_added_skipped">Přidáno do tvých úkolů: %1$d (%2$d tam už bylo)</string>
+    <string name="action_items_to_todos_none_new">Všechny úkoly už ve tvých úkolech jsou</string>
+    <string name="action_items_to_todos_failed">Úkoly se nepodařilo přidat do tvých úkolů</string>
+    <string name="chat_all_meetings">Ptát se napříč všemi schůzkami</string>
+    <string name="chat_all_meetings_title">Zeptej se svých schůzek</string>
+    <string name="chat_all_meetings_placeholder">např. Co jsme se rozhodli ohledně cen?</string>
+    <string name="chat_all_meetings_empty_title">Ptej se napříč všemi svými schůzkami</string>
+    <string name="chat_all_meetings_empty_message">Odpovědi vycházejí z tvých shrnutí a přepisů, s odkazy na schůzky, ze kterých pocházejí.</string>
+    <string name="chat_all_meetings_sources">Zdroje</string>
+    <string name="chat_all_meetings_failed">Odpověď se nepodařilo získat. Zkus to znovu.</string>
+    <string name="chat_all_meetings_send">Odeslat</string>
+    <string name="settings_default_template">Výchozí styl shrnutí</string>
+    <string name="settings_default_template_hint">Používá se pro nové nahrávky, pokud pro konkrétní nahrávku nevybereš jiný styl</string>
+</resources>

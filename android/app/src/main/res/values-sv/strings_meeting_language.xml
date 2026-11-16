@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="meeting_language_label">Transkriberingsspråk</string>
+    <string name="meeting_language_auto">Identifiera automatiskt</string>
+    <string name="meeting_language_hint">Automatisk identifiering fungerar för de flesta möten. Välj ett språk om transkriptionen blir fel. Ditt val kommer ihåg.</string>
+    <string name="meeting_language_dialog_title">Transkriberingsspråk</string>
+    <string name="meeting_language_change">Ändra språk</string>
+    <string name="meeting_language_active">Språk: %1$s</string>
+    <string name="meeting_language_changed">Transkriberingsspråket har ställts in på %1$s</string>
+    <string name="meeting_language_change_note">Gäller tal från och med nu.</string>
+    <string name="meeting_language_switch_unavailable">Det här mötet kan inte byta språk under pågående live-transkribering</string>
+    <string name="meeting_language_switch_failed">Det gick inte att ändra språket. Försök igen.</string>
+    <string name="meeting_language_hint_auto_english_live">Automatisk identifiering hittar språket för den slutliga transkriptionen. Live-undertexterna förblir på engelska om du inte väljer ett språk.</string>
+    <string name="meeting_language_hint_delayed">Live-undertexter på det här språket kan komma %1$s minuter för sent. Den slutliga transkriptionen påverkas inte.</string>
+    <string name="meeting_language_reason_fixed">Live-språket ställdes in när boten anslöt och kan inte ändras under det här mötet.</string>
+    <string name="meeting_language_reason_not_live">Språket kan bara ändras medan boten är med i mötet.</string>
+    <string name="meeting_language_switch_not_live">Boten är inte med i mötet just nu, så språket kan inte ändras.</string>
+    <string name="meeting_language_saved_not_live">%1$s sparades för den slutliga transkriptionen, men live-transkriptionen kunde inte växlas just nu.</string>
+</resources>

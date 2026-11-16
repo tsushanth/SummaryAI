@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="edit">Redigera</string>
+    <string name="save">Spara</string>
+    <string name="copy">Kopiera</string>
+    <string name="todo_assignee">Ansvarig (valfritt)</string>
+    <string name="todo_due_date">Förfallodatum (valfritt)</string>
+    <string name="todo_due_date_pick">Välj datum</string>
+    <string name="todo_due_date_clear">Rensa datum</string>
+    <string name="todo_due_chip">Förfaller %1$s</string>
+    <string name="summary_template_title">Sammanfattningsstil</string>
+    <string name="summary_template_current">Nuvarande: %1$s</string>
+    <string name="summary_template_not_set">Inte angiven (använder din standard)</string>
+    <string name="summary_template_regenerate">Skapa sammanfattningen på nytt</string>
+    <string name="summary_template_regenerating">Skapar på nytt…</string>
+    <string name="summary_template_confirm_title">Skapa sammanfattningen på nytt?</string>
+    <string name="summary_template_confirm_message">Då ersätts den nuvarande sammanfattningen, huvudpunkterna och åtgärdspunkterna med en ny version i stilen %1$s. Det går inte att ångra.</string>
+    <string name="summary_template_regenerate_confirm">Skapa på nytt</string>
+    <string name="summary_template_failed">Det gick inte att skapa sammanfattningen på nytt</string>
+    <string name="summary_template_done">Sammanfattningen har skapats på nytt</string>
+    <string name="summary_template_load_failed">Det gick inte att läsa in sammanfattningsstilarna</string>
+    <string name="followup_email">Skriv uppföljningsmejl</string>
+    <string name="followup_email_title">Uppföljningsmejl</string>
+    <string name="followup_email_subject">Ämne</string>
+    <string name="followup_email_body">Text</string>
+    <string name="followup_email_drafting">Skriver utkast…</string>
+    <string name="followup_email_failed">Det gick inte att skriva mejlet</string>
+    <string name="followup_email_copied">Mejlet kopierades</string>
+    <string name="followup_email_send">Skicka</string>
+    <string name="followup_email_no_app">Ingen e-postapp hittades</string>
+    <string name="action_items_to_todos">Lägg till i min att göra-lista</string>
+    <string name="action_items_to_todos_adding">Lägger till…</string>
+    <string name="action_items_to_todos_added">%1$d lades till i din att göra-lista</string>
+    <string name="action_items_to_todos_added_skipped">%1$d lades till i din att göra-lista (%2$d fanns redan)</string>
+    <string name="action_items_to_todos_none_new">Alla åtgärdspunkter finns redan i din att göra-lista</string>
+    <string name="action_items_to_todos_failed">Det gick inte att lägga till åtgärdspunkterna i att göra-listan</string>
+    <string name="chat_all_meetings">Fråga bland alla möten</string>
+    <string name="chat_all_meetings_title">Fråga dina möten</string>
+    <string name="chat_all_meetings_placeholder">t.ex. Vad bestämde vi om prissättningen?</string>
+    <string name="chat_all_meetings_empty_title">Fråga bland alla dina möten</string>
+    <string name="chat_all_meetings_empty_message">Svaren kommer från dina sammanfattningar och transkriptioner, med länkar till mötena de kommer från.</string>
+    <string name="chat_all_meetings_sources">Källor</string>
+    <string name="chat_all_meetings_failed">Det gick inte att få ett svar. Försök igen.</string>
+    <string name="chat_all_meetings_send">Skicka</string>
+    <string name="settings_default_template">Standardstil för sammanfattning</string>
+    <string name="settings_default_template_hint">Används för nya inspelningar om du inte väljer en stil för en specifik inspelning</string>
+</resources>

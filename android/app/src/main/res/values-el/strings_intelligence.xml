@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="edit">Επεξεργασία</string>
+    <string name="save">Αποθήκευση</string>
+    <string name="copy">Αντιγραφή</string>
+    <string name="todo_assignee">Υπεύθυνος (προαιρετικό)</string>
+    <string name="todo_due_date">Προθεσμία (προαιρετικό)</string>
+    <string name="todo_due_date_pick">Επιλογή ημερομηνίας</string>
+    <string name="todo_due_date_clear">Εκκαθάριση ημερομηνίας</string>
+    <string name="todo_due_chip">Προθεσμία %1$s</string>
+    <string name="summary_template_title">Στυλ περίληψης</string>
+    <string name="summary_template_current">Τρέχον: %1$s</string>
+    <string name="summary_template_not_set">Δεν έχει οριστεί (χρησιμοποιείται το προεπιλεγμένο)</string>
+    <string name="summary_template_regenerate">Αναδημιουργία περίληψης</string>
+    <string name="summary_template_regenerating">Αναδημιουργία…</string>
+    <string name="summary_template_confirm_title">Αναδημιουργία περίληψης;</string>
+    <string name="summary_template_confirm_message">Αυτό αντικαθιστά την τρέχουσα περίληψη, τα βασικά σημεία και τις ενέργειες με μια νέα έκδοση %1$s. Δεν μπορεί να αναιρεθεί.</string>
+    <string name="summary_template_regenerate_confirm">Αναδημιουργία</string>
+    <string name="summary_template_failed">Δεν ήταν δυνατή η αναδημιουργία της περίληψης</string>
+    <string name="summary_template_done">Η περίληψη αναδημιουργήθηκε</string>
+    <string name="summary_template_load_failed">Δεν ήταν δυνατή η φόρτωση των στυλ περίληψης</string>
+    <string name="followup_email">Σύνταξη email παρακολούθησης</string>
+    <string name="followup_email_title">Email παρακολούθησης</string>
+    <string name="followup_email_subject">Θέμα</string>
+    <string name="followup_email_body">Κείμενο</string>
+    <string name="followup_email_drafting">Σύνταξη…</string>
+    <string name="followup_email_failed">Δεν ήταν δυνατή η σύνταξη του email</string>
+    <string name="followup_email_copied">Το email αντιγράφηκε</string>
+    <string name="followup_email_send">Αποστολή</string>
+    <string name="followup_email_no_app">Δεν βρέθηκε εφαρμογή email</string>
+    <string name="action_items_to_todos">Προσθήκη στη λίστα ενεργειών μου</string>
+    <string name="action_items_to_todos_adding">Προσθήκη…</string>
+    <string name="action_items_to_todos_added">Προστέθηκαν στη λίστα ενεργειών σου: %1$d</string>
+    <string name="action_items_to_todos_added_skipped">Προστέθηκαν στη λίστα ενεργειών σου: %1$d (%2$d υπήρχαν ήδη)</string>
+    <string name="action_items_to_todos_none_new">Όλες οι ενέργειες υπάρχουν ήδη στη λίστα ενεργειών σου</string>
+    <string name="action_items_to_todos_failed">Δεν ήταν δυνατή η προσθήκη των ενεργειών στη λίστα ενεργειών</string>
+    <string name="chat_all_meetings">Ρώτα σε όλες τις συσκέψεις</string>
+    <string name="chat_all_meetings_title">Ρώτα τις συσκέψεις σου</string>
+    <string name="chat_all_meetings_placeholder">π.χ. Τι αποφασίσαμε για την τιμολόγηση;</string>
+    <string name="chat_all_meetings_empty_title">Ρώτα σε όλες τις συσκέψεις σου</string>
+    <string name="chat_all_meetings_empty_message">Οι απαντήσεις προέρχονται από τις περιλήψεις και τις απομαγνητοφωνήσεις σου, με συνδέσμους προς τις συσκέψεις από τις οποίες προήλθαν.</string>
+    <string name="chat_all_meetings_sources">Πηγές</string>
+    <string name="chat_all_meetings_failed">Δεν ήταν δυνατή η λήψη απάντησης. Δοκίμασε ξανά.</string>
+    <string name="chat_all_meetings_send">Αποστολή</string>
+    <string name="settings_default_template">Προεπιλεγμένο στυλ περίληψης</string>
+    <string name="settings_default_template_hint">Χρησιμοποιείται για νέες ηχογραφήσεις, εκτός αν επιλέξεις στυλ για κάποια συγκεκριμένη</string>
+</resources>

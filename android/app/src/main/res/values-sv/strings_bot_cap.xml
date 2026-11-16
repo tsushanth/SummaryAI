@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="error_bot_cap_reached">Du har förbrukat den här månadens mötesbottid. Den nollställs %1$s. Du kan fortfarande spela in möten själv.</string>
+    <string name="error_bot_cap_reached_no_date">Du har förbrukat den här månadens mötesbottid. Den nollställs i början av nästa månad. Du kan fortfarande spela in möten själv.</string>
+</resources>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="integrations_title">Надсилайте підсумки кудись ще</string>
+    <string name="integrations_desc">Після обробки кожної зустрічі MeetingMind може надсилати підсумок і завдання на webhook, у Slack або Notion. Секрети зберігаються в зашифрованому вигляді й більше ніколи не відображаються.</string>
+    <string name="integration_webhook">Webhook</string>
+    <string name="integration_webhook_url">URL webhook (https)</string>
+    <string name="integration_webhook_secret">Секрет підпису (необов’язково)</string>
+    <string name="integration_slack">Slack</string>
+    <string name="integration_slack_url">URL вхідного webhook Slack</string>
+    <string name="integration_notion">Notion</string>
+    <string name="integration_notion_token">Токен інтеграції Notion</string>
+    <string name="integration_notion_database">ID бази даних Notion</string>
+    <string name="integration_connected">Під’єднано</string>
+    <string name="integration_last_delivery">Остання доставка: %1$s</string>
+    <string name="integration_leave_to_keep">Введіть нове значення, щоб замінити</string>
+    <string name="integration_save">Зберегти</string>
+    <string name="integration_test">Надіслати тест</string>
+    <string name="integration_remove">Видалити</string>
+    <string name="integrations_saved">Збережено.</string>
+    <string name="integrations_removed">Видалено.</string>
+    <string name="integrations_test_delivered">Тест доставлено.</string>
+    <string name="integrations_test_failed">Тест не вдався.</string>
+    <string name="integrations_load_failed">Не вдалося завантажити інтеграції.</string>
+    <string name="integrations_save_failed">Не вдалося зберегти.</string>
+    <string name="integrations_remove_failed">Не вдалося видалити.</string>
+    <string name="integrations_message_with_detail">%1$s %2$s</string>
+    <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
+    <string name="tile_record_label">Записати зустріч</string>
+    <string name="widget_record_label">Запис</string>
+    <string name="widget_description">Почніть запис з головного екрана</string>
+    <string name="analytics_title">Час розмови</string>
+    <string name="analytics_questions">Запитань: %1$d</string>
+    <string name="analytics_words">Слів: %1$d</string>
+    <string name="analytics_longest_monologue">Найдовший монолог: %1$s (%2$s)</string>
+</resources>

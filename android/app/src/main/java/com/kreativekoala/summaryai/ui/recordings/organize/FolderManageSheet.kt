@@ -1,5 +1,7 @@
 package com.kreativekoala.summaryai.ui.recordings.organize
 
+import com.kreativekoala.summaryai.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -64,15 +66,15 @@ fun FolderManageSheet(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text("Folders", style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.ui_folders), style = MaterialTheme.typography.titleLarge)
                 TextButton(onClick = { dialog = FolderDialog.Create }) {
                     Icon(Icons.Default.Add, contentDescription = null)
-                    Text("New folder", modifier = Modifier.padding(start = 4.dp))
+                    Text(stringResource(R.string.ui_new_folder), modifier = Modifier.padding(start = 4.dp))
                 }
             }
             if (folders.isEmpty()) {
                 Text(
-                    "No folders yet. Create one to group related recordings.",
+                    stringResource(R.string.ui_no_folders_yet_create_one),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(vertical = 16.dp),
@@ -129,10 +131,10 @@ fun FolderManageSheet(
             },
             confirmButton = {
                 TextButton(onClick = { onDelete(d.folder); dialog = null }) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
                 }
             },
-            dismissButton = { TextButton(onClick = { dialog = null }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { dialog = null }) { Text(stringResource(R.string.cancel)) } },
         )
         null -> Unit
     }
@@ -158,12 +160,12 @@ private fun FolderNameDialog(
                 value = name,
                 onValueChange = { if (it.length <= 60) name = it },
                 singleLine = true,
-                label = { Text("Name") },
+                label = { Text(stringResource(R.string.ui_name)) },
             )
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(name.trim()) }, enabled = isValidFolderName(name)) { Text(confirmLabel) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
     )
 }

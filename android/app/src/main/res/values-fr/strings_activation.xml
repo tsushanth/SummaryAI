@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">Enregistre 30 secondes de n’importe quoi, même juste toi en train de parler, et regarde ton résumé apparaître.</string>
+    <string name="first_run_mic_note">Nous n’utilisons le micro que pendant que tu enregistres.</string>
+    <string name="first_run_record">Appuie pour enregistrer</string>
+    <string name="first_run_see_sample">Ou regarde d’abord un exemple de réunion</string>
+    <string name="sample_cta_title">À ton tour</string>
+    <string name="sample_cta_button">Enregistrer la tienne</string>
+    <string name="sample_chat_locked">Enregistre ta propre réunion pour poser des questions à son sujet.</string>
+    <string name="sample_badge">Exemple, fictif</string>
+</resources>

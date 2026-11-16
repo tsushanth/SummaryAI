@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="integrations_title">Összefoglalók küldése máshová</string>
+    <string name="integrations_desc">Minden megbeszélés feldolgozása után a MeetingMind elküldheti az összefoglalót és a teendőket egy webhookra, a Slackre vagy a Notionre. A titkos adatok titkosítva tárolódnak, és soha többé nem jelennek meg.</string>
+    <string name="integration_webhook">Webhook</string>
+    <string name="integration_webhook_url">Webhook URL (https)</string>
+    <string name="integration_webhook_secret">Aláírási titok (nem kötelező)</string>
+    <string name="integration_slack">Slack</string>
+    <string name="integration_slack_url">Slack bejövő webhook URL</string>
+    <string name="integration_notion">Notion</string>
+    <string name="integration_notion_token">Notion integrációs token</string>
+    <string name="integration_notion_database">Notion adatbázis-azonosító</string>
+    <string name="integration_connected">Összekapcsolva</string>
+    <string name="integration_last_delivery">Utolsó kézbesítés: %1$s</string>
+    <string name="integration_leave_to_keep">Add meg az új értéket a cseréhez</string>
+    <string name="integration_save">Mentés</string>
+    <string name="integration_test">Teszt küldése</string>
+    <string name="integration_remove">Eltávolítás</string>
+    <string name="integrations_saved">Mentve.</string>
+    <string name="integrations_removed">Eltávolítva.</string>
+    <string name="integrations_test_delivered">A teszt kézbesítve.</string>
+    <string name="integrations_test_failed">A teszt nem sikerült.</string>
+    <string name="integrations_load_failed">Az integrációkat nem sikerült betölteni.</string>
+    <string name="integrations_save_failed">A mentés nem sikerült.</string>
+    <string name="integrations_remove_failed">Az eltávolítás nem sikerült.</string>
+    <string name="integrations_message_with_detail">%1$s %2$s</string>
+    <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
+    <string name="tile_record_label">Megbeszélés felvétele</string>
+    <string name="widget_record_label">Felvétel</string>
+    <string name="widget_description">Indíts felvételt a kezdőképernyőről</string>
+    <string name="analytics_title">Beszédidő</string>
+    <string name="analytics_questions">Kérdések: %1$d</string>
+    <string name="analytics_words">Szavak: %1$d</string>
+    <string name="analytics_longest_monologue">Leghosszabb monológ: %1$s (%2$s)</string>
+</resources>

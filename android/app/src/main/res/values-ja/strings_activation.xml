@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">何でもいいので30秒間録音してみましょう。自分で話すだけでも大丈夫です。要約が表示されます。</string>
+    <string name="first_run_mic_note">マイクは録音中にのみ使用します。</string>
+    <string name="first_run_record">タップして録音</string>
+    <string name="first_run_see_sample">または、まずサンプルのミーティングを見る</string>
+    <string name="sample_cta_title">次はあなたの番です</string>
+    <string name="sample_cta_button">自分で録音する</string>
+    <string name="sample_chat_locked">自分のミーティングを録音すると、その内容について質問できます。</string>
+    <string name="sample_badge">サンプル(架空)</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="weekly_stats_title">Останні 7 днів</string>
+    <string name="weekly_stats_meetings">Зустрічі</string>
+    <string name="weekly_stats_hours">Годин записано</string>
+    <string name="weekly_stats_action_items">Завдання</string>
+</resources>

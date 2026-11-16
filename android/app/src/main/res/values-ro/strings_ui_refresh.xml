@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="ui_action_items">Sarcini</string>
+    <string name="ui_notes">Notițe</string>
+    <string name="ui_loading">Se încarcă</string>
+    <string name="ui_transcript_jump_to">Salt la %1$s</string>
+    <string name="ui_transcript_speaker_line">%1$s la %2$s: %3$s</string>
+    <string name="ui_speakers_label">Vorbitori</string>
+    <string name="ui_no_recordings_title">Încă nu există înregistrări</string>
+    <string name="ui_no_results_title">Nicio înregistrare potrivită</string>
+    <string name="ui_clear_search">Șterge căutarea</string>
+    <string name="ui_detailed_summary">Rezumat detaliat</string>
+</resources>

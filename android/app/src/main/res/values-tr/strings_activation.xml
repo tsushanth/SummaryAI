@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">Herhangi bir şeyi 30 saniye kaydet, sadece konuşman bile olur, ve özetinin belirmesini izle.</string>
+    <string name="first_run_mic_note">Mikrofonu yalnızca kayıt yaparken kullanırız.</string>
+    <string name="first_run_record">Kaydetmek için dokun</string>
+    <string name="first_run_see_sample">Ya da önce örnek bir toplantıya bak</string>
+    <string name="sample_cta_title">Şimdi sıra sende</string>
+    <string name="sample_cta_button">Kendi kaydını yap</string>
+    <string name="sample_chat_locked">Toplantı hakkında soru sormak için kendi toplantını kaydet.</string>
+    <string name="sample_badge">Örnek, kurgusal</string>
+</resources>

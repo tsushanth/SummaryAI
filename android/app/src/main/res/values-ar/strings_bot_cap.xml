@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="error_bot_cap_reached">لقد استهلكت وقت بوت الاجتماعات لهذا الشهر. يُعاد ضبطه في %1$s. ما زال بإمكانك تسجيل الاجتماعات بنفسك.</string>
+    <string name="error_bot_cap_reached_no_date">لقد استهلكت وقت بوت الاجتماعات لهذا الشهر. يُعاد ضبطه في بداية الشهر القادم. ما زال بإمكانك تسجيل الاجتماعات بنفسك.</string>
+</resources>

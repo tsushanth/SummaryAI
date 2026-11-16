@@ -1,5 +1,6 @@
 package com.kreativekoala.summaryai.ui.settings
 
+import java.util.Locale
 import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatDelegate
@@ -47,22 +48,17 @@ fun SettingsScreen(
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
 
-    val languages = remember {
-        listOf(
-            "en" to R.string.language_english,
-            "es" to R.string.language_spanish,
-            "fr" to R.string.language_french,
-            "de" to R.string.language_german,
-            "ja" to R.string.language_japanese,
-            "zh-CN" to R.string.language_chinese,
-            "ko" to R.string.language_korean,
-            "pt-BR" to R.string.language_portuguese,
-            "it" to R.string.language_italian,
-            "hi" to R.string.language_hindi
-        )
+    // Every shipped language, each shown by its own name (endonym) so a person can find theirs in any UI language.
+    // Keep in sync with xml/locales_config.xml (LocalizationParityTest covers the resource folders).
+    val languages = remember { SUPPORTED_LANGUAGE_TAGS.map { it to languageEndonym(it) } }
+    val storedTag = AppCompatDelegate.getApplicationLocales().toLanguageTags()
+    val currentLocaleTag = storedTag.ifEmpty {
+        val device = Locale.getDefault()
+        SUPPORTED_LANGUAGE_TAGS.firstOrNull { it.equals(device.toLanguageTag(), ignoreCase = true) }
+            ?: SUPPORTED_LANGUAGE_TAGS.firstOrNull { it.substringBefore('-') == device.language }
+            ?: "en"
     }
-    val currentLocaleTag = AppCompatDelegate.getApplicationLocales().toLanguageTags().ifEmpty { "en" }
-    val currentLanguageRes = languages.firstOrNull { it.first == currentLocaleTag }?.second ?: R.string.language_english
+    val currentLanguageName = languages.firstOrNull { it.first == currentLocaleTag }?.second ?: languageEndonym("en")
 
     LaunchedEffect(uiState.signedOut) {
         if (uiState.signedOut) {
@@ -118,7 +114,7 @@ fun SettingsScreen(
                 SettingsItem(
                     icon = Icons.Default.Language,
                     title = stringResource(R.string.language),
-                    subtitle = stringResource(currentLanguageRes),
+                    subtitle = currentLanguageName,
                     onClick = { showLanguageDialog = true }
                 )
             }
@@ -264,8 +260,8 @@ fun SettingsScreen(
                 onDismissRequest = { showLanguageDialog = false },
                 title = { Text(stringResource(R.string.language_picker_title)) },
                 text = {
-                    Column {
-                        languages.forEach { (code, nameRes) ->
+                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        languages.forEach { (code, languageName) ->
                             val isCurrent = currentLocaleTag == code
                             val pick = {
                                 AppCompatDelegate.setApplicationLocales(
@@ -283,7 +279,7 @@ fun SettingsScreen(
                                 RadioButton(selected = isCurrent, onClick = null)
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = stringResource(nameRes),
+                                    text = languageName,
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                             }
@@ -512,4 +508,17 @@ private fun ThemeOption(
             }
         }
     }
+}
+
+/** Languages offered in the in-app picker: the shipped resource folders. Same set as xml/locales_config.xml. */
+internal val SUPPORTED_LANGUAGE_TAGS = listOf(
+    "en", "es", "fr", "de", "ja", "zh-CN", "ko", "pt-BR", "it", "hi",
+    "ar", "id", "ms", "nl", "pl", "ru", "th", "tl", "tr", "vi",
+    "cs", "el", "fi", "hu", "ro", "sv", "uk"
+)
+
+/** The language's own name, for example "Deutsch" or "Русский". */
+internal fun languageEndonym(tag: String): String {
+    val locale = Locale.forLanguageTag(tag)
+    return locale.getDisplayName(locale).replaceFirstChar { it.titlecase(locale) }
 }

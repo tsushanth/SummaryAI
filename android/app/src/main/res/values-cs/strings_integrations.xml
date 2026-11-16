@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="integrations_title">Posílat shrnutí jinam</string>
+    <string name="integrations_desc">Po zpracování každé schůzky může MeetingMind poslat shrnutí a úkoly do webhooku, Slacku nebo Notionu. Tajné klíče se ukládají zašifrované a už se nikdy nezobrazí.</string>
+    <string name="integration_webhook">Webhook</string>
+    <string name="integration_webhook_url">Adresa webhooku (https)</string>
+    <string name="integration_webhook_secret">Podpisový klíč (volitelné)</string>
+    <string name="integration_slack">Slack</string>
+    <string name="integration_slack_url">Adresa příchozího webhooku Slacku</string>
+    <string name="integration_notion">Notion</string>
+    <string name="integration_notion_token">Token integrace Notion</string>
+    <string name="integration_notion_database">ID databáze Notion</string>
+    <string name="integration_connected">Připojeno</string>
+    <string name="integration_last_delivery">Poslední doručení: %1$s</string>
+    <string name="integration_leave_to_keep">Zadej novou hodnotu, kterou chceš nahradit</string>
+    <string name="integration_save">Uložit</string>
+    <string name="integration_test">Poslat test</string>
+    <string name="integration_remove">Odebrat</string>
+    <string name="integrations_saved">Uloženo.</string>
+    <string name="integrations_removed">Odebráno.</string>
+    <string name="integrations_test_delivered">Test byl doručen.</string>
+    <string name="integrations_test_failed">Test se nezdařil.</string>
+    <string name="integrations_load_failed">Integrace se nepodařilo načíst.</string>
+    <string name="integrations_save_failed">Nepodařilo se uložit.</string>
+    <string name="integrations_remove_failed">Nepodařilo se odebrat.</string>
+    <string name="integrations_message_with_detail">%1$s %2$s</string>
+    <string name="settings_integrations_subtitle">Webhook, Slack, Notion</string>
+    <string name="tile_record_label">Nahrát schůzku</string>
+    <string name="widget_record_label">Nahrát</string>
+    <string name="widget_description">Spusť nahrávání z domovské obrazovky</string>
+    <string name="analytics_title">Čas mluvení</string>
+    <string name="analytics_questions">Otázky: %1$d</string>
+    <string name="analytics_words">Slova: %1$d</string>
+    <string name="analytics_longest_monologue">Nejdelší monolog: %1$s (%2$s)</string>
+</resources>
