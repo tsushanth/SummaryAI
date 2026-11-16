@@ -8,6 +8,8 @@ WHAT YOU CAN DO
 - Send the Meeting Mind bot to a Zoom, Google Meet or Microsoft Teams meeting. The bot joins as a visible participant named Meeting Mind. Bot time has a monthly limit.
 - Get a summary, key points and action items for each recording.
 - Search your recordings and ask questions about a meeting.
+- Transcribe in many languages: leave the language on auto-detect or pick the language of the meeting.
+- See who said what: transcripts label the speakers, and you can rename them.
 - Use the web app at meetingmind.org with the same account. You can also upload audio files you already have there.
 
 AI COACH
