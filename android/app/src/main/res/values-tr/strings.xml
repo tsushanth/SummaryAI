@@ -230,7 +230,6 @@
     <string name="onboarding_recording_title">Her Şeyi Kaydedin</string>
     <string name="onboarding_recording_desc">Toplantıları, dersleri, röportajları veya herhangi bir konuşmayı kristal netliğinde sesle kaydedin</string>
     <string name="onboarding_transcribe_title">Yapay Zeka Destekli Transkripsiyon</string>
-    <string name="onboarding_transcribe_desc">120\'den fazla dilde konuşmacı tanımlama ile doğru transkriptler alın</string>
     <string name="onboarding_summary_title">Akıllı Özetler</string>
     <string name="onboarding_summary_desc">Yapay zeka önemli noktalar ve görevlerle özlü özetler oluşturur</string>
     <string name="onboarding_qa_title">Soru Sorun</string>

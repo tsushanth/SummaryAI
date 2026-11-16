@@ -230,7 +230,6 @@
     <string name="onboarding_recording_title">Rakam Apa Sahaja</string>
     <string name="onboarding_recording_desc">Rakam mesyuarat, kuliah, temu bual, atau sebarang perbualan dengan audio yang jernih</string>
     <string name="onboarding_transcribe_title">Transkripsi Berkuasa AI</string>
-    <string name="onboarding_transcribe_desc">Dapatkan transkrip tepat dengan pengenalpastian penutur dalam lebih 120 bahasa</string>
     <string name="onboarding_summary_title">Ringkasan Pintar</string>
     <string name="onboarding_summary_desc">AI menjana ringkasan padat dengan perkara utama dan tugasan</string>
     <string name="onboarding_qa_title">Tanya Soalan</string>

@@ -1,5 +1,7 @@
 package com.kreativekoala.summaryai.ui.onboarding
 
+import com.kreativekoala.summaryai.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -90,7 +92,7 @@ fun EmailCaptureScreen(
             Spacer(Modifier.height(32.dp))
 
             Text(
-                text = "Save your progress",
+                text = stringResource(R.string.ui_save_your_progress),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
@@ -99,7 +101,7 @@ fun EmailCaptureScreen(
             Spacer(Modifier.height(12.dp))
 
             Text(
-                text = "Drop your email so your recordings sync across devices and we can send you the occasional tip.",
+                text = stringResource(R.string.ui_drop_your_email_so_your),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -152,7 +154,7 @@ fun EmailCaptureScreen(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Continue", fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.voice_consent_accept), fontWeight = FontWeight.SemiBold)
                     Spacer(Modifier.width(8.dp))
                     Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
                 }
@@ -162,7 +164,7 @@ fun EmailCaptureScreen(
 
             TextButton(onClick = onContinue, modifier = Modifier.heightIn(min = 48.dp)) {
                 Text(
-                    "Skip for now",
+                    stringResource(R.string.ui_skip_for_now),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

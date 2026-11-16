@@ -1,5 +1,7 @@
 package com.kreativekoala.summaryai.ui.recordings.share
 
+import com.kreativekoala.summaryai.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -75,11 +77,11 @@ fun EditSpeakerNamesSheet(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Rename Speakers",
+                    text = stringResource(R.string.ui_rename_speakers),
                     style = MaterialTheme.typography.titleMedium
                 )
                 Row {
-                    TextButton(onClick = onDismiss, enabled = !isSaving) { Text("Cancel") }
+                    TextButton(onClick = onDismiss, enabled = !isSaving) { Text(stringResource(R.string.cancel)) }
                     TextButton(
                         onClick = {
                             isSaving = true
@@ -116,7 +118,7 @@ fun EditSpeakerNamesSheet(
                         OutlinedTextField(
                             value = draft[key].orEmpty(),
                             onValueChange = { draft[key] = it },
-                            placeholder = { Text("Name (optional)") },
+                            placeholder = { Text(stringResource(R.string.ui_name_optional)) },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(
                                 capitalization = KeyboardCapitalization.Words,
@@ -128,7 +130,7 @@ fun EditSpeakerNamesSheet(
                 }
                 Spacer(Modifier.padding(top = 8.dp))
                 Text(
-                    text = "Names replace “Speaker 0”, “Speaker 1”, etc. in the transcript, summary, and shared exports. Leave blank to keep the default.",
+                    text = stringResource(R.string.ui_names_replace_speaker_0_speaker),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

@@ -1,5 +1,7 @@
 package com.kreativekoala.summaryai.ui.livecaption
 
+import com.kreativekoala.summaryai.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import android.Manifest
@@ -110,7 +112,7 @@ fun LiveCaptionScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Live Caption",
+                        text = stringResource(R.string.ui_live_caption),
                         modifier = Modifier.semantics { heading() },
                     )
                 },
@@ -118,7 +120,7 @@ fun LiveCaptionScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                         )
                     }
                 },
@@ -184,7 +186,7 @@ private fun LiveCaptionContent(
             if (!state.onDeviceAvailable) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Using cloud recognition on this device. Audio leaves the phone.",
+                    text = stringResource(R.string.ui_using_cloud_recognition_on_this),
                     style = MaterialTheme.typography.bodySmall,
                     color = Color(0xFFFFB86C),
                     textAlign = TextAlign.Center,

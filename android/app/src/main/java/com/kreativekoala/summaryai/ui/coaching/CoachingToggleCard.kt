@@ -1,5 +1,7 @@
 package com.kreativekoala.summaryai.ui.coaching
 
+import com.kreativekoala.summaryai.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -47,7 +49,7 @@ fun CoachingToggleCard(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = accent)
             Spacer(Modifier.width(8.dp))
-            Text("AI Coach", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.ui_ai_coach), style = MaterialTheme.typography.titleSmall)
             Spacer(Modifier.weight(1f))
             Switch(
                 checked = enabled,
@@ -83,7 +85,7 @@ fun CoachingToggleCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 else -> TextButton(onClick = onGetMoreCredits) {
-                    Text("Get credits", style = MaterialTheme.typography.bodySmall, color = accent)
+                    Text(stringResource(R.string.ui_get_credits), style = MaterialTheme.typography.bodySmall, color = accent)
                 }
             }
         }

@@ -53,7 +53,7 @@
     <string name="add_to_favorites">添加到收藏</string>
     <string name="remove_from_favorites">从收藏中移除</string>
     <string name="delete_recording">删除录音</string>
-    <string name="delete_recording_confirm">确定要删除"%s"吗？此操作无法撤销。</string>
+    <string name="delete_recording_confirm">确定要删除“%s”吗？此操作无法撤销。</string>
     <string name="failed">失败</string>
     <string name="refresh">刷新</string>
     <string name="transcript">转录文本</string>
@@ -202,7 +202,6 @@
     <string name="onboarding_recording_title">录制一切</string>
     <string name="onboarding_recording_desc">以清晰的音质捕捉会议、讲座、访谈或任何对话</string>
     <string name="onboarding_transcribe_title">AI驱动的转录</string>
-    <string name="onboarding_transcribe_desc">获取支持120多种语言的带说话人识别的准确转录</string>
     <string name="onboarding_summary_title">智能摘要</string>
     <string name="onboarding_summary_desc">AI生成包含要点和行动事项的简洁摘要</string>
     <string name="onboarding_qa_title">提问</string>
@@ -214,7 +213,7 @@
     <string name="search_prompt">搜索您的录音</string>
     <string name="search_hint">按标题、转录内容或主题搜索</string>
     <string name="no_results">未找到结果</string>
-    <string name="no_results_for_query">没有与"%s"匹配的录音</string>
+    <string name="no_results_for_query">没有与“%s”匹配的录音</string>
     <string name="calls">通话</string>
     <string name="dialer">拨号器</string>
     <string name="waiting_for_transcript">等待转录…</string>

@@ -230,7 +230,6 @@
     <string name="onboarding_recording_title">Ghi âm mọi thứ</string>
     <string name="onboarding_recording_desc">Ghi lại cuộc họp, bài giảng, phỏng vấn hoặc bất kỳ cuộc trò chuyện nào với âm thanh trong trẻo</string>
     <string name="onboarding_transcribe_title">Phiên âm bằng AI</string>
-    <string name="onboarding_transcribe_desc">Nhận bản phiên âm chính xác với nhận diện người nói bằng hơn 120 ngôn ngữ</string>
     <string name="onboarding_summary_title">Tóm tắt thông minh</string>
     <string name="onboarding_summary_desc">AI tạo bản tóm tắt ngắn gọn với các điểm chính và công việc cần làm</string>
     <string name="onboarding_qa_title">Đặt câu hỏi</string>

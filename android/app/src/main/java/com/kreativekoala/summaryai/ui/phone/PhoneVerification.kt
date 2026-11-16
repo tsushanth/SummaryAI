@@ -1,5 +1,7 @@
 package com.kreativekoala.summaryai.ui.phone
 
+import com.kreativekoala.summaryai.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -55,7 +57,7 @@ internal fun NoVerifiedPhoneContent(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Verify Your Phone",
+            text = stringResource(R.string.ui_verify_your_phone),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )
@@ -63,7 +65,7 @@ internal fun NoVerifiedPhoneContent(
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "To make calls through the app, you need to verify your phone number first. We'll call you with a verification code.",
+            text = stringResource(R.string.ui_to_make_calls_through_the),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -86,7 +88,7 @@ internal fun NoVerifiedPhoneContent(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                "Verify Phone Number",
+                stringResource(R.string.ui_verify_phone_number),
                 style = MaterialTheme.typography.titleMedium
             )
         }
@@ -117,7 +119,7 @@ internal fun VerificationBottomSheet(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Verify Phone Number",
+                text = stringResource(R.string.ui_verify_phone_number),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -127,7 +129,7 @@ internal fun VerificationBottomSheet(
             when (verificationState) {
                 VerificationState.IDLE, VerificationState.SENDING_CODE -> {
                     Text(
-                        text = "Enter your phone number. We'll call you with a verification code.",
+                        text = stringResource(R.string.ui_enter_your_phone_number_we),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -138,7 +140,7 @@ internal fun VerificationBottomSheet(
                     OutlinedTextField(
                         value = verificationPhoneNumber,
                         onValueChange = onPhoneNumberChange,
-                        label = { Text("Phone number") },
+                        label = { Text(stringResource(R.string.ui_phone_number)) },
                         placeholder = { Text("+1 (555) 123-4567") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                         modifier = Modifier.fillMaxWidth(),
@@ -161,14 +163,14 @@ internal fun VerificationBottomSheet(
                                 color = Color.White
                             )
                         } else {
-                            Text("Call Me with Code")
+                            Text(stringResource(R.string.ui_call_me_with_code))
                         }
                     }
                 }
 
                 VerificationState.CODE_SENT, VerificationState.VERIFYING -> {
                     Text(
-                        text = "Answer your phone! Enter the 6-digit code you hear.",
+                        text = stringResource(R.string.ui_answer_your_phone_enter_the),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -187,7 +189,7 @@ internal fun VerificationBottomSheet(
                     OutlinedTextField(
                         value = verificationCode,
                         onValueChange = { if (it.length <= 6) onCodeChange(it) },
-                        label = { Text("Verification code") },
+                        label = { Text(stringResource(R.string.ui_verification_code)) },
                         placeholder = { Text("123456") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.fillMaxWidth(),
@@ -215,14 +217,14 @@ internal fun VerificationBottomSheet(
                                 color = Color.White
                             )
                         } else {
-                            Text("Verify")
+                            Text(stringResource(R.string.ui_verify))
                         }
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
 
                     TextButton(onClick = onReset) {
-                        Text("Request New Code")
+                        Text(stringResource(R.string.ui_request_new_code))
                     }
                 }
 
@@ -237,7 +239,7 @@ internal fun VerificationBottomSheet(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "Phone Verified!",
+                        text = stringResource(R.string.ui_phone_verified),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
@@ -246,7 +248,7 @@ internal fun VerificationBottomSheet(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "You can now make calls through the app.",
+                        text = stringResource(R.string.ui_you_can_now_make_calls),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -260,7 +262,7 @@ internal fun VerificationBottomSheet(
                             .height(56.dp),
                         shape = MaterialTheme.shapes.medium
                     ) {
-                        Text("Done")
+                        Text(stringResource(R.string.voice_close))
                     }
                 }
 
@@ -275,7 +277,7 @@ internal fun VerificationBottomSheet(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "Verification Failed",
+                        text = stringResource(R.string.ui_verification_failed),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.error
@@ -299,7 +301,7 @@ internal fun VerificationBottomSheet(
                             .height(56.dp),
                         shape = MaterialTheme.shapes.medium
                     ) {
-                        Text("Try Again")
+                        Text(stringResource(R.string.ui_try_again))
                     }
                 }
             }

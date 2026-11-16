@@ -230,7 +230,6 @@
     <string name="onboarding_recording_title">I-record ang Kahit Ano</string>
     <string name="onboarding_recording_desc">I-capture ang mga pulong, lektura, interbyu, o anumang usapan nang may kristal na linaw ng audio</string>
     <string name="onboarding_transcribe_title">AI-Powered na Transcription</string>
-    <string name="onboarding_transcribe_desc">Makakuha ng tumpak na mga transcript na may pagkilala sa nagsasalita sa higit 120 wika</string>
     <string name="onboarding_summary_title">Mga Matalinong Buod</string>
     <string name="onboarding_summary_desc">Ang AI ay gumagawa ng maiikling buod na may mga pangunahing punto at mga gawain</string>
     <string name="onboarding_qa_title">Magtanong</string>

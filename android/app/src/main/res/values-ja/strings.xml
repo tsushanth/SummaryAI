@@ -202,7 +202,6 @@
     <string name="onboarding_recording_title">何でも録音</string>
     <string name="onboarding_recording_desc">会議、講義、インタビュー、あらゆる会話をクリアな音質でキャプチャ</string>
     <string name="onboarding_transcribe_title">AI搭載の文字起こし</string>
-    <string name="onboarding_transcribe_desc">120以上の言語で話者識別付きの正確な文字起こしを取得</string>
     <string name="onboarding_summary_title">スマート要約</string>
     <string name="onboarding_summary_desc">AIが要点とアクションアイテムを含む簡潔な要約を生成</string>
     <string name="onboarding_qa_title">質問する</string>

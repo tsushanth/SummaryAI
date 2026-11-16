@@ -1,5 +1,6 @@
 package com.kreativekoala.summaryai.ui.intelligence
 
+import androidx.compose.material.icons.automirrored.filled.Send
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -294,7 +295,7 @@ private fun FollowUpEmailSheet(
                             onMessage(context.getString(R.string.followup_email_no_app))
                         }
                     }) {
-                        Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.size(8.dp))
                         Text(stringResource(R.string.followup_email_send))
                     }

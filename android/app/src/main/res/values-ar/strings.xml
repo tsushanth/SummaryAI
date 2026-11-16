@@ -230,7 +230,6 @@
     <string name="onboarding_recording_title">سجّل أي شيء</string>
     <string name="onboarding_recording_desc">التقط الاجتماعات والمحاضرات والمقابلات أو أي محادثة بصوت واضح تماماً</string>
     <string name="onboarding_transcribe_title">تفريغ بالذكاء الاصطناعي</string>
-    <string name="onboarding_transcribe_desc">احصل على نصوص دقيقة مع تحديد المتحدثين بأكثر من 120 لغة</string>
     <string name="onboarding_summary_title">ملخصات ذكية</string>
     <string name="onboarding_summary_desc">يُنشئ الذكاء الاصطناعي ملخصات موجزة مع النقاط الرئيسية والمهام</string>
     <string name="onboarding_qa_title">اطرح أسئلة</string>

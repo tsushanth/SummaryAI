@@ -202,7 +202,6 @@
     <string name="onboarding_recording_title">Alles Aufnehmen</string>
     <string name="onboarding_recording_desc">Erfassen Sie Besprechungen, Vorlesungen, Interviews oder jedes Gespräch mit kristallklarem Audio</string>
     <string name="onboarding_transcribe_title">KI-gestützte Transkription</string>
-    <string name="onboarding_transcribe_desc">Erhalten Sie genaue Transkripte mit Sprecheridentifikation in über 120 Sprachen</string>
     <string name="onboarding_summary_title">Intelligente Zusammenfassungen</string>
     <string name="onboarding_summary_desc">KI erstellt prägnante Zusammenfassungen mit Kernpunkten und Aufgaben</string>
     <string name="onboarding_qa_title">Fragen Stellen</string>

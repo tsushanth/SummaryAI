@@ -202,7 +202,6 @@
     <string name="onboarding_recording_title">कुछ भी रिकॉर्ड करें</string>
     <string name="onboarding_recording_desc">बैठकों, व्याख्यानों, साक्षात्कारों या किसी भी बातचीत को क्रिस्टल-क्लियर ऑडियो के साथ कैप्चर करें</string>
     <string name="onboarding_transcribe_title">AI-संचालित ट्रांसक्रिप्शन</string>
-    <string name="onboarding_transcribe_desc">120 से अधिक भाषाओं में वक्ता पहचान के साथ सटीक प्रतिलेख प्राप्त करें</string>
     <string name="onboarding_summary_title">स्मार्ट सारांश</string>
     <string name="onboarding_summary_desc">AI मुख्य बिंदुओं और कार्य सूची के साथ संक्षिप्त सारांश बनाता है</string>
     <string name="onboarding_qa_title">प्रश्न पूछें</string>

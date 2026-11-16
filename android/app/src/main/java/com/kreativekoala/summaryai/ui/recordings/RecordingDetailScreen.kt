@@ -113,7 +113,7 @@ fun RecordingDetailScreen(
                         }
                         if (!isSample) {
                             DropdownMenuItem(
-                                text = { Text("Rename Speakers") },
+                                text = { Text(stringResource(R.string.ui_rename_speakers)) },
                                 onClick = {
                                     showMoreMenu = false
                                     showSpeakerEditor = true

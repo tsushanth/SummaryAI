@@ -202,7 +202,6 @@
     <string name="onboarding_recording_title">Registra Qualsiasi Cosa</string>
     <string name="onboarding_recording_desc">Cattura riunioni, lezioni, interviste o qualsiasi conversazione con audio cristallino</string>
     <string name="onboarding_transcribe_title">Trascrizione con IA</string>
-    <string name="onboarding_transcribe_desc">Ottieni trascrizioni accurate con identificazione dei parlanti in oltre 120 lingue</string>
     <string name="onboarding_summary_title">Riassunti Intelligenti</string>
     <string name="onboarding_summary_desc">L\'IA genera riassunti concisi con punti chiave e attività</string>
     <string name="onboarding_qa_title">Fai Domande</string>

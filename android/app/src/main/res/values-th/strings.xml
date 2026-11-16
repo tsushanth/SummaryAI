@@ -230,7 +230,6 @@
     <string name="onboarding_recording_title">บันทึกทุกอย่าง</string>
     <string name="onboarding_recording_desc">บันทึกการประชุม บรรยาย สัมภาษณ์ หรือบทสนทนาใดๆ ด้วยเสียงที่คมชัด</string>
     <string name="onboarding_transcribe_title">การถอดเสียงด้วย AI</string>
-    <string name="onboarding_transcribe_desc">รับบทถอดเสียงที่แม่นยำพร้อมระบุผู้พูดในกว่า 120 ภาษา</string>
     <string name="onboarding_summary_title">สรุปอัจฉริยะ</string>
     <string name="onboarding_summary_desc">AI สร้างสรุปที่กระชับพร้อมประเด็นสำคัญและรายการสิ่งที่ต้องทำ</string>
     <string name="onboarding_qa_title">ถามคำถาม</string>

@@ -20,5 +20,4 @@
     <locale android:name="tl" />
     <locale android:name="tr" />
     <locale android:name="vi" />
-    <locale android:name="ro" />
 </locale-config>

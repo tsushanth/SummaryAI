@@ -230,7 +230,6 @@
     <string name="onboarding_recording_title">Neem alles op</string>
     <string name="onboarding_recording_desc">Leg vergaderingen, lezingen, interviews of elk gesprek vast met kristalhelder geluid</string>
     <string name="onboarding_transcribe_title">AI-aangedreven transcriptie</string>
-    <string name="onboarding_transcribe_desc">Krijg nauwkeurige transcripten met sprekerherkenning in meer dan 120 talen</string>
     <string name="onboarding_summary_title">Slimme samenvattingen</string>
     <string name="onboarding_summary_desc">AI genereert beknopte samenvattingen met hoofdpunten en actiepunten</string>
     <string name="onboarding_qa_title">Stel vragen</string>

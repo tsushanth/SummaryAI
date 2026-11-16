@@ -1,5 +1,7 @@
 package com.kreativekoala.summaryai.ui.phone
 
+import com.kreativekoala.summaryai.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -49,7 +51,7 @@ internal fun DialerContent(
                 fontSize = 24.sp,
                 textAlign = TextAlign.Center
             ),
-            placeholder = { Text("Phone number", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) },
+            placeholder = { Text(stringResource(R.string.ui_phone_number), textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
             singleLine = true
         )
@@ -61,7 +63,7 @@ internal fun DialerContent(
             value = dialerContactName,
             onValueChange = onContactNameChange,
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Contact name (optional)") },
+            placeholder = { Text(stringResource(R.string.ui_contact_name_optional)) },
             singleLine = true
         )
 
@@ -127,7 +129,7 @@ internal fun DialerContent(
         ) {
             Icon(
                 Icons.Default.Phone,
-                contentDescription = "Call",
+                contentDescription = stringResource(R.string.ui_call),
                 tint = Color.White,
                 modifier = Modifier.size(32.dp)
             )
@@ -136,7 +138,7 @@ internal fun DialerContent(
         if (!hasVerifiedPhones) {
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Verify a phone number in Settings to make calls",
+                text = stringResource(R.string.ui_verify_a_phone_number_in),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -262,7 +264,7 @@ internal fun NativeDialerContent(
             ),
             placeholder = {
                 Text(
-                    "Enter phone number",
+                    stringResource(R.string.ui_enter_phone_number),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -301,20 +303,20 @@ internal fun NativeDialerContent(
             ) {
                 Icon(
                     Icons.Default.Phone,
-                    contentDescription = "Call",
+                    contentDescription = stringResource(R.string.ui_call),
                     tint = Color.White,
                     modifier = Modifier.size(32.dp)
                 )
             }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Call",
+                text = stringResource(R.string.ui_call),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             if (!hasVerifiedPhone) {
                 Text(
-                    text = "Verify phone to call",
+                    text = stringResource(R.string.ui_verify_phone_to_call),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )

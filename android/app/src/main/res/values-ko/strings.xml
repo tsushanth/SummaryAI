@@ -202,7 +202,6 @@
     <string name="onboarding_recording_title">무엇이든 녹음</string>
     <string name="onboarding_recording_desc">회의, 강의, 인터뷰 또는 모든 대화를 선명한 오디오로 캡처하세요</string>
     <string name="onboarding_transcribe_title">AI 기반 전사</string>
-    <string name="onboarding_transcribe_desc">120개 이상의 언어에서 화자 식별이 포함된 정확한 전사를 받으세요</string>
     <string name="onboarding_summary_title">스마트 요약</string>
     <string name="onboarding_summary_desc">AI가 핵심 사항과 실행 항목이 포함된 간결한 요약을 생성합니다</string>
     <string name="onboarding_qa_title">질문하기</string>

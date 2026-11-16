@@ -230,7 +230,6 @@
     <string name="onboarding_recording_title">Записывайте всё</string>
     <string name="onboarding_recording_desc">Записывайте встречи, лекции, интервью или любые разговоры с кристально чистым звуком</string>
     <string name="onboarding_transcribe_title">ИИ-транскрибирование</string>
-    <string name="onboarding_transcribe_desc">Получайте точные транскрипты с определением говорящих на более чем 120 языках</string>
     <string name="onboarding_summary_title">Умные резюме</string>
     <string name="onboarding_summary_desc">ИИ создаёт краткие резюме с ключевыми моментами и задачами</string>
     <string name="onboarding_qa_title">Задавайте вопросы</string>
@@ -275,4 +274,12 @@
     <string name="no_recordings_in_filter_subtitle">Подходящих записей пока нет. Выберите «Все», чтобы увидеть всё.</string>
     <string name="summary_no_speech">В этой записи не обнаружена речь, поэтому резюмировать нечего.</string>
     <string name="error_load_recording_failed">Не удалось загрузить эту запись. Проверьте подключение и повторите попытку.</string>
+
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_assistant_section">Бот для встреч</string>
+    <string name="voice_assistant_title">Голосовой помощник на встречах</string>
+    <string name="voice_assistant_hint">Если включено, бот на встрече отвечает на вопросы вслух, когда кто-то говорит «Meeting Mind, ...». Выключите, чтобы бот молчал.</string>
+    <string name="voice_assistant_load_error">Не удалось загрузить эту настройку. Проверьте подключение.</string>
+    <string name="voice_assistant_save_error">Не удалось сохранить изменение. Проверьте подключение и повторите попытку.</string>
+    <string name="onboarding_transcribe_desc">Получайте точные расшифровки с определением говорящих более чем на 30 языках</string>
 </resources>

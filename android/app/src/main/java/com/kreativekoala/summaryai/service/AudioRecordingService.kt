@@ -154,10 +154,10 @@ class AudioRecordingService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Recording",
+                getString(R.string.notif_channel_recording_name),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Shows when recording or uploading is in progress"
+                description = getString(R.string.notif_channel_recording_description)
                 setShowBadge(false)
             }
             val notificationManager = getSystemService(NotificationManager::class.java)
@@ -195,17 +195,17 @@ class AudioRecordingService : Service() {
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(if (state.isPaused) "Recording Paused" else "Recording")
+            .setContentTitle(getString(if (state.isPaused) R.string.notif_recording_paused else R.string.recording_fallback))
             .setContentText(duration)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .addAction(
                 R.drawable.ic_launcher_foreground,
-                if (state.isPaused) "Resume" else "Pause",
+                getString(if (state.isPaused) R.string.notif_action_resume else R.string.pause),
                 pauseResumeIntent
             )
-            .addAction(R.drawable.ic_launcher_foreground, "Stop", stopIntent)
+            .addAction(R.drawable.ic_launcher_foreground, getString(R.string.notif_action_stop), stopIntent)
             .build()
     }
 
@@ -217,8 +217,8 @@ class AudioRecordingService : Service() {
             PendingIntent.FLAG_IMMUTABLE
         )
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Uploading recording")
-            .setContentText("$progressPercent% — keep the app open until upload finishes")
+            .setContentTitle(getString(R.string.notif_uploading_recording))
+            .setContentText(getString(R.string.notif_uploading_keep_open, progressPercent))
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(pendingIntent)
             .setOngoing(true)

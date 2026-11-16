@@ -202,7 +202,6 @@
     <string name="onboarding_recording_title">Graba Cualquier Cosa</string>
     <string name="onboarding_recording_desc">Captura reuniones, conferencias, entrevistas o cualquier conversación con audio cristalino</string>
     <string name="onboarding_transcribe_title">Transcripción con IA</string>
-    <string name="onboarding_transcribe_desc">Obtén transcripciones precisas con identificación de hablantes en más de 120 idiomas</string>
     <string name="onboarding_summary_title">Resúmenes Inteligentes</string>
     <string name="onboarding_summary_desc">La IA genera resúmenes concisos con puntos clave y tareas pendientes</string>
     <string name="onboarding_qa_title">Haz Preguntas</string>
