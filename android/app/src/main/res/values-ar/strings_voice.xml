@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_entry_todos">أضف أو اسأل بالصوت</string>
+    <string name="voice_entry_debrief">استمع إلى الملخص</string>
+    <string name="voice_sheet_title">بدون استخدام اليدين</string>
+    <string name="voice_listening">جارٍ الاستماع…</string>
+    <string name="voice_working">لحظة من فضلك…</string>
+    <string name="voice_speaking">جارٍ التحدث…</string>
+    <string name="voice_heard_label">سمعتُ</string>
+    <string name="voice_save">حفظ</string>
+    <string name="voice_edit">تعديل</string>
+    <string name="voice_cancel">إلغاء</string>
+    <string name="voice_undo">تراجع</string>
+    <string name="voice_close">تم</string>
+    <string name="voice_add_to_calendar">إضافة إلى التقويم</string>
+    <string name="voice_email_this">إرسال هذا بالبريد</string>
+    <string name="voice_outward_note">يفتح تطبيق التقويم أو البريد. لا يُرسل شيء حتى تضغط هناك.</string>
+    <string name="voice_consent_title">استخدام صوتك؟</string>
+    <string name="voice_consent_body">يحوّل التعرّف على الكلام في هاتفك صوتك إلى نص. في كثير من الهواتف يتم ذلك على الجهاز نفسه، وفي غيرها قد تعالج خدمة Google الصوت. لا يحتفظ MeetingMind بالصوت. لا يُحفظ شيء في قائمتك حتى تقول نعم أو تضغط على حفظ.</string>
+    <string name="voice_consent_accept">متابعة</string>
+    <string name="voice_consent_decline">ليس الآن</string>
+    <string name="voice_try_hint">جرّب: «أضف مهمة لإرسال العرض يوم الجمعة» أو «ما هي مهامي المفتوحة» أو «علّم بند الميزانية كمنجز».</string>
+    <string name="voice_no_calendar_app">لم يتم العثور على تطبيق تقويم.</string>
+    <string name="voice_no_mail_app">لم يتم العثور على تطبيق بريد.</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">Graba 30 segundos de lo que sea, aunque solo seas tú hablando, y mira cómo aparece tu resumen.</string>
+    <string name="first_run_mic_note">Solo usamos el micrófono mientras grabas.</string>
+    <string name="first_run_record">Toca para grabar</string>
+    <string name="first_run_see_sample">O mira primero una reunión de ejemplo</string>
+    <string name="sample_cta_title">Ahora prueba con la tuya</string>
+    <string name="sample_cta_button">Graba la tuya</string>
+    <string name="sample_chat_locked">Graba tu propia reunión para hacerle preguntas.</string>
+    <string name="sample_badge">Ejemplo ficticio</string>
+</resources>

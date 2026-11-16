@@ -21,7 +21,7 @@ class LocalizationParityTest {
      * Languages whose translations of the newest strings are still being written. They are exempt only from
      * [everyDefaultStringIsTranslated]; every other test applies to them. Remove an entry when its language is complete.
      */
-    private val pendingTranslation: Set<String> = setOf("ar", "de", "es", "fr", "hi", "id", "it", "ja", "ko", "ms", "nl", "pl", "pt-BR", "th", "tl", "tr", "vi", "zh-CN")
+    private val pendingTranslation: Set<String> = setOf("de", "fr", "hi", "id", "it", "ja", "ko", "ms", "nl", "pl", "pt-BR", "th", "tl", "tr", "vi", "zh-CN")
 
     private class Entry(val plural: Boolean, val items: Map<String, String>)
 

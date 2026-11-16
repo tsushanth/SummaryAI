@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">سجّل 30 ثانية من أي شيء، حتى لو كنت تتحدث وحدك، وشاهد ملخصك يظهر.</string>
+    <string name="first_run_mic_note">نستخدم الميكروفون فقط أثناء التسجيل.</string>
+    <string name="first_run_record">اضغط للتسجيل</string>
+    <string name="first_run_see_sample">أو شاهد اجتماعًا تجريبيًا أولًا</string>
+    <string name="sample_cta_title">جرّب الآن اجتماعك</string>
+    <string name="sample_cta_button">سجّل اجتماعك</string>
+    <string name="sample_chat_locked">سجّل اجتماعك الخاص لتتمكن من طرح أسئلة عنه.</string>
+    <string name="sample_badge">مثال خيالي</string>
+</resources>

@@ -238,4 +238,12 @@
     <string name="no_recordings_in_filter_subtitle">Todavía no hay grabaciones que coincidan. Selecciona Todas para verlo todo.</string>
     <string name="summary_no_speech">No se detectó voz en esta grabación, así que no hay nada que resumir.</string>
     <string name="error_load_recording_failed">No se pudo cargar esta grabación. Comprueba tu conexión e inténtalo de nuevo.</string>
+
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="voice_assistant_section">Bot de reuniones</string>
+    <string name="voice_assistant_title">Asistente de voz en las reuniones</string>
+    <string name="voice_assistant_hint">Si está activado, el bot de reuniones responde preguntas en voz alta cuando alguien dice «Meeting Mind, ...». Desactívalo para que el bot permanezca en silencio.</string>
+    <string name="voice_assistant_load_error">No se pudo cargar este ajuste. Comprueba tu conexión.</string>
+    <string name="voice_assistant_save_error">No se pudo guardar el cambio. Comprueba tu conexión e inténtalo de nuevo.</string>
+    <string name="onboarding_transcribe_desc">Obtén transcripciones precisas con identificación de hablantes en más de 30 idiomas</string>
 </resources>
