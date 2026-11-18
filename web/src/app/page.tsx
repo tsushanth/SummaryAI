@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { RibbonMark } from '@/components/ui/ribbon-mark';
 import { ActivationBeacon } from '@/components/ActivationBeacon';
+import { playUrl } from '@/lib/playLinks';
 import {
   ArrowUpRight,
   Sparkles,
@@ -64,7 +65,7 @@ const PLATFORMS = [
   {
     name: 'Android',
     caption: 'Android 10+, on Google Play',
-    href: 'https://play.google.com/store/apps/details?id=com.kreativekoala.meetingmind',
+    href: playUrl('download'),
     icon: Play,
   },
   {
