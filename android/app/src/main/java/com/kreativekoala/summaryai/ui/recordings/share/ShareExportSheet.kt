@@ -78,6 +78,7 @@ fun ShareExportSheet(
         ).meetingsRepository()
     }
     val hasMeetingId = !recording.meetingId.isNullOrBlank()
+    val defaultShareError = stringResource(R.string.share_error_default)
 
     fun run(type: ShareExporter.ExportType) {
         if (isGenerating) return
@@ -99,7 +100,7 @@ fun ShareExportSheet(
                 liveTranscript = liveStitched,
             )
             isGenerating = false
-            result.onFailure { e -> onError(e.message ?: "Couldn't share.") }
+            result.onFailure { e -> onError(e.message ?: defaultShareError) }
             onDismiss()
         }
     }
@@ -123,51 +124,51 @@ fun ShareExportSheet(
 
             ShareRow(
                 icon = Icons.Default.PictureAsPdf,
-                title = "Share Summary as PDF",
+                title = stringResource(R.string.share_summary_pdf),
                 enabled = summary != null && !isGenerating
             ) { run(ShareExporter.ExportType.SUMMARY_PDF) }
 
             ShareRow(
                 icon = Icons.AutoMirrored.Filled.TextSnippet,
-                title = "Share Summary as Text",
+                title = stringResource(R.string.share_summary_text),
                 enabled = summary != null && !isGenerating
             ) { run(ShareExporter.ExportType.SUMMARY_TEXT) }
 
             ShareRow(
                 icon = Icons.Default.Description,
-                title = "Share Transcript as PDF",
+                title = stringResource(R.string.share_transcript_pdf),
                 enabled = transcript != null && !isGenerating
             ) { run(ShareExporter.ExportType.TRANSCRIPT_PDF) }
 
             ShareRow(
                 icon = Icons.AutoMirrored.Filled.TextSnippet,
-                title = "Share Transcript as Text",
+                title = stringResource(R.string.share_transcript_text),
                 enabled = transcript != null && !isGenerating
             ) { run(ShareExporter.ExportType.TRANSCRIPT_TEXT) }
 
             if (hasMeetingId) {
                 ShareRow(
                     icon = Icons.AutoMirrored.Filled.TextSnippet,
-                    title = "Share Live Transcript as Text",
+                    title = stringResource(R.string.share_live_transcript_text),
                     enabled = !isGenerating
                 ) { run(ShareExporter.ExportType.LIVE_TRANSCRIPT_TEXT) }
 
                 ShareRow(
                     icon = Icons.Default.Description,
-                    title = "Share Live Transcript as PDF",
+                    title = stringResource(R.string.share_live_transcript_pdf),
                     enabled = !isGenerating
                 ) { run(ShareExporter.ExportType.LIVE_TRANSCRIPT_PDF) }
             }
 
             ShareRow(
                 icon = Icons.Default.Link,
-                title = "Create public link",
+                title = stringResource(R.string.share_create_public_link),
                 enabled = !isGenerating
             ) { showPublicLink = true }
 
             ShareRow(
                 icon = Icons.Default.Audiotrack,
-                title = "Share Audio",
+                title = stringResource(R.string.share_audio),
                 enabled = recording.audioUrl != null && !isGenerating
             ) { run(ShareExporter.ExportType.AUDIO) }
 

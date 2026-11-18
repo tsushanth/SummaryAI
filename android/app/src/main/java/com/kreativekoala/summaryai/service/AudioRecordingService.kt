@@ -140,7 +140,7 @@ class AudioRecordingService : Service() {
             ACTION_RESUME -> resumeRecording()
             ACTION_UPLOAD -> {
                 val path = intent.getStringExtra(EXTRA_FILE_PATH)
-                val title = intent.getStringExtra(EXTRA_TITLE) ?: "Recording"
+                val title = intent.getStringExtra(EXTRA_TITLE) ?: getString(R.string.recording_fallback)
                 val duration = intent.getIntExtra(EXTRA_DURATION, 0)
                 if (path != null) {
                     startUpload(File(path), title, duration)
@@ -259,7 +259,7 @@ class AudioRecordingService : Service() {
             startAmplitudeMonitor()
         } catch (e: Exception) {
             _recordingState.value = _recordingState.value.copy(
-                error = "Failed to start recording: ${e.message}"
+                error = getString(R.string.recording_error_start, e.message)
             )
             stopSelf()
         }
@@ -275,7 +275,7 @@ class AudioRecordingService : Service() {
                 updateNotification(createRecordingNotification())
             } catch (e: Exception) {
                 _recordingState.value = _recordingState.value.copy(
-                    error = "Failed to pause: ${e.message}"
+                    error = getString(R.string.recording_error_pause, e.message)
                 )
             }
         }
@@ -291,7 +291,7 @@ class AudioRecordingService : Service() {
                 updateNotification(createRecordingNotification())
             } catch (e: Exception) {
                 _recordingState.value = _recordingState.value.copy(
-                    error = "Failed to resume: ${e.message}"
+                    error = getString(R.string.recording_error_resume, e.message)
                 )
             }
         }
@@ -352,7 +352,7 @@ class AudioRecordingService : Service() {
      */
     fun startUpload(file: File, title: String, durationSeconds: Int) {
         if (!file.exists()) {
-            _uploadState.value = UploadState(error = "Recording file not found")
+            _uploadState.value = UploadState(error = getString(R.string.error_recording_file_not_found))
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
             stopSelf()
             return
@@ -397,7 +397,7 @@ class AudioRecordingService : Service() {
                     _uploadState.value = UploadState(
                         isUploading = false,
                         file = file,
-                        error = error.message ?: "Upload failed"
+                        error = error.message ?: getString(R.string.recording_upload_failed_default)
                     )
                     // Intentionally keep the file + meta sidecar for retry
                 }

@@ -70,7 +70,7 @@ internal fun SettingsContent(
         if (verifiedPhones.isNotEmpty()) {
             item {
                 MmSectionHeader(
-                    title = "Verified Numbers",
+                    title = stringResource(R.string.phone_settings_verified_numbers),
                     modifier = Modifier.padding(top = 12.dp)
                 )
             }
@@ -163,7 +163,7 @@ internal fun SettingsContent(
                             )
                         }
                         VerificationState.CODE_SENT, VerificationState.VERIFYING -> {
-                            Text("Enter the 6-digit code sent to $verificationPhoneNumber")
+                            Text(stringResource(R.string.phone_verify_enter_code, verificationPhoneNumber))
                             Spacer(modifier = Modifier.height(16.dp))
                             OutlinedTextField(
                                 value = verificationCode,
@@ -190,7 +190,7 @@ internal fun SettingsContent(
                         }
                         VerificationState.ERROR -> {
                             Text(
-                                text = verificationError ?: "Verification failed",
+                                text = verificationError ?: stringResource(R.string.phone_verify_failed),
                                 color = MaterialTheme.colorScheme.error
                             )
                         }

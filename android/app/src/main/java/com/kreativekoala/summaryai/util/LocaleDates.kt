@@ -40,4 +40,10 @@ object LocaleDates {
     fun dateNumeric(date: Date) = format(date, DATE_NUMERIC, "MM/dd/yy")
     fun weekdayMonthDayTime(date: Date) = format(date, "EEEMMMdjm", "EEE, MMM d, h:mm a")
     fun monthName(date: Date) = format(date, MONTH_NAME, "MMMM")
+
+    /** Stand-alone month name with year ("September 2026" in English) for [month] (1-12) of [year]. */
+    fun monthYear(year: Int, month: Int): String {
+        val cal = java.util.Calendar.getInstance().apply { clear(); set(year, month - 1, 1) }
+        return format(cal.time, "yLLLL", "LLLL yyyy")
+    }
 }

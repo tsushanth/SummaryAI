@@ -1,5 +1,6 @@
 package com.kreativekoala.summaryai.ui.recordings.share
 
+import com.kreativekoala.summaryai.R
 import android.content.Context
 import android.content.Intent
 import android.graphics.Paint
@@ -44,41 +45,41 @@ object ShareExporter {
     ): Result<Unit> = runCatching {
         when (type) {
             ExportType.SUMMARY_TEXT -> {
-                val text = summary?.let { summaryMarkdown(recording, it, transcript?.speakerNames) }
-                    ?: throw IllegalStateException("Summary not ready yet.")
+                val text = summary?.let { summaryMarkdown(context, recording, it, transcript?.speakerNames) }
+                    ?: throw IllegalStateException(context.getString(R.string.share_error_summary_not_ready))
                 shareText(context, text)
             }
             ExportType.SUMMARY_PDF -> {
-                val text = summary?.let { summaryMarkdown(recording, it, transcript?.speakerNames) }
-                    ?: throw IllegalStateException("Summary not ready yet.")
-                val file = writePdf(context, "${safeTitle(recording.title)} - Summary", text)
+                val text = summary?.let { summaryMarkdown(context, recording, it, transcript?.speakerNames) }
+                    ?: throw IllegalStateException(context.getString(R.string.share_error_summary_not_ready))
+                val file = writePdf(context, context.getString(R.string.share_export_title_summary, safeTitle(context, recording.title)), text)
                 shareFile(context, file, "application/pdf")
             }
             ExportType.TRANSCRIPT_TEXT -> {
-                val text = transcript?.let { transcriptMarkdown(recording, it) }
-                    ?: throw IllegalStateException("Transcript not ready yet.")
+                val text = transcript?.let { transcriptMarkdown(context, recording, it) }
+                    ?: throw IllegalStateException(context.getString(R.string.share_error_transcript_not_ready))
                 shareText(context, text)
             }
             ExportType.TRANSCRIPT_PDF -> {
-                val text = transcript?.let { transcriptMarkdown(recording, it) }
-                    ?: throw IllegalStateException("Transcript not ready yet.")
-                val file = writePdf(context, "${safeTitle(recording.title)} - Transcript", text)
+                val text = transcript?.let { transcriptMarkdown(context, recording, it) }
+                    ?: throw IllegalStateException(context.getString(R.string.share_error_transcript_not_ready))
+                val file = writePdf(context, context.getString(R.string.share_export_title_transcript, safeTitle(context, recording.title)), text)
                 shareFile(context, file, "application/pdf")
             }
             ExportType.LIVE_TRANSCRIPT_TEXT -> {
-                val text = liveTranscript?.let { liveTranscriptMarkdown(recording, it) }
-                    ?: throw IllegalStateException("No live transcript captured yet.")
+                val text = liveTranscript?.let { liveTranscriptMarkdown(context, recording, it) }
+                    ?: throw IllegalStateException(context.getString(R.string.share_error_live_not_ready))
                 shareText(context, text)
             }
             ExportType.LIVE_TRANSCRIPT_PDF -> {
-                val text = liveTranscript?.let { liveTranscriptMarkdown(recording, it) }
-                    ?: throw IllegalStateException("No live transcript captured yet.")
-                val file = writePdf(context, "${safeTitle(recording.title)} - Live Transcript", text)
+                val text = liveTranscript?.let { liveTranscriptMarkdown(context, recording, it) }
+                    ?: throw IllegalStateException(context.getString(R.string.share_error_live_not_ready))
+                val file = writePdf(context, context.getString(R.string.share_export_title_live_transcript, safeTitle(context, recording.title)), text)
                 shareFile(context, file, "application/pdf")
             }
             ExportType.AUDIO -> {
                 val url = recording.audioUrl
-                    ?: throw IllegalStateException("No audio available for this recording.")
+                    ?: throw IllegalStateException(context.getString(R.string.share_error_no_audio))
                 val file = downloadAudio(context, recording.title, url)
                 shareFile(context, file, "audio/*")
             }
@@ -86,11 +87,12 @@ object ShareExporter {
     }
 
     private fun liveTranscriptMarkdown(
+        context: Context,
         recording: Recording,
         stitched: com.kreativekoala.summaryai.data.api.models.StitchedLiveTranscriptResponse,
     ): String = buildString {
-        appendLine("# ${recording.title} - Live Transcript").appendLine()
-        appendLine("_Captured live during the meeting. ${stitched.wordCount} words, ${stitched.speakerCount} speakers._").appendLine()
+        appendLine("# " + context.getString(R.string.share_export_title_live_transcript, recording.title)).appendLine()
+        appendLine("_" + context.getString(R.string.share_export_live_caption, stitched.wordCount, stitched.speakerCount) + "_").appendLine()
         stitched.segments.forEach { seg ->
             val mins = (seg.startTime / 60).toInt()
             val secs = (seg.startTime % 60).toInt()
@@ -101,31 +103,31 @@ object ShareExporter {
 
     // ----- Content generators (markdown-compatible plain text) -----
 
-    private fun summaryMarkdown(recording: Recording, summary: Summary, names: Map<String, String>?): String = buildString {
+    private fun summaryMarkdown(context: Context, recording: Recording, summary: Summary, names: Map<String, String>?): String = buildString {
         appendLine("# ${recording.title}").appendLine()
-        appendLine("## Summary").appendLine(summary.shortSummary.applyingSpeakerNames(names))
+        appendLine("## " + context.getString(R.string.share_export_heading_summary)).appendLine(summary.shortSummary.applyingSpeakerNames(names))
         summary.detailedSummary?.takeIf { it.isNotBlank() }?.let {
             appendLine().appendLine(it.applyingSpeakerNames(names))
         }
         if (summary.hasKeyPoints) {
-            appendLine().appendLine("## Key Points")
+            appendLine().appendLine("## " + context.getString(R.string.share_export_heading_key_points))
             summary.keyPoints.forEach { appendLine("• ${it.applyingSpeakerNames(names)}") }
         }
         if (summary.hasActionItems) {
-            appendLine().appendLine("## Action Items")
+            appendLine().appendLine("## " + context.getString(R.string.share_export_heading_action_items))
             summary.actionItems.forEach { appendLine("• ${it.applyingSpeakerNames(names)}") }
         }
         if (summary.hasTopics) {
-            appendLine().appendLine("## Topics")
+            appendLine().appendLine("## " + context.getString(R.string.share_export_heading_topics))
             appendLine(summary.topics.joinToString(", "))
         }
     }
 
-    private fun transcriptMarkdown(recording: Recording, transcript: Transcript): String = buildString {
+    private fun transcriptMarkdown(context: Context, recording: Recording, transcript: Transcript): String = buildString {
         val names = transcript.speakerNames
-        appendLine("# ${recording.title} - Transcript").appendLine()
+        appendLine("# " + context.getString(R.string.share_export_title_transcript, recording.title)).appendLine()
         transcript.segments.forEach { seg ->
-            val speaker = (seg.speaker ?: "Speaker").applyingSpeakerNames(names)
+            val speaker = (seg.speaker ?: context.getString(R.string.share_export_speaker)).applyingSpeakerNames(names)
             appendLine("[${seg.formattedStartTime}] $speaker: ${seg.text.applyingSpeakerNames(names)}").appendLine()
         }
     }
@@ -195,7 +197,7 @@ object ShareExporter {
             val info = PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNumber).create()
             val page = document.startPage(info)
             val canvas = page.canvas
-            val header = if (pageNumber == 1) title else "$title (cont.)"
+            val header = if (pageNumber == 1) title else context.getString(R.string.share_export_pdf_continued, title)
             canvas.drawText(header, margin.toFloat(), (margin + 22).toFloat(), pageHeaderPaint)
 
             var y = contentTop
@@ -214,7 +216,7 @@ object ShareExporter {
             pageNumber++
         }
 
-        val outFile = sharedFile(context, "${safeTitle(title)}.pdf")
+        val outFile = sharedFile(context, "${safeTitle(context, title)}.pdf")
         FileOutputStream(outFile).use { document.writeTo(it) }
         document.close()
         return outFile
@@ -253,15 +255,15 @@ object ShareExporter {
         withContext(Dispatchers.IO) {
             val client = OkHttpClient()
             val response = client.newCall(Request.Builder().url(url).build()).execute()
-            if (!response.isSuccessful) throw IllegalStateException("Audio download failed (${response.code}).")
+            if (!response.isSuccessful) throw IllegalStateException(context.getString(R.string.share_error_audio_download, response.code))
 
             // Pick extension carefully: signed URLs end with a JWT (...?token=eyJ.payload.sig)
             // where the last `.` is in the token, not the filename. Strip the query first.
             val ext = audioExtensionFor(url, response.header("Content-Type"))
-            val outFile = sharedFile(context, "${safeTitle(title)}.$ext")
+            val outFile = sharedFile(context, "${safeTitle(context, title)}.$ext")
             response.body?.byteStream()?.use { input ->
                 FileOutputStream(outFile).use { output -> input.copyTo(output) }
-            } ?: throw IllegalStateException("Empty audio response.")
+            } ?: throw IllegalStateException(context.getString(R.string.share_error_audio_empty))
             outFile
         }
 
@@ -293,7 +295,7 @@ object ShareExporter {
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, text)
         }
-        context.startActivity(Intent.createChooser(intent, "Share").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        context.startActivity(Intent.createChooser(intent, context.getString(R.string.share)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
     private fun shareFile(context: Context, file: File, mime: String) {
@@ -304,7 +306,7 @@ object ShareExporter {
             putExtra(Intent.EXTRA_STREAM, uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        context.startActivity(Intent.createChooser(intent, "Share").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        context.startActivity(Intent.createChooser(intent, context.getString(R.string.share)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
     private fun sharedFile(context: Context, name: String): File {
@@ -312,6 +314,6 @@ object ShareExporter {
         return File(dir, name)
     }
 
-    private fun safeTitle(title: String): String =
-        title.replace(Regex("[\\\\/:*?\"<>|]"), "-").trim().ifBlank { "Recording" }
+    private fun safeTitle(context: Context, title: String): String =
+        title.replace(Regex("[\\\\/:*?\"<>|]"), "-").trim().ifBlank { context.getString(R.string.recording_fallback) }
 }

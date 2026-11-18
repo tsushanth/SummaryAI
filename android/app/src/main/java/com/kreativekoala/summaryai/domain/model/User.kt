@@ -1,5 +1,8 @@
 package com.kreativekoala.summaryai.domain.model
 
+import androidx.annotation.StringRes
+import com.kreativekoala.summaryai.R
+
 /**
  * Authentication provider
  */
@@ -8,11 +11,12 @@ enum class AuthProvider {
     APPLE,
     EMAIL;
 
-    val displayName: String
+    @get:StringRes
+    val labelRes: Int
         get() = when (this) {
-            GOOGLE -> "Google"
-            APPLE -> "Apple"
-            EMAIL -> "Email"
+            GOOGLE -> R.string.auth_provider_google
+            APPLE -> R.string.auth_provider_apple
+            EMAIL -> R.string.auth_provider_email
         }
 }
 
@@ -29,13 +33,14 @@ enum class SubscriptionStatus {
     val isPro: Boolean
         get() = this in listOf(TRIAL, ACTIVE)
 
-    val displayName: String
+    @get:StringRes
+    val labelRes: Int
         get() = when (this) {
-            FREE -> "Free"
-            TRIAL -> "Trial"
-            ACTIVE -> "Pro"
-            EXPIRED -> "Expired"
-            CANCELLED -> "Cancelled"
+            FREE -> R.string.free
+            TRIAL -> R.string.status_trial
+            ACTIVE -> R.string.status_pro
+            EXPIRED -> R.string.status_expired
+            CANCELLED -> R.string.status_cancelled
         }
 }
 

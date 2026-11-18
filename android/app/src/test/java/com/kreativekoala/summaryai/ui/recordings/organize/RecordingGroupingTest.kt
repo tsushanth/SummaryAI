@@ -37,7 +37,15 @@ class RecordingGroupingTest {
             now,
         )
         assertEquals(
-            listOf("Starred", "Today", "Yesterday", "This week", "This month", "September 2026", "Earlier"),
+            listOf(
+                GroupLabel.Starred,
+                GroupLabel.Today,
+                GroupLabel.Yesterday,
+                GroupLabel.ThisWeek,
+                GroupLabel.ThisMonth,
+                GroupLabel.Month(2026, 9),
+                GroupLabel.Earlier,
+            ),
             groups.map { it.label },
         )
         assertEquals(listOf("starredOld"), groups[0].recordings.map { it.id })
@@ -54,6 +62,6 @@ class RecordingGroupingTest {
         val laNow = ZonedDateTime.of(2026, 10, 12, 9, 0, 0, 0, la)
         // 2026-10-12T03:00Z is still Oct 11 in LA -> Yesterday
         val groups = groupRecordingsByDate(listOf(rec("r", "2026-10-12T03:00:00+00:00")), laNow)
-        assertEquals("Yesterday", groups.single().label)
+        assertEquals(GroupLabel.Yesterday, groups.single().label)
     }
 }

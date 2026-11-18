@@ -1,5 +1,8 @@
 package com.kreativekoala.summaryai.domain.model
 
+import androidx.annotation.StringRes
+import com.kreativekoala.summaryai.R
+
 /**
  * Phone call status enum for domain layer
  */
@@ -14,17 +17,18 @@ enum class PhoneCallStatus {
     NO_ANSWER,
     CANCELLED;
 
-    val displayName: String
+    @get:StringRes
+    val labelRes: Int
         get() = when (this) {
-            INITIATED -> "Initiated"
-            RINGING -> "Ringing"
-            IN_PROGRESS -> "In Progress"
-            RECORDING -> "Recording"
-            COMPLETED -> "Completed"
-            FAILED -> "Failed"
-            BUSY -> "Busy"
-            NO_ANSWER -> "No Answer"
-            CANCELLED -> "Cancelled"
+            INITIATED -> R.string.status_initiated
+            RINGING -> R.string.status_ringing
+            IN_PROGRESS -> R.string.status_in_progress
+            RECORDING -> R.string.recording_fallback
+            COMPLETED -> R.string.completed
+            FAILED -> R.string.failed
+            BUSY -> R.string.status_busy
+            NO_ANSWER -> R.string.status_no_answer
+            CANCELLED -> R.string.status_cancelled
         }
 
     val isActive: Boolean

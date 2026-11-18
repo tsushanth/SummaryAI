@@ -1,6 +1,8 @@
 package com.kreativekoala.summaryai.domain.model
 
+import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
+import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.ui.theme.Green50
 import com.kreativekoala.summaryai.ui.theme.Orange50
 import com.kreativekoala.summaryai.ui.theme.Red50
@@ -15,12 +17,13 @@ enum class TodoPriority {
     LOW,
     NONE;
 
-    val displayName: String
+    @get:StringRes
+    val labelRes: Int
         get() = when (this) {
-            HIGH -> "High"
-            MEDIUM -> "Medium"
-            LOW -> "Low"
-            NONE -> "None"
+            HIGH -> R.string.high
+            MEDIUM -> R.string.medium
+            LOW -> R.string.low
+            NONE -> R.string.none
         }
 
     val color: Color

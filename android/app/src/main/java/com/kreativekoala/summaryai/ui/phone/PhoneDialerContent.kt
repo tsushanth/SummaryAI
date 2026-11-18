@@ -78,7 +78,7 @@ internal fun DialerContent(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                Text("From: ", style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.phone_dialer_from), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(end = 4.dp))
 
                 ExposedDropdownMenuBox(
                     expanded = expanded,
@@ -88,7 +88,7 @@ internal fun DialerContent(
                         onClick = { expanded = true },
                         modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable)
                     ) {
-                        Text(selectedPhone?.formattedPhoneNumber ?: "Select phone")
+                        Text(selectedPhone?.formattedPhoneNumber ?: stringResource(R.string.phone_dialer_select_phone))
                         Icon(Icons.Default.ArrowDropDown, null)
                     }
 
@@ -197,7 +197,7 @@ internal fun DialPad(
             ) {
                 Icon(
                     Icons.AutoMirrored.Filled.Backspace,
-                    contentDescription = "Delete"
+                    contentDescription = stringResource(R.string.delete)
                 )
             }
         }

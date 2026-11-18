@@ -94,7 +94,7 @@ fun EditSpeakerNamesSheet(
                             onSave(filtered)
                         },
                         enabled = !isSaving
-                    ) { Text(if (isSaving) "Saving…" else "Save") }
+                    ) { Text(stringResource(if (isSaving) R.string.speaker_edit_saving else R.string.save)) }
                 }
             }
             HorizontalDivider()
@@ -109,7 +109,7 @@ fun EditSpeakerNamesSheet(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Speaker $key",
+                            text = stringResource(R.string.speaker_edit_row_label, key),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.width(96.dp)

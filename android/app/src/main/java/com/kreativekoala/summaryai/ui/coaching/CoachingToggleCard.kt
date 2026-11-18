@@ -63,14 +63,14 @@ fun CoachingToggleCard(
             var expanded by remember { mutableStateOf(false) }
             Box {
                 TextButton(onClick = { expanded = true }, contentPadding = PaddingValues(horizontal = 4.dp)) {
-                    Text(persona.displayName, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(persona.labelRes), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.width(4.dp))
                     Icon(Icons.Default.ExpandMore, contentDescription = null, modifier = Modifier.size(14.dp))
                 }
                 DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                     CoachingPersonaKey.entries.forEach { p ->
                         DropdownMenuItem(
-                            text = { Text(p.displayName) },
+                            text = { Text(stringResource(p.labelRes)) },
                             onClick = { onPersonaChange(p); expanded = false }
                         )
                     }

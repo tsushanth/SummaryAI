@@ -17,10 +17,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import android.content.Context
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kreativekoala.summaryai.domain.model.PhoneCall
+import com.kreativekoala.summaryai.util.LocaleDates
 import com.kreativekoala.summaryai.domain.model.PhoneCallStatus
 import com.kreativekoala.summaryai.ui.components.MmCard
 import com.kreativekoala.summaryai.ui.components.MmEmptyState
@@ -41,7 +44,7 @@ internal fun CallsContent(
     onCallClick: (PhoneCall) -> Unit
 ) {
     if (isLoading && calls.isEmpty()) {
-        SkeletonCardList(count = 5, loadingDescription = "Loading calls")
+        SkeletonCardList(count = 5, loadingDescription = stringResource(R.string.phone_calls_loading))
     } else if (calls.isEmpty()) {
         EmptyCallsContent()
     } else {
@@ -119,7 +122,7 @@ internal fun PhoneCallCard(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = call.status.displayName,
+                        text = stringResource(call.status.labelRes),
                         style = MaterialTheme.typography.bodySmall,
                         color = accent
                     )
@@ -154,7 +157,7 @@ internal fun PhoneCallCard(
             // Timestamp and recording link
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = formatCallDate(call.startedAt ?: call.createdAt),
+                    text = formatCallDate(LocalContext.current, call.startedAt ?: call.createdAt),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -197,8 +200,8 @@ internal fun EmptyCallsContent() {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         MmEmptyState(
             icon = Icons.Default.Phone,
-            title = "No calls yet",
-            message = "Make a call using the dialer to get started"
+            title = stringResource(R.string.phone_calls_empty_title),
+            message = stringResource(R.string.phone_calls_empty_message)
         )
     }
 }
@@ -216,28 +219,26 @@ internal fun callStatusColor(status: PhoneCallStatus): Color {
     }
 }
 
-internal fun formatCallDate(dateString: String): String {
+internal fun formatCallDate(context: Context, dateString: String): String {
     return try {
-        val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+        val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
         val date = parser.parse(dateString) ?: return dateString
 
         val now = Calendar.getInstance()
         val callDate = Calendar.getInstance().apply { time = date }
 
-        val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
-        val dateFormat = SimpleDateFormat("MMM d", Locale.getDefault())
 
         when {
             now.get(Calendar.DAY_OF_YEAR) == callDate.get(Calendar.DAY_OF_YEAR) &&
             now.get(Calendar.YEAR) == callDate.get(Calendar.YEAR) -> {
-                "Today ${timeFormat.format(date)}"
+                context.getString(R.string.phone_call_date_today, LocaleDates.time(date))
             }
             now.get(Calendar.DAY_OF_YEAR) - 1 == callDate.get(Calendar.DAY_OF_YEAR) &&
             now.get(Calendar.YEAR) == callDate.get(Calendar.YEAR) -> {
-                "Yesterday ${timeFormat.format(date)}"
+                context.getString(R.string.phone_call_date_yesterday, LocaleDates.time(date))
             }
             else -> {
-                "${dateFormat.format(date)} ${timeFormat.format(date)}"
+                LocaleDates.monthDayTime(date)
             }
         }
     } catch (e: Exception) {

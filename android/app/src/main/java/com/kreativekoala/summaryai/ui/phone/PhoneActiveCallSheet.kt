@@ -99,14 +99,14 @@ internal fun ActiveCallSheet(
 
             // Status with appropriate color for different states
             val statusText = when (callState) {
-                ActiveCallState.INITIATING -> "Connecting..."
-                ActiveCallState.RINGING -> "Ringing..."
-                ActiveCallState.CONNECTED, ActiveCallState.RECORDING -> "Connected - Recording"
-                ActiveCallState.ENDED -> "Call Ended"
-                ActiveCallState.DECLINED -> "Call Declined"
-                ActiveCallState.BUSY -> "Line Busy"
-                ActiveCallState.NO_ANSWER -> "No Answer"
-                ActiveCallState.ERROR -> "Call Failed"
+                ActiveCallState.INITIATING -> stringResource(R.string.phone_call_connecting)
+                ActiveCallState.RINGING -> stringResource(R.string.phone_call_ringing)
+                ActiveCallState.CONNECTED, ActiveCallState.RECORDING -> stringResource(R.string.phone_call_connected_recording)
+                ActiveCallState.ENDED -> stringResource(R.string.phone_call_ended)
+                ActiveCallState.DECLINED -> stringResource(R.string.phone_call_declined)
+                ActiveCallState.BUSY -> stringResource(R.string.phone_call_line_busy)
+                ActiveCallState.NO_ANSWER -> stringResource(R.string.status_no_answer)
+                ActiveCallState.ERROR -> stringResource(R.string.phone_call_failed)
                 else -> ""
             }
 
@@ -176,14 +176,14 @@ internal fun ActiveCallSheet(
                     ) {
                         Icon(
                             if (isMuted) Icons.Default.MicOff else Icons.Default.Mic,
-                            contentDescription = if (isMuted) "Unmute" else "Mute",
+                            contentDescription = stringResource(if (isMuted) R.string.phone_unmute else R.string.phone_mute),
                             modifier = Modifier.size(24.dp),
                             tint = if (isMuted) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        if (isMuted) "Unmute" else "Mute",
+                        stringResource(if (isMuted) R.string.phone_unmute else R.string.phone_mute),
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
@@ -215,14 +215,14 @@ internal fun ActiveCallSheet(
                     ) {
                         Icon(
                             if (isSpeakerOn) Icons.AutoMirrored.Filled.VolumeUp else Icons.AutoMirrored.Filled.VolumeDown,
-                            contentDescription = if (isSpeakerOn) "Speaker Off" else "Speaker On",
+                            contentDescription = stringResource(if (isSpeakerOn) R.string.phone_speaker_off_action else R.string.phone_speaker_on_action),
                             modifier = Modifier.size(24.dp),
                             tint = if (isSpeakerOn) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        if (isSpeakerOn) "Speaker" else "Speaker",
+                        stringResource(R.string.phone_speaker),
                         style = MaterialTheme.typography.labelSmall
                     )
                 }

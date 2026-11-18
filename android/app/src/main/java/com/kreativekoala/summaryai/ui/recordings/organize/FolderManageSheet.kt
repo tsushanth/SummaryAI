@@ -1,6 +1,7 @@
 package com.kreativekoala.summaryai.ui.recordings.organize
 
 import com.kreativekoala.summaryai.R
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -86,18 +87,18 @@ fun FolderManageSheet(
                             Column(modifier = Modifier.weight(1f).padding(vertical = 8.dp)) {
                                 Text(f.name, style = MaterialTheme.typography.bodyLarge)
                                 Text(
-                                    "${f.recordingCount} ${if (f.recordingCount == 1) "recording" else "recordings"}",
+                                    pluralStringResource(R.plurals.folder_recording_count, f.recordingCount, f.recordingCount),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                             IconButton(onClick = { dialog = FolderDialog.Rename(f) }) {
-                                Icon(Icons.Default.Edit, contentDescription = "Rename ${f.name}")
+                                Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.folder_rename_description, f.name))
                             }
                             IconButton(onClick = { dialog = FolderDialog.Delete(f) }) {
                                 Icon(
                                     Icons.Default.Delete,
-                                    contentDescription = "Delete ${f.name}",
+                                    contentDescription = stringResource(R.string.folder_delete_description, f.name),
                                     tint = MaterialTheme.colorScheme.error,
                                 )
                             }
@@ -110,24 +111,24 @@ fun FolderManageSheet(
 
     when (val d = dialog) {
         FolderDialog.Create -> FolderNameDialog(
-            title = "New folder",
+            title = stringResource(R.string.ui_new_folder),
             initial = "",
-            confirmLabel = "Create",
+            confirmLabel = stringResource(R.string.ui_create),
             onDismiss = { dialog = null },
             onConfirm = { onCreate(it); dialog = null },
         )
         is FolderDialog.Rename -> FolderNameDialog(
-            title = "Rename folder",
+            title = stringResource(R.string.folder_rename_title),
             initial = d.folder.name,
-            confirmLabel = "Save",
+            confirmLabel = stringResource(R.string.save),
             onDismiss = { dialog = null },
             onConfirm = { onRename(d.folder, it); dialog = null },
         )
         is FolderDialog.Delete -> AlertDialog(
             onDismissRequest = { dialog = null },
-            title = { Text("Delete \"${d.folder.name}\"?") },
+            title = { Text(stringResource(R.string.folder_delete_title, d.folder.name)) },
             text = {
-                Text("The folder is removed. Its ${d.folder.recordingCount} recording(s) are kept and become unfiled.")
+                Text(pluralStringResource(R.plurals.folder_delete_message, d.folder.recordingCount, d.folder.recordingCount))
             },
             confirmButton = {
                 TextButton(onClick = { onDelete(d.folder); dialog = null }) {

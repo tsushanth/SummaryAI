@@ -1,5 +1,7 @@
 package com.kreativekoala.summaryai.ui.recordings.organize
 
+import androidx.compose.ui.res.stringResource
+import com.kreativekoala.summaryai.R
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
@@ -21,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.kreativekoala.summaryai.data.api.models.FolderDto
 import com.kreativekoala.summaryai.data.repository.UNFILED_FOLDER_ID
 import com.kreativekoala.summaryai.domain.model.Recording
+import com.kreativekoala.summaryai.util.LocaleDates
 
 /** Horizontal chip row: one chip per folder, then one per tag. Tapping a selected chip clears it. */
 @Composable
@@ -52,13 +55,13 @@ fun FolderTagFilterRow(
     ) {
         if (onPickDateRange != null) {
             val active = dateRangeLabel != null
-            OrganizeChip(label = dateRangeLabel ?: "Any date", selected = active) {
+            OrganizeChip(label = dateRangeLabel ?: stringResource(R.string.organize_any_date), selected = active) {
                 if (active && onClearDateRange != null) onClearDateRange() else onPickDateRange()
             }
         }
         if (showUnfiled) {
             val selected = selectedFolderId == UNFILED_FOLDER_ID
-            OrganizeChip(label = "Unfiled", selected = selected) { onFolder(if (selected) null else UNFILED_FOLDER_ID) }
+            OrganizeChip(label = stringResource(R.string.organize_unfiled), selected = selected) { onFolder(if (selected) null else UNFILED_FOLDER_ID) }
         }
         folders.forEach { f ->
             val selected = f.id == selectedFolderId
@@ -73,7 +76,7 @@ fun FolderTagFilterRow(
             OrganizeChip(label = "#$t", selected = selected) { onTag(if (selected) null else t) }
         }
         if (onManageFolders != null) {
-            OrganizeChip(label = "Manage folders", selected = false) { onManageFolders() }
+            OrganizeChip(label = stringResource(R.string.organize_manage_folders), selected = false) { onManageFolders() }
         }
     }
 }
@@ -105,9 +108,9 @@ fun LazyListScope.groupedRecordingItems(
     itemContent: @Composable (Recording) -> Unit,
 ) {
     groupRecordingsByDate(recordings).forEach { group ->
-        item(key = "group-header-${group.label}") {
+        item(key = "group-header-${group.label.key}") {
             Text(
-                text = group.label,
+                text = groupLabelText(group.label),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
@@ -115,4 +118,16 @@ fun LazyListScope.groupedRecordingItems(
         }
         items(items = group.recordings, key = { it.id }) { recording -> itemContent(recording) }
     }
+}
+
+/** Display text of a recordings-list group header, in the user's language. */
+@Composable
+internal fun groupLabelText(label: GroupLabel): String = when (label) {
+    GroupLabel.Starred -> stringResource(R.string.group_starred)
+    GroupLabel.Today -> stringResource(R.string.group_today)
+    GroupLabel.Yesterday -> stringResource(R.string.group_yesterday)
+    GroupLabel.ThisWeek -> stringResource(R.string.group_this_week)
+    GroupLabel.ThisMonth -> stringResource(R.string.group_this_month)
+    GroupLabel.Earlier -> stringResource(R.string.group_earlier)
+    is GroupLabel.Month -> LocaleDates.monthYear(label.year, label.month)
 }
