@@ -24,7 +24,7 @@ People who attend recurring meetings, calls, or lectures and want an automatic r
 
 ## Platforms
 
-- Android (Android 10+): https://play.google.com/store/apps/details?id=com.kreativekoala.meetingmind
+- Android (Android 10+): https://play.google.com/store/apps/details?id=com.kreativekoala.meetingmind&referrer=utm_source%3Dmeetingmind_web%26utm_medium%3Dweb%26utm_campaign%3Dllms
 - Web app: https://meetingmind.org/auth
 
 ## Pricing
