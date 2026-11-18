@@ -422,7 +422,7 @@ private fun AccountCard(user: User) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = stringResource(R.string.via_provider, user.provider.displayName),
+                text = stringResource(R.string.via_provider, stringResource(user.provider.labelRes)),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

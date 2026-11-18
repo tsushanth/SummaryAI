@@ -2,6 +2,8 @@ package com.kreativekoala.summaryai.service
 
 import android.content.Context
 import android.media.AudioManager
+import androidx.annotation.StringRes
+import com.kreativekoala.summaryai.R
 import android.util.Log
 import com.twilio.voice.Call
 import com.twilio.voice.CallException
@@ -17,14 +19,14 @@ import javax.inject.Singleton
 /**
  * Reason why a call ended
  */
-enum class CallEndReason(val displayMessage: String) {
-    COMPLETED("Call ended"),
-    DECLINED("Call was declined"),
-    BUSY("Line is busy"),
-    NO_ANSWER("No answer"),
-    CANCELLED("Call cancelled"),
-    FAILED("Call failed"),
-    UNKNOWN("Call ended")
+enum class CallEndReason(@StringRes val messageRes: Int) {
+    COMPLETED(R.string.call_end_completed),
+    DECLINED(R.string.call_end_declined),
+    BUSY(R.string.call_end_busy),
+    NO_ANSWER(R.string.no_answer),
+    CANCELLED(R.string.call_end_cancelled),
+    FAILED(R.string.call_end_failed),
+    UNKNOWN(R.string.call_end_completed)
 }
 
 /**
@@ -88,7 +90,7 @@ class VoipService @Inject constructor(
         val token = accessToken
         if (token == null) {
             Log.e(TAG, "No access token set")
-            _callState.value = VoipCallState.Failed("No access token")
+            _callState.value = VoipCallState.Failed(context.getString(R.string.voip_error_no_token))
             return false
         }
 
@@ -128,7 +130,7 @@ class VoipService @Inject constructor(
             return true
         } catch (e: Exception) {
             Log.e(TAG, "Failed to make call", e)
-            _callState.value = VoipCallState.Failed(e.message ?: "Unknown error")
+            _callState.value = VoipCallState.Failed(e.message ?: context.getString(R.string.voip_error_unknown))
             return false
         }
     }
@@ -187,7 +189,7 @@ class VoipService @Inject constructor(
         override fun onConnectFailure(call: Call, callException: CallException) {
             Log.e(TAG, "Connect failure: ${callException.message}", callException)
             activeCall = null
-            _callState.value = VoipCallState.Failed(callException.message ?: "Connection failed")
+            _callState.value = VoipCallState.Failed(callException.message ?: context.getString(R.string.voip_error_connect_failed))
             resetAudio()
         }
 

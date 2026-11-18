@@ -44,6 +44,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -196,10 +197,11 @@ fun RecordingsListScreen(
                 },
                 actions = {
                     // Live Caption — deaf / HoH streaming transcript entry point
+                    val liveCaptionDescription = stringResource(R.string.live_caption_entry_description)
                     IconButton(
                         onClick = onLiveCaptionClick,
                         modifier = Modifier.semantics {
-                            contentDescription = "Live Caption — turn speech around you into on-screen text"
+                            contentDescription = liveCaptionDescription
                         },
                     ) {
                         Icon(
@@ -663,7 +665,7 @@ private fun StatusBadge(status: RecordingStatus) {
     val (color, text) = when (status) {
         RecordingStatus.COMPLETED -> Green50 to stringResource(R.string.completed)
         RecordingStatus.FAILED -> RecordingRed to stringResource(R.string.failed)
-        else -> Orange50 to status.displayName
+        else -> Orange50 to stringResource(status.labelRes)
     }
 
     Surface(
@@ -714,11 +716,7 @@ private fun PendingUploadsBanner(
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(
-                text = if (pending.size == 1) {
-                    "1 recording didn't upload"
-                } else {
-                    "${pending.size} recordings didn't upload"
-                },
+                text = pluralStringResource(R.plurals.recordings_not_uploaded_banner, pending.size, pending.size),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onErrorContainer
@@ -763,10 +761,13 @@ private fun PendingUploadsBanner(
     }
 }
 
+@Composable
 private fun formatPendingDuration(seconds: Int): String {
-    if (seconds <= 0) return "—"
+    if (seconds <= 0) return "\u2014"
     val h = seconds / 3600
     val m = (seconds % 3600) / 60
     val s = seconds % 60
-    return if (h > 0) "${h}h ${m}m" else if (m > 0) "${m}m ${s}s" else "${s}s"
+    return if (h > 0) stringResource(R.string.recordings_duration_hms, h, m)
+    else if (m > 0) stringResource(R.string.recordings_duration_ms, m, s)
+    else stringResource(R.string.recordings_duration_s, s)
 }

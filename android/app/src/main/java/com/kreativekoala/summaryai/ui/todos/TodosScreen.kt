@@ -221,7 +221,7 @@ private fun TodoItem(
                     // Priority badge
                     if (todo.priority != TodoPriority.NONE) {
                         MmStatusPill(
-                            text = todo.priority.displayName,
+                            text = stringResource(todo.priority.labelRes),
                             container = todo.priority.color.copy(alpha = 0.2f),
                             content = todo.priority.color
                         )
@@ -343,7 +343,7 @@ private fun AddTodoDialog(
                 ) {
                     TodoPriority.values().forEach { p ->
                         MmChip(
-                            label = p.displayName,
+                            label = stringResource(p.labelRes),
                             selected = priority == p,
                             onClick = { onPriorityChange(p) }
                         )

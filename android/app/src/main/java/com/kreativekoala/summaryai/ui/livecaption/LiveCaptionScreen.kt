@@ -169,10 +169,10 @@ private fun LiveCaptionContent(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             val statusText = when {
-                !hasMicPermission -> "Microphone permission needed. Tap the mic button to allow."
-                state.errorMessage != null -> "Error: ${state.errorMessage}"
-                state.isListening -> "Listening…"
-                else -> "Tap the mic to start"
+                !hasMicPermission -> stringResource(R.string.live_caption_status_mic_permission)
+                state.errorMessage != null -> stringResource(R.string.live_caption_status_error, state.errorMessage)
+                state.isListening -> stringResource(R.string.live_transcribe_listening)
+                else -> stringResource(R.string.live_caption_status_idle)
             }
             Text(
                 text = statusText,
@@ -209,10 +209,9 @@ private fun LiveCaptionContent(
         ) {
             if (state.transcript.isBlank()) {
                 Text(
-                    text = if (state.isListening)
-                        "Speak nearby and the words will appear here."
-                    else
-                        "Captions will appear here once you start listening.",
+                    text = stringResource(
+                        if (state.isListening) R.string.live_caption_empty_listening else R.string.live_caption_empty_idle
+                    ),
                     fontSize = 18.sp,
                     color = Color.Gray,
                     textAlign = TextAlign.Center,
@@ -233,6 +232,9 @@ private fun LiveCaptionContent(
 
         // ---- Giant toggle button ----
         Spacer(modifier = Modifier.height(20.dp))
+        val toggleDescription = stringResource(
+            if (state.isListening) R.string.live_caption_stop_listening else R.string.live_caption_start_listening
+        )
         Button(
             onClick = onToggle,
             modifier = Modifier
@@ -240,11 +242,7 @@ private fun LiveCaptionContent(
                 .height(96.dp)
                 .padding(bottom = 12.dp)
                 .semantics {
-                    contentDescription = if (state.isListening) {
-                        "Stop listening"
-                    } else {
-                        "Start listening"
-                    }
+                    contentDescription = toggleDescription
                 },
             shape = MaterialTheme.shapes.large,
             colors = ButtonDefaults.buttonColors(
@@ -259,7 +257,7 @@ private fun LiveCaptionContent(
             )
             Spacer(modifier = Modifier.size(12.dp))
             Text(
-                text = if (state.isListening) "Stop" else "Start",
+                text = stringResource(if (state.isListening) R.string.live_caption_stop else R.string.live_caption_start),
                 fontSize = 22.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = Color.White,

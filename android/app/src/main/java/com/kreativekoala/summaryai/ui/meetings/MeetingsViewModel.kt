@@ -1,5 +1,6 @@
 package com.kreativekoala.summaryai.ui.meetings
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kreativekoala.summaryai.data.LanguageCatalog
@@ -9,7 +10,9 @@ import com.kreativekoala.summaryai.data.repository.MeetingsRepository
 import com.kreativekoala.summaryai.data.repository.TranscriptionLanguagesRepository
 import com.kreativekoala.summaryai.domain.model.CalendarConnection
 import com.kreativekoala.summaryai.domain.model.Meeting
+import com.kreativekoala.summaryai.R
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,6 +31,7 @@ data class MeetingsUiState(
 
 @HiltViewModel
 class MeetingsViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val meetingsRepository: MeetingsRepository,
     private val calendarRepository: CalendarRepository,
     private val languagesRepository: TranscriptionLanguagesRepository
@@ -114,7 +118,7 @@ class MeetingsViewModel @Inject constructor(
                     }
                     _uiState.value = _uiState.value.copy(
                         upcomingMeetings = revertedMeetings,
-                        error = "Failed to update: ${error.message}"
+                        error = context.getString(R.string.meetings_error_update, error.message)
                     )
                 }
             )
@@ -145,7 +149,7 @@ class MeetingsViewModel @Inject constructor(
                 onFailure = {
                     _uiState.value = _uiState.value.copy(
                         upcomingMeetings = _uiState.value.upcomingMeetings.map { if (it.id == meeting.id) meeting else it },
-                        error = "Failed to update: ${it.message}"
+                        error = context.getString(R.string.meetings_error_update, it.message)
                     )
                 }
             )

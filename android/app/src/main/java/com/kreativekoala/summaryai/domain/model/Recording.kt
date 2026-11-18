@@ -1,5 +1,8 @@
 package com.kreativekoala.summaryai.domain.model
 
+import androidx.annotation.StringRes
+import com.kreativekoala.summaryai.R
+
 /**
  * Recording status
  */
@@ -16,16 +19,17 @@ enum class RecordingStatus {
     val isProcessing: Boolean
         get() = this != COMPLETED && this != FAILED
 
-    val displayName: String
+    @get:StringRes
+    val labelRes: Int
         get() = when (this) {
-            PENDING -> "Bot joining..."
-            UPLOADING -> "Recording..."
-            UPLOADED -> "Processing..."
-            PROCESSING -> "Processing..."
-            TRANSCRIBING -> "Transcribing..."
-            SUMMARIZING -> "Summarizing..."
-            COMPLETED -> "Ready"
-            FAILED -> "Failed"
+            PENDING -> R.string.status_bot_joining
+            UPLOADING -> R.string.status_recording_progress
+            UPLOADED -> R.string.status_processing_progress
+            PROCESSING -> R.string.status_processing_progress
+            TRANSCRIBING -> R.string.status_transcribing
+            SUMMARIZING -> R.string.status_summarizing
+            COMPLETED -> R.string.status_ready
+            FAILED -> R.string.failed
         }
 }
 

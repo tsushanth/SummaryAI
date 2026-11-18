@@ -1,14 +1,16 @@
 package com.kreativekoala.summaryai.data.api.coaching
 
+import androidx.annotation.StringRes
 import com.google.gson.annotations.SerializedName
+import com.kreativekoala.summaryai.R
 
 /**
  * Wire types for the `/api/coaching/...` endpoints. See backend's
  * `coaching.ts` + iOS `CoachingModels.swift` for the parallel definitions.
  */
 
-enum class CoachingPersonaKey(val key: String, val displayName: String) {
-    SalesDiscovery("sales_discovery", "Sales Discovery");
+enum class CoachingPersonaKey(val key: String, @StringRes val labelRes: Int) {
+    SalesDiscovery("sales_discovery", R.string.coaching_persona_sales_discovery);
 
     companion object {
         fun fromKey(key: String?): CoachingPersonaKey =

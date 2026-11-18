@@ -1,5 +1,8 @@
 package com.kreativekoala.summaryai.domain.model
 
+import androidx.annotation.StringRes
+import com.kreativekoala.summaryai.R
+
 /**
  * Meeting status
  */
@@ -9,12 +12,13 @@ enum class MeetingStatus {
     COMPLETED,
     CANCELLED;
 
-    val displayName: String
+    @get:StringRes
+    val labelRes: Int
         get() = when (this) {
-            SCHEDULED -> "Scheduled"
-            IN_PROGRESS -> "In Progress"
-            COMPLETED -> "Completed"
-            CANCELLED -> "Cancelled"
+            SCHEDULED -> R.string.status_scheduled
+            IN_PROGRESS -> R.string.status_in_progress
+            COMPLETED -> R.string.completed
+            CANCELLED -> R.string.status_cancelled
         }
 }
 
@@ -29,14 +33,15 @@ enum class BotStatus {
     DONE,
     ERROR;
 
-    val displayName: String
+    @get:StringRes
+    val labelRes: Int
         get() = when (this) {
-            WAITING -> "Waiting"
-            JOINING -> "Joining"
-            IN_CALL -> "In Call"
-            RECORDING -> "Recording"
-            DONE -> "Done"
-            ERROR -> "Error"
+            WAITING -> R.string.status_waiting
+            JOINING -> R.string.status_joining
+            IN_CALL -> R.string.status_in_call
+            RECORDING -> R.string.recording_fallback
+            DONE -> R.string.status_done
+            ERROR -> R.string.error
         }
 
     val isActive: Boolean
@@ -69,13 +74,14 @@ data class Meeting(
     val hasRecording: Boolean
         get() = recordingId != null
 
-    val platformDisplayName: String
+    /** Brand name of the platform (or the raw platform key for an unlisted one); null when the platform is not known. */
+    val platformDisplayName: String?
         get() = when (platform?.lowercase()) {
             "zoom" -> "Zoom"
             "google_meet", "googlemeet" -> "Google Meet"
             "teams", "microsoft_teams" -> "Microsoft Teams"
             "webex" -> "Webex"
-            else -> platform ?: "Unknown"
+            else -> platform
         }
 }
 

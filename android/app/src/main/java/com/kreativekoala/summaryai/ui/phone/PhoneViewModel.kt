@@ -151,7 +151,7 @@ class PhoneViewModel @Inject constructor(
 
                 // Handle call ended - show appropriate message
                 if (state is VoipCallState.Disconnected) {
-                    val message = state.reason.displayMessage
+                    val message = context.getString(state.reason.messageRes)
                     if (state.reason != CallEndReason.COMPLETED && state.reason != CallEndReason.CANCELLED) {
                         // Only show error for actual problems (not normal hang up)
                         _uiState.value = _uiState.value.copy(error = message)
@@ -446,7 +446,7 @@ class PhoneViewModel @Inject constructor(
 
         val digitCount = dialerNumber.filter { it.isDigit() }.length
         if (digitCount < 10) {
-            _uiState.value = _uiState.value.copy(error = "Please enter a complete 10-digit phone number")
+            _uiState.value = _uiState.value.copy(error = context.getString(R.string.phone_error_incomplete_number))
             return
         }
 

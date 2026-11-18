@@ -183,7 +183,7 @@ private fun SearchResultItem(
                 )
 
                 Text(
-                    text = recording.status.displayName,
+                    text = stringResource(recording.status.labelRes),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

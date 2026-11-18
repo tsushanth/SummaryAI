@@ -1,5 +1,6 @@
 package com.kreativekoala.summaryai.service
 
+import com.kreativekoala.summaryai.R
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -197,15 +198,15 @@ class LiveSpeechRecognizer @Inject constructor(
     }
 
     private fun errorDescription(code: Int): String = when (code) {
-        SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
-        SpeechRecognizer.ERROR_CLIENT -> "Client side error"
-        SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Microphone permission denied"
-        SpeechRecognizer.ERROR_NETWORK -> "Network error"
-        SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Network timeout"
-        SpeechRecognizer.ERROR_NO_MATCH -> "No match"
-        SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Recognizer busy"
-        SpeechRecognizer.ERROR_SERVER -> "Server error"
-        SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech input"
-        else -> "Unknown error $code"
+        SpeechRecognizer.ERROR_AUDIO -> context.getString(R.string.speech_error_audio)
+        SpeechRecognizer.ERROR_CLIENT -> context.getString(R.string.speech_error_client)
+        SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> context.getString(R.string.speech_error_permission)
+        SpeechRecognizer.ERROR_NETWORK -> context.getString(R.string.speech_error_network)
+        SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> context.getString(R.string.speech_error_network_timeout)
+        SpeechRecognizer.ERROR_NO_MATCH -> context.getString(R.string.speech_error_no_match)
+        SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> context.getString(R.string.speech_error_busy)
+        SpeechRecognizer.ERROR_SERVER -> context.getString(R.string.speech_error_server)
+        SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> context.getString(R.string.speech_error_no_speech)
+        else -> context.getString(R.string.speech_error_unknown, code)
     }
 }

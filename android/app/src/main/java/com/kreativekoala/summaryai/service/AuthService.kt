@@ -1,5 +1,6 @@
 package com.kreativekoala.summaryai.service
 
+import com.kreativekoala.summaryai.R
 import android.content.Context
 import android.content.Intent
 import android.util.Log
@@ -210,7 +211,7 @@ class AuthService @Inject constructor(
 
             // Get Google ID token
             val idToken = account?.idToken
-                ?: return Result.failure(Exception("No ID token received"))
+                ?: return Result.failure(Exception(context.getString(R.string.auth_error_no_id_token)))
 
             Log.d(TAG, "Got Google ID token, exchanging with Supabase...")
 
@@ -221,7 +222,7 @@ class AuthService @Inject constructor(
             }
 
             val session = supabase.auth.currentSessionOrNull()
-                ?: return Result.failure(Exception("Failed to get session"))
+                ?: return Result.failure(Exception(context.getString(R.string.auth_error_no_session)))
 
             Log.d(TAG, "Got Supabase session for user: ${session.user?.email}")
 
@@ -265,7 +266,7 @@ class AuthService @Inject constructor(
             }
             _authState.value = _authState.value.copy(
                 isLoading = false,
-                error = "Google sign-in failed: ${e.statusCode}"
+                error = context.getString(R.string.auth_error_google_failed, e.statusCode)
             )
             Result.failure(e)
         } catch (e: Exception) {
@@ -354,7 +355,7 @@ class AuthService @Inject constructor(
                 val errorMsg = signupError.message?.lowercase() ?: ""
                 if (errorMsg.contains("already") || errorMsg.contains("exists") || errorMsg.contains("registered")) {
                     _authState.value = _authState.value.copy(isLoading = false)
-                    return Result.failure(Exception("An account with this email already exists. Please sign in instead."))
+                    return Result.failure(Exception(context.getString(R.string.auth_error_account_exists)))
                 }
                 throw signupError
             }
@@ -373,7 +374,7 @@ class AuthService @Inject constructor(
             }
 
             if (session == null) {
-                return Result.failure(Exception("Account created but failed to sign in. Please try signing in."))
+                return Result.failure(Exception(context.getString(R.string.auth_error_signin_after_signup)))
             }
 
             Log.d(TAG, "Got Supabase session for user: ${session.user?.email}")
@@ -407,7 +408,7 @@ class AuthService @Inject constructor(
             Log.e(TAG, "Email sign-up exception: ${e.message}", e)
             _authState.value = _authState.value.copy(
                 isLoading = false,
-                error = e.message ?: "Sign up failed"
+                error = e.message ?: context.getString(R.string.auth_error_signup_failed)
             )
             Result.failure(e)
         }
@@ -428,7 +429,7 @@ class AuthService @Inject constructor(
             }
 
             val session = supabase.auth.currentSessionOrNull()
-                ?: return Result.failure(Exception("Failed to get session"))
+                ?: return Result.failure(Exception(context.getString(R.string.auth_error_no_session)))
 
             Log.d(TAG, "Got Supabase session for user: ${session.user?.email}")
 

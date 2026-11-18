@@ -1,5 +1,6 @@
 package com.kreativekoala.summaryai.ui.recordings
 
+import com.kreativekoala.summaryai.R
 import android.content.Context
 import android.content.Intent
 import android.util.Log
@@ -142,7 +143,7 @@ class RecordingsListViewModel @Inject constructor(
 
     private fun readPendingUpload(file: File): PendingUpload {
         val meta = File(file.parentFile, file.nameWithoutExtension + ".meta")
-        var title = "Recovered recording"
+        var title = context.getString(R.string.recordings_recovered_title)
         var duration = 0
         if (meta.exists()) {
             runCatching {
@@ -249,7 +250,7 @@ class RecordingsListViewModel @Inject constructor(
         viewModelScope.launch {
             organizeRepository.createFolder(name).fold(
                 onSuccess = { loadFolders() },
-                onFailure = { _uiState.value = _uiState.value.copy(error = "Could not create folder: ${it.message}") }
+                onFailure = { _uiState.value = _uiState.value.copy(error = context.getString(R.string.recordings_error_create_folder, it.message)) }
             )
         }
     }
@@ -258,7 +259,7 @@ class RecordingsListViewModel @Inject constructor(
         viewModelScope.launch {
             organizeRepository.renameFolder(folder.id, name).fold(
                 onSuccess = { loadFolders() },
-                onFailure = { _uiState.value = _uiState.value.copy(error = "Could not rename folder: ${it.message}") }
+                onFailure = { _uiState.value = _uiState.value.copy(error = context.getString(R.string.recordings_error_rename_folder, it.message)) }
             )
         }
     }
@@ -273,7 +274,7 @@ class RecordingsListViewModel @Inject constructor(
                     loadFolders()
                     if (wasSelected) reloadForFilterChange() else loadRecordings()
                 },
-                onFailure = { _uiState.value = _uiState.value.copy(error = "Could not delete folder: ${it.message}") }
+                onFailure = { _uiState.value = _uiState.value.copy(error = context.getString(R.string.recordings_error_delete_folder, it.message)) }
             )
         }
     }
@@ -330,7 +331,7 @@ class RecordingsListViewModel @Inject constructor(
                     }
                     _uiState.value = _uiState.value.copy(
                         allRecordings = revertedRecordings,
-                        error = "Failed to update favorite: ${error.message}"
+                        error = context.getString(R.string.recordings_error_update_favorite, error.message)
                     )
                     applyFilter()
                 }
@@ -355,7 +356,7 @@ class RecordingsListViewModel @Inject constructor(
                     val revertedRecordings = _uiState.value.allRecordings + recording
                     _uiState.value = _uiState.value.copy(
                         allRecordings = revertedRecordings,
-                        error = "Failed to delete recording: ${error.message}"
+                        error = context.getString(R.string.recordings_error_delete_recording, error.message)
                     )
                     applyFilter()
                 }

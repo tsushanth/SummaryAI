@@ -198,7 +198,7 @@ fun RecordingDetailScreen(
 
                 // Processing indicator
                 if (detail.recording.isProcessing) {
-                    ProcessingIndicator(status = detail.recording.status.displayName)
+                    ProcessingIndicator(status = stringResource(detail.recording.status.labelRes))
                 }
 
                 // Styled tab picker with icons

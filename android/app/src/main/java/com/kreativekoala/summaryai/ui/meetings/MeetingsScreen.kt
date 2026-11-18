@@ -256,7 +256,7 @@ private fun MeetingCardIOS(
 
             if (meeting.platform != null) {
                 Spacer(modifier = Modifier.height(8.dp))
-                MmStatusPill(text = meeting.platformDisplayName)
+                MmStatusPill(text = meeting.platformDisplayName ?: stringResource(R.string.meeting_platform_unknown))
             }
 
             HorizontalDivider(
