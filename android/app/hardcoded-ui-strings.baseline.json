@@ -1,0 +1,19 @@
+{
+  "_note": "Per-file count of hard-coded user-visible English literals in src/main. NoHardcodedUiStringsTest fails if a count rises or a new file adds any. Lower counts are fine. Regenerate deliberately with scripts/update-hardcoded-baseline.sh; see docs/hardcoded-ui-strings-guard.md.",
+  "total": 24,
+  "files": {
+    "src/main/java/com/kreativekoala/summaryai/FailureReporterInterceptor.kt": {"count": 1, "h": ["a4a14917"]},
+    "src/main/java/com/kreativekoala/summaryai/data/repository/MeetingsRepository.kt": {"count": 1, "h": ["31b68a79"]},
+    "src/main/java/com/kreativekoala/summaryai/data/repository/RecordingsRepository.kt": {"count": 1, "h": ["5500962e"]},
+    "src/main/java/com/kreativekoala/summaryai/data/sample/SampleMeeting.kt": {"count": 2, "h": ["0c16806e", "280c76e4"]},
+    "src/main/java/com/kreativekoala/summaryai/domain/model/Meeting.kt": {"count": 6, "h": ["002a97f3", "04f962e7", "118a8945", "2d03f57b", "4becbdce", "82062bc4"]},
+    "src/main/java/com/kreativekoala/summaryai/service/AuthService.kt": {"count": 2, "h": ["3ec0c585", "c4c75c41"]},
+    "src/main/java/com/kreativekoala/summaryai/service/BillingManager.kt": {"count": 1, "h": ["5edc1c97"]},
+    "src/main/java/com/kreativekoala/summaryai/service/voice/VoiceActionsViewModel.kt": {"count": 5, "h": ["267e021f", "3d119b14", "a8339d52", "a8339d52", "acf59687"]},
+    "src/main/java/com/kreativekoala/summaryai/ui/coaching/CoachingToggleCard.kt": {"count": 1, "h": ["8206e7ae"]},
+    "src/main/java/com/kreativekoala/summaryai/ui/components/MmComponents.kt": {"count": 1, "h": ["7749791c"]},
+    "src/main/java/com/kreativekoala/summaryai/ui/onboarding/EmailCaptureScreen.kt": {"count": 1, "h": ["af28494e"]},
+    "src/main/java/com/kreativekoala/summaryai/ui/recordings/RecordingsListScreen.kt": {"count": 1, "h": ["415481dc"]},
+    "src/main/java/com/kreativekoala/summaryai/ui/recordings/organize/PublicLinkSheet.kt": {"count": 1, "h": ["73baaa20"]}
+  }
+}
