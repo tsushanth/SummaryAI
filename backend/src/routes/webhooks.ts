@@ -5,6 +5,7 @@
  */
 
 import { isRevenueCatAuthorized } from '../lib/webhookAuth.js';
+import { twilioWebhookAuth } from '../lib/twilioWebhookAuth.js';
 import { Router, Request, Response } from 'express';
 import { Webhook } from 'svix';
 import { checkRecallWebhook } from '../lib/recallWebhookAuth.js';
@@ -25,6 +26,9 @@ import { checkRecallEvidence, parseFallbackState, recallIsVisible, selectLiveRun
 import { inc } from '../lib/liveSttMetrics.js';
 
 const router = Router();
+
+// Twilio callbacks carry X-Twilio-Signature. PHASE 1: verify + log only (enforce: false). See lib/twilioWebhookAuth.ts.
+router.use('/twilio', twilioWebhookAuth({ enforce: false }));
 
 /**
  * Helper to extract header value (handles string | string[] | undefined)
