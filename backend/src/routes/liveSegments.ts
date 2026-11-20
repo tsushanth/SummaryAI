@@ -218,12 +218,13 @@ export function liveSegmentsRouter(opts: { nowSec?: () => number } = {}): Router
       // In-meeting voice assistant, only when it is told to take its wake phrase from this stream. Newly stored segments only (a
       // retried batch must not ask twice), never awaited (the assistant must not slow down or fail the sink), nothing logged.
       const recallBotId = (botRun as { recall_bot_id?: string | null }).recall_bot_id;
-      if (insertedCount > 0 && !hiddenByFallback && recallBotId && loadVoiceAssistantConfig().wakeSource === 'live_stt') {
+      const vaCfg = loadVoiceAssistantConfig();
+      if (insertedCount > 0 && !hiddenByFallback && recallBotId && (vaCfg.wakeSource === 'live_stt' || (vaCfg.multilingual && !shadow))) {
         const stored = new Set((inserted ?? []).map((r: { source_key?: string }) => r.source_key));
         const fresh = recorded
           .filter((s) => stored.has(`${ns}:${body.ref}:${s.key}`))
           .sort((a, b) => a.seq - b.seq)
-          .map((s) => ({ text: s.segment_text, speakerName: s.speaker_name || null, isHost: s.is_host }));
+          .map((s) => ({ text: s.segment_text, speakerName: s.speaker_name || null, isHost: s.is_host, ...(vaCfg.multilingual && s.language ? { language: s.language } : {}) }));
         void import('../services/voiceAssistant/manager.js')
           .then((m) => m.getVoiceAssistantManager().handleLive(recallBotId, fresh))
           .catch(() => console.error(`${TAG} voice assistant forward failed`));
