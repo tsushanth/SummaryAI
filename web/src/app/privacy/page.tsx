@@ -35,6 +35,7 @@ export default function PrivacyPage() {
           <h3 className="text-lg font-medium text-foreground/80 mb-3">Information Collected Automatically</h3>
           <ul className="list-disc list-inside text-muted-foreground space-y-2">
             <li><strong>Analytics (Android):</strong> app usage events and device identifiers collected through Firebase Analytics.</li>
+            <li><strong>Website visits (this site&apos;s public home page):</strong> we count visits with Gaugemint, our own analytics. It sets no cookies and stores no IP address. It records the page address, the referring page, your browser and your country.</li>
             <li><strong>Error reports:</strong> error details, app version, device make and model, operating system version, and an account identifier.</li>
           </ul>
         </section>
