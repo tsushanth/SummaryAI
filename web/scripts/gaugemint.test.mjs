@@ -14,7 +14,7 @@ test('landing page loads the Gaugemint tag with the meetingmind.org domain', () 
   assert.match(page, /strategy="afterInteractive"/);
 });
 
-test('no other source file loads Gaugemint', () => {
+test('no other source file loads Gaugemint (the admin embed validator only names the host)', () => {
   const root = new URL('../src/', import.meta.url);
   const hits = [];
   const walk = (dir) => {
@@ -25,6 +25,9 @@ test('no other source file loads Gaugemint', () => {
     }
   };
   walk(root);
-  assert.equal(hits.length, 1, `expected only the landing page, got ${hits}`);
-  assert.ok(hits[0].endsWith('/src/app/page.tsx'));
+  // The admin embed validator (src/lib/gaugemintEmbed.ts) names the host to allow-list it; it loads nothing.
+  const loaders = hits.filter((h) => !h.endsWith('/src/lib/gaugemintEmbed.ts'));
+  assert.equal(loaders.length, 1, `expected only the landing page, got ${hits}`);
+  assert.ok(loaders[0].endsWith('/src/app/page.tsx'));
+  assert.ok(!/js\/script/.test(read('../src/lib/gaugemintEmbed.ts')), 'the validator must not reference the tag script');
 });
