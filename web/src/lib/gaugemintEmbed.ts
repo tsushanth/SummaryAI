@@ -55,13 +55,15 @@ export function validateGaugemintEmbedUrl(raw: string | null | undefined, gaugem
 
   const keep = new URLSearchParams();
   const seen = new Set<string>();
-  for (const [k, v] of u.searchParams) {
-    if (seen.has(k)) return null;
+  let bad = false;
+  u.searchParams.forEach((v, k) => {
+    if (seen.has(k)) bad = true;
     seen.add(k);
     if (k === 'theme' && (v === 'light' || v === 'dark')) keep.set(k, v);
     else if (k === 'period' && PERIOD_RE.test(v)) keep.set(k, v);
-    else return null;
-  }
+    else bad = true;
+  });
+  if (bad) return null;
 
   const qs = keep.toString();
   return `https://${u.hostname.toLowerCase()}/embed/${m[1]}${qs ? `?${qs}` : ''}`;
