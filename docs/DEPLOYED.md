@@ -4,7 +4,12 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 
 | Component | Fly app | Release | Image | Built from | Date |
 |---|---|---|---|---|---|
-| Web (`web/`, meetingmind.org) | `meeting-mind-web` | v35 | `registry.fly.io/meeting-mind-web:deployment-01M7P0BYF9JX282T9G6Y14EEBV` | `origin/main` at `8c29316` (merge of #83; `web/` tree identical to main) | 2026-11-18 (UTC) |
+| Web (`web/`, meetingmind.org) | `meeting-mind-web` | v39 | `registry.fly.io/meeting-mind-web:deployment-01M80MVFF67NNXW4G3ZYX9MPSN` | `origin/main` at `8c20741` (squash merge of #91; `web/` tree `95ac59f1309ef4fe01c82d47ae720fe58b40373b` identical to main) | 2026-11-22 (UTC) |
+
+## 2026-11-21 Web (meetingmind.org): Gaugemint website visits on /admin (#91), release v39
+- GitHub Actions `Web deploy (Fly)` run 44980866740 for `8c20741` (squash merge of #91), success. Adds a server-rendered "Website visits (Gaugemint)" section to /admin (framed Gaugemint embed), shown only to admins and only when the Fly secret `GAUGEMINT_EMBED_URL` is set (set before the merge as a new secret: v38 was that secret change, copy in Keychain `GAUGEMINT_EMBED_URL_meetingmind.org`; Gaugemint site meetingmind.org has embed origins https://meetingmind.org and https://www.meetingmind.org). The URL is validated (`web/src/lib/gaugemintEmbed.ts`) and never reaches client JS (checked in the build output).
+- Verified after deploy: anonymous `/admin` answers 307 and its HTML contains no embed address. NOT verified: the framed dashboard itself renders for the admin Google account (needs a login); check it once and note it here.
+- Tests before merge: 170 pass, 0 fail, `tsc` and `next build` clean.
 
 ## 2026-11-21 Web (meetingmind.org, Fly `meeting-mind-web`): Gaugemint visit counter on the landing page (#89) + install-referrer tag (#83) finally live
 - Release v37 via the GitHub Actions `Web deploy (Fly)` run for `86ee24f` (squash merge of #89), 5m14s, success. It shipped #83 (the Play-link install referrer `utm_source=meetingmind_web`) together with #89.
