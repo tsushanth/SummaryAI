@@ -6,6 +6,11 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 |---|---|---|---|---|---|
 | Web (`web/`, meetingmind.org) | `meeting-mind-web` | v35 | `registry.fly.io/meeting-mind-web:deployment-01M7P0BYF9JX282T9G6Y14EEBV` | `origin/main` at `8c29316` (merge of #83; `web/` tree identical to main) | 2026-11-18 (UTC) |
 
+## 2026-11-21 Web (meetingmind.org, Fly `meeting-mind-web`): Gaugemint visit counter on the landing page (#89) + install-referrer tag (#83) finally live
+- Release v37 via the GitHub Actions `Web deploy (Fly)` run for `86ee24f` (squash merge of #89), 5m14s, success. It shipped #83 (the Play-link install referrer `utm_source=meetingmind_web`) together with #89.
+- CORRECTION of the 2026-11-17 entry below: #83 was NOT live from 2026-11-17. The CI run for `8c29316` (2026-11-18 00:19Z) timed out after 21 minutes in "Deploy to Fly" and rolled back, so v35 never served: v36 (2026-11-18 00:40Z) re-used the v34 image built from `ca5af80` on 2026-11-13. Until v37, production served the 2026-11-13 web tree.
+- Verified live in a real browser: the landing page injects `<script data-domain="meetingmind.org" src="https://guagemint.com/js/script.js">` (absent from server HTML by design: next/script afterInteractive); `/privacy` and `/auth` load none (the share page and dashboard were checked before merge); the privacy page carries one sentence about Gaugemint; the Play links carry `referrer=utm_source%3Dmeetingmind_web...`. The site is registered in the Gaugemint ops account; the script honours Do Not Track and Global Privacy Control.
+
 ## 2026-11-20 Android 1.7.12 (versionCode 65): seven added UI languages, staged 20%
 - Play production: 1.7.12 (65) `inProgress` at userFraction 0.2; 1.7.11 (64) remains `completed`. Read back from the production track after commit.
 - Tag `play/1.7.12-65` on main SHA `5068f1dbdc1826895a60045ba6bdd357746e33c5` (PR #87, squash). AAB sha256 `0c582cb81ee210fb030c824c1966107e69fbc01eefdfd3930edb030921d5b0df`.
