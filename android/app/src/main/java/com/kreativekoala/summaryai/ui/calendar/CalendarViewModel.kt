@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.data.local.TokenManager
 import com.kreativekoala.summaryai.util.ApiErrors
+import com.kreativekoala.summaryai.util.appLocaleContext
 import com.kreativekoala.summaryai.data.repository.CalendarRepository
 import com.kreativekoala.summaryai.domain.model.CalendarConnection
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -66,7 +67,7 @@ class CalendarViewModel @Inject constructor(
 
     fun connectGoogle() {
         if (isDemoMode) {
-            _uiState.value = _uiState.value.copy(error = context.getString(R.string.calendar_demo_mode_message))
+            _uiState.value = _uiState.value.copy(error = appLocaleContext(context).getString(R.string.calendar_demo_mode_message))
             return
         }
 
@@ -94,7 +95,7 @@ class CalendarViewModel @Inject constructor(
 
     fun connectMicrosoft() {
         if (isDemoMode) {
-            _uiState.value = _uiState.value.copy(error = context.getString(R.string.calendar_demo_mode_message))
+            _uiState.value = _uiState.value.copy(error = appLocaleContext(context).getString(R.string.calendar_demo_mode_message))
             return
         }
 

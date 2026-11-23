@@ -79,7 +79,7 @@ object ApiErrors {
 
     /** Text for the user. Falls back to the server message for unknown codes, then to the exception's message. */
     fun userMessage(context: Context, t: Throwable): String? {
-        resFor(t)?.let { return context.getString(it) }
+        resFor(t)?.let { return appLocaleContext(context).getString(it) }
         return parse(t).message ?: t.message
     }
 }
