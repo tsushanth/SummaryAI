@@ -141,6 +141,7 @@ export interface GetRecordingResponse {
 export interface AskQuestionRequest {
   question: string;
   include_context?: boolean;  // Include previous Q&A as context
+  output_language?: string;   // BCP-47 code the answer is written in (default: the recording's output_language)
 }
 
 /**

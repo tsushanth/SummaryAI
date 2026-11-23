@@ -214,7 +214,7 @@ router.post(
       .single();
 
     if (fetchError || !recording) {
-      throw Errors.notFound('Recording');
+      throw Errors.notFound('Recording', 'RECORDING_NOT_FOUND');
     }
 
     // Verify status is 'uploading'
@@ -404,7 +404,7 @@ router.get(
       .single();
 
     if (recordingError || !recording) {
-      throw Errors.notFound('Recording');
+      throw Errors.notFound('Recording', 'RECORDING_NOT_FOUND');
     }
 
     const response: GetRecordingResponse = { recording };
@@ -509,7 +509,7 @@ router.patch(
       .single();
 
     if (!existing) {
-      throw Errors.notFound('Recording');
+      throw Errors.notFound('Recording', 'RECORDING_NOT_FOUND');
     }
 
     // A folder can only be a folder the caller owns
@@ -577,7 +577,7 @@ router.patch(
       .single();
 
     if (!recording) {
-      throw Errors.notFound('Recording');
+      throw Errors.notFound('Recording', 'RECORDING_NOT_FOUND');
     }
 
     // Check if transcript exists
@@ -588,7 +588,7 @@ router.patch(
       .single();
 
     if (!existingTranscript) {
-      throw Errors.notFound('Transcript');
+      throw Errors.notFound('Transcript', 'TRANSCRIPT_NOT_FOUND');
     }
 
     // Update speaker_names in transcript
@@ -603,7 +603,7 @@ router.patch(
 
     if (error || !transcript) {
       console.error('Failed to update speaker names:', error);
-      throw Errors.internal('Failed to update speaker names');
+      throw Errors.internal('Failed to update speaker names', 'SPEAKER_NAMES_UPDATE_FAILED');
     }
 
     res.status(200).json({ transcript });
@@ -625,14 +625,14 @@ router.get(
       .eq('id', recordingId)
       .eq('user_id', userId)
       .single();
-    if (!recording) throw Errors.notFound('Recording');
+    if (!recording) throw Errors.notFound('Recording', 'RECORDING_NOT_FOUND');
 
     const { data: transcript } = await supabaseAdmin
       .from('transcripts')
       .select('segments, speaker_names')
       .eq('recording_id', recordingId)
       .maybeSingle();
-    if (!transcript) throw Errors.notFound('Transcript');
+    if (!transcript) throw Errors.notFound('Transcript', 'TRANSCRIPT_NOT_FOUND');
 
     res.json({ analytics: computeMeetingAnalytics(transcript.segments, transcript.speaker_names) });
   })
@@ -658,7 +658,7 @@ router.post(
       .single();
 
     if (!recording) {
-      throw Errors.notFound('Recording');
+      throw Errors.notFound('Recording', 'RECORDING_NOT_FOUND');
     }
 
     // Delete old transcript and summary so processing creates fresh ones
@@ -700,7 +700,7 @@ router.post(
       .single();
 
     if (!recording) {
-      throw Errors.notFound('Recording');
+      throw Errors.notFound('Recording', 'RECORDING_NOT_FOUND');
     }
 
     await supabaseAdmin.from('transcripts').delete().eq('recording_id', recordingId);
@@ -737,7 +737,7 @@ router.delete(
       .single();
 
     if (!recording) {
-      throw Errors.notFound('Recording');
+      throw Errors.notFound('Recording', 'RECORDING_NOT_FOUND');
     }
 
     // Delete from storage
@@ -758,7 +758,7 @@ router.delete(
 
     if (deleteError) {
       console.error('Failed to delete recording:', deleteError);
-      throw Errors.internal('Failed to delete recording');
+      throw Errors.internal('Failed to delete recording', 'RECORDING_DELETE_FAILED');
     }
 
     res.status(204).send();

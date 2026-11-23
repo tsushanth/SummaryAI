@@ -95,6 +95,8 @@ router.post('/credits/grant-debug', asyncHandler(async (req: Request, res: Respo
 const startSchema = z.object({
   recording_id: z.string().uuid(),
   persona: z.string().min(1),
+  // BCP-47 language the coaching tips are written in; absent = the recording's output_language, else the model default.
+  output_language: z.string().min(2).max(16).optional(),
 });
 
 router.post('/sessions', asyncHandler(async (req: Request, res: Response) => {
@@ -102,7 +104,7 @@ router.post('/sessions', asyncHandler(async (req: Request, res: Response) => {
   const body = startSchema.parse(req.body);
 
   try {
-    const { sessionId } = await startSession(userId, body.recording_id, body.persona);
+    const { sessionId } = await startSession(userId, body.recording_id, body.persona, body.output_language);
     res.status(201).json({ session_id: sessionId, persona: body.persona });
   } catch (err) {
     if (err instanceof NoCreditsError) return res.status(402).json({ error: 'no_credits', message: 'No coaching credits available.' });

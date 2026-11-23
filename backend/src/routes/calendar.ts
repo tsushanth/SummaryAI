@@ -762,7 +762,7 @@ router.delete(
     const provider = req.params.provider;
 
     if (provider !== 'google' && provider !== 'microsoft') {
-      throw Errors.badRequest('Invalid provider');
+      throw Errors.badRequest('Invalid provider', undefined, 'CALENDAR_INVALID_PROVIDER');
     }
 
     // Get connection to revoke tokens

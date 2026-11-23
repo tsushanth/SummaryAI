@@ -28,8 +28,10 @@ export class AppError extends Error {
  * Common error factory functions
  */
 export const Errors = {
-  badRequest: (message: string, details?: Record<string, string>) =>
-    new AppError(400, 'BAD_REQUEST', message, details),
+  // Each factory takes an optional stable `code` for errors a client renders from its own string resources. `message`
+  // stays English for logs and for clients that do not know the code; the default code is the generic one.
+  badRequest: (message: string, details?: Record<string, string>, code = 'BAD_REQUEST') =>
+    new AppError(400, code, message, details),
 
   unauthorized: (message = 'Authentication required') =>
     new AppError(401, 'UNAUTHORIZED', message),
@@ -37,24 +39,24 @@ export const Errors = {
   forbidden: (message = 'Access denied') =>
     new AppError(403, 'FORBIDDEN', message),
 
-  notFound: (resource = 'Resource') =>
-    new AppError(404, 'NOT_FOUND', `${resource} not found`),
+  notFound: (resource = 'Resource', code = 'NOT_FOUND') =>
+    new AppError(404, code, `${resource} not found`),
 
-  conflict: (message: string) =>
-    new AppError(409, 'CONFLICT', message),
+  conflict: (message: string, code = 'CONFLICT') =>
+    new AppError(409, code, message),
 
   payloadTooLarge: (maxSize: string) =>
     new AppError(413, 'PAYLOAD_TOO_LARGE', `File exceeds maximum size of ${maxSize}`),
 
-  unprocessable: (message: string, details?: Record<string, string>) =>
-    new AppError(422, 'UNPROCESSABLE_ENTITY', message, details),
+  unprocessable: (message: string, details?: Record<string, string>, code = 'UNPROCESSABLE_ENTITY') =>
+    new AppError(422, code, message, details),
 
   tooManyRequests: (retryAfter?: number) =>
     new AppError(429, 'RATE_LIMITED', 'Too many requests',
       retryAfter ? { retry_after: String(retryAfter) } : undefined),
 
-  internal: (message = 'An unexpected error occurred') =>
-    new AppError(500, 'INTERNAL_ERROR', message),
+  internal: (message = 'An unexpected error occurred', code = 'INTERNAL_ERROR') =>
+    new AppError(500, code, message),
 };
 
 /**

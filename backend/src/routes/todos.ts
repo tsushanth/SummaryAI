@@ -180,7 +180,7 @@ router.get(
 
     if (error) {
       console.error('Failed to list todos:', error);
-      throw Errors.internal('Failed to list todos');
+      throw Errors.internal('Failed to list todos', 'TODO_LIST_FAILED');
     }
 
     const totalCount = count || 0;
@@ -227,7 +227,7 @@ router.post(
 
     if (error || !todo) {
       console.error('Failed to create todo:', error);
-      throw Errors.internal('Failed to create todo');
+      throw Errors.internal('Failed to create todo', 'TODO_CREATE_FAILED');
     }
 
     res.status(201).json({ todo: present(todo) });
@@ -293,7 +293,7 @@ router.post(
 
     if (error || !todos) {
       console.error('Failed to create todos from text:', error);
-      throw Errors.internal('Failed to create todos');
+      throw Errors.internal('Failed to create todos', 'TODO_CREATE_FAILED');
     }
 
     res.status(201).json({ todos: todos.map(present) });
@@ -319,7 +319,7 @@ router.get(
       .single();
 
     if (error || !todo) {
-      throw Errors.notFound('Todo not found');
+      throw Errors.notFound('Todo not found', 'TODO_NOT_FOUND');
     }
 
     res.json({ todo: present(todo) });
@@ -352,7 +352,7 @@ router.patch(
     }
 
     if (Object.keys(updates).length === 0) {
-      throw Errors.badRequest('No updates provided');
+      throw Errors.badRequest('No updates provided', undefined, 'TODO_NO_UPDATES');
     }
 
     const { data: todo, error } = await supabaseAdmin
@@ -364,7 +364,7 @@ router.patch(
       .single();
 
     if (error || !todo) {
-      throw Errors.notFound('Todo not found');
+      throw Errors.notFound('Todo not found', 'TODO_NOT_FOUND');
     }
 
     res.json({ todo: present(todo) });
@@ -390,7 +390,7 @@ router.delete(
 
     if (error) {
       console.error('Failed to delete todo:', error);
-      throw Errors.internal('Failed to delete todo');
+      throw Errors.internal('Failed to delete todo', 'TODO_DELETE_FAILED');
     }
 
     res.status(204).send();
@@ -417,7 +417,7 @@ router.post(
       .single();
 
     if (fetchError || !existing) {
-      throw Errors.notFound('Todo not found');
+      throw Errors.notFound('Todo not found', 'TODO_NOT_FOUND');
     }
 
     const newStatus = !existing.is_completed;
@@ -434,7 +434,7 @@ router.post(
       .single();
 
     if (error || !todo) {
-      throw Errors.internal('Failed to toggle todo');
+      throw Errors.internal('Failed to toggle todo', 'TODO_TOGGLE_FAILED');
     }
 
     res.json({ todo: present(todo) });

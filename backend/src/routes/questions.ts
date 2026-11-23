@@ -11,6 +11,7 @@ import { authenticate } from '../middleware/auth.js';
 import { asyncHandler, Errors } from '../middleware/errorHandler.js';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
+import { pickOutputLanguage } from '../lib/outputLanguage.js';
 import {
   answerQuestion,
   answerQuestionMock,
@@ -36,6 +37,8 @@ router.use(authenticate);
 const askQuestionSchema = z.object({
   question: z.string().min(3).max(1000),
   include_context: z.boolean().optional().default(true),
+  // BCP-47 language the answer should be written in. Absent: the recording's own output_language, else the model default.
+  output_language: z.string().min(2).max(16).optional(),
 });
 
 const listQuestionsSchema = z.object({
@@ -61,13 +64,13 @@ router.post(
     // Verify recording exists and user owns it
     const { data: recording, error: recordingError } = await supabaseAdmin
       .from('recordings')
-      .select('id, status, title, meeting_id')
+      .select('id, status, title, meeting_id, output_language')
       .eq('id', recordingId)
       .eq('user_id', userId)
       .single();
 
     if (recordingError || !recording) {
-      throw Errors.notFound('Recording');
+      throw Errors.notFound('Recording', 'RECORDING_NOT_FOUND');
     }
 
     let segments: TranscriptSegment[] = [];
@@ -104,7 +107,8 @@ router.post(
       if (!['transcribed', 'summarizing', 'completed'].includes(recording.status)) {
         throw Errors.unprocessable(
           'Recording must be transcribed before asking questions',
-          { status: recording.status }
+          { status: recording.status },
+          'RECORDING_NOT_TRANSCRIBED'
         );
       }
 
@@ -116,7 +120,7 @@ router.post(
         .single();
 
       if (transcriptError || !transcript) {
-        throw Errors.unprocessable('Transcript not found for this recording');
+        throw Errors.unprocessable('Transcript not found for this recording', undefined, 'TRANSCRIPT_NOT_FOUND');
       }
 
       // Parse segments (stored as JSONB)
@@ -159,7 +163,7 @@ router.post(
     }
 
     if (segments.length === 0) {
-      throw Errors.unprocessable('Recording transcript is empty');
+      throw Errors.unprocessable('Recording transcript is empty', undefined, 'TRANSCRIPT_EMPTY');
     }
 
     // Fetch previous Q&A for context if requested
@@ -183,7 +187,10 @@ router.post(
     try {
       if (config.ANTHROPIC_API_KEY) {
         // Use real LLM
-        result = await answerQuestion(body.question, segments, { previousQA });
+        result = await answerQuestion(body.question, segments, {
+          previousQA,
+          outputLanguage: pickOutputLanguage(body.output_language, (recording as { output_language?: string | null }).output_language),
+        });
       } else {
         // Use mock for development
         console.warn('ANTHROPIC_API_KEY not set, using mock Q&A');
@@ -191,7 +198,7 @@ router.post(
       }
     } catch (error) {
       console.error('LLM error:', error);
-      throw Errors.internal('Failed to process question');
+      throw Errors.internal('Failed to process question', 'QA_FAILED');
     }
 
     // Store Q&A in history
@@ -258,7 +265,7 @@ router.get(
       .single();
 
     if (!recording) {
-      throw Errors.notFound('Recording');
+      throw Errors.notFound('Recording', 'RECORDING_NOT_FOUND');
     }
 
     // Fetch Q&A history
@@ -272,7 +279,7 @@ router.get(
 
     if (error) {
       console.error('Failed to fetch Q&A history:', error);
-      throw Errors.internal('Failed to fetch Q&A history');
+      throw Errors.internal('Failed to fetch Q&A history', 'QA_HISTORY_FAILED');
     }
 
     // Transform to response format
