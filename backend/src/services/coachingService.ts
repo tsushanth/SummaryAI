@@ -222,6 +222,7 @@ function startTicker(sessionId: string, persona: CoachingPersona): void {
 function stopTicker(sessionId: string): void {
   const t = activeTimers.get(sessionId);
   if (t) { clearInterval(t); activeTimers.delete(sessionId); }
+  sessionLanguages.delete(sessionId); // a stopped session never ticks again, so its language is not needed
 }
 
 async function tick(sessionId: string, persona: CoachingPersona): Promise<void> {
