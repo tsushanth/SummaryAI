@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">Den här inspelningen hittades inte.</string>
+    <string name="api_error_recording_not_transcribed">Den här inspelningen transkriberas fortfarande. Försök igen om en stund.</string>
+    <string name="api_error_transcript_unavailable">Den här inspelningen har ännu ingen transkription.</string>
+    <string name="api_error_todo_not_found">Den här uppgiften hittades inte.</string>
+    <string name="api_error_calendar_provider_unavailable">Den här kalenderleverantören är inte tillgänglig än.</string>
+    <string name="api_error_not_found">Vi hittade inte det du bad om.</string>
+    <string name="api_error_rate_limited">För många förfrågningar. Vänta en stund och försök igen.</string>
+    <string name="api_error_unauthorized">Logga in igen för att fortsätta.</string>
+    <string name="api_error_forbidden">Du har inte åtkomst till detta.</string>
+    <string name="api_error_invalid_request">Förfrågan var ogiltig. Kontrollera den och försök igen.</string>
+    <string name="api_error_server">Något gick fel hos oss. Försök igen.</string>
+    <string name="api_error_network">Det gick inte att nå servern. Kontrollera anslutningen och försök igen.</string>
+    <string name="calendar_demo_mode_message">Kalenderintegrationen kräver inloggning med Google. Logga ut och logga in med ditt Google-konto för att använda funktionen.</string>
+    <string name="server_title_call_with">Samtal med %1$s</string>
+    <string name="server_title_call_to">Samtal till %1$s</string>
+    <string name="server_speaker_numbered">Talare %1$d</string>
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">この録音が見つかりませんでした。</string>
+    <string name="api_error_recording_not_transcribed">この録音はまだ文字起こし中です。しばらくしてからもう一度お試しください。</string>
+    <string name="api_error_transcript_unavailable">この録音の文字起こしはまだありません。</string>
+    <string name="api_error_todo_not_found">このタスクが見つかりませんでした。</string>
+    <string name="api_error_calendar_provider_unavailable">このカレンダープロバイダーはまだ利用できません。</string>
+    <string name="api_error_not_found">ご希望のものが見つかりませんでした。</string>
+    <string name="api_error_rate_limited">リクエストが多すぎます。しばらく待ってからもう一度お試しください。</string>
+    <string name="api_error_unauthorized">続行するには、もう一度サインインしてください。</string>
+    <string name="api_error_forbidden">これにアクセスする権限がありません。</string>
+    <string name="api_error_invalid_request">リクエストが無効でした。内容を確認してもう一度お試しください。</string>
+    <string name="api_error_server">こちら側で問題が発生しました。もう一度お試しください。</string>
+    <string name="api_error_network">サーバーに接続できませんでした。接続を確認してもう一度お試しください。</string>
+    <string name="calendar_demo_mode_message">カレンダー連携にはGoogleでのサインインが必要です。この機能を使うには、いったんサインアウトして、Googleアカウントでサインインし直してください。</string>
+    <string name="server_title_call_with">%1$sとの通話</string>
+    <string name="server_title_call_to">%1$sへの発信</string>
+    <string name="server_speaker_numbered">話者%1$d</string>
+</resources>

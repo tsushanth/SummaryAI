@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">Rekaman ini tidak ditemukan.</string>
+    <string name="api_error_recording_not_transcribed">Rekaman ini masih ditranskripsikan. Silakan coba lagi sebentar lagi.</string>
+    <string name="api_error_transcript_unavailable">Rekaman ini belum memiliki transkrip.</string>
+    <string name="api_error_todo_not_found">Tugas ini tidak ditemukan.</string>
+    <string name="api_error_calendar_provider_unavailable">Penyedia kalender ini belum tersedia.</string>
+    <string name="api_error_not_found">Kami tidak menemukan yang Anda minta.</string>
+    <string name="api_error_rate_limited">Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi.</string>
+    <string name="api_error_unauthorized">Silakan masuk lagi untuk melanjutkan.</string>
+    <string name="api_error_forbidden">Anda tidak memiliki akses ke ini.</string>
+    <string name="api_error_invalid_request">Permintaan tidak valid. Periksa lalu coba lagi.</string>
+    <string name="api_error_server">Terjadi masalah di pihak kami. Silakan coba lagi.</string>
+    <string name="api_error_network">Tidak dapat menghubungi server. Periksa koneksi Anda lalu coba lagi.</string>
+    <string name="calendar_demo_mode_message">Integrasi kalender memerlukan masuk dengan Google. Silakan keluar lalu masuk dengan akun Google Anda untuk menggunakan fitur ini.</string>
+    <string name="server_title_call_with">Panggilan dengan %1$s</string>
+    <string name="server_title_call_to">Panggilan ke %1$s</string>
+    <string name="server_speaker_numbered">Pembicara %1$d</string>
+</resources>

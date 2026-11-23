@@ -97,7 +97,9 @@ data class CreateRecordingRequest(
     val title: String,
     @SerializedName("duration_seconds") val durationSeconds: Int,
     @SerializedName("file_size_bytes") val fileSizeBytes: Long,
-    @SerializedName("content_type") val contentType: String = "audio/mp4"
+    @SerializedName("content_type") val contentType: String = "audio/mp4",
+    /** BCP-47 language the summary is written in. Null (not sent) keeps the server default. */
+    @SerializedName("output_language") val outputLanguage: String? = null
 )
 
 data class CompleteUploadRequest(
@@ -106,7 +108,9 @@ data class CompleteUploadRequest(
 )
 
 data class AskQuestionRequest(
-    val question: String
+    val question: String,
+    /** BCP-47 language the answer is written in. Null (not sent) means the recording's language. */
+    @SerializedName("output_language") val outputLanguage: String? = null
 )
 
 data class UpdateSpeakerNamesRequest(

@@ -38,7 +38,9 @@ data class CoachingDebugGrantResponse(
 
 data class CoachingStartSessionRequest(
     @SerializedName("recording_id") val recordingId: String,
-    val persona: String
+    val persona: String,
+    /** BCP-47 language the coaching tips are written in. Null (not sent) keeps the server default. */
+    @SerializedName("output_language") val outputLanguage: String? = null
 )
 
 data class CoachingStartSessionResponse(

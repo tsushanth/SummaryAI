@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">This recording could not be found.</string>
+    <string name="api_error_recording_not_transcribed">This recording is still being transcribed. Please try again in a moment.</string>
+    <string name="api_error_transcript_unavailable">There is no transcript for this recording yet.</string>
+    <string name="api_error_todo_not_found">This task could not be found.</string>
+    <string name="api_error_calendar_provider_unavailable">This calendar provider is not available yet.</string>
+    <string name="api_error_not_found">We could not find what you asked for.</string>
+    <string name="api_error_rate_limited">Too many requests. Please wait a moment and try again.</string>
+    <string name="api_error_unauthorized">Please sign in again to continue.</string>
+    <string name="api_error_forbidden">You do not have access to this.</string>
+    <string name="api_error_invalid_request">That request was not valid. Please check it and try again.</string>
+    <string name="api_error_server">Something went wrong on our side. Please try again.</string>
+    <string name="api_error_network">Could not reach the server. Check your connection and try again.</string>
+    <string name="calendar_demo_mode_message">Calendar integration requires signing in with Google. Please sign out and sign in with your Google account to use this feature.</string>
+    <string name="server_title_call_with">Call with %1$s</string>
+    <string name="server_title_call_to">Call to %1$s</string>
+    <string name="server_speaker_numbered">Speaker %1$d</string>
+</resources>

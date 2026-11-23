@@ -1,11 +1,14 @@
 package com.kreativekoala.summaryai.ui.todos
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kreativekoala.summaryai.util.ApiErrors
 import com.kreativekoala.summaryai.data.repository.TodosRepository
 import com.kreativekoala.summaryai.domain.model.Todo
 import com.kreativekoala.summaryai.domain.model.TodoPriority
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,7 +39,8 @@ data class TodosUiState(
 
 @HiltViewModel
 class TodosViewModel @Inject constructor(
-    private val todosRepository: TodosRepository
+    private val todosRepository: TodosRepository,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TodosUiState())
@@ -152,7 +156,7 @@ class TodosViewModel @Inject constructor(
                     loadTodos()
                 },
                 onFailure = { error ->
-                    _uiState.value = _uiState.value.copy(error = error.message)
+                    _uiState.value = _uiState.value.copy(error = ApiErrors.userMessage(context, error))
                 }
             )
         }
@@ -170,7 +174,7 @@ class TodosViewModel @Inject constructor(
                     _uiState.value = _uiState.value.copy(todos = updatedList)
                 },
                 onFailure = { error ->
-                    _uiState.value = _uiState.value.copy(error = error.message)
+                    _uiState.value = _uiState.value.copy(error = ApiErrors.userMessage(context, error))
                 }
             )
         }
@@ -186,7 +190,7 @@ class TodosViewModel @Inject constructor(
                     _uiState.value = _uiState.value.copy(todos = updatedList)
                 },
                 onFailure = { error ->
-                    _uiState.value = _uiState.value.copy(error = error.message)
+                    _uiState.value = _uiState.value.copy(error = ApiErrors.userMessage(context, error))
                 }
             )
         }
@@ -215,7 +219,7 @@ class TodosViewModel @Inject constructor(
                 onFailure = { error ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = error.message
+                        error = ApiErrors.userMessage(context, error)
                     )
                 }
             )

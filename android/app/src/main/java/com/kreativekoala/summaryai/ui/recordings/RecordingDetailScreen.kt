@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.summaryai.R
+import com.kreativekoala.summaryai.util.serverTitle
 import com.kreativekoala.summaryai.ui.components.MmEmptyState
 import com.kreativekoala.summaryai.ui.components.SkeletonBox
 import com.kreativekoala.summaryai.ui.intelligence.ActionItemsToTodosButton
@@ -79,7 +80,7 @@ fun RecordingDetailScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text(detail?.recording?.title ?: stringResource(R.string.recording_fallback)) },
+                title = { Text(detail?.recording?.title?.let { serverTitle(it) } ?: stringResource(R.string.recording_fallback)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))

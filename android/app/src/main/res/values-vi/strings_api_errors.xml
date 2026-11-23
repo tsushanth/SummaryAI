@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">Không tìm thấy bản ghi âm này.</string>
+    <string name="api_error_recording_not_transcribed">Bản ghi âm này vẫn đang được chép lời. Vui lòng thử lại sau giây lát.</string>
+    <string name="api_error_transcript_unavailable">Bản ghi âm này chưa có bản chép lời.</string>
+    <string name="api_error_todo_not_found">Không tìm thấy nhiệm vụ này.</string>
+    <string name="api_error_calendar_provider_unavailable">Nhà cung cấp lịch này hiện chưa khả dụng.</string>
+    <string name="api_error_not_found">Chúng tôi không tìm thấy nội dung bạn yêu cầu.</string>
+    <string name="api_error_rate_limited">Quá nhiều yêu cầu. Vui lòng đợi một lát rồi thử lại.</string>
+    <string name="api_error_unauthorized">Vui lòng đăng nhập lại để tiếp tục.</string>
+    <string name="api_error_forbidden">Bạn không có quyền truy cập nội dung này.</string>
+    <string name="api_error_invalid_request">Yêu cầu không hợp lệ. Vui lòng kiểm tra rồi thử lại.</string>
+    <string name="api_error_server">Đã xảy ra sự cố ở phía chúng tôi. Vui lòng thử lại.</string>
+    <string name="api_error_network">Không thể kết nối với máy chủ. Hãy kiểm tra kết nối của bạn rồi thử lại.</string>
+    <string name="calendar_demo_mode_message">Tích hợp lịch yêu cầu đăng nhập bằng Google. Vui lòng đăng xuất rồi đăng nhập bằng tài khoản Google của bạn để dùng tính năng này.</string>
+    <string name="server_title_call_with">Cuộc gọi với %1$s</string>
+    <string name="server_title_call_to">Cuộc gọi đến %1$s</string>
+    <string name="server_speaker_numbered">Người nói %1$d</string>
+</resources>

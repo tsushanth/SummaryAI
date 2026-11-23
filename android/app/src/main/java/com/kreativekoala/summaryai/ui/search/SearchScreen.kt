@@ -26,6 +26,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.summaryai.R
+import com.kreativekoala.summaryai.util.serverTitle
 import com.kreativekoala.summaryai.domain.model.Recording
 import com.kreativekoala.summaryai.ui.components.MmCard
 import com.kreativekoala.summaryai.ui.components.MmEmptyState
@@ -159,7 +160,7 @@ private fun SearchResultItem(
         ) {
             // Highlight matching text in title
             Text(
-                text = highlightText(recording.title, query),
+                text = highlightText(serverTitle(recording.title), query),
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">Ez a felvétel nem található.</string>
+    <string name="api_error_recording_not_transcribed">Ez a felvétel még átírás alatt áll. Próbáld újra egy pillanat múlva.</string>
+    <string name="api_error_transcript_unavailable">Ehhez a felvételhez még nincs átirat.</string>
+    <string name="api_error_todo_not_found">Ez a feladat nem található.</string>
+    <string name="api_error_calendar_provider_unavailable">Ez a naptárszolgáltató még nem érhető el.</string>
+    <string name="api_error_not_found">Nem találtuk meg, amit kértél.</string>
+    <string name="api_error_rate_limited">Túl sok kérés. Várj egy kicsit, majd próbáld újra.</string>
+    <string name="api_error_unauthorized">Jelentkezz be újra a folytatáshoz.</string>
+    <string name="api_error_forbidden">Nincs hozzáférésed ehhez.</string>
+    <string name="api_error_invalid_request">A kérés érvénytelen volt. Ellenőrizd, majd próbáld újra.</string>
+    <string name="api_error_server">Valami hiba történt a mi oldalunkon. Próbáld újra.</string>
+    <string name="api_error_network">A szerver nem érhető el. Ellenőrizd a kapcsolatot, majd próbáld újra.</string>
+    <string name="calendar_demo_mode_message">A naptár-integrációhoz Google-fiókkal kell bejelentkezni. Jelentkezz ki, majd jelentkezz be Google-fiókoddal a funkció használatához.</string>
+    <string name="server_title_call_with">Hívás: %1$s</string>
+    <string name="server_title_call_to">Hívás ide: %1$s</string>
+    <string name="server_speaker_numbered">%1$d. beszélő</string>
+</resources>

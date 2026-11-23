@@ -1,11 +1,15 @@
 package com.kreativekoala.summaryai.ui.calendar
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.data.local.TokenManager
+import com.kreativekoala.summaryai.util.ApiErrors
 import com.kreativekoala.summaryai.data.repository.CalendarRepository
 import com.kreativekoala.summaryai.domain.model.CalendarConnection
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,12 +23,11 @@ data class CalendarUiState(
     val error: String? = null
 )
 
-private const val DEMO_MODE_MESSAGE = "Calendar integration requires signing in with Google. Please sign out and sign in with your Google account to use this feature."
-
 @HiltViewModel
 class CalendarViewModel @Inject constructor(
     private val calendarRepository: CalendarRepository,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val isDemoMode: Boolean
@@ -54,7 +57,7 @@ class CalendarViewModel @Inject constructor(
                 onFailure = { error ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = error.message
+                        error = ApiErrors.userMessage(context, error)
                     )
                 }
             )
@@ -63,7 +66,7 @@ class CalendarViewModel @Inject constructor(
 
     fun connectGoogle() {
         if (isDemoMode) {
-            _uiState.value = _uiState.value.copy(error = DEMO_MODE_MESSAGE)
+            _uiState.value = _uiState.value.copy(error = context.getString(R.string.calendar_demo_mode_message))
             return
         }
 
@@ -82,7 +85,7 @@ class CalendarViewModel @Inject constructor(
                 onFailure = { error ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = error.message
+                        error = ApiErrors.userMessage(context, error)
                     )
                 }
             )
@@ -91,7 +94,7 @@ class CalendarViewModel @Inject constructor(
 
     fun connectMicrosoft() {
         if (isDemoMode) {
-            _uiState.value = _uiState.value.copy(error = DEMO_MODE_MESSAGE)
+            _uiState.value = _uiState.value.copy(error = context.getString(R.string.calendar_demo_mode_message))
             return
         }
 
@@ -110,7 +113,7 @@ class CalendarViewModel @Inject constructor(
                 onFailure = { error ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = error.message
+                        error = ApiErrors.userMessage(context, error)
                     )
                 }
             )
@@ -130,7 +133,7 @@ class CalendarViewModel @Inject constructor(
                 onFailure = { error ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = error.message
+                        error = ApiErrors.userMessage(context, error)
                     )
                 }
             )

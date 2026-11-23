@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">ไม่พบการบันทึกนี้</string>
+    <string name="api_error_recording_not_transcribed">การบันทึกนี้ยังอยู่ระหว่างการถอดเสียง โปรดลองอีกครั้งในอีกสักครู่</string>
+    <string name="api_error_transcript_unavailable">การบันทึกนี้ยังไม่มีบทถอดเสียง</string>
+    <string name="api_error_todo_not_found">ไม่พบงานนี้</string>
+    <string name="api_error_calendar_provider_unavailable">ผู้ให้บริการปฏิทินนี้ยังไม่พร้อมใช้งาน</string>
+    <string name="api_error_not_found">เราไม่พบสิ่งที่คุณขอ</string>
+    <string name="api_error_rate_limited">มีคำขอมากเกินไป โปรดรอสักครู่แล้วลองอีกครั้ง</string>
+    <string name="api_error_unauthorized">โปรดลงชื่อเข้าใช้อีกครั้งเพื่อดำเนินการต่อ</string>
+    <string name="api_error_forbidden">คุณไม่มีสิทธิ์เข้าถึงสิ่งนี้</string>
+    <string name="api_error_invalid_request">คำขอไม่ถูกต้อง โปรดตรวจสอบแล้วลองอีกครั้ง</string>
+    <string name="api_error_server">เกิดข้อผิดพลาดจากฝั่งเรา โปรดลองอีกครั้ง</string>
+    <string name="api_error_network">ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ โปรดตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง</string>
+    <string name="calendar_demo_mode_message">การเชื่อมต่อปฏิทินต้องลงชื่อเข้าใช้ด้วย Google โปรดออกจากระบบแล้วลงชื่อเข้าใช้ด้วยบัญชี Google ของคุณเพื่อใช้ฟีเจอร์นี้</string>
+    <string name="server_title_call_with">สายกับ %1$s</string>
+    <string name="server_title_call_to">โทรไปยัง %1$s</string>
+    <string name="server_speaker_numbered">ผู้พูด %1$d</string>
+</resources>

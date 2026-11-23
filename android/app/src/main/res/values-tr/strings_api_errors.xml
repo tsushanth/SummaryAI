@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">Bu kayıt bulunamadı.</string>
+    <string name="api_error_recording_not_transcribed">Bu kayıt hâlâ yazıya dökülüyor. Lütfen biraz sonra tekrar deneyin.</string>
+    <string name="api_error_transcript_unavailable">Bu kayıt için henüz bir transkript yok.</string>
+    <string name="api_error_todo_not_found">Bu görev bulunamadı.</string>
+    <string name="api_error_calendar_provider_unavailable">Bu takvim sağlayıcısı henüz kullanılamıyor.</string>
+    <string name="api_error_not_found">İstediğinizi bulamadık.</string>
+    <string name="api_error_rate_limited">Çok fazla istek. Lütfen biraz bekleyip tekrar deneyin.</string>
+    <string name="api_error_unauthorized">Devam etmek için lütfen yeniden oturum açın.</string>
+    <string name="api_error_forbidden">Buna erişiminiz yok.</string>
+    <string name="api_error_invalid_request">İstek geçerli değildi. Lütfen kontrol edip tekrar deneyin.</string>
+    <string name="api_error_server">Bizim tarafımızda bir sorun oluştu. Lütfen tekrar deneyin.</string>
+    <string name="api_error_network">Sunucuya ulaşılamadı. Bağlantınızı kontrol edip tekrar deneyin.</string>
+    <string name="calendar_demo_mode_message">Takvim entegrasyonu için Google ile oturum açmanız gerekir. Bu özelliği kullanmak için oturumu kapatıp Google hesabınızla yeniden açın.</string>
+    <string name="server_title_call_with">%1$s ile görüşme</string>
+    <string name="server_title_call_to">%1$s numarasına görüşme</string>
+    <string name="server_speaker_numbered">Konuşmacı %1$d</string>
+</resources>

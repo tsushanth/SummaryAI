@@ -51,6 +51,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.summaryai.R
+import com.kreativekoala.summaryai.util.serverTitle
 import com.kreativekoala.summaryai.domain.model.Recording
 import com.kreativekoala.summaryai.domain.model.RecordingStatus
 import com.kreativekoala.summaryai.ui.components.MmCard
@@ -472,7 +473,7 @@ private fun RecordingCardIOS(
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = recording.title,
+                        text = serverTitle(recording.title),
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
@@ -570,7 +571,7 @@ private fun RecordingCardIOS(
         AlertDialog(
             onDismissRequest = { showDeleteConfirmation = false },
             title = { Text(stringResource(R.string.delete_recording)) },
-            text = { Text(stringResource(R.string.delete_recording_confirm, recording.title)) },
+            text = { Text(stringResource(R.string.delete_recording_confirm, serverTitle(recording.title))) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -626,7 +627,7 @@ private fun RecordingCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = recording.title,
+                    text = serverTitle(recording.title),
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

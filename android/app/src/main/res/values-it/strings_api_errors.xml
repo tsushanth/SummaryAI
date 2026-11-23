@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">Impossibile trovare questa registrazione.</string>
+    <string name="api_error_recording_not_transcribed">Questa registrazione è ancora in fase di trascrizione. Riprova tra un momento.</string>
+    <string name="api_error_transcript_unavailable">Questa registrazione non ha ancora una trascrizione.</string>
+    <string name="api_error_todo_not_found">Impossibile trovare questa attività.</string>
+    <string name="api_error_calendar_provider_unavailable">Questo provider di calendario non è ancora disponibile.</string>
+    <string name="api_error_not_found">Non abbiamo trovato ciò che hai richiesto.</string>
+    <string name="api_error_rate_limited">Troppe richieste. Attendi un momento e riprova.</string>
+    <string name="api_error_unauthorized">Accedi di nuovo per continuare.</string>
+    <string name="api_error_forbidden">Non hai accesso a questo contenuto.</string>
+    <string name="api_error_invalid_request">La richiesta non era valida. Controllala e riprova.</string>
+    <string name="api_error_server">Qualcosa è andato storto da parte nostra. Riprova.</string>
+    <string name="api_error_network">Impossibile raggiungere il server. Controlla la connessione e riprova.</string>
+    <string name="calendar_demo_mode_message">L\'integrazione del calendario richiede l\'accesso con Google. Esci e accedi con il tuo account Google per usare questa funzione.</string>
+    <string name="server_title_call_with">Chiamata con %1$s</string>
+    <string name="server_title_call_to">Chiamata a %1$s</string>
+    <string name="server_speaker_numbered">Interlocutore %1$d</string>
+</resources>

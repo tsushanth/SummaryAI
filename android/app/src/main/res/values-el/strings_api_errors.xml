@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">Δεν βρέθηκε αυτή η εγγραφή.</string>
+    <string name="api_error_recording_not_transcribed">Αυτή η εγγραφή μεταγράφεται ακόμη. Δοκιμάστε ξανά σε λίγο.</string>
+    <string name="api_error_transcript_unavailable">Αυτή η εγγραφή δεν έχει ακόμη μεταγραφή.</string>
+    <string name="api_error_todo_not_found">Δεν βρέθηκε αυτή η εργασία.</string>
+    <string name="api_error_calendar_provider_unavailable">Αυτός ο πάροχος ημερολογίου δεν είναι ακόμη διαθέσιμος.</string>
+    <string name="api_error_not_found">Δεν βρήκαμε αυτό που ζητήσατε.</string>
+    <string name="api_error_rate_limited">Πάρα πολλά αιτήματα. Περιμένετε λίγο και δοκιμάστε ξανά.</string>
+    <string name="api_error_unauthorized">Συνδεθείτε ξανά για να συνεχίσετε.</string>
+    <string name="api_error_forbidden">Δεν έχετε πρόσβαση σε αυτό.</string>
+    <string name="api_error_invalid_request">Το αίτημα δεν ήταν έγκυρο. Ελέγξτε το και δοκιμάστε ξανά.</string>
+    <string name="api_error_server">Κάτι πήγε στραβά από τη δική μας πλευρά. Δοκιμάστε ξανά.</string>
+    <string name="api_error_network">Δεν ήταν δυνατή η σύνδεση με τον διακομιστή. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.</string>
+    <string name="calendar_demo_mode_message">Η ενσωμάτωση ημερολογίου απαιτεί σύνδεση με Google. Αποσυνδεθείτε και συνδεθείτε ξανά με τον λογαριασμό σας Google για να χρησιμοποιήσετε αυτή τη λειτουργία.</string>
+    <string name="server_title_call_with">Κλήση με %1$s</string>
+    <string name="server_title_call_to">Κλήση προς %1$s</string>
+    <string name="server_speaker_numbered">Ομιλητής %1$d</string>
+</resources>

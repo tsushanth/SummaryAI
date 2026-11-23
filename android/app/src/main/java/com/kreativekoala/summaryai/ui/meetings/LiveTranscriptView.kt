@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kreativekoala.summaryai.R
+import com.kreativekoala.summaryai.util.serverSpeakerLabel
 import com.kreativekoala.summaryai.data.LanguageCatalog
 import com.kreativekoala.summaryai.domain.model.LiveTranscriptSegment
 import com.kreativekoala.summaryai.ui.coaching.ActiveCoachingSession
@@ -296,7 +297,7 @@ private fun LiveTranscriptSegmentItem(
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = segment.displaySpeakerName,
+                    text = serverSpeakerLabel(segment.displaySpeakerName),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Medium,
                     color = speakerColor
