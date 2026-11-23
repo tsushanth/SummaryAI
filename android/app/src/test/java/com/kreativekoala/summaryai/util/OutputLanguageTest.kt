@@ -5,17 +5,14 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class OutputLanguageTest {
-    @Test fun autoFollowsTheAppLanguage() {
-        assertEquals("th", OutputLanguage.resolve("auto", "th"))
-        assertEquals("th", OutputLanguage.resolve("AUTO", "th"))
-        assertEquals("th", OutputLanguage.resolve("", "th"))
-        assertEquals("th", OutputLanguage.resolve(null, "th"))
-        assertEquals("th", OutputLanguage.resolve("  ", "th"))
+    @Test fun autoAndEmptySendNothingSoTheServerFollowsTheTranscript() {
+        for (v in listOf("auto", "AUTO", "", "  ", null)) assertNull(v, OutputLanguage.resolve(v))
     }
 
-    @Test fun anExplicitPreferenceWinsOverTheAppLanguage() {
-        assertEquals("de", OutputLanguage.resolve("de", "th"))
-        assertEquals("pt-BR", OutputLanguage.resolve("pt-BR", "en"))
+    @Test fun anExplicitPreferenceIsSent() {
+        assertEquals("de", OutputLanguage.resolve("de"))
+        assertEquals("pt-BR", OutputLanguage.resolve("pt-BR"))
+        assertEquals("id", OutputLanguage.resolve("in"))
     }
 
     @Test fun regionAndScriptAreKeptButExtensionsAreDropped() {
@@ -31,8 +28,7 @@ class OutputLanguageTest {
     }
 
     @Test fun nothingUsableMeansNothingIsSent() {
-        assertNull(OutputLanguage.resolve("auto", null))
-        assertNull(OutputLanguage.resolve("auto", ""))
+        assertNull(OutputLanguage.resolve("und"))
         assertNull(OutputLanguage.normalize("und"))
         assertNull(OutputLanguage.normalize("auto"))
     }
