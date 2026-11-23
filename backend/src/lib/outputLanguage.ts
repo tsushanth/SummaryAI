@@ -49,7 +49,8 @@ export function languageNameForCode(code: string | null | undefined): string | n
   const normalized = code.trim().toLowerCase();
   if (!normalized || normalized === 'auto') return null;
   const base = normalized.split(/[-_]/)[0];
-  return base ? (LANGUAGE_NAMES[base] ?? null) : null;
+  // Own keys only: a plain object lookup would resolve 'constructor' / '__proto__' to Object.prototype members.
+  return base && Object.hasOwn(LANGUAGE_NAMES, base) ? LANGUAGE_NAMES[base] : null;
 }
 
 /** The first usable output language: explicit request value, then the recording's stored one. null = leave the model default. */
