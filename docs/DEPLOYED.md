@@ -4,7 +4,17 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 
 | Component | Fly app | Release | Image | Built from | Date |
 |---|---|---|---|---|---|
+| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v59 | `registry.fly.io/summary-ai-backend:deployment-01M855TND6ZZHSE10Y172EQNW2` | `origin/main` at `63d6069` (squash merge of #93; backend tree identical to main) | 2026-11-23 (UTC) |
 | Web (`web/`, meetingmind.org) | `meeting-mind-web` | v39 | `registry.fly.io/meeting-mind-web:deployment-01M80MVFF67NNXW4G3ZYX9MPSN` | `origin/main` at `8c20741` (squash merge of #91; `web/` tree `95ac59f1309ef4fe01c82d47ae720fe58b40373b` identical to main) | 2026-11-22 (UTC) |
+
+## 2026-11-23 Backend (summary-ai-backend): output language (#93), release v59
+- Fly release v59 (previous v58, 2026-11-13 17:07 PT, image `registry.fly.io/summary-ai-backend:deployment-01M7AXYCHQHG60W6PQWEDK8565`). Deployed with `flyctl deploy --remote-only` from a clean detached worktree of `origin/main` at `63d6069`.
+- Delta proof: the compiled `dist/` of v58 (read over `flyctl ssh`) is file-for-file identical to a fresh `tsc` build of `a0826f2`, the last `backend/` commit before #93. `git log a0826f2..origin/main -- backend/` is only `63d6069` (#93): no Soniox, STT provider, feature-flag, migration, package.json, Dockerfile or env change shipped. The v59 `dist/` is identical to a build of main (`.map` files and the `llmUsage.js` copy step aside).
+- What it does: Q&A, live insights and coaching append a language instruction when an explicit `output_language` is given (own-key lookup, so `constructor` or `__proto__` give no instruction); no language means unchanged prompts; `Errors.*` carry a stable `code`, `message` unchanged. Android (#93) sends `output_language` only for an explicit preference; `auto` or empty sends nothing.
+- Verified: `tsc` clean, vitest 90 files / 1262 tests pass; `/health` 200 and `/health/detailed` healthy with all loops fresh; an unauthenticated question call still answers 401 "Missing or invalid authorization header", same as before. NOT verified end to end: no authenticated call with `output_language` `th` or `constructor` (no test user token); covered by unit tests only.
+- Secrets: names only listed, none set or unset.
+- Rollback: `flyctl releases rollback 58 -a summary-ai-backend` (or `flyctl deploy --image registry.fly.io/summary-ai-backend:deployment-01M7AXYCHQHG60W6PQWEDK8565 -a summary-ai-backend`). Old Android clients are unaffected either way.
+- Android for #93 NOT released: Play production still has 1.7.12 (65) `inProgress` at 20%, so no new upload was staged (an upload would replace the in-progress release). Next release needs 65 promoted to 100% (or halted) first; the old backend accepted the new fields, and the app falls back safely.
 
 ## 2026-11-21 Web (meetingmind.org): Gaugemint website visits on /admin (#91), release v39
 - GitHub Actions `Web deploy (Fly)` run 44980866740 for `8c20741` (squash merge of #91), success. Adds a server-rendered "Website visits (Gaugemint)" section to /admin (framed Gaugemint embed), shown only to admins and only when the Fly secret `GAUGEMINT_EMBED_URL` is set (set before the merge as a new secret: v38 was that secret change, copy in Keychain `GAUGEMINT_EMBED_URL_meetingmind.org`; Gaugemint site meetingmind.org has embed origins https://meetingmind.org and https://www.meetingmind.org). The URL is validated (`web/src/lib/gaugemintEmbed.ts`) and never reaches client JS (checked in the build output).
