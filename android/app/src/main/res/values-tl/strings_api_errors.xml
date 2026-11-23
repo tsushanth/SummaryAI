@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">Hindi makita ang recording na ito.</string>
+    <string name="api_error_recording_not_transcribed">Ang recording na ito ay isinasalin pa sa teksto. Pakisubukan ulit sa ilang sandali.</string>
+    <string name="api_error_transcript_unavailable">Wala pang transcript ang recording na ito.</string>
+    <string name="api_error_todo_not_found">Hindi makita ang gawaing ito.</string>
+    <string name="api_error_calendar_provider_unavailable">Hindi pa available ang provider ng kalendaryong ito.</string>
+    <string name="api_error_not_found">Hindi namin nahanap ang hiniling mo.</string>
+    <string name="api_error_rate_limited">Masyadong maraming kahilingan. Maghintay sandali at subukan ulit.</string>
+    <string name="api_error_unauthorized">Mag-sign in ulit para magpatuloy.</string>
+    <string name="api_error_forbidden">Wala kang access dito.</string>
+    <string name="api_error_invalid_request">Hindi valid ang kahilingang iyon. Pakisuri at subukan ulit.</string>
+    <string name="api_error_server">May nagkamali sa panig namin. Pakisubukan ulit.</string>
+    <string name="api_error_network">Hindi maabot ang server. Suriin ang koneksyon mo at subukan ulit.</string>
+    <string name="calendar_demo_mode_message">Kailangan ng pag-sign in gamit ang Google para sa integrasyon ng kalendaryo. Mag-sign out at mag-sign in gamit ang Google account mo para magamit ang feature na ito.</string>
+    <string name="server_title_call_with">Tawag kasama si %1$s</string>
+    <string name="server_title_call_to">Tawag kay %1$s</string>
+    <string name="server_speaker_numbered">Tagapagsalita %1$d</string>
+</resources>

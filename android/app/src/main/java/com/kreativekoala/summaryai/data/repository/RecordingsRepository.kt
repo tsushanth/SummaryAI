@@ -13,6 +13,7 @@ import com.kreativekoala.summaryai.data.sample.SampleMeetingStore
 import com.kreativekoala.summaryai.domain.model.Recording
 import com.kreativekoala.summaryai.domain.model.RecordingDetail
 import com.kreativekoala.summaryai.domain.model.Summary
+import com.kreativekoala.summaryai.util.OutputLanguageSource
 import com.kreativekoala.summaryai.domain.model.Transcript
 import com.kreativekoala.summaryai.domain.model.TranscriptSegment
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +39,8 @@ private const val TAG = "RecordingsRepository"
 class RecordingsRepository @Inject constructor(
     private val api: SummaryAIApi,
     @UploadClient private val uploadClient: OkHttpClient,
-    private val sampleStore: SampleMeetingStore
+    private val sampleStore: SampleMeetingStore,
+    private val outputLanguage: OutputLanguageSource
 ) {
     /**
      * Get paginated list of recordings
@@ -126,7 +128,8 @@ class RecordingsRepository @Inject constructor(
                 CreateRecordingRequest(
                     title = title,
                     durationSeconds = durationSeconds,
-                    fileSizeBytes = fileSize
+                    fileSizeBytes = fileSize,
+                    outputLanguage = outputLanguage.current()
                 )
             )
             Log.d(TAG, "Recording created: id=${createResponse.recording.id}")
@@ -235,7 +238,7 @@ class RecordingsRepository @Inject constructor(
     ): Result<String> = withContext(Dispatchers.IO) {
         if (SampleMeeting.isSample(recordingId)) return@withContext Result.success(SampleMeeting.QA_LOCKED_MESSAGE)
         try {
-            val response = api.askQuestion(recordingId, AskQuestionRequest(question))
+            val response = api.askQuestion(recordingId, AskQuestionRequest(question, outputLanguage.current()))
             Result.success(response.answer)
         } catch (e: Exception) {
             Result.failure(e)

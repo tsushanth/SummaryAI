@@ -55,6 +55,7 @@ fun SettingsScreen(
     val currentLocaleTag = storedTag.ifEmpty {
         val device = Locale.getDefault()
         SUPPORTED_LANGUAGE_TAGS.firstOrNull { it.equals(device.toLanguageTag(), ignoreCase = true) }
+            ?: SUPPORTED_LANGUAGE_TAGS.firstOrNull { it == device.language }
             ?: SUPPORTED_LANGUAGE_TAGS.firstOrNull { it.substringBefore('-') == device.language }
             ?: "en"
     }
@@ -514,7 +515,7 @@ private fun ThemeOption(
 internal val SUPPORTED_LANGUAGE_TAGS = listOf(
     "en", "es", "fr", "de", "ja", "zh-CN", "ko", "pt-BR", "it", "hi",
     "ar", "id", "ms", "nl", "pl", "ru", "th", "tl", "tr", "vi",
-    "cs", "el", "fi", "hu", "ro", "sv", "uk"
+    "cs", "el", "fi", "hu", "ro", "sv", "uk", "pt"
 )
 
 /** The language's own name, for example "Deutsch" or "Русский". */

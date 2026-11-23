@@ -13,6 +13,8 @@
  *   urgency: 'now' | 'soon' | 'before-end'
  */
 
+import { languageInstruction } from '../lib/outputLanguage.js';
+
 export type CoachingPersonaKey = 'sales_discovery';
 
 export interface CoachingPersona {
@@ -60,4 +62,12 @@ export const PERSONAS: Record<CoachingPersonaKey, CoachingPersona> = {
 
 export function getPersona(key: string): CoachingPersona | null {
   return PERSONAS[key as CoachingPersonaKey] ?? null;
+}
+
+/**
+ * The persona's system prompt with the output-language instruction appended when a language is known. With no language
+ * the prompt is the persona's own, unchanged (old-client behaviour).
+ */
+export function personaSystemPrompt(persona: CoachingPersona, outputLanguage?: string | null): string {
+  return persona.system + languageInstruction(outputLanguage);
 }

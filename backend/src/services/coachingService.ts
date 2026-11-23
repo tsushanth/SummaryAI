@@ -16,7 +16,8 @@ import { instrumentAnthropic, withFeature } from '../lib/llm.js';
 import { config } from '../config/index.js';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { reportAlert } from '../lib/alerts.js';
-import { getPersona, CoachingPersona } from './coachingPersonas.js';
+import { getPersona, personaSystemPrompt, CoachingPersona } from './coachingPersonas.js';
+import { pickOutputLanguage } from '../lib/outputLanguage.js';
 
 const REFUND_THRESHOLD_INSIGHTS = 3;
 const TRANSCRIPT_TAIL_SEGMENTS = 30; // ~5min of typical meeting transcript
@@ -26,6 +27,8 @@ const activeTimers = new Map<string, NodeJS.Timeout>();
 // In-memory subscribers map: sessionId → array of SSE-style emit callbacks.
 type EmitFn = (event: string, data: unknown) => void;
 const subscribers = new Map<string, Set<EmitFn>>();
+// Language the client asked for at session start (not persisted: after a restart the recording's output_language is used).
+const sessionLanguages = new Map<string, string>();
 
 // ----- Public API -----
 
@@ -87,7 +90,8 @@ export async function grantCredits(
 export async function startSession(
   userId: string,
   recordingId: string,
-  personaKey: string
+  personaKey: string,
+  outputLanguage?: string | null
 ): Promise<{ sessionId: string }> {
   const persona = getPersona(personaKey);
   if (!persona) throw new InvalidPersonaError(personaKey);
@@ -138,6 +142,8 @@ export async function startSession(
     throw error;
   }
 
+  const language = pickOutputLanguage(outputLanguage);
+  if (language) sessionLanguages.set(session.id, language);
   startTicker(session.id, persona);
   return { sessionId: session.id };
 }
@@ -180,6 +186,7 @@ export async function endSession(sessionId: string): Promise<{ refunded: boolean
     .eq('id', sessionId);
 
   subscribers.delete(sessionId);
+  sessionLanguages.delete(sessionId);
   return { refunded };
 }
 
@@ -215,6 +222,7 @@ function startTicker(sessionId: string, persona: CoachingPersona): void {
 function stopTicker(sessionId: string): void {
   const t = activeTimers.get(sessionId);
   if (t) { clearInterval(t); activeTimers.delete(sessionId); }
+  sessionLanguages.delete(sessionId); // a stopped session never ticks again, so its language is not needed
 }
 
 async function tick(sessionId: string, persona: CoachingPersona): Promise<void> {
@@ -235,7 +243,7 @@ async function tick(sessionId: string, persona: CoachingPersona): Promise<void> 
   // Pull recent transcript segments for this recording's live meeting.
   const { data: recording } = await supabaseAdmin
     .from('recordings')
-    .select('meeting_id')
+    .select('meeting_id, output_language')
     .eq('id', session.recording_id)
     .maybeSingle();
   if (!recording?.meeting_id) {
@@ -277,7 +285,10 @@ async function tick(sessionId: string, persona: CoachingPersona): Promise<void> 
     max_tokens: 1024,
     system: [{
       type: 'text',
-      text: persona.system,
+      text: personaSystemPrompt(
+        persona,
+        pickOutputLanguage(sessionLanguages.get(sessionId), (recording as { output_language?: string | null }).output_language)
+      ),
       cache_control: { type: 'ephemeral' },
     }] as any,
     messages: [{

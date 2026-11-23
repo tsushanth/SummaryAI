@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">تعذر العثور على هذا التسجيل.</string>
+    <string name="api_error_recording_not_transcribed">ما زال هذا التسجيل قيد النسخ. يرجى المحاولة مرة أخرى بعد قليل.</string>
+    <string name="api_error_transcript_unavailable">لا يوجد نص مكتوب لهذا التسجيل بعد.</string>
+    <string name="api_error_todo_not_found">تعذر العثور على هذه المهمة.</string>
+    <string name="api_error_calendar_provider_unavailable">مزوّد التقويم هذا غير متاح بعد.</string>
+    <string name="api_error_not_found">لم نتمكن من العثور على ما طلبته.</string>
+    <string name="api_error_rate_limited">طلبات كثيرة جدًا. يرجى الانتظار قليلًا ثم المحاولة مرة أخرى.</string>
+    <string name="api_error_unauthorized">يرجى تسجيل الدخول مرة أخرى للمتابعة.</string>
+    <string name="api_error_forbidden">ليس لديك صلاحية الوصول إلى هذا.</string>
+    <string name="api_error_invalid_request">الطلب غير صالح. يرجى التحقق منه ثم المحاولة مرة أخرى.</string>
+    <string name="api_error_server">حدث خطأ من جانبنا. يرجى المحاولة مرة أخرى.</string>
+    <string name="api_error_network">تعذر الوصول إلى الخادم. تحقق من اتصالك ثم حاول مرة أخرى.</string>
+    <string name="calendar_demo_mode_message">يتطلب ربط التقويم تسجيل الدخول باستخدام Google. يرجى تسجيل الخروج ثم تسجيل الدخول بحساب Google لاستخدام هذه الميزة.</string>
+    <string name="server_title_call_with">مكالمة مع %1$s</string>
+    <string name="server_title_call_to">مكالمة إلى %1$s</string>
+    <string name="server_speaker_numbered">المتحدث %1$d</string>
+</resources>

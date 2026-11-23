@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">Cet enregistrement est introuvable.</string>
+    <string name="api_error_recording_not_transcribed">Cet enregistrement est encore en cours de transcription. Réessayez dans un instant.</string>
+    <string name="api_error_transcript_unavailable">Cet enregistrement n\'a pas encore de transcription.</string>
+    <string name="api_error_todo_not_found">Cette tâche est introuvable.</string>
+    <string name="api_error_calendar_provider_unavailable">Ce fournisseur de calendrier n\'est pas encore disponible.</string>
+    <string name="api_error_not_found">Nous n\'avons pas trouvé ce que vous avez demandé.</string>
+    <string name="api_error_rate_limited">Trop de requêtes. Patientez un instant puis réessayez.</string>
+    <string name="api_error_unauthorized">Veuillez vous reconnecter pour continuer.</string>
+    <string name="api_error_forbidden">Vous n\'avez pas accès à ceci.</string>
+    <string name="api_error_invalid_request">Cette requête n\'était pas valide. Vérifiez-la puis réessayez.</string>
+    <string name="api_error_server">Un problème est survenu de notre côté. Veuillez réessayer.</string>
+    <string name="api_error_network">Impossible de joindre le serveur. Vérifiez votre connexion puis réessayez.</string>
+    <string name="calendar_demo_mode_message">L\'intégration du calendrier nécessite une connexion avec Google. Déconnectez-vous puis reconnectez-vous avec votre compte Google pour utiliser cette fonctionnalité.</string>
+    <string name="server_title_call_with">Appel avec %1$s</string>
+    <string name="server_title_call_to">Appel à %1$s</string>
+    <string name="server_speaker_numbered">Intervenant %1$d</string>
+</resources>

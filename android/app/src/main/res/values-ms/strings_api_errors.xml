@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">Rakaman ini tidak ditemui.</string>
+    <string name="api_error_recording_not_transcribed">Rakaman ini masih dalam transkripsi. Sila cuba lagi sebentar lagi.</string>
+    <string name="api_error_transcript_unavailable">Rakaman ini belum mempunyai transkrip.</string>
+    <string name="api_error_todo_not_found">Tugas ini tidak ditemui.</string>
+    <string name="api_error_calendar_provider_unavailable">Penyedia kalendar ini belum tersedia.</string>
+    <string name="api_error_not_found">Kami tidak menjumpai apa yang anda minta.</string>
+    <string name="api_error_rate_limited">Terlalu banyak permintaan. Tunggu sebentar dan cuba lagi.</string>
+    <string name="api_error_unauthorized">Sila log masuk semula untuk meneruskan.</string>
+    <string name="api_error_forbidden">Anda tidak mempunyai akses kepada ini.</string>
+    <string name="api_error_invalid_request">Permintaan tidak sah. Sila semak dan cuba lagi.</string>
+    <string name="api_error_server">Sesuatu telah berlaku di pihak kami. Sila cuba lagi.</string>
+    <string name="api_error_network">Tidak dapat menghubungi pelayan. Semak sambungan anda dan cuba lagi.</string>
+    <string name="calendar_demo_mode_message">Integrasi kalendar memerlukan log masuk dengan Google. Sila log keluar dan log masuk dengan akaun Google anda untuk menggunakan ciri ini.</string>
+    <string name="server_title_call_with">Panggilan dengan %1$s</string>
+    <string name="server_title_call_to">Panggilan ke %1$s</string>
+    <string name="server_speaker_numbered">Penutur %1$d</string>
+</resources>

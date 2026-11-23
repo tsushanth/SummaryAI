@@ -42,6 +42,7 @@ import com.kreativekoala.summaryai.ui.components.MmEmptyState
 import com.kreativekoala.summaryai.ui.components.SpeakerAvatar
 import com.kreativekoala.summaryai.ui.meetings.LiveTranscriptView
 import com.kreativekoala.summaryai.ui.recordings.share.applyingSpeakerNames
+import com.kreativekoala.summaryai.util.serverSpeakerLabel
 import com.kreativekoala.summaryai.ui.theme.speakerColor
 
 @Composable
@@ -178,7 +179,7 @@ private fun TranscriptSegmentItem(
     onSeek: () -> Unit
 ) {
     val speakerLabel = segment.speaker
-    val displayName = speakerLabel?.applyingSpeakerNames(speakerNames)
+    val displayName = speakerLabel?.applyingSpeakerNames(speakerNames)?.let { serverSpeakerLabel(it) }
     val text = segment.text.applyingSpeakerNames(speakerNames)
     val time = segment.formattedStartTime
 

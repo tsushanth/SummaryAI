@@ -8,6 +8,7 @@ import { instrumentAnthropic, withFeature } from '../lib/llm.js';
 import { config } from '../config/index.js';
 import type { TranscriptSegment } from '../types/database.js';
 import type { Citation } from '../types/api.js';
+import { languageInstruction } from '../lib/outputLanguage.js';
 
 // ============================================================================
 // Types
@@ -276,6 +277,8 @@ export async function answerQuestion(
   options: {
     previousQA?: Array<{ question: string; answer: string }>;
     maxTokens?: number;
+    /** BCP-47 code the answer must be written in; absent/'auto' keeps the model default. */
+    outputLanguage?: string | null;
   } = {}
 ): Promise<QAResult> {
   const client = getAnthropicClient();
@@ -303,7 +306,7 @@ export async function answerQuestion(
   const response = await withFeature('qa', () => client.messages.create({
     model: config.ANTHROPIC_MODEL,
     max_tokens: config.ANTHROPIC_MAX_TOKENS,
-    system: QA_SYSTEM_PROMPT,
+    system: QA_SYSTEM_PROMPT + languageInstruction(options.outputLanguage),
     messages: [
       {
         role: 'user',

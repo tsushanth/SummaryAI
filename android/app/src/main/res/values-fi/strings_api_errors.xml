@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">Tätä tallennetta ei löytynyt.</string>
+    <string name="api_error_recording_not_transcribed">Tätä tallennetta litteroidaan vielä. Yritä hetken kuluttua uudelleen.</string>
+    <string name="api_error_transcript_unavailable">Tällä tallenteella ei ole vielä litteraattia.</string>
+    <string name="api_error_todo_not_found">Tätä tehtävää ei löytynyt.</string>
+    <string name="api_error_calendar_provider_unavailable">Tämä kalenteripalvelu ei ole vielä käytettävissä.</string>
+    <string name="api_error_not_found">Emme löytäneet pyytämääsi.</string>
+    <string name="api_error_rate_limited">Liikaa pyyntöjä. Odota hetki ja yritä uudelleen.</string>
+    <string name="api_error_unauthorized">Kirjaudu uudelleen sisään jatkaaksesi.</string>
+    <string name="api_error_forbidden">Sinulla ei ole pääsyä tähän.</string>
+    <string name="api_error_invalid_request">Pyyntö oli virheellinen. Tarkista se ja yritä uudelleen.</string>
+    <string name="api_error_server">Meidän päässämme tapahtui virhe. Yritä uudelleen.</string>
+    <string name="api_error_network">Palvelimeen ei saatu yhteyttä. Tarkista yhteytesi ja yritä uudelleen.</string>
+    <string name="calendar_demo_mode_message">Kalenteri-integraatio vaatii kirjautumisen Googlella. Kirjaudu ulos ja takaisin sisään Google-tililläsi käyttääksesi tätä toimintoa.</string>
+    <string name="server_title_call_with">Puhelu: %1$s</string>
+    <string name="server_title_call_to">Puhelu numeroon %1$s</string>
+    <string name="server_speaker_numbered">Puhuja %1$d</string>
+</resources>

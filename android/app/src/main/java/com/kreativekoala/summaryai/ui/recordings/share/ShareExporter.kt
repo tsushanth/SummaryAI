@@ -1,6 +1,7 @@
 package com.kreativekoala.summaryai.ui.recordings.share
 
 import com.kreativekoala.summaryai.R
+import com.kreativekoala.summaryai.util.ServerText
 import android.content.Context
 import android.content.Intent
 import android.graphics.Paint
@@ -97,7 +98,7 @@ object ShareExporter {
             val mins = (seg.startTime / 60).toInt()
             val secs = (seg.startTime % 60).toInt()
             val ts = String.format("%02d:%02d", mins, secs)
-            appendLine("[$ts] ${seg.speakerLabel}: ${seg.text}").appendLine()
+            appendLine("[$ts] ${ServerText.speakerLabel(context, seg.speakerLabel)}: ${seg.text}").appendLine()
         }
     }
 
@@ -127,7 +128,7 @@ object ShareExporter {
         val names = transcript.speakerNames
         appendLine("# " + context.getString(R.string.share_export_title_transcript, recording.title)).appendLine()
         transcript.segments.forEach { seg ->
-            val speaker = (seg.speaker ?: context.getString(R.string.share_export_speaker)).applyingSpeakerNames(names)
+            val speaker = ServerText.speakerLabel(context, (seg.speaker ?: context.getString(R.string.share_export_speaker)).applyingSpeakerNames(names))
             appendLine("[${seg.formattedStartTime}] $speaker: ${seg.text.applyingSpeakerNames(names)}").appendLine()
         }
     }

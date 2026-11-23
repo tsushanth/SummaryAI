@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">Nie znaleziono tego nagrania.</string>
+    <string name="api_error_recording_not_transcribed">To nagranie jest jeszcze transkrybowane. Spróbuj ponownie za chwilę.</string>
+    <string name="api_error_transcript_unavailable">To nagranie nie ma jeszcze transkrypcji.</string>
+    <string name="api_error_todo_not_found">Nie znaleziono tego zadania.</string>
+    <string name="api_error_calendar_provider_unavailable">Ten dostawca kalendarza nie jest jeszcze dostępny.</string>
+    <string name="api_error_not_found">Nie znaleźliśmy tego, o co prosisz.</string>
+    <string name="api_error_rate_limited">Zbyt wiele żądań. Poczekaj chwilę i spróbuj ponownie.</string>
+    <string name="api_error_unauthorized">Zaloguj się ponownie, aby kontynuować.</string>
+    <string name="api_error_forbidden">Nie masz do tego dostępu.</string>
+    <string name="api_error_invalid_request">To żądanie było nieprawidłowe. Sprawdź je i spróbuj ponownie.</string>
+    <string name="api_error_server">Coś poszło nie tak po naszej stronie. Spróbuj ponownie.</string>
+    <string name="api_error_network">Nie można połączyć się z serwerem. Sprawdź połączenie i spróbuj ponownie.</string>
+    <string name="calendar_demo_mode_message">Integracja z kalendarzem wymaga zalogowania się przez Google. Wyloguj się i zaloguj kontem Google, aby korzystać z tej funkcji.</string>
+    <string name="server_title_call_with">Rozmowa z %1$s</string>
+    <string name="server_title_call_to">Rozmowa do %1$s</string>
+    <string name="server_speaker_numbered">Mówca %1$d</string>
+</resources>

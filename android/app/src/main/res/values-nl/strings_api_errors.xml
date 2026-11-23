@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">Deze opname is niet gevonden.</string>
+    <string name="api_error_recording_not_transcribed">Deze opname wordt nog getranscribeerd. Probeer het zo meteen opnieuw.</string>
+    <string name="api_error_transcript_unavailable">Deze opname heeft nog geen transcript.</string>
+    <string name="api_error_todo_not_found">Deze taak is niet gevonden.</string>
+    <string name="api_error_calendar_provider_unavailable">Deze agendaprovider is nog niet beschikbaar.</string>
+    <string name="api_error_not_found">We hebben niet kunnen vinden wat je vroeg.</string>
+    <string name="api_error_rate_limited">Te veel verzoeken. Wacht even en probeer het opnieuw.</string>
+    <string name="api_error_unauthorized">Log opnieuw in om door te gaan.</string>
+    <string name="api_error_forbidden">Je hebt hier geen toegang toe.</string>
+    <string name="api_error_invalid_request">Dat verzoek was ongeldig. Controleer het en probeer het opnieuw.</string>
+    <string name="api_error_server">Er is iets misgegaan aan onze kant. Probeer het opnieuw.</string>
+    <string name="api_error_network">De server is niet bereikbaar. Controleer je verbinding en probeer het opnieuw.</string>
+    <string name="calendar_demo_mode_message">Voor de agenda-integratie moet je inloggen met Google. Log uit en log in met je Google-account om deze functie te gebruiken.</string>
+    <string name="server_title_call_with">Gesprek met %1$s</string>
+    <string name="server_title_call_to">Gesprek naar %1$s</string>
+    <string name="server_speaker_numbered">Spreker %1$d</string>
+</resources>

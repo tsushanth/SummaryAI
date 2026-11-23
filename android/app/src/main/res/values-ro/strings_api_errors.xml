@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">Această înregistrare nu a fost găsită.</string>
+    <string name="api_error_recording_not_transcribed">Această înregistrare este încă în curs de transcriere. Încearcă din nou peste puțin timp.</string>
+    <string name="api_error_transcript_unavailable">Această înregistrare nu are încă o transcriere.</string>
+    <string name="api_error_todo_not_found">Această sarcină nu a fost găsită.</string>
+    <string name="api_error_calendar_provider_unavailable">Acest furnizor de calendar nu este încă disponibil.</string>
+    <string name="api_error_not_found">Nu am găsit ce ai cerut.</string>
+    <string name="api_error_rate_limited">Prea multe solicitări. Așteaptă puțin și încearcă din nou.</string>
+    <string name="api_error_unauthorized">Autentifică-te din nou pentru a continua.</string>
+    <string name="api_error_forbidden">Nu ai acces la aceasta.</string>
+    <string name="api_error_invalid_request">Solicitarea nu a fost validă. Verifică-o și încearcă din nou.</string>
+    <string name="api_error_server">Ceva nu a mers bine din partea noastră. Încearcă din nou.</string>
+    <string name="api_error_network">Serverul nu a putut fi contactat. Verifică conexiunea și încearcă din nou.</string>
+    <string name="calendar_demo_mode_message">Integrarea calendarului necesită autentificarea cu Google. Deconectează-te și autentifică-te din nou cu contul tău Google pentru a folosi această funcție.</string>
+    <string name="server_title_call_with">Apel cu %1$s</string>
+    <string name="server_title_call_to">Apel către %1$s</string>
+    <string name="server_speaker_numbered">Vorbitor %1$d</string>
+</resources>

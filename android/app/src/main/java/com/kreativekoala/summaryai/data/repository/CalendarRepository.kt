@@ -5,7 +5,6 @@ import com.kreativekoala.summaryai.data.api.models.*
 import com.kreativekoala.summaryai.domain.model.CalendarConnection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import retrofit2.HttpException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -35,11 +34,9 @@ class CalendarRepository @Inject constructor(
         try {
             val response = api.connectCalendar(provider)
             Result.success(response.url)
-        } catch (e: HttpException) {
-            // 422 = the server has no OAuth app for this provider (e.g. Outlook). Say so instead of "HTTP 422".
-            if (e.code() == 422) Result.failure(Exception("This calendar provider is not available yet."))
-            else Result.failure(e)
         } catch (e: Exception) {
+            // The HttpException carries the server's stable code (422 PROVIDER_NOT_CONFIGURED = no OAuth app for this provider, e.g.
+            // Outlook); the screen turns it into text in the user's language (ApiErrors).
             Result.failure(e)
         }
     }

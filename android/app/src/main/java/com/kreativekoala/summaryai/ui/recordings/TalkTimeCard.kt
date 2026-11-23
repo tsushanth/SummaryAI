@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.data.api.models.MeetingAnalyticsDto
+import com.kreativekoala.summaryai.util.serverSpeakerLabel
 import kotlin.math.roundToInt
 
 /** Per-speaker talk share, question count and longest monologue for a finished meeting. */
@@ -38,7 +39,7 @@ fun TalkTimeCard(analytics: MeetingAnalyticsDto, modifier: Modifier = Modifier) 
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(s.name, style = MaterialTheme.typography.bodyMedium)
+                        Text(serverSpeakerLabel(s.name), style = MaterialTheme.typography.bodyMedium)
                         Text(
                             "${(s.talkShare * 100).roundToInt()}%",
                             style = MaterialTheme.typography.bodyMedium,
@@ -62,7 +63,7 @@ fun TalkTimeCard(analytics: MeetingAnalyticsDto, modifier: Modifier = Modifier) 
                 Text(
                     text = stringResource(
                         R.string.analytics_longest_monologue,
-                        speaker,
+                        serverSpeakerLabel(speaker),
                         formatDuration(analytics.longestMonologueSeconds)
                     ),
                     style = MaterialTheme.typography.bodySmall,

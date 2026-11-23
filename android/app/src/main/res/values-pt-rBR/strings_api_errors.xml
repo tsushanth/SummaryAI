@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">Não foi possível encontrar esta gravação.</string>
+    <string name="api_error_recording_not_transcribed">Esta gravação ainda está sendo transcrita. Tente novamente em instantes.</string>
+    <string name="api_error_transcript_unavailable">Esta gravação ainda não tem transcrição.</string>
+    <string name="api_error_todo_not_found">Não foi possível encontrar esta tarefa.</string>
+    <string name="api_error_calendar_provider_unavailable">Este provedor de agenda ainda não está disponível.</string>
+    <string name="api_error_not_found">Não encontramos o que você pediu.</string>
+    <string name="api_error_rate_limited">Muitas solicitações. Aguarde um momento e tente novamente.</string>
+    <string name="api_error_unauthorized">Faça login novamente para continuar.</string>
+    <string name="api_error_forbidden">Você não tem acesso a isto.</string>
+    <string name="api_error_invalid_request">A solicitação não era válida. Verifique e tente novamente.</string>
+    <string name="api_error_server">Algo deu errado do nosso lado. Tente novamente.</string>
+    <string name="api_error_network">Não foi possível acessar o servidor. Verifique sua conexão e tente novamente.</string>
+    <string name="calendar_demo_mode_message">A integração com a agenda exige login com o Google. Saia e entre novamente com sua conta Google para usar este recurso.</string>
+    <string name="server_title_call_with">Chamada com %1$s</string>
+    <string name="server_title_call_to">Chamada para %1$s</string>
+    <string name="server_speaker_numbered">Falante %1$d</string>
+</resources>

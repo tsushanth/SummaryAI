@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">Эта запись не найдена.</string>
+    <string name="api_error_recording_not_transcribed">Эта запись ещё расшифровывается. Попробуйте ещё раз через минуту.</string>
+    <string name="api_error_transcript_unavailable">У этой записи пока нет расшифровки.</string>
+    <string name="api_error_todo_not_found">Эта задача не найдена.</string>
+    <string name="api_error_calendar_provider_unavailable">Этот поставщик календаря пока недоступен.</string>
+    <string name="api_error_not_found">Мы не нашли то, что вы запросили.</string>
+    <string name="api_error_rate_limited">Слишком много запросов. Подождите немного и попробуйте снова.</string>
+    <string name="api_error_unauthorized">Войдите снова, чтобы продолжить.</string>
+    <string name="api_error_forbidden">У вас нет доступа к этому.</string>
+    <string name="api_error_invalid_request">Запрос был недопустимым. Проверьте его и попробуйте снова.</string>
+    <string name="api_error_server">Что-то пошло не так на нашей стороне. Попробуйте снова.</string>
+    <string name="api_error_network">Не удалось связаться с сервером. Проверьте подключение и попробуйте снова.</string>
+    <string name="calendar_demo_mode_message">Для интеграции с календарём нужно войти через Google. Выйдите и войдите снова с аккаунтом Google, чтобы использовать эту функцию.</string>
+    <string name="server_title_call_with">Звонок с %1$s</string>
+    <string name="server_title_call_to">Звонок на %1$s</string>
+    <string name="server_speaker_numbered">Говорящий %1$d</string>
+</resources>

@@ -18,6 +18,7 @@ import { reportAlert } from '../lib/alerts.js';
 import { getRecordingLimits } from '../config/recordingLimits.js';
 import { evaluateSummaryEligibility, countSpeechUnits } from './shortRecordingGuard.js';
 import { languageHintForRecording } from './meetingLanguage.js';
+import { languageNameForCode } from '../lib/outputLanguage.js';
 import { transcribeAudio, isSttConfigured, getSttMode, type NormalizedTranscript, type TranscriptSegment } from './stt/index.js';
 
 export interface ProcessingJob {
@@ -438,35 +439,6 @@ function formatTimestamp(seconds: number): string {
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
-
-/**
- * Map a BCP-47 language code (or display name) to a human-readable language name
- * for prompting. Returns null for unrecognized / "auto" / empty values.
- */
-function languageNameForCode(code: string | null | undefined): string | null {
-  if (!code) return null;
-  const normalized = code.trim().toLowerCase();
-  if (!normalized || normalized === 'auto') return null;
-  const base = normalized.split(/[-_]/)[0];
-  const map: Record<string, string> = {
-    en: 'English',
-    es: 'Spanish',
-    fr: 'French',
-    de: 'German',
-    pt: 'Portuguese',
-    it: 'Italian',
-    ja: 'Japanese',
-    ko: 'Korean',
-    zh: 'Chinese',
-    hi: 'Hindi',
-    ar: 'Arabic',
-    ru: 'Russian',
-    nl: 'Dutch',
-    pl: 'Polish',
-    tr: 'Turkish',
-  };
-  return base ? (map[base] ?? null) : null;
 }
 
 /**

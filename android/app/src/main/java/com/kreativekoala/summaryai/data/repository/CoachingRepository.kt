@@ -9,6 +9,7 @@ import com.kreativekoala.summaryai.data.api.coaching.CoachingInsight
 import com.kreativekoala.summaryai.data.api.coaching.CoachingPersonaKey
 import com.kreativekoala.summaryai.data.api.coaching.CoachingStartSessionRequest
 import com.kreativekoala.summaryai.data.api.coaching.CoachingStartSessionResponse
+import com.kreativekoala.summaryai.util.OutputLanguageSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -26,6 +27,7 @@ import javax.inject.Singleton
 @Singleton
 class CoachingRepository @Inject constructor(
     private val api: CoachingApi,
+    private val outputLanguage: OutputLanguageSource,
 ) {
     private val gson: Gson = Gson()
 
@@ -36,7 +38,7 @@ class CoachingRepository @Inject constructor(
     suspend fun debugGrantCredits() = api.debugGrantCredits()
 
     suspend fun startSession(recordingId: String, persona: CoachingPersonaKey): CoachingStartSessionResponse =
-        api.startSession(CoachingStartSessionRequest(recordingId, persona.key))
+        api.startSession(CoachingStartSessionRequest(recordingId, persona.key, outputLanguage.current()))
 
     suspend fun endSession(sessionId: String): CoachingEndResponse = api.endSession(sessionId)
 

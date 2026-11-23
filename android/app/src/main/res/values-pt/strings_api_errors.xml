@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">Não foi possível encontrar esta gravação.</string>
+    <string name="api_error_recording_not_transcribed">Esta gravação ainda está a ser transcrita. Tente novamente dentro de instantes.</string>
+    <string name="api_error_transcript_unavailable">Esta gravação ainda não tem transcrição.</string>
+    <string name="api_error_todo_not_found">Não foi possível encontrar esta tarefa.</string>
+    <string name="api_error_calendar_provider_unavailable">Este fornecedor de calendário ainda não está disponível.</string>
+    <string name="api_error_not_found">Não encontrámos o que pediu.</string>
+    <string name="api_error_rate_limited">Demasiados pedidos. Aguarde um momento e tente novamente.</string>
+    <string name="api_error_unauthorized">Inicie sessão novamente para continuar.</string>
+    <string name="api_error_forbidden">Não tem acesso a isto.</string>
+    <string name="api_error_invalid_request">O pedido não era válido. Verifique-o e tente novamente.</string>
+    <string name="api_error_server">Algo correu mal do nosso lado. Tente novamente.</string>
+    <string name="api_error_network">Não foi possível contactar o servidor. Verifique a ligação e tente novamente.</string>
+    <string name="calendar_demo_mode_message">A integração do calendário requer o início de sessão com a Google. Termine sessão e inicie-a com a sua conta Google para usar esta funcionalidade.</string>
+    <string name="server_title_call_with">Chamada com %1$s</string>
+    <string name="server_title_call_to">Chamada para %1$s</string>
+    <string name="server_speaker_numbered">Interlocutor %1$d</string>
+</resources>

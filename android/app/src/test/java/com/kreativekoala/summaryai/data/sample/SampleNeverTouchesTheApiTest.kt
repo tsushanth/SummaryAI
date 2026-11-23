@@ -2,6 +2,7 @@ package com.kreativekoala.summaryai.data.sample
 
 import com.kreativekoala.summaryai.data.api.SummaryAIApi
 import com.kreativekoala.summaryai.data.repository.RecordingsRepository
+import com.kreativekoala.summaryai.util.OutputLanguageSource
 import com.kreativekoala.summaryai.testutil.FakeSharedPreferences
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
@@ -19,7 +20,7 @@ class SampleNeverTouchesTheApiTest {
     ) { _, method, _ -> throw AssertionError("the sample must not call the API: ${method.name}") } as SummaryAIApi
 
     private val store = SampleMeetingStore(FakeSharedPreferences()).also { it.seed() }
-    private val repo = RecordingsRepository(api, OkHttpClient(), store)
+    private val repo = RecordingsRepository(api, OkHttpClient(), store, OutputLanguageSource { null })
 
     @Test fun openingTheSampleIsLocal() = runBlocking {
         val r = repo.getRecording(SampleMeeting.ID, includeTranscript = true, includeSummary = true)

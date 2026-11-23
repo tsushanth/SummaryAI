@@ -9,6 +9,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.data.api.models.MeetingAnalyticsDto
+import com.kreativekoala.summaryai.util.ApiErrors
 import com.kreativekoala.summaryai.data.repository.IntegrationsRepository
 import com.kreativekoala.summaryai.data.sample.SampleMeeting
 import com.kreativekoala.summaryai.data.repository.RecordingsRepository
@@ -232,7 +233,7 @@ class RecordingDetailViewModel @Inject constructor(
                             ) else it
                         },
                         isAskingQuestion = false,
-                        error = error.message
+                        error = ApiErrors.userMessage(context, error)
                     )
                 }
             )
@@ -252,7 +253,7 @@ class RecordingDetailViewModel @Inject constructor(
                     }
                 },
                 onFailure = { error ->
-                    _uiState.value = _uiState.value.copy(error = error.message)
+                    _uiState.value = _uiState.value.copy(error = ApiErrors.userMessage(context, error))
                 }
             )
         }
@@ -274,7 +275,7 @@ class RecordingDetailViewModel @Inject constructor(
                 onFailure = { error ->
                     _uiState.value = _uiState.value.copy(
                         isDeleting = false,
-                        error = error.message
+                        error = ApiErrors.userMessage(context, error)
                     )
                 }
             )
@@ -317,7 +318,7 @@ class RecordingDetailViewModel @Inject constructor(
                 onFailure = { error ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = error.message
+                        error = ApiErrors.userMessage(context, error)
                     )
                 }
             )

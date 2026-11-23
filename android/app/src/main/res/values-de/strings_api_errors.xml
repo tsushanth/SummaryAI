@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">Diese Aufnahme wurde nicht gefunden.</string>
+    <string name="api_error_recording_not_transcribed">Diese Aufnahme wird noch transkribiert. Bitte versuche es gleich noch einmal.</string>
+    <string name="api_error_transcript_unavailable">Für diese Aufnahme gibt es noch kein Transkript.</string>
+    <string name="api_error_todo_not_found">Diese Aufgabe wurde nicht gefunden.</string>
+    <string name="api_error_calendar_provider_unavailable">Dieser Kalenderanbieter ist noch nicht verfügbar.</string>
+    <string name="api_error_not_found">Wir konnten nicht finden, wonach du gesucht hast.</string>
+    <string name="api_error_rate_limited">Zu viele Anfragen. Bitte warte einen Moment und versuche es erneut.</string>
+    <string name="api_error_unauthorized">Bitte melde dich erneut an, um fortzufahren.</string>
+    <string name="api_error_forbidden">Du hast keinen Zugriff darauf.</string>
+    <string name="api_error_invalid_request">Die Anfrage war ungültig. Bitte überprüfe sie und versuche es erneut.</string>
+    <string name="api_error_server">Auf unserer Seite ist etwas schiefgelaufen. Bitte versuche es erneut.</string>
+    <string name="api_error_network">Der Server ist nicht erreichbar. Prüfe deine Verbindung und versuche es erneut.</string>
+    <string name="calendar_demo_mode_message">Die Kalenderintegration erfordert die Anmeldung mit Google. Bitte melde dich ab und mit deinem Google-Konto wieder an, um diese Funktion zu nutzen.</string>
+    <string name="server_title_call_with">Anruf mit %1$s</string>
+    <string name="server_title_call_to">Anruf an %1$s</string>
+    <string name="server_speaker_numbered">Sprecher %1$d</string>
+</resources>

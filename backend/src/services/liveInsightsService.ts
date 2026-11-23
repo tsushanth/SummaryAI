@@ -7,6 +7,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { instrumentAnthropic, withFeature } from '../lib/llm.js';
 import { config } from '../config/index.js';
 import { supabaseAdmin } from '../lib/supabase.js';
+import { languageInstruction } from '../lib/outputLanguage.js';
 import { LiveInsight, LiveInsightType, VerificationStatus } from '../types/meetings.js';
 
 // Track meetings with pending insight generation to batch requests
@@ -44,6 +45,28 @@ export async function queueInsightGeneration(meetingId: string, userId: string):
 }
 
 /**
+ * The language live insights are written in: the output_language of the meeting's recording (sent by the client when the
+ * recording was created). null = no instruction, i.e. the model default, which is what clients that send none get.
+ * Never throws: a language lookup must not block insight generation.
+ */
+export async function getMeetingOutputLanguage(meetingId: string): Promise<string | null> {
+  try {
+    const { data } = await supabaseAdmin
+      .from('recordings')
+      .select('output_language')
+      .eq('meeting_id', meetingId)
+      .not('output_language', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const lang = (data as { output_language?: string | null } | null)?.output_language;
+    return typeof lang === 'string' && lang ? lang : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Generate insights for a meeting based on recent transcript segments
  */
 async function generateInsightsForMeeting(meetingId: string, userId: string): Promise<void> {
@@ -77,11 +100,13 @@ async function generateInsightsForMeeting(meetingId: string, userId: string): Pr
 
   const anthropic = instrumentAnthropic(new Anthropic({ apiKey: config.ANTHROPIC_API_KEY }));
 
+  const outputLanguage = await getMeetingOutputLanguage(meetingId);
+
   // Generate insights in parallel
   const [keyPoints, questions, factChecks] = await Promise.all([
-    generateKeyPoints(anthropic, context),
-    generateQuestions(anthropic, context),
-    generateFactChecks(anthropic, context),
+    generateKeyPoints(anthropic, context, outputLanguage),
+    generateQuestions(anthropic, context, outputLanguage),
+    generateFactChecks(anthropic, context, outputLanguage),
   ]);
 
   // Calculate approximate timestamp (use the last segment's end time)
@@ -152,7 +177,7 @@ async function generateInsightsForMeeting(meetingId: string, userId: string): Pr
   }
 
   // Check for cross-meeting contradictions asynchronously
-  findCrossMeetingContradictions(meetingId, userId, context, timestampSeconds).catch(err => {
+  findCrossMeetingContradictions(meetingId, userId, context, timestampSeconds, outputLanguage).catch(err => {
     console.error('[LiveInsights] Error checking cross-meeting contradictions:', err);
   });
 }
@@ -160,7 +185,7 @@ async function generateInsightsForMeeting(meetingId: string, userId: string): Pr
 /**
  * Generate key points from transcript context
  */
-async function generateKeyPoints(anthropic: Anthropic, context: string): Promise<string[]> {
+async function generateKeyPoints(anthropic: Anthropic, context: string, outputLanguage: string | null = null): Promise<string[]> {
   try {
     const response = await withFeature('live_insights', () => anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
@@ -172,7 +197,7 @@ async function generateKeyPoints(anthropic: Anthropic, context: string): Promise
 - Key insights
 
 Return ONLY a JSON array of strings, no explanation. Example: ["Key point 1", "Key point 2"]
-If no key points, return: []`,
+If no key points, return: []` + languageInstruction(outputLanguage),
       messages: [
         {
           role: 'user',
@@ -192,7 +217,7 @@ If no key points, return: []`,
 /**
  * Generate follow-up questions from transcript context
  */
-async function generateQuestions(anthropic: Anthropic, context: string): Promise<string[]> {
+async function generateQuestions(anthropic: Anthropic, context: string, outputLanguage: string | null = null): Promise<string[]> {
   try {
     const response = await withFeature('live_insights', () => anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
@@ -204,7 +229,7 @@ async function generateQuestions(anthropic: Anthropic, context: string): Promise
 - Challenge assumptions
 
 Return ONLY a JSON array of strings, no explanation. Example: ["Question 1?", "Question 2?"]
-If no good questions, return: []`,
+If no good questions, return: []` + languageInstruction(outputLanguage),
       messages: [
         {
           role: 'user',
@@ -231,7 +256,7 @@ interface FactCheckResult {
 /**
  * Fact-check claims in the transcript
  */
-async function generateFactChecks(anthropic: Anthropic, context: string): Promise<FactCheckResult[]> {
+async function generateFactChecks(anthropic: Anthropic, context: string, outputLanguage: string | null = null): Promise<FactCheckResult[]> {
   try {
     const response = await withFeature('live_insights', () => anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
@@ -250,7 +275,7 @@ Only flag claims about:
 
 Return ONLY a JSON array, no explanation. Example:
 [{"claim": "The claim text", "status": "verified", "confidence": 0.9}]
-If no verifiable claims, return: []`,
+If no verifiable claims, return: []` + languageInstruction(outputLanguage),
       messages: [
         {
           role: 'user',
@@ -274,7 +299,8 @@ async function findCrossMeetingContradictions(
   meetingId: string,
   userId: string,
   currentContext: string,
-  timestampSeconds: number
+  timestampSeconds: number,
+  outputLanguage: string | null = null
 ): Promise<void> {
   if (!config.ANTHROPIC_API_KEY) return;
 
@@ -331,7 +357,7 @@ async function findCrossMeetingContradictions(
 
 Return ONLY a JSON array of findings. Example:
 [{"type": "contradiction", "current": "current statement", "previous": "previous statement", "explanation": "brief explanation"}]
-If nothing notable, return: []`,
+If nothing notable, return: []` + languageInstruction(outputLanguage),
       messages: [
         {
           role: 'user',

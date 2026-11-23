@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">Tuto nahrávku se nepodařilo najít.</string>
+    <string name="api_error_recording_not_transcribed">Tato nahrávka se ještě přepisuje. Zkuste to za chvíli znovu.</string>
+    <string name="api_error_transcript_unavailable">Tato nahrávka zatím nemá přepis.</string>
+    <string name="api_error_todo_not_found">Tento úkol se nepodařilo najít.</string>
+    <string name="api_error_calendar_provider_unavailable">Tento poskytovatel kalendáře zatím není k dispozici.</string>
+    <string name="api_error_not_found">Nenašli jsme, o co jste požádali.</string>
+    <string name="api_error_rate_limited">Příliš mnoho požadavků. Chvíli počkejte a zkuste to znovu.</string>
+    <string name="api_error_unauthorized">Pro pokračování se přihlaste znovu.</string>
+    <string name="api_error_forbidden">K tomuto nemáte přístup.</string>
+    <string name="api_error_invalid_request">Požadavek byl neplatný. Zkontrolujte ho a zkuste to znovu.</string>
+    <string name="api_error_server">Na naší straně se něco pokazilo. Zkuste to prosím znovu.</string>
+    <string name="api_error_network">Server se nepodařilo kontaktovat. Zkontrolujte připojení a zkuste to znovu.</string>
+    <string name="calendar_demo_mode_message">Integrace kalendáře vyžaduje přihlášení přes Google. Odhlaste se a přihlaste se znovu účtem Google, abyste mohli tuto funkci používat.</string>
+    <string name="server_title_call_with">Hovor s %1$s</string>
+    <string name="server_title_call_to">Hovor na %1$s</string>
+    <string name="server_speaker_numbered">Mluvčí %1$d</string>
+</resources>
