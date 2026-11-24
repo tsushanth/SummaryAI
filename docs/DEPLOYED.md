@@ -4,8 +4,16 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 
 | Component | Fly app | Release | Image | Built from | Date |
 |---|---|---|---|---|---|
-| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v59 | `registry.fly.io/summary-ai-backend:deployment-01M855TND6ZZHSE10Y172EQNW2` | `origin/main` at `63d6069` (squash merge of #93; backend tree identical to main) | 2026-11-23 (UTC) |
+| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v60 | `registry.fly.io/summary-ai-backend:deployment-01M85HVXGK26HWJGM331VTSH89` | `origin/main` at `ee5cb3e` (`backend/` tree `6ed54eb8a3e3a7d5677d3d487fabf6db38897d95` identical to main; backend change is #95) | 2026-11-24 (UTC) |
 | Web (`web/`, meetingmind.org) | `meeting-mind-web` | v39 | `registry.fly.io/meeting-mind-web:deployment-01M80MVFF67NNXW4G3ZYX9MPSN` | `origin/main` at `8c20741` (squash merge of #91; `web/` tree `95ac59f1309ef4fe01c82d47ae720fe58b40373b` identical to main) | 2026-11-22 (UTC) |
+
+## 2026-11-23 Backend (summary-ai-backend): Traditional Chinese output language (#95), release v60
+- Fly release v60 (previous v59, image `registry.fly.io/summary-ai-backend:deployment-01M855TND6ZZHSE10Y172EQNW2`, built from `63d6069`). Deployed with `flyctl deploy --remote-only` from a clean detached worktree of `origin/main` at `ee5cb3e`; worktree `backend/` tree equals `origin/main:backend` (`6ed54eb8a3e3a7d5677d3d487fabf6db38897d95`).
+- Delta proof (backend deploys were frozen for the Soniox rollout, so this was checked first): `git log 63d6069..origin/main -- backend/` is only `3031d38` (#95); `git diff 63d6069..origin/main --stat -- backend/` is `src/lib/outputLanguage.ts` and `test/output-language.test.ts`, nothing else. No Soniox, STT provider, feature-flag, migration, package.json, Dockerfile or env change shipped. #96 (zh-TW wording) is Android resources only. v59 confirmed as the newest release before this deploy.
+- What it does: `output_language` zh-TW / zh-Hant => "Traditional Chinese (Taiwan)", zh-HK / zh-MO => "Traditional Chinese (Hong Kong)", bare zh / zh-CN / zh-Hans => "Simplified Chinese" (was "Chinese"). Own-key whitelist kept, so `constructor` / `__proto__` give no instruction.
+- Verified: `tsc` clean, vitest 90 files / 1264 tests pass (`--maxWorkers=2`, on this worktree); no live meetings or user traffic in the logs before deploy (only health checks and background loops); after deploy `/health` 200, `/health/detailed` healthy with all five loops fresh; unauthenticated question call still 401 "Missing or invalid authorization header", same as before; deployed `/app/dist/lib/outputLanguage.js` contains the Taiwan and Hong Kong names (1 match each). NOT verified end to end: no authenticated call with `output_language` (no test user token); covered by unit tests only.
+- Secrets: names only listed, none set or unset.
+- Rollback: `flyctl releases rollback 59 -a summary-ai-backend` (or `flyctl deploy --image registry.fly.io/summary-ai-backend:deployment-01M855TND6ZZHSE10Y172EQNW2 -a summary-ai-backend`).
 
 ## 2026-11-23 Backend (summary-ai-backend): output language (#93), release v59
 - Fly release v59 (previous v58, 2026-11-13 17:07 PT, image `registry.fly.io/summary-ai-backend:deployment-01M7AXYCHQHG60W6PQWEDK8565`). Deployed with `flyctl deploy --remote-only` from a clean detached worktree of `origin/main` at `63d6069`.
