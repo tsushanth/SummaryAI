@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="integrations_title">將摘要傳送到其他位置</string>
+    <string name="integrations_desc">每場會議處理完成後，MeetingMind 可以將摘要和行動事項傳送到 Webhook、Slack 或 Notion。金鑰以加密方式儲存，且不會再次顯示。</string>
+    <string name="integration_webhook">Webhook</string>
+    <string name="integration_webhook_url">Webhook URL（https）</string>
+    <string name="integration_webhook_secret">簽名金鑰（可選）</string>
+    <string name="integration_slack">Slack</string>
+    <string name="integration_slack_url">Slack 傳入 Webhook URL</string>
+    <string name="integration_notion">Notion</string>
+    <string name="integration_notion_token">Notion 整合令牌</string>
+    <string name="integration_notion_database">Notion 資料庫 ID</string>
+    <string name="integration_connected">已連線</string>
+    <string name="integration_last_delivery">上次傳送：%1$s</string>
+    <string name="integration_leave_to_keep">輸入新值以替換</string>
+    <string name="integration_save">儲存</string>
+    <string name="integration_test">傳送測試</string>
+    <string name="integration_remove">移除</string>
+    <string name="integrations_saved">已儲存。</string>
+    <string name="integrations_removed">已移除。</string>
+    <string name="integrations_test_delivered">測試已傳送。</string>
+    <string name="integrations_test_failed">測試失敗。</string>
+    <string name="integrations_load_failed">無法載入整合。</string>
+    <string name="integrations_save_failed">無法儲存。</string>
+    <string name="integrations_remove_failed">無法移除。</string>
+    <string name="integrations_message_with_detail">%1$s%2$s</string>
+    <string name="settings_integrations_subtitle">Webhook、Slack、Notion</string>
+    <string name="tile_record_label">錄製會議</string>
+    <string name="widget_record_label">錄音</string>
+    <string name="widget_description">從主螢幕開始錄音</string>
+    <string name="analytics_title">發言時間</string>
+    <string name="analytics_questions">個問題: %1$d</string>
+    <string name="analytics_words">個詞: %1$d</string>
+    <string name="analytics_longest_monologue">最長獨白：%1$s（%2$s）</string>
+</resources>

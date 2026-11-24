@@ -17,7 +17,7 @@ const LANGUAGE_NAMES: Record<string, string> = {
   it: 'Italian',
   ja: 'Japanese',
   ko: 'Korean',
-  zh: 'Chinese',
+  zh: 'Simplified Chinese', // bare 'zh' (old clients) stays Simplified; Traditional variants are resolved in chineseVariantName
   hi: 'Hindi',
   ar: 'Arabic',
   ru: 'Russian',
@@ -40,6 +40,24 @@ const LANGUAGE_NAMES: Record<string, string> = {
   uk: 'Ukrainian',
 };
 
+/** Chinese written in Traditional characters, by market (wording differs: Taiwan 軟體/網路, Hong Kong 軟件/網絡). */
+const TRADITIONAL_CHINESE_NAMES: Record<'tw' | 'hk', string> = {
+  tw: 'Traditional Chinese (Taiwan)',
+  hk: 'Traditional Chinese (Hong Kong)',
+};
+
+/**
+ * Name for a Chinese tag, from its script and region subtags: zh-TW / zh-Hant / zh-Hant-TW => Taiwan, zh-HK / zh-MO /
+ * zh-Hant-HK / zh-Hant-MO => Hong Kong, everything else (zh, zh-CN, zh-SG, zh-Hans, ...) => Simplified.
+ */
+function chineseVariantName(subtags: string[]): string {
+  const script = subtags.find((t) => t.length === 4);
+  const region = subtags.find((t) => t.length === 2);
+  const traditional = script === 'hant' || (script === undefined && (region === 'tw' || region === 'hk' || region === 'mo'));
+  if (!traditional) return LANGUAGE_NAMES.zh;
+  return region === 'hk' || region === 'mo' ? TRADITIONAL_CHINESE_NAMES.hk : TRADITIONAL_CHINESE_NAMES.tw;
+}
+
 /**
  * Map a BCP-47 language code (or "es_MX") to a human-readable language name for prompting.
  * Returns null for unrecognized / "auto" / empty values.
@@ -48,9 +66,11 @@ export function languageNameForCode(code: string | null | undefined): string | n
   if (!code) return null;
   const normalized = code.trim().toLowerCase();
   if (!normalized || normalized === 'auto') return null;
-  const base = normalized.split(/[-_]/)[0];
+  const subtags = normalized.split(/[-_]/);
+  const base = subtags[0];
   // Own keys only: a plain object lookup would resolve 'constructor' / '__proto__' to Object.prototype members.
-  return base && Object.hasOwn(LANGUAGE_NAMES, base) ? LANGUAGE_NAMES[base] : null;
+  if (!base || !Object.hasOwn(LANGUAGE_NAMES, base)) return null;
+  return base === 'zh' ? chineseVariantName(subtags.slice(1)) : LANGUAGE_NAMES[base];
 }
 
 /** The first usable output language: explicit request value, then the recording's stored one. null = leave the model default. */

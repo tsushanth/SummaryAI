@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="weekly_stats_title">過去 7 天</string>
+    <string name="weekly_stats_meetings">會議</string>
+    <string name="weekly_stats_hours">錄音時長</string>
+    <string name="weekly_stats_action_items">行動事項</string>
+</resources>

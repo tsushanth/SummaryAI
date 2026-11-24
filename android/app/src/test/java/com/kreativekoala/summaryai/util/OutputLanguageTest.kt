@@ -18,6 +18,8 @@ class OutputLanguageTest {
     @Test fun regionAndScriptAreKeptButExtensionsAreDropped() {
         assertEquals("zh-CN", OutputLanguage.normalize("zh-CN"))
         assertEquals("zh-Hant-TW", OutputLanguage.normalize("zh-Hant-TW"))
+        assertEquals("zh-TW", OutputLanguage.normalize("zh-TW"))
+        assertEquals("zh-HK", OutputLanguage.resolve("zh_HK"))
         assertEquals("en-US", OutputLanguage.normalize("en_US"))
         assertEquals("en", OutputLanguage.normalize("en-u-ca-gregory"))
     }

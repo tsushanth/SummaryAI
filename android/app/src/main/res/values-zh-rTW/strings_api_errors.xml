@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_error_recording_not_found">找不到這條錄音。</string>
+    <string name="api_error_recording_not_transcribed">這條錄音仍在轉寫中，請稍後再試。</string>
+    <string name="api_error_transcript_unavailable">這條錄音暫時還沒有文字記錄。</string>
+    <string name="api_error_todo_not_found">找不到這項任務。</string>
+    <string name="api_error_calendar_provider_unavailable">此日曆服務商暫不可用。</string>
+    <string name="api_error_not_found">我們沒有找到你要的內容。</string>
+    <string name="api_error_rate_limited">請求過於頻繁，請稍等片刻後重試。</string>
+    <string name="api_error_unauthorized">請重新登入後繼續。</string>
+    <string name="api_error_forbidden">你沒有訪問權限。</string>
+    <string name="api_error_invalid_request">該請求無效，請檢查後重試。</string>
+    <string name="api_error_server">我們這邊出了點問題，請重試。</string>
+    <string name="api_error_network">無法連線到伺服器，請檢查網路後重試。</string>
+    <string name="calendar_demo_mode_message">日曆整合需要使用 Google 登入。請先退出登入，再用你的 Google 帳號登入以使用此功能。</string>
+    <string name="server_title_call_with">與%1$s的通話</string>
+    <string name="server_title_call_to">致電%1$s</string>
+    <string name="server_speaker_numbered">發言人%1$d</string>
+</resources>
