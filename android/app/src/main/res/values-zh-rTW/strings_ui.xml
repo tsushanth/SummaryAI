@@ -7,7 +7,7 @@
     <string name="ui_live_caption">實時字幕</string>
     <string name="ui_using_cloud_recognition_on_this">此裝置正在使用雲端識別。音訊會離開手機。</string>
     <string name="ui_save_your_progress">儲存您的進度</string>
-    <string name="ui_drop_your_email_so_your">留下您的郵箱，讓錄音在各裝置間同步，我們也會偶爾傳送小貼士。</string>
+    <string name="ui_drop_your_email_so_your">留下您的信箱，讓錄音在各裝置間同步，我們也會偶爾傳送小貼士。</string>
     <string name="ui_skip_for_now">暫時跳過</string>
     <string name="ui_end_call">結束通話</string>
     <string name="ui_call">撥打</string>

@@ -8,7 +8,7 @@
     <string name="api_error_not_found">我們沒有找到你要的內容。</string>
     <string name="api_error_rate_limited">請求過於頻繁，請稍等片刻後重試。</string>
     <string name="api_error_unauthorized">請重新登入後繼續。</string>
-    <string name="api_error_forbidden">你沒有訪問權限。</string>
+    <string name="api_error_forbidden">你沒有存取權限。</string>
     <string name="api_error_invalid_request">該請求無效，請檢查後重試。</string>
     <string name="api_error_server">我們這邊出了點問題，請重試。</string>
     <string name="api_error_network">無法連線到伺服器，請檢查網路後重試。</string>
