@@ -9,6 +9,7 @@ import com.kreativekoala.paywallkit.manager.ExperimentManager
 import com.kreativekoala.paywallkit.manager.PaywallManager
 import com.kreativekoala.paywallkit.manager.PromoCodeManager
 import com.kreativekoala.ratingkit.RatingKit
+import com.kreativekoala.summaryai.util.preserveFrameworkAppLocales
 import dagger.hilt.android.HiltAndroidApp
 
 /**
@@ -19,6 +20,8 @@ class MeetingMindApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // Before any activity: keep a language chosen in system Settings before the first launch (AppCompat would wipe it).
+        preserveFrameworkAppLocales(this)
         FailureReporter.init(this, "meetingmind", "afr_a60112f598c3f7206a8ecb8866dc22c3", BuildConfig.VERSION_NAME)
 
         // Initialize PaywallKit experiment manager
