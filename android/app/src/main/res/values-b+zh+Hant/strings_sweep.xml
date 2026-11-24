@@ -41,7 +41,7 @@
     <string name="auth_error_google_failed">Google 登入失敗：%1$d</string>
     <string name="auth_error_no_id_token">未收到 ID 令牌</string>
     <string name="auth_error_no_session">無法獲取會話</string>
-    <string name="auth_error_account_exists">該郵箱已有帳號。請直接登入。</string>
+    <string name="auth_error_account_exists">該信箱已有帳號。請直接登入。</string>
     <string name="auth_error_signin_after_signup">帳號已建立，但登入失敗。請嘗試登入。</string>
     <string name="auth_error_signup_failed">註冊失敗</string>
     <string name="call_end_completed">通話已結束</string>
@@ -49,7 +49,7 @@
     <string name="call_end_busy">線路忙</string>
     <string name="call_end_cancelled">通話已取消</string>
     <string name="call_end_failed">通話失敗</string>
-    <string name="voip_error_no_token">沒有訪問令牌</string>
+    <string name="voip_error_no_token">沒有存取令牌</string>
     <string name="voip_error_unknown">未知錯誤</string>
     <string name="voip_error_connect_failed">連線失敗</string>
     <string name="live_caption_status_mic_permission">需要麥克風權限。點按麥克風按鈕即可允許。</string>

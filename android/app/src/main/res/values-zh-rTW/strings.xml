@@ -5,8 +5,8 @@
     <string name="sign_up">註冊</string>
     <string name="sign_out">退出登入</string>
     <string name="continue_with_google">使用Google繼續</string>
-    <string name="continue_with_email">使用郵箱繼續</string>
-    <string name="email">郵箱</string>
+    <string name="continue_with_email">使用信箱繼續</string>
+    <string name="email">信箱</string>
     <string name="password">密碼</string>
     <string name="forgot_password">忘記密碼？</string>
     <string name="auth_tagline">錄音、轉錄、總結</string>
@@ -173,7 +173,7 @@
     <string name="export_text">匯出為文字</string>
     <string name="export_markdown">匯出為Markdown</string>
     <string name="service_description_recording">在會議和電話通話期間錄製音訊以進行轉錄</string>
-    <string name="service_description_playback">在後臺播放錄製的會議和電話通話</string>
+    <string name="service_description_playback">在背景播放錄製的會議和電話通話</string>
     <string name="error">錯誤</string>
     <string name="ok">確定</string>
     <string name="cancel">取消</string>
@@ -182,7 +182,7 @@
     <string name="no_internet">無網路連線</string>
     <string name="permission_required">需要權限</string>
     <string name="microphone_permission_required">錄製音訊需要麥克風權限</string>
-    <string name="notification_permission_required">後臺錄音需要通知權限</string>
+    <string name="notification_permission_required">背景錄音需要通知權限</string>
     <string name="demo_mode_message">儲存錄音需要使用Google登入。請退出登入並使用您的Google帳戶重新登入以儲存錄音。</string>
     <string name="error_recording_file_not_found">找不到錄音檔案</string>
     <string name="error_upload_failed">上傳失敗</string>
