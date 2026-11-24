@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meeting_language_label">轉錄語言</string>
+    <string name="meeting_language_auto">自動檢測</string>
+    <string name="meeting_language_hint">自動檢測適用於大多數會議。如果轉錄不準確，請選擇語言。系統會記住你的選擇。</string>
+    <string name="meeting_language_dialog_title">轉錄語言</string>
+    <string name="meeting_language_change">更改語言</string>
+    <string name="meeting_language_active">語言：%1$s</string>
+    <string name="meeting_language_changed">轉錄語言已設為%1$s</string>
+    <string name="meeting_language_change_note">僅對此後的發言生效。</string>
+    <string name="meeting_language_switch_unavailable">此會議在進行中無法切換語言</string>
+    <string name="meeting_language_switch_failed">無法更改語言，請重試。</string>
+    <string name="meeting_language_hint_auto_english_live">自動檢測會為最終轉錄判斷語言。除非你選擇語言，否則實時字幕保持英語。</string>
+    <string name="meeting_language_hint_delayed">此語言的實時字幕可能延遲 %1$s 分鐘到達。最終轉錄不受影響。</string>
+    <string name="meeting_language_reason_fixed">實時語言在機器人加入時已確定，本次會議期間無法更改。</string>
+    <string name="meeting_language_reason_not_live">只有在機器人處於會議中時才能更改語言。</string>
+    <string name="meeting_language_switch_not_live">機器人目前不在會議中，因此無法更改語言。</string>
+    <string name="meeting_language_saved_not_live">已為最終轉錄儲存%1$s，但暫時無法切換實時轉錄。</string>
+</resources>

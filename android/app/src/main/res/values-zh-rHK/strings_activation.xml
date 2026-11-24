@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- wave2: machine-translated, needs native review -->
+    <string name="first_run_prompt">隨便錄 30 秒，哪怕只是自己説話，就能看到摘要自動生成。</string>
+    <string name="first_run_mic_note">我們僅在您錄音時使用麥克風。</string>
+    <string name="first_run_record">點按開始錄音</string>
+    <string name="first_run_see_sample">或者先看看示例會議</string>
+    <string name="sample_cta_title">現在試試您自己的</string>
+    <string name="sample_cta_button">錄製您自己的</string>
+    <string name="sample_chat_locked">錄製您自己的會議，即可就其內容提問。</string>
+    <string name="sample_badge">示例，純屬虛構</string>
+</resources>

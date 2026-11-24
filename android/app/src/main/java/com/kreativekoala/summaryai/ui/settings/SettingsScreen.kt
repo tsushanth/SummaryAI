@@ -54,10 +54,7 @@ fun SettingsScreen(
     val storedTag = AppCompatDelegate.getApplicationLocales().toLanguageTags()
     val currentLocaleTag = storedTag.ifEmpty {
         val device = Locale.getDefault()
-        SUPPORTED_LANGUAGE_TAGS.firstOrNull { it.equals(device.toLanguageTag(), ignoreCase = true) }
-            ?: SUPPORTED_LANGUAGE_TAGS.firstOrNull { it == device.language }
-            ?: SUPPORTED_LANGUAGE_TAGS.firstOrNull { it.substringBefore('-') == device.language }
-            ?: "en"
+        matchSupportedTag(device) ?: "en"
     }
     val currentLanguageName = languages.firstOrNull { it.first == currentLocaleTag }?.second ?: languageEndonym("en")
 
@@ -515,11 +512,38 @@ private fun ThemeOption(
 internal val SUPPORTED_LANGUAGE_TAGS = listOf(
     "en", "es", "fr", "de", "ja", "zh-CN", "ko", "pt-BR", "it", "hi",
     "ar", "id", "ms", "nl", "pl", "ru", "th", "tl", "tr", "vi",
-    "cs", "el", "fi", "hu", "ro", "sv", "uk", "pt"
+    "cs", "el", "fi", "hu", "ro", "sv", "uk", "pt", "zh-TW", "zh-HK"
+)
+
+/**
+ * The picker entry for a device locale, or null if none fits. Chinese is split by script: Traditional (zh-Hant, or the
+ * regions TW/HK/MO) must never land on Simplified zh-CN just because the language code is "zh".
+ */
+internal fun matchSupportedTag(device: Locale): String? {
+    SUPPORTED_LANGUAGE_TAGS.firstOrNull { it.equals(device.toLanguageTag(), ignoreCase = true) }?.let { return it }
+    if (device.language == "zh") {
+        val traditional = device.script.equals("Hant", ignoreCase = true) ||
+            (device.script.isEmpty() && device.country.uppercase() in setOf("TW", "HK", "MO"))
+        return when {
+            traditional && device.country.uppercase() in setOf("HK", "MO") -> "zh-HK" // i18n-ok: locale tag
+            traditional -> "zh-TW" // i18n-ok: locale tag
+            else -> "zh-CN" // i18n-ok: locale tag
+        }
+    }
+    return SUPPORTED_LANGUAGE_TAGS.firstOrNull { it == device.language }
+        ?: SUPPORTED_LANGUAGE_TAGS.firstOrNull { it.substringBefore('-') == device.language }
+}
+
+/** Chinese variants are named by script, because the system's display name ("中文 (台灣)") hides which script is used. */
+private val CHINESE_ENDONYMS = mapOf(
+    "zh-CN" to "简体中文",
+    "zh-TW" to "繁體中文（台灣）",
+    "zh-HK" to "繁體中文（香港）"
 )
 
 /** The language's own name, for example "Deutsch" or "Русский". */
 internal fun languageEndonym(tag: String): String {
+    CHINESE_ENDONYMS[tag]?.let { return it }
     val locale = Locale.forLanguageTag(tag)
     return locale.getDisplayName(locale).replaceFirstChar { it.titlecase(locale) }
 }
