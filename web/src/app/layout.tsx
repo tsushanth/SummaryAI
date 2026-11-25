@@ -3,6 +3,7 @@ import { Schibsted_Grotesk, Newsreader } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import WebFailureReporter from '@/components/WebFailureReporter'
+import { OutreachCapture } from '@/components/OutreachAttribution'
 
 // UI + headings: a grotesk with newsroom roots. Reading text (summaries, transcripts): a text serif.
 const sans = Schibsted_Grotesk({ subsets: ['latin'], variable: '--font-sans', display: 'swap' });
@@ -53,6 +54,7 @@ export default function RootLayout({
       </head>
       <body className={`${sans.variable} ${serif.variable} font-sans`}>
         <WebFailureReporter />
+        <OutreachCapture />
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
