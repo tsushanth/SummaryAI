@@ -13,7 +13,9 @@
 
 import { randomUUID } from 'node:crypto';
 import { supabaseAdmin } from '../lib/supabase.js';
-import { finalizeBotRecording } from './recallService.js';
+import { finalizeBotRecording, RecallService } from './recallService.js';
+import { failNeverRecordedRun, type FailableRun } from './botFailure.js';
+import { neverRecordedOutcome } from '../lib/recallStatus.js';
 import { reportRecordingFailureById, botFailureCode } from '../lib/recordingFailure.js';
 import type { BotRun, Meeting } from '../types/meetings.js';
 import { registerLoop, runLoopPass, reportLoopScanError } from '../lib/loopMonitor.js';
@@ -286,6 +288,21 @@ function isPermanentUploadError(message: string): boolean {
 }
 
 /**
+ * Ask Recall what the bot actually did. When it is finished and never recorded (typically never admitted from the waiting room),
+ * close the run, meeting and pending recording as failed. Returns false, changing nothing, in every other case.
+ */
+async function closeIfNeverRecorded(
+  run: FailableRun & { recall_bot_id: string },
+  meeting: { id: string; recording_id?: string | null }
+): Promise<boolean> {
+  const outcome = neverRecordedOutcome(await RecallService.getBot(run.recall_bot_id));
+  if (!outcome) return false;
+  await failNeverRecordedRun(run, meeting, outcome.code);
+  console.log(`${BOT_RUN_TAG} bot_run=${run.id.slice(0, 8)} never recorded (${outcome.code}); marked failed`);
+  return true;
+}
+
+/**
  * Find bot_runs that reached a terminal Recall state (`call_ended`/`done` —
  * i.e. `status: 'processing'`) more than BOT_RUN_MIN_AGE_MS ago, whose
  * linked recording is still `uploading` with no file_path. This is the
@@ -299,6 +316,9 @@ function isPermanentUploadError(message: string): boolean {
  * `status_changes` includes `recording_done` and `done`, and
  * `media_shortcuts` already has a `download_url`), so we just poll for it
  * directly instead of waiting on a webhook that may never come.
+ *
+ * Runs whose recording is still `pending` (or that have none) never got as far as recording; those are closed as failed once
+ * Recall confirms it (closeIfNeverRecorded).
  */
 export async function reconcileStuckBotRecordings(): Promise<void> {
   const cutoffIso = new Date(Date.now() - BOT_RUN_MIN_AGE_MS).toISOString();
@@ -335,6 +355,7 @@ export async function reconcileStuckBotRecordings(): Promise<void> {
       const typedMeeting = meeting as Meeting;
 
       if (!typedMeeting.recording_id) {
+        await closeIfNeverRecorded(botRun, typedMeeting);
         continue;
       }
 
@@ -345,6 +366,11 @@ export async function reconcileStuckBotRecordings(): Promise<void> {
         .single();
 
       if (recordingError || !recording) {
+        continue;
+      }
+
+      if (recording.status === 'pending' && !recording.file_path) {
+        await closeIfNeverRecorded(botRun, typedMeeting);
         continue;
       }
 
@@ -399,14 +425,15 @@ export const STALE_BOT_RUN_MS = 24 * 60 * 60 * 1000;
  * Close out bot_runs left in `pending`/`joining` for 24 h+. Recall's status webhooks (bot.joining_call, in_call_recording,
  * call_ended, ...) are the only thing that advances a run; when they were missed (stale webhook subscription, May-June
  * 2026) the row stayed `joining` forever, kept the BOT_NEVER_JOINED invariant firing, and misled anyone reading bot_runs.
- * Only the bot_runs row is touched (never the meeting or the recording): `completed` when the meeting's recording did
- * complete (the live-transcript stitcher finished it), otherwise `failed` with a distinct error_code.
+ * `completed` when the meeting's recording did complete (the live-transcript stitcher finished it). Otherwise, if Recall
+ * confirms the bot never recorded, the run, meeting and pending recording are failed with Recall's reason. In every other case
+ * only the bot_runs row is touched: `failed` with a distinct error_code.
  */
 export async function expireStaleBotRuns(): Promise<number> {
   const cutoffIso = new Date(Date.now() - STALE_BOT_RUN_MS).toISOString();
   const { data: stale, error } = await supabaseAdmin
     .from('bot_runs')
-    .select('id, meeting_id')
+    .select('id, meeting_id, recall_bot_id, created_at')
     .in('status', ['pending', 'joining'])
     .lt('updated_at', cutoffIso)
     .limit(50);
@@ -418,13 +445,24 @@ export async function expireStaleBotRuns(): Promise<number> {
   if (!stale?.length) return 0;
 
   let closed = 0;
-  for (const run of stale as Array<{ id: string; meeting_id: string }>) {
+  for (const run of stale as Array<FailableRun & { recall_bot_id: string }>) {
     let recordingDone = false;
     const { data: meeting } = await supabaseAdmin.from('meetings').select('recording_id').eq('id', run.meeting_id).maybeSingle();
     const recordingId = (meeting as { recording_id: string | null } | null)?.recording_id;
     if (recordingId) {
       const { data: rec } = await supabaseAdmin.from('recordings').select('status').eq('id', recordingId).maybeSingle();
       recordingDone = (rec as { status: string } | null)?.status === 'completed';
+    }
+    if (!recordingDone) {
+      try {
+        if (await closeIfNeverRecorded(run, { id: run.meeting_id, recording_id: recordingId })) {
+          closed++;
+          continue;
+        }
+      } catch (e: any) {
+        // Recall unreachable or the bot is gone: fall through and close the run row alone, as before.
+        console.warn(`${BOT_RUN_TAG} outcome check failed for bot_run=${run.id.slice(0, 8)}: ${e?.message || e}`);
+      }
     }
     const patch = recordingDone
       ? { status: 'completed' }

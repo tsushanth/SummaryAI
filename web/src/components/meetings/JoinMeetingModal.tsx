@@ -8,13 +8,17 @@ import { X, Link as LinkIcon, Loader2, Calendar, Clock } from 'lucide-react';
 import { getTranscriptionLanguages, setDefaultTranscriptionLanguage } from '@/lib/api/meetings';
 import { languageChoiceHint, normalizeChoice } from '@/lib/transcriptionLanguages';
 import { LanguageSelect } from './LanguageSelect';
-import type { CreateMeetingRequest } from '@/types/api';
+import { getDefaultDateTime, zoomLinkWarning } from '@/lib/meetingLink';
+import type { CreateMeetingRequest, JoinMeetingRequest } from '@/types/api';
 
 interface JoinMeetingModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: CreateMeetingRequest) => Promise<{ warning?: string } | void>;
+  /** Send the bot immediately (POST /api/meetings/join). */
+  onJoinNow: (data: JoinMeetingRequest) => Promise<unknown>;
   isSubmitting: boolean;
+  isJoining: boolean;
 }
 
 function detectPlatform(url: string): string | null {
@@ -54,26 +58,16 @@ function isValidMeetingUrl(url: string): boolean {
   }
 }
 
-function getDefaultDateTime(): { date: string; time: string } {
-  const now = new Date();
-  // Round up to next 15 minutes
-  const minutes = Math.ceil(now.getMinutes() / 15) * 15;
-  now.setMinutes(minutes, 0, 0);
-
-  // Local date and time. toISOString() is UTC, so in the evening (PT) it gave tomorrow's date.
-  const pad = (n: number) => String(n).padStart(2, '0');
-  const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-  const time = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-  return { date, time };
-}
-
 export function JoinMeetingModal({
   isOpen,
   onClose,
   onSubmit,
+  onJoinNow,
   isSubmitting,
+  isJoining,
 }: JoinMeetingModalProps) {
-  const defaults = getDefaultDateTime();
+  // The page mounts this form when it is opened, so these are the defaults for now, not for when the page loaded.
+  const [defaults] = useState(() => getDefaultDateTime());
   const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
   const [date, setDate] = useState(defaults.date);
@@ -93,7 +87,9 @@ export function JoinMeetingModal({
   const normalizedUrl = normalizeMeetingUrl(url);
   const isValidUrl = isValidMeetingUrl(normalizedUrl);
   const detectedPlatform = isValidUrl ? detectPlatform(normalizedUrl) : null;
+  const linkWarning = isValidUrl ? zoomLinkWarning(normalizedUrl) : null;
   const isValidForm = isValidUrl && title.trim().length > 0 && date && time;
+  const isBusy = isSubmitting || isJoining;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,35 +119,42 @@ export function JoinMeetingModal({
         auto_join: autoJoin,
         transcription_language: language,
       });
-      // Remember the choice as the default for the next meeting (best effort: the meeting itself is already added).
-      if (language !== savedDefault) {
-        setDefaultTranscriptionLanguage(language).then(() => refreshLanguages(), () => undefined);
-      }
-      setPickedLanguage(null);
-      // Reset form
-      setUrl('');
-      setTitle('');
-      const newDefaults = getDefaultDateTime();
-      setDate(newDefaults.date);
-      setTime(newDefaults.time);
-      setAutoJoin(true);
+      rememberLanguage();
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add meeting');
     }
   };
 
-  const handleClose = () => {
-    setUrl('');
-    setTitle('');
-    const newDefaults = getDefaultDateTime();
-    setDate(newDefaults.date);
-    setTime(newDefaults.time);
-    setAutoJoin(true);
-    setPickedLanguage(null);
-    setError(null);
-    onClose();
+  // Remember the choice as the default for the next meeting (best effort: the meeting itself is already added).
+  const rememberLanguage = () => {
+    if (language !== savedDefault) {
+      setDefaultTranscriptionLanguage(language).then(() => refreshLanguages(), () => undefined);
+    }
   };
+
+  // Needs only the link: no title, date or time. The backend applies the same monthly allowance as a scheduled join.
+  const handleJoinNow = async () => {
+    setError(null);
+    if (!isValidUrl) {
+      setError('Please enter a valid meeting URL');
+      return;
+    }
+    try {
+      await onJoinNow({
+        join_url: normalizedUrl,
+        ...(title.trim() ? { title: title.trim() } : {}),
+        transcription_language: language,
+      });
+      rememberLanguage();
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send the bot');
+    }
+  };
+
+  // The form is unmounted on close, so there is nothing to reset.
+  const handleClose = onClose;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -159,7 +162,7 @@ export function JoinMeetingModal({
         className="absolute inset-0 bg-black/50"
         onClick={handleClose}
       />
-      <div className="relative bg-card rounded-lg shadow-xl w-full max-w-md p-6">
+      <div className="relative bg-card rounded-lg shadow-xl w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto mx-4 p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Add Meeting</h2>
           <button
@@ -212,6 +215,11 @@ export function JoinMeetingModal({
               {detectedPlatform && (
                 <p className="text-sm text-success mt-1">
                   Detected: {detectedPlatform}
+                </p>
+              )}
+              {linkWarning && (
+                <p role="alert" className="mt-2 rounded-md bg-amber-500/10 border border-amber-500/30 px-3 py-2 text-sm text-amber-800 dark:text-amber-300">
+                  {linkWarning}
                 </p>
               )}
               {url.trim() && !isValidUrl && (
@@ -290,16 +298,30 @@ export function JoinMeetingModal({
             </p>
           </div>
 
-          <div className="flex justify-end gap-3 mt-6">
+          <p className="mt-4 text-xs text-muted-foreground">
+            Join now sends the bot immediately and ignores the date and time.
+          </p>
+
+          <div className="flex flex-wrap justify-end gap-3 mt-3">
             <Button
               type="button"
               variant="outline"
               onClick={handleClose}
-              disabled={isSubmitting}
+              disabled={isBusy}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={!isValidForm || isSubmitting}>
+            <Button type="button" variant="outline" onClick={handleJoinNow} disabled={!isValidUrl || isBusy}>
+              {isJoining ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Sending bot...
+                </>
+              ) : (
+                'Join now'
+              )}
+            </Button>
+            <Button type="submit" disabled={!isValidForm || isBusy}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />

@@ -3,6 +3,8 @@ import type {
   ListMeetingsResponse,
   CreateMeetingRequest,
   CreateMeetingResponse,
+  JoinMeetingRequest,
+  JoinMeetingResponse,
   UpdateMeetingRequest,
   UpdateMeetingResponse,
   Meeting,
@@ -24,6 +26,8 @@ export async function getMeetings(params?: {
   if (params?.offset) searchParams.set('offset', params.offset.toString());
   if (params?.status) searchParams.set('status', params.status);
   if (params?.days_ahead) searchParams.set('days_ahead', params.days_ahead.toString());
+  // Keep meetings that have started: the bot is in them, or they failed recently. Older backends ignore this.
+  searchParams.set('include_recent', 'true');
 
   const query = searchParams.toString();
   return apiClient<ListMeetingsResponse>(
@@ -62,6 +66,14 @@ export async function createMeeting(
   data: CreateMeetingRequest
 ): Promise<CreateMeetingResponse> {
   return apiClient<CreateMeetingResponse>('/api/meetings', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+/** Creates the meeting and sends the bot immediately. 403 (ApiError) when the monthly bot allowance is used up. */
+export async function joinMeeting(data: JoinMeetingRequest): Promise<JoinMeetingResponse> {
+  return apiClient<JoinMeetingResponse>('/api/meetings/join', {
     method: 'POST',
     body: JSON.stringify(data),
   });

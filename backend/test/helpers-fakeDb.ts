@@ -54,6 +54,10 @@ export class FakeDb {
       update: (p: Row) => { op = 'update'; payload = p; return q; },
       delete: () => { op = 'delete'; return q; },
       eq: (c: string, v: any) => { filters.push((r) => r[c] === v); return q; },
+      neq: (c: string, v: any) => { filters.push((r) => r[c] !== v); return q; },
+      /** Recorded, not evaluated: the expression itself is what tests assert on. */
+      or: (expr: string) => { db.log.push({ table, op: 'or', payload: expr }); return q; },
+      range: (from: number, to: number) => { lim = to - from + 1; return q; },
       in: (c: string, vs: any[]) => { filters.push((r) => vs.includes(r[c])); return q; },
       gte: (c: string, v: any) => { filters.push((r) => r[c] != null && r[c] >= v); return q; },
       lt: (c: string, v: any) => { filters.push((r) => r[c] != null && r[c] < v); return q; },

@@ -11,12 +11,12 @@ import {
   useDisconnectCalendar,
   useSyncCalendars,
 } from '@/hooks/useCalendar';
-import { useMeetings, useCreateMeeting, useUpdateMeeting } from '@/hooks/useMeetings';
+import { useMeetings, useCreateMeeting, useJoinMeeting, useUpdateMeeting } from '@/hooks/useMeetings';
 import { CalendarConnectionCard } from '@/components/meetings/CalendarConnectionCard';
 import { ConnectCalendarButton } from '@/components/meetings/ConnectCalendarButton';
 import { MeetingCard } from '@/components/meetings/MeetingCard';
 import { JoinMeetingModal } from '@/components/meetings/JoinMeetingModal';
-import type { CreateMeetingRequest } from '@/types/api';
+import type { CreateMeetingRequest, JoinMeetingRequest } from '@/types/api';
 
 export default function MeetingsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,6 +34,7 @@ export default function MeetingsPage() {
   const { meetings, isLoading: isLoadingMeetings, refresh: refreshMeetings, isValidating: isRefreshing } = useMeetings();
   const { create, isCreating } = useCreateMeeting();
   const { update, isUpdating } = useUpdateMeeting();
+  const { join, isJoining } = useJoinMeeting();
 
   const hasGoogleConnection = connections.some((c) => c.provider === 'google');
   const hasMicrosoftConnection = connections.some((c) => c.provider === 'microsoft');
@@ -66,6 +67,15 @@ export default function MeetingsPage() {
     return result;
   };
 
+  const handleJoinNow = async (data: JoinMeetingRequest) => {
+    const result = await join(data);
+    setBanner(
+      result.already_exists
+        ? 'A bot is already in this meeting or on its way.'
+        : 'The bot is on its way. If the meeting has a waiting room, admit "Meeting Mind".'
+    );
+  };
+
   const handleToggleAutoJoin = async (id: string, autoJoin: boolean) => {
     try {
       await update(id, { auto_join: autoJoin });
@@ -80,8 +90,9 @@ export default function MeetingsPage() {
     await refreshMeetings();
   };
 
+  const failedMeetings = meetings.filter((m) => m.status === 'failed').reverse();
   const upcomingMeetings = meetings.filter(
-    (m) => m.status !== 'completed' && m.status !== 'cancelled'
+    (m) => m.status !== 'completed' && m.status !== 'cancelled' && m.status !== 'failed'
   );
   const pastMeetings = meetings.filter(
     (m) => m.status === 'completed' || m.status === 'cancelled'
@@ -181,6 +192,23 @@ export default function MeetingsPage() {
         )}
       </div>
 
+      {/* Recently failed: kept visible so the reason can be read */}
+      {failedMeetings.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold mb-4">Could not record</h2>
+          <div className="space-y-3">
+            {failedMeetings.map((meeting) => (
+              <MeetingCard
+                key={meeting.id}
+                meeting={meeting}
+                onToggleAutoJoin={handleToggleAutoJoin}
+                isUpdating={isUpdating}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Upcoming Meetings Section */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
@@ -254,12 +282,16 @@ export default function MeetingsPage() {
       )}
 
       {/* Join Meeting Modal */}
-      <JoinMeetingModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleAddMeeting}
-        isSubmitting={isCreating}
-      />
+      {isModalOpen && (
+        <JoinMeetingModal
+          isOpen
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleAddMeeting}
+          onJoinNow={handleJoinNow}
+          isSubmitting={isCreating}
+          isJoining={isJoining}
+        />
+      )}
     </div>
   );
 }

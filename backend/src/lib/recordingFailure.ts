@@ -12,6 +12,7 @@ export type RecordingFailureCode =
   | 'PROCESSING_INTERRUPTED'
   | 'NO_MEDIA'
   | 'BOT_FATAL'
+  | 'BOT_NEVER_RECORDED'
   | 'RECORDING_PERMISSION_DENIED'
   | 'BOT_RECORDING_FAILED';
 

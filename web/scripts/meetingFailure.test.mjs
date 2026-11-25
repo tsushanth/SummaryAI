@@ -8,6 +8,8 @@ import {
   isBotCapMessage,
   GENERIC_FAILURE,
   BOT_MONTHLY_CAP_REACHED,
+  botFailureSentence,
+  recordingBotFailureReason,
 } from '../src/lib/meetingFailure.ts';
 
 // The text the backend stores on a scheduled meeting it refused (backend/src/services/botUsageCap.ts, botCapError).
@@ -78,3 +80,42 @@ test('contract: the backend still stores the text this matches on (skipped until
   assert.ok(src.includes('meeting-bot minutes for this month'));
   assert.ok(src.includes('available again on'));
 });
+
+test('passcode, meeting not found and never admitted each get their own sentence', () => {
+  const show = (code) => meetingFailureReason({ status: 'failed', error_message: code });
+  assert.match(show('meeting_password_incorrect'), /passcode was wrong or missing.*Copy invite link/);
+  assert.match(show('meeting_not_found'), /not found/);
+  assert.match(show('timeout_exceeded_waiting_room'), /waiting room/);
+  assert.match(show('zoom_local_recording_request_denied_by_host'), /did not allow/);
+});
+
+test('a bot recording shows its reason from error_code, or from the old stored text', () => {
+  assert.match(recordingBotFailureReason({ status: 'failed', error_code: 'meeting_not_found' }), /not found/);
+  assert.equal(recordingBotFailureReason({ status: 'failed', error_message: 'Bot encountered a fatal error' }), GENERIC_FAILURE);
+});
+
+test('a provider code without its own sentence still says the bot could not join', () => {
+  assert.equal(recordingBotFailureReason({ status: 'failed', error_code: 'zoom_sdk_app_not_published' }), GENERIC_FAILURE);
+});
+
+test('other recording failures and unknown values are left alone', () => {
+  assert.equal(recordingBotFailureReason({ status: 'failed', error_code: 'PROCESSING_ERROR', error_message: 'raw provider text' }), null);
+  assert.equal(recordingBotFailureReason({ status: 'failed', error_code: 'FAILED_UPLOAD' }), null);
+  assert.equal(recordingBotFailureReason({ status: 'completed', error_code: 'meeting_not_found' }), null);
+  assert.equal(botFailureSentence('constructor'), null);
+  assert.equal(botFailureSentence('__proto__'), null);
+});
+
+test('contract: every never-admitted code the backend stores has its own sentence', async () => {
+  let backend;
+  try {
+    backend = await import('../../backend/src/lib/recallStatus.ts');
+  } catch (e) {
+    if (e.code === 'ERR_MODULE_NOT_FOUND') return;
+    throw e;
+  }
+  for (const code of [...backend.NOT_ADMITTED_SUB_CODES, backend.NEVER_RECORDED_CODE]) {
+    assert.ok(botFailureSentence(code), code);
+  }
+});
+
