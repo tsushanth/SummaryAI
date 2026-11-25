@@ -20,6 +20,12 @@
  *                            which is the SummaryAI project). Everyone in that table is skipped; if it cannot be
  *                            read, nothing is sent.
  *
+ * Outreach metrics (see scripts/lib/promo-metrics.mjs): every send is tagged campaign_id=meetingmind-promoN-<yyyymm01> + product=meetingmind,
+ * every accepted send is written to a local ledger (~/.outreach-ledger/meetingmind.jsonl, hashes only), and touch 1 skips anyone
+ * already mailed by this product in the last 90 days. With OUTREACH_METRICS=1 (default OFF) it also registers the campaign, asks the
+ * Calldesk layer to dedupe, stops on its circuit breaker (bounce rate over 2%) and posts `sent` events. Every layer call is
+ * fail-open with a 3 s timeout. Links are never rewritten here. Needs CRON_SECRET (+ OUTREACH_EVENT_SECRET) only when the flag is on.
+ *
  * Usage:
  *   export RESEND_API_KEY=re_xxxx
  *   export SUPABASE_URL=https://xxx.supabase.co
@@ -60,7 +66,12 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 // Signed unsubscribe + suppression helpers (ESM, loaded lazily because this script runs as CommonJS under tsx).
 type PromoMail = typeof import("./lib/promo-mail.mjs");
 type Unsub = typeof import("./lib/unsubscribe.mjs");
+type PromoMetrics = typeof import("./lib/promo-metrics.mjs");
+type OM = import("./lib/outreach-metrics.mjs").OutreachMetrics;
+const METRICS_PRODUCT = "meetingmind";
 let promoMail: PromoMail;
+let promoMetrics: PromoMetrics;
+let om: OM;
 let suppressed: Set<string> = new Set();
 
 const redeemUrl = `https://play.google.com/redeem?code=${OFFER_ID}`;
@@ -630,6 +641,23 @@ async function sendBatch(
     return;
   }
 
+  // Outreach metrics: local ledger dedupe (touch 1) and, with OUTREACH_METRICS=1, the layer's dedupe + breaker. Fail-open.
+  const screened = await promoMetrics.screenDrip({ om, product: METRICS_PRODUCT, template, users });
+  users = screened.allowed as Profile[];
+  log(
+    `${template}: outreach dedupe skipped ${screened.skippedLedger} (ledger) + ${screened.skippedLayer} (layer), campaign ${screened.campaign}`
+  );
+  if (screened.halt) {
+    log(`HALT ${template}: ${screened.halt.reason} (bounce ${screened.halt.bounce_pct}% over ${screened.halt.window_size})`);
+    return;
+  }
+  if (users.length === 0) {
+    log(`Nothing left to send for ${template} after dedupe. Skipping.`);
+    return;
+  }
+  const tags = promoMetrics.dripTags(METRICS_PRODUCT, template);
+  if (!DRY_RUN) await om.registerCampaign({ id: screened.campaign, product: METRICS_PRODUCT, senderDomain: "send.kreativekoala.llc", audienceSource: `meetingmind ${template}`, plannedSize: users.length, notes: "send-promo.ts drip" });
+
   log(
     `Sending ${template} to ${users.length} users${DRY_RUN ? " (DRY RUN)" : ""}…`
   );
@@ -638,8 +666,14 @@ async function sendBatch(
   let sent = 0;
   let failed = 0;
 
+  let handled = 0;
   for (const user of users) {
     if (!user.email) continue;
+    if (!DRY_RUN && handled > 0 && handled % 50 === 0) {
+      const halt = await promoMetrics.breakerHalt({ om, product: METRICS_PRODUCT, template });
+      if (halt) { log(`HALT ${template} after ${handled}: ${halt}`); break; }
+    }
+    handled++;
 
     // Footer + List-Unsubscribe headers. Throws if UNSUB_SECRET is missing, so nothing goes out unsigned.
     const message = promoMail.buildPromoMessage({
@@ -647,6 +681,7 @@ async function sendBatch(
       to: user.email,
       subject,
       html: buildHtml(user.display_name),
+      tags,
     });
 
     if (DRY_RUN) {
@@ -659,6 +694,7 @@ async function sendBatch(
       const { error } = await resend!.emails.send(message);
       if (error) throw new Error(error.message);
       await recordSend(user.id, user.email, template);
+      om.recordSent({ product: METRICS_PRODUCT, campaign: screened.campaign, email: user.email });
       sent++;
       log(`Sent ${template}`);
     } catch (err: any) {
@@ -670,6 +706,7 @@ async function sendBatch(
     await new Promise((r) => setTimeout(r, 600));
   }
 
+  await om.flushEvents();
   log(`${template} done. Sent: ${sent} | Failed: ${failed}`);
 }
 
@@ -683,6 +720,9 @@ async function main() {
 
   promoMail = await import("./lib/promo-mail.mjs");
   const unsub: Unsub = await import("./lib/unsubscribe.mjs");
+  promoMetrics = await import("./lib/promo-metrics.mjs");
+  const omLib = await import("./lib/outreach-metrics.mjs");
+  om = new omLib.OutreachMetrics({ log });
   // Fail closed: if the suppression table cannot be read this throws and nothing is sent.
   suppressed = await unsub.loadSuppressions({
     supabaseUrl: process.env.SUPPRESSION_SUPABASE_URL ?? SUPABASE_URL,
