@@ -5,11 +5,15 @@
  *   POST /api/activation/attribution  Bearer-authenticated, first write wins
  *
  * Enabled only when ACTIVATION_EVENTS_ENABLED=true (a Fly env change). Flag off: both endpoints answer 204 and write nothing.
+ * Separately, when OUTREACH_EVENTS_URL is set the attribution endpoint also reports a signup for first touches that came from an
+ * outreach link (utm_source=outreach) to the outreach metrics layer, see services/outreachEvents.ts. That works with or without
+ * ACTIVATION_EVENTS_ENABLED (without it nothing is stored here).
  * Mounted before the auth-required groups (like /api/attribution); the events route is public by design.
  */
 import { Router, Request, Response } from 'express';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { authenticate, optionalAuth } from '../middleware/auth.js';
+import { outreachAttribution, outreachEnabled, reportOutreachEvent, type OutreachAttribution } from '../services/outreachEvents.js';
 import {
   ANON_LIMIT, IP_LIMIT, createLimiter, validateAttribution, validateEvent,
   type ActivationEventRow, type AttributionRow,
@@ -18,7 +22,11 @@ import {
 export interface ActivationDeps {
   enabled(): boolean;
   insertEvent(row: ActivationEventRow): Promise<void>;
-  insertAttribution(row: AttributionRow): Promise<void>;
+  /** Resolves false when the user already had a row (first write wins); anything else counts as newly written. */
+  insertAttribution(row: AttributionRow): Promise<boolean | void>;
+  /** Outreach metrics layer (OUTREACH_EVENTS_URL set). Independent of `enabled`. */
+  outreachEnabled(): boolean;
+  reportSignup(attribution: OutreachAttribution, email: string): void;
   /** Optional Bearer user; null for anonymous or any auth trouble (this endpoint must never fail the client). */
   resolveUser(req: Request): Promise<string | null>;
   limiter: ReturnType<typeof createLimiter>;
@@ -36,9 +44,13 @@ const defaults = (): ActivationDeps => ({
   enabled: () => process.env.ACTIVATION_EVENTS_ENABLED === 'true',
   insertEvent: async (row) => { const { error } = await supabaseAdmin.from('activation_events').insert(row); if (error) throw new Error(error.code ?? 'db'); },
   insertAttribution: async (row) => {
-    const { error } = await supabaseAdmin.from('signup_attribution').upsert(row, { onConflict: 'user_id', ignoreDuplicates: true });
+    // With ignoreDuplicates only a newly written row comes back, so an empty result means the first touch was already stored.
+    const { data, error } = await supabaseAdmin.from('signup_attribution').upsert(row, { onConflict: 'user_id', ignoreDuplicates: true }).select('user_id');
     if (error) throw new Error(error.code ?? 'db');
+    return (data?.length ?? 0) > 0;
   },
+  outreachEnabled: () => outreachEnabled(),
+  reportSignup: (attribution, email) => reportOutreachEvent({ event: 'signup', attribution, email }),
   resolveUser: resolveUserViaMiddleware,
   limiter: createLimiter(),
 });
@@ -63,13 +75,24 @@ export function createActivationRouter(overrides: Partial<ActivationDeps> = {}, 
   });
 
   router.post('/attribution', (req, res, next) => {
-    if (!d.enabled()) return void res.status(204).end();
+    if (!d.enabled() && !d.outreachEnabled()) return void res.status(204).end();
     authMw(req, res, next);
   }, async (req: Request, res: Response) => {
     const row = validateAttribution(req.body, req.user!.id);
     if (!row) return void res.status(204).end();
-    try { await d.insertAttribution(row); }
-    catch (e) { console.error('[Activation] attribution insert failed:', (e as Error).message); }
+    let inserted = true;
+    if (d.enabled()) {
+      try { inserted = (await d.insertAttribution(row)) !== false; }
+      catch (e) { console.error('[Activation] attribution insert failed:', (e as Error).message); }
+    }
+    // Outreach metrics: only for a first touch that came from an outreach link. Fire and forget, never delays or fails the client.
+    try {
+      const attribution = inserted && d.outreachEnabled()
+        ? outreachAttribution({ utm_source: row.utm_source, utm_campaign: row.utm_campaign, utm_content: (req.body as Record<string, unknown> | undefined)?.utm_content })
+        : null;
+      const email = req.user?.email;
+      if (attribution && email) d.reportSignup(attribution, email);
+    } catch { /* swallowed on purpose */ }
     res.status(204).end();
   });
 

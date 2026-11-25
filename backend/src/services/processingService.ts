@@ -3,6 +3,7 @@
  * Handles async processing of recordings (transcription + summarization)
  */
 
+import { noteRecordingCompleted } from './outreachActivation.js';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -295,6 +296,9 @@ async function processRecordingAsync(
     }
 
     console.log(`[Processing] ${jobId}: Completed successfully, status updated to 'completed'`);
+
+    // Outreach attribution: first completed recording = activation. Fire and forget, off unless OUTREACH_EVENTS_URL is set.
+    noteRecordingCompleted(recording.user_id ?? userId);
 
     // Fire-and-forget: integration failures must never affect processing.
     void dispatchRecordingCompleted(recordingId);
