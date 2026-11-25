@@ -4,8 +4,14 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 
 | Component | Fly app | Release | Image | Built from | Date |
 |---|---|---|---|---|---|
-| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v60 | `registry.fly.io/summary-ai-backend:deployment-01M85HVXGK26HWJGM331VTSH89` | `origin/main` at `ee5cb3e` (`backend/` tree `6ed54eb8a3e3a7d5677d3d487fabf6db38897d95` identical to main; backend change is #95) | 2026-11-24 (UTC) |
+| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v61 | `registry.fly.io/summary-ai-backend:deployment-01M88801YCCTGT3304PAZJ3CAN` | `origin/main` at `e588eb3` (`backend/` tree `d8e7f30620e3884f806dc2043db378b1c2affd7e` identical to main; backend change is #101) | 2026-11-25 (UTC) |
 | Web (`web/`, meetingmind.org) | `meeting-mind-web` | v39 | `registry.fly.io/meeting-mind-web:deployment-01M80MVFF67NNXW4G3ZYX9MPSN` | `origin/main` at `8c20741` (squash merge of #91; `web/` tree `95ac59f1309ef4fe01c82d47ae720fe58b40373b` identical to main) | 2026-11-22 (UTC) |
+
+## 2026-11-24 Backend (summary-ai-backend): outreach attribution reporting (#101), release v61, flag OFF
+- Fly release v61 (previous v60, image `registry.fly.io/summary-ai-backend:deployment-01M85HVXGK26HWJGM331VTSH89`). `flyctl deploy --remote-only` from a clean detached worktree of `origin/main` at `e588eb3`; worktree `backend/` tree equals `origin/main:backend` (`d8e7f30620e3884f806dc2043db378b1c2affd7e`). Delta from the v60 build (`ee5cb3e`): only #101.
+- What it does: signup (from `POST /api/activation/attribution` for utm_source=outreach) and activated (first completed recording) events to the Calldesk outreach metrics layer. Does nothing unless `OUTREACH_EVENTS_URL` and an event secret are set; neither is set, no secret was touched. See `docs/OUTREACH-ATTRIBUTION.md` for the enable steps and `docs/outreach-baseline.sql` for the 14-day baseline query.
+- Quiet moment checked first: no user traffic in the logs, only health checks and the background loops. Verified after deploy: `/health/detailed` healthy with all loops fresh, `POST /api/activation/attribution` without a token still 204 (ACTIVATION_EVENTS_ENABLED is not set in production, so attribution is not stored yet). vitest 91 files / 1281 tests pass, tsc clean.
+- Rollback: `flyctl releases rollback 60 -a summary-ai-backend`.
 
 ## 2026-11-23 Android 1.7.13 (versionCode 66): Traditional Chinese and output language, staged 20%
 - Play production: 1.7.13 (66) `inProgress` at userFraction 0.2; 1.7.12 (65) `completed`. Read back from the production track after commit. Release note (en-US): "Traditional Chinese for Taiwan and Hong Kong, and meeting titles and errors in your language."
