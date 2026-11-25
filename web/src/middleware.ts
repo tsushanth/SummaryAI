@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { isSwitchedOffPath } from '@/lib/features';
 
 interface CookieToSet {
   name: string;
@@ -11,6 +12,11 @@ export async function middleware(request: NextRequest) {
   // Public share pages never need a session: skip the Supabase round trip (and its failure modes) entirely.
   if (request.nextUrl.pathname.startsWith('/share/')) {
     return NextResponse.next();
+  }
+
+  // Pages of a switched-off feature (lib/features.ts): old links and bookmarks land on the recordings list.
+  if (isSwitchedOffPath(request.nextUrl.pathname)) {
+    return NextResponse.redirect(new URL('/recordings', request.url));
   }
 
   let response = NextResponse.next({

@@ -183,8 +183,8 @@
     <string name="export_pdf">Exportálás PDF-ként</string>
     <string name="export_text">Exportálás szövegként</string>
     <string name="export_markdown">Exportálás Markdownként</string>
-    <string name="service_description_recording">Hangot rögzít a megbeszélések és telefonhívások során az átíráshoz</string>
-    <string name="service_description_playback">A rögzített megbeszéléseket és telefonhívásokat játssza le a háttérben</string>
+    <string name="service_description_recording">Hangot rögzít a megbeszélések során az átíráshoz</string>
+    <string name="service_description_playback">A rögzített megbeszéléseket játssza le a háttérben</string>
     <string name="error">Hiba</string>
     <string name="ok">OK</string>
     <string name="cancel">Mégse</string>

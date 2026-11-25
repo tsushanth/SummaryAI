@@ -196,8 +196,8 @@
     <string name="export_markdown">Eksportuj jako Markdown</string>
 
     <!-- Service Descriptions -->
-    <string name="service_description_recording">Nagrywa dźwięk podczas spotkań i rozmów telefonicznych do transkrypcji</string>
-    <string name="service_description_playback">Odtwarza nagrane spotkania i rozmowy telefoniczne w tle</string>
+    <string name="service_description_recording">Nagrywa dźwięk podczas spotkań do transkrypcji</string>
+    <string name="service_description_playback">Odtwarza nagrane spotkania w tle</string>
 
     <!-- Errors -->
     <string name="error">Błąd</string>

@@ -183,8 +183,8 @@
     <string name="export_pdf">Exportă ca PDF</string>
     <string name="export_text">Exportă ca text</string>
     <string name="export_markdown">Exportă ca Markdown</string>
-    <string name="service_description_recording">Înregistrează audio în timpul întâlnirilor și al apelurilor telefonice pentru transcriere</string>
-    <string name="service_description_playback">Redă în fundal întâlnirile și apelurile telefonice înregistrate</string>
+    <string name="service_description_recording">Înregistrează audio în timpul întâlnirilor pentru transcriere</string>
+    <string name="service_description_playback">Redă în fundal întâlnirile înregistrate</string>
     <string name="error">Eroare</string>
     <string name="ok">OK</string>
     <string name="cancel">Anulează</string>

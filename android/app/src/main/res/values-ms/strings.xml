@@ -196,8 +196,8 @@
     <string name="export_markdown">Eksport sebagai Markdown</string>
 
     <!-- Service Descriptions -->
-    <string name="service_description_recording">Merakam audio semasa mesyuarat dan panggilan telefon untuk transkripsi</string>
-    <string name="service_description_playback">Memainkan semula mesyuarat dan panggilan yang dirakam di latar belakang</string>
+    <string name="service_description_recording">Merakam audio semasa mesyuarat untuk transkripsi</string>
+    <string name="service_description_playback">Memainkan semula mesyuarat yang dirakam di latar belakang</string>
 
     <!-- Errors -->
     <string name="error">Ralat</string>

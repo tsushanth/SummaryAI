@@ -172,8 +172,8 @@
     <string name="export_pdf">Als PDF exportieren</string>
     <string name="export_text">Als Text exportieren</string>
     <string name="export_markdown">Als Markdown exportieren</string>
-    <string name="service_description_recording">Nimmt Audio während Besprechungen und Telefonaten zur Transkription auf</string>
-    <string name="service_description_playback">Gibt aufgenommene Besprechungen und Telefonate im Hintergrund wieder</string>
+    <string name="service_description_recording">Nimmt Audio während Besprechungen zur Transkription auf</string>
+    <string name="service_description_playback">Gibt aufgenommene Besprechungen im Hintergrund wieder</string>
     <string name="error">Fehler</string>
     <string name="ok">OK</string>
     <string name="cancel">Abbrechen</string>

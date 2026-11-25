@@ -61,6 +61,7 @@ import com.kreativekoala.summaryai.ui.recordings.RecordingsListScreen
 import com.kreativekoala.summaryai.ui.search.SearchScreen
 import com.kreativekoala.summaryai.ui.settings.SettingsScreen
 import com.kreativekoala.summaryai.ui.todos.TodosScreen
+import com.kreativekoala.summaryai.util.FeatureFlags
 
 // CompositionLocal to communicate tab re-selection for scroll-to-top behavior
 val LocalTabReselection = compositionLocalOf { TabReselectionState() }
@@ -107,7 +108,7 @@ data class BottomNavItem(
     val icon: NavIcon
 )
 
-val bottomNavItems = listOf(
+val bottomNavItems = listOfNotNull(
     BottomNavItem(
         screen = Screen.Recordings,
         titleRes = R.string.recordings,
@@ -127,7 +128,7 @@ val bottomNavItems = listOf(
         screen = Screen.Phone,
         titleRes = R.string.phone,
         icon = NavIcon.Vector(Icons.Filled.Phone, Icons.Outlined.Phone)
-    ),
+    ).takeIf { FeatureFlags.PHONE_CALLS },
     BottomNavItem(
         screen = Screen.Settings,
         titleRes = R.string.settings,
@@ -465,13 +466,23 @@ fun MeetingMindNavGraph(
                 )
             }
 
-            // Phone
+            // Phone. The route stays registered while phone calls are off, so a restored back stack or a leftover
+            // navigation to it cannot crash; it goes to the recordings list instead.
             composable(Screen.Phone.route) {
-                PhoneScreen(
-                    onRecordingClick = { recordingId ->
-                        navController.navigate(Screen.RecordingDetail.createRoute(recordingId))
+                if (FeatureFlags.PHONE_CALLS) {
+                    PhoneScreen(
+                        onRecordingClick = { recordingId ->
+                            navController.navigate(Screen.RecordingDetail.createRoute(recordingId))
+                        }
+                    )
+                } else {
+                    LaunchedEffect(Unit) {
+                        navController.navigate(Screen.Recordings.route) {
+                            popUpTo(Screen.Phone.route) { inclusive = true }
+                            launchSingleTop = true
+                        }
                     }
-                )
+                }
             }
 
             // Settings

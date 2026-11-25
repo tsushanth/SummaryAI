@@ -183,8 +183,8 @@
     <string name="export_pdf">Vie PDF-tiedostona</string>
     <string name="export_text">Vie tekstinä</string>
     <string name="export_markdown">Vie Markdown-muodossa</string>
-    <string name="service_description_recording">Tallentaa ääntä kokouksissa ja puheluissa litterointia varten</string>
-    <string name="service_description_playback">Toistaa tallennettuja kokouksia ja puheluita taustalla</string>
+    <string name="service_description_recording">Tallentaa ääntä kokouksissa litterointia varten</string>
+    <string name="service_description_playback">Toistaa tallennettuja kokouksia taustalla</string>
     <string name="error">Virhe</string>
     <string name="ok">OK</string>
     <string name="cancel">Peruuta</string>

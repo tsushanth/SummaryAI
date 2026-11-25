@@ -183,8 +183,8 @@
     <string name="export_pdf">Exportovat jako PDF</string>
     <string name="export_text">Exportovat jako text</string>
     <string name="export_markdown">Exportovat jako Markdown</string>
-    <string name="service_description_recording">Nahrává zvuk během schůzek a telefonních hovorů kvůli přepisu</string>
-    <string name="service_description_playback">Přehrává nahrané schůzky a telefonní hovory na pozadí</string>
+    <string name="service_description_recording">Nahrává zvuk během schůzek kvůli přepisu</string>
+    <string name="service_description_playback">Přehrává nahrané schůzky na pozadí</string>
     <string name="error">Chyba</string>
     <string name="ok">OK</string>
     <string name="cancel">Zrušit</string>

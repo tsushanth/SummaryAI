@@ -196,8 +196,8 @@
     <string name="export_markdown">Exporteren als Markdown</string>
 
     <!-- Service Descriptions -->
-    <string name="service_description_recording">Neemt audio op tijdens vergaderingen en telefoongesprekken voor transcriptie</string>
-    <string name="service_description_playback">Speelt opgenomen vergaderingen en telefoongesprekken af op de achtergrond</string>
+    <string name="service_description_recording">Neemt audio op tijdens vergaderingen voor transcriptie</string>
+    <string name="service_description_playback">Speelt opgenomen vergaderingen af op de achtergrond</string>
 
     <!-- Errors -->
     <string name="error">Fout</string>

@@ -172,8 +172,8 @@
     <string name="export_pdf">Esporta come PDF</string>
     <string name="export_text">Esporta come Testo</string>
     <string name="export_markdown">Esporta come Markdown</string>
-    <string name="service_description_recording">Registra l\'audio durante riunioni e telefonate per la trascrizione</string>
-    <string name="service_description_playback">Riproduce riunioni e telefonate registrate in background</string>
+    <string name="service_description_recording">Registra l\'audio durante le riunioni per la trascrizione</string>
+    <string name="service_description_playback">Riproduce le riunioni registrate in background</string>
     <string name="error">Errore</string>
     <string name="ok">OK</string>
     <string name="cancel">Annulla</string>

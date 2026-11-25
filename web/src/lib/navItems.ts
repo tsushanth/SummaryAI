@@ -1,7 +1,9 @@
+import { PHONE_CALLS_ENABLED } from './features.ts';
+
 /** Sidebar entries. Icons are mapped by name in components/layout/Sidebar.tsx so this file stays importable by node tests. */
 export type NavIconName = 'Mic' | 'Search' | 'MessageSquare' | 'Calendar' | 'Phone' | 'ListTodo' | 'Settings';
 
-export const NAV_ITEMS: { name: string; href: string; icon: NavIconName }[] = [
+const ALL_NAV_ITEMS: { name: string; href: string; icon: NavIconName }[] = [
   { name: 'Recordings', href: '/recordings', icon: 'Mic' },
   { name: 'Search', href: '/search', icon: 'Search' },
   { name: 'Ask AI', href: '/chat', icon: 'MessageSquare' },
@@ -10,3 +12,5 @@ export const NAV_ITEMS: { name: string; href: string; icon: NavIconName }[] = [
   { name: 'Todos', href: '/todos', icon: 'ListTodo' },
   { name: 'Settings', href: '/settings', icon: 'Settings' },
 ];
+
+export const NAV_ITEMS = ALL_NAV_ITEMS.filter((item) => PHONE_CALLS_ENABLED || item.href !== '/phone');

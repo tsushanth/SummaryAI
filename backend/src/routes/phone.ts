@@ -7,6 +7,7 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { authenticate } from '../middleware/auth.js';
 import { asyncHandler, Errors } from '../middleware/errorHandler.js';
+import { phoneCallsApiGate } from '../middleware/phoneCallsGate.js';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { TwilioService } from '../services/twilioService.js';
 
@@ -14,6 +15,9 @@ const router = Router();
 
 // All routes require authentication
 router.use(authenticate);
+
+// Off unless FEATURE_PHONE_CALLS is set: nothing below runs then.
+router.use(phoneCallsApiGate);
 
 // ============================================================================
 // Schemas

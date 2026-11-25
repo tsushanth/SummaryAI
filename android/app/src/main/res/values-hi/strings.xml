@@ -172,8 +172,8 @@
     <string name="export_pdf">PDF के रूप में निर्यात करें</string>
     <string name="export_text">टेक्स्ट के रूप में निर्यात करें</string>
     <string name="export_markdown">Markdown के रूप में निर्यात करें</string>
-    <string name="service_description_recording">ट्रांसक्रिप्शन के लिए बैठकों और फ़ोन कॉल के दौरान ऑडियो रिकॉर्ड करता है</string>
-    <string name="service_description_playback">रिकॉर्ड की गई बैठकों और फ़ोन कॉल को बैकग्राउंड में चलाता है</string>
+    <string name="service_description_recording">ट्रांसक्रिप्शन के लिए बैठकों के दौरान ऑडियो रिकॉर्ड करता है</string>
+    <string name="service_description_playback">रिकॉर्ड की गई बैठकों को बैकग्राउंड में चलाता है</string>
     <string name="error">त्रुटि</string>
     <string name="ok">ठीक है</string>
     <string name="cancel">रद्द करें</string>
