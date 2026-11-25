@@ -7,6 +7,17 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 | Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v65 | `registry.fly.io/summary-ai-backend:deployment-01M89ZXDPTA91RB6HX5RX8QHA4` | `origin/main` at `7f7be54` (squash merge of #110; `backend/` tree `a7c29e3e031af25cb68ebb6f5759de40bffd952a` identical to main) | 2026-11-25 (UTC) |
 | Web (`web/`, meetingmind.org) | `meeting-mind-web` | v42 | `registry.fly.io/meeting-mind-web:deployment-01M89WXC4EMVGBM9MQWT88T2NT` | `origin/main` at `3fca3c4` (#108, deployed by the web-deploy workflow; `web/` tree `99e061269208c96c2730f5b42823e16189faceb5` identical to main) | 2026-11-25 (UTC) |
 
+## 2026-11-25 Android 1.7.15 (68), Play production, staged 20% (replaces the 20% rollout of 67)
+- Tag `play/1.7.15-68` = `main` at `44d946c` (#113, version bump only on top of `253aac4`). Built from exactly this commit in a clean detached worktree; the `paywallkit`, `ratingkit` and `crosspromokit` library modules come from their local checkouts, as before.
+- Play read back after commit: production 1.7.15 (68) `inProgress` userFraction 0.2, 1.7.13 (66) `completed`; 1.7.14 (67) is no longer on the track. Beta, alpha and internal moved to 68 `completed` (they held 54, 54 and 60). Uploaded with the Play edit API.
+- 67 before replacing it (read 2026-11-25, data up to 11-24): Play returned no crash or ANR rate rows and no crash or ANR issue for versionCode 67 or 66 in 28 days. That is an absence of data at this install base, not a measured clean rate. No review in the reviews API window.
+- targetSdk 36 / minSdk 26, Play Billing 8.0.0, upload-key signature (`jarsigner -verify` ok), AAB sha256 `21965a7badaaa15e4a3a0a512425a2376d7c27e4a2421786da32cb518f378613`. No permission added compared with the Play-generated APK of 67.
+- Release note (en-US): "The Phone tab has been removed. A recording in progress can no longer be uploaded or discarded by mistake, and a failed calendar connection now returns you to the app."
+- Contents: the Android changes of #110, on top of 1.7.14 (67).
+- Checks: `testDebugUnitTest` 293 tests, 0 failures; `lintDebug` 0 errors (471 warnings).
+- NOT verified: any device run, the Play-signed build, a real calendar sign-in. Google calendar connect stays broken until the redirect configuration in #110 is changed.
+- Rollback: halt the staged rollout; 1.7.13 (66) stays completed. Promotion to 100% needs 24-48 h of crash/ANR review first. Not promoted.
+
 ## 2026-11-25 Database: client write lockdown (Supabase `mlofjzlmncgnhxbiuemf`), migration 031
 - Applied to production before this was committed, recorded as `031_client_write_lockdown`. No deploy, no data change, no secret change.
 - New in production: signed-in users can no longer write `recordings`, `meetings` or `bot_runs` directly (owner reads unchanged). The apps and website write through the backend only.
