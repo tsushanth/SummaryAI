@@ -4,8 +4,19 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 
 | Component | Fly app | Release | Image | Built from | Date |
 |---|---|---|---|---|---|
-| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v61 | `registry.fly.io/summary-ai-backend:deployment-01M88801YCCTGT3304PAZJ3CAN` | `origin/main` at `e588eb3` (`backend/` tree `d8e7f30620e3884f806dc2043db378b1c2affd7e` identical to main; backend change is #101) | 2026-11-25 (UTC) |
-| Web (`web/`, meetingmind.org) | `meeting-mind-web` | v40 | `registry.fly.io/meeting-mind-web:deployment-01M88987MVYRCNZNWS4HQYYAZB` | `origin/main` at `d9d551b` (squash merge of #104, deployed by the web-deploy workflow; `web/` tree `5b94f35a51cb5e6decd084237eb715f8c593ee3c` identical to main) |
+| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v63 | `registry.fly.io/summary-ai-backend:deployment-01M89RJKNX17JPCZ2NYGSX4GAD` | `origin/main` at `55b3d15` (squash merge of #106; `backend/` tree `c236fd5c432f53fb11084888254239dbe834412e` identical to main) | 2026-11-25 (UTC) |
+| Web (`web/`, meetingmind.org) | `meeting-mind-web` | v41 | `registry.fly.io/meeting-mind-web:deployment-01M89RKD12F4WA30JM7JNHP89V` | `origin/main` at `55b3d15` (#106, deployed by the web-deploy workflow; `web/` tree `a8efc66af8c58d5ee2a014a3427750354e0900d0` identical to main) | 2026-11-25 (UTC) |
+
+## 2026-11-25 Meeting bot failures (#106): backend v63, web v41
+- Backend: `flyctl deploy --remote-only` from a clean detached worktree of `origin/main` at `55b3d15`. Web: `web-deploy.yml` on the merge (run succeeded, no rollback).
+- Change: the bot failure reason is saved and shown, Zoom links without a passcode are warned about, "Join now", started and failed meetings stay listed, bots that never recorded end as failed.
+- Quiet moment checked: no bot job due within 30 minutes, no bot run in the last 6 hours, only a finished upload 17 minutes earlier.
+- First reconciler pass marked exactly six old never-admitted bot runs (and their meetings and recordings) failed. No email or push lines in the log after the deploy.
+- Verified: tests rerun before merge (backend 1305, web 189, typecheck clean); `/health/detailed` healthy with all loops fresh; site `/` and `/auth` 200. NOT verified: a real bot joining a meeting.
+- Rollback: `flyctl releases rollback 62 -a summary-ai-backend`; web `flyctl deploy -a meeting-mind-web --image registry.fly.io/meeting-mind-web:deployment-01M88987MVYRCNZNWS4HQYYAZB`. Rolling back does not undo the six rows.
+
+## 2026-11-25 Backend v62: configuration only
+- Same image as v61. Set `OUTREACH_EVENT_SECRET`, `OUTREACH_EVENTS_URL` and `ACTIVATION_EVENTS_ENABLED=true`, so outreach attribution reporting from #101 is now on. Off switch: unset `OUTREACH_EVENTS_URL`.
 
 ## 2026-11-24 Web (meeting-mind-web): outreach UTM captured and posted with utm_content (#104), release v40
 - v39 (image `registry.fly.io/meeting-mind-web:deployment-01M80MVFF67NNXW4G3ZYX9MPSN`) -> v40. Deployed by `.github/workflows/web-deploy.yml` on the merge of #104 (tests, rollback target recorded, 90 s settle plus 5 health checks; run succeeded, no rollback). The web app has no long-running jobs; the loops are in the backend.
