@@ -4,8 +4,20 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 
 | Component | Fly app | Release | Image | Built from | Date |
 |---|---|---|---|---|---|
-| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v64 | `registry.fly.io/summary-ai-backend:deployment-01M89X96ABMPXMVP2N8X59ZY1F` | `origin/main` at `3fca3c4` (squash merge of #108; `backend/` tree `ccfcf742e900617fb803b54887cd3acbac9ac376` identical to main) | 2026-11-25 (UTC) |
+| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v65 | `registry.fly.io/summary-ai-backend:deployment-01M89ZXDPTA91RB6HX5RX8QHA4` | `origin/main` at `7f7be54` (squash merge of #110; `backend/` tree `a7c29e3e031af25cb68ebb6f5759de40bffd952a` identical to main) | 2026-11-25 (UTC) |
 | Web (`web/`, meetingmind.org) | `meeting-mind-web` | v42 | `registry.fly.io/meeting-mind-web:deployment-01M89WXC4EMVGBM9MQWT88T2NT` | `origin/main` at `3fca3c4` (#108, deployed by the web-deploy workflow; `web/` tree `99e061269208c96c2730f5b42823e16189faceb5` identical to main) | 2026-11-25 (UTC) |
+
+## 2026-11-25 Silent feature failures and coaching credit fixes (#110): backend v65
+- Backend: `flyctl deploy --remote-only` from a clean detached worktree of `origin/main` at `7f7be54`; previous v64. Web not deployed (`web/` unchanged). Android not released.
+- Change: the coaching debug credit grant route is removed; credit debit and refund are one per session and a session starts only on the caller's own recording; live insights read fenced model replies; calendar callback failures are reported, the first import after connecting works and runs once per connection; meetings whose bot run ended are closed; `AbandonedUploads` and `AccountPurgeRetry` are in the loop watchdog; invariant changes. No migration, no secret set or unset.
+- Quiet moment checked: no open bot run, no recording pending, uploading or processing, none touched in 10 minutes, no bot job due within 30 minutes, no open coaching session.
+- First reconciler pass closed exactly the 11 meetings left `bot_joining` since June, as listed by a read-only query before the deploy: 7 to `failed` (`STATUS_NEVER_REPORTED`), 4 to `completed`. No row deleted (51 meetings before and after); no recording, bot run or coaching credit row changed.
+- Verified: `tsc` clean and vitest 100 files / 1371 tests pass on the merged tree; Android `testDebugUnitTest` 293 tests, 0 failures; `/health` and `/health/detailed` healthy with all seven loops fresh; all 119 compiled `.js` files on the machine identical to a fresh build of the same tree; the coaching router loaded from the running image has no `grant-debug` route. An unauthenticated POST to it answers 401 (router authentication runs before routing, as before), so a 404 with a signed-in user was NOT observed.
+- Watched for 7 minutes after the deploy, including the first invariant pass at +5 minutes: no error line in the logs, and the failure reporter received only the expected alert.
+- Expected alert: `BAD_GOOGLE_REDIRECT_URI` (sent once at boot). Google calendar connect stays broken until the OAuth client and `GOOGLE_REDIRECT_URI` are changed (see #110).
+- NOT verified: a signed-in request, a real calendar sign-in, a live meeting or live insights in production, a coaching session, any device run.
+- Android: the app changes in #110 (no upload or discard of the file being recorded, calendar error link returns to the app, calendar screen reloads on return, debug credit call removed) need a release after 1.7.14 (67).
+- Rollback: `flyctl releases rollback 64 -a summary-ai-backend` brings the debug grant route back, so prefer fixing forward. Rolling back does not undo the 11 meeting rows.
 
 ## 2026-11-25 Phone calls switched off (#108): web v42, backend v64, Android 1.7.14 (67) staged 20%
 - Change: the phone call feature is hidden behind flags that are off (`FEATURE_PHONE_CALLS` on the backend, `PHONE_CALLS_ENABLED` in `web/src/lib/features.ts`, `FeatureFlags.PHONE_CALLS` on Android). The code stays. The PR text describes what each surface answers.
