@@ -172,8 +172,8 @@
     <string name="export_pdf">Exporter en PDF</string>
     <string name="export_text">Exporter en Texte</string>
     <string name="export_markdown">Exporter en Markdown</string>
-    <string name="service_description_recording">Enregistre l\'audio pendant les réunions et les appels téléphoniques pour la transcription</string>
-    <string name="service_description_playback">Lit les réunions et appels téléphoniques enregistrés en arrière-plan</string>
+    <string name="service_description_recording">Enregistre l\'audio pendant les réunions pour la transcription</string>
+    <string name="service_description_playback">Lit les réunions enregistrées en arrière-plan</string>
     <string name="error">Erreur</string>
     <string name="ok">OK</string>
     <string name="cancel">Annuler</string>

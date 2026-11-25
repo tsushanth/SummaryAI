@@ -2,6 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { PHONE_CALLS_ENABLED } from '../src/lib/features.ts';
 
 const files = {
   'landing page': readFileSync(new URL('../src/app/page.tsx', import.meta.url), 'utf8'),
@@ -20,6 +21,10 @@ const banned = [
   [/(does not|doesn't|never) train/i, 'a no-training claim (not verified with Deepgram or Anthropic)'],
   [/\bunlimited\b/i, 'bare "unlimited" (fair use and per-file limits apply)'],
 ];
+
+if (!PHONE_CALLS_ENABLED) {
+  banned.push([/phone[ -]?call|call recording|speakerphone|calls? from the app/i, 'phone call claim (the feature is switched off)']);
+}
 
 for (const [name, text] of Object.entries(files)) {
   for (const [re, why] of banned) {

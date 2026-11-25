@@ -183,8 +183,8 @@
     <string name="export_pdf">Експортувати як PDF</string>
     <string name="export_text">Експортувати як текст</string>
     <string name="export_markdown">Експортувати як Markdown</string>
-    <string name="service_description_recording">Записує звук під час зустрічей і телефонних дзвінків для транскрибування</string>
-    <string name="service_description_playback">Відтворює записані зустрічі й телефонні дзвінки у фоновому режимі</string>
+    <string name="service_description_recording">Записує звук під час зустрічей для транскрибування</string>
+    <string name="service_description_playback">Відтворює записані зустрічі у фоновому режимі</string>
     <string name="error">Помилка</string>
     <string name="ok">OK</string>
     <string name="cancel">Скасувати</string>

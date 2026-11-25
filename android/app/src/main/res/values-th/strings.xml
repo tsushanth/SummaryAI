@@ -196,8 +196,8 @@
     <string name="export_markdown">ส่งออกเป็น Markdown</string>
 
     <!-- Service Descriptions -->
-    <string name="service_description_recording">บันทึกเสียงระหว่างการประชุมและการโทรเพื่อถอดเสียง</string>
-    <string name="service_description_playback">เล่นการประชุมและการโทรที่บันทึกไว้ในพื้นหลัง</string>
+    <string name="service_description_recording">บันทึกเสียงระหว่างการประชุมเพื่อถอดเสียง</string>
+    <string name="service_description_playback">เล่นการประชุมที่บันทึกไว้ในพื้นหลัง</string>
 
     <!-- Errors -->
     <string name="error">ข้อผิดพลาด</string>

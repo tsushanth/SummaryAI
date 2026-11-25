@@ -1,14 +1,13 @@
 # Meeting Mind
 
-> Meeting Mind is a free AI meeting-notes app for Android and the web. It records and transcribes meetings, phone calls and in-person conversations, writes summaries and action items, and lets you ask questions about your recordings.
+> Meeting Mind is a free AI meeting-notes app for Android and the web. It records and transcribes meetings and in-person conversations, writes summaries and action items, and lets you ask questions about your recordings.
 
 ## What it does
 
-- Record with your device microphone (in person, lectures, speakerphone) or upload existing audio
+- Record with your device microphone (in person, lectures) or upload existing audio
 - Speech-to-text transcription with speaker identification and timestamps, language detected automatically (36+ languages)
 - AI-generated summaries: key points, decisions, and action items
 - Q&A over your own recordings, with citations
-- Phone call recording and transcription (the other party hears a recording notice)
 - Meeting bot for Zoom, Microsoft Teams, and Google Meet: connect a Google or Outlook calendar (or paste a meeting link) and the bot joins as a visible participant named "Meeting Mind". The live transcript during a bot meeting is English only.
 
 ## Who it's for

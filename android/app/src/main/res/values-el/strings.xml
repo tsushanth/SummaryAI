@@ -183,8 +183,8 @@
     <string name="export_pdf">Εξαγωγή ως PDF</string>
     <string name="export_text">Εξαγωγή ως κείμενο</string>
     <string name="export_markdown">Εξαγωγή ως Markdown</string>
-    <string name="service_description_recording">Ηχογραφεί ήχο κατά τις συσκέψεις και τις τηλεφωνικές κλήσεις για απομαγνητοφώνηση</string>
-    <string name="service_description_playback">Αναπαράγει στο παρασκήνιο ηχογραφημένες συσκέψεις και τηλεφωνικές κλήσεις</string>
+    <string name="service_description_recording">Ηχογραφεί ήχο κατά τις συσκέψεις για απομαγνητοφώνηση</string>
+    <string name="service_description_playback">Αναπαράγει στο παρασκήνιο ηχογραφημένες συσκέψεις</string>
     <string name="error">Σφάλμα</string>
     <string name="ok">OK</string>
     <string name="cancel">Ακύρωση</string>

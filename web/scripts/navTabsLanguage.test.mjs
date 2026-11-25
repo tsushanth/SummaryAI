@@ -4,15 +4,32 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { NAV_ITEMS } from '../src/lib/navItems.ts';
+import { PHONE_CALLS_ENABLED, isSwitchedOffPath } from '../src/lib/features.ts';
 import { filtersToParams } from '../src/lib/recordingFilters.ts';
 import { recordingsQueryString } from '../src/lib/recordingsQuery.ts';
 import { OUTPUT_LANGUAGES, outputLanguageParam } from '../src/lib/outputLanguages.ts';
 
-test('Phone is in the sidebar, after Meetings', () => {
-  const hrefs = NAV_ITEMS.map((n) => n.href);
-  assert.ok(hrefs.includes('/phone'));
-  assert.ok(hrefs.indexOf('/phone') > hrefs.indexOf('/meetings'));
-  assert.equal(NAV_ITEMS.find((n) => n.href === '/phone').name, 'Phone');
+test('phone calls are switched off', () => {
+  assert.equal(PHONE_CALLS_ENABLED, false);
+});
+
+test('Phone is not in the sidebar while phone calls are off', () => {
+  assert.deepEqual(NAV_ITEMS.map((n) => n.href), ['/recordings', '/search', '/chat', '/meetings', '/todos', '/settings']);
+});
+
+test('the phone pages are redirected while phone calls are off, and only those', () => {
+  for (const path of ['/phone', '/phone/', '/phone/settings']) assert.equal(isSwitchedOffPath(path), true, path);
+  for (const path of ['/', '/recordings', '/phones', '/phone-help', '/share/phone', '/settings']) {
+    assert.equal(isSwitchedOffPath(path), false, path);
+  }
+  assert.equal(isSwitchedOffPath('/phone', true), false, 'switching the flag back on opens the pages again');
+});
+
+test('the middleware redirects switched-off pages before anything else needs a session', () => {
+  const mw = readFileSync(new URL('../src/middleware.ts', import.meta.url), 'utf8');
+  const gate = mw.indexOf('isSwitchedOffPath(request.nextUrl.pathname)');
+  assert.ok(gate > 0, 'middleware does not call isSwitchedOffPath');
+  assert.ok(gate < mw.indexOf('createServerClient('), 'the redirect must not depend on Supabase');
 });
 
 test('every sidebar page is protected by the auth middleware', () => {

@@ -196,8 +196,8 @@
     <string name="export_markdown">Markdown olarak Dışa Aktar</string>
 
     <!-- Service Descriptions -->
-    <string name="service_description_recording">Transkripsiyon için toplantılar ve telefon görüşmeleri sırasında ses kaydı yapar</string>
-    <string name="service_description_playback">Kaydedilmiş toplantıları ve telefon görüşmelerini arka planda oynatır</string>
+    <string name="service_description_recording">Transkripsiyon için toplantılar sırasında ses kaydı yapar</string>
+    <string name="service_description_playback">Kaydedilmiş toplantıları arka planda oynatır</string>
 
     <!-- Errors -->
     <string name="error">Hata</string>

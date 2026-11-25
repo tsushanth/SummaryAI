@@ -196,8 +196,8 @@
     <string name="export_markdown">Xuất dạng Markdown</string>
 
     <!-- Service Descriptions -->
-    <string name="service_description_recording">Ghi âm trong cuộc họp và cuộc gọi điện thoại để phiên âm</string>
-    <string name="service_description_playback">Phát lại các cuộc họp và cuộc gọi đã ghi trong nền</string>
+    <string name="service_description_recording">Ghi âm trong cuộc họp để phiên âm</string>
+    <string name="service_description_playback">Phát lại các cuộc họp đã ghi trong nền</string>
 
     <!-- Errors -->
     <string name="error">Lỗi</string>

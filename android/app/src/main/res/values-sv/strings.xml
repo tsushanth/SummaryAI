@@ -183,8 +183,8 @@
     <string name="export_pdf">Exportera som PDF</string>
     <string name="export_text">Exportera som text</string>
     <string name="export_markdown">Exportera som Markdown</string>
-    <string name="service_description_recording">Spelar in ljud under möten och telefonsamtal för transkribering</string>
-    <string name="service_description_playback">Spelar upp inspelade möten och telefonsamtal i bakgrunden</string>
+    <string name="service_description_recording">Spelar in ljud under möten för transkribering</string>
+    <string name="service_description_playback">Spelar upp inspelade möten i bakgrunden</string>
     <string name="error">Fel</string>
     <string name="ok">OK</string>
     <string name="cancel">Avbryt</string>

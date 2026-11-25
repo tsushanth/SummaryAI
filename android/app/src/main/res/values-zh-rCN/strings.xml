@@ -172,8 +172,8 @@
     <string name="export_pdf">导出为PDF</string>
     <string name="export_text">导出为文本</string>
     <string name="export_markdown">导出为Markdown</string>
-    <string name="service_description_recording">在会议和电话通话期间录制音频以进行转录</string>
-    <string name="service_description_playback">在后台播放录制的会议和电话通话</string>
+    <string name="service_description_recording">在会议期间录制音频以进行转录</string>
+    <string name="service_description_playback">在后台播放录制的会议</string>
     <string name="error">错误</string>
     <string name="ok">确定</string>
     <string name="cancel">取消</string>

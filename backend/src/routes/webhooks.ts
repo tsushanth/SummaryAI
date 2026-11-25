@@ -21,6 +21,7 @@ import { failNeverRecordedRun } from '../services/botFailure.js';
 import { queueInsightGeneration } from '../services/liveInsightsService.js';
 import { grantCredits } from '../services/coachingService.js';
 import { TwilioService } from '../services/twilioService.js';
+import { refuseDialWhenPhoneCallsOff } from '../middleware/phoneCallsGate.js';
 import { reportAlert } from '../lib/alerts.js';
 import { alertWebhookFailure, alertPaymentFailure } from '../services/alertingService.js';
 import { checkRecallEvidence, parseFallbackState, recallIsVisible, selectLiveRun } from '../lib/liveSttFallback.js';
@@ -690,6 +691,9 @@ router.post('/recall/transcript', async (req: Request, res: Response) => {
 
 // ============================================================================
 // Twilio Webhooks (Phone Calls)
+// With phone calls off (FEATURE_PHONE_CALLS unset) only the two routes whose TwiML dials a number are refused
+// (caller-connect, voip-outbound). The rest cannot start a call and stay on, so a call or recording already in
+// flight at the switch still gets its recording notice, its status and its recording.
 // ============================================================================
 
 /**
@@ -731,7 +735,7 @@ router.post('/twilio/verification-status', async (req: Request, res: Response) =
  * Called when the USER answers their phone for a server-initiated call
  * This bridges them to the recipient with recording enabled
  */
-router.post('/twilio/caller-connect', async (req: Request, res: Response) => {
+router.post('/twilio/caller-connect', refuseDialWhenPhoneCallsOff, async (req: Request, res: Response) => {
   const { CallSid, CallStatus } = req.body;
   const callId = req.query.call_id as string;
   const toNumber = req.query.to as string;
@@ -834,7 +838,7 @@ router.post('/twilio/server-call-answer', async (req: Request, res: Response) =>
  *
  * NOTE: When called from Twilio Voice SDK, custom params are in req.body, NOT query params
  */
-router.post('/twilio/voip-outbound', async (req: Request, res: Response) => {
+router.post('/twilio/voip-outbound', refuseDialWhenPhoneCallsOff, async (req: Request, res: Response) => {
   // Twilio Voice SDK sends custom params in the body
   const { From, To, CallSid, call_id: bodyCallId, to: bodyTo } = req.body;
 

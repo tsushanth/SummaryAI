@@ -172,8 +172,8 @@
     <string name="export_pdf">匯出為PDF</string>
     <string name="export_text">匯出為文字</string>
     <string name="export_markdown">匯出為Markdown</string>
-    <string name="service_description_recording">在會議和電話通話期間錄製音訊以進行轉錄</string>
-    <string name="service_description_playback">在背景播放錄製的會議和電話通話</string>
+    <string name="service_description_recording">在會議期間錄製音訊以進行轉錄</string>
+    <string name="service_description_playback">在背景播放錄製的會議</string>
     <string name="error">錯誤</string>
     <string name="ok">確定</string>
     <string name="cancel">取消</string>

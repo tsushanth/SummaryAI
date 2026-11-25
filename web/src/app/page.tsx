@@ -13,7 +13,7 @@ import {
   MessageSquareText,
   AudioLines,
   CalendarCheck,
-  PhoneCall,
+  Mic,
   Plug,
   Languages,
   type LucideIcon,
@@ -46,9 +46,9 @@ const FEATURES: { title: string; body: string; icon: LucideIcon }[] = [
     icon: CalendarCheck,
   },
   {
-    title: 'Phone calls and in person',
-    body: 'Place a call from the app, or record a conversation in the room with your device microphone. You get the same transcript and summary afterwards.',
-    icon: PhoneCall,
+    title: 'In-person recording',
+    body: 'Record a conversation in the room with your device microphone. You get the same transcript and summary afterwards.',
+    icon: Mic,
   },
   {
     title: 'Integrations',
@@ -278,7 +278,7 @@ export default function LandingPage() {
           </h2>
           <p className="mt-4 max-w-xl text-lg text-muted-foreground">
             Every feature is included at no charge: recording, transcripts, summaries, questions about your
-            meetings, the meeting bot and phone call recording. Fair use applies, along with the per-file size
+            meetings and the meeting bot. Fair use applies, along with the per-file size
             and length limits in our <Link href="/terms" className="underline underline-offset-4 hover:text-foreground">Terms</Link>.
           </p>
           <p className="mt-4 max-w-xl text-sm text-muted-foreground">

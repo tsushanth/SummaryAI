@@ -196,8 +196,8 @@
     <string name="export_markdown">تصدير كـ Markdown</string>
 
     <!-- Service Descriptions -->
-    <string name="service_description_recording">تسجيل الصوت أثناء الاجتماعات والمكالمات الهاتفية للتفريغ</string>
-    <string name="service_description_playback">تشغيل الاجتماعات والمكالمات المسجلة في الخلفية</string>
+    <string name="service_description_recording">تسجيل الصوت أثناء الاجتماعات للتفريغ</string>
+    <string name="service_description_playback">تشغيل الاجتماعات المسجلة في الخلفية</string>
 
     <!-- Errors -->
     <string name="error">خطأ</string>

@@ -172,8 +172,8 @@
     <string name="export_pdf">PDF로 내보내기</string>
     <string name="export_text">텍스트로 내보내기</string>
     <string name="export_markdown">Markdown으로 내보내기</string>
-    <string name="service_description_recording">전사를 위해 회의 및 전화 통화 중 오디오를 녹음합니다</string>
-    <string name="service_description_playback">녹음된 회의 및 전화 통화를 백그라운드에서 재생합니다</string>
+    <string name="service_description_recording">전사를 위해 회의 중 오디오를 녹음합니다</string>
+    <string name="service_description_playback">녹음된 회의를 백그라운드에서 재생합니다</string>
     <string name="error">오류</string>
     <string name="ok">확인</string>
     <string name="cancel">취소</string>
