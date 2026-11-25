@@ -8,6 +8,8 @@ import { instrumentAnthropic, withFeature } from '../lib/llm.js';
 import { config } from '../config/index.js';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { languageInstruction } from '../lib/outputLanguage.js';
+import { reportAlert } from '../lib/alerts.js';
+import { parseModelJsonArray } from '../lib/modelJson.js';
 import { LiveInsight, LiveInsightType, VerificationStatus } from '../types/meetings.js';
 
 // Track meetings with pending insight generation to batch requests
@@ -66,10 +68,90 @@ export async function getMeetingOutputLanguage(meetingId: string): Promise<strin
   }
 }
 
+interface InsightRow {
+  meeting_id: string;
+  user_id: string;
+  insight_type: LiveInsightType;
+  content: string;
+  context: string | null;
+  confidence: number | null;
+  verification_status: VerificationStatus | null;
+  timestamp_seconds: number | null;
+}
+
+/**
+ * Inserts the rows in one call; if the database rejects the batch (one row failing a constraint rejects all of them),
+ * inserts them one at a time so only the bad ones are lost. Any rejection is reported: codes and counts only.
+ */
+async function storeInsights(meetingId: string, rows: InsightRow[]): Promise<void> {
+  if (rows.length === 0) return;
+  const { error: batchError } = await supabaseAdmin.from('live_insights').insert(rows);
+  if (!batchError) {
+    console.log(`[LiveInsights] Inserted ${rows.length} insights for meeting ${meetingId}`);
+    return;
+  }
+  console.error('[LiveInsights] Failed to insert insights:', batchError);
+  let failed = 0;
+  let code = batchError.code;
+  for (const row of rows) {
+    const { error } = await supabaseAdmin.from('live_insights').insert(row);
+    if (error) { failed++; code = error.code; }
+  }
+  reportAlert('live_insights', failed === rows.length ? 'INSERT_FAILED' : 'INSERT_PARTLY_FAILED', { code, failed, rows: rows.length });
+}
+
+type InsightPart = 'key_points' | 'questions' | 'fact_checks' | 'contradictions';
+
+/**
+ * The usable items of one model reply. Reports a reply that cannot be read, and items that were unreadable or invalid;
+ * a valid empty array is the model saying there is nothing to add and is not reported.
+ */
+function readReply<T>(part: InsightPart, response: Anthropic.Message, validate: (item: unknown) => T | null): T[] {
+  const text = response.content[0]?.type === 'text' ? response.content[0].text : '';
+  const parsed = parseModelJsonArray(text);
+  if (!parsed.ok) {
+    console.error(`[LiveInsights] Unreadable ${part} reply (stop_reason=${response.stop_reason}, ${text.length} chars)`);
+    reportAlert('live_insights', 'PARSE_FAILED', { part, stop_reason: response.stop_reason });
+    return [];
+  }
+  const valid = parsed.items.map(validate).filter((v): v is T => v !== null);
+  const rejected = parsed.failed + (parsed.items.length - valid.length);
+  if (rejected > 0) {
+    console.error(`[LiveInsights] Rejected ${rejected} ${part} item(s)`);
+    reportAlert('live_insights', 'ITEMS_REJECTED', { part, rejected, kept: valid.length, stop_reason: response.stop_reason });
+  }
+  return valid;
+}
+
+const nonEmpty = (v: unknown): string | null => (typeof v === 'string' && v.trim() ? v.trim() : null);
+
+/** A key point or question: a string, or an object carrying one under a usual key. */
+function textItem(item: unknown): string | null {
+  const o = item as Record<string, unknown> | null;
+  return nonEmpty(item) ?? nonEmpty(o?.text) ?? nonEmpty(o?.point) ?? nonEmpty(o?.question) ?? nonEmpty(o?.content);
+}
+
+/** Statuses the live_insights check constraint accepts. Anything else is stored as 'unknown'. */
+const VERIFICATION_STATUSES: readonly string[] = ['verified', 'disputed', 'false', 'unknown'];
+
+function factCheckItem(item: unknown): FactCheckResult | null {
+  const o = item as Record<string, unknown> | null;
+  const claim = nonEmpty(o?.claim);
+  if (!claim) return null;
+  const status = String(o?.status ?? '').trim().toLowerCase();
+  const confidence = typeof o?.confidence === 'number' && o.confidence >= 0 && o.confidence <= 1 ? o.confidence : undefined;
+  return {
+    claim,
+    status: (VERIFICATION_STATUSES.includes(status) ? status : 'unknown') as FactCheckResult['status'],
+    explanation: nonEmpty(o?.explanation) ?? undefined,
+    confidence,
+  };
+}
+
 /**
  * Generate insights for a meeting based on recent transcript segments
  */
-async function generateInsightsForMeeting(meetingId: string, userId: string): Promise<void> {
+export async function generateInsightsForMeeting(meetingId: string, userId: string): Promise<void> {
   if (!config.ANTHROPIC_API_KEY) {
     console.log('[LiveInsights] Anthropic API key not configured, skipping insight generation');
     return;
@@ -85,6 +167,7 @@ async function generateInsightsForMeeting(meetingId: string, userId: string): Pr
     .order('created_at', { ascending: false })
     .limit(20);
 
+  if (segmentsError) reportAlert('live_insights', 'SEGMENTS_QUERY_FAILED', { code: segmentsError.code });
   if (segmentsError || !segments || segments.length === 0) {
     console.log(`[LiveInsights] No new segments for meeting ${meetingId}`);
     return;
@@ -114,16 +197,7 @@ async function generateInsightsForMeeting(meetingId: string, userId: string): Pr
   const timestampSeconds = lastSegment?.end_timestamp || 0;
 
   // Store insights
-  const insightsToInsert: Array<{
-    meeting_id: string;
-    user_id: string;
-    insight_type: LiveInsightType;
-    content: string;
-    context: string | null;
-    confidence: number | null;
-    verification_status: VerificationStatus | null;
-    timestamp_seconds: number | null;
-  }> = [];
+  const insightsToInsert: InsightRow[] = [];
 
   for (const point of keyPoints) {
     insightsToInsert.push({
@@ -158,23 +232,13 @@ async function generateInsightsForMeeting(meetingId: string, userId: string): Pr
       insight_type: 'fact_check',
       content: check.claim,
       context: check.explanation || null,
-      confidence: check.confidence || null,
+      confidence: check.confidence ?? null,
       verification_status: check.status as VerificationStatus,
       timestamp_seconds: timestampSeconds,
     });
   }
 
-  if (insightsToInsert.length > 0) {
-    const { error: insertError } = await supabaseAdmin
-      .from('live_insights')
-      .insert(insightsToInsert);
-
-    if (insertError) {
-      console.error('[LiveInsights] Failed to insert insights:', insertError);
-    } else {
-      console.log(`[LiveInsights] Inserted ${insightsToInsert.length} insights for meeting ${meetingId}`);
-    }
-  }
+  await storeInsights(meetingId, insightsToInsert);
 
   // Check for cross-meeting contradictions asynchronously
   findCrossMeetingContradictions(meetingId, userId, context, timestampSeconds, outputLanguage).catch(err => {
@@ -206,8 +270,7 @@ If no key points, return: []` + languageInstruction(outputLanguage),
       ],
     }));
 
-    const content = response.content[0]?.type === 'text' ? response.content[0].text : '[]';
-    return JSON.parse(content);
+    return readReply('key_points', response, textItem);
   } catch (error) {
     console.error('[LiveInsights] Error generating key points:', error);
     return [];
@@ -238,8 +301,7 @@ If no good questions, return: []` + languageInstruction(outputLanguage),
       ],
     }));
 
-    const content = response.content[0]?.type === 'text' ? response.content[0].text : '[]';
-    return JSON.parse(content);
+    return readReply('questions', response, textItem);
   } catch (error) {
     console.error('[LiveInsights] Error generating questions:', error);
     return [];
@@ -284,8 +346,7 @@ If no verifiable claims, return: []` + languageInstruction(outputLanguage),
       ],
     }));
 
-    const content = response.content[0]?.type === 'text' ? response.content[0].text : '[]';
-    return JSON.parse(content);
+    return readReply('fact_checks', response, factCheckItem);
   } catch (error) {
     console.error('[LiveInsights] Error generating fact checks:', error);
     return [];
@@ -304,15 +365,7 @@ async function findCrossMeetingContradictions(
 ): Promise<void> {
   if (!config.ANTHROPIC_API_KEY) return;
 
-  // Get past transcripts for comparison (from completed recordings)
-  const { data: pastTranscripts, error: transcriptsError } = await supabaseAdmin
-    .from('transcripts')
-    .select('recording_id, full_text')
-    .eq('recording_id', supabaseAdmin.rpc('get_user_recording_ids', { p_user_id: userId }))
-    .order('created_at', { ascending: false })
-    .limit(5);
-
-  // If no past transcripts or error, try getting from recordings directly
+  // Past completed recordings to compare against
   const { data: recordings, error: recordingsError } = await supabaseAdmin
     .from('recordings')
     .select('id, title, created_at')
@@ -366,22 +419,21 @@ If nothing notable, return: []` + languageInstruction(outputLanguage),
       ],
     }));
 
-    const content = response.content[0]?.type === 'text' ? response.content[0].text : '[]';
-    const findings = JSON.parse(content);
+    const findings = readReply('contradictions', response, (item) =>
+      item && typeof item === 'object' ? (item as Record<string, unknown>) : null);
 
-    // Insert contradiction insights
-    for (const finding of findings) {
-      if (finding.type === 'contradiction' || finding.type === 'changed_position') {
-        await supabaseAdmin.from('live_insights').insert({
-          meeting_id: meetingId,
-          user_id: userId,
-          insight_type: 'contradiction',
-          content: finding.explanation || `Current: "${finding.current}" vs Previous: "${finding.previous}"`,
-          context: finding.current,
-          timestamp_seconds: timestampSeconds,
-        });
-      }
-    }
+    await storeInsights(meetingId, findings
+      .filter((f) => f.type === 'contradiction' || f.type === 'changed_position')
+      .map((f) => ({
+        meeting_id: meetingId,
+        user_id: userId,
+        insight_type: 'contradiction' as const,
+        content: nonEmpty(f.explanation) ?? `Current: "${f.current}" vs Previous: "${f.previous}"`,
+        context: nonEmpty(f.current),
+        confidence: null,
+        verification_status: null,
+        timestamp_seconds: timestampSeconds,
+      })));
   } catch (error) {
     console.error('[LiveInsights] Error finding contradictions:', error);
   }

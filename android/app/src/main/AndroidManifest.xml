@@ -100,6 +100,11 @@
                     android:scheme="summaryai"
                     android:host="calendar"
                     android:path="/connected" />
+                <!-- A refused or failed connection must also return to the app, not a dead browser page. -->
+                <data
+                    android:scheme="summaryai"
+                    android:host="calendar"
+                    android:path="/error" />
             </intent-filter>
 
             <!-- Supabase auth callback -->

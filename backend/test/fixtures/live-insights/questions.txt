@@ -1,0 +1,6 @@
+```json
+[
+  "Priya, can you clarify what bug you're referring to and how the boiling point relates to our mobile release timeline?",
+  "Sam, what was the reasoning behind dropping the legacy export format, and do we have a migration plan for users who depend on it?"
+]
+```

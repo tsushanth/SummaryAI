@@ -58,7 +58,7 @@ describe('expireStaleBotRuns', () => {
     expect(updates).toEqual([]);
   });
 
-  it('marks the run completed when its recording completed, else failed with STATUS_NEVER_REPORTED; never touches meetings/recordings', async () => {
+  it('marks the run completed when its recording completed, else failed with STATUS_NEVER_REPORTED; the run is all it writes', async () => {
     data = {
       bot_runs: { data: [{ id: 'b1', meeting_id: 'm1' }], error: null },
       'meetings:one': { data: { recording_id: 'r1' }, error: null },

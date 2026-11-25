@@ -223,26 +223,6 @@ class JoinMeetingViewModel @Inject constructor(
         return launched
     }
 
-    /** DEBUG builds only: grants 5 credits per call so we can test before real IAPs ship. */
-    fun debugGrantCoachingCredits() {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoadingCoachingCredits = true)
-            runCatching { coachingRepository.debugGrantCredits() }
-                .onSuccess { resp ->
-                    _uiState.value = _uiState.value.copy(
-                        isLoadingCoachingCredits = false,
-                        coachingCredits = resp.balance
-                    )
-                }
-                .onFailure { e ->
-                    _uiState.value = _uiState.value.copy(
-                        isLoadingCoachingCredits = false,
-                        coachingError = "Debug grant failed: ${e.message}"
-                    )
-                }
-        }
-    }
-
     private fun startCoachingSession(meetingId: String, recordingId: String) {
         viewModelScope.launch {
             runCatching {

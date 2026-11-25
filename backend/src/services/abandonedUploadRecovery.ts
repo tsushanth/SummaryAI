@@ -26,12 +26,30 @@ import { supabaseAdmin } from '../lib/supabase.js';
 import { registerLoop, runLoopPass, reportLoopScanError } from '../lib/loopMonitor.js';
 import { getRecordingLimits, type RecordingLimits } from '../config/recordingLimits.js';
 import { FAILED_UPLOAD_CODE, FAILED_UPLOAD_MESSAGE } from './shortRecordingGuard.js';
+import { reportRecordingFailure } from '../lib/recordingFailure.js';
 
 export const ABANDONED_UPLOAD_CODE = FAILED_UPLOAD_CODE;
 export const ABANDONED_UPLOAD_MESSAGE = FAILED_UPLOAD_MESSAGE;
 export const ABANDONED_SCAN_INTERVAL_MS = 30 * 60 * 1000;
 const LOOP = 'AbandonedUploads';
 const TAG = '[AbandonedUploads]';
+
+const REPORT_COLUMNS = 'id, file_size_bytes, duration_seconds, content_type';
+interface FailedUploadRow { file_size_bytes?: number | null; duration_seconds?: number | null; content_type?: string | null }
+
+/** One report per upload given up on: the user lost it, and nothing else on the server notices. */
+function reportFailedUploads(rows: unknown, reason: 'NOT_COMPLETED_NO_LENGTH' | 'AUDIO_NEVER_ARRIVED'): void {
+  for (const r of (Array.isArray(rows) ? rows : []) as FailedUploadRow[]) {
+    reportRecordingFailure('FAILED_UPLOAD', {
+      source: 'upload',
+      stage: 'uploading',
+      reason,
+      sizeBytes: r.file_size_bytes,
+      durationSeconds: r.duration_seconds,
+      contentType: r.content_type,
+    });
+  }
+}
 
 /** Returns how many recordings were marked failed. */
 export async function sweepAbandonedUploads(
@@ -51,7 +69,7 @@ export async function sweepAbandonedUploads(
     .is('meeting_id', null)
     .or('duration_seconds.is.null,duration_seconds.eq.0')
     .lt('updated_at', cutoffIso)
-    .select('id');
+    .select(REPORT_COLUMNS);
   if (error) {
     console.error(`${TAG} sweep failed:`, error.message);
     reportLoopScanError(LOOP);
@@ -59,6 +77,7 @@ export async function sweepAbandonedUploads(
   }
   const n = Array.isArray(data) ? data.length : 0;
   if (n > 0) console.log(`${TAG} marked ${n} abandoned upload(s) failed (older than ${limits.abandonedUploadHours} h, no duration)`);
+  reportFailedUploads(data, 'NOT_COMPLETED_NO_LENGTH');
   return n;
 }
 
@@ -110,7 +129,7 @@ export async function sweepStuckUploadsWithDuration(now: number = Date.now()): P
     })
     .in('id', ids)
     .eq('status', 'uploading') // a row that moved on in the meantime no longer matches
-    .select('id');
+    .select(REPORT_COLUMNS);
   if (updErr) {
     console.error(`${TAG} stuck-with-duration update failed:`, updErr.message);
     reportLoopScanError(LOOP);
@@ -118,6 +137,7 @@ export async function sweepStuckUploadsWithDuration(now: number = Date.now()): P
   }
   const n = Array.isArray(updated) ? updated.length : 0;
   if (n > 0) console.log(`${TAG} marked ${n} stuck upload(s) with a length failed (older than ${STUCK_WITH_DURATION_HOURS} h, no audio object)`);
+  reportFailedUploads(updated, 'AUDIO_NEVER_ARRIVED');
   return n;
 }
 

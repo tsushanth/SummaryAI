@@ -1,6 +1,6 @@
 /**
  * Signals to the failure reporter when a recording ends up 'failed' (or is auto-retried).
- * Context holds ONLY non-content strings: code, source, audio_minutes, stage. The message is
+ * Context holds ONLY non-content strings: code, source, audio_minutes, stage, and for uploads reason, size and type. The message is
  * stable per code so the reporter's per-fingerprint dedupe groups repeats. Never pass titles,
  * transcript text, emails or user ids. Fire-and-forget: never throws.
  */
@@ -14,13 +14,20 @@ export type RecordingFailureCode =
   | 'BOT_FATAL'
   | 'BOT_NEVER_RECORDED'
   | 'RECORDING_PERMISSION_DENIED'
-  | 'BOT_RECORDING_FAILED';
+  | 'BOT_RECORDING_FAILED'
+  | 'FAILED_UPLOAD';
 
 export interface RecordingFailureMeta {
   source?: string | null;
   durationSeconds?: number | null;
   stage?: string | null;
+  /** Why it failed, when the code alone does not say (a fixed label, never free text). */
+  reason?: string | null;
+  sizeBytes?: number | null;
+  contentType?: string | null;
 }
+
+const MEDIA_TYPE = /^[a-z]{1,20}\/[a-z0-9.+-]{1,60}$/i;
 
 function buildContext(code: string, meta: RecordingFailureMeta): Record<string, string> {
   return {
@@ -28,6 +35,10 @@ function buildContext(code: string, meta: RecordingFailureMeta): Record<string, 
     source: meta.source || 'unknown',
     audio_minutes: meta.durationSeconds ? String(Math.round(meta.durationSeconds / 60)) : 'unknown',
     stage: meta.stage || 'unknown',
+    ...(meta.reason ? { reason: meta.reason } : {}),
+    ...(meta.sizeBytes ? { size_bytes: String(meta.sizeBytes) } : {}),
+    // The client names the type, so only something shaped like a media type is passed on.
+    ...(meta.contentType ? { content_type: MEDIA_TYPE.test(meta.contentType) ? meta.contentType : 'other' } : {}),
   };
 }
 

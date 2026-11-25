@@ -95,12 +95,16 @@ class AudioRecordingService : Service() {
             return dir
         }
 
+        /** Which files this process is writing or sending right now. Lost with the process, which is what makes them "pending". */
+        internal val busyFiles = BusyRecordingFiles()
+
         /** Returns audio files that finished recording but haven't been uploaded. */
         fun listPendingUploads(context: Context): List<File> {
-            return recordingsDir(context)
+            val files = recordingsDir(context)
                 .listFiles { f -> f.isFile && f.name.endsWith(".m4a") }
                 ?.sortedByDescending { it.lastModified() }
                 ?: emptyList()
+            return busyFiles.pendingAmong(files)
         }
     }
 
@@ -254,6 +258,7 @@ class AudioRecordingService : Service() {
                 outputFile = outputFile
             )
 
+            busyFiles.recording = outputFile
             startForegroundAs(ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE, createRecordingNotification())
             startTimer()
             startAmplitudeMonitor()
@@ -319,6 +324,7 @@ class AudioRecordingService : Service() {
         }
 
         mediaRecorder = null
+        busyFiles.recording = null
         _recordingState.value = RecordingState()
         // Note: foreground state is intentionally kept so caller can start upload.
         // If neither startUpload nor discardRecording is called, the service will
@@ -337,6 +343,7 @@ class AudioRecordingService : Service() {
             }
         } catch (_: Exception) { /* ignore */ }
         mediaRecorder = null
+        busyFiles.recording = null
         file?.delete()
         metaFileFor(file)?.delete()
         _recordingState.value = RecordingState()
@@ -351,6 +358,12 @@ class AudioRecordingService : Service() {
      * foreground service type to DATA_SYNC for the duration of the upload.
      */
     fun startUpload(file: File, title: String, durationSeconds: Int) {
+        // Never while recording: the file being written would change length mid-upload, and switching the service to
+        // DATA_SYNC (then stopping it) would end the recording. The file stays on disk and is offered again later.
+        if (mediaRecorder != null) {
+            Log.w(TAG, "Upload refused while a recording is in progress")
+            return
+        }
         if (!file.exists()) {
             _uploadState.value = UploadState(error = getString(R.string.error_recording_file_not_found))
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
@@ -364,6 +377,7 @@ class AudioRecordingService : Service() {
         startForegroundAs(ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC, createUploadNotification(0))
 
         uploadJob?.cancel()
+        busyFiles.uploading = file
         uploadJob = scope.launch(Dispatchers.IO) {
             var lastPct = -1
             val result = runCatching {
@@ -402,8 +416,12 @@ class AudioRecordingService : Service() {
                     // Intentionally keep the file + meta sidecar for retry
                 }
             )
-            ServiceCompat.stopForeground(this@AudioRecordingService, ServiceCompat.STOP_FOREGROUND_REMOVE)
-            stopSelf()
+            busyFiles.finishedUploading(file)
+            // A new recording or a later upload may have started while this one ran: it now owns the foreground service.
+            if (mediaRecorder == null && busyFiles.uploading == null) {
+                ServiceCompat.stopForeground(this@AudioRecordingService, ServiceCompat.STOP_FOREGROUND_REMOVE)
+                stopSelf()
+            }
         }
     }
 
@@ -493,6 +511,7 @@ class AudioRecordingService : Service() {
         amplitudeJob?.cancel()
         mediaRecorder?.release()
         mediaRecorder = null
+        busyFiles.recording = null
         // Note: don't cancel uploadJob here — onDestroy can fire briefly when the
         // last bind is removed. The upload coroutine completes stopSelf() itself.
     }

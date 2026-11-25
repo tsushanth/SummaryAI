@@ -16,10 +16,6 @@ interface CoachingApi {
     @POST("api/coaching/credits/claim-free")
     suspend fun claimFreeCredits(): CoachingClaimFreeResponse
 
-    /** DEBUG only — grants 5 credits per call so we can test before real IAPs ship. */
-    @POST("api/coaching/credits/grant-debug")
-    suspend fun debugGrantCredits(): CoachingDebugGrantResponse
-
     @GET("api/coaching/credits")
     suspend fun getCredits(): CoachingCredits
 

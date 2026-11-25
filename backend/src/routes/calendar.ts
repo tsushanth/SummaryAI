@@ -27,6 +27,7 @@
  */
 
 import { reportAlert } from '../lib/alerts.js';
+import { callbackProviderCode, OAuthExchangeError } from '../lib/oauthError.js';
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { supabaseAdmin } from '../lib/supabase.js';
@@ -60,11 +61,70 @@ export const calendarCallbackRouter = Router();
 // OAuth state expiry in milliseconds (5 minutes)
 const OAUTH_STATE_EXPIRY = 5 * 60 * 1000;
 
+type CalendarProviderName = 'google' | 'microsoft';
+
+/**
+ * Every OAuth callback failure goes to the failure reporter with a reason. Failures tied to a sign-in this server started
+ * (a known state) are never throttled; the others can be produced by anyone calling the public URL, so each reason is sent
+ * at most once per 10 minutes to keep junk traffic from using up the app's alert allowance.
+ */
+function reportCallbackFailure(
+  provider: CalendarProviderName,
+  reason: string,
+  knownState: boolean,
+  context: Record<string, unknown> = {}
+): void {
+  reportAlert(
+    'calendar_connect_failed',
+    `${provider.toUpperCase()}_${reason}`,
+    { provider, reason, ...context },
+    knownState ? 0 : undefined
+  );
+}
+
+/** The provider sent the user back with an error (cancelled consent, blocked app, admin approval needed...). */
+async function reportProviderRefusal(provider: CalendarProviderName, state: unknown, error: unknown, description?: unknown): Promise<void> {
+  let knownState = false;
+  if (typeof state === 'string' && state) {
+    try {
+      // A refusal ends this sign-in, so the state is used up: opening the same URL again counts as unknown (throttled).
+      const { data } = await supabaseAdmin.from('oauth_states').delete().eq('state', state).select('user_id');
+      knownState = !!data?.length;
+    } catch { /* report as unknown */ }
+  }
+  reportCallbackFailure(provider, 'PROVIDER_ERROR', knownState, { provider_error: callbackProviderCode(error, description) });
+}
+
+/** First import after connecting. The connection is already saved, so a failure here only reports. */
+function startInitialSync(connection: CalendarConnection): void {
+  syncCalendarConnection(connection).then(result => {
+    console.log(`[Calendar] Initial ${connection.provider} sync complete: ${result.created} meetings created`);
+  }).catch(err => {
+    console.error(`[Calendar] Initial ${connection.provider} sync failed:`, err);
+    reportAlert('calendar_sync_failed', 'INITIAL_SYNC_FAILED', { provider: connection.provider }, 0);
+  });
+}
+
+const escapeHtml = (v: string) =>
+  v.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+/** A value inside an inline script: JSON, with "<" escaped so it cannot close the script element. */
+const scriptValue = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
+
+/**
+ * Sends one of the popup pages. helmet's site-wide policy forbids inline scripts, which left these pages showing
+ * "Closing window..." for ever with a dead button; allow exactly this script, by nonce.
+ */
+function sendOAuthPage(res: Response, render: (nonce: string) => string): void {
+  const nonce = crypto.randomBytes(16).toString('base64');
+  res.setHeader('Content-Security-Policy', `default-src 'none'; script-src 'nonce-${nonce}'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'`);
+  res.send(render(nonce));
+}
+
 /**
  * Generate HTML page that closes the popup and notifies parent window
  * Used for web OAuth flow (popup window)
  */
-function generateOAuthSuccessPage(provider: string, email: string): string {
+function generateOAuthSuccessPage(provider: string, email: string, nonce: string): string {
   return `
 <!DOCTYPE html>
 <html>
@@ -144,11 +204,13 @@ function generateOAuthSuccessPage(provider: string, email: string): string {
       </svg>
     </div>
     <h1>Calendar Connected!</h1>
-    <p>Successfully connected <span class="email">${email}</span></p>
+    <p>Successfully connected <span class="email">${escapeHtml(email)}</span></p>
     <p class="status" id="status">Closing window...</p>
-    <button class="close-btn" id="closeBtn" style="display: none;" onclick="handleClose()">Close Window</button>
+    <button class="close-btn" id="closeBtn" style="display: none;">Close Window</button>
   </div>
-  <script>
+  <script nonce="${nonce}">
+    document.getElementById('closeBtn').addEventListener('click', handleClose);
+
     function handleClose() {
       // Try to close the window
       window.close();
@@ -164,8 +226,7 @@ function generateOAuthSuccessPage(provider: string, email: string): string {
       try {
         localStorage.setItem('calendar-oauth-complete', JSON.stringify({
           type: 'calendar-connected',
-          provider: '${provider}',
-          email: '${email}',
+          provider: ${scriptValue(provider)},
           timestamp: Date.now()
         }));
       } catch (e) {}
@@ -175,8 +236,7 @@ function generateOAuthSuccessPage(provider: string, email: string): string {
         try {
           window.opener.postMessage({
             type: 'calendar-connected',
-            provider: '${provider}',
-            email: '${email}'
+            provider: ${scriptValue(provider)}
           }, '*');
         } catch (e) {}
       }
@@ -204,7 +264,7 @@ function generateOAuthSuccessPage(provider: string, email: string): string {
 /**
  * Generate HTML page for OAuth errors (web flow)
  */
-function generateOAuthErrorPage(message: string): string {
+function generateOAuthErrorPage(message: string, nonce: string): string {
   return `
 <!DOCTYPE html>
 <html>
@@ -287,11 +347,13 @@ function generateOAuthErrorPage(message: string): string {
       </svg>
     </div>
     <h1>Connection Failed</h1>
-    <p class="error-msg">${message}</p>
+    <p class="error-msg">${escapeHtml(message)}</p>
     <p class="status" id="status">Closing window...</p>
-    <button class="close-btn" id="closeBtn" style="display: none;" onclick="handleClose()">Close Window</button>
+    <button class="close-btn" id="closeBtn" style="display: none;">Close Window</button>
   </div>
-  <script>
+  <script nonce="${nonce}">
+    document.getElementById('closeBtn').addEventListener('click', handleClose);
+
     function handleClose() {
       window.close();
       setTimeout(() => {
@@ -304,7 +366,7 @@ function generateOAuthErrorPage(message: string): string {
         try {
           window.opener.postMessage({
             type: 'calendar-error',
-            error: '${message}'
+            error: ${scriptValue(message)}
           }, '*');
         } catch (e) {}
       }
@@ -428,7 +490,7 @@ calendarCallbackRouter.get('/callback/google', async (req: Request, res: Respons
   // Helper to send response based on platform
   const sendError = (message: string) => {
     if (isWeb) {
-      res.send(generateOAuthErrorPage(message));
+      sendOAuthPage(res, (nonce) => generateOAuthErrorPage(message, nonce));
     } else {
       res.redirect(`summaryai://calendar/error?message=${encodeURIComponent(message)}`);
     }
@@ -436,7 +498,7 @@ calendarCallbackRouter.get('/callback/google', async (req: Request, res: Respons
 
   const sendSuccess = (provider: string, email: string) => {
     if (isWeb) {
-      res.send(generateOAuthSuccessPage(provider, email));
+      sendOAuthPage(res, (nonce) => generateOAuthSuccessPage(provider, email, nonce));
     } else {
       res.redirect(`summaryai://calendar/connected?provider=${provider}&email=${encodeURIComponent(email)}`);
     }
@@ -445,19 +507,25 @@ calendarCallbackRouter.get('/callback/google', async (req: Request, res: Respons
   // OAuth error handling
   if (oauthError) {
     console.error('[Calendar] OAuth error:', oauthError);
+    await reportProviderRefusal('google', state, oauthError, req.query.error_description);
     sendError(String(oauthError));
     return;
   }
 
   if (!code || !state) {
+    reportCallbackFailure('google', 'MISSING_PARAMS', false);
     sendError('missing_params');
     return;
   }
 
+  // What the callback was doing when it threw, for the failure report.
+  let stage = 'STATE_CHECK_FAILED';
+  let knownState = false;
   try {
     // Parse and validate state
     const stateData = parseOAuthState(state as string);
     if (!stateData) {
+      reportCallbackFailure('google', 'STATE_UNREADABLE', false);
       sendError('invalid_state');
       return;
     }
@@ -471,13 +539,18 @@ calendarCallbackRouter.get('/callback/google', async (req: Request, res: Respons
 
     if (stateError || !storedState) {
       console.error('[Calendar] State not found or expired');
+      const lookupFailed = !!stateError && stateError.code !== 'PGRST116';
+      reportCallbackFailure('google', lookupFailed ? 'STATE_LOOKUP_FAILED' : 'STATE_NOT_FOUND', false, { code: stateError?.code });
       sendError('invalid_state');
       return;
     }
 
+    knownState = true;
+
     // Check expiry
     if (new Date(storedState.expires_at) < new Date()) {
       await supabaseAdmin.from('oauth_states').delete().eq('state', state);
+      reportCallbackFailure('google', 'STATE_EXPIRED', true);
       sendError('state_expired');
       return;
     }
@@ -488,12 +561,15 @@ calendarCallbackRouter.get('/callback/google', async (req: Request, res: Respons
     await supabaseAdmin.from('oauth_states').delete().eq('state', state);
 
     // Exchange code for tokens
+    stage = 'TOKEN_EXCHANGE_FAILED';
     const tokens = await GoogleCalendarService.exchangeCode(code as string);
+    stage = 'USERINFO_FAILED';
 
     // Get user info from Google
     const userInfo = await GoogleCalendarService.getUserInfo(tokens.access_token);
 
     // Encrypt tokens before storage
+    stage = 'TOKEN_ENCRYPT_FAILED';
     const encryptedAccessToken = encryptToken(tokens.access_token);
     const encryptedRefreshToken = tokens.refresh_token
       ? encryptToken(tokens.refresh_token)
@@ -504,7 +580,8 @@ calendarCallbackRouter.get('/callback/google', async (req: Request, res: Respons
     ).toISOString();
 
     // Upsert calendar connection
-    const { error: upsertError } = await supabaseAdmin
+    stage = 'SAVE_FAILED';
+    const { data: saved, error: upsertError } = await supabaseAdmin
       .from('calendar_connections')
       .upsert(
         {
@@ -520,10 +597,13 @@ calendarCallbackRouter.get('/callback/google', async (req: Request, res: Respons
         {
           onConflict: 'user_id,provider',
         }
-      );
+      )
+      .select('id')
+      .single();
 
-    if (upsertError) {
+    if (upsertError || !saved) {
       console.error('[Calendar] Failed to save connection:', upsertError);
+      reportCallbackFailure('google', 'SAVE_FAILED', true, { code: upsertError?.code });
       sendError('save_failed');
       return;
     }
@@ -532,7 +612,7 @@ calendarCallbackRouter.get('/callback/google', async (req: Request, res: Respons
 
     // Trigger initial sync in background (don't wait for it)
     const connection: CalendarConnection = {
-      id: '', // Will be fetched
+      id: (saved as { id: string }).id,
       user_id: userId,
       provider: 'google',
       provider_account_id: userInfo.id,
@@ -547,17 +627,13 @@ calendarCallbackRouter.get('/callback/google', async (req: Request, res: Respons
       updated_at: new Date().toISOString(),
     };
 
-    // Initial sync - run in background
-    syncCalendarConnection(connection).then(result => {
-      console.log(`[Calendar] Initial sync complete for ${userInfo.email}: ${result.created} meetings created`);
-    }).catch(err => {
-      console.error(`[Calendar] Initial sync failed for ${userInfo.email}:`, err);
-    });
+    startInitialSync(connection);
 
     // Send success response
     sendSuccess('google', userInfo.email);
   } catch (error) {
     console.error('[Calendar] OAuth callback error:', error);
+    reportCallbackFailure('google', stage, knownState, error instanceof OAuthExchangeError ? { provider_error: error.providerCode } : {});
     sendError('callback_failed');
   }
 });
@@ -574,7 +650,7 @@ calendarCallbackRouter.get('/callback/microsoft', async (req: Request, res: Resp
   // Helper to send response based on platform
   const sendError = (message: string) => {
     if (isWeb) {
-      res.send(generateOAuthErrorPage(message));
+      sendOAuthPage(res, (nonce) => generateOAuthErrorPage(message, nonce));
     } else {
       res.redirect(`summaryai://calendar/error?message=${encodeURIComponent(message)}`);
     }
@@ -582,7 +658,7 @@ calendarCallbackRouter.get('/callback/microsoft', async (req: Request, res: Resp
 
   const sendSuccess = (provider: string, email: string) => {
     if (isWeb) {
-      res.send(generateOAuthSuccessPage(provider, email));
+      sendOAuthPage(res, (nonce) => generateOAuthSuccessPage(provider, email, nonce));
     } else {
       res.redirect(`summaryai://calendar/connected?provider=${provider}&email=${encodeURIComponent(email)}`);
     }
@@ -591,19 +667,25 @@ calendarCallbackRouter.get('/callback/microsoft', async (req: Request, res: Resp
   // OAuth error handling
   if (oauthError) {
     console.error('[Calendar] Microsoft OAuth error:', oauthError, error_description);
+    await reportProviderRefusal('microsoft', state, oauthError, error_description);
     sendError(String(oauthError));
     return;
   }
 
   if (!code || !state) {
+    reportCallbackFailure('microsoft', 'MISSING_PARAMS', false);
     sendError('missing_params');
     return;
   }
 
+  // What the callback was doing when it threw, for the failure report.
+  let stage = 'STATE_CHECK_FAILED';
+  let knownState = false;
   try {
     // Parse and validate state
     const stateData = parseOAuthState(state as string);
     if (!stateData) {
+      reportCallbackFailure('microsoft', 'STATE_UNREADABLE', false);
       sendError('invalid_state');
       return;
     }
@@ -617,13 +699,18 @@ calendarCallbackRouter.get('/callback/microsoft', async (req: Request, res: Resp
 
     if (stateError || !storedState) {
       console.error('[Calendar] Microsoft state not found or expired');
+      const lookupFailed = !!stateError && stateError.code !== 'PGRST116';
+      reportCallbackFailure('microsoft', lookupFailed ? 'STATE_LOOKUP_FAILED' : 'STATE_NOT_FOUND', false, { code: stateError?.code });
       sendError('invalid_state');
       return;
     }
 
+    knownState = true;
+
     // Check expiry
     if (new Date(storedState.expires_at) < new Date()) {
       await supabaseAdmin.from('oauth_states').delete().eq('state', state);
+      reportCallbackFailure('microsoft', 'STATE_EXPIRED', true);
       sendError('state_expired');
       return;
     }
@@ -634,7 +721,9 @@ calendarCallbackRouter.get('/callback/microsoft', async (req: Request, res: Resp
     await supabaseAdmin.from('oauth_states').delete().eq('state', state);
 
     // Exchange code for tokens
+    stage = 'TOKEN_EXCHANGE_FAILED';
     const tokens = await MicrosoftCalendarService.exchangeCode(code as string);
+    stage = 'USERINFO_FAILED';
 
     // Get user info from Microsoft Graph
     const userInfo = await MicrosoftCalendarService.getUserInfo(tokens.access_token);
@@ -643,6 +732,7 @@ calendarCallbackRouter.get('/callback/microsoft', async (req: Request, res: Resp
     const userEmail = userInfo.mail || userInfo.userPrincipalName;
 
     // Encrypt tokens before storage
+    stage = 'TOKEN_ENCRYPT_FAILED';
     const encryptedAccessToken = encryptToken(tokens.access_token);
     const encryptedRefreshToken = tokens.refresh_token
       ? encryptToken(tokens.refresh_token)
@@ -653,7 +743,8 @@ calendarCallbackRouter.get('/callback/microsoft', async (req: Request, res: Resp
     ).toISOString();
 
     // Upsert calendar connection
-    const { error: upsertError } = await supabaseAdmin
+    stage = 'SAVE_FAILED';
+    const { data: saved, error: upsertError } = await supabaseAdmin
       .from('calendar_connections')
       .upsert(
         {
@@ -669,10 +760,13 @@ calendarCallbackRouter.get('/callback/microsoft', async (req: Request, res: Resp
         {
           onConflict: 'user_id,provider',
         }
-      );
+      )
+      .select('id')
+      .single();
 
-    if (upsertError) {
+    if (upsertError || !saved) {
       console.error('[Calendar] Failed to save Microsoft connection:', upsertError);
+      reportCallbackFailure('microsoft', 'SAVE_FAILED', true, { code: upsertError?.code });
       sendError('save_failed');
       return;
     }
@@ -681,7 +775,7 @@ calendarCallbackRouter.get('/callback/microsoft', async (req: Request, res: Resp
 
     // Trigger initial sync in background (don't wait for it)
     const connection: CalendarConnection = {
-      id: '', // Will be fetched
+      id: (saved as { id: string }).id,
       user_id: userId,
       provider: 'microsoft',
       provider_account_id: userInfo.id,
@@ -696,17 +790,13 @@ calendarCallbackRouter.get('/callback/microsoft', async (req: Request, res: Resp
       updated_at: new Date().toISOString(),
     };
 
-    // Initial sync - run in background
-    syncMicrosoftCalendarConnection(connection).then(result => {
-      console.log(`[Calendar] Initial Microsoft sync complete for ${userEmail}: ${result.created} meetings created`);
-    }).catch(err => {
-      console.error(`[Calendar] Initial Microsoft sync failed for ${userEmail}:`, err);
-    });
+    startInitialSync(connection);
 
     // Send success response
     sendSuccess('microsoft', userEmail);
   } catch (error) {
     console.error('[Calendar] Microsoft OAuth callback error:', error);
+    reportCallbackFailure('microsoft', stage, knownState, error instanceof OAuthExchangeError ? { provider_error: error.providerCode } : {});
     sendError('callback_failed');
   }
 });
@@ -893,16 +983,28 @@ router.post(
   })
 );
 
+/** An imported event that could not be saved: the user's meeting is missing and the bot will not join it. */
+function reportMeetingWriteFailure(provider: string, code: string | undefined): void {
+  console.error(`[Calendar] Failed to save an imported ${provider} meeting: ${code}`);
+  reportAlert('calendar_sync_failed', 'MEETING_WRITE_FAILED', { provider, code });
+}
+
+const syncsInFlight = new Map<string, Promise<{ created: number; updated: number }>>();
+
 /**
- * Sync a single calendar connection (routes to appropriate provider)
+ * Sync a single calendar connection (routes to appropriate provider). One run per connection at a time: the app can ask
+ * for a sync while the first import is still running, and both would insert the same events.
  */
-async function syncCalendarConnection(
+function syncCalendarConnection(
   connection: CalendarConnection
 ): Promise<{ created: number; updated: number }> {
-  if (connection.provider === 'microsoft') {
-    return syncMicrosoftCalendarConnection(connection);
+  let run = syncsInFlight.get(connection.id);
+  if (!run) {
+    const sync = connection.provider === 'microsoft' ? syncMicrosoftCalendarConnection : syncGoogleCalendarConnection;
+    run = sync(connection).finally(() => syncsInFlight.delete(connection.id));
+    syncsInFlight.set(connection.id, run);
   }
-  return syncGoogleCalendarConnection(connection);
+  return run;
 }
 
 /**
@@ -955,7 +1057,8 @@ async function syncGoogleCalendarConnection(
       .select('id, calendar_event_etag')
       .eq('user_id', connection.user_id)
       .eq('calendar_event_id', event.id)
-      .single();
+      .limit(1)
+      .maybeSingle();
 
     // Generate a generic title based on platform and date/time
     // We do NOT store Google Calendar event titles to ensure data segregation
@@ -985,7 +1088,7 @@ async function syncGoogleCalendarConnection(
       }
     } else {
       // Create new meeting
-      await supabaseAdmin.from('meetings').insert({
+      const { error: insertError } = await supabaseAdmin.from('meetings').insert({
         user_id: connection.user_id,
         source: 'calendar',
         calendar_connection_id: connection.id,
@@ -1003,7 +1106,8 @@ async function syncGoogleCalendarConnection(
         auto_join: false,
         status: 'scheduled',
       });
-      created++;
+      if (insertError) reportMeetingWriteFailure(connection.provider, insertError.code);
+      else created++;
     }
   }
 
@@ -1078,7 +1182,8 @@ async function syncMicrosoftCalendarConnection(
       .select('id, calendar_event_etag')
       .eq('user_id', connection.user_id)
       .eq('calendar_event_id', event.id)
-      .single();
+      .limit(1)
+      .maybeSingle();
 
     // Generate a generic title based on platform and date/time
     // We do NOT store Microsoft Calendar event subjects to ensure data segregation
@@ -1108,7 +1213,7 @@ async function syncMicrosoftCalendarConnection(
       }
     } else {
       // Create new meeting
-      await supabaseAdmin.from('meetings').insert({
+      const { error: insertError } = await supabaseAdmin.from('meetings').insert({
         user_id: connection.user_id,
         source: 'calendar',
         calendar_connection_id: connection.id,
@@ -1126,7 +1231,8 @@ async function syncMicrosoftCalendarConnection(
         auto_join: false,
         status: 'scheduled',
       });
-      created++;
+      if (insertError) reportMeetingWriteFailure(connection.provider, insertError.code);
+      else created++;
     }
   }
 

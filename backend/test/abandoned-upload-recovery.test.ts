@@ -22,6 +22,9 @@ vi.mock('../src/lib/loopMonitor.js', () => ({
   registerLoop: vi.fn(), runLoopPass: async (_n: string, fn: () => Promise<unknown>) => fn(), reportLoopScanError: vi.fn(),
 }));
 
+const reportRecordingFailure = vi.fn();
+vi.mock('../src/lib/recordingFailure.js', () => ({ reportRecordingFailure: (...a: any[]) => reportRecordingFailure(...a) }));
+
 const { sweepAbandonedUploads, ABANDONED_UPLOAD_CODE, ABANDONED_UPLOAD_MESSAGE } =
   await import('../src/services/abandonedUploadRecovery.js');
 const { reportLoopScanError } = await import('../src/lib/loopMonitor.js');
@@ -33,7 +36,7 @@ const filter = (m: string, key?: string) => calls.filter((c) => c.method === m &
 beforeEach(() => {
   calls = [];
   updateResult = { data: [{ id: 'a' }, { id: 'b' }], error: null };
-  fromSpy.mockClear(); removeSpy.mockClear();
+  fromSpy.mockClear(); removeSpy.mockClear(); reportRecordingFailure.mockClear();
   vi.spyOn(console, 'log').mockImplementation(() => {});
   vi.spyOn(console, 'error').mockImplementation(() => {});
 });
@@ -47,6 +50,15 @@ describe('sweepAbandonedUploads', () => {
     expect(patch()).toMatchObject({ status: 'failed', error_code: ABANDONED_UPLOAD_CODE, error_message: ABANDONED_UPLOAD_MESSAGE });
     expect(Object.keys(patch()).sort()).toEqual(['error_code', 'error_message', 'status', 'updated_at']);
     expect(ABANDONED_UPLOAD_CODE).toBe('FAILED_UPLOAD');
+  });
+
+  it('reports each upload it gives up on, with the reason and the size', async () => {
+    updateResult = { data: [{ id: 'a', file_size_bytes: 71297094, duration_seconds: null, content_type: 'audio/mp4' }, { id: 'b' }], error: null };
+    await sweepAbandonedUploads(NOW);
+    expect(reportRecordingFailure).toHaveBeenCalledTimes(2);
+    expect(reportRecordingFailure.mock.calls[0]).toEqual(['FAILED_UPLOAD', {
+      source: 'upload', stage: 'uploading', reason: 'NOT_COMPLETED_NO_LENGTH', sizeBytes: 71297094, durationSeconds: null, contentType: 'audio/mp4',
+    }]);
   });
 
   it('never deletes rows or audio', async () => {
@@ -73,6 +85,7 @@ describe('sweepAbandonedUploads', () => {
   it('idempotent: a second pass that matches nothing returns 0 and changes nothing', async () => {
     updateResult = { data: [], error: null };
     expect(await sweepAbandonedUploads(NOW)).toBe(0);
+    expect(reportRecordingFailure).not.toHaveBeenCalled();
   });
 
   it('a failed write is reported as a scan error and does not throw', async () => {

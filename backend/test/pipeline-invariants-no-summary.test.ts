@@ -51,7 +51,26 @@ describe('COMPLETED_NO_SUMMARY', () => {
   it('asks the database to skip guard codes too, so they cannot crowd real rows out of the 500-row page', async () => {
     data = { recordings: { data: [{ id: 'r3', error_code: null }], count: 0, error: null }, summaries: { data: [], error: null } };
     await checkPipelineInvariants(NOW);
-    const or = calls.find((c) => c.table === 'recordings' && c.op === 'or');
+    const or = calls.find((c) => c.table === 'recordings' && c.op === 'or' && String(c.args[0]).includes('not.in'));
     expect(or?.args[0]).toBe('error_code.is.null,error_code.not.in.(NO_SPEECH,TOO_SHORT)');
+  });
+});
+
+describe('ZERO_SUCCESS_24H and STUCK_RECORDINGS filters', () => {
+  it('does not count no-speech recordings as success, nor short empty taps as attempts', async () => {
+    await checkPipelineInvariants(NOW);
+    const ors = calls.filter((c) => c.table === 'recordings' && c.op === 'or').map((c) => c.args[0]);
+    expect(ors).toContain('error_code.is.null,error_code.neq.NO_SPEECH');
+    expect(ors).toContain('duration_seconds.is.null,duration_seconds.lt.10');
+    expect(calls.some((c) => c.op === 'eq' && c.args[0] === 'error_code' && c.args[1] === 'NO_SPEECH')).toBe(true);
+  });
+
+  it('includes pending and uploading rows, with a longer age than mid-pipeline rows', async () => {
+    await checkPipelineInvariants(NOW);
+    const stuck = calls.find((c) => c.op === 'or' && String(c.args[0]).startsWith('and('))!.args[0];
+    expect(stuck).toBe(
+      'and(status.in.(uploaded,transcribing,transcribed,summarizing),updated_at.lt.2026-11-04T09:00:00.000Z),' +
+      'and(status.in.(pending,uploading),updated_at.lt.2026-11-03T10:00:00.000Z)',
+    );
   });
 });

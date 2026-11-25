@@ -1,0 +1,7 @@
+```json
+[
+  "New onboarding flow shipped last Tuesday resulted in 40% increase in signups",
+  "Mobile release launch date confirmed for December 3rd with checklist to be sent by Friday",
+  "Decision made to drop legacy export and keep only CSV format"
+]
+```

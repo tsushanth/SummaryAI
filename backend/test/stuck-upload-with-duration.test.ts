@@ -28,6 +28,9 @@ vi.mock('../src/lib/loopMonitor.js', () => ({
   registerLoop: vi.fn(), runLoopPass: async (_n: string, fn: () => Promise<unknown>) => fn(), reportLoopScanError: vi.fn(),
 }));
 
+const reportRecordingFailure = vi.fn();
+vi.mock('../src/lib/recordingFailure.js', () => ({ reportRecordingFailure: (...a: any[]) => reportRecordingFailure(...a) }));
+
 const { sweepStuckUploadsWithDuration, STUCK_WITH_DURATION_HOURS, ABANDONED_UPLOAD_CODE } =
   await import('../src/services/abandonedUploadRecovery.js');
 
@@ -40,6 +43,7 @@ beforeEach(() => {
   updateResult = { data: [], error: null };
   listResults = {};
   listSpy.mockClear();
+  reportRecordingFailure.mockClear();
   vi.spyOn(console, 'log').mockImplementation(() => {});
   vi.spyOn(console, 'error').mockImplementation(() => {});
 });
@@ -53,6 +57,15 @@ describe('sweepStuckUploadsWithDuration', () => {
     expect(of('gt', 'duration_seconds')[0].args[1]).toBe(0);
     expect(of('lt', 'updated_at')[0].args[1]).toBe(new Date(NOW - STUCK_WITH_DURATION_HOURS * 3600 * 1000).toISOString());
     expect(STUCK_WITH_DURATION_HOURS).toBe(24);
+  });
+
+  it('reports an upload whose audio never arrived, with its size and length', async () => {
+    selectResult = { data: [{ id: 'gone', file_path: 'u1/gone.mp4' }], error: null };
+    updateResult = { data: [{ id: 'gone', file_size_bytes: 4582381, duration_seconds: 369, content_type: 'audio/mp4' }], error: null };
+    await sweepStuckUploadsWithDuration(NOW);
+    expect(reportRecordingFailure.mock.calls).toEqual([['FAILED_UPLOAD', {
+      source: 'upload', stage: 'uploading', reason: 'AUDIO_NEVER_ARRIVED', sizeBytes: 4582381, durationSeconds: 369, contentType: 'audio/mp4',
+    }]]);
   });
 
   it('marks a row failed only when storage shows no object for it', async () => {

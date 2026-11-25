@@ -5,6 +5,7 @@
 
 import { MeetingPlatform } from '../types/meetings.js';
 import { config } from '../config/index.js';
+import { OAuthExchangeError } from '../lib/oauthError.js';
 
 // OAuth scopes for Microsoft Graph API
 const SCOPES = [
@@ -147,7 +148,7 @@ export class MicrosoftCalendarService {
     if (!response.ok) {
       const error = await response.text();
       console.error('[Microsoft OAuth] Token exchange failed:', error);
-      throw new Error('Failed to exchange code for tokens');
+      throw new OAuthExchangeError('Failed to exchange code for tokens', response.status, error);
     }
 
     return response.json() as Promise<MicrosoftTokenResponse>;
