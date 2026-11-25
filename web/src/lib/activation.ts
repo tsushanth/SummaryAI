@@ -77,6 +77,8 @@ export interface Attribution {
   utm_source?: string;
   utm_medium?: string;
   utm_campaign?: string;
+  /** The outreach link code. Kept only when utm_source=outreach, and with its case (codes are case-sensitive). */
+  utm_content?: string;
   referrer_host?: string;
   landing_path?: string;
 }
@@ -89,6 +91,8 @@ export function parseUtm(search: string, referrer: string, ownHost = '', landing
   if (s) out.utm_source = s;
   if (m) out.utm_medium = m;
   if (c) out.utm_campaign = c;
+  const code = (q.get('utm_content') || '').trim();
+  if (s === 'outreach' && /^[A-Za-z0-9_-]{1,64}$/.test(code)) out.utm_content = code;
   if (referrer) {
     try {
       const host = new URL(referrer).hostname.toLowerCase();

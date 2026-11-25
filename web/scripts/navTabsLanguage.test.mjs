@@ -50,9 +50,9 @@ test('recording_type is sent in the list query string', () => {
 });
 
 test('output languages are all supported by the backend prompt map, and unique', () => {
-  const src = readFileSync(new URL('../../backend/src/services/processingService.ts', import.meta.url), 'utf8');
-  const fn = src.slice(src.indexOf('function languageNameForCode'));
-  const mapBlock = fn.slice(fn.indexOf('const map'), fn.indexOf('};'));
+  const src = readFileSync(new URL('../../backend/src/lib/outputLanguage.ts', import.meta.url), 'utf8');
+  const fn = src.slice(src.indexOf('const LANGUAGE_NAMES'));
+  const mapBlock = fn.slice(0, fn.indexOf('};'));
   const backendCodes = [...mapBlock.matchAll(/^\s*([a-z]{2}):/gm)].map((m) => m[1]);
   assert.ok(backendCodes.length >= 10, 'could not parse the backend language map');
   for (const { code } of OUTPUT_LANGUAGES) {

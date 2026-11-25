@@ -1,5 +1,6 @@
 import { Sidebar } from '@/components/layout/Sidebar';
 import { ActivationSession } from '@/components/ActivationSession';
+import { OutreachAttributionSender } from '@/components/OutreachAttribution';
 
 export default function DashboardLayout({
   children,
@@ -9,6 +10,7 @@ export default function DashboardLayout({
   return (
     <div className="flex h-screen flex-col bg-background md:flex-row">
       <ActivationSession />
+      <OutreachAttributionSender />
       <Sidebar />
       <main id="main" className="min-w-0 flex-1 overflow-auto">{children}</main>
     </div>
