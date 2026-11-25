@@ -9,24 +9,16 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
 
     <!-- Audio recording feature -->
     <uses-feature
         android:name="android.hardware.microphone"
         android:required="true" />
-
-    <!-- Telephony feature (optional - app works without it but enhanced with it) -->
-    <uses-feature
-        android:name="android.hardware.telephony"
-        android:required="false" />
 
     <queries>
         <intent><action android:name="android.speech.RecognitionService" /></intent>
@@ -69,11 +61,6 @@
         <property
             android:name="android.app.PROPERTY_FOREGROUND_SERVICE_MEDIA_PLAYBACK_DECLARATION"
             android:value="Meeting Mind uses media playback to play recorded meetings and phone calls. Playback continues in the background so users can listen while using other apps." />
-
-        <!-- Phone call foreground service: Used for VoIP calling -->
-        <property
-            android:name="android.app.PROPERTY_FOREGROUND_SERVICE_PHONE_CALL_DECLARATION"
-            android:value="Meeting Mind uses VoIP calling to make phone calls through the app. This enables automatic recording and transcription of phone conversations." />
 
         <!-- Data sync foreground service: Used to finish uploading recordings
              after the user stops recording, even if the app is backgrounded

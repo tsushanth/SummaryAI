@@ -54,6 +54,17 @@ class FreeAppNavigationTest {
         }
     }
 
+    /** Nothing but the switched-off phone feature used these; declaring them would claim a use Play cannot see. */
+    @Test fun noPhoneOnlyPermissionsWhilePhoneCallsAreOff() {
+        val manifest = File("src/main/AndroidManifest.xml").readText()
+        for (token in listOf("FOREGROUND_SERVICE_PHONE_CALL", "MANAGE_OWN_CALLS", "READ_PHONE_STATE", "android.hardware.telephony")) {
+            assertFalse("AndroidManifest.xml must not declare $token", manifest.contains(token))
+        }
+        for (kept in listOf("RECORD_AUDIO", "FOREGROUND_SERVICE_MICROPHONE", "FOREGROUND_SERVICE_MEDIA_PLAYBACK", "FOREGROUND_SERVICE_DATA_SYNC")) {
+            assertTrue("recording and playback still need $kept", manifest.contains("android.permission.$kept\""))
+        }
+    }
+
     @Test fun noPaywallRoutesExist() {
         val navGraph = source("ui/navigation/NavGraph.kt")
         for (token in listOf("FeaturePaywall", "Screen.Paywall", "object Paywall", "PaywallScreen", "paywall/")) {
