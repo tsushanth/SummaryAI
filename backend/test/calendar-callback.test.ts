@@ -27,12 +27,18 @@ vi.mock('../src/lib/supabase.js', () => ({
         if (update) { db.connectionUpdates.push({ id: v, values: update }); return Promise.resolve({ error: null }); }
         return q;
       };
-      q.delete = () => ({ eq: async () => ({ error: null }) });
+      // delete().eq() is awaited as is, or followed by .select() which returns the row removed (once).
+      q.delete = () => ({
+        eq: () => Object.assign(Promise.resolve({ error: null }), {
+          select: async () => { const data = db.state ? [db.state] : []; db.state = null; return { data, error: null }; },
+        }),
+      });
+      q.limit = () => q;
       q.single = async () => {
         if (table === 'oauth_states') return db.state ? { data: db.state, error: null } : { data: null, error: { code: 'PGRST116' } };
         return { data: null, error: { code: 'PGRST116' } };
       };
-      q.maybeSingle = async () => ({ data: db.state, error: null });
+      q.maybeSingle = async () => ({ data: table === 'oauth_states' ? db.state : null, error: null });
       q.upsert = () => ({ select: () => ({ single: async () => (db.upsertError ? { data: null, error: db.upsertError } : { data: { id: 'conn-1' }, error: null }) }) });
       q.insert = async (row: any) => { if (!db.meetingError) db.inserted.push(row); return { error: db.meetingError }; };
       q.update = (v: any) => { update = v; return q; };
@@ -116,6 +122,12 @@ describe('every calendar callback failure is reported with a reason', () => {
       expect(only()).toMatchObject({ code: `${P}_PROVIDER_ERROR`, throttle: undefined });
     });
   }
+  it('a refusal uses the sign-in up: opening the same URL again is throttled', async () => {
+    validState();
+    await callback('error=access_denied&state=abc');
+    await callback('error=access_denied&state=abc');
+    expect(alerts.map((a) => a.throttle)).toEqual([0, undefined]);
+  });
   it('expired sign-in', async () => {
     db.state = { user_id: 'u', expires_at: new Date(Date.now() - 1000).toISOString() };
     await callback('code=c&state=abc');
@@ -150,6 +162,18 @@ describe('a successful connection', () => {
     expect(db.inserted).toMatchObject([{ calendar_connection_id: 'conn-1', source: 'calendar' }]);
     expect(db.connectionUpdates.map((u) => u.id)).toEqual(['conn-1']);
     expect(alerts).toEqual([]);
+  });
+  it('runs one sync per connection at a time, so an event is not imported twice', async () => {
+    let release!: (events: unknown[]) => void;
+    google.getUpcomingEvents.mockReturnValue(new Promise((r) => { release = r; }));
+    validState();
+    await callback('code=c&state=abc');
+    validState();
+    await callback('code=c&state=abc'); // the second sync of conn-1 starts while the first is still fetching
+    release([{ id: 'e1', etag: '1', start: { dateTime: '2027-01-01T10:00:00Z' } }]);
+    await new Promise((r) => setTimeout(r, 10));
+    expect(google.getUpcomingEvents).toHaveBeenCalledTimes(1);
+    expect(db.inserted).toHaveLength(1);
   });
   it('reports an initial sync that fails and meetings that cannot be saved', async () => {
     validState();

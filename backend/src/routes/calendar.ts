@@ -87,8 +87,9 @@ async function reportProviderRefusal(provider: CalendarProviderName, state: unkn
   let knownState = false;
   if (typeof state === 'string' && state) {
     try {
-      const { data } = await supabaseAdmin.from('oauth_states').select('user_id').eq('state', state).maybeSingle();
-      knownState = !!data;
+      // A refusal ends this sign-in, so the state is used up: opening the same URL again counts as unknown (throttled).
+      const { data } = await supabaseAdmin.from('oauth_states').delete().eq('state', state).select('user_id');
+      knownState = !!data?.length;
     } catch { /* report as unknown */ }
   }
   reportCallbackFailure(provider, 'PROVIDER_ERROR', knownState, { provider_error: callbackProviderCode(error, description) });
@@ -988,16 +989,22 @@ function reportMeetingWriteFailure(provider: string, code: string | undefined): 
   reportAlert('calendar_sync_failed', 'MEETING_WRITE_FAILED', { provider, code });
 }
 
+const syncsInFlight = new Map<string, Promise<{ created: number; updated: number }>>();
+
 /**
- * Sync a single calendar connection (routes to appropriate provider)
+ * Sync a single calendar connection (routes to appropriate provider). One run per connection at a time: the app can ask
+ * for a sync while the first import is still running, and both would insert the same events.
  */
-async function syncCalendarConnection(
+function syncCalendarConnection(
   connection: CalendarConnection
 ): Promise<{ created: number; updated: number }> {
-  if (connection.provider === 'microsoft') {
-    return syncMicrosoftCalendarConnection(connection);
+  let run = syncsInFlight.get(connection.id);
+  if (!run) {
+    const sync = connection.provider === 'microsoft' ? syncMicrosoftCalendarConnection : syncGoogleCalendarConnection;
+    run = sync(connection).finally(() => syncsInFlight.delete(connection.id));
+    syncsInFlight.set(connection.id, run);
   }
-  return syncGoogleCalendarConnection(connection);
+  return run;
 }
 
 /**
@@ -1050,7 +1057,8 @@ async function syncGoogleCalendarConnection(
       .select('id, calendar_event_etag')
       .eq('user_id', connection.user_id)
       .eq('calendar_event_id', event.id)
-      .single();
+      .limit(1)
+      .maybeSingle();
 
     // Generate a generic title based on platform and date/time
     // We do NOT store Google Calendar event titles to ensure data segregation
@@ -1174,7 +1182,8 @@ async function syncMicrosoftCalendarConnection(
       .select('id, calendar_event_etag')
       .eq('user_id', connection.user_id)
       .eq('calendar_event_id', event.id)
-      .single();
+      .limit(1)
+      .maybeSingle();
 
     // Generate a generic title based on platform and date/time
     // We do NOT store Microsoft Calendar event subjects to ensure data segregation

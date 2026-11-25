@@ -27,6 +27,8 @@ export interface RecordingFailureMeta {
   contentType?: string | null;
 }
 
+const MEDIA_TYPE = /^[a-z]{1,20}\/[a-z0-9.+-]{1,60}$/i;
+
 function buildContext(code: string, meta: RecordingFailureMeta): Record<string, string> {
   return {
     code,
@@ -35,7 +37,8 @@ function buildContext(code: string, meta: RecordingFailureMeta): Record<string, 
     stage: meta.stage || 'unknown',
     ...(meta.reason ? { reason: meta.reason } : {}),
     ...(meta.sizeBytes ? { size_bytes: String(meta.sizeBytes) } : {}),
-    ...(meta.contentType ? { content_type: meta.contentType } : {}),
+    // The client names the type, so only something shaped like a media type is passed on.
+    ...(meta.contentType ? { content_type: MEDIA_TYPE.test(meta.contentType) ? meta.contentType : 'other' } : {}),
   };
 }
 

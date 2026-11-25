@@ -106,4 +106,9 @@ describe('failed upload report', () => {
       code: 'FAILED_UPLOAD', source: 'upload', audio_minutes: '6', stage: 'uploading', reason: 'AUDIO_NEVER_ARRIVED', size_bytes: '4582381', content_type: 'audio/mp4',
     });
   });
+  it('passes a client-named content type on only when it is shaped like a media type', async () => {
+    const { reportRecordingFailure } = await import('../src/lib/recordingFailure.js');
+    reportRecordingFailure('FAILED_UPLOAD', { contentType: 'see https://example.com/now' });
+    expect(reportFailure.mock.calls[0]![2].content_type).toBe('other');
+  });
 });
