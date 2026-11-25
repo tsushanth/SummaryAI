@@ -95,3 +95,15 @@ describe('bot-path failure reporting', () => {
     expect(JSON.stringify(reportFailure.mock.calls[0])).not.toContain('rec-secret-id');
   });
 });
+
+describe('failed upload report', () => {
+  it('sends the reason, size and type, and no ids', async () => {
+    const { reportRecordingFailure } = await import('../src/lib/recordingFailure.js');
+    reportFailure.mockClear();
+    reportRecordingFailure('FAILED_UPLOAD', { source: 'upload', stage: 'uploading', reason: 'AUDIO_NEVER_ARRIVED', sizeBytes: 4582381, durationSeconds: 369, contentType: 'audio/mp4' });
+    expect(reportFailure.mock.calls[0]![0]).toBe('recording_failed');
+    expect(reportFailure.mock.calls[0]![2]).toEqual({
+      code: 'FAILED_UPLOAD', source: 'upload', audio_minutes: '6', stage: 'uploading', reason: 'AUDIO_NEVER_ARRIVED', size_bytes: '4582381', content_type: 'audio/mp4',
+    });
+  });
+});
