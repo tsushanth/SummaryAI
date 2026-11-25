@@ -7,6 +7,13 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 | Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v65 | `registry.fly.io/summary-ai-backend:deployment-01M89ZXDPTA91RB6HX5RX8QHA4` | `origin/main` at `7f7be54` (squash merge of #110; `backend/` tree `a7c29e3e031af25cb68ebb6f5759de40bffd952a` identical to main) | 2026-11-25 (UTC) |
 | Web (`web/`, meetingmind.org) | `meeting-mind-web` | v42 | `registry.fly.io/meeting-mind-web:deployment-01M89WXC4EMVGBM9MQWT88T2NT` | `origin/main` at `3fca3c4` (#108, deployed by the web-deploy workflow; `web/` tree `99e061269208c96c2730f5b42823e16189faceb5` identical to main) | 2026-11-25 (UTC) |
 
+## 2026-11-25 Database: client write lockdown (Supabase `mlofjzlmncgnhxbiuemf`), migration 031
+- Applied to production before this was committed, recorded as `031_client_write_lockdown`. No deploy, no data change, no secret change.
+- New in production: signed-in users can no longer write `recordings`, `meetings` or `bot_runs` directly (owner reads unchanged). The apps and website write through the backend only.
+- Parts 1 and 2 of the file record what production already had since 2026-11-03 (live transcript tables server-written; only harmless profile columns client-writable), so a database rebuilt from the repo matches.
+- Verified with role checks in transactions that were rolled back (client writes refused; owner reads, own-profile update and service-role writes pass), `/health/detailed` healthy, site 200. NOT verified: a signed-in device session after the change.
+- Reverse: `backend/supabase/rollbacks/031_client_write_lockdown_down.sql`.
+
 ## 2026-11-25 Silent feature failures and coaching credit fixes (#110): backend v65
 - Backend: `flyctl deploy --remote-only` from a clean detached worktree of `origin/main` at `7f7be54`; previous v64. Web not deployed (`web/` unchanged). Android not released.
 - Change: the coaching debug credit grant route is removed; credit debit and refund are one per session and a session starts only on the caller's own recording; live insights read fenced model replies; calendar callback failures are reported, the first import after connecting works and runs once per connection; meetings whose bot run ended are closed; `AbandonedUploads` and `AccountPurgeRetry` are in the loop watchdog; invariant changes. No migration, no secret set or unset.
