@@ -1,0 +1,9 @@
+```json
+[
+  {
+    "claim": "Water boils at 90 degrees Celsius at sea level",
+    "status": "false",
+    "confidence": 0.99
+  }
+]
+```
