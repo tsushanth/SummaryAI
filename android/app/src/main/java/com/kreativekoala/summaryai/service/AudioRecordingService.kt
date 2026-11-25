@@ -417,8 +417,8 @@ class AudioRecordingService : Service() {
                 }
             )
             busyFiles.finishedUploading(file)
-            // A new recording may have started while this upload ran: it now owns the foreground service.
-            if (mediaRecorder == null) {
+            // A new recording or a later upload may have started while this one ran: it now owns the foreground service.
+            if (mediaRecorder == null && busyFiles.uploading == null) {
                 ServiceCompat.stopForeground(this@AudioRecordingService, ServiceCompat.STOP_FOREGROUND_REMOVE)
                 stopSelf()
             }
