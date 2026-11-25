@@ -20,6 +20,9 @@ let attributions: any[] = [];
 let user: string | null = null;
 let failInsert = false;
 let limiter = createLimiter();
+let outreachOn = false;
+let insertResult: boolean | void = undefined;
+let signups: any[] = [];
 
 function build() {
   const app = express();
@@ -27,12 +30,14 @@ function build() {
   app.use('/api/activation', createActivationRouter({
     enabled: () => enabled,
     insertEvent: async (r) => { if (failInsert) throw new Error('boom'); events.push(r); },
-    insertAttribution: async (r) => { attributions.push(r); },
+    insertAttribution: async (r) => { attributions.push(r); return insertResult; },
+    outreachEnabled: () => outreachOn,
+    reportSignup: (a, email) => { signups.push({ a, email }); },
     resolveUser: async () => user,
     limiter,
   }, (req: any, res: any, next: any) => {
     if (!req.headers.authorization) return res.status(401).json({ error: { code: 'UNAUTHORIZED' } });
-    req.user = { id: UID }; next();
+    req.user = { id: UID, email: 'new.user@example.com' }; next();
   }));
   return app;
 }
@@ -46,7 +51,7 @@ async function post(p: string, body: unknown, headers: Record<string, string> = 
   } finally { server.close(); }
 }
 
-beforeEach(() => { enabled = true; events = []; attributions = []; user = null; failInsert = false; limiter = createLimiter(); });
+beforeEach(() => { outreachOn = false; insertResult = undefined; signups = []; enabled = true; events = []; attributions = []; user = null; failInsert = false; limiter = createLimiter(); });
 
 describe('allow-list and validation', () => {
   it('has exactly the nine contract names', () => {
@@ -175,5 +180,46 @@ describe('migration file', () => {
   });
   it('has a rollback', () => {
     expect(fs.existsSync(path.join(__dirname, '../supabase/rollbacks/027_activation_events_down.sql'))).toBe(true);
+  });
+});
+
+describe('outreach signup report', () => {
+  const auth = { authorization: 'Bearer x' };
+  const outreach = { utm_source: 'outreach', utm_medium: 'email', utm_campaign: 'mm-2026-12-a', utm_content: 'abc123' };
+  it('reports a signup for an outreach first touch, with the link code when the client sent one', async () => {
+    outreachOn = true;
+    expect((await post('/attribution', outreach, auth)).status).toBe(204);
+    expect(signups).toEqual([{ a: { campaign: 'mm-2026-12-a', linkCode: 'abc123' }, email: 'new.user@example.com' }]);
+  });
+  it('works without the code and without ACTIVATION_EVENTS_ENABLED (nothing stored then)', async () => {
+    outreachOn = true; enabled = false;
+    await post('/attribution', { utm_source: 'outreach', utm_campaign: 'mm-2026-12-a' }, auth);
+    expect(attributions).toHaveLength(0);
+    expect(signups).toHaveLength(1);
+    expect(signups[0].a.linkCode).toBeNull();
+  });
+  it('reports nothing when the layer flag is off, the source is not outreach, or the first touch was already stored', async () => {
+    await post('/attribution', outreach, auth);
+    outreachOn = true;
+    await post('/attribution', { utm_source: 'google', utm_campaign: 'mm-2026-12-a' }, auth);
+    insertResult = false;
+    await post('/attribution', outreach, auth);
+    expect(signups).toHaveLength(0);
+  });
+  it('both flags off: 204 without auth, nothing stored or reported', async () => {
+    enabled = false;
+    expect((await post('/attribution', outreach)).status).toBe(204);
+    expect(signups).toHaveLength(0);
+  });
+  it('a reporter that throws never fails the client', async () => {
+    outreachOn = true;
+    const app = express(); app.use(express.json());
+    app.use('/a', createActivationRouter({ enabled: () => true, insertAttribution: async () => true, outreachEnabled: () => true, reportSignup: () => { throw new Error('x'); } }, (req: any, _r: any, n: any) => { req.user = { id: UID, email: 'a@b.com' }; n(); }));
+    const server = app.listen(0);
+    try {
+      const { port } = server.address() as AddressInfo;
+      const res = await fetch(`http://127.0.0.1:${port}/a/attribution`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(outreach) });
+      expect(res.status).toBe(204);
+    } finally { server.close(); }
   });
 });
