@@ -37,8 +37,32 @@ export function findMissingConfig(env: NodeJS.ProcessEnv = process.env): { requi
   return { required: missing(REQUIRED_IN_PRODUCTION), features: missing(FEATURE_SECRETS) };
 }
 
+/**
+ * OAuth redirect URIs that do not point at this server's calendar callback. The provider sends the user to that address
+ * after consent, so a stale one fails every connection without this server ever seeing a request (GOOGLE_REDIRECT_URI kept
+ * pointing at a deleted Cloud Run service after the move to Fly). The values are public, but only hosts are reported.
+ */
+export function findBadRedirectUris(env: NodeJS.ProcessEnv = process.env): Array<{ name: string; host: string }> {
+  let serviceHost: string;
+  try { serviceHost = new URL(String(env.SERVICE_URL)).host; } catch { return []; } // missing SERVICE_URL is reported above
+  const bad: Array<{ name: string; host: string }> = [];
+  for (const [name, provider] of [['GOOGLE_REDIRECT_URI', 'google'], ['MICROSOFT_REDIRECT_URI', 'microsoft']] as const) {
+    const value = env[name]?.trim();
+    if (!value) continue;
+    let url: URL | null = null;
+    try { url = new URL(value); } catch { /* unparseable is bad */ }
+    const ok = !!url && url.host === serviceHost && new RegExp(`^(/v\\d+)?/api/calendar/callback/${provider}$`).test(url.pathname);
+    if (!ok) bad.push({ name, host: url?.host ?? 'unparseable' });
+  }
+  return bad;
+}
+
 export function checkStartupConfig(env: NodeJS.ProcessEnv = process.env): void {
   if (env.NODE_ENV !== 'production') return;
+  for (const { name, host } of findBadRedirectUris(env)) {
+    console.error(`[startup] ${name} does not point at this server's calendar callback (host ${host})`);
+    reportAlert('startup_config', `BAD_${name}`, { host }, 60 * 60_000);
+  }
   const { required, features } = findMissingConfig(env);
   if (required.length) {
     console.error(`[startup] missing required secrets: ${required.join(', ')}`);
