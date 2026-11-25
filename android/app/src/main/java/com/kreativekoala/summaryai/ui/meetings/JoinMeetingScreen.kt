@@ -248,12 +248,7 @@ fun JoinMeetingScreen(
                 creditBalance = uiState.coachingCredits,
                 isLoadingBalance = uiState.isLoadingCoachingCredits,
                 onGetMoreCredits = {
-                    val launched = activity?.let { viewModel.purchaseCoachingSubscription(it) } ?: false
-                    // DEBUG fallback: if purchase couldn't launch (e.g. IAP not yet provisioned),
-                    // grant 5 credits so developers can keep iterating without Play setup.
-                    if (!launched && com.kreativekoala.summaryai.BuildConfig.DEBUG) {
-                        viewModel.debugGrantCoachingCredits()
-                    }
+                    activity?.let { viewModel.purchaseCoachingSubscription(it) }
                 }
             )
 

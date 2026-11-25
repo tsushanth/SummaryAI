@@ -31,11 +31,6 @@ data class CoachingClaimFreeResponse(
     @SerializedName("free_tier_credits") val freeTierCredits: Int
 )
 
-data class CoachingDebugGrantResponse(
-    val granted: Int,
-    val balance: Int
-)
-
 data class CoachingStartSessionRequest(
     @SerializedName("recording_id") val recordingId: String,
     val persona: String,

@@ -75,21 +75,6 @@ router.get('/credits', asyncHandler(async (req: Request, res: Response) => {
   res.json({ balance, by_source: bySource });
 }));
 
-// ----- POST /api/coaching/credits/grant-debug -----
-//
-// DEBUG ONLY: grant 5 coaching credits per call to the requesting user. Used
-// by the iOS/Android dev builds to test the coaching flow before real IAPs
-// clear App Store / Play Store review. No gating in code — only the DEBUG
-// client builds call this; if you're worried about abuse, gate later via
-// an X-Debug-Token header against a Fly secret.
-router.post('/credits/grant-debug', asyncHandler(async (req: Request, res: Response) => {
-  const userId = (req as any).user.id;
-  const sourceEventId = `debug-grant:${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  await grantCredits(userId, 5, 'manual', { sourceEventId });
-  const balance = await getCreditBalance(userId);
-  res.json({ granted: 5, balance });
-}));
-
 // ----- POST /api/coaching/sessions -----
 
 const startSchema = z.object({

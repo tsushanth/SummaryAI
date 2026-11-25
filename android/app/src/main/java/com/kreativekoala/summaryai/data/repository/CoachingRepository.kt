@@ -34,9 +34,6 @@ class CoachingRepository @Inject constructor(
     suspend fun claimFreeCredits(): CoachingClaimFreeResponse = api.claimFreeCredits()
     suspend fun getCredits(): CoachingCredits = api.getCredits()
 
-    /** DEBUG only — grants 5 credits per call. */
-    suspend fun debugGrantCredits() = api.debugGrantCredits()
-
     suspend fun startSession(recordingId: String, persona: CoachingPersonaKey): CoachingStartSessionResponse =
         api.startSession(CoachingStartSessionRequest(recordingId, persona.key, outputLanguage.current()))
 
