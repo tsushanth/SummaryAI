@@ -110,18 +110,7 @@ export async function startSession(
     .maybeSingle();
   if (!credit) throw new NoCreditsError();
 
-  // Atomically decrement the credit balance. Optimistic check: we read
-  // balance>0 above; if a parallel session-start already grabbed the last
-  // credit, the update affects zero rows and we retry/fail.
-  const { data: debited, error: debitErr } = await supabaseAdmin
-    .from('coaching_credits')
-    .update({ balance: credit.balance - 1 })
-    .eq('id', credit.id)
-    .gt('balance', 0)
-    .select('id')
-    .maybeSingle();
-  if (debitErr) throw debitErr;
-  if (!debited) throw new NoCreditsError();
+  if (!(await changeCreditBalance(credit.id, -1))) throw new NoCreditsError();
 
   const { data: session, error } = await supabaseAdmin
     .from('coaching_sessions')
@@ -135,10 +124,7 @@ export async function startSession(
     .single();
   if (error) {
     // Roll back the debit so the user doesn't lose a credit to a bad session row.
-    await supabaseAdmin
-      .from('coaching_credits')
-      .update({ balance: credit.balance })
-      .eq('id', credit.id);
+    await changeCreditBalance(credit.id, 1);
     throw error;
   }
 
@@ -148,42 +134,64 @@ export async function startSession(
   return { sessionId: session.id };
 }
 
+/**
+ * Adds `delta` to a credit row, writing only if the balance is still the one just read. Two requests working from the same
+ * read must not both write: that loses a debit or repeats a refund. false = nothing changed.
+ */
+async function changeCreditBalance(creditId: string, delta: 1 | -1): Promise<boolean> {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const { data: row, error: readError } = await supabaseAdmin
+      .from('coaching_credits')
+      .select('balance')
+      .eq('id', creditId)
+      .maybeSingle();
+    if (readError) throw readError;
+    if (!row || row.balance + delta < 0) return false;
+    const { data: changed, error } = await supabaseAdmin
+      .from('coaching_credits')
+      .update({ balance: row.balance + delta })
+      .eq('id', creditId)
+      .eq('balance', row.balance)
+      .select('id')
+      .maybeSingle();
+    if (error) throw error;
+    if (changed) return true;
+  }
+  return false;
+}
+
 /** End a session. Auto-refunds the credit if too few insights were emitted. */
 export async function endSession(sessionId: string): Promise<{ refunded: boolean }> {
   stopTicker(sessionId);
 
-  const { data: session } = await supabaseAdmin
+  // Close first, and only if still open: of repeated or simultaneous calls exactly one gets the row, so only one can refund.
+  const { data: session, error: closeError } = await supabaseAdmin
     .from('coaching_sessions')
-    .select('id, credit_id, insight_count, ended_at')
+    .update({ ended_at: new Date().toISOString() })
     .eq('id', sessionId)
+    .is('ended_at', null)
+    .select('id, credit_id, insight_count')
     .maybeSingle();
-  if (!session || session.ended_at) return { refunded: false };
+  if (closeError) console.error(`[Coaching] could not end session ${sessionId}:`, closeError.message);
+  if (!session) return { refunded: false };
 
   let refunded = false;
   if (session.insight_count < REFUND_THRESHOLD_INSIGHTS && session.credit_id) {
     // Auto-refund: bump the originating credit balance back up by 1.
-    const { data: credit } = await supabaseAdmin
-      .from('coaching_credits')
-      .select('balance')
-      .eq('id', session.credit_id)
-      .maybeSingle();
-    if (credit) {
-      await supabaseAdmin
-        .from('coaching_credits')
-        .update({ balance: credit.balance + 1 })
-        .eq('id', session.credit_id);
-      refunded = true;
+    try {
+      refunded = await changeCreditBalance(session.credit_id, 1);
+    } catch (e) {
+      console.error(`[Coaching] refund failed for session ${sessionId}:`, (e as { message?: string }).message);
     }
+    if (!refunded) reportAlert('coaching', 'REFUND_FAILED');
   }
 
-  await supabaseAdmin
-    .from('coaching_sessions')
-    .update({
-      ended_at: new Date().toISOString(),
-      refunded,
-      refund_reason: refunded ? 'insight_count_below_threshold' : null,
-    })
-    .eq('id', sessionId);
+  if (refunded) {
+    await supabaseAdmin
+      .from('coaching_sessions')
+      .update({ refunded: true, refund_reason: 'insight_count_below_threshold' })
+      .eq('id', sessionId);
+  }
 
   subscribers.delete(sessionId);
   sessionLanguages.delete(sessionId);

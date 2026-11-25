@@ -88,6 +88,15 @@ router.post('/sessions', asyncHandler(async (req: Request, res: Response) => {
   const userId = (req as any).user.id;
   const body = startSchema.parse(req.body);
 
+  // The session reads the recording's live transcript, so it must be the caller's own recording.
+  const { data: recording } = await supabaseAdmin
+    .from('recordings')
+    .select('id')
+    .eq('id', body.recording_id)
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (!recording) throw Errors.notFound('Recording not found.');
+
   try {
     const { sessionId } = await startSession(userId, body.recording_id, body.persona, body.output_language);
     res.status(201).json({ session_id: sessionId, persona: body.persona });
