@@ -251,6 +251,7 @@ export type MeetingStatus =
   | 'bot_queued'
   | 'bot_joining'
   | 'bot_in_meeting'
+  | 'bot_left'
   | 'completed'
   | 'failed'
   | 'cancelled';
@@ -270,7 +271,7 @@ export interface Meeting {
   recording_id: string | null;
   source: MeetingSource;
   bot_id: string | null;
-  /** Why the meeting failed (status 'failed'). Returned by GET /api/meetings/:id. */
+  /** Why the meeting failed (status 'failed'). Returned by GET /api/meetings and /api/meetings/:id. */
   error_message?: string | null;
   created_at: string;
   updated_at: string;
@@ -328,6 +329,21 @@ export interface CreateMeetingRequest {
 export interface CreateMeetingResponse {
   meeting: Meeting;
   warning?: string;
+}
+
+export interface JoinMeetingRequest {
+  join_url: string;
+  title?: string;
+  /** 'auto' | language code. */
+  transcription_language?: string;
+}
+
+export interface JoinMeetingResponse {
+  meeting: Pick<Meeting, 'id' | 'title' | 'platform' | 'status' | 'join_url' | 'recording_id'>;
+  bot_id?: string;
+  recording_id: string | null;
+  /** True when a bot was already active for this link; nothing new was sent. */
+  already_exists?: boolean;
 }
 
 export interface UpdateMeetingRequest {

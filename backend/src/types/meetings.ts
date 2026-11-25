@@ -189,6 +189,8 @@ export const ListMeetingsSchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(50),
   offset: z.coerce.number().int().min(0).default(0),
   status: z.enum(['upcoming', 'past', 'all']).default('upcoming'),
+  /** With status=upcoming: also return active and recently failed meetings that have started (lib/meetingListFilter.ts). */
+  include_recent: z.enum(['true', 'false']).optional(),
   days_ahead: z.coerce.number().int().min(1).max(30).default(14),
 });
 
@@ -345,9 +347,11 @@ export interface RecallBotResponse {
   meeting_url: string;
   status_changes?: Array<{
     code: string;
-    message: string;
+    sub_code?: string | null;
+    message: string | null;
     created_at: string;
   }>;
+  recordings?: unknown[];
   video_url?: string;
   audio_url?: string;
   transcript?: RecallTranscript[];
@@ -367,6 +371,9 @@ export interface RecallTranscript {
 export interface RecallWebhookPayload {
   event: string;
   data: {
+    /** Status events nest the reason here (lib/recallStatus.ts). */
+    data?: { code?: string; sub_code?: string | null; updated_at?: string };
+    bot?: { id?: string };
     bot_id: string;
     status?: string;
     code?: string;

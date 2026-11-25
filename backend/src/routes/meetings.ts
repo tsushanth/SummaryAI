@@ -53,6 +53,7 @@ import {
 } from '../types/meetings.js';
 import { getLiveInsights } from '../services/liveInsightsService.js';
 import { enforceBotMonthlyCap, BOT_CAP_ERROR_CODE } from '../services/botUsageCap.js';
+import { upcomingMeetingsFilter } from '../lib/meetingListFilter.js';
 
 const router = Router();
 
@@ -147,29 +148,22 @@ router.get(
       throw Errors.badRequest('Invalid request parameters');
     }
 
-    const { limit, offset, status, days_ahead } = parsed.data;
+    const { limit, offset, status, days_ahead, include_recent } = parsed.data;
 
     let query = supabaseAdmin
       .from('meetings')
       .select(
-        'id, title, platform, source, scheduled_start, scheduled_end, auto_join, status, recording_id, join_url',
+        'id, title, platform, source, scheduled_start, scheduled_end, auto_join, status, recording_id, join_url, error_message',
         { count: 'exact' }
       )
       .eq('user_id', userId);
 
     const now = new Date().toISOString();
-    const futureDate = new Date(
-      Date.now() + days_ahead * 24 * 60 * 60 * 1000
-    ).toISOString();
 
     if (status === 'upcoming') {
-      // Include meetings that:
-      // 1. Start time is in the future (upcoming), OR
-      // 2. Start time is in the past but end time is in the future (ongoing)
-      // Since Supabase doesn't support OR conditions easily, we use a raw filter
-      // We filter: (scheduled_start >= now AND scheduled_start <= futureDate) OR (scheduled_start < now AND scheduled_end > now)
+      // Future and ongoing meetings; with include_recent also active and recently failed ones (lib/meetingListFilter.ts).
       query = query
-        .or(`and(scheduled_start.gte.${now},scheduled_start.lte.${futureDate}),and(scheduled_start.lt.${now},scheduled_end.gt.${now})`)
+        .or(upcomingMeetingsFilter(Date.now(), days_ahead, include_recent === 'true'))
         .order('scheduled_start', { ascending: true });
     } else if (status === 'past') {
       query = query

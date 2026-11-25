@@ -16,6 +16,8 @@ import { RecallWebhookPayload, BotRun, Meeting, RecallTranscriptWebhookPayload }
 import { finalizeBotRecording } from '../services/recallService.js';
 import { triggerProcessing } from '../services/processingService.js';
 import { reportRecordingFailureById, botFailureCode } from '../lib/recordingFailure.js';
+import { NOT_ADMITTED_SUB_CODES, recallStatusDetail } from '../lib/recallStatus.js';
+import { failNeverRecordedRun } from '../services/botFailure.js';
 import { queueInsightGeneration } from '../services/liveInsightsService.js';
 import { grantCredits } from '../services/coachingService.js';
 import { TwilioService } from '../services/twilioService.js';
@@ -188,7 +190,7 @@ router.post('/recall', async (req: Request, res: Response) => {
         break;
 
       case 'bot.call_ended':
-        await handleBotCallEnded(botRun, meeting);
+        await handleBotCallEnded(botRun, meeting, data);
         break;
 
       case 'bot.done':
@@ -238,18 +240,23 @@ async function handleBotJoining(
 ): Promise<void> {
   console.log(`[Webhook] Bot ${botRun.id} is joining call`);
 
+  // Recall can fail a bot within a second of joining_call: a late or concurrent delivery must not revive it.
+  if (botRun.status === 'failed') return;
+
   await supabaseAdmin
     .from('bot_runs')
     .update({
       status: 'joining',
       recall_status: 'joining_call',
     })
-    .eq('id', botRun.id);
+    .eq('id', botRun.id)
+    .neq('status', 'failed');
 
   await supabaseAdmin
     .from('meetings')
     .update({ status: 'bot_joining' })
-    .eq('id', meeting.id);
+    .eq('id', meeting.id)
+    .neq('status', 'failed');
 }
 
 /**
@@ -260,13 +267,16 @@ async function handleBotInWaitingRoom(
 ): Promise<void> {
   console.log(`[Webhook] Bot ${botRun.id} is in waiting room`);
 
+  if (botRun.status === 'failed') return;
+
   await supabaseAdmin
     .from('bot_runs')
     .update({
       status: 'joining',
       recall_status: 'in_waiting_room',
     })
-    .eq('id', botRun.id);
+    .eq('id', botRun.id)
+    .neq('status', 'failed');
 }
 
 /**
@@ -331,23 +341,43 @@ async function handleBotNotRecording(
  */
 async function handleBotCallEnded(
   botRun: BotRun,
-  meeting: Meeting
+  meeting: Meeting,
+  data: RecallWebhookPayload['data']
 ): Promise<void> {
-  console.log(`[Webhook] Bot ${botRun.id} call ended`);
+  const { subCode } = recallStatusDetail(data);
+  console.log(`[Webhook] Bot ${botRun.id} call ended${subCode ? `: ${subCode}` : ''}`);
+
+  // Already closed (fatal, permission denied, finalized): leaving the call must not put it back into processing.
+  const closed = botRun.status === 'failed' || botRun.status === 'completed';
+  const leftAt = botRun.left_at || new Date().toISOString();
+
+  // Never let in: there will be no recording, so no later event would ever close these rows.
+  if (!closed && !botRun.joined_at && subCode && NOT_ADMITTED_SUB_CODES.includes(subCode)) {
+    await failNeverRecordedRun(botRun, meeting, subCode, { recall_status: 'call_ended', left_at: leftAt });
+    return;
+  }
+
+  // The leave time counts towards the monthly bot allowance, so it is stored whatever state the run is in.
+  await supabaseAdmin
+    .from('bot_runs')
+    .update({ recall_status: 'call_ended', left_at: leftAt })
+    .eq('id', botRun.id);
+
+  if (closed) return;
 
   await supabaseAdmin
     .from('bot_runs')
-    .update({
-      status: 'processing',
-      recall_status: 'call_ended',
-      left_at: new Date().toISOString(),
-    })
-    .eq('id', botRun.id);
+    .update({ status: 'processing' })
+    .eq('id', botRun.id)
+    .neq('status', 'failed')
+    .neq('status', 'completed');
 
   await supabaseAdmin
     .from('meetings')
     .update({ status: 'bot_left' })
-    .eq('id', meeting.id);
+    .eq('id', meeting.id)
+    .neq('status', 'failed')
+    .neq('status', 'completed');
 }
 
 /**
@@ -367,7 +397,10 @@ async function handleBotDone(
         recall_status: 'done',
         left_at: botRun.left_at || new Date().toISOString(),
       })
-      .eq('id', botRun.id);
+      .eq('id', botRun.id)
+      // call_ended arrives within a millisecond of done and may fail the run after it was read above.
+      .neq('status', 'failed')
+      .neq('status', 'completed');
   }
 }
 
@@ -379,7 +412,9 @@ async function handleBotFatal(
   meeting: Meeting,
   data: RecallWebhookPayload['data']
 ): Promise<void> {
-  const errorMessage = data.sub_code || data.message || 'Bot encountered a fatal error';
+  const { subCode, message } = recallStatusDetail(data);
+  const errorCode = subCode || 'bot_fatal';
+  const errorMessage = subCode || message || 'Bot encountered a fatal error';
   console.error(`[Webhook] Bot ${botRun.id} fatal error: ${errorMessage}`);
 
   await supabaseAdmin
@@ -387,7 +422,7 @@ async function handleBotFatal(
     .update({
       status: 'failed',
       recall_status: 'fatal',
-      error_code: data.sub_code,
+      error_code: errorCode,
       error_message: errorMessage,
     })
     .eq('id', botRun.id);
@@ -406,6 +441,7 @@ async function handleBotFatal(
       .from('recordings')
       .update({
         status: 'failed',
+        error_code: errorCode,
         error_message: errorMessage,
       })
       .eq('id', meeting.recording_id);
@@ -422,14 +458,16 @@ async function handleRecordingPermissionDenied(
   meeting: Meeting,
   data: RecallWebhookPayload['data']
 ): Promise<void> {
-  const errorMessage = data.sub_code || 'Recording permission denied by host';
+  const { subCode } = recallStatusDetail(data);
+  const errorCode = subCode || 'recording_permission_denied';
+  const errorMessage = subCode || 'Recording permission denied by host';
   console.error(`[Webhook] Bot ${botRun.id} recording permission denied: ${errorMessage}`);
 
   await supabaseAdmin
     .from('bot_runs')
     .update({
       status: 'failed',
-      error_code: 'recording_permission_denied',
+      error_code: errorCode,
       error_message: errorMessage,
     })
     .eq('id', botRun.id);
@@ -448,6 +486,7 @@ async function handleRecordingPermissionDenied(
       .from('recordings')
       .update({
         status: 'failed',
+        error_code: errorCode,
         error_message: errorMessage,
       })
       .eq('id', meeting.recording_id);

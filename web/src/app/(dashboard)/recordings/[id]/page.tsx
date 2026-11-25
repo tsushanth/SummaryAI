@@ -77,6 +77,7 @@ import { SpeakerTimeline } from '@/components/recordings/VoiceRibbon';
 import { useRecordingAnalytics } from '@/hooks/useRecordingAnalytics';
 import { NoSummaryNotice } from '@/components/recordings/NoSummaryNotice';
 import { getSummaryView } from '@/lib/summaryState';
+import { recordingBotFailureReason } from '@/lib/meetingFailure';
 import { summaryViewedState } from '@/lib/activation';
 import { track } from '@/lib/activationClient';
 
@@ -181,6 +182,7 @@ export default function RecordingDetailPage() {
   const isProcessing = ['pending', 'uploading', 'uploaded', 'transcribing', 'summarizing'].includes(
     recording.status
   );
+  const botFailureReason = recordingBotFailureReason(recording);
 
   return (
     <div className="flex h-full flex-col">
@@ -267,6 +269,12 @@ export default function RecordingDetailPage() {
             currentTime={currentTime}
             onSeek={handleSeek}
           />
+        )}
+
+        {botFailureReason && (
+          <div role="alert" className="mt-4 rounded-md bg-destructive/10 p-3 text-sm text-foreground">
+            {botFailureReason}
+          </div>
         )}
 
         {/* Processing banner */}

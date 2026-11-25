@@ -335,6 +335,10 @@ export default function MeetingDetailPage() {
             <p className="text-sm mt-2">
               {meeting.status === 'completed'
                 ? 'This meeting has ended.'
+                : meeting.status === 'failed'
+                ? 'The bot did not record this meeting.'
+                : meeting.status === 'bot_left'
+                ? 'The bot has left. The recording is being processed.'
                 : meeting.status === 'bot_joining'
                 ? 'Bot is joining the meeting...'
                 : 'Live transcript will appear when the meeting starts.'}

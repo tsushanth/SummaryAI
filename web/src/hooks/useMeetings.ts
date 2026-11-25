@@ -5,10 +5,11 @@ import { useState, useCallback } from 'react';
 import {
   getMeetings,
   createMeeting,
+  joinMeeting,
   updateMeeting,
   deleteMeeting,
 } from '@/lib/api/meetings';
-import type { CreateMeetingRequest, UpdateMeetingRequest } from '@/types/api';
+import type { CreateMeetingRequest, JoinMeetingRequest, UpdateMeetingRequest } from '@/types/api';
 
 export function useMeetings(params?: {
   limit?: number;
@@ -27,7 +28,8 @@ export function useMeetings(params?: {
           (m) =>
             m.status === 'bot_queued' ||
             m.status === 'bot_joining' ||
-            m.status === 'bot_in_meeting'
+            m.status === 'bot_in_meeting' ||
+            m.status === 'bot_left'
         );
         return hasActiveMeeting ? 5000 : 30000;
       },
@@ -70,6 +72,30 @@ export function useCreateMeeting() {
   return {
     create,
     isCreating,
+  };
+}
+
+export function useJoinMeeting() {
+  const [isJoining, setIsJoining] = useState(false);
+  const { refresh } = useMeetings();
+
+  const join = useCallback(
+    async (data: JoinMeetingRequest) => {
+      setIsJoining(true);
+      try {
+        return await joinMeeting(data);
+      } finally {
+        // Also after a failure: the backend keeps the refused meeting as failed, and the list should show it.
+        await refresh().catch(() => undefined);
+        setIsJoining(false);
+      }
+    },
+    [refresh]
+  );
+
+  return {
+    join,
+    isJoining,
   };
 }
 

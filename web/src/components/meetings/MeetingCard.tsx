@@ -93,6 +93,12 @@ function getStatusBadge(status: MeetingStatus) {
           Recording
         </span>
       );
+    case 'bot_left':
+      return (
+        <span className="px-2 py-0.5 text-xs rounded-full bg-accent text-accent-foreground">
+          Processing
+        </span>
+      );
     case 'completed':
       return (
         <span className="px-2 py-0.5 text-xs rounded-full bg-success/15 text-success">
@@ -144,6 +150,8 @@ export function MeetingCard({
     await onToggleAutoJoin(meeting.id, !meeting.auto_join);
   };
   const failureReason = meetingFailureReason(meeting);
+  // Switching a finished meeting back on would send a bot straight away, so the switch is locked once the bot is done.
+  const toggleLocked = ['completed', 'cancelled', 'failed', 'bot_left'].includes(meeting.status);
 
   return (
     <Card className="p-4">
@@ -183,7 +191,7 @@ export function MeetingCard({
               )}
             </div>
             {failureReason ? (
-              <p className="mt-2 text-xs text-muted-foreground max-w-md truncate" title={failureReason}>
+              <p className="mt-2 text-xs text-muted-foreground max-w-md">
                 {failureReason}
               </p>
             ) : (
@@ -203,11 +211,11 @@ export function MeetingCard({
             <span className="text-sm text-muted-foreground">Auto-record</span>
             <button
               onClick={handleToggle}
-              disabled={isUpdating || meeting.status === 'completed' || meeting.status === 'cancelled'}
+              disabled={isUpdating || toggleLocked}
               className={cn(
                 'relative w-10 h-6 rounded-full transition-colors',
                 meeting.auto_join ? 'bg-primary' : 'bg-muted-foreground/40',
-                (isUpdating || meeting.status === 'completed' || meeting.status === 'cancelled') && 'opacity-50 cursor-not-allowed'
+                (isUpdating || toggleLocked) && 'opacity-50 cursor-not-allowed'
               )}
             >
               <span

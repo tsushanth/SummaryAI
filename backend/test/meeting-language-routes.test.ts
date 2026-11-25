@@ -324,3 +324,20 @@ describe('GET /api/meetings/:id exposes the language state', () => {
     expect(r.json.live_language).toMatchObject({ language: 'auto', can_change: true, provider: 'soniox' });
   });
 });
+
+describe('GET /api/meetings include_recent', () => {
+  const filterFor = async (query: string) => {
+    db.log.length = 0;
+    const r = await call('GET', `/api/meetings${query}`);
+    expect(r.status).toBe(200);
+    return String(db.log.find((e) => e.op === 'or')?.payload);
+  };
+
+  it('adds recently failed and active meetings only when asked, and returns error_message', async () => {
+    expect(await filterFor('')).not.toContain('status.');
+    expect(await filterFor('?status=upcoming&days_ahead=14')).not.toContain('status.');
+    expect(await filterFor('?include_recent=true')).toContain('status.eq.failed');
+    expect((await call('GET', '/api/meetings?include_recent=yes')).status).toBe(400);
+  });
+});
+
