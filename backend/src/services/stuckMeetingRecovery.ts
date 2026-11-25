@@ -427,7 +427,7 @@ export const STALE_BOT_RUN_MS = 24 * 60 * 60 * 1000;
  * 2026) the row stayed `joining` forever, kept the BOT_NEVER_JOINED invariant firing, and misled anyone reading bot_runs.
  * `completed` when the meeting's recording did complete (the live-transcript stitcher finished it). Otherwise, if Recall
  * confirms the bot never recorded, the run, meeting and pending recording are failed with Recall's reason. In every other case
- * only the bot_runs row is touched: `failed` with a distinct error_code.
+ * only the bot_runs row is touched here (`failed` with a distinct error_code); closeMeetingsOfClosedRuns then closes the meeting.
  */
 export async function expireStaleBotRuns(): Promise<number> {
   const cutoffIso = new Date(Date.now() - STALE_BOT_RUN_MS).toISOString();
@@ -482,9 +482,63 @@ export async function expireStaleBotRuns(): Promise<number> {
   return closed;
 }
 
+/** Meeting statuses that mean "a bot is still working on this". */
+const OPEN_MEETING_STATUSES = ['bot_joining', 'bot_in_meeting', 'bot_left'];
+/** A meeting this long without a change is no longer waiting for a late webhook. */
+export const STALE_MEETING_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Close meetings left open after their bot run closed. Several paths close only the run (expireStaleBotRuns, a missed
+ * webhook), which left the meeting "joining" for months. The newest run decides; a meeting with a run still open, or with
+ * none, is left alone. Recordings are not touched: the live-transcript stitcher may still complete them.
+ */
+export async function closeMeetingsOfClosedRuns(now: number = Date.now()): Promise<number> {
+  const { data: open, error } = await supabaseAdmin
+    .from('meetings')
+    .select('id')
+    .in('status', OPEN_MEETING_STATUSES)
+    .lt('updated_at', new Date(now - STALE_MEETING_MS).toISOString())
+    .limit(50);
+  if (error) {
+    console.error(`${BOT_RUN_TAG} open meeting scan failed:`, error.message);
+    reportLoopScanError('BotRecordingReconciler');
+    return 0;
+  }
+  let closed = 0;
+  for (const meeting of (open ?? []) as Array<{ id: string }>) {
+    const { data: run, error: runError } = await supabaseAdmin
+      .from('bot_runs')
+      .select('status, error_code, error_message')
+      .eq('meeting_id', meeting.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const latest = run as { status: string; error_code: string | null; error_message: string | null } | null;
+    if (runError || !latest || (latest.status !== 'completed' && latest.status !== 'failed')) continue;
+    const patch = latest.status === 'completed'
+      ? { status: 'completed' }
+      : { status: 'failed', error_message: latest.error_code || latest.error_message || 'bot_failed' };
+    const { data: updated, error: updErr } = await supabaseAdmin
+      .from('meetings')
+      .update(patch)
+      .eq('id', meeting.id)
+      .in('status', OPEN_MEETING_STATUSES) // never overwrite a status a late webhook just set
+      .select('id');
+    if (updErr) {
+      console.error(`${BOT_RUN_TAG} could not close meeting ${meeting.id.slice(0, 8)}: ${updErr.message}`);
+      reportLoopScanError('BotRecordingReconciler');
+      continue;
+    }
+    if (updated?.length) closed++;
+  }
+  if (closed) console.log(`${BOT_RUN_TAG} closed ${closed} meeting(s) whose bot run had already closed`);
+  return closed;
+}
+
 async function reconcilePass(): Promise<void> {
   await reconcileStuckBotRecordings();
   await expireStaleBotRuns();
+  await closeMeetingsOfClosedRuns();
 }
 
 export function startBotRecordingReconcilerLoop(): void {

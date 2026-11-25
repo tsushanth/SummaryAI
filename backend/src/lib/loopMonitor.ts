@@ -1,6 +1,5 @@
 /**
- * Heartbeats and a watchdog for the background loops (BotJoinReconciler, StuckRecovery, BotRecordingReconciler,
- * OrphanRecovery). Before this, a pass that threw, or a loop that never started or hung, only wrote a console line.
+ * Heartbeats and a watchdog for the background loops (EXPECTED_LOOPS below). Before this, a pass that threw, or a loop that never started or hung, only wrote a console line.
  *
  *  - runLoopPass(name, fn): runs one pass, records a heartbeat on success, reports a thrown pass.
  *  - reportLoopScanError(name): for scan queries that return { error } instead of throwing (the pass "succeeds" but did nothing).
@@ -16,7 +15,9 @@ const loops = new Map<string, LoopState>();
 const bootedAt = Date.now();
 let watchdog: NodeJS.Timeout | null = null;
 
-export const EXPECTED_LOOPS = ['BotJoinReconciler', 'StuckRecovery', 'BotRecordingReconciler', 'OrphanRecovery', 'PipelineInvariants'] as const;
+export const EXPECTED_LOOPS = [
+  'BotJoinReconciler', 'StuckRecovery', 'BotRecordingReconciler', 'OrphanRecovery', 'PipelineInvariants', 'AbandonedUploads', 'AccountPurgeRetry',
+] as const;
 
 export function registerLoop(name: string, intervalMs: number): void {
   const now = Date.now();

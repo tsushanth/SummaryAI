@@ -3,11 +3,13 @@
  * stuck, or a pipeline that produces nothing. Each breach raises ONE stable alert (re-sent at most every 6 hours);
  * context is counts only.
  *
- *   STUCK_RECORDINGS         recordings left in a mid-pipeline status for 3 h (the 65-day 'transcribing' incident)
+ *   STUCK_RECORDINGS         recordings left in a mid-pipeline status for 3 h (the 65-day 'transcribing' incident), or
+ *                            still pending / uploading after 26 h (past the upload sweeper's 24 h and any real meeting)
  *   BOT_NEVER_JOINED         bot runs still pending/joining 45 min to 24 h after they were created. Older rows are not
  *                            alerted on: nothing can still change for them, and expireStaleBotRuns() closes them out
  *   COMPLETED_NO_SUMMARY     recordings completed in the last 24 h that have no summary row
- *   ZERO_SUCCESS_24H         recordings were created in the last 24 h and none completed
+ *   ZERO_SUCCESS_24H         3+ recordings in the last 24 h and none completed with speech. 'No speech' is not success;
+ *                            empty ones under 10 s (tap and stop) are not counted as attempts either
  *   HIGH_FAILURE_RATE_24H    at least 5 created and at least half failed
  */
 import { supabaseAdmin } from '../lib/supabase.js';
@@ -19,6 +21,10 @@ import { NO_SPEECH_CODE, TOO_SHORT_CODE } from './shortRecordingGuard.js';
 const INTENTIONALLY_SUMMARYLESS: string[] = [NO_SPEECH_CODE, TOO_SHORT_CODE];
 
 export const INVARIANT_INTERVAL_MS = 30 * 60_000;
+/** A pending bot recording or an upload still open after this long cannot be in flight. */
+export const STUCK_WAITING_HOURS = 26;
+/** A 'no speech' recording shorter than this is a tap, not an attempt. */
+export const EMPTY_TAP_SECONDS = 10;
 const REALERT_MS = 6 * 3600_000;
 const HOUR = 3600_000;
 /** A bot run younger than this may legitimately still be joining (waiting room, early scheduling). */
@@ -39,8 +45,10 @@ export async function checkPipelineInvariants(now: number = Date.now()): Promise
   const stuck = await supabaseAdmin
     .from('recordings')
     .select('id', { count: 'exact', head: true })
-    .in('status', ['uploaded', 'transcribing', 'transcribed', 'summarizing'])
-    .lt('updated_at', iso(3 * HOUR));
+    .or(
+      `and(status.in.(uploaded,transcribing,transcribed,summarizing),updated_at.lt.${iso(3 * HOUR)}),` +
+      `and(status.in.(pending,uploading),updated_at.lt.${iso(STUCK_WAITING_HOURS * HOUR)})`,
+    );
   if (stuck.error) { reportLoopScanError('PipelineInvariants'); return breaches; }
   if ((stuck.count ?? 0) > 0) fire('STUCK_RECORDINGS', stuck.count ?? 0);
 
@@ -52,16 +60,20 @@ export async function checkPipelineInvariants(now: number = Date.now()): Promise
     .gte('created_at', iso(BOT_ALERT_MAX_AGE_MS));
   if (!botStuck.error && (botStuck.count ?? 0) > 0) fire('BOT_NEVER_JOINED', botStuck.count ?? 0);
 
-  const [created, completed, failed] = await Promise.all([
-    supabaseAdmin.from('recordings').select('id', { count: 'exact', head: true }).gte('created_at', iso(24 * HOUR)).lt('created_at', iso(30 * 60_000)),
-    supabaseAdmin.from('recordings').select('id', { count: 'exact', head: true }).eq('status', 'completed').gte('created_at', iso(24 * HOUR)).lt('created_at', iso(30 * 60_000)),
-    supabaseAdmin.from('recordings').select('id', { count: 'exact', head: true }).eq('status', 'failed').gte('created_at', iso(24 * HOUR)).lt('created_at', iso(30 * 60_000)),
+  const inWindow = () => supabaseAdmin.from('recordings').select('id', { count: 'exact', head: true }).gte('created_at', iso(24 * HOUR)).lt('created_at', iso(30 * 60_000));
+  const [created, completed, failed, taps] = await Promise.all([
+    inWindow(),
+    // PostgREST's `neq` drops NULLs, hence the explicit `is.null`.
+    inWindow().eq('status', 'completed').or(`error_code.is.null,error_code.neq.${NO_SPEECH_CODE}`),
+    inWindow().eq('status', 'failed'),
+    inWindow().eq('error_code', NO_SPEECH_CODE).or(`duration_seconds.is.null,duration_seconds.lt.${EMPTY_TAP_SECONDS}`),
   ]);
-  if (created.error || completed.error || failed.error) { reportLoopScanError('PipelineInvariants'); return breaches; }
+  if (created.error || completed.error || failed.error || taps.error) { reportLoopScanError('PipelineInvariants'); return breaches; }
   const n = created.count ?? 0;
   const c = completed.count ?? 0;
   const f = failed.count ?? 0;
-  if (n >= 3 && c === 0) fire('ZERO_SUCCESS_24H', n, { created: n, completed: c, failed: f });
+  const attempts = n - (taps.count ?? 0);
+  if (attempts >= 3 && c === 0) fire('ZERO_SUCCESS_24H', attempts, { created: n, completed: c, failed: f, empty_taps: taps.count ?? 0 });
   else if (n >= 5 && f / n >= 0.5) fire('HIGH_FAILURE_RATE_24H', f, { created: n, completed: c, failed: f });
 
   // Completed recordings with no summary row (summary insert silently skipped, or deleted by a retry that never finished).
