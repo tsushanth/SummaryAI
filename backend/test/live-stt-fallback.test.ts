@@ -16,6 +16,8 @@ vi.mock('../src/services/liveInsightsService.js', () => ({ queueInsightGeneratio
 vi.mock('../src/services/voiceAssistant/manager.js', () => ({ getVoiceAssistantManager: () => ({ handleLive: vi.fn(async () => ({ handled: true })) }) }));
 vi.mock('../src/services/recallService.js', () => ({ finalizeBotRecording: vi.fn() }));
 vi.mock('../src/services/processingService.js', () => ({ triggerProcessing: vi.fn() }));
+const reportAlert = vi.fn((_flow: string, _code: string) => true);
+vi.mock('../src/lib/alerts.js', async (importOriginal) => ({ ...(await importOriginal<typeof import('../src/lib/alerts.js')>()), reportAlert }));
 
 const SECRET = 'sink-secret-for-tests';
 const REF = '3f2b8c1e-aaaa-4bbb-8ccc-0123456789ab';
@@ -113,6 +115,7 @@ beforeEach(async () => {
   fb.resetFallbackColumnFlag();
   fb.resetFallbackThrottle();
   queueInsightGeneration.mockClear();
+  reportAlert.mockClear();
   logs = [];
   for (const m of ['log', 'warn', 'error'] as const) vi.spyOn(console, m).mockImplementation((...a: unknown[]) => { logs.push(a.map(String).join(' ')); });
   vi.useFakeTimers({ toFake: ['Date'], now: BASE_MS });
@@ -264,6 +267,26 @@ describe('default mode (no Recall transcript on the bot): failure marks the live
     expect(fb.fallbackColumnIsMissing()).toBe(true);
     expect(metrics.getCounter('live_stt_fallback_unsupported')).toBeGreaterThan(0);
     expect(visible()).toHaveLength(4);
+    expect(reportAlert).toHaveBeenCalledWith('live_stt', 'LIVE_STT_FALLBACK_MIGRATION_MISSING', {}, 3_600_000);
+  });
+
+  it('before migration 030, a shadow run raises no alert: it has nothing to fall back from', async () => {
+    db.missing.add('bot_runs.live_stt_fallback');
+    seedRun({ live_stt_provider: 'shadow' });
+    expect((await new FakeSonioxService().speak(0, 20)).status).toBe(200);
+    expect(live()).toHaveLength(4);
+    expect(fb.fallbackColumnIsMissing()).toBe(true);
+    expect(await fb.sweepNoSegments({ nowMs: BASE_MS + 1_000_000 })).toBe(0);
+    expect(reportAlert).not.toHaveBeenCalled();
+  });
+
+  it('before migration 030, a Soniox run still alerts after the missing column was already remembered by an earlier read', async () => {
+    db.missing.add('bot_runs.live_stt_fallback');
+    seedRun({ live_stt_provider: 'shadow' });
+    await new FakeSonioxService().speak(0, 10);
+    run().live_stt_provider = 'soniox';
+    await new FakeSonioxService().speak(10, 20);
+    expect(reportAlert).toHaveBeenCalledWith('live_stt', 'LIVE_STT_FALLBACK_MIGRATION_MISSING', {}, 3_600_000);
   });
 });
 

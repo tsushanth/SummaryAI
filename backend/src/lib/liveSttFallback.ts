@@ -153,10 +153,16 @@ export function fallbackColumnIsMissing(): boolean { return fallbackColumnKnownM
 function noteMissingColumn(): void {
   if (!fallbackColumnKnownMissing()) {
     markFallbackColumnMissing();
-    console.error('[LiveStt] bot_runs.live_stt_fallback is missing (migration 030 not applied): automatic fallback is unavailable');
-    reportAlert('live_stt', 'LIVE_STT_FALLBACK_MIGRATION_MISSING', {}, 60 * 60_000);
+    console.warn('[LiveStt] bot_runs.live_stt_fallback is missing (migration 030 not applied): automatic fallback is unavailable');
   }
   inc('live_stt_fallback_unsupported');
+}
+
+/** Only a Soniox-primary run can fall back. For shadow and Recall runs the missing column changes nothing, so no alert. */
+function alertIfSonioxRunUnprotected(provider: unknown): void {
+  if (provider === 'soniox' && fallbackColumnKnownMissing()) {
+    reportAlert('live_stt', 'LIVE_STT_FALLBACK_MIGRATION_MISSING', {}, 60 * 60_000);
+  }
 }
 
 /** Select a bot run tolerating a database without migration 030 (and 026). `by` = the filter column. */
@@ -167,7 +173,11 @@ export async function selectLiveRun(by: 'live_stt_ref' | 'recall_bot_id', value:
     : [`${base}, live_stt_fallback, joined_at`, `${base}, joined_at`, base];
   for (const cols of attempts) {
     const { data, error } = await supabaseAdmin.from('bot_runs').select(cols).eq(by, value).maybeSingle();
-    if (!error) return { data: (data as unknown as LiveRun & Record<string, unknown>) ?? null, error: false };
+    if (!error) {
+      const run = (data as unknown as LiveRun & Record<string, unknown>) ?? null;
+      alertIfSonioxRunUnprotected(run?.live_stt_provider);
+      return { data: run, error: false };
+    }
     if (isMissingColumn(error, 'live_stt_fallback')) noteMissingColumn();
     else if (!isMissingColumn(error, 'joined_at') && !isMissingColumn(error, 'live_stt_provider')) return { data: null, error: true };
   }
@@ -177,7 +187,7 @@ export async function selectLiveRun(by: 'live_stt_ref' | 'recall_bot_id', value:
 async function writeState(runId: string, state: FallbackState): Promise<boolean> {
   const { error } = await supabaseAdmin.from('bot_runs').update({ live_stt_fallback: state }).eq('id', runId);
   if (error) {
-    if (isMissingColumn(error, 'live_stt_fallback')) noteMissingColumn();
+    if (isMissingColumn(error, 'live_stt_fallback')) { noteMissingColumn(); alertIfSonioxRunUnprotected('soniox'); }
     else console.error('[LiveStt] could not save fallback state');
     return false;
   }
@@ -329,6 +339,8 @@ export async function sweepNoSegments(deps: { nowMs?: number; cfg?: FallbackConf
     .gte('created_at', since)
     .limit(200);
   if (error) {
+    // The watchdog queries Soniox runs only, but PostgREST rejects the unknown column even when there are none: the alert
+    // comes from selectLiveRun, which sees the run itself.
     if (isMissingColumn(error, 'live_stt_fallback')) noteMissingColumn();
     return 0;
   }
