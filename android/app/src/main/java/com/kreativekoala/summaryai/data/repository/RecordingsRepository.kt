@@ -7,6 +7,7 @@ import com.kreativekoala.summaryai.data.api.SummaryAIApi
 import com.kreativekoala.summaryai.data.api.UploadDiagnostics
 import com.kreativekoala.summaryai.data.api.models.*
 import com.kreativekoala.summaryai.di.UploadClient
+import com.kreativekoala.summaryai.service.AutomaticUploadRetry
 import com.kreativekoala.summaryai.service.activation.Activation
 import com.kreativekoala.summaryai.data.sample.SampleMeeting
 import com.kreativekoala.summaryai.data.sample.SampleMeetingStore
@@ -109,12 +110,14 @@ class RecordingsRepository @Inject constructor(
     }
 
     /**
-     * Upload a new recording
+     * Upload a new recording. [onRetryableFailure] is called before a failed result when the audio did not reach the
+     * server and the same upload may work later (see [AutomaticUploadRetry.worthRetrying]).
      */
     suspend fun uploadRecording(
         title: String,
         audioFile: File,
         durationSeconds: Int,
+        onRetryableFailure: () -> Unit = {},
         onProgress: (Float) -> Unit = {}
     ): Result<Recording> = withContext(Dispatchers.IO) {
         var stage = "create"
@@ -173,6 +176,7 @@ class RecordingsRepository @Inject constructor(
 
             Result.success(completeResponse.recording.toDomain())
         } catch (e: Exception) {
+            if (AutomaticUploadRetry.worthRetrying(stage, e, putDiagnostics?.status)) onRetryableFailure()
             // Stable message per stage + exception class (no titles, ids or URLs) so the reporter dedupes it.
             if (e !is kotlinx.coroutines.CancellationException) {
                 com.kreativekoala.summaryai.FailureReporter.failure(

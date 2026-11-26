@@ -17,6 +17,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.kreativekoala.summaryai.MainActivity
 import com.kreativekoala.summaryai.R
+import com.kreativekoala.summaryai.data.local.TokenManager
 import com.kreativekoala.summaryai.data.repository.RecordingsRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -81,6 +82,7 @@ class AudioRecordingService : Service() {
         const val EXTRA_FILE_PATH = "extra_file_path"
         const val EXTRA_TITLE = "extra_title"
         const val EXTRA_DURATION = "extra_duration"
+        const val EXTRA_AUTOMATIC = "extra_automatic"
 
         private const val MAX_AMPLITUDES = 50
 
@@ -106,9 +108,26 @@ class AudioRecordingService : Service() {
                 ?: emptyList()
             return busyFiles.pendingAmong(files)
         }
+
+        /**
+         * A recording to send again by itself now, or null (nothing due, or a recording or upload is running). The file
+         * counts as being uploaded from here on; start it with [EXTRA_AUTOMATIC], or call [abandonAutomaticRetry].
+         */
+        internal fun claimAutomaticRetry(context: Context, userId: String?): AutomaticUploadRetry.Claim? {
+            if (busyFiles.recording != null || busyFiles.uploading != null) return null
+            return AutomaticUploadRetry.claim(listPendingUploads(context), userId, System.currentTimeMillis())
+                ?.also { busyFiles.uploading = it.file }
+        }
+
+        /** The system refused to start the upload: leave the recording due for a later try. */
+        internal fun abandonAutomaticRetry(claim: AutomaticUploadRetry.Claim) {
+            claim.undo()
+            busyFiles.finishedUploading(claim.file)
+        }
     }
 
     @Inject lateinit var recordingsRepository: RecordingsRepository
+    @Inject lateinit var tokenManager: TokenManager
 
     private val binder = RecordingBinder()
     private var mediaRecorder: MediaRecorder? = null
@@ -147,7 +166,7 @@ class AudioRecordingService : Service() {
                 val title = intent.getStringExtra(EXTRA_TITLE) ?: getString(R.string.recording_fallback)
                 val duration = intent.getIntExtra(EXTRA_DURATION, 0)
                 if (path != null) {
-                    startUpload(File(path), title, duration)
+                    startUpload(File(path), title, duration, intent.getBooleanExtra(EXTRA_AUTOMATIC, false))
                 }
             }
         }
@@ -344,8 +363,10 @@ class AudioRecordingService : Service() {
         } catch (_: Exception) { /* ignore */ }
         mediaRecorder = null
         busyFiles.recording = null
-        file?.delete()
-        metaFileFor(file)?.delete()
+        file?.let {
+            it.delete()
+            PendingUploadMeta.fileFor(it).delete()
+        }
         _recordingState.value = RecordingState()
         _uploadState.value = UploadState()
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
@@ -356,12 +377,16 @@ class AudioRecordingService : Service() {
      * Uploads the given recording file. Persists title+duration to a sidecar
      * meta file so the upload can be retried after a crash. Switches the
      * foreground service type to DATA_SYNC for the duration of the upload.
+     *
+     * An [automatic] retry shows only the notification: it never takes over the Record screen with progress, an error or
+     * a jump to the finished recording.
      */
-    fun startUpload(file: File, title: String, durationSeconds: Int) {
+    fun startUpload(file: File, title: String, durationSeconds: Int, automatic: Boolean = false) {
         // Never while recording: the file being written would change length mid-upload, and switching the service to
         // DATA_SYNC (then stopping it) would end the recording. The file stays on disk and is offered again later.
         if (mediaRecorder != null) {
             Log.w(TAG, "Upload refused while a recording is in progress")
+            busyFiles.finishedUploading(file)
             return
         }
         if (!file.exists()) {
@@ -371,26 +396,37 @@ class AudioRecordingService : Service() {
             return
         }
 
-        writeMetaFile(file, title, durationSeconds)
+        val previous = PendingUploadMeta.read(file)
+        // Not due again until this attempt fails: if the process dies mid-upload the audio may already be on the server.
+        val meta = PendingUploadMeta(
+            title = title,
+            durationSeconds = durationSeconds,
+            owner = if (automatic) previous.owner else tokenManager.userId,
+            automaticAttempts = if (automatic) previous.automaticAttempts else 0,
+        )
+        meta.writeFor(file)
 
-        _uploadState.value = UploadState(isUploading = true, progress = 0f, file = file)
+        if (!automatic) _uploadState.value = UploadState(isUploading = true, progress = 0f, file = file)
         startForegroundAs(ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC, createUploadNotification(0))
 
         uploadJob?.cancel()
         busyFiles.uploading = file
         uploadJob = scope.launch(Dispatchers.IO) {
             var lastPct = -1
+            var retryLater = false
             val result = runCatching {
                 recordingsRepository.uploadRecording(
                     title = title,
                     audioFile = file,
                     durationSeconds = durationSeconds,
+                    onRetryableFailure = { retryLater = true },
                     onProgress = { progress ->
                         val pct = (progress * 100).toInt().coerceIn(0, 100)
                         if (pct != lastPct) {
                             lastPct = pct
-                            _uploadState.value = _uploadState.value.copy(progress = progress)
-                            updateNotification(createUploadNotification(pct))
+                            if (!automatic) _uploadState.value = _uploadState.value.copy(progress = progress)
+                            // A recording started during an automatic retry owns the notification.
+                            if (mediaRecorder == null) updateNotification(createUploadNotification(pct))
                         }
                     }
                 )
@@ -398,22 +434,29 @@ class AudioRecordingService : Service() {
 
             result.fold(
                 onSuccess = { recording ->
-                    _uploadState.value = UploadState(
-                        isUploading = false,
-                        progress = 1f,
-                        uploadedRecordingId = recording.id
-                    )
+                    if (!automatic) {
+                        _uploadState.value = UploadState(
+                            isUploading = false,
+                            progress = 1f,
+                            uploadedRecordingId = recording.id
+                        )
+                    }
                     file.delete()
-                    metaFileFor(file)?.delete()
+                    PendingUploadMeta.fileFor(file).delete()
                 },
                 onFailure = { error ->
                     Log.e(TAG, "Upload failed, file retained for retry: ${file.absolutePath}", error)
-                    _uploadState.value = UploadState(
-                        isUploading = false,
-                        file = file,
-                        error = error.message ?: getString(R.string.recording_upload_failed_default)
-                    )
                     // Intentionally keep the file + meta sidecar for retry
+                    if (retryLater) {
+                        meta.copy(retryAutomatically = true, lastFailureMs = System.currentTimeMillis()).writeFor(file)
+                    }
+                    if (!automatic) {
+                        _uploadState.value = UploadState(
+                            isUploading = false,
+                            file = file,
+                            error = error.message ?: getString(R.string.recording_upload_failed_default)
+                        )
+                    }
                 }
             )
             busyFiles.finishedUploading(file)
@@ -478,19 +521,6 @@ class AudioRecordingService : Service() {
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
         val fileName = "recording_$timestamp.m4a"
         return File(recordingsDir(this), fileName)
-    }
-
-    private fun writeMetaFile(audio: File, title: String, durationSeconds: Int) {
-        runCatching {
-            metaFileFor(audio)?.writeText(
-                "title=$title\nduration=$durationSeconds\n"
-            )
-        }
-    }
-
-    private fun metaFileFor(audio: File?): File? {
-        if (audio == null) return null
-        return File(audio.parentFile, audio.nameWithoutExtension + ".meta")
     }
 
     private fun formatDuration(seconds: Int): String {
