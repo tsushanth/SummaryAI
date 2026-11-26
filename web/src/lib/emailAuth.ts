@@ -22,6 +22,18 @@ export function resetRedirectUrl(origin: string): string {
   return `${origin}/auth/callback?next=${encodeURIComponent('/auth/reset')}`;
 }
 
+/**
+ * Message for /auth?error=... (set by /auth/callback or the sign-in provider). Fixed texts only: the query string is
+ * whatever the link says, so it is matched and never shown.
+ */
+export function authCallbackError(error: string | null | undefined): string | null {
+  if (!error) return null;
+  if (/access_denied|cancel/i.test(error)) return 'Sign-in was cancelled. Try again when you are ready.';
+  if (/code verifier|pkce|flow state/i.test(error)) return 'That sign-in link was opened in a different browser from the one you started in. Sign in again here.';
+  if (/expired|invalid/i.test(error)) return 'That sign-in link has expired or was already used. Sign in again.';
+  return 'Sign-in did not finish. Please try again.';
+}
+
 export function friendlyAuthError(message: string | null | undefined): string {
   if (!message) return 'Something went wrong. Please try again.';
   if (/invalid login credentials/i.test(message)) return 'That email or password is not right.';

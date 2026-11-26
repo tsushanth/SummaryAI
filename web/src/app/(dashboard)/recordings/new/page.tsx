@@ -54,7 +54,9 @@ export default function NewRecordingPage() {
   // Filled after mount (local time; avoids a server/client text mismatch). Used when the title box is left blank.
   const [fallbackTitle, setFallbackTitle] = useState('');
   useEffect(() => setFallbackTitle(defaultRecordingTitle()), []);
-  const effectiveTitle = resolveRecordingTitle(title, fallbackTitle);
+  // Empty until mounted: this page is prerendered, so a date resolved during render would be the build's date and would
+  // not match the browser (React hydration errors on every direct visit).
+  const effectiveTitle = fallbackTitle ? resolveRecordingTitle(title, fallbackTitle) : title.trim();
   const [outputLanguage, setOutputLanguage] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -127,7 +129,7 @@ export default function NewRecordingPage() {
         const durationSeconds = recorder.recordedSeconds ?? (await readAudioDuration(audioBlob));
         const { recordingId } = await uploadWithPersistence(
           createIndexedDbStore(),
-          { id, title: effectiveTitle, blob: audioBlob, fileName, contentType, fileSize: audioBlob.size, durationSeconds, createdAt: Date.now(), outputLanguage: outputLanguageParam(outputLanguage) },
+          { id, title: resolveRecordingTitle(title, fallbackTitle), blob: audioBlob, fileName, contentType, fileSize: audioBlob.size, durationSeconds, createdAt: Date.now(), outputLanguage: outputLanguageParam(outputLanguage) },
           {
             create: async (req) => {
               const { recording, upload_info } = await createRecording(req);
@@ -155,7 +157,7 @@ export default function NewRecordingPage() {
 
       // Step 1: Create recording in backend (gets signed upload URL)
       const { recording, upload_info } = await createRecording({
-        title: effectiveTitle,
+        title: resolveRecordingTitle(title, fallbackTitle),
         file_name: fileName,
         content_type: contentType,
         file_size: fileSize,
@@ -223,7 +225,7 @@ export default function NewRecordingPage() {
               disabled={isSubmitting}
             />
             <p className="mt-2 text-xs text-muted-foreground">
-              Optional. Leave it blank to use &quot;{effectiveTitle}&quot;.
+              {fallbackTitle ? <>Optional. Leave it blank to use &quot;{effectiveTitle}&quot;.</> : 'Optional.'}
             </p>
           </CardContent>
         </Card>
@@ -294,10 +296,10 @@ export default function NewRecordingPage() {
                   isPaused={recorder.isPaused}
                   duration={recorder.duration}
                   error={recorder.error}
-                  onStart={() => {
+                  onStart={async () => {
                     track('record_clicked');
-                    if (firstRecording()) track('first_recording_started', { mode: 'record' });
-                    return recorder.startRecording();
+                    // Counted only once the microphone opened: the gap from record_clicked is permission or device trouble.
+                    if ((await recorder.startRecording()) && firstRecording()) track('first_recording_started', { mode: 'record' });
                   }}
                   onStop={recorder.stopRecording}
                   onPause={recorder.pauseRecording}

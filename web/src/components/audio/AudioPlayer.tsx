@@ -22,15 +22,18 @@ interface AudioPlayerProps {
   src: string;
   onTimeUpdate?: (time: number) => void;
   seekRequest?: SeekRequest | null;
+  /** The recording's stored length, used when the file itself carries none (browser-recorded webm). */
+  knownDuration?: number | null;
 }
 
 const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
-export function AudioPlayer({ src, onTimeUpdate, seekRequest }: AudioPlayerProps) {
+export function AudioPlayer({ src, onTimeUpdate, seekRequest, knownDuration }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [fileDuration, setDuration] = useState(0);
+  const duration = Number.isFinite(fileDuration) && fileDuration > 0 ? fileDuration : (knownDuration ?? 0);
   const [speed, setSpeed] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
 
@@ -53,11 +56,13 @@ export function AudioPlayer({ src, onTimeUpdate, seekRequest }: AudioPlayerProps
 
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('durationchange', handleLoadedMetadata);
     audio.addEventListener('ended', handleEnded);
 
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('durationchange', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
     };
   }, [onTimeUpdate]);

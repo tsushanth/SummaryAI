@@ -34,9 +34,9 @@ export function reportBackendError(req: { method: string; path?: string; user?: 
   void post('backend_error', `${req.method} ${(req.path ?? '').replace(/(\/api\/public\/shares\/)[^/?#\s]+/g, '$1[redacted]')}`, err, { status: String(statusCode) }, 5000, req.user?.id);
 }
 
-/** A background job or flow failed (worker, queue, cron). */
-export function reportFailure(flow: string, err: unknown, context: Record<string, string> = {}): void {
-  void post('failure', flow, err, context, 5000);
+/** A background job or flow failed (worker, queue, cron). userRef is the affected user's opaque account id, never an email. */
+export function reportFailure(flow: string, err: unknown, context: Record<string, string> = {}, userRef?: string): void {
+  void post('failure', flow, err, context, 5000, userRef);
 }
 
 /** Process is about to die: await this before process.exit so the email actually goes out. */

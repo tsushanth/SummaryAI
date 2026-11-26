@@ -28,7 +28,8 @@ export function useAudioRecorder() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const clockRef = useRef<RecordingClock>(new RecordingClock());
 
-  const startRecording = useCallback(async () => {
+  /** Resolves true when recording started, false when the microphone could not be opened. */
+  const startRecording = useCallback(async (): Promise<boolean> => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
@@ -76,11 +77,13 @@ export function useAudioRecorder() {
         audioBlob: null,
         error: null,
       });
+      return true;
     } catch (error) {
       setState((prev) => ({
         ...prev,
         error: 'Failed to access microphone. Please grant permission.',
       }));
+      return false;
     }
   }, []);
 

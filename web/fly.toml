@@ -7,6 +7,8 @@ primary_region = "iad"
 
   [build.args]
     NEXT_PUBLIC_API_URL = "https://summary-ai-backend.fly.dev"
+    # Anonymous first-party step counts (sign-up, recording, summary). Off: remove this line. Never sent with DNT / GPC.
+    NEXT_PUBLIC_ACTIVATION_EVENTS = "1"
     NEXT_PUBLIC_GOOGLE_CLIENT_ID = "753424767416-54viqmpd45g10oohm7vug13o8tdhb8qp.apps.googleusercontent.com"
     NEXT_PUBLIC_SUPABASE_ANON_KEY = "sb_publishable_z2oPrlsfqmjKzPHrXCyPxg_f7rOs8QJ"
     NEXT_PUBLIC_SUPABASE_URL = "https://mlofjzlmncgnhxbiuemf.supabase.co"

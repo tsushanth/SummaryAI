@@ -17,6 +17,7 @@ import { serverErrorReporter } from './middleware/serverErrorReporter.js';
 import { checkStartupConfig } from './lib/startupConfig.js';
 import { startLoopWatchdog, reportLoopInitFailure } from './lib/loopMonitor.js';
 import { startPipelineInvariantLoop } from './services/pipelineInvariants.js';
+import { startFirstRecordingAlertLoop } from './services/firstRecordingAlert.js';
 import { testConnection } from './lib/supabase.js';
 import { flushLlmUsage } from './lib/llm.js';
 import { requestTiming, startRuntimeMonitor } from './lib/requestTiming.js';
@@ -161,6 +162,7 @@ async function startServer(): Promise<void> {
     }
     startLoopWatchdog();
     startPipelineInvariantLoop();
+    startFirstRecordingAlertLoop();
     // Backstop for the Recall bot.status_change webhook subscription gap:
     // auto-stitches live_transcripts into the transcripts table for any
     // recording stuck in `pending` for >10 min.

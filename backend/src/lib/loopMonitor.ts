@@ -16,7 +16,7 @@ const bootedAt = Date.now();
 let watchdog: NodeJS.Timeout | null = null;
 
 export const EXPECTED_LOOPS = [
-  'BotJoinReconciler', 'StuckRecovery', 'BotRecordingReconciler', 'OrphanRecovery', 'PipelineInvariants', 'AbandonedUploads', 'AccountPurgeRetry',
+  'BotJoinReconciler', 'StuckRecovery', 'BotRecordingReconciler', 'OrphanRecovery', 'PipelineInvariants', 'AbandonedUploads', 'AccountPurgeRetry', 'FirstRecordingAlert',
 ] as const;
 
 export function registerLoop(name: string, intervalMs: number): void {
