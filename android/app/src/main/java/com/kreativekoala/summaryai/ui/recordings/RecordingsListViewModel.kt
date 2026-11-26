@@ -1,13 +1,14 @@
 package com.kreativekoala.summaryai.ui.recordings
 
-import com.kreativekoala.summaryai.R
 import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.data.api.models.FolderDto
 import com.kreativekoala.summaryai.data.api.models.WeeklyStatsDto
+import com.kreativekoala.summaryai.data.local.TokenManager
 import com.kreativekoala.summaryai.data.repository.OrganizeRepository
 import com.kreativekoala.summaryai.data.repository.StatsRepository
 import com.kreativekoala.summaryai.data.repository.RecordingsRepository
@@ -17,6 +18,7 @@ import com.kreativekoala.summaryai.domain.model.RecordingType
 import com.kreativekoala.summaryai.data.repository.RecordingsFilter
 import com.kreativekoala.summaryai.data.repository.UNFILED_FOLDER_ID
 import com.kreativekoala.summaryai.service.AudioRecordingService
+import com.kreativekoala.summaryai.service.PendingUploadMeta
 import com.kreativekoala.summaryai.ui.recordings.organize.DateRangeSelection
 import com.kreativekoala.summaryai.ui.recordings.organize.buildRecordingsFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -87,7 +89,8 @@ class RecordingsListViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val recordingsRepository: RecordingsRepository,
     private val organizeRepository: OrganizeRepository,
-    private val statsRepository: StatsRepository
+    private val statsRepository: StatsRepository,
+    private val tokenManager: TokenManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RecordingsListUiState())
@@ -129,11 +132,12 @@ class RecordingsListViewModel @Inject constructor(
 
     init {
         Log.i(TAG, "RecordingsListViewModel init - loading recordings")
+        // Before loadRecordings: its success may start a retry and take that file out of the banner.
+        refreshPendingUploads()
         loadRecordings()
         loadFolders()
         loadTags()
         startPolling()
-        refreshPendingUploads()
     }
 
     fun refreshPendingUploads() {
@@ -142,35 +146,41 @@ class RecordingsListViewModel @Inject constructor(
     }
 
     private fun readPendingUpload(file: File): PendingUpload {
-        val meta = File(file.parentFile, file.nameWithoutExtension + ".meta")
-        var title = context.getString(R.string.recordings_recovered_title)
-        var duration = 0
-        if (meta.exists()) {
-            runCatching {
-                meta.readLines().forEach { line ->
-                    val (k, v) = line.split("=", limit = 2).let {
-                        if (it.size == 2) it[0] to it[1] else return@forEach
-                    }
-                    when (k) {
-                        "title" -> title = v
-                        "duration" -> duration = v.toIntOrNull() ?: 0
-                    }
-                }
-            }
-        }
-        return PendingUpload(file, title, duration)
+        val meta = PendingUploadMeta.read(file)
+        return PendingUpload(
+            file = file,
+            title = meta.title ?: context.getString(R.string.recordings_recovered_title),
+            durationSeconds = meta.durationSeconds
+        )
     }
 
     fun retryPendingUpload(pending: PendingUpload) {
-        val intent = Intent(context, AudioRecordingService::class.java).apply {
-            action = AudioRecordingService.ACTION_UPLOAD
-            putExtra(AudioRecordingService.EXTRA_FILE_PATH, pending.file.absolutePath)
-            putExtra(AudioRecordingService.EXTRA_TITLE, pending.title)
-            putExtra(AudioRecordingService.EXTRA_DURATION, pending.durationSeconds)
-        }
-        context.startForegroundService(intent)
+        context.startForegroundService(uploadIntent(pending))
         // Optimistically remove from banner; if it fails again the next refresh will re-list it.
         _pendingUploads.value = _pendingUploads.value.filterNot { it.file == pending.file }
+    }
+
+    private fun uploadIntent(pending: PendingUpload) = Intent(context, AudioRecordingService::class.java).apply {
+        action = AudioRecordingService.ACTION_UPLOAD
+        putExtra(AudioRecordingService.EXTRA_FILE_PATH, pending.file.absolutePath)
+        putExtra(AudioRecordingService.EXTRA_TITLE, pending.title)
+        putExtra(AudioRecordingService.EXTRA_DURATION, pending.durationSeconds)
+    }
+
+    /** The server just answered, so send one recording whose upload failed on the network or a server error. */
+    private fun retryOneFailedUpload() {
+        val claim = AudioRecordingService.claimAutomaticRetry(context, tokenManager.userId) ?: return
+        val pending = readPendingUpload(claim.file)
+        // Android refuses a foreground service start from the background; the recording then waits for a later load.
+        runCatching {
+            context.startForegroundService(
+                uploadIntent(pending).putExtra(AudioRecordingService.EXTRA_AUTOMATIC, true)
+            )
+        }.onSuccess {
+            _pendingUploads.value = _pendingUploads.value.filterNot { it.file == claim.file }
+        }.onFailure {
+            AudioRecordingService.abandonAutomaticRetry(claim)
+        }
     }
 
     fun discardPendingUpload(pending: PendingUpload) {
@@ -419,6 +429,7 @@ class RecordingsListViewModel @Inject constructor(
                         error = null
                     )
                     applyFilter()
+                    if (!append) retryOneFailedUpload()
                     Log.i(TAG, "UI state updated - total recordings: ${allRecordings.size}, filtered: ${_uiState.value.filteredRecordings.size}")
                 },
                 onFailure = { error ->
