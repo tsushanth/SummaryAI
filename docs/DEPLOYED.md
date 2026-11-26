@@ -4,8 +4,17 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 
 | Component | Fly app | Release | Image | Built from | Date |
 |---|---|---|---|---|---|
-| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v67 (config only; same image and code as v66) | `registry.fly.io/summary-ai-backend:deployment-01M8ARVKW8VSMBW0PN9CM6F3HF` | `origin/main` at `6d6ab89` (squash merge of #115; `backend/` tree `aa2c1cc7ca82dbd5899aa54e5cfa27b666683067` identical to main) | 2026-11-26 (UTC) |
-| Web (`web/`, meetingmind.org) | `meeting-mind-web` | v42 | `registry.fly.io/meeting-mind-web:deployment-01M89WXC4EMVGBM9MQWT88T2NT` | `origin/main` at `3fca3c4` (#108, deployed by the web-deploy workflow; `web/` tree `99e061269208c96c2730f5b42823e16189faceb5` identical to main) | 2026-11-25 (UTC) |
+| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v68 | `registry.fly.io/summary-ai-backend:deployment-01M8CNWRWY6SKY6DXHXFQHHCKR` | `origin/main` at `464634a` (squash merge of #119; `backend/` tree `20d83562f174ed6a595e0dd4dfe52b2e401e1b58` identical to main) | 2026-11-26 (UTC) |
+| Web (`web/`, meetingmind.org) | `meeting-mind-web` | v43 | `registry.fly.io/meeting-mind-web:deployment-01M8CNXBE7KE1AJAXTEMJHWPBE` | `origin/main` at `464634a` (#119, deployed by the web-deploy workflow; `web/` tree `eaca6a737c817ac6f6def0a61e7c0e477a68902b` identical to main) | 2026-11-26 (UTC) |
+
+## 2026-11-26 Web sign-up fixes, step counts, first-recording report (#119): backend v68, web v43
+- Backend: `flyctl deploy --remote-only` from a clean detached worktree of `origin/main` at `464634a`. Web: `web-deploy.yml` on the merge (run 45885190510 succeeded, no rollback). No migration, no secret set or unset. Calendar settings untouched.
+- Quiet moment checked: no open bot run, no unfinished recording touched in 20 minutes, no live segment in 15 minutes, no auto-join due within 45 minutes, no open coaching session.
+- Web: `NEXT_PUBLIC_ACTIVATION_EVENTS=1` is now set in `web/fly.toml` (anonymous step counts into `activation_events`; not sent with Do Not Track or Global Privacy Control; off again by removing that line). Privacy page says so. `/auth?error=` shows a message; no hydration errors on a direct visit to `/recordings/new`; no `Infinity:NaN` in the player; `first_recording_started` only after the microphone opened.
+- Backend: loop `FirstRecordingAlert` (every 5 minutes) reports flow `first_recording_failed` when a user's first recording fails or has no speech; clear test accounts are skipped. `/health/detailed` now lists eight loops.
+- Verified live with throwaway example.com accounts (since deleted, with their 7 test step rows): email sign-up to summary on web (browser recording 47 s, and a file upload), Google button reaches Google's sign-in page, a silent recording showed "No speech detected", all seven step events were stored, and the loop logged "skipped a test account". Backend `tsc` clean, vitest 101 files / 1379 tests; web 198 tests.
+- NOT verified: a report actually sent for a real user (needs a real first-time failure), Google sign-in past Google's page, password reset email.
+- Rollback: backend `flyctl releases rollback 67 -a summary-ai-backend`; web `flyctl deploy -a meeting-mind-web --image registry.fly.io/meeting-mind-web:deployment-01M89WXC4EMVGBM9MQWT88T2NT` then revert #119 on main.
 
 ## 2026-11-26 Backend v67: Google Calendar redirect address corrected (config only)
 - `GOOGLE_REDIRECT_URI` secret updated to `https://summary-ai-backend.fly.dev/api/calendar/callback/google` (owner request). It still pointed at the old Cloud Run host, which answers 404, so Google Calendar connections could not complete. The new address was added to the OAuth client first and Google accepted it. No code, image or migration change.
