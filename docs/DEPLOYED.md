@@ -4,8 +4,17 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 
 | Component | Fly app | Release | Image | Built from | Date |
 |---|---|---|---|---|---|
-| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v65 | `registry.fly.io/summary-ai-backend:deployment-01M89ZXDPTA91RB6HX5RX8QHA4` | `origin/main` at `7f7be54` (squash merge of #110; `backend/` tree `a7c29e3e031af25cb68ebb6f5759de40bffd952a` identical to main) | 2026-11-25 (UTC) |
+| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v66 | `registry.fly.io/summary-ai-backend:deployment-01M8ARVKW8VSMBW0PN9CM6F3HF` | `origin/main` at `6d6ab89` (squash merge of #115; `backend/` tree `aa2c1cc7ca82dbd5899aa54e5cfa27b666683067` identical to main) | 2026-11-26 (UTC) |
 | Web (`web/`, meetingmind.org) | `meeting-mind-web` | v42 | `registry.fly.io/meeting-mind-web:deployment-01M89WXC4EMVGBM9MQWT88T2NT` | `origin/main` at `3fca3c4` (#108, deployed by the web-deploy workflow; `web/` tree `99e061269208c96c2730f5b42823e16189faceb5` identical to main) | 2026-11-25 (UTC) |
+
+## 2026-11-26 Backend v66: live transcription fallback alert only for Soniox-primary runs (#115)
+- Backend: `flyctl deploy --remote-only` from a clean detached worktree of `origin/main` at `6d6ab89`; previous v65. Web not deployed. No secret set or unset, no migration.
+- Change: `LIVE_STT_FALLBACK_MIGRATION_MISSING` is raised only for a Soniox-primary bot run. Shadow and Recall runs log a warning. Migration 030 is still NOT applied; apply it (runbook step 0 in `backend/LIVE_STT.md`) before any Soniox-primary traffic.
+- Quiet moment checked: no open bot run or active meeting, no unfinished recording touched recently, no live segment in 15 minutes, no auto-join due within 45 minutes, no open coaching session.
+- Verified: `tsc` clean, vitest 100 files / 1373 tests; `/health/detailed` healthy with all seven loops fresh; all 119 compiled `.js` files on the machine identical to a fresh build of the same tree. NOT verified: a live meeting after the deploy.
+- Expected alert: `BAD_GOOGLE_REDIRECT_URI` at boot, until the configuration change in #110 is made.
+- Rollback: `flyctl releases rollback 65 -a summary-ai-backend`.
+- Android #116 (automatic retry of a failed recording upload) is merged and NOT released; it needs a release after 1.7.15 (68). `testDebugUnitTest` 304 tests, 0 failures; `lintDebug` 0 errors; no device run.
 
 ## 2026-11-25 Android 1.7.15 (68), Play production, staged 20% (replaces the 20% rollout of 67)
 - Tag `play/1.7.15-68` = `main` at `44d946c` (#113, version bump only on top of `253aac4`). Built from exactly this commit in a clean detached worktree; the `paywallkit`, `ratingkit` and `crosspromokit` library modules come from their local checkouts, as before.
