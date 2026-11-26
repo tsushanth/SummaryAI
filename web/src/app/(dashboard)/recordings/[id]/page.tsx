@@ -405,6 +405,7 @@ export default function RecordingDetailPage() {
               src={audioUrl}
               onTimeUpdate={setCurrentTime}
               seekRequest={seekRequest}
+              knownDuration={recording.duration_seconds}
             />
           </div>
         </div>

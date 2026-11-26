@@ -111,6 +111,16 @@ test('summary_viewed state maps the summary tab kinds', () => {
   assert.equal(summaryViewedState('failed_upload'), null);
 });
 
-test('the build flag is not set in fly.toml (default OFF)', () => {
-  assert.equal(/NEXT_PUBLIC_ACTIVATION_EVENTS/.test(fs.readFileSync(new URL('../fly.toml', import.meta.url), 'utf8')), false);
+test('the step counts are on in the production build and reach next build', () => {
+  const read = (f) => fs.readFileSync(new URL(f, import.meta.url), 'utf8');
+  assert.match(read('../fly.toml'), /NEXT_PUBLIC_ACTIVATION_EVENTS = "1"/);
+  const docker = read('../Dockerfile');
+  assert.match(docker, /^ARG NEXT_PUBLIC_ACTIVATION_EVENTS$/m);
+  const env = docker.indexOf('ENV NEXT_PUBLIC_ACTIVATION_EVENTS=$NEXT_PUBLIC_ACTIVATION_EVENTS');
+  assert.ok(env > 0 && env < docker.indexOf('RUN npm run build'));
+});
+
+test('a recording counts as started only after the microphone opened', () => {
+  const page = fs.readFileSync(new URL('../src/app/(dashboard)/recordings/new/page.tsx', import.meta.url), 'utf8');
+  assert.match(page, /await recorder\.startRecording\(\)[\s\S]{0,80}first_recording_started/);
 });

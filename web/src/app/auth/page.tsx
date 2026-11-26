@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { GoogleSignIn } from '@/components/auth/GoogleSignIn';
 import { EmailAuthSection } from '@/components/auth/EmailAuthSection';
+import { AuthErrorNotice } from '@/components/auth/AuthErrorNotice';
 import { ActivationBeacon } from '@/components/ActivationBeacon';
 import { ActivationAuthWatch } from '@/components/auth/ActivationAuthWatch';
 import { RibbonMark } from '@/components/ui/ribbon-mark';
@@ -25,6 +26,7 @@ export default function AuthPage() {
               </div>
             }
           >
+            <AuthErrorNotice />
             <ActivationAuthWatch>
             <GoogleSignIn />
             <div className="flex items-center gap-3 text-xs uppercase tracking-wide text-muted-foreground" aria-hidden="true">

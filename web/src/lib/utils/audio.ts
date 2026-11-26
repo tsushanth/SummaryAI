@@ -1,5 +1,6 @@
 export function formatDuration(seconds: number | null): string {
-  if (seconds === null || seconds === undefined) return '0:00';
+  // A browser-recorded webm has no length in its header, so the player reports Infinity (and NaN before metadata).
+  if (seconds === null || seconds === undefined || !Number.isFinite(seconds)) return '0:00';
 
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);

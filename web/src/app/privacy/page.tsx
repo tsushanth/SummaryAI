@@ -10,7 +10,7 @@ export default function PrivacyPage() {
     <div className="min-h-screen bg-background text-foreground py-16">
       <div className="max-w-[900px] mx-auto px-6">
         <h1 className="text-3xl md:text-4xl font-bold mb-2">Privacy Policy</h1>
-        <p className="text-muted-foreground text-sm mb-12">Last updated: 2026-11-03</p>
+        <p className="text-muted-foreground text-sm mb-12">Last updated: 2026-11-26</p>
 
         <section className="mb-10">
           <h2 className="text-xl font-semibold mb-4">Introduction</h2>
@@ -36,6 +36,7 @@ export default function PrivacyPage() {
           <ul className="list-disc list-inside text-muted-foreground space-y-2">
             <li><strong>Analytics (Android):</strong> app usage events and device identifiers collected through Firebase Analytics.</li>
             <li><strong>Website visits (this site&apos;s public home page):</strong> we count visits with Gaugemint, our own analytics. It sets no cookies and stores no IP address. It records the page address, the referring page, your browser and your country.</li>
+            <li><strong>Website steps:</strong> when you sign up and use this website, we count a few steps (page opened, sign-up started and finished, recording started and finished, summary viewed). They carry a random identifier kept in your browser and, once you sign up, are linked to your account with the page or campaign that brought you here. They hold no audio, text or file names, and are not sent when your browser asks not to be tracked (Do Not Track or Global Privacy Control).</li>
             <li><strong>Error reports:</strong> error details, app version, device make and model, operating system version, and an account identifier.</li>
           </ul>
         </section>
@@ -48,7 +49,7 @@ export default function PrivacyPage() {
             <li>Generate AI-powered summaries, action items, and Q&amp;A from your transcripts</li>
             <li>Join meetings and place calls that you ask for</li>
             <li>Send account emails and emails you ask us to send</li>
-            <li>Fix errors and understand how Android features are used</li>
+            <li>Fix errors and understand how the app and website are used</li>
           </ul>
         </section>
 

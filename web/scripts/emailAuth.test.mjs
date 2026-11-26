@@ -35,3 +35,14 @@ test('provider messages become plain language', () => {
   assert.equal(friendlyAuthError('Something odd'), 'Something odd');
   assert.match(friendlyAuthError(undefined), /try again/i);
 });
+
+test('sign-in callback errors get a fixed message and the query text is never echoed', async () => {
+  const { authCallbackError } = await import('../src/lib/emailAuth.ts');
+  assert.equal(authCallbackError(null), null);
+  assert.equal(authCallbackError(''), null);
+  assert.match(authCallbackError('access_denied'), /cancelled/);
+  assert.match(authCallbackError('PKCE code verifier not found in storage.'), /different browser/);
+  assert.match(authCallbackError('Email link is invalid or has expired'), /expired/);
+  const other = authCallbackError('Call +1 555 to restore your account');
+  assert.equal(other, 'Sign-in did not finish. Please try again.');
+});
