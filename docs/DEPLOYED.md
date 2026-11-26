@@ -4,8 +4,13 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 
 | Component | Fly app | Release | Image | Built from | Date |
 |---|---|---|---|---|---|
-| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v66 | `registry.fly.io/summary-ai-backend:deployment-01M8ARVKW8VSMBW0PN9CM6F3HF` | `origin/main` at `6d6ab89` (squash merge of #115; `backend/` tree `aa2c1cc7ca82dbd5899aa54e5cfa27b666683067` identical to main) | 2026-11-26 (UTC) |
+| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v67 (config only; same image and code as v66) | `registry.fly.io/summary-ai-backend:deployment-01M8ARVKW8VSMBW0PN9CM6F3HF` | `origin/main` at `6d6ab89` (squash merge of #115; `backend/` tree `aa2c1cc7ca82dbd5899aa54e5cfa27b666683067` identical to main) | 2026-11-26 (UTC) |
 | Web (`web/`, meetingmind.org) | `meeting-mind-web` | v42 | `registry.fly.io/meeting-mind-web:deployment-01M89WXC4EMVGBM9MQWT88T2NT` | `origin/main` at `3fca3c4` (#108, deployed by the web-deploy workflow; `web/` tree `99e061269208c96c2730f5b42823e16189faceb5` identical to main) | 2026-11-25 (UTC) |
+
+## 2026-11-26 Backend v67: Google Calendar redirect address corrected (config only)
+- `GOOGLE_REDIRECT_URI` secret updated to `https://summary-ai-backend.fly.dev/api/calendar/callback/google` (owner request). It still pointed at the old Cloud Run host, which answers 404, so Google Calendar connections could not complete. The new address was added to the OAuth client first and Google accepted it. No code, image or migration change.
+- Checked: /health 200, no startup config warning. Not verified: a real end-to-end calendar connection by a user.
+- Rollback: set `GOOGLE_REDIRECT_URI` back to `https://summary-ai-backend-917362189743.us-central1.run.app/v1/api/calendar/callback/google` (a dead address, so only if the new one is rejected).
 
 ## 2026-11-26 Backend v66: live transcription fallback alert only for Soniox-primary runs (#115)
 - Backend: `flyctl deploy --remote-only` from a clean detached worktree of `origin/main` at `6d6ab89`; previous v65. Web not deployed. No secret set or unset, no migration.
