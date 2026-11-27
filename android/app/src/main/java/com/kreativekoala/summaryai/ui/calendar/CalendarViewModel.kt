@@ -36,7 +36,7 @@ class CalendarViewModel @Inject constructor(
     /** How the last browser sign-in ended, until the screen has shown it. */
     val calendarReturn: StateFlow<CalendarReturn?> = calendarReturnStore.pending
 
-    fun consumeCalendarReturn() = calendarReturnStore.consume()
+    fun consumeCalendarReturn(shown: CalendarReturn) = calendarReturnStore.consume(shown)
 
     /** The phone has nothing that can open the sign-in page. */
     fun onNoBrowser() {

@@ -46,7 +46,10 @@ class CalendarReturnTest {
         store.offer(null)
         store.offer("summaryai://auth/callback")
         assertEquals(CalendarReturn.Failed("callback_failed"), store.pending.value)
-        store.consume()
+        // A message that was cut short by a newer result must not clear the newer one.
+        store.consume(CalendarReturn.Connected("google"))
+        assertEquals(CalendarReturn.Failed("callback_failed"), store.pending.value)
+        store.consume(CalendarReturn.Failed("callback_failed"))
         assertNull(store.pending.value)
     }
 }

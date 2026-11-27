@@ -7,7 +7,7 @@ export class PopupBlockedError extends Error {
   }
 }
 
-type SignInWindow = { location: { href: string }; close: () => void };
+type SignInWindow = { location: { href: string }; close: () => void; focus?: () => void };
 
 /**
  * Opens the sign-in window first and only then asks the server where to send it: a window opened after waiting for the
@@ -16,6 +16,8 @@ type SignInWindow = { location: { href: string }; close: () => void };
 export async function openCalendarSignIn<W extends SignInWindow>(open: () => W | null, authUrl: () => Promise<string>): Promise<W> {
   const popup = open();
   if (!popup) throw new PopupBlockedError();
+  // A window left over from an earlier try is reused by name and may sit behind this one.
+  popup.focus?.();
   try {
     popup.location.href = await authUrl();
   } catch (error) {

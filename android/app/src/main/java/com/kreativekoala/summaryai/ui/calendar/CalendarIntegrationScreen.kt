@@ -58,9 +58,14 @@ fun CalendarIntegrationScreen(
         null -> null
     }
     LaunchedEffect(calendarReturn) {
+        val shown = calendarReturn ?: return@LaunchedEffect
         returnMessage?.let {
-            snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Long)
-            viewModel.consumeCalendarReturn()
+            // Consumed also when the person leaves while the message is up, so it is not shown again later.
+            try {
+                snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Long)
+            } finally {
+                viewModel.consumeCalendarReturn(shown)
+            }
         }
     }
 

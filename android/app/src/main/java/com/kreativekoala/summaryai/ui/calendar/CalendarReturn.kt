@@ -57,7 +57,8 @@ class CalendarReturnStore @Inject constructor() {
         CalendarReturn.parse(link)?.let { _pending.value = it }
     }
 
-    fun consume() {
-        _pending.value = null
+    /** Clears the result that was shown. A newer one that arrived meanwhile stays. */
+    fun consume(shown: CalendarReturn) {
+        _pending.compareAndSet(shown, null)
     }
 }

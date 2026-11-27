@@ -77,13 +77,14 @@ export function useConnectCalendar() {
             cleanup();
             refresh();
 
-            // Try to close popup if still open (may fail due to COOP)
+            // Close the window only on success: on a failure it shows the reason, which the person has to read.
+            if (event.data.type !== 'calendar-connected') return;
             try {
               if (popup && !popup.closed) {
                 popup.close();
               }
             } catch {
-              // Ignore COOP errors
+              // May fail due to COOP
             }
           }
         };
