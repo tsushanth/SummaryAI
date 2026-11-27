@@ -9,7 +9,7 @@
  */
 
 import { reportAlert } from '../lib/alerts.js';
-import { buildSummaryPrompts, parseSummaryResponseDetailed, type ParsedSummary } from './summaryService.js';
+import { buildSummaryPrompts, parseSummaryResponseDetailed, phoneCallNote, type ParsedSummary } from './summaryService.js';
 
 /**
  * Output cap for summary (and merge) calls. claude-sonnet-4-6 allows up to 64k output tokens, so 8192 is well inside
@@ -54,6 +54,8 @@ export interface GenerateSummaryInput {
   templateId?: string | null;
   languageName?: string | null;
   complete: CompleteFn;
+  /** `recordings.source`: a phone call is summarised without anything about its recording. */
+  source?: string | null;
   /** Log context only. */
   recordingId?: string | null;
   model: string;
@@ -106,6 +108,7 @@ export function buildChunkNotesPrompts(opts: {
   total: number;
   speakers: string[];
   languageName?: string | null;
+  source?: string | null;
 }): { system: string; user: string } {
   const lang = opts.languageName ? ` Write the notes in ${opts.languageName}.` : ' Write the notes in the language of the transcript.';
   const system = `You take faithful, concise notes on one part of a longer meeting transcript, to be merged later with the notes of the other parts.${lang} Never invent anything that is not in the transcript.`;
@@ -117,7 +120,7 @@ Action items: each commitment as "task | owner | due date if stated". Use the sp
 Key facts: figures, dates, names, commitments, disagreements and open questions, with who said them.
 Topics: the subjects discussed, in order, with the [m:ss] timestamp where each begins.
 
-Rules: use names and terms exactly as written in the transcript; state only what the transcript says; keep the notes under 1000 words in total.
+Rules: use names and terms exactly as written in the transcript; state only what the transcript says; keep the notes under 1000 words in total.${phoneCallNote(opts.source)}
 
 ${speakerList}Transcript part ${opts.index + 1} of ${opts.total}:
 ${opts.chunk}`;
@@ -203,6 +206,7 @@ export async function generateSummary(input: GenerateSummaryInput): Promise<Pars
       transcriptText,
       speakers: input.speakers,
       languageName: input.languageName,
+      source: input.source,
     });
     return summaryJsonCall(input, 'summary', prompts);
   }
@@ -225,6 +229,7 @@ export async function generateSummary(input: GenerateSummaryInput): Promise<Pars
       total: chunks.length,
       speakers: input.speakers,
       languageName: input.languageName,
+      source: input.source,
     });
     const res = await input.complete({ kind: 'chunk', ...prompts, maxTokens: CHUNK_NOTES_MAX_TOKENS });
     if (res.stopReason === 'max_tokens') {
@@ -248,6 +253,7 @@ export async function generateSummary(input: GenerateSummaryInput): Promise<Pars
     speakers: input.speakers,
     languageName: input.languageName,
     fromNotes: true,
+    source: input.source,
   });
   return summaryJsonCall(input, 'merge', prompts);
 }

@@ -98,7 +98,7 @@ router.put(
 async function loadOwnedRecording(recordingId: string, userId: string) {
   const { data: recording } = await supabaseAdmin
     .from('recordings')
-    .select('id, title, status, recording_type, output_language, summary_template, content_type, file_path')
+    .select('id, title, status, recording_type, output_language, summary_template, content_type, file_path, source')
     .eq('id', recordingId)
     .eq('user_id', userId)
     .single();
@@ -141,6 +141,7 @@ router.post(
         templateId: template,
         languageName: languageNameForCode(summaryLanguageCode(recording, transcript.language)),
         recordingId,
+        source: recording.source,
         model: config.SUMMARY_MODEL,
         // completeText carries one 'intelligence' feature label for all calls, and does not expose stop_reason
         // (a truncated reply still fails JSON parsing and is retried once).

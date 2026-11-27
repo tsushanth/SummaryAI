@@ -62,6 +62,8 @@ interface OwnedRecording {
   created_at: string;
   duration_seconds: number | null;
   status?: string;
+  /** Loaded for a single recording only. */
+  source?: string | null;
 }
 
 async function ownedRecordings(userId: string, limit = MAX_SCOPE_RECORDINGS): Promise<OwnedRecording[]> {
@@ -78,7 +80,7 @@ async function ownedRecordings(userId: string, limit = MAX_SCOPE_RECORDINGS): Pr
 async function loadOwned(recordingId: string, userId: string): Promise<OwnedRecording> {
   const { data } = await supabaseAdmin
     .from('recordings')
-    .select('id, title, created_at, duration_seconds, status')
+    .select('id, title, created_at, duration_seconds, status, source')
     .eq('id', recordingId)
     .eq('user_id', userId)
     .maybeSingle();
@@ -487,7 +489,7 @@ router.post(
       res.json({ id, title: rec.title, date: dayOf(rec.created_at), decisions: [], actions: [], dropped: 0, truncated: false, note: 'Too little was said to debrief.' });
       return;
     }
-    const { system, user } = buildDebriefPrompt({ title: rec.title, turns });
+    const { system, user } = buildDebriefPrompt({ title: rec.title, turns, source: rec.source });
     let text: string;
     try {
       text = await completeDebriefText({ system, user });
