@@ -8,6 +8,11 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.kreativekoala.summaryai.R
+import com.kreativekoala.summaryai.data.api.models.BotStateDto
+import com.kreativekoala.summaryai.data.repository.MeetingsRepository
+import com.kreativekoala.summaryai.domain.model.Recording
+import com.kreativekoala.summaryai.ui.coaching.ActiveCoachingSession
+import com.kreativekoala.summaryai.ui.coaching.CoachingState
 import com.kreativekoala.summaryai.data.api.models.MeetingAnalyticsDto
 import com.kreativekoala.summaryai.util.ApiErrors
 import com.kreativekoala.summaryai.data.repository.IntegrationsRepository
@@ -59,7 +64,9 @@ data class RecordingDetailUiState(
     val deleted: Boolean = false,
     val showLiveTranscript: Boolean = true,  // Default to live for live meetings
     val audioPlayerState: AudioPlayerState = AudioPlayerState(),
-    val analytics: MeetingAnalyticsDto? = null
+    val analytics: MeetingAnalyticsDto? = null,
+    /** The meeting bot, while the meeting is live or after it failed. */
+    val botState: BotStateDto? = null
 )
 
 @HiltViewModel
@@ -67,6 +74,8 @@ class RecordingDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val recordingsRepository: RecordingsRepository,
     private val integrationsRepository: IntegrationsRepository,
+    private val meetingsRepository: MeetingsRepository,
+    private val coaching: ActiveCoachingSession,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -74,6 +83,12 @@ class RecordingDetailViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(RecordingDetailUiState())
     val uiState: StateFlow<RecordingDetailUiState> = _uiState.asStateFlow()
+
+    val coachingState: StateFlow<CoachingState> = coaching.state
+
+    fun stopCoaching() = coaching.stop()
+
+    fun retryCoaching() = coaching.retry()
 
     private var pollingActive = false
     private var positionUpdateActive = false
@@ -308,6 +323,9 @@ class RecordingDetailViewModel @Inject constructor(
                         selectedTab = defaultTab
                     )
 
+                    detail.recording.meetingId?.let { coaching.attach(it, recordingId) }
+                    refreshBotState(detail.recording)
+
                     // Start polling if still processing
                     if (detail.recording.isProcessing) {
                         startPolling()
@@ -340,6 +358,7 @@ class RecordingDetailViewModel @Inject constructor(
         pollingActive = true
 
         viewModelScope.launch {
+            var polls = 0
             while (pollingActive) {
                 delay(3000)
 
@@ -351,6 +370,8 @@ class RecordingDetailViewModel @Inject constructor(
 
                 result.onSuccess { detail ->
                     _uiState.value = _uiState.value.copy(recordingDetail = detail)
+                    // Every other poll is often enough to say "let the bot in"; a finished recording is checked at once.
+                    if (++polls % 2 == 0 || !detail.recording.isProcessing) refreshBotState(detail.recording)
 
                     if (!detail.recording.isProcessing) {
                         pollingActive = false
@@ -358,6 +379,18 @@ class RecordingDetailViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    private suspend fun refreshBotState(recording: Recording) {
+        val meetingId = recording.meetingId
+        if (meetingId == null || !(recording.isLiveMeeting || recording.status == RecordingStatus.FAILED)) {
+            _uiState.value = _uiState.value.copy(botState = null)
+            return
+        }
+        // A failed request keeps what was last known.
+        meetingsRepository.getBotState(meetingId).onSuccess { bot ->
+            _uiState.value = _uiState.value.copy(botState = bot)
         }
     }
 

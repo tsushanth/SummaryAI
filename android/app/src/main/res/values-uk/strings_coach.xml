@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">Бот приєднується</string>
+    <string name="bot_status_joining_body">Зазвичай це займає менше хвилини.</string>
+    <string name="bot_status_waiting_title">Впустіть бота</string>
+    <string name="bot_status_waiting_body">Бот очікує в залі очікування. У своїй нараді допустіть Meeting Mind (або вибране вами ім\'я бота). Через 10 хвилин він припинить спробу.</string>
+    <string name="bot_status_in_call_title">Майже готово</string>
+    <string name="bot_status_in_call_body">Бот у нараді, але ще не записує. Якщо нарада запитає дозвіл на запис, дозвольте його.</string>
+    <string name="bot_failed_title">Бот не записав цю нараду</string>
+    <string name="bot_failed_not_admitted">Нікому не вдалося вчасно впустити бота із залу очікування. Приєднайтеся знову та допустіть його, коли він попросить.</string>
+    <string name="bot_failed_removed_waiting">Бота видалено із залу очікування. Попросіть організатора впустити його, а потім приєднайтеся знову.</string>
+    <string name="bot_failed_not_started">Нарада ще не розпочалася. Почніть нараду, а потім приєднайтеся знову.</string>
+    <string name="bot_failed_passcode">Код доступу до наради неправильний або відсутній. Вставте повне посилання-запрошення з кодом доступу та приєднайтеся знову.</string>
+    <string name="bot_failed_link">Нараду не знайдено. Перевірте посилання та приєднайтеся знову.</string>
+    <string name="bot_failed_sign_in">Ця нарада допускає лише зареєстрованих користувачів. Попросіть організатора дозволити гостей, а потім приєднайтеся знову.</string>
+    <string name="bot_failed_blocked">Нарада не дозволила боту приєднатися. Попросіть організатора дозволити це, а потім приєднайтеся знову.</string>
+    <string name="bot_failed_permission">Запис не дозволено. Попросіть організатора дозволити запис, а потім приєднайтеся знову.</string>
+    <string name="bot_failed_generic">Боту не вдалося приєднатися. Перевірте посилання на нараду та приєднайтеся знову.</string>
+    <string name="coach_starting">Запуск ШІ-коуча…</string>
+    <string name="coach_listening_hint">Поради з\'являються приблизно кожні 30 секунд, коли бот у нараді та учасники розмовляють.</string>
+    <string name="coach_reconnecting">Перепідключення…</string>
+    <string name="coach_stop">Зупинити</string>
+    <string name="coach_ended">ШІ-коуч завершив роботу.</string>
+    <string name="coach_ended_not_admitted">ШІ-коуч зупинився, бо бота не впустили до наради.</string>
+    <string name="coach_ended_bot_failed">ШІ-коуч зупинився, бо боту не вдалося приєднатися до наради.</string>
+    <string name="coach_ended_no_speech">ШІ-коуч завершив роботу, не почувши жодної мови.</string>
+    <string name="coach_ended_model_failed">ШІ-коуч не зміг надати поради через проблему з нашого боку.</string>
+    <string name="coach_credit_returned">Кредит за сесію повернуто.</string>
+    <string name="coach_no_credit_used">Кредити не використано.</string>
+    <string name="coach_error_no_credits">ШІ-коуч не запустився, бо у вас не залишилося сесій.</string>
+    <string name="coach_error_meeting_over">ШІ-коуч не запустився, бо бот більше не в нараді.</string>
+    <string name="coach_error_generic">ШІ-коуч не вдалося запустити. Перевірте з\'єднання та спробуйте знову.</string>
+    <string name="coach_join_hint">Поради з\'являються в цьому застосунку на вкладці «Транскрипція» наради. Впустіть бота, коли він попросить приєднатися.</string>
+    <string name="coach_delayed_language">На цій мові живий транскрипт надходить із затримкою кілька хвилин, тому поради також будуть із запізненням.</string>
+</resources>

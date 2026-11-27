@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">Der Bot tritt bei</string>
+    <string name="bot_status_joining_body">Das dauert normalerweise weniger als eine Minute.</string>
+    <string name="bot_status_waiting_title">Bot einlassen</string>
+    <string name="bot_status_waiting_body">Der Bot wartet im Warteraum. Lassen Sie Meeting Mind (oder den gewählten Bot-Namen) in Ihrem Meeting ein. Nach 10 Minuten bricht er ab.</string>
+    <string name="bot_status_in_call_title">Fast bereit</string>
+    <string name="bot_status_in_call_body">Der Bot ist im Meeting, nimmt aber noch nicht auf. Falls das Meeting fragt, ob aufgezeichnet werden darf, erlauben Sie es.</string>
+    <string name="bot_failed_title">Der Bot hat dieses Meeting nicht aufgezeichnet</string>
+    <string name="bot_failed_not_admitted">Der Bot wurde nicht rechtzeitig aus dem Warteraum eingelassen. Treten Sie erneut bei und lassen Sie ihn ein, wenn er fragt.</string>
+    <string name="bot_failed_removed_waiting">Der Bot wurde aus dem Warteraum entfernt. Bitten Sie den Host, ihn einzulassen, und treten Sie erneut bei.</string>
+    <string name="bot_failed_not_started">Das Meeting hatte noch nicht begonnen. Starten Sie das Meeting und treten Sie erneut bei.</string>
+    <string name="bot_failed_passcode">Der Meeting-Passcode war falsch oder fehlte. Fügen Sie den vollständigen Einladungslink mit Passcode ein und treten Sie erneut bei.</string>
+    <string name="bot_failed_link">Das Meeting wurde nicht gefunden. Prüfen Sie den Link und treten Sie erneut bei.</string>
+    <string name="bot_failed_sign_in">Dieses Meeting erlaubt nur angemeldeten oder registrierten Personen den Zutritt. Bitten Sie den Host, Gäste zuzulassen, und treten Sie erneut bei.</string>
+    <string name="bot_failed_blocked">Das Meeting hat dem Bot den Beitritt verweigert. Bitten Sie den Host, ihn zuzulassen, und treten Sie erneut bei.</string>
+    <string name="bot_failed_permission">Aufzeichnung war nicht erlaubt. Bitten Sie den Host, die Aufzeichnung zu erlauben, und treten Sie erneut bei.</string>
+    <string name="bot_failed_generic">Der Bot konnte nicht beitreten. Prüfen Sie den Meeting-Link und treten Sie erneut bei.</string>
+    <string name="coach_starting">KI-Coach wird gestartet…</string>
+    <string name="coach_listening_hint">Tipps erscheinen etwa alle 30 Sekunden, sobald der Bot im Meeting ist und gesprochen wird.</string>
+    <string name="coach_reconnecting">Verbindung wird wiederhergestellt…</string>
+    <string name="coach_stop">Beenden</string>
+    <string name="coach_ended">KI-Coach wurde beendet.</string>
+    <string name="coach_ended_not_admitted">KI-Coach wurde beendet, weil der Bot nicht ins Meeting eingelassen wurde.</string>
+    <string name="coach_ended_bot_failed">KI-Coach wurde beendet, weil der Bot dem Meeting nicht beitreten konnte.</string>
+    <string name="coach_ended_no_speech">KI-Coach wurde beendet, ohne Sprache erkannt zu haben.</string>
+    <string name="coach_ended_model_failed">KI-Coach konnte aufgrund eines Problems auf unserer Seite keine Tipps erstellen.</string>
+    <string name="coach_credit_returned">Ihr Sitzungs-Credit wurde zurückgegeben.</string>
+    <string name="coach_no_credit_used">Es wurde kein Credit verwendet.</string>
+    <string name="coach_error_no_credits">KI-Coach wurde nicht gestartet, weil keine Sitzungen mehr verfügbar sind.</string>
+    <string name="coach_error_meeting_over">KI-Coach wurde nicht gestartet, weil der Bot nicht mehr im Meeting ist.</string>
+    <string name="coach_error_generic">KI-Coach konnte nicht gestartet werden. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.</string>
+    <string name="coach_join_hint">Tipps erscheinen in dieser App, im Transkript-Tab des Meetings. Lassen Sie den Bot ein, wenn er um Zutritt bittet.</string>
+    <string name="coach_delayed_language">In dieser Sprache kommt das Live-Transkript mit einigen Minuten Verzögerung, daher erscheinen Tipps entsprechend später.</string>
+</resources>

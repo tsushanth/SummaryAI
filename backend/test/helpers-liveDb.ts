@@ -42,7 +42,7 @@ export class LiveDb {
       if (bad) return { data: null, error: { code: '42703', message: `column "${bad}" of relation "${table}" does not exist` } };
       if (op === 'insert') {
         const r = db.seed(table, payload);
-        return { data: returning ? [r] : null, error: null };
+        return { data: returning ? (one ? r : [r]) : null, error: null };
       }
       if (op === 'upsert') {
         const inserted: Row[] = [];
@@ -55,7 +55,7 @@ export class LiveDb {
       let matched = db.rows(table).filter((r) => filters.every((f) => f(r)));
       if (op === 'update') {
         matched.forEach((r) => Object.assign(r, payload));
-        return { data: returning ? matched : null, error: null };
+        return { data: returning ? (one ? matched[0] ?? null : matched) : null, error: null };
       }
       if (order) matched = [...matched].sort((a, b) => (a[order!.col] > b[order!.col] ? 1 : a[order!.col] < b[order!.col] ? -1 : 0) * (order!.asc ? 1 : -1));
       if (rng) matched = matched.slice(rng[0], rng[1] + 1);
@@ -73,6 +73,9 @@ export class LiveDb {
       in: (c: string, vs: any[]) => { filters.push((r) => vs.includes(r[c])); return q; },
       gte: (c: string, v: any) => { filters.push((r) => r[c] >= v); return q; },
       lt: (c: string, v: any) => { filters.push((r) => r[c] < v); return q; },
+      gt: (c: string, v: any) => { filters.push((r) => r[c] > v); return q; },
+      /** Recorded nowhere and not evaluated: the coaching credit expiry filter. */
+      or: () => q,
       like: (c: string, p: string) => { filters.push((r) => like(r[c], p)); return q; },
       is: (c: string, v: any) => { filters.push((r) => (v === null ? r[c] === null || r[c] === undefined : r[c] === v)); return q; },
       order: (c: string, o?: { ascending?: boolean }) => { order = { col: c, asc: o?.ascending !== false }; return q; },

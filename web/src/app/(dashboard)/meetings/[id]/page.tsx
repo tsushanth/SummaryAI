@@ -24,7 +24,7 @@ import { LiveTranscriptViewer } from '@/components/meetings/LiveTranscriptViewer
 import { AIInsightsPanel } from '@/components/meetings/AIInsightsPanel';
 import { LiveLanguageControl } from '@/components/meetings/LiveLanguageControl';
 import { cn } from '@/lib/utils/cn';
-import { meetingFailureReason } from '@/lib/meetingFailure';
+import { botJoiningText, meetingFailureReason } from '@/lib/meetingFailure';
 import type { Meeting, MeetingStatus, MeetingPlatform } from '@/types/api';
 
 type Tab = 'transcript' | 'insights';
@@ -340,7 +340,7 @@ export default function MeetingDetailPage() {
                 : meeting.status === 'bot_left'
                 ? 'The bot has left. The recording is being processed.'
                 : meeting.status === 'bot_joining'
-                ? 'Bot is joining the meeting...'
+                ? botJoiningText(meeting)
                 : 'Live transcript will appear when the meeting starts.'}
             </p>
             {meeting.recording_id && (

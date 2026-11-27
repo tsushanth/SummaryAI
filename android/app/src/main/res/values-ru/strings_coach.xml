@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">Бот подключается</string>
+    <string name="bot_status_joining_body">Обычно это занимает меньше минуты.</string>
+    <string name="bot_status_waiting_title">Впустите бота</string>
+    <string name="bot_status_waiting_body">Бот ожидает в комнате ожидания. Допустите Meeting Mind (или выбранное вами имя бота) в встречу. Через 10 минут бот прекратит попытки.</string>
+    <string name="bot_status_in_call_title">Почти готово</string>
+    <string name="bot_status_in_call_body">Бот в встрече, запись ещё не началась. Если встреча спрашивает разрешение на запись, разрешите её.</string>
+    <string name="bot_failed_title">Бот не записал эту встречу</string>
+    <string name="bot_failed_not_admitted">Никто не впустил бота из комнаты ожидания вовремя. Присоединитесь снова и допустите его.</string>
+    <string name="bot_failed_removed_waiting">Бот был удалён из комнаты ожидания. Попросите организатора впустить его и присоединитесь снова.</string>
+    <string name="bot_failed_not_started">Встреча ещё не началась. Запустите встречу и присоединитесь снова.</string>
+    <string name="bot_failed_passcode">Код доступа к встрече неверный или не указан. Вставьте полную ссылку-приглашение с кодом доступа и присоединитесь снова.</string>
+    <string name="bot_failed_link">Встреча не найдена. Проверьте ссылку и присоединитесь снова.</string>
+    <string name="bot_failed_sign_in">Встреча допускает только зарегистрированных участников. Попросите организатора разрешить гостей и присоединитесь снова.</string>
+    <string name="bot_failed_blocked">Встреча не позволила боту подключиться. Попросите организатора разрешить это и присоединитесь снова.</string>
+    <string name="bot_failed_permission">Запись не разрешена. Попросите организатора разрешить запись и присоединитесь снова.</string>
+    <string name="bot_failed_generic">Боту не удалось подключиться. Проверьте ссылку и присоединитесь снова.</string>
+    <string name="coach_starting">Запуск ИИ-коуча…</string>
+    <string name="coach_listening_hint">Советы появляются примерно каждые 30 секунд, когда бот в встрече и участники говорят.</string>
+    <string name="coach_reconnecting">Переподключение…</string>
+    <string name="coach_stop">Остановить</string>
+    <string name="coach_ended">ИИ-коуч завершил работу.</string>
+    <string name="coach_ended_not_admitted">ИИ-коуч остановился, так как бот не был впущен в встречу.</string>
+    <string name="coach_ended_bot_failed">ИИ-коуч остановился, так как боту не удалось подключиться к встрече.</string>
+    <string name="coach_ended_no_speech">ИИ-коуч завершил работу, не обнаружив речи.</string>
+    <string name="coach_ended_model_failed">ИИ-коуч не смог создать советы из-за ошибки на нашей стороне.</string>
+    <string name="coach_credit_returned">Кредит за сессию возвращён.</string>
+    <string name="coach_no_credit_used">Кредиты не использованы.</string>
+    <string name="coach_error_no_credits">ИИ-коуч не запустился: у вас не осталось сессий.</string>
+    <string name="coach_error_meeting_over">ИИ-коуч не запустился: бот больше не в встрече.</string>
+    <string name="coach_error_generic">ИИ-коуч не удалось запустить. Проверьте соединение и попробуйте снова.</string>
+    <string name="coach_join_hint">Советы появляются в этом приложении, на вкладке «Транскрипт» встречи. Впустите бота, когда он запросит вход.</string>
+    <string name="coach_delayed_language">На этом языке живая транскрипция поступает с опозданием в несколько минут, поэтому советы тоже будут запаздывать.</string>
+</resources>

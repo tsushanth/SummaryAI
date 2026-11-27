@@ -67,6 +67,19 @@ data class CoachingSessionMeta(
     val refunded: Boolean?
 )
 
+data class CoachingLatestSessionResponse(
+    @SerializedName("session") val session: CoachingLatestSession?,
+    @SerializedName("insights") val insights: List<CoachingInsight>?
+)
+
+data class CoachingLatestSession(
+    @SerializedName("id") val id: String,
+    @SerializedName("ended_at") val endedAt: String?,
+    @SerializedName("refunded") val refunded: Boolean?,
+    /** Why the session gave nothing, when it gave nothing. */
+    @SerializedName("end_reason") val endReason: String?
+)
+
 data class CoachingEndResponse(
     val ended: Boolean,
     val refunded: Boolean

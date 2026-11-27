@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">Bot katılıyor</string>
+    <string name="bot_status_joining_body">Bu genellikle bir dakikadan kısa sürer.</string>
+    <string name="bot_status_waiting_title">Botu içeri alın</string>
+    <string name="bot_status_waiting_body">Bot bekleme odasında bekliyor. Toplantınızda Meeting Mind\'ı (veya seçtiğiniz bot adını) kabul edin. Bot 10 dakika sonra vazgeçer.</string>
+    <string name="bot_status_in_call_title">Neredeyse hazır</string>
+    <string name="bot_status_in_call_body">Bot toplantıda ancak henüz kayıt etmiyor. Toplantınız kayıt izni isterse izin verin.</string>
+    <string name="bot_failed_title">Bot bu toplantıyı kaydetmedi</string>
+    <string name="bot_failed_not_admitted">Bekleme odasındaki bot zamanında içeri alınmadı. Yeniden katılın ve bot istek gönderdiğinde kabul edin.</string>
+    <string name="bot_failed_removed_waiting">Bot bekleme odasından çıkarıldı. Toplantı sahibinden botu kabul etmesini isteyin, ardından yeniden katılın.</string>
+    <string name="bot_failed_not_started">Toplantı henüz başlamamıştı. Toplantıyı başlatın, ardından yeniden katılın.</string>
+    <string name="bot_failed_passcode">Toplantı şifresi hatalı veya eksik. Şifreyi de içeren davet bağlantısının tamamını yapıştırın ve yeniden katılın.</string>
+    <string name="bot_failed_link">Toplantı bulunamadı. Bağlantıyı kontrol edin ve yeniden katılın.</string>
+    <string name="bot_failed_sign_in">Bu toplantı yalnızca oturum açmış veya kayıtlı kişilere izin veriyor. Toplantı sahibinden misafirlere izin vermesini isteyin, ardından yeniden katılın.</string>
+    <string name="bot_failed_blocked">Toplantı botun katılmasına izin vermedi. Toplantı sahibinden izin vermesini isteyin, ardından yeniden katılın.</string>
+    <string name="bot_failed_permission">Kayıt için izin verilmedi. Toplantı sahibinden kayda izin vermesini isteyin, ardından yeniden katılın.</string>
+    <string name="bot_failed_generic">Bot katılamadı. Toplantı bağlantısını kontrol edin ve yeniden katılın.</string>
+    <string name="coach_starting">Yapay Zeka Koçu başlatılıyor…</string>
+    <string name="coach_listening_hint">Bot toplantıya katıldıktan ve konuşmalar başladıktan sonra her 30 saniyede bir ipucu görünür.</string>
+    <string name="coach_reconnecting">Yeniden bağlanıyor…</string>
+    <string name="coach_stop">Durdur</string>
+    <string name="coach_ended">Yapay Zeka Koçu sona erdi.</string>
+    <string name="coach_ended_not_admitted">Bot toplantıya alınmadığı için Yapay Zeka Koçu durdu.</string>
+    <string name="coach_ended_bot_failed">Bot toplantıya katılamadığı için Yapay Zeka Koçu durdu.</string>
+    <string name="coach_ended_no_speech">Yapay Zeka Koçu hiç konuşma algılamadan sona erdi.</string>
+    <string name="coach_ended_model_failed">Yapay Zeka Koçu, tarafımızdaki bir sorun nedeniyle ipucu oluşturamadı.</string>
+    <string name="coach_credit_returned">Oturum krediniz iade edildi.</string>
+    <string name="coach_no_credit_used">Hiç kredi kullanılmadı.</string>
+    <string name="coach_error_no_credits">Kalan oturum hakkınız olmadığı için Yapay Zeka Koçu başlatılmadı.</string>
+    <string name="coach_error_meeting_over">Bot artık toplantıda olmadığı için Yapay Zeka Koçu başlatılmadı.</string>
+    <string name="coach_error_generic">Yapay Zeka Koçu başlatılamadı. Bağlantınızı kontrol edip tekrar deneyin.</string>
+    <string name="coach_join_hint">İpuçları bu uygulamada, toplantının Transkript sekmesinde görünür. Bot katılmak istediğinde kabul edin.</string>
+    <string name="coach_delayed_language">Bu dilde canlı transkript birkaç dakika geç gelir, dolayısıyla ipuçları da geç görünebilir.</string>
+</resources>

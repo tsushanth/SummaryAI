@@ -18,7 +18,7 @@ import { reportRecordingFailureById, botFailureCode } from '../lib/recordingFail
 import { NOT_ADMITTED_SUB_CODES, recallStatusDetail } from '../lib/recallStatus.js';
 import { failNeverRecordedRun } from '../services/botFailure.js';
 import { queueInsightGeneration } from '../services/liveInsightsService.js';
-import { grantCredits } from '../services/coachingService.js';
+import { grantCredits, endSessionsIfBotGone } from '../services/coachingService.js';
 import { reportAlert } from '../lib/alerts.js';
 import { alertWebhookFailure, alertPaymentFailure } from '../services/alertingService.js';
 import { checkRecallEvidence, parseFallbackState, recallIsVisible, selectLiveRun } from '../lib/liveSttFallback.js';
@@ -92,6 +92,12 @@ function legacyVerifyRecallSignature(
     return false;
   }
 }
+
+/** Bot events after which the bot may be gone for good. */
+const BOT_OVER_EVENTS = new Set([
+  'bot.call_ended', 'bot.done', 'bot.fatal', 'bot.recording_permission_denied',
+  'recording.done', 'recording.failed', 'audio_mixed.done', 'audio_mixed.failed',
+]);
 
 /**
  * POST /webhooks/recall
@@ -220,6 +226,15 @@ router.post('/recall', async (req: Request, res: Response) => {
 
       default:
         console.log(`[Webhook] Unhandled event type: ${event}`);
+    }
+
+    // A failed, refused or finished bot ends any AI Coach session at once (the coach ticker is the backstop).
+    if (BOT_OVER_EVENTS.has(event)) {
+      try {
+        await endSessionsIfBotGone(meeting.id);
+      } catch (e) {
+        console.error('[Webhook] Could not close coaching sessions:', e instanceof Error ? e.message : 'error');
+      }
     }
 
     res.json({ ok: true });

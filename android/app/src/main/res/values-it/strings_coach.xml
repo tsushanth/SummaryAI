@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">Il bot sta entrando</string>
+    <string name="bot_status_joining_body">Di solito ci vuole meno di un minuto.</string>
+    <string name="bot_status_waiting_title">Fai entrare il bot</string>
+    <string name="bot_status_waiting_body">Il bot è in sala d\'attesa. Nella riunione, ammetti Meeting Mind (o il nome bot che hai scelto). Rinuncia dopo 10 minuti.</string>
+    <string name="bot_status_in_call_title">Quasi pronto</string>
+    <string name="bot_status_in_call_body">Il bot è nella riunione e non sta ancora registrando. Se la riunione chiede il permesso di registrare, consentilo.</string>
+    <string name="bot_failed_title">Il bot non ha registrato questa riunione</string>
+    <string name="bot_failed_not_admitted">Nessuno ha fatto entrare il bot dalla sala d\'attesa in tempo. Riprova e ammettilo quando richiede l\'accesso.</string>
+    <string name="bot_failed_removed_waiting">Il bot è stato rimosso dalla sala d\'attesa. Chiedi all\'organizzatore di farlo entrare, poi riprova.</string>
+    <string name="bot_failed_not_started">La riunione non era ancora iniziata. Avvia la riunione, poi riprova.</string>
+    <string name="bot_failed_passcode">Il codice di accesso era errato o mancante. Incolla il link di invito completo, con il codice, e riprova.</string>
+    <string name="bot_failed_link">Riunione non trovata. Controlla il link e riprova.</string>
+    <string name="bot_failed_sign_in">Questa riunione ammette solo persone registrate o con accesso effettuato. Chiedi all\'organizzatore di consentire gli ospiti, poi riprova.</string>
+    <string name="bot_failed_blocked">La riunione non ha consentito al bot di partecipare. Chiedi all\'organizzatore di permetterlo, poi riprova.</string>
+    <string name="bot_failed_permission">La registrazione non era consentita. Chiedi all\'organizzatore di abilitarla, poi riprova.</string>
+    <string name="bot_failed_generic">Il bot non è riuscito a partecipare. Controlla il link della riunione e riprova.</string>
+    <string name="coach_starting">Avvio di Coach IA…</string>
+    <string name="coach_listening_hint">I suggerimenti appaiono circa ogni 30 secondi quando il bot è nella riunione e le persone stanno parlando.</string>
+    <string name="coach_reconnecting">Riconnessione in corso…</string>
+    <string name="coach_stop">Interrompi</string>
+    <string name="coach_ended">Coach IA è terminato.</string>
+    <string name="coach_ended_not_admitted">Coach IA si è interrotto perché il bot non è stato ammesso nella riunione.</string>
+    <string name="coach_ended_bot_failed">Coach IA si è interrotto perché il bot non è riuscito a partecipare alla riunione.</string>
+    <string name="coach_ended_no_speech">Coach IA è terminato senza rilevare alcun parlato.</string>
+    <string name="coach_ended_model_failed">Coach IA non ha potuto generare suggerimenti a causa di un problema da parte nostra.</string>
+    <string name="coach_credit_returned">Il tuo credito sessione è stato restituito.</string>
+    <string name="coach_no_credit_used">Nessun credito è stato utilizzato.</string>
+    <string name="coach_error_no_credits">Coach IA non è stato avviato perché non hai sessioni rimanenti.</string>
+    <string name="coach_error_meeting_over">Coach IA non è stato avviato perché il bot non è più nella riunione.</string>
+    <string name="coach_error_generic">Coach IA non è riuscito ad avviarsi. Controlla la connessione e riprova.</string>
+    <string name="coach_join_hint">I suggerimenti appaiono in questa app, nella scheda Trascrizione della riunione. Ammetti il bot quando richiede di partecipare.</string>
+    <string name="coach_delayed_language">In questa lingua la trascrizione in tempo reale arriva con alcuni minuti di ritardo, quindi anche i suggerimenti potrebbero tardare.</string>
+</resources>

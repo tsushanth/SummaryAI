@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">Το bot συνδέεται</string>
+    <string name="bot_status_joining_body">Συνήθως διαρκεί λιγότερο από ένα λεπτό.</string>
+    <string name="bot_status_waiting_title">Αφήστε το bot να μπει</string>
+    <string name="bot_status_waiting_body">Το bot περιμένει να γίνει δεκτό. Στη σύσκεψή σας, αποδεχτείτε το Meeting Mind (ή το όνομα bot που επιλέξατε). Εγκαταλείπει μετά από 10 λεπτά.</string>
+    <string name="bot_status_in_call_title">Σχεδόν έτοιμο</string>
+    <string name="bot_status_in_call_body">Το bot βρίσκεται στη σύσκεψη και δεν έχει ξεκινήσει εγγραφή ακόμα. Αν η σύσκεψη ρωτήσει αν επιτρέπεται η εγγραφή, επιτρέψτε την.</string>
+    <string name="bot_failed_title">Το bot δεν κατέγραψε αυτή τη σύσκεψη</string>
+    <string name="bot_failed_not_admitted">Κανείς δεν αποδέχτηκε το bot από την αίθουσα αναμονής εγκαίρως. Συνδεθείτε ξανά και δεχτείτε το όταν ζητηθεί.</string>
+    <string name="bot_failed_removed_waiting">Το bot αφαιρέθηκε από την αίθουσα αναμονής. Ζητήστε από τον οικοδεσπότη να το αποδεχτεί και συνδεθείτε ξανά.</string>
+    <string name="bot_failed_not_started">Η σύσκεψη δεν είχε ξεκινήσει. Ξεκινήστε τη σύσκεψη και συνδεθείτε ξανά.</string>
+    <string name="bot_failed_passcode">Ο κωδικός πρόσβασης ήταν λανθασμένος ή απουσίαζε. Επικολλήστε τον πλήρη σύνδεσμο πρόσκλησης με τον κωδικό πρόσβασης και συνδεθείτε ξανά.</string>
+    <string name="bot_failed_link">Η σύσκεψη δεν βρέθηκε. Ελέγξτε τον σύνδεσμο και συνδεθείτε ξανά.</string>
+    <string name="bot_failed_sign_in">Αυτή η σύσκεψη επιτρέπει μόνο συνδεδεμένους ή εγγεγραμμένους χρήστες. Ζητήστε από τον οικοδεσπότη να επιτρέψει επισκέπτες και συνδεθείτε ξανά.</string>
+    <string name="bot_failed_blocked">Η σύσκεψη δεν επέτρεψε στο bot να συμμετάσχει. Ζητήστε από τον οικοδεσπότη να το επιτρέψει και συνδεθείτε ξανά.</string>
+    <string name="bot_failed_permission">Η εγγραφή δεν επιτράπηκε. Ζητήστε από τον οικοδεσπότη να επιτρέψει την εγγραφή και συνδεθείτε ξανά.</string>
+    <string name="bot_failed_generic">Το bot δεν μπόρεσε να συνδεθεί. Ελέγξτε τον σύνδεσμο σύσκεψης και συνδεθείτε ξανά.</string>
+    <string name="coach_starting">Εκκίνηση Προπονητή AI…</string>
+    <string name="coach_listening_hint">Συμβουλές εμφανίζονται περίπου κάθε 30 δευτερόλεπτα όταν το bot βρίσκεται στη σύσκεψη και υπάρχει ομιλία.</string>
+    <string name="coach_reconnecting">Επανασύνδεση…</string>
+    <string name="coach_stop">Διακοπή</string>
+    <string name="coach_ended">Ο Προπονητής AI ολοκληρώθηκε.</string>
+    <string name="coach_ended_not_admitted">Ο Προπονητής AI διακόπηκε επειδή το bot δεν έγινε δεκτό στη σύσκεψη.</string>
+    <string name="coach_ended_bot_failed">Ο Προπονητής AI διακόπηκε επειδή το bot δεν μπόρεσε να συνδεθεί στη σύσκεψη.</string>
+    <string name="coach_ended_no_speech">Ο Προπονητής AI ολοκληρώθηκε χωρίς να ανιχνευτεί ομιλία.</string>
+    <string name="coach_ended_model_failed">Ο Προπονητής AI δεν μπόρεσε να δημιουργήσει συμβουλές λόγω προβλήματος από την πλευρά μας.</string>
+    <string name="coach_credit_returned">Η πίστωση συνεδρίας σας επιστράφηκε.</string>
+    <string name="coach_no_credit_used">Δεν χρησιμοποιήθηκε καμία πίστωση.</string>
+    <string name="coach_error_no_credits">Ο Προπονητής AI δεν ξεκίνησε επειδή δεν έχετε διαθέσιμες συνεδρίες.</string>
+    <string name="coach_error_meeting_over">Ο Προπονητής AI δεν ξεκίνησε επειδή το bot δεν βρίσκεται πλέον στη σύσκεψη.</string>
+    <string name="coach_error_generic">Ο Προπονητής AI δεν μπόρεσε να ξεκινήσει. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.</string>
+    <string name="coach_join_hint">Οι συμβουλές εμφανίζονται σε αυτή την εφαρμογή, στην καρτέλα Απομαγνητοφώνηση της σύσκεψης. Αποδεχτείτε το bot όταν ζητά να συμμετάσχει.</string>
+    <string name="coach_delayed_language">Σε αυτή τη γλώσσα η ζωντανή απομαγνητοφώνηση φτάνει με καθυστέρηση λεπτών, οπότε οι συμβουλές θα καθυστερούν επίσης.</string>
+</resources>

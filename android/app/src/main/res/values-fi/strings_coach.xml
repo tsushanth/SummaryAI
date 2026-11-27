@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">Botti liittyy kokoukseen</string>
+    <string name="bot_status_joining_body">Tämä kestää yleensä alle minuutin.</string>
+    <string name="bot_status_waiting_title">Päästä botti sisään</string>
+    <string name="bot_status_waiting_body">Botti odottaa päästymistä sisään. Hyväksy kokouksessa Meeting Mind (tai valitsemasi bottinimi). Botti luovuttaa 10 minuutin kuluttua.</string>
+    <string name="bot_status_in_call_title">Melkein valmis</string>
+    <string name="bot_status_in_call_body">Botti on kokouksessa eikä vielä nauhoita. Jos kokous kysyy, saako se nauhoittaa, salli se.</string>
+    <string name="bot_failed_title">Botti ei nauhoittanut tätä kokousta</string>
+    <string name="bot_failed_not_admitted">Bottia ei päästetty odotushuoneesta sisään ajoissa. Liity uudelleen ja hyväksy botti, kun se pyytää.</string>
+    <string name="bot_failed_removed_waiting">Botti poistettiin odotushuoneesta. Pyydä isäntää päästämään se sisään ja liity sitten uudelleen.</string>
+    <string name="bot_failed_not_started">Kokous ei ollut alkanut. Käynnistä kokous ja liity sitten uudelleen.</string>
+    <string name="bot_failed_passcode">Kokouksen pääsykoodi oli väärä tai puuttui. Liitä koko kutsulinkki pääsykoodeineen ja liity uudelleen.</string>
+    <string name="bot_failed_link">Kokousta ei löytynyt. Tarkista linkki ja liity uudelleen.</string>
+    <string name="bot_failed_sign_in">Kokous sallii vain kirjautuneet tai rekisteröityneet osallistujat. Pyydä isäntää sallimaan vieraat ja liity sitten uudelleen.</string>
+    <string name="bot_failed_blocked">Kokous ei sallinut botin liittymistä. Pyydä isäntää sallimaan se ja liity sitten uudelleen.</string>
+    <string name="bot_failed_permission">Nauhoittaminen ei ollut sallittu. Pyydä isäntää sallimaan nauhoitus ja liity sitten uudelleen.</string>
+    <string name="bot_failed_generic">Botti ei pystynyt liittymään. Tarkista kokouslinkki ja liity uudelleen.</string>
+    <string name="coach_starting">Käynnistetään Tekoälyvalmentajaa…</string>
+    <string name="coach_listening_hint">Vinkkejä ilmestyy noin 30 sekunnin välein, kun botti on kokouksessa ja ihmiset puhuvat.</string>
+    <string name="coach_reconnecting">Yhdistetään uudelleen…</string>
+    <string name="coach_stop">Lopeta</string>
+    <string name="coach_ended">Tekoälyvalmentaja on päättynyt.</string>
+    <string name="coach_ended_not_admitted">Tekoälyvalmentaja pysähtyi, koska bottia ei päästetty kokoukseen.</string>
+    <string name="coach_ended_bot_failed">Tekoälyvalmentaja pysähtyi, koska botti ei pystynyt liittymään kokoukseen.</string>
+    <string name="coach_ended_no_speech">Tekoälyvalmentaja päättyi kuulematta yhtään puhetta.</string>
+    <string name="coach_ended_model_failed">Tekoälyvalmentaja ei pystynyt luomaan vinkkejä palvelinongelman vuoksi.</string>
+    <string name="coach_credit_returned">Istuntokredittisi palautettiin.</string>
+    <string name="coach_no_credit_used">Kredittejä ei käytetty.</string>
+    <string name="coach_error_no_credits">Tekoälyvalmentaja ei käynnistynyt, koska sinulla ei ole istuntoja jäljellä.</string>
+    <string name="coach_error_meeting_over">Tekoälyvalmentaja ei käynnistynyt, koska botti ei ole enää kokouksessa.</string>
+    <string name="coach_error_generic">Tekoälyvalmentaja ei käynnistynyt. Tarkista yhteys ja yritä uudelleen.</string>
+    <string name="coach_join_hint">Vinkit ilmestyvät tähän sovellukseen kokouksen Litteraatti-välilehdelle. Hyväksy botti, kun se pyytää liittymistä.</string>
+    <string name="coach_delayed_language">Tällä kielellä reaaliaikainen litteraatti saapuu minuutteja myöhässä, joten vinkit viivästyvät myös.</string>
+</resources>

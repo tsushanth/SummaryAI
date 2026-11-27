@@ -28,6 +28,9 @@ interface CoachingApi {
     @GET("api/coaching/sessions/{id}/insights")
     suspend fun getInsights(@Path("id") sessionId: String): CoachingInsightsResponse
 
+    @GET("api/coaching/recordings/{id}/session")
+    suspend fun getLatestSession(@Path("id") recordingId: String): CoachingLatestSessionResponse
+
     @Streaming
     @GET
     suspend fun streamInsights(@Url url: String): ResponseBody
