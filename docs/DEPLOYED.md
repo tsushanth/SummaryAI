@@ -83,6 +83,14 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 - Rollback: `flyctl releases rollback 65 -a summary-ai-backend`.
 - Android #116 (automatic retry of a failed recording upload) is merged and NOT released; it needs a release after 1.7.15 (68). `testDebugUnitTest` 304 tests, 0 failures; `lintDebug` 0 errors; no device run.
 
+## 2026-11-27 Short calls free, asking about more minutes, phone summaries (migration 038, backend v76, Android 1.7.17 internal)
+- Owner approved on 27 November. #137: outgoing calls under 15 seconds use no free minutes (first 5 a month); the app asks about interest in more minutes at 5 or fewer, with nothing to buy; summaries of phone calls leave out the recording notice and consent. 038 also puts forwarded incoming calls back into the minutes shown, which 037 had left out.
+- Database: dry run in a rolled-back transaction, applied at 12:46 PT with no call open; read back limits 15 s and 5 calls, 30 minutes, same cap; server access only.
+- Backend: v76 from a clean detached worktree of `origin/main` `ee15839`, image `registry.fly.io/summary-ai-backend:deployment-01M8FC4JQA89YT218EGX6KV64P`; no recording, bot run or phone call open; no secret change; health 200. Rollback: image `deployment-01M8DMBSHZRNPKZ2JD071FSDAG` (v73 to v75 build).
+- Android: 1.7.17 (70) on Play internal testing only (12:51 PT), built from `6f28f1d` (#138), tag `play/1.7.17-70`, AAB sha256 `ed7f4492793dd4c8...`, upload-key signature, no new permission. Production, beta and alpha stay on 1.7.15 (68). Installed on the test phone over the side-loaded copy.
+- Checks: backend 1603 tests; Android 351 unit tests, lint 0 errors. Summary wording checked with a real model on made-up transcripts only.
+- NOT verified: the new card on a device, a real call after the change, native review of the new translations.
+
 ## 2026-11-27 Database: minutes shown during a call (migration 037, calling switched off for the public)
 - Found in the first real test: while a call was in progress the app showed no free minutes left and said they were used up, because the whole reservation counted. `phone_budget()` now shows finished calls plus the started minutes a connected call has run. What a new call may use is unchanged.
 - Dry run in a rolled-back transaction, then applied at 11:56 PT with no call open; read back: server access only. No server or app release. Backend tests: 1570 passed. Not yet watched during a live call after the change.
