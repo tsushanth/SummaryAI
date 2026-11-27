@@ -1,0 +1,48 @@
+Meeting Mind: ghi chú họp AI đa ngôn ngữ
+
+Ghi âm một cuộc họp, bài giảng, buổi phỏng vấn hoặc cuộc gọi điện thoại từ ứng dụng và nhận bản ghi lời, bản tóm tắt cùng danh sách việc cần làm. Ghi âm, bản ghi lời và bản tóm tắt là miễn phí. Số điện thoại riêng phải trả phí.
+
+BẠN CÓ THỂ LÀM GÌ
+- Ghi âm trực tiếp bằng micrô điện thoại.
+- Gọi từ ứng dụng đến số điện thoại Mỹ và Canada, cuộc gọi được ghi âm.
+- Gửi bot Meeting Mind vào cuộc họp Zoom, Google Meet hoặc Microsoft Teams. Bot tham gia với tư cách người tham dự hiển thị tên Meeting Mind. Thời gian dùng bot có giới hạn theo tháng.
+- Nhận bản tóm tắt, ý chính và việc cần làm cho từng bản ghi.
+- Tìm kiếm trong các bản ghi và đặt câu hỏi về một cuộc họp.
+- Biết ai nói gì: bản ghi lời gắn nhãn người nói và bạn có thể đổi tên họ.
+- Dùng ứng dụng web tại meetingmind.org với cùng tài khoản. Ở đó bạn cũng có thể tải lên các tệp âm thanh có sẵn.
+
+CUỘC GỌI ĐIỆN THOẠI: CHỈ SỐ CỦA MỸ VÀ CANADA
+- Xác minh một lần số điện thoại Mỹ hoặc Canada của chính bạn. Người được gọi sẽ thấy số này.
+- Trước khi kết nối, bạn và người được gọi đều nghe thông báo rằng cuộc gọi đang được ghi âm.
+- Sau cuộc gọi, bạn nhận được bản ghi âm, bản ghi lời và bản tóm tắt.
+- Tối đa 30 phút gọi miễn phí mỗi tháng và tối đa 30 phút mỗi cuộc gọi. Có hạn mức gọi hằng tháng dùng chung cho mọi người dùng, nên có thể không gọi được trong thời gian còn lại của tháng.
+- Chỉ gọi đi, qua kết nối internet của bạn. Không thể gọi số khẩn cấp.
+- Không hỗ trợ số miễn cước, số tính phí cao và số đặc biệt, Alaska, các vùng lãnh thổ của Canada và các vùng lãnh thổ của Mỹ.
+
+SỐ ĐIỆN THOẠI RIÊNG
+- Mua số điện thoại Mỹ hoặc Canada của riêng bạn trong ứng dụng và dùng số đó trong Meeting Mind. Số này phải trả phí.
+
+TRỢ LÝ ĐIỆN THOẠI
+- Thiết lập trợ lý điện thoại chỉ bằng một câu lệnh: viết ra việc bạn muốn trợ lý làm.
+
+CHUYỂN GIỌNG NÓI THÀNH VĂN BẢN BẰNG 30 NGÔN NGỮ
+Meeting Mind nhận diện ngôn ngữ được nói và viết bản ghi lời bằng ngôn ngữ đó: Tiếng Anh, Tiếng Ba Lan, Tiếng Bồ Đào Nha, Tiếng Bulgaria, Tiếng Catalan, Tiếng Đan Mạch, Tiếng Đức, Tiếng Hà Lan, Tiếng Hàn, Tiếng Hindi, Tiếng Hungary, Tiếng Hy Lạp, Tiếng Indonesia, Tiếng Italy, Tiếng Litva, Tiếng Mã Lai, Tiếng Na Uy, Tiếng Nga, Tiếng Nhật, Tiếng Pháp, Tiếng Phần Lan, Tiếng Séc, Tiếng Slovak, Tiếng Tây Ban Nha, Tiếng Thái, Tiếng Thổ Nhĩ Kỳ, Tiếng Thụy Điển, Tiếng Trung (Quan thoại), Tiếng Ukraina và Tiếng Việt.
+- Mỗi bản ghi được nhận diện một ngôn ngữ chính.
+- Với cuộc họp trực tuyến, bạn cũng có thể chọn ngôn ngữ trước khi bot tham gia.
+
+NGÔN NGỮ CỦA BẢN TÓM TẮT
+Bản tóm tắt được viết bằng ngôn ngữ của bản ghi âm. Khi ghi âm hoặc tải lên trên ứng dụng web, bạn có thể chọn một trong 15 ngôn ngữ tóm tắt để thay thế. Tiếng Việt không nằm trong số đó.
+
+ỨNG DỤNG BẰNG NGÔN NGỮ CỦA BẠN
+Ứng dụng Android có 27 ngôn ngữ. Bạn có thể đổi ngôn ngữ ứng dụng trong phần Cài đặt.
+
+AI COACH
+Huấn luyện trực tiếp AI Coach trong các cuộc họp có bot là tùy chọn và dùng tín dụng riêng.
+
+CẦN BIẾT
+- Bạn chịu trách nhiệm thông báo cho mọi người biết bạn đang ghi âm và tuân thủ luật ghi âm tại nơi bạn ở. Một số nơi yêu cầu sự đồng ý của tất cả mọi người.
+- Chất lượng bản ghi lời phụ thuộc vào âm thanh: giọng nói rõ và ít tiếng ồn nền cho kết quả tốt nhất.
+- Bản ghi quá ngắn sẽ không có bản tóm tắt. Hãy nói thêm một chút hoặc tải lên âm thanh dài hơn trên ứng dụng web.
+- Bản ghi được xử lý bởi các dịch vụ AI và chuyển giọng nói thành văn bản nêu trong chính sách quyền riêng tư của chúng tôi.
+
+Câu hỏi hoặc góp ý: support@kreativekoala.llc

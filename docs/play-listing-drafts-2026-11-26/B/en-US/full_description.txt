@@ -1,0 +1,42 @@
+Meeting Mind: AI meeting notes in many languages
+
+Record a meeting, a lecture, an interview or a phone call made in the app and get a transcript, a summary and a list of action items. Meeting Mind is free: no card and no subscription.
+
+WHAT YOU CAN DO
+- Record in person with your phone's microphone.
+- Call United States and Canada numbers from the app and have the calls recorded.
+- Send the Meeting Mind bot to a Zoom, Google Meet or Microsoft Teams meeting. The bot joins as a visible participant named Meeting Mind. Bot time has a monthly limit.
+- Get a summary, key points and action items for each recording.
+- Search your recordings and ask questions about a meeting.
+- See who said what: transcripts label the speakers, and you can rename them.
+- Use the web app at meetingmind.org with the same account. You can also upload audio files you already have there.
+
+PHONE CALLS: UNITED STATES AND CANADA NUMBERS ONLY
+- Verify your own United States or Canada phone number once. People you call see that number.
+- Before you are connected, you and the person you call both hear a notice that the call is being recorded.
+- After the call you get the recording, a transcript and a summary.
+- Up to 30 free call minutes a month, and up to 30 minutes per call. All users share a monthly calling limit, so calling can be unavailable for the rest of a month.
+- Outgoing calls only, over your internet connection. Emergency calls are not possible.
+- Toll-free, premium and special-rate numbers, Alaska, the Canadian territories and US territories are not supported.
+
+TRANSCRIPTS IN 30 LANGUAGES
+Meeting Mind detects the spoken language and writes the transcript in it: Bulgarian, Catalan, Chinese (Mandarin), Czech, Danish, Dutch, English, Finnish, French, German, Greek, Hindi, Hungarian, Indonesian, Italian, Japanese, Korean, Lithuanian, Malay, Norwegian, Polish, Portuguese, Russian, Slovak, Spanish, Swedish, Thai, Turkish, Ukrainian, and Vietnamese.
+- One main language is detected for each recording.
+- For an online meeting you can also choose its language before the bot joins.
+
+SUMMARY LANGUAGE
+Summaries are written in the language of the recording. When you record or upload on the web app, you can choose one of 15 summary languages instead.
+
+THE APP IN YOUR LANGUAGE
+The Android app is available in 27 languages. You can change the app language in Settings.
+
+AI COACH
+AI Coach live coaching during bot meetings is optional and uses separate credits. Everything else above is free.
+
+GOOD TO KNOW
+- You are responsible for telling people you are recording and for following the recording laws where you are. Some places require everyone's consent.
+- Transcript quality depends on the audio: clear speech and little background noise work best.
+- Very short recordings do not get a summary. Say a little more, or upload longer audio on the web app.
+- Recordings are processed by the AI and transcription services listed in our privacy policy.
+
+Questions or feedback: support@kreativekoala.llc

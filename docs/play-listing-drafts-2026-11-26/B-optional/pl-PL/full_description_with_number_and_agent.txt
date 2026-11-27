@@ -1,0 +1,48 @@
+Meeting Mind: notatki AI w wielu językach
+
+Nagraj spotkanie, wykład, wywiad lub rozmowę telefoniczną prowadzoną w aplikacji i otrzymaj transkrypcję, streszczenie oraz listę zadań do wykonania. Nagrywanie, transkrypcje i streszczenia są darmowe. Własny numer telefonu jest płatny.
+
+CO MOŻESZ ZROBIĆ
+- Nagrywać na żywo mikrofonem telefonu.
+- Dzwoń z aplikacji na numery w Stanach Zjednoczonych i Kanadzie i nagrywaj te rozmowy.
+- Wysłać bota Meeting Mind na spotkanie w Zoom, Google Meet lub Microsoft Teams. Bot dołącza jako widoczny uczestnik o nazwie Meeting Mind. Czas działania bota ma miesięczny limit.
+- Otrzymać streszczenie, najważniejsze punkty i zadania do każdego nagrania.
+- Przeszukiwać nagrania i zadawać pytania o spotkanie.
+- Zobaczyć, kto co powiedział: transkrypcje oznaczają rozmówców, a ich nazwy możesz zmienić.
+- Korzystać z aplikacji internetowej meetingmind.org na tym samym koncie. Możesz tam też przesłać pliki audio, które już masz.
+
+ROZMOWY: TYLKO NUMERY W USA I KANADZIE
+- Zweryfikuj raz swój własny numer z USA lub Kanady. Osoby, do których dzwonisz, widzą ten numer.
+- Przed połączeniem ty i twój rozmówca słyszycie komunikat, że rozmowa jest nagrywana.
+- Po rozmowie otrzymujesz nagranie, transkrypcję i streszczenie.
+- Do 30 darmowych minut rozmów miesięcznie i do 30 minut na jedną rozmowę. Istnieje miesięczny limit połączeń wspólny dla wszystkich użytkowników, więc do końca miesiąca dzwonienie może być niedostępne.
+- Tylko połączenia wychodzące, przez twoje łącze internetowe. Nie można dzwonić na numery alarmowe.
+- Numery bezpłatne, o podwyższonej opłacie i specjalne, Alaska, terytoria kanadyjskie i terytoria USA nie są obsługiwane.
+
+TWÓJ WŁASNY NUMER
+- Kup w aplikacji własny numer z USA lub Kanady i używaj go w Meeting Mind. Numer jest płatny.
+
+AGENT TELEFONICZNY
+- Skonfiguruj agenta telefonicznego jednym poleceniem: napisz, co ma robić.
+
+TRANSKRYPCJE W 30 JĘZYKACH
+Meeting Mind wykrywa język mówiony i zapisuje transkrypcję w tym języku. Obsługiwane języki: angielski, bułgarski, chiński (mandaryński), czeski, duński, fiński, francuski, grecki, hindi, hiszpański, indonezyjski, japoński, kataloński, koreański, litewski, malajski, niderlandzki, niemiecki, norweski, polski, portugalski, rosyjski, słowacki, szwedzki, tajski, turecki, ukraiński, węgierski, wietnamski i włoski.
+- W każdym nagraniu wykrywany jest jeden główny język.
+- W przypadku spotkania online możesz też wybrać język, zanim bot dołączy.
+
+JĘZYK STRESZCZENIA
+Streszczenia powstają w języku nagrania. Nagrywając lub przesyłając plik w aplikacji internetowej, możesz zamiast tego wybrać jeden z 15 języków streszczenia, w tym polski.
+
+APLIKACJA W TWOIM JĘZYKU
+Aplikacja na Androida jest dostępna w 27 językach. Język aplikacji możesz zmienić w ustawieniach.
+
+AI COACH
+Coaching na żywo AI Coach podczas spotkań z botem jest opcjonalny i zużywa osobne kredyty.
+
+WARTO WIEDZIEĆ
+- To Ty odpowiadasz za poinformowanie osób, że nagrywasz, i za przestrzeganie przepisów o nagrywaniu obowiązujących tam, gdzie jesteś. W niektórych miejscach wymagana jest zgoda wszystkich.
+- Jakość transkrypcji zależy od dźwięku: najlepsze efekty daje wyraźna mowa i mało hałasu w tle.
+- Bardzo krótkie nagrania nie dostają streszczenia. Mów trochę dłużej albo prześlij dłuższe nagranie w aplikacji internetowej.
+- Nagrania przetwarzają usługi AI i transkrypcji wymienione w naszej polityce prywatności.
+
+Pytania lub uwagi: support@kreativekoala.llc

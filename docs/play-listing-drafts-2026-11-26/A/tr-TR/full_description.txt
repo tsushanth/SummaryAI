@@ -1,0 +1,33 @@
+Meeting Mind: birçok dilde yapay zeka toplantı notları
+
+Bir toplantıyı, dersi veya röportajı kaydedin; dökümünü, özetini ve yapılacaklar listesini alın. Meeting Mind ücretsizdir: kart yok, abonelik yok.
+
+NELER YAPABİLİRSİNİZ
+- Telefonunuzun mikrofonuyla yüz yüze kayıt yapın.
+- Meeting Mind botunu bir Zoom, Google Meet veya Microsoft Teams toplantısına gönderin. Bot, Meeting Mind adıyla görünen bir katılımcı olarak katılır. Bot süresinin aylık bir sınırı vardır.
+- Her kayıt için özet, ana noktalar ve yapılacaklar alın.
+- Kayıtlarınızda arama yapın ve bir toplantı hakkında sorular sorun.
+- Kimin ne dediğini görün: dökümlerde konuşmacılar etiketlenir ve adlarını değiştirebilirsiniz.
+- Aynı hesapla meetingmind.org adresindeki web uygulamasını kullanın. Orada hazır ses dosyalarınızı da yükleyebilirsiniz.
+
+30 DİLDE YAZIYA DÖKÜM
+Meeting Mind konuşulan dili algılar ve dökümü o dilde yazar. Desteklenen diller: Almanca, Bulgarca, Çekçe, Çince (Mandarin), Danca, Endonezce, Felemenkçe, Fince, Fransızca, Hintçe, İngilizce, İspanyolca, İsveççe, İtalyanca, Japonca, Katalanca, Korece, Lehçe, Litvanca, Macarca, Malayca, Norveççe, Portekizce, Rusça, Slovakça, Tayca, Türkçe, Ukraynaca, Vietnamca ve Yunanca.
+- Her kayıtta tek bir ana dil algılanır.
+- Çevrimiçi toplantılarda bot katılmadan önce dili de seçebilirsiniz.
+
+ÖZET DİLİ
+Özetler kaydın dilinde yazılır. Web uygulamasında kayıt yaparken veya dosya yüklerken bunun yerine, Türkçe dahil 15 özet dilinden birini seçebilirsiniz.
+
+UYGULAMA KENDİ DİLİNİZDE
+Android uygulaması 27 dilde kullanılabilir. Uygulama dilini Ayarlar bölümünden değiştirebilirsiniz.
+
+AI COACH
+Bot ile yapılan toplantılarda AI Coach canlı koçluğu isteğe bağlıdır ve ayrı kredi kullanır. Yukarıdaki diğer her şey ücretsizdir.
+
+BİLMENİZDE FAYDA VAR
+- Kayıt yaptığınızı insanlara söylemek ve bulunduğunuz yerdeki kayıt yasalarına uymak sizin sorumluluğunuzdadır. Bazı yerlerde herkesin onayı gerekir.
+- Dökümün kalitesi sese bağlıdır: en iyi sonuç net konuşma ve az arka plan gürültüsüyle alınır.
+- Çok kısa kayıtlara özet çıkarılmaz. Biraz daha uzun konuşun ya da web uygulamasında daha uzun bir ses yükleyin.
+- Kayıtlar, gizlilik politikamızda belirtilen yapay zeka ve yazıya dökme hizmetleri tarafından işlenir.
+
+Sorular ve geri bildirim: support@kreativekoala.llc

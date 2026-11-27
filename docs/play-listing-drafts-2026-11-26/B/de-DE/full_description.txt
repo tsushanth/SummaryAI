@@ -1,0 +1,42 @@
+Meeting Mind: KI-Meeting-Notizen in vielen Sprachen
+
+Nimm ein Meeting, eine Vorlesung, ein Interview oder einen in der App geführten Anruf auf und erhalte ein Transkript, eine Zusammenfassung und eine Liste mit Aufgaben. Meeting Mind ist kostenlos: keine Karte und kein Abo.
+
+WAS DU TUN KANNST
+- Nimm vor Ort mit dem Mikrofon deines Telefons auf.
+- Rufe aus der App Nummern in den USA und Kanada an und lass die Anrufe aufnehmen.
+- Schicke den Meeting-Mind-Bot in ein Zoom-, Google-Meet- oder Microsoft-Teams-Meeting. Der Bot tritt als sichtbarer Teilnehmer mit dem Namen Meeting Mind bei. Die Bot-Zeit ist pro Monat begrenzt.
+- Erhalte für jede Aufnahme eine Zusammenfassung, die wichtigsten Punkte und Aufgaben.
+- Durchsuche deine Aufnahmen und stelle Fragen zu einem Meeting.
+- Sieh, wer was gesagt hat: Das Transkript kennzeichnet die Sprecher, und du kannst sie umbenennen.
+- Nutze die Web-App unter meetingmind.org mit demselben Konto. Dort kannst du auch Audiodateien hochladen, die du bereits hast.
+
+TELEFONATE: NUR NUMMERN IN DEN USA UND KANADA
+- Bestätige einmal deine eigene Telefonnummer aus den USA oder Kanada. Angerufene sehen diese Nummer.
+- Bevor ihr verbunden werdet, hört ihr beide den Hinweis, dass der Anruf aufgezeichnet wird.
+- Nach dem Anruf erhältst du die Aufnahme, ein Transkript und eine Zusammenfassung.
+- Bis zu 30 kostenlose Gesprächsminuten pro Monat und bis zu 30 Minuten pro Anruf. Es gibt ein monatliches Anruflimit für alle Nutzer zusammen, daher können Anrufe für den Rest eines Monats nicht verfügbar sein.
+- Nur ausgehende Anrufe über deine Internetverbindung. Notrufe sind nicht möglich.
+- Gebührenfreie Nummern, Premium- und Sondernummern sowie Alaska, die kanadischen Territorien und die US-Außengebiete werden nicht unterstützt.
+
+TRANSKRIPTE IN 30 SPRACHEN
+Meeting Mind erkennt die gesprochene Sprache und schreibt das Transkript in dieser Sprache: Bulgarisch, Chinesisch (Mandarin), Dänisch, Deutsch, Englisch, Finnisch, Französisch, Griechisch, Hindi, Indonesisch, Italienisch, Japanisch, Katalanisch, Koreanisch, Litauisch, Malaiisch, Niederländisch, Norwegisch, Polnisch, Portugiesisch, Russisch, Schwedisch, Slowakisch, Spanisch, Thailändisch, Tschechisch, Türkisch, Ukrainisch, Ungarisch und Vietnamesisch.
+- Pro Aufnahme wird eine Hauptsprache erkannt.
+- Bei einem Online-Meeting kannst du die Sprache auch wählen, bevor der Bot beitritt.
+
+SPRACHE DER ZUSAMMENFASSUNG
+Zusammenfassungen werden in der Sprache der Aufnahme geschrieben. Beim Aufnehmen oder Hochladen in der Web-App kannst du stattdessen eine von 15 Sprachen für die Zusammenfassung wählen, darunter Deutsch.
+
+DIE APP IN DEINER SPRACHE
+Die Android-App gibt es in 27 Sprachen. Die App-Sprache kannst du in den Einstellungen ändern.
+
+AI COACH
+Das Live-Coaching von AI Coach in Meetings mit dem Bot ist optional und verbraucht separate Guthaben. Alles andere oben ist kostenlos.
+
+GUT ZU WISSEN
+- Du bist dafür verantwortlich, andere über die Aufnahme zu informieren und die Aufnahmegesetze deines Standorts einzuhalten. Manche Orte verlangen die Zustimmung aller.
+- Die Qualität des Transkripts hängt vom Ton ab: Deutliche Sprache und wenig Hintergrundgeräusche funktionieren am besten.
+- Sehr kurze Aufnahmen erhalten keine Zusammenfassung. Sprich etwas länger oder lade längeres Audio in der Web-App hoch.
+- Aufnahmen werden von den KI- und Transkriptionsdiensten verarbeitet, die in unserer Datenschutzerklärung aufgeführt sind.
+
+Fragen oder Feedback: support@kreativekoala.llc

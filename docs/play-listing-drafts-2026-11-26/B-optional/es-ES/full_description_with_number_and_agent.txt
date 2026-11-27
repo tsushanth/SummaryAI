@@ -1,0 +1,48 @@
+Meeting Mind: notas de reuniones con IA en muchos idiomas
+
+Graba una reunión, una clase, una entrevista o una llamada hecha desde la app y obtén una transcripción, un resumen y una lista de tareas. Las grabaciones, las transcripciones y los resúmenes son gratis. Tu propio número de teléfono es de pago.
+
+QUÉ PUEDES HACER
+- Graba en persona con el micrófono del teléfono.
+- Llama desde la app a números de Estados Unidos y Canadá y graba las llamadas.
+- Envía el bot de Meeting Mind a una reunión de Zoom, Google Meet o Microsoft Teams. El bot se une como un participante visible llamado Meeting Mind. El tiempo del bot tiene un límite mensual.
+- Obtén un resumen, los puntos clave y las tareas de cada grabación.
+- Busca en tus grabaciones y haz preguntas sobre una reunión.
+- Mira quién dijo qué: la transcripción identifica a los hablantes y puedes cambiarles el nombre.
+- Usa la app web en meetingmind.org con la misma cuenta. Allí también puedes subir archivos de audio que ya tengas.
+
+LLAMADAS: SOLO NÚMEROS DE ESTADOS UNIDOS Y CANADÁ
+- Verifica una vez tu propio número de Estados Unidos o Canadá. Las personas a las que llames verán ese número.
+- Antes de conectar, tú y la persona a la que llamas oís un aviso de que la llamada se está grabando.
+- Después de la llamada recibes la grabación, una transcripción y un resumen.
+- Hasta 30 minutos de llamadas gratis al mes y hasta 30 minutos por llamada. Hay un límite mensual de llamadas compartido por todos los usuarios, así que puede que no se pueda llamar durante el resto del mes.
+- Solo llamadas salientes, a través de tu conexión a internet. No se pueden hacer llamadas de emergencia.
+- No se admiten números gratuitos, de tarificación adicional o especial, ni Alaska, los territorios canadienses o los territorios de Estados Unidos.
+
+TU PROPIO NÚMERO
+- Compra en la app tu propio número de Estados Unidos o Canadá y úsalo en Meeting Mind. El número es de pago.
+
+AGENTE TELEFÓNICO
+- Configura un agente telefónico con una sola instrucción: escribe lo que quieres que haga.
+
+TRANSCRIPCIONES EN 30 IDIOMAS
+Meeting Mind detecta el idioma hablado y escribe la transcripción en ese idioma: alemán, búlgaro, catalán, checo, chino (mandarín), coreano, danés, eslovaco, español, finés, francés, griego, hindi, húngaro, indonesio, inglés, italiano, japonés, lituano, malayo, neerlandés, noruego, polaco, portugués, ruso, sueco, tailandés, turco, ucraniano y vietnamita.
+- En cada grabación se detecta un idioma principal.
+- En una reunión en línea también puedes elegir el idioma antes de que entre el bot.
+
+IDIOMA DEL RESUMEN
+Los resúmenes se escriben en el idioma de la grabación. Al grabar o subir un archivo en la app web, puedes escoger en su lugar uno de 15 idiomas de resumen, incluido el español.
+
+LA APP EN TU IDIOMA
+La app para Android está disponible en 27 idiomas. Puedes cambiar el idioma de la app en Ajustes.
+
+AI COACH
+El coaching en directo de AI Coach durante las reuniones con el bot es opcional y usa créditos aparte.
+
+CONVIENE SABER
+- Eres responsable de avisar a las personas de que estás grabando y de cumplir las leyes de grabación de tu zona. En algunos lugares se exige el consentimiento de todos.
+- La calidad de la transcripción depende del audio: funciona mejor con voces claras y poco ruido de fondo.
+- Las grabaciones muy cortas no reciben resumen. Habla un poco más o sube un audio más largo en la app web.
+- Las grabaciones las procesan los servicios de IA y de transcripción que se indican en nuestra política de privacidad.
+
+¿Preguntas o comentarios? support@kreativekoala.llc

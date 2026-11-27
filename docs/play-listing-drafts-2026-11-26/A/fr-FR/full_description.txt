@@ -1,0 +1,33 @@
+Meeting Mind : notes de réunion IA en de nombreuses langues
+
+Enregistrez une réunion, un cours ou un entretien et obtenez une transcription, un résumé et une liste de tâches. Meeting Mind est gratuit : pas de carte bancaire et pas d'abonnement.
+
+CE QUE VOUS POUVEZ FAIRE
+- Enregistrez en personne avec le micro de votre téléphone.
+- Envoyez le bot Meeting Mind dans une réunion Zoom, Google Meet ou Microsoft Teams. Le bot rejoint la réunion comme un participant visible nommé Meeting Mind. Le temps du bot est limité chaque mois.
+- Obtenez un résumé, les points clés et les tâches de chaque enregistrement.
+- Recherchez dans vos enregistrements et posez des questions sur une réunion.
+- Voyez qui a dit quoi : la transcription distingue les intervenants et vous pouvez les renommer.
+- Utilisez l'application web sur meetingmind.org avec le même compte. Vous pouvez aussi y importer des fichiers audio que vous avez déjà.
+
+TRANSCRIPTIONS EN 30 LANGUES
+Meeting Mind détecte la langue parlée et rédige la transcription dans cette langue : allemand, anglais, bulgare, catalan, chinois (mandarin), coréen, danois, espagnol, finnois, français, grec, hindi, hongrois, indonésien, italien, japonais, lituanien, malais, néerlandais, norvégien, polonais, portugais, russe, slovaque, suédois, tchèque, thaï, turc, ukrainien et vietnamien.
+- Une langue principale est détectée par enregistrement.
+- Pour une réunion en ligne, vous pouvez aussi choisir la langue avant l'arrivée du bot.
+
+LANGUE DU RÉSUMÉ
+Les résumés sont rédigés dans la langue de l'enregistrement. Lorsque vous enregistrez ou importez un fichier dans l'application web, vous pouvez choisir à la place l'une des 15 langues de résumé, dont le français.
+
+L'APPLICATION DANS VOTRE LANGUE
+L'application Android est disponible en 27 langues. Vous pouvez changer la langue de l'application dans les paramètres.
+
+AI COACH
+Le coaching en direct d'AI Coach pendant les réunions avec le bot est facultatif et utilise des crédits distincts. Tout le reste ci-dessus est gratuit.
+
+BON À SAVOIR
+- Il vous appartient d'informer les personnes que vous enregistrez et de respecter les lois sur l'enregistrement en vigueur là où vous êtes. Certains endroits exigent le consentement de tous.
+- La qualité de la transcription dépend du son : une voix claire et peu de bruit de fond donnent les meilleurs résultats.
+- Les enregistrements très courts ne reçoivent pas de résumé. Parlez un peu plus longtemps ou importez un audio plus long sur l'application web.
+- Les enregistrements sont traités par les services d'IA et de transcription indiqués dans notre politique de confidentialité.
+
+Questions ou commentaires : support@kreativekoala.llc
