@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">Numărul meu</string>
+    <string name="phone_own_title">Numărul tău, cu un agent telefonic</string>
+    <string name="phone_own_intro">Obține un număr din Statele Unite sau Canada. Descrie cu cuvintele tale ce dorești, iar un agent răspunde la apeluri. Primești un rezumat și transcrierea fiecărui apel.</string>
+    <string name="phone_trial_offer">Probă gratuită: %1$d zile cu %2$d minute de agent. Nu este necesară plata.</string>
+    <string name="phone_number_country">Țara numărului</string>
+    <string name="phone_number_area_code">Prefix de zonă (opțional)</string>
+    <string name="phone_number_get">Obține numărul meu</string>
+    <string name="phone_trial_confirm_title">Începi proba gratuită?</string>
+    <string name="phone_trial_confirm_body">Acum se configurează un număr nou pentru tine. Proba durează %1$d zile și include %2$d minute de agent. Când proba se termină sau minutele sunt folosite, numărul este eliberat și nu poate fi recuperat.</string>
+    <string name="phone_trial_start">Începe proba</string>
+    <string name="phone_trial_status">Probă gratuită până la %1$s. Minute de agent rămase: %2$d</string>
+    <string name="phone_plan_status">Minute de agent rămase: %1$d. Minute de apel rămase: %2$d</string>
+    <string name="phone_plan_includes">Include %1$d minute de apel și %2$d minute de agent în fiecare perioadă de facturare.</string>
+    <string name="phone_subscribe">Abonează-te cu %1$s</string>
+    <string name="phone_trial_end">Încheie proba</string>
+    <string name="phone_trial_end_title">Închei proba gratuită?</string>
+    <string name="phone_trial_end_body">Numărul și agentul sunt eliminate acum. Numărul nu poate fi recuperat. Apelurile și înregistrările anterioare rămân.</string>
+    <string name="phone_trial_ended">Proba gratuită s-a încheiat. Apelurile și înregistrările anterioare rămân în aplicație.</string>
+    <string name="phone_number_removing">Numărul tău este în curs de eliminare.</string>
+    <string name="phone_own_number_label">Numărul tău Meeting Mind</string>
+    <string name="phone_number_answers_agent">Agentul tău răspunde la apelurile către acest număr.</string>
+    <string name="phone_number_rings_you">Apelurile către acest număr sună pe telefonul tău.</string>
+    <string name="phone_agent_title">Agent telefonic</string>
+    <string name="phone_agent_prompt_label">Ce ar trebui să facă agentul?</string>
+    <string name="phone_agent_prompt_hint">De exemplu: preia un mesaj și cere numele apelantului și un număr pentru a-l suna înapoi.</string>
+    <string name="phone_agent_language">Limba vorbită de agent</string>
+    <string name="phone_agent_recording_note">Apelanții aud un anunț că apelul este înregistrat. Apelurile sunt transcrise, rezumate și salvate în înregistrările tale. Folosește agentul doar unde ai voie să înregistrezi apeluri.</string>
+    <string name="phone_agent_create">Creează agentul</string>
+    <string name="phone_agent_saving">Agentul se configurează. Poate dura un minut sau mai mult.</string>
+    <string name="phone_agent_delete">Șterge agentul</string>
+    <string name="phone_agent_delete_title">Ștergi acest agent?</string>
+    <string name="phone_agent_delete_body">Apelurile către numărul tău vor suna pe telefonul tău.</string>
+    <string name="phone_agent_left_out">Agentul conversează, pune întrebări și preia mesaje. Restul descrierii a fost omis.</string>
+    <string name="phone_agent_results_hint">Apelurile preluate de agent apar cu transcrierea în fila Apeluri.</string>
+    <string name="phone_call_answered_by_agent">Preluat de agentul tău</string>
+    <string name="phone_result_collected">Detalii colectate</string>
+    <string name="phone_result_agent">Agent</string>
+    <string name="phone_result_caller">Apelant</string>
+    <string name="phone_error_trial_used">Proba gratuită a fost deja folosită.</string>
+    <string name="phone_error_trial_full">Momentan nu există locuri pentru proba gratuită. Revino mai târziu.</string>
+    <string name="phone_error_no_number_found">Niciun număr disponibil în acea zonă. Încearcă alt prefix.</string>
+    <string name="phone_error_number_pending">Numărul tău se configurează. Verifică din nou într-un minut.</string>
+    <string name="phone_error_number_failed">Numărul nu a putut fi configurat. Încearcă din nou.</string>
+    <string name="phone_error_agent_failed">Agentul nu a putut fi configurat. Încearcă din nou.</string>
+    <string name="phone_error_agent_not_allowed">Această descriere nu poate fi folosită. Modific-o și încearcă din nou.</string>
+    <string name="phone_error_agent_language">Alege altă limbă pentru agent.</string>
+    <string name="phone_error_agent_limit">Momentan nu se mai pot face modificări agentului. Încearcă mai târziu.</string>
+    <string name="phone_error_purchase">Achiziția nu a putut fi confirmată încă. Deschide din nou acest ecran peste câteva minute.</string>
+    <string name="phone_error_purchase_in_use">Acea achiziție aparține altui cont.</string>
+</resources>

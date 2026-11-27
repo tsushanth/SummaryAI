@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">Số của tôi</string>
+    <string name="phone_own_title">Số riêng của bạn với trợ lý điện thoại</string>
+    <string name="phone_own_intro">Nhận một số tại Hoa Kỳ hoặc Canada. Mô tả điều bạn muốn bằng lời của mình, trợ lý sẽ trả lời các cuộc gọi đến. Bạn nhận được bản tóm tắt và bản chép lời của mỗi cuộc gọi.</string>
+    <string name="phone_trial_offer">Dùng thử miễn phí: %1$d ngày với %2$d phút trợ lý. Không cần thanh toán.</string>
+    <string name="phone_number_country">Quốc gia của số</string>
+    <string name="phone_number_area_code">Mã vùng (không bắt buộc)</string>
+    <string name="phone_number_get">Nhận số của tôi</string>
+    <string name="phone_trial_confirm_title">Bắt đầu dùng thử miễn phí?</string>
+    <string name="phone_trial_confirm_body">Một số mới sẽ được thiết lập cho bạn ngay bây giờ. Thời gian dùng thử kéo dài %1$d ngày và gồm %2$d phút trợ lý. Khi hết thời gian dùng thử hoặc hết phút, số sẽ được trả lại và không thể lấy lại.</string>
+    <string name="phone_trial_start">Bắt đầu dùng thử</string>
+    <string name="phone_trial_status">Dùng thử miễn phí đến %1$s. Số phút trợ lý còn lại: %2$d</string>
+    <string name="phone_plan_status">Số phút trợ lý còn lại: %1$d. Số phút gọi còn lại: %2$d</string>
+    <string name="phone_plan_includes">Gồm %1$d phút gọi và %2$d phút trợ lý mỗi kỳ thanh toán.</string>
+    <string name="phone_subscribe">Đăng ký với giá %1$s</string>
+    <string name="phone_trial_end">Kết thúc dùng thử</string>
+    <string name="phone_trial_end_title">Kết thúc dùng thử miễn phí?</string>
+    <string name="phone_trial_end_body">Số và trợ lý của bạn sẽ bị xóa ngay. Không thể lấy lại số. Các cuộc gọi và bản ghi trước đây vẫn được giữ.</string>
+    <string name="phone_trial_ended">Thời gian dùng thử miễn phí đã kết thúc. Các cuộc gọi và bản ghi trước đây vẫn còn trong ứng dụng.</string>
+    <string name="phone_number_removing">Đang xóa số của bạn.</string>
+    <string name="phone_own_number_label">Số Meeting Mind của bạn</string>
+    <string name="phone_number_answers_agent">Trợ lý của bạn trả lời các cuộc gọi đến số này.</string>
+    <string name="phone_number_rings_you">Cuộc gọi đến số này sẽ đổ chuông trên điện thoại của bạn.</string>
+    <string name="phone_agent_title">Trợ lý điện thoại</string>
+    <string name="phone_agent_prompt_label">Trợ lý của bạn nên làm gì?</string>
+    <string name="phone_agent_prompt_hint">Ví dụ: Ghi lời nhắn, hỏi tên người gọi và số để gọi lại.</string>
+    <string name="phone_agent_language">Ngôn ngữ trợ lý sử dụng</string>
+    <string name="phone_agent_recording_note">Người gọi sẽ nghe thông báo rằng cuộc gọi được ghi âm. Cuộc gọi được chép lời, tóm tắt và lưu vào bản ghi của bạn. Chỉ dùng trợ lý ở nơi bạn được phép ghi âm cuộc gọi.</string>
+    <string name="phone_agent_create">Tạo trợ lý</string>
+    <string name="phone_agent_saving">Đang thiết lập trợ lý. Việc này có thể mất một phút hoặc lâu hơn.</string>
+    <string name="phone_agent_delete">Xóa trợ lý</string>
+    <string name="phone_agent_delete_title">Xóa trợ lý này?</string>
+    <string name="phone_agent_delete_body">Khi đó cuộc gọi đến số của bạn sẽ đổ chuông trên điện thoại của bạn.</string>
+    <string name="phone_agent_left_out">Trợ lý trò chuyện, đặt câu hỏi và ghi lời nhắn. Những nội dung khác trong mô tả đã được bỏ qua.</string>
+    <string name="phone_agent_results_hint">Cuộc gọi do trợ lý trả lời xuất hiện kèm bản chép lời trong thẻ Cuộc gọi.</string>
+    <string name="phone_call_answered_by_agent">Trợ lý của bạn đã trả lời</string>
+    <string name="phone_result_collected">Thông tin đã thu thập</string>
+    <string name="phone_result_agent">Trợ lý</string>
+    <string name="phone_result_caller">Người gọi</string>
+    <string name="phone_error_trial_used">Bạn đã dùng lượt dùng thử miễn phí.</string>
+    <string name="phone_error_trial_full">Hiện chưa có suất dùng thử miễn phí. Vui lòng quay lại sau.</string>
+    <string name="phone_error_no_number_found">Không có số nào ở khu vực đó. Hãy thử mã vùng khác.</string>
+    <string name="phone_error_number_pending">Số của bạn đang được thiết lập. Hãy kiểm tra lại sau một phút.</string>
+    <string name="phone_error_number_failed">Không thể thiết lập số. Hãy thử lại.</string>
+    <string name="phone_error_agent_failed">Không thể thiết lập trợ lý. Hãy thử lại.</string>
+    <string name="phone_error_agent_not_allowed">Không thể dùng mô tả này. Hãy sửa và thử lại.</string>
+    <string name="phone_error_agent_language">Hãy chọn ngôn ngữ khác cho trợ lý.</string>
+    <string name="phone_error_agent_limit">Hiện không thể thay đổi trợ lý thêm. Hãy thử lại sau.</string>
+    <string name="phone_error_purchase">Chưa thể xác nhận giao dịch mua. Hãy mở lại màn hình này sau vài phút.</string>
+    <string name="phone_error_purchase_in_use">Giao dịch mua đó thuộc về tài khoản khác.</string>
+</resources>

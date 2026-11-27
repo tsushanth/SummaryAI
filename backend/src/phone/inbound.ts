@@ -12,6 +12,8 @@ import { RING_TIMEOUT_SECONDS, TIME_LIMIT_MARGIN_SECONDS, noticesFor } from './c
 import { webhookUrl } from './settings.js';
 import { verifiedPhones } from './verification.js';
 import type { NumberRow } from './numbersStore.js';
+import { numberFunding } from './provision.js';
+import { CalldeskError } from './calldesk.js';
 
 const reject = (): string => {
   const r = new TwiML.VoiceResponse();
@@ -43,12 +45,14 @@ export async function answerInboundCall(d: PhoneDeps, x: PhoneExtras, params: Re
     const phones = verifiedPhones(await d.store.phonesOfUser(userId));
     const own = phones.find((p) => p.id === phoneId) ?? (number.kind === 'personal' ? phones[0] : undefined);
 
+    // A shared number and a trial number are company money; a paid number is the subscription's.
+    const trial = number.kind === 'personal' && (await numberFunding(d, x, userId)) === 'trial';
     if (number.kind === 'personal' && number.agent_id && x.calldesk) {
-      const answered = await withAgent(d, x, number, userId, from.e164, remoteHash, params.CallSid);
+      const answered = await withAgent(d, x, number, userId, from.e164, remoteHash, params.CallSid, trial);
       if (answered) return answered;
     }
     if (!own) return reject();
-    return forward(d, x, number, userId, own.phone_number, from.e164, remoteHash, params.CallSid);
+    return forward(d, x, number, userId, own.phone_number, from.e164, remoteHash, params.CallSid, number.kind === 'pool' || trial);
   } catch {
     d.alert('INBOUND_FAILED');
     return reject();
@@ -62,11 +66,11 @@ async function record(d: PhoneDeps, callId: string, userId: string, ourNumber: s
   } as Parameters<PhoneDeps['store']['insertCall']>[0]);
 }
 
-async function forward(d: PhoneDeps, x: PhoneExtras, number: NumberRow, userId: string, own: string, caller: string, remoteHash: string, callSid: string): Promise<string> {
+async function forward(d: PhoneDeps, x: PhoneExtras, number: NumberRow, userId: string, own: string, caller: string, remoteHash: string, callSid: string, company: boolean): Promise<string> {
   const callId = d.newId();
   const reserved = await x.numbers.reserveLeg({
     kind: 'inbound', callId, userId, numberId: number.id, userHash: hashNumber(own, d.settings.numberHashKey), remoteHash,
-    from: number.phone_number!, to: own, callSid, company: number.kind === 'pool',
+    from: number.phone_number!, to: own, callSid, company,
   });
   if (reserved.ok === false) {
     await refused(d, userId, reserved.reason);
@@ -92,10 +96,10 @@ async function forward(d: PhoneDeps, x: PhoneExtras, number: NumberRow, userId: 
 }
 
 /** Null when the agent cannot take this call (the caller is then forwarded). */
-async function withAgent(d: PhoneDeps, x: PhoneExtras, number: NumberRow, userId: string, caller: string, remoteHash: string, callSid: string): Promise<string | null> {
+async function withAgent(d: PhoneDeps, x: PhoneExtras, number: NumberRow, userId: string, caller: string, remoteHash: string, callSid: string, company: boolean): Promise<string | null> {
   const callId = d.newId();
   const reserved = await x.numbers.reserveLeg({
-    kind: 'agent', callId, userId, numberId: number.id, userHash: null, remoteHash, from: number.phone_number!, to: caller, callSid, company: false,
+    kind: 'agent', callId, userId, numberId: number.id, userHash: null, remoteHash, from: number.phone_number!, to: caller, callSid, company,
   });
   if (reserved.ok === false) {
     await refused(d, userId, reserved.reason);
@@ -105,9 +109,11 @@ async function withAgent(d: PhoneDeps, x: PhoneExtras, number: NumberRow, userId
   let session;
   try {
     session = await x.calldesk!.createSession({ userId, agentId: number.agent_id!, callId, language, maxSeconds: reserved.limitSeconds, remoteNumber: caller });
-  } catch {
+  } catch (e) {
     await x.numbers.settleLeg(callId, 0, false).catch(() => d.alert('LEDGER_UNAVAILABLE', { at: 'agent_release' }));
-    d.alert('AGENT_SESSION_FAILED');
+    const code = e instanceof CalldeskError ? e.code : 'error';
+    d.alert('AGENT_SESSION_FAILED', { code });
+    await d.track('agent_failed', userId, { reason: `session_${code}`.slice(0, 40) });
     return null;
   }
   await record(d, callId, userId, number.phone_number!, caller, callSid, { agent_id: number.agent_id, call_language: language });

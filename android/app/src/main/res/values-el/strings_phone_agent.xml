@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">Ο αριθμός μου</string>
+    <string name="phone_own_title">Δικός σας αριθμός με τηλεφωνικό βοηθό</string>
+    <string name="phone_own_intro">Αποκτήστε αριθμό στις Ηνωμένες Πολιτείες ή τον Καναδά. Περιγράψτε με δικά σας λόγια τι θέλετε και ένας βοηθός απαντά στις κλήσεις. Λαμβάνετε περίληψη και απομαγνητοφώνηση κάθε κλήσης.</string>
+    <string name="phone_trial_offer">Δωρεάν δοκιμή: %1$d ημέρες με %2$d λεπτά βοηθού. Δεν απαιτείται πληρωμή.</string>
+    <string name="phone_number_country">Χώρα του αριθμού</string>
+    <string name="phone_number_area_code">Κωδικός περιοχής (προαιρετικά)</string>
+    <string name="phone_number_get">Απόκτηση αριθμού</string>
+    <string name="phone_trial_confirm_title">Έναρξη δωρεάν δοκιμής;</string>
+    <string name="phone_trial_confirm_body">Θα ρυθμιστεί τώρα ένας νέος αριθμός για εσάς. Η δοκιμή διαρκεί %1$d ημέρες και περιλαμβάνει %2$d λεπτά βοηθού. Όταν λήξει η δοκιμή ή εξαντληθούν τα λεπτά, ο αριθμός αποδεσμεύεται και δεν μπορεί να ανακτηθεί.</string>
+    <string name="phone_trial_start">Έναρξη δοκιμής</string>
+    <string name="phone_trial_status">Δωρεάν δοκιμή έως %1$s. Υπόλοιπα λεπτά βοηθού: %2$d</string>
+    <string name="phone_plan_status">Υπόλοιπα λεπτά βοηθού: %1$d. Υπόλοιπα λεπτά κλήσεων: %2$d</string>
+    <string name="phone_plan_includes">Περιλαμβάνει %1$d λεπτά κλήσεων και %2$d λεπτά βοηθού ανά περίοδο χρέωσης.</string>
+    <string name="phone_subscribe">Συνδρομή με %1$s</string>
+    <string name="phone_trial_end">Λήξη δοκιμής</string>
+    <string name="phone_trial_end_title">Λήξη της δωρεάν δοκιμής;</string>
+    <string name="phone_trial_end_body">Ο αριθμός και ο βοηθός σας αφαιρούνται τώρα. Ο αριθμός δεν μπορεί να ανακτηθεί. Οι προηγούμενες κλήσεις και ηχογραφήσεις παραμένουν.</string>
+    <string name="phone_trial_ended">Η δωρεάν δοκιμή σας έληξε. Οι προηγούμενες κλήσεις και ηχογραφήσεις παραμένουν στην εφαρμογή.</string>
+    <string name="phone_number_removing">Ο αριθμός σας αφαιρείται.</string>
+    <string name="phone_own_number_label">Ο αριθμός σας στο Meeting Mind</string>
+    <string name="phone_number_answers_agent">Ο βοηθός σας απαντά στις κλήσεις προς αυτόν τον αριθμό.</string>
+    <string name="phone_number_rings_you">Οι κλήσεις προς αυτόν τον αριθμό χτυπούν στο τηλέφωνό σας.</string>
+    <string name="phone_agent_title">Τηλεφωνικός βοηθός</string>
+    <string name="phone_agent_prompt_label">Τι πρέπει να κάνει ο βοηθός σας;</string>
+    <string name="phone_agent_prompt_hint">Για παράδειγμα: κράτησε μήνυμα και ζήτησε το όνομα του καλούντος και αριθμό για επανάκληση.</string>
+    <string name="phone_agent_language">Γλώσσα που μιλά ο βοηθός</string>
+    <string name="phone_agent_recording_note">Όσοι καλούν ακούν ειδοποίηση ότι η κλήση ηχογραφείται. Οι κλήσεις απομαγνητοφωνούνται, συνοψίζονται και αποθηκεύονται στις ηχογραφήσεις σας. Χρησιμοποιήστε τον βοηθό μόνο όπου επιτρέπεται η ηχογράφηση κλήσεων.</string>
+    <string name="phone_agent_create">Δημιουργία βοηθού</string>
+    <string name="phone_agent_saving">Ρύθμιση του βοηθού σας. Μπορεί να χρειαστεί ένα λεπτό ή περισσότερο.</string>
+    <string name="phone_agent_delete">Διαγραφή βοηθού</string>
+    <string name="phone_agent_delete_title">Διαγραφή αυτού του βοηθού;</string>
+    <string name="phone_agent_delete_body">Οι κλήσεις προς τον αριθμό σας θα χτυπούν στο τηλέφωνό σας.</string>
+    <string name="phone_agent_left_out">Ο βοηθός συνομιλεί, κάνει ερωτήσεις και κρατά μηνύματα. Τα υπόλοιπα της περιγραφής παραλείφθηκαν.</string>
+    <string name="phone_agent_results_hint">Οι κλήσεις που απαντά ο βοηθός εμφανίζονται με την απομαγνητοφώνηση στην καρτέλα Κλήσεις.</string>
+    <string name="phone_call_answered_by_agent">Απαντήθηκε από τον βοηθό σας</string>
+    <string name="phone_result_collected">Στοιχεία που συλλέχθηκαν</string>
+    <string name="phone_result_agent">Βοηθός</string>
+    <string name="phone_result_caller">Καλών</string>
+    <string name="phone_error_trial_used">Η δωρεάν δοκιμή έχει ήδη χρησιμοποιηθεί.</string>
+    <string name="phone_error_trial_full">Δεν υπάρχει διαθέσιμη θέση δοκιμής αυτή τη στιγμή. Ελέγξτε ξανά αργότερα.</string>
+    <string name="phone_error_no_number_found">Δεν υπάρχει διαθέσιμος αριθμός σε αυτή την περιοχή. Δοκιμάστε άλλον κωδικό.</string>
+    <string name="phone_error_number_pending">Ο αριθμός σας ρυθμίζεται. Ελέγξτε ξανά σε ένα λεπτό.</string>
+    <string name="phone_error_number_failed">Δεν ήταν δυνατή η ρύθμιση του αριθμού. Δοκιμάστε ξανά.</string>
+    <string name="phone_error_agent_failed">Δεν ήταν δυνατή η ρύθμιση του βοηθού. Δοκιμάστε ξανά.</string>
+    <string name="phone_error_agent_not_allowed">Αυτή η περιγραφή δεν μπορεί να χρησιμοποιηθεί. Αλλάξτε την και δοκιμάστε ξανά.</string>
+    <string name="phone_error_agent_language">Επιλέξτε άλλη γλώσσα για τον βοηθό.</string>
+    <string name="phone_error_agent_limit">Δεν είναι δυνατές άλλες αλλαγές στον βοηθό αυτή τη στιγμή. Δοκιμάστε αργότερα.</string>
+    <string name="phone_error_purchase">Η αγορά δεν μπόρεσε να επιβεβαιωθεί ακόμη. Ανοίξτε ξανά αυτή την οθόνη σε λίγα λεπτά.</string>
+    <string name="phone_error_purchase_in_use">Αυτή η αγορά ανήκει σε άλλον λογαριασμό.</string>
+</resources>

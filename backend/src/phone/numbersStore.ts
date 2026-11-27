@@ -34,6 +34,17 @@ export interface AgentCallRow { id: string; user_id: string; agent_id: string; c
 
 export type LegKind = 'call' | 'inbound' | 'agent';
 
+export interface TrialState {
+  ends_at: string;
+  ended_at: string | null;
+  end_reason: string | null;
+  /** Not ended and not past its end. */
+  running: boolean;
+  /** Agent time not used yet. */
+  seconds_left: number;
+  open_call: boolean;
+}
+
 export interface NumbersStore {
   numberByE164(e164: string): Promise<NumberRow | null>;
   /** The account's personal number that is not released. */
@@ -48,7 +59,17 @@ export interface NumbersStore {
   routeFor(numberId: string, remoteHash: string): Promise<{ user_id: string; phone_id: string } | null>;
   reserveLeg(a: { kind: LegKind; callId: string; userId: string; numberId: string; userHash: string | null; remoteHash: string; from: string; to: string; callSid: string | null; company: boolean }): Promise<{ ok: true; limitSeconds: number } | Refusal>;
   settleLeg(callId: string, seconds: number, unknown: boolean): Promise<{ ok: true; costMicro: number; talkSeconds: number; overReservation: boolean } | Refusal>;
-  reserveDraft(userId: string): Promise<{ ok: true } | Refusal>;
+  reserveDraft(userId: string): Promise<{ ok: true; ledgerId?: number } | Refusal>;
+  releaseDraft(ledgerId: number): Promise<void>;
+  /** The length and agent time of a trial. */
+  trialLimits(): Promise<{ days: number; agentMinutes: number }>;
+  /** With `dry`, only says whether a trial could start now. */
+  startTrial(userId: string, numberHash: string, dry: boolean): Promise<{ ok: true; already?: boolean } | Refusal>;
+  cancelTrial(userId: string): Promise<void>;
+  endTrial(userId: string, reason: string): Promise<boolean>;
+  /** Ends trials that hold no number. */
+  sweepTrials(switchedOff: boolean): Promise<number>;
+  trialState(userId: string): Promise<TrialState | null>;
   subLeft(userId: string, what: 'call' | 'agent'): Promise<number>;
   subscription(userId: string): Promise<SubscriptionRow | null>;
   subscriptionOwner(tokenHash: string): Promise<string | null>;
@@ -111,7 +132,20 @@ export function createSupabaseNumbersStore(db: SupabaseClient<any, any, any>): N
       const r = answer(await rpc('phone_settle_leg', { p_call: callId, p_seconds: seconds, p_unknown: unknown }), 'settle_leg');
       return r.ok ? { ok: true, costMicro: Number(r.cost_micro), talkSeconds: Number(r.talk_seconds), overReservation: r.over_reservation === true } : refusal(r);
     },
-    async reserveDraft(userId) { const r = answer(await rpc('phone_reserve_draft', { p_user: userId }), 'reserve_draft'); return r.ok ? { ok: true } : refusal(r); },
+    async reserveDraft(userId) { const r = answer(await rpc('phone_reserve_draft', { p_user: userId }), 'reserve_draft'); return r.ok ? { ok: true, ledgerId: Number(r.ledger_id) } : refusal(r); },
+    async releaseDraft(ledgerId) { await rpc('phone_release_draft', { p_ledger_id: ledgerId }); },
+    async trialLimits() {
+      const r = await rpc('phone_trial_limits', {});
+      return { days: Number(r?.days), agentMinutes: Math.floor(Number(r?.agent_seconds) / 60) };
+    },
+    async startTrial(userId, numberHash, dry) {
+      const r = answer(await rpc('phone_trial_start', { p_user: userId, p_number_hash: numberHash, p_dry: dry }), 'trial_start');
+      return r.ok ? { ok: true, already: r.already === true } : refusal(r);
+    },
+    async cancelTrial(userId) { await rpc('phone_trial_cancel', { p_user: userId }); },
+    async endTrial(userId, reason) { return (await rpc('phone_trial_end', { p_user: userId, p_reason: reason })) === true; },
+    async sweepTrials(switchedOff) { return Number(await rpc('phone_trial_sweep', { p_switched_off: switchedOff })) || 0; },
+    async trialState(userId) { return ((await rpc('phone_trial_state', { p_user: userId })) as TrialState | null) ?? null; },
     async subLeft(userId, what) { return Number(await rpc('phone_sub_left', { p_user: userId, p_what: what })) || 0; },
     async subscription(userId) { return check(await db.from('phone_subscriptions').select(SUB).eq('user_id', userId).maybeSingle(), 'subscription') as unknown as SubscriptionRow | null; },
     async subscriptionOwner(tokenHash) {

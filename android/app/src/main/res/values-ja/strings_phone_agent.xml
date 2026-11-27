@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">自分の番号</string>
+    <string name="phone_own_title">電話エージェント付きの自分専用番号</string>
+    <string name="phone_own_intro">米国またはカナダの番号を取得できます。希望を自分の言葉で説明すると、エージェントがその番号への電話に応答します。通話ごとに要約と文字起こしが届きます。</string>
+    <string name="phone_trial_offer">無料トライアル: %1$d日間、エージェント利用%2$d分。支払いは不要です。</string>
+    <string name="phone_number_country">番号の国</string>
+    <string name="phone_number_area_code">市外局番（任意）</string>
+    <string name="phone_number_get">番号を取得</string>
+    <string name="phone_trial_confirm_title">無料トライアルを開始しますか？</string>
+    <string name="phone_trial_confirm_body">これから新しい番号を設定します。トライアルは%1$d日間で、エージェント利用%2$d分が含まれます。トライアルが終了するか分数を使い切ると番号は解放され、元に戻せません。</string>
+    <string name="phone_trial_start">トライアルを開始</string>
+    <string name="phone_trial_status">無料トライアルは%1$sまで。エージェント残り分数: %2$d</string>
+    <string name="phone_plan_status">エージェント残り分数: %1$d。通話の残り分数: %2$d</string>
+    <string name="phone_plan_includes">請求期間ごとに通話%1$d分とエージェント利用%2$d分が含まれます。</string>
+    <string name="phone_subscribe">%1$sで定期購入</string>
+    <string name="phone_trial_end">トライアルを終了</string>
+    <string name="phone_trial_end_title">無料トライアルを終了しますか？</string>
+    <string name="phone_trial_end_body">番号とエージェントは今すぐ削除されます。番号は元に戻せません。過去の通話と録音は残ります。</string>
+    <string name="phone_trial_ended">無料トライアルは終了しました。過去の通話と録音はアプリに残ります。</string>
+    <string name="phone_number_removing">番号を削除しています。</string>
+    <string name="phone_own_number_label">あなたの Meeting Mind 番号</string>
+    <string name="phone_number_answers_agent">この番号への電話にはエージェントが応答します。</string>
+    <string name="phone_number_rings_you">この番号への電話はお使いの端末に着信します。</string>
+    <string name="phone_agent_title">電話エージェント</string>
+    <string name="phone_agent_prompt_label">エージェントに何をしてほしいですか？</string>
+    <string name="phone_agent_prompt_hint">例: 伝言を受けて、相手の名前と折り返し先の番号を聞いてください。</string>
+    <string name="phone_agent_language">エージェントが話す言語</string>
+    <string name="phone_agent_recording_note">電話をかけた人には、通話が録音されるというお知らせが流れます。通話は文字起こしと要約を行い、録音一覧に保存されます。通話の録音が認められる場合にのみエージェントを使ってください。</string>
+    <string name="phone_agent_create">エージェントを作成</string>
+    <string name="phone_agent_saving">エージェントを設定しています。1分以上かかることがあります。</string>
+    <string name="phone_agent_delete">エージェントを削除</string>
+    <string name="phone_agent_delete_title">このエージェントを削除しますか？</string>
+    <string name="phone_agent_delete_body">番号への電話はお使いの端末に着信するようになります。</string>
+    <string name="phone_agent_left_out">エージェントは会話、質問、伝言の受け付けを行います。説明のうち、それ以外の内容は省かれました。</string>
+    <string name="phone_agent_results_hint">エージェントが応答した通話は、文字起こしと一緒に通話タブに表示されます。</string>
+    <string name="phone_call_answered_by_agent">エージェントが応答</string>
+    <string name="phone_result_collected">聞き取った内容</string>
+    <string name="phone_result_agent">エージェント</string>
+    <string name="phone_result_caller">発信者</string>
+    <string name="phone_error_trial_used">無料トライアルはすでに利用済みです。</string>
+    <string name="phone_error_trial_full">現在、無料トライアルの空きがありません。しばらくしてからご確認ください。</string>
+    <string name="phone_error_no_number_found">その地域には利用できる番号がありません。別の市外局番をお試しください。</string>
+    <string name="phone_error_number_pending">番号を設定しています。1分後にもう一度ご確認ください。</string>
+    <string name="phone_error_number_failed">番号を設定できませんでした。もう一度お試しください。</string>
+    <string name="phone_error_agent_failed">エージェントを設定できませんでした。もう一度お試しください。</string>
+    <string name="phone_error_agent_not_allowed">この説明は使用できません。変更してもう一度お試しください。</string>
+    <string name="phone_error_agent_language">エージェントの言語を別のものにしてください。</string>
+    <string name="phone_error_agent_limit">現在、これ以上エージェントを変更できません。しばらくしてからお試しください。</string>
+    <string name="phone_error_purchase">購入をまだ確認できません。数分後にこの画面をもう一度開いてください。</string>
+    <string name="phone_error_purchase_in_use">この購入は別のアカウントのものです。</string>
+</resources>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">मेरा नंबर</string>
+    <string name="phone_own_title">फ़ोन एजेंट के साथ आपका अपना नंबर</string>
+    <string name="phone_own_intro">अमेरिका या कनाडा का नंबर लें। अपने शब्दों में बताएँ कि आप क्या चाहते हैं, और एक एजेंट उसकी कॉल का जवाब देगा। हर कॉल का सारांश और ट्रांसक्रिप्ट आपको मिलेगा।</string>
+    <string name="phone_trial_offer">मुफ़्त ट्रायल: %1$d दिन, %2$d एजेंट मिनट के साथ। किसी भुगतान की ज़रूरत नहीं।</string>
+    <string name="phone_number_country">नंबर का देश</string>
+    <string name="phone_number_area_code">एरिया कोड (वैकल्पिक)</string>
+    <string name="phone_number_get">मेरा नंबर लें</string>
+    <string name="phone_trial_confirm_title">मुफ़्त ट्रायल शुरू करें?</string>
+    <string name="phone_trial_confirm_body">अभी आपके लिए एक नया नंबर सेट किया जाएगा। ट्रायल %1$d दिन का है और इसमें %2$d एजेंट मिनट शामिल हैं। ट्रायल खत्म होने या मिनट पूरे होने पर नंबर छोड़ दिया जाता है और वापस नहीं मिल सकता।</string>
+    <string name="phone_trial_start">ट्रायल शुरू करें</string>
+    <string name="phone_trial_status">%1$s तक मुफ़्त ट्रायल। बचे एजेंट मिनट: %2$d</string>
+    <string name="phone_plan_status">बचे एजेंट मिनट: %1$d. बचे कॉल मिनट: %2$d</string>
+    <string name="phone_plan_includes">हर बिलिंग अवधि में %1$d कॉल मिनट और %2$d एजेंट मिनट शामिल हैं।</string>
+    <string name="phone_subscribe">%1$s में सब्सक्राइब करें</string>
+    <string name="phone_trial_end">ट्रायल खत्म करें</string>
+    <string name="phone_trial_end_title">मुफ़्त ट्रायल खत्म करें?</string>
+    <string name="phone_trial_end_body">आपका नंबर और एजेंट अभी हटा दिए जाएँगे। नंबर वापस नहीं मिल सकता। आपकी पिछली कॉल और रिकॉर्डिंग बनी रहेंगी।</string>
+    <string name="phone_trial_ended">आपका मुफ़्त ट्रायल खत्म हो गया है। आपकी पिछली कॉल और रिकॉर्डिंग ऐप में बनी रहेंगी।</string>
+    <string name="phone_number_removing">आपका नंबर हटाया जा रहा है।</string>
+    <string name="phone_own_number_label">आपका Meeting Mind नंबर</string>
+    <string name="phone_number_answers_agent">इस नंबर पर आने वाली कॉल का जवाब आपका एजेंट देता है।</string>
+    <string name="phone_number_rings_you">इस नंबर पर आने वाली कॉल आपके फ़ोन पर बजती है।</string>
+    <string name="phone_agent_title">फ़ोन एजेंट</string>
+    <string name="phone_agent_prompt_label">आपके एजेंट को क्या करना चाहिए?</string>
+    <string name="phone_agent_prompt_hint">उदाहरण: संदेश लें, और कॉल करने वाले का नाम व वापस कॉल करने का नंबर पूछें।</string>
+    <string name="phone_agent_language">एजेंट की भाषा</string>
+    <string name="phone_agent_recording_note">कॉल करने वालों को सूचना सुनाई देती है कि कॉल रिकॉर्ड हो रही है। कॉल का ट्रांसक्रिप्ट और सारांश बनकर आपकी रिकॉर्डिंग में सहेजा जाता है। एजेंट का उपयोग वहीं करें जहाँ आपको कॉल रिकॉर्ड करने की अनुमति हो।</string>
+    <string name="phone_agent_create">एजेंट बनाएँ</string>
+    <string name="phone_agent_saving">आपका एजेंट सेट हो रहा है। इसमें एक मिनट या अधिक लग सकता है।</string>
+    <string name="phone_agent_delete">एजेंट हटाएँ</string>
+    <string name="phone_agent_delete_title">इस एजेंट को हटाएँ?</string>
+    <string name="phone_agent_delete_body">तब आपके नंबर पर आने वाली कॉल आपके फ़ोन पर बजेगी।</string>
+    <string name="phone_agent_left_out">एजेंट बात करता है, सवाल पूछता है और संदेश लेता है। आपके विवरण की बाकी बातें छोड़ दी गई हैं।</string>
+    <string name="phone_agent_results_hint">एजेंट की ली हुई कॉल ट्रांसक्रिप्ट के साथ कॉल टैब में दिखती हैं।</string>
+    <string name="phone_call_answered_by_agent">आपके एजेंट ने जवाब दिया</string>
+    <string name="phone_result_collected">एकत्र की गई जानकारी</string>
+    <string name="phone_result_agent">एजेंट</string>
+    <string name="phone_result_caller">कॉल करने वाला</string>
+    <string name="phone_error_trial_used">मुफ़्त ट्रायल पहले ही इस्तेमाल हो चुका है।</string>
+    <string name="phone_error_trial_full">अभी मुफ़्त ट्रायल की कोई जगह खाली नहीं है। बाद में फिर देखें।</string>
+    <string name="phone_error_no_number_found">उस इलाके में कोई नंबर उपलब्ध नहीं है। कोई दूसरा एरिया कोड आज़माएँ।</string>
+    <string name="phone_error_number_pending">आपका नंबर सेट हो रहा है। एक मिनट में फिर देखें।</string>
+    <string name="phone_error_number_failed">नंबर सेट नहीं हो सका। फिर कोशिश करें।</string>
+    <string name="phone_error_agent_failed">एजेंट सेट नहीं हो सका। फिर कोशिश करें।</string>
+    <string name="phone_error_agent_not_allowed">यह विवरण इस्तेमाल नहीं हो सकता। इसे बदलकर फिर कोशिश करें।</string>
+    <string name="phone_error_agent_language">एजेंट के लिए कोई दूसरी भाषा चुनें।</string>
+    <string name="phone_error_agent_limit">अभी एजेंट में और बदलाव संभव नहीं हैं। बाद में कोशिश करें।</string>
+    <string name="phone_error_purchase">खरीद की पुष्टि अभी नहीं हो सकी। कुछ मिनट बाद यह स्क्रीन फिर खोलें।</string>
+    <string name="phone_error_purchase_in_use">यह खरीद किसी दूसरे खाते की है।</string>
+</resources>

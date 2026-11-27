@@ -21,6 +21,7 @@ import android.content.Context
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.kreativekoala.summaryai.domain.model.PhoneCall
 import com.kreativekoala.summaryai.util.LocaleDates
@@ -37,7 +38,8 @@ internal fun CallsContent(
     calls: List<PhoneCall>,
     isLoading: Boolean,
     onRecordingClick: (String) -> Unit,
-    onCallClick: (PhoneCall) -> Unit
+    onCallClick: (PhoneCall) -> Unit,
+    onDetails: (PhoneCall) -> Unit
 ) {
     if (isLoading && calls.isEmpty()) {
         SkeletonCardList(count = 5, loadingDescription = stringResource(R.string.phone_calls_loading))
@@ -53,7 +55,8 @@ internal fun CallsContent(
                 PhoneCallCard(
                     call = call,
                     onRecordingClick = onRecordingClick,
-                    onCallClick = onCallClick
+                    onCallClick = onCallClick,
+                    onDetails = onDetails
                 )
             }
         }
@@ -64,10 +67,13 @@ internal fun CallsContent(
 internal fun PhoneCallCard(
     call: PhoneCall,
     onRecordingClick: (String) -> Unit,
-    onCallClick: ((PhoneCall) -> Unit)? = null
+    onCallClick: ((PhoneCall) -> Unit)? = null,
+    onDetails: ((PhoneCall) -> Unit)? = null
 ) {
     val accent = callStatusColor(call.status)
-    MmCard(onClick = onCallClick?.let { cb -> { cb(call) } }) {
+    // A call an agent took opens its result; any other call is dialled again.
+    val open = onDetails?.takeIf { call.agent != null }
+    MmCard(onClick = (open ?: onCallClick)?.let { cb -> { cb(call) } }) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -117,7 +123,7 @@ internal fun PhoneCallCard(
                         color = accent
                     )
 
-                    call.recordingDuration?.let {
+                    call.durationSeconds?.let {
                         Text(
                             text = "• ${call.formattedDuration}",
                             style = MaterialTheme.typography.bodySmall,
@@ -125,6 +131,16 @@ internal fun PhoneCallCard(
                         )
                     }
 
+                }
+                if (call.agent != null) {
+                    Text(
+                        text = stringResource(R.string.phone_call_answered_by_agent),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    call.agent.summary?.let {
+                        Text(text = it, style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    }
                 }
             }
 
@@ -152,8 +168,8 @@ internal fun PhoneCallCard(
                 }
             }
 
-            // Show call button if callback available
-            if (onCallClick != null) {
+            // Show call button if callback available; a result sheet has its own.
+            if (onCallClick != null && open == null) {
                 Spacer(modifier = Modifier.width(8.dp))
                 IconButton(
                     onClick = { onCallClick(call) }

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">Мій номер</string>
+    <string name="phone_own_title">Ваш номер із телефонним агентом</string>
+    <string name="phone_own_intro">Отримайте номер США або Канади. Опишіть своїми словами, що вам потрібно, і агент відповідатиме на дзвінки. Щодо кожного дзвінка ви отримаєте підсумок і розшифровку.</string>
+    <string name="phone_trial_offer">Безкоштовний пробний період: %1$d дн. і %2$d хв агента. Оплата не потрібна.</string>
+    <string name="phone_number_country">Країна номера</string>
+    <string name="phone_number_area_code">Код міста (необов’язково)</string>
+    <string name="phone_number_get">Отримати номер</string>
+    <string name="phone_trial_confirm_title">Почати безкоштовний пробний період?</string>
+    <string name="phone_trial_confirm_body">Зараз для вас буде підключено новий номер. Пробний період триває %1$d дн. і містить %2$d хв агента. Коли він закінчиться або хвилини буде витрачено, номер звільниться, і повернути його буде неможливо.</string>
+    <string name="phone_trial_start">Почати</string>
+    <string name="phone_trial_status">Пробний період до %1$s. Залишилося хвилин агента: %2$d</string>
+    <string name="phone_plan_status">Залишилося хвилин агента: %1$d. Залишилося хвилин дзвінків: %2$d</string>
+    <string name="phone_plan_includes">У кожен розрахунковий період входить %1$d хв дзвінків і %2$d хв агента.</string>
+    <string name="phone_subscribe">Підписатися за %1$s</string>
+    <string name="phone_trial_end">Завершити пробний період</string>
+    <string name="phone_trial_end_title">Завершити пробний період?</string>
+    <string name="phone_trial_end_body">Номер і агента буде видалено зараз. Повернути номер буде неможливо. Попередні дзвінки та записи збережуться.</string>
+    <string name="phone_trial_ended">Безкоштовний пробний період закінчився. Попередні дзвінки та записи залишаються в застосунку.</string>
+    <string name="phone_number_removing">Ваш номер видаляється.</string>
+    <string name="phone_own_number_label">Ваш номер Meeting Mind</string>
+    <string name="phone_number_answers_agent">На дзвінки на цей номер відповідає ваш агент.</string>
+    <string name="phone_number_rings_you">Дзвінки на цей номер надходять на ваш телефон.</string>
+    <string name="phone_agent_title">Телефонний агент</string>
+    <string name="phone_agent_prompt_label">Що має робити агент?</string>
+    <string name="phone_agent_prompt_hint">Наприклад: прийми повідомлення та запитай ім’я абонента й номер, щоб передзвонити.</string>
+    <string name="phone_agent_language">Мова агента</string>
+    <string name="phone_agent_recording_note">Ті, хто телефонує, чують попередження про запис розмови. Дзвінки розшифровуються, підсумовуються та зберігаються у ваших записах. Використовуйте агента лише там, де дозволено записувати дзвінки.</string>
+    <string name="phone_agent_create">Створити агента</string>
+    <string name="phone_agent_saving">Налаштовуємо агента. Це може тривати хвилину або довше.</string>
+    <string name="phone_agent_delete">Видалити агента</string>
+    <string name="phone_agent_delete_title">Видалити цього агента?</string>
+    <string name="phone_agent_delete_body">Дзвінки на ваш номер надходитимуть на ваш телефон.</string>
+    <string name="phone_agent_left_out">Агент розмовляє, ставить запитання та приймає повідомлення. Решту опису не враховано.</string>
+    <string name="phone_agent_results_hint">Дзвінки, прийняті агентом, з’являються з розшифровкою на вкладці «Дзвінки».</string>
+    <string name="phone_call_answered_by_agent">Відповів ваш агент</string>
+    <string name="phone_result_collected">Зібрані відомості</string>
+    <string name="phone_result_agent">Агент</string>
+    <string name="phone_result_caller">Абонент</string>
+    <string name="phone_error_trial_used">Безкоштовний пробний період уже використано.</string>
+    <string name="phone_error_trial_full">Зараз немає вільних місць для пробного періоду. Завітайте пізніше.</string>
+    <string name="phone_error_no_number_found">У цьому регіоні немає доступних номерів. Спробуйте інший код.</string>
+    <string name="phone_error_number_pending">Ваш номер налаштовується. Перевірте за хвилину.</string>
+    <string name="phone_error_number_failed">Не вдалося налаштувати номер. Повторіть спробу.</string>
+    <string name="phone_error_agent_failed">Не вдалося налаштувати агента. Повторіть спробу.</string>
+    <string name="phone_error_agent_not_allowed">Цей опис не можна використати. Змініть його та повторіть спробу.</string>
+    <string name="phone_error_agent_language">Виберіть іншу мову для агента.</string>
+    <string name="phone_error_agent_limit">Зараз змінити агента більше не можна. Спробуйте пізніше.</string>
+    <string name="phone_error_purchase">Поки не вдалося підтвердити покупку. Відкрийте цей екран знову за кілька хвилин.</string>
+    <string name="phone_error_purchase_in_use">Ця покупка належить іншому обліковому запису.</string>
+</resources>

@@ -327,6 +327,32 @@ interface SummaryAIApi {
     @POST("api/phone/profile")
     suspend fun postPhoneProfile(@Body request: PhoneProfileRequest): Response<Unit>
 
+    // MARK: - Own number and phone agent
+
+    @GET("api/phone/plan")
+    suspend fun getPhonePlan(): PhonePlanResponse
+
+    @POST("api/phone/number")
+    suspend fun getOwnNumber(@Body request: GetNumberRequest): OwnNumberDto
+
+    @DELETE("api/phone/number")
+    suspend fun releaseOwnNumber(): ReleaseNumberResponse
+
+    @GET("api/phone/agent/languages")
+    suspend fun getAgentLanguages(): AgentLanguagesResponse
+
+    @GET("api/phone/agent")
+    suspend fun getPhoneAgent(): AgentDetailResponse
+
+    @PUT("api/phone/agent")
+    suspend fun setPhoneAgent(@Body request: SetAgentRequest): SetAgentResponse
+
+    @DELETE("api/phone/agent")
+    suspend fun deletePhoneAgent(): Response<Unit>
+
+    @POST("api/phone/subscription")
+    suspend fun confirmPhonePurchase(@Body request: PhonePurchaseRequest): PhonePurchaseResponse
+
     // MARK: - Organization (folders, tags, public share links, search)
 
     @GET("api/folders")

@@ -12,6 +12,7 @@ import { carrierCode, type CarrierCall } from './gateway.js';
 import { webhookUrl } from './settings.js';
 import { NUMBER_PROBLEMS, verifiedPhones } from './verification.js';
 import type { LedgerCall } from './store.js';
+import { numberFunding } from './provision.js';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const isUuid = (v: unknown): v is string => typeof v === 'string' && UUID.test(v);
@@ -95,7 +96,9 @@ export async function startCall(d: PhoneDeps, userId: string, input: StartCallIn
   const fromParsed = { e164: callerId, country: ownParsed.country };
 
   const callId = d.newId();
-  const reserving = usePersonal
+  // A trial number calls on the free minutes; a paid one on its subscription.
+  const paidNumber = usePersonal && (await numberFunding(d, d.extras!, userId)) !== 'trial';
+  const reserving = paidNumber
     ? d.extras!.numbers.reserveLeg({ kind: 'call', callId, userId, numberId: personal!.id, userHash: fromHash, remoteHash: destHash, from: callerId, to: to.e164, callSid: null, company: false })
       .then((r) => (r.ok === false ? r : { ...r, minutesLeft: Math.floor(r.limitSeconds / 60) }))
     : d.store.reserveCall({ callId, userId, fromHash, destHash, from: callerId, to: to.e164 });

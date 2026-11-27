@@ -54,7 +54,7 @@ export const USER_TABLES: { table: string; col: string }[] = [
   { table: 'profiles', col: 'id' },
 ];
 
-interface PhoneCallRefs { recording_sid?: string | null; twilio_call_sid?: string | null; twilio_account?: string | null; recording_deleted_at?: string | null }
+interface PhoneCallRefs { agent_id?: string | null; recording_sid?: string | null; twilio_call_sid?: string | null; twilio_account?: string | null; recording_deleted_at?: string | null }
 
 /** What the carrier may still hold for these rows (formats: services/twilioService.ts). */
 export function carrierReferences(calls: PhoneCallRefs[], numbers: { twilio_caller_id_sid?: string | null }[]): string[] {
@@ -228,7 +228,9 @@ export function createPurgeDeps(overrides: Partial<PurgeDeps> = {}): PurgeDeps {
           supabaseAdmin.from('verified_phones').select('*').eq('user_id', userId).order('id').range(a, b));
         const owned = await selectAll<OwnedNumber>((a, b) =>
           supabaseAdmin.from('phone_numbers').select('*').eq('user_id', userId).order('id').range(a, b));
-        return { recordings, botRuns, twilioSids: [...carrierReferences(calls, numbers), ...ownedReferences(userId, owned)] };
+        // Calls an agent took leave transcripts at the agent service, also after the number is gone.
+        const agentRefs = calls.some((c) => c.agent_id) ? [`agent:${userId}`] : [];
+        return { recordings, botRuns, twilioSids: [...new Set([...carrierReferences(calls, numbers), ...ownedReferences(userId, owned), ...agentRefs])] };
       },
       async countRows(userId) {
         const out: Record<string, number> = {};
@@ -244,6 +246,9 @@ export function createPurgeDeps(overrides: Partial<PurgeDeps> = {}): PurgeDeps {
         // The spend ledger is kept (the month's budget must stay true) but no longer points at the account.
         const { error: ledgerError } = await supabaseAdmin.from('phone_ledger').update({ user_id: null }).eq('user_id', userId);
         if (ledgerError && !isMissingTable(ledgerError)) failedTables.push('phone_ledger');
+        // So is the record that a free trial was had (one per phone number); the maintenance pass ends one still open.
+        const { error: trialError } = await supabaseAdmin.from('phone_trials').update({ user_id: null }).eq('user_id', userId);
+        if (trialError && !isMissingTable(trialError)) failedTables.push('phone_trials');
         for (const { table, col } of USER_TABLES) {
           const { count, error } = await supabaseAdmin.from(table).delete({ count: 'exact' }).eq(col, userId);
           if (error) {

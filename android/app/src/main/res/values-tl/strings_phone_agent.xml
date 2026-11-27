@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">Numero ko</string>
+    <string name="phone_own_title">Sarili mong numero na may phone agent</string>
+    <string name="phone_own_intro">Kumuha ng numero sa United States o Canada. Ilarawan ang gusto mo sa sarili mong salita, at may agent na sasagot sa mga tawag. Makakakuha ka ng buod at transcript ng bawat tawag.</string>
+    <string name="phone_trial_offer">Libreng pagsubok: %1$d araw na may %2$d minuto ng agent. Walang bayad na kailangan.</string>
+    <string name="phone_number_country">Bansa ng numero</string>
+    <string name="phone_number_area_code">Area code (opsyonal)</string>
+    <string name="phone_number_get">Kunin ang numero ko</string>
+    <string name="phone_trial_confirm_title">Simulan ang libreng pagsubok?</string>
+    <string name="phone_trial_confirm_body">Ise-set up na ngayon ang bagong numero para sa iyo. Tatagal ang pagsubok nang %1$d araw at may kasamang %2$d minuto ng agent. Kapag natapos ang pagsubok o naubos ang minuto, bibitawan ang numero at hindi na mababawi.</string>
+    <string name="phone_trial_start">Simulan ang pagsubok</string>
+    <string name="phone_trial_status">Libreng pagsubok hanggang %1$s. Natitirang minuto ng agent: %2$d</string>
+    <string name="phone_plan_status">Natitirang minuto ng agent: %1$d. Natitirang minuto ng tawag: %2$d</string>
+    <string name="phone_plan_includes">May kasamang %1$d minuto ng tawag at %2$d minuto ng agent sa bawat billing period.</string>
+    <string name="phone_subscribe">Mag-subscribe sa halagang %1$s</string>
+    <string name="phone_trial_end">Tapusin ang pagsubok</string>
+    <string name="phone_trial_end_title">Tapusin ang libreng pagsubok?</string>
+    <string name="phone_trial_end_body">Aalisin na ngayon ang numero at agent mo. Hindi na mababawi ang numero. Mananatili ang mga nakaraan mong tawag at recording.</string>
+    <string name="phone_trial_ended">Tapos na ang libreng pagsubok mo. Nasa app pa rin ang mga nakaraan mong tawag at recording.</string>
+    <string name="phone_number_removing">Inaalis ang numero mo.</string>
+    <string name="phone_own_number_label">Numero mo sa Meeting Mind</string>
+    <string name="phone_number_answers_agent">Sinasagot ng agent mo ang mga tawag sa numerong ito.</string>
+    <string name="phone_number_rings_you">Tutunog sa telepono mo ang mga tawag sa numerong ito.</string>
+    <string name="phone_agent_title">Phone agent</string>
+    <string name="phone_agent_prompt_label">Ano ang dapat gawin ng agent mo?</string>
+    <string name="phone_agent_prompt_hint">Halimbawa: Kumuha ng mensahe, at itanong ang pangalan ng tumatawag at numerong matatawagan pabalik.</string>
+    <string name="phone_agent_language">Wikang sinasalita ng agent</string>
+    <string name="phone_agent_recording_note">Maririnig ng mga tumatawag ang paunawa na nire-record ang tawag. Ang mga tawag ay isinasalin sa teksto, binubuod, at sine-save sa mga recording mo. Gamitin lang ang agent kung pinapayagan kang mag-record ng tawag.</string>
+    <string name="phone_agent_create">Gumawa ng agent</string>
+    <string name="phone_agent_saving">Sine-set up ang agent mo. Maaaring abutin ng isang minuto o higit pa.</string>
+    <string name="phone_agent_delete">Burahin ang agent</string>
+    <string name="phone_agent_delete_title">Burahin ang agent na ito?</string>
+    <string name="phone_agent_delete_body">Tutunog na sa telepono mo ang mga tawag sa numero mo.</string>
+    <string name="phone_agent_left_out">Nakikipag-usap, nagtatanong at kumukuha ng mensahe ang agent. Hindi isinama ang ibang bahagi ng paglalarawan mo.</string>
+    <string name="phone_agent_results_hint">Lalabas sa tab na Mga Tawag, kasama ang transcript, ang mga tawag na sinagot ng agent mo.</string>
+    <string name="phone_call_answered_by_agent">Sinagot ng agent mo</string>
+    <string name="phone_result_collected">Mga nakuhang detalye</string>
+    <string name="phone_result_agent">Agent</string>
+    <string name="phone_result_caller">Tumatawag</string>
+    <string name="phone_error_trial_used">Nagamit na ang libreng pagsubok.</string>
+    <string name="phone_error_trial_full">Walang bakanteng puwesto sa libreng pagsubok ngayon. Tingnan muli mamaya.</string>
+    <string name="phone_error_no_number_found">Walang available na numero sa lugar na iyon. Sumubok ng ibang area code.</string>
+    <string name="phone_error_number_pending">Sine-set up ang numero mo. Tingnan muli pagkalipas ng isang minuto.</string>
+    <string name="phone_error_number_failed">Hindi na-set up ang numero. Subukan muli.</string>
+    <string name="phone_error_agent_failed">Hindi na-set up ang agent. Subukan muli.</string>
+    <string name="phone_error_agent_not_allowed">Hindi magagamit ang paglalarawang ito. Baguhin at subukan muli.</string>
+    <string name="phone_error_agent_language">Pumili ng ibang wika para sa agent.</string>
+    <string name="phone_error_agent_limit">Hindi na muna mababago ang agent ngayon. Subukan mamaya.</string>
+    <string name="phone_error_purchase">Hindi pa makumpirma ang pagbili. Buksan muli ang screen na ito pagkalipas ng ilang minuto.</string>
+    <string name="phone_error_purchase_in_use">Sa ibang account ang pagbiling iyon.</string>
+</resources>

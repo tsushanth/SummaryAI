@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">Mijn nummer</string>
+    <string name="phone_own_title">Je eigen nummer met een telefoonagent</string>
+    <string name="phone_own_intro">Neem een nummer in de Verenigde Staten of Canada. Beschrijf in je eigen woorden wat je wilt en een agent beantwoordt de gesprekken. Van elk gesprek krijg je een samenvatting en transcript.</string>
+    <string name="phone_trial_offer">Gratis proefperiode: %1$d dagen met %2$d agentminuten. Geen betaling nodig.</string>
+    <string name="phone_number_country">Land van het nummer</string>
+    <string name="phone_number_area_code">Netnummer (optioneel)</string>
+    <string name="phone_number_get">Mijn nummer ophalen</string>
+    <string name="phone_trial_confirm_title">Gratis proefperiode starten?</string>
+    <string name="phone_trial_confirm_body">Nu wordt een nieuw nummer voor je ingesteld. De proefperiode duurt %1$d dagen en bevat %2$d agentminuten. Als de proefperiode eindigt of de minuten op zijn, wordt het nummer vrijgegeven en kan het niet worden teruggehaald.</string>
+    <string name="phone_trial_start">Proefperiode starten</string>
+    <string name="phone_trial_status">Gratis proefperiode tot %1$s. Resterende agentminuten: %2$d</string>
+    <string name="phone_plan_status">Resterende agentminuten: %1$d. Resterende belminuten: %2$d</string>
+    <string name="phone_plan_includes">Bevat %1$d belminuten en %2$d agentminuten per factureringsperiode.</string>
+    <string name="phone_subscribe">Abonneren voor %1$s</string>
+    <string name="phone_trial_end">Proefperiode stoppen</string>
+    <string name="phone_trial_end_title">Gratis proefperiode stoppen?</string>
+    <string name="phone_trial_end_body">Je nummer en agent worden nu verwijderd. Het nummer kan niet worden teruggehaald. Je eerdere gesprekken en opnames blijven bewaard.</string>
+    <string name="phone_trial_ended">Je gratis proefperiode is afgelopen. Je eerdere gesprekken en opnames blijven in de app.</string>
+    <string name="phone_number_removing">Je nummer wordt verwijderd.</string>
+    <string name="phone_own_number_label">Je Meeting Mind-nummer</string>
+    <string name="phone_number_answers_agent">Je agent beantwoordt gesprekken naar dit nummer.</string>
+    <string name="phone_number_rings_you">Gesprekken naar dit nummer gaan over op je telefoon.</string>
+    <string name="phone_agent_title">Telefoonagent</string>
+    <string name="phone_agent_prompt_label">Wat moet je agent doen?</string>
+    <string name="phone_agent_prompt_hint">Bijvoorbeeld: neem een bericht aan en vraag de naam van de beller en een terugbelnummer.</string>
+    <string name="phone_agent_language">Taal die de agent spreekt</string>
+    <string name="phone_agent_recording_note">Bellers horen een melding dat het gesprek wordt opgenomen. Gesprekken worden uitgeschreven, samengevat en bij je opnames bewaard. Gebruik de agent alleen waar je gesprekken mag opnemen.</string>
+    <string name="phone_agent_create">Agent maken</string>
+    <string name="phone_agent_saving">Je agent wordt ingesteld. Dit kan een minuut of langer duren.</string>
+    <string name="phone_agent_delete">Agent verwijderen</string>
+    <string name="phone_agent_delete_title">Deze agent verwijderen?</string>
+    <string name="phone_agent_delete_body">Gesprekken naar je nummer gaan dan over op je telefoon.</string>
+    <string name="phone_agent_left_out">De agent praat, stelt vragen en neemt berichten aan. Andere dingen uit je beschrijving zijn weggelaten.</string>
+    <string name="phone_agent_results_hint">Gesprekken die je agent beantwoordt, staan met transcript op het tabblad Gesprekken.</string>
+    <string name="phone_call_answered_by_agent">Beantwoord door je agent</string>
+    <string name="phone_result_collected">Verzamelde gegevens</string>
+    <string name="phone_result_agent">Agent</string>
+    <string name="phone_result_caller">Beller</string>
+    <string name="phone_error_trial_used">De gratis proefperiode is al gebruikt.</string>
+    <string name="phone_error_trial_full">Er is nu geen proefplek vrij. Kijk later nog eens.</string>
+    <string name="phone_error_no_number_found">Geen nummer beschikbaar in dat gebied. Probeer een ander netnummer.</string>
+    <string name="phone_error_number_pending">Je nummer wordt ingesteld. Kijk over een minuut opnieuw.</string>
+    <string name="phone_error_number_failed">Het nummer kon niet worden ingesteld. Probeer het opnieuw.</string>
+    <string name="phone_error_agent_failed">De agent kon niet worden ingesteld. Probeer het opnieuw.</string>
+    <string name="phone_error_agent_not_allowed">Deze beschrijving kan niet worden gebruikt. Pas haar aan en probeer het opnieuw.</string>
+    <string name="phone_error_agent_language">Kies een andere taal voor de agent.</string>
+    <string name="phone_error_agent_limit">Nu zijn er geen wijzigingen meer mogelijk aan de agent. Probeer het later.</string>
+    <string name="phone_error_purchase">De aankoop kon nog niet worden bevestigd. Open dit scherm over een paar minuten opnieuw.</string>
+    <string name="phone_error_purchase_in_use">Die aankoop hoort bij een ander account.</string>
+</resources>

@@ -35,7 +35,7 @@ sealed class PhoneMessage {
     data class Failure(val error: Throwable) : PhoneMessage()
 }
 
-enum class PhoneTab { DIALER, CALLS }
+enum class PhoneTab { DIALER, CALLS, NUMBER }
 
 sealed class Verification {
     object Hidden : Verification()
@@ -73,9 +73,18 @@ data class PhoneUiState(
     val consent: PendingConsent? = null,
     val starting: Boolean = false,
     val activeCall: ActiveCall? = null,
-    val message: PhoneMessage? = null
+    val message: PhoneMessage? = null,
+    /** The server shows the own-number screen to this account. */
+    val ownNumberAvailable: Boolean = false,
+    /** The account's own number, which calls can show instead of a verified one. */
+    val ownNumber: VerifiedPhone? = null,
+    val openCall: PhoneCall? = null
 ) {
-    val selectedPhone: VerifiedPhone? get() = phones.firstOrNull { it.id == selectedPhoneId } ?: phones.firstOrNull()
+    /** Calls need a verified number; the own number can then be chosen as the one shown. */
+    val selectedPhone: VerifiedPhone?
+        get() = phones.firstOrNull { it.id == selectedPhoneId }
+            ?: ownNumber?.takeIf { it.id == selectedPhoneId && phones.isNotEmpty() }
+            ?: phones.firstOrNull()
 }
 
 /** Client-side check of what was typed; the server repeats it and decides. Null when it can be sent. */
@@ -119,6 +128,7 @@ class PhoneViewModel @Inject constructor(
 
     private var consentVersion: String? = null
     private var businessAnswered = true
+    private var businessContext = "number"
     private var verificationJob: Job? = null
     private var callJob: Job? = null
 
@@ -154,6 +164,8 @@ class PhoneViewModel @Inject constructor(
                 serviceAvailable = status.serviceAvailable ?: false,
                 maxNumbers = status.maxVerifiedNumbers ?: 2,
                 phones = status.phones.orEmpty().map { p -> p.toDomain() },
+                ownNumberAvailable = status.ownNumber == true,
+                tab = if (it.tab == PhoneTab.NUMBER && status.ownNumber != true) PhoneTab.DIALER else it.tab,
                 callLanguages = languages,
                 callLanguage = if (it.isLoading) defaultCallLanguage(device.language, languages) else it.callLanguage
             )
@@ -166,6 +178,23 @@ class PhoneViewModel @Inject constructor(
     }
 
     fun selectPhone(id: String) = _uiState.update { it.copy(selectedPhoneId = id) }
+    fun setOwnNumber(number: VerifiedPhone?) = _uiState.update { it.copy(ownNumber = number) }
+
+    // MARK: - Results
+
+    fun openCall(call: PhoneCall) {
+        track("call_result_opened")
+        _uiState.update { it.copy(openCall = call) }
+    }
+
+    fun closeCall() = _uiState.update { it.copy(openCall = null) }
+
+    /** Asked once, also when somebody sets up an agent without having answered it for a number. */
+    fun askBusinessForAgent() {
+        if (businessAnswered || _uiState.value.askBusiness) return
+        businessContext = "agent"
+        _uiState.update { it.copy(askBusiness = true) }
+    }
     fun setDialerNumber(value: String) = _uiState.update { it.copy(dialerNumber = value.take(20)) }
     fun appendDigit(digit: String) = setDialerNumber(_uiState.value.dialerNumber + digit)
     fun deleteDigit() = _uiState.update { it.copy(dialerNumber = it.dialerNumber.dropLast(1)) }
@@ -238,7 +267,7 @@ class PhoneViewModel @Inject constructor(
         businessAnswered = true
         _uiState.update { it.copy(askBusiness = false) }
         viewModelScope.launch {
-            repository.profile(PhoneProfileRequest(business, type, "number", device.region, device.isTest.takeIf { it }))
+            repository.profile(PhoneProfileRequest(business, type, businessContext, device.region, device.isTest.takeIf { it }))
         }
     }
 
@@ -265,7 +294,7 @@ class PhoneViewModel @Inject constructor(
 
     /** Dials a past call again: the number is filled in and the consent screen is shown, as for any call. */
     fun callFromHistory(call: PhoneCall) {
-        _uiState.update { it.copy(tab = PhoneTab.DIALER, dialerNumber = call.toNumber, dialerName = call.toName.orEmpty()) }
+        _uiState.update { it.copy(tab = PhoneTab.DIALER, dialerNumber = call.toNumber, dialerName = call.toName.orEmpty(), openCall = null) }
         requestCall(call.toNumber, call.toName)
     }
 

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">Saját szám</string>
+    <string name="phone_own_title">Saját telefonszám telefonos ügynökkel</string>
+    <string name="phone_own_intro">Szerezzen egyesült államokbeli vagy kanadai számot. Írja le saját szavaival, mit szeretne, és egy ügynök fogadja a hívásokat. Minden hívásról összefoglalót és átiratot kap.</string>
+    <string name="phone_trial_offer">Ingyenes próba: %1$d nap, %2$d ügynökperc. Fizetés nem szükséges.</string>
+    <string name="phone_number_country">A szám országa</string>
+    <string name="phone_number_area_code">Körzetszám (nem kötelező)</string>
+    <string name="phone_number_get">Számom kérése</string>
+    <string name="phone_trial_confirm_title">Elindítja az ingyenes próbát?</string>
+    <string name="phone_trial_confirm_body">Most beállítunk Önnek egy új számot. A próba %1$d napig tart, és %2$d ügynökpercet tartalmaz. A próba végén vagy a percek elfogyásakor a szám felszabadul, és nem szerezhető vissza.</string>
+    <string name="phone_trial_start">Próba indítása</string>
+    <string name="phone_trial_status">Ingyenes próba eddig: %1$s. Hátralévő ügynökperc: %2$d</string>
+    <string name="phone_plan_status">Hátralévő ügynökperc: %1$d. Hátralévő hívásperc: %2$d</string>
+    <string name="phone_plan_includes">Számlázási időszakonként %1$d hívásperc és %2$d ügynökperc jár.</string>
+    <string name="phone_subscribe">Előfizetés: %1$s</string>
+    <string name="phone_trial_end">Próba befejezése</string>
+    <string name="phone_trial_end_title">Befejezi az ingyenes próbát?</string>
+    <string name="phone_trial_end_body">A száma és az ügynöke most törlődik. A szám nem szerezhető vissza. A korábbi hívások és felvételek megmaradnak.</string>
+    <string name="phone_trial_ended">Az ingyenes próba véget ért. A korábbi hívások és felvételek az alkalmazásban maradnak.</string>
+    <string name="phone_number_removing">A szám eltávolítása folyamatban.</string>
+    <string name="phone_own_number_label">Az Ön Meeting Mind száma</string>
+    <string name="phone_number_answers_agent">Az erre a számra érkező hívásokat az ügynöke fogadja.</string>
+    <string name="phone_number_rings_you">Az erre a számra érkező hívások a telefonján csörögnek.</string>
+    <string name="phone_agent_title">Telefonos ügynök</string>
+    <string name="phone_agent_prompt_label">Mit csináljon az ügynök?</string>
+    <string name="phone_agent_prompt_hint">Például: vegyen fel üzenetet, és kérje el a hívó nevét és visszahívási számát.</string>
+    <string name="phone_agent_language">Az ügynök nyelve</string>
+    <string name="phone_agent_recording_note">A hívók értesítést hallanak arról, hogy a hívást rögzítik. A hívásokról átirat és összefoglaló készül, és a felvételei közé kerülnek. Csak ott használja az ügynököt, ahol szabad hívást rögzíteni.</string>
+    <string name="phone_agent_create">Ügynök létrehozása</string>
+    <string name="phone_agent_saving">Az ügynök beállítása folyamatban. Ez egy percig vagy tovább is tarthat.</string>
+    <string name="phone_agent_delete">Ügynök törlése</string>
+    <string name="phone_agent_delete_title">Törli ezt az ügynököt?</string>
+    <string name="phone_agent_delete_body">A számára érkező hívások ezután a telefonján csörögnek.</string>
+    <string name="phone_agent_left_out">Az ügynök beszélget, kérdez és üzenetet vesz fel. A leírás többi része kimaradt.</string>
+    <string name="phone_agent_results_hint">Az ügynök által fogadott hívások átirattal a Hívások lapon jelennek meg.</string>
+    <string name="phone_call_answered_by_agent">Az ügynöke fogadta</string>
+    <string name="phone_result_collected">Összegyűjtött adatok</string>
+    <string name="phone_result_agent">Ügynök</string>
+    <string name="phone_result_caller">Hívó</string>
+    <string name="phone_error_trial_used">Az ingyenes próbát már felhasználta.</string>
+    <string name="phone_error_trial_full">Jelenleg nincs szabad próbahely. Nézzen vissza később.</string>
+    <string name="phone_error_no_number_found">Ezen a területen nincs elérhető szám. Próbáljon másik körzetszámot.</string>
+    <string name="phone_error_number_pending">A szám beállítása folyamatban. Nézzen vissza egy perc múlva.</string>
+    <string name="phone_error_number_failed">A számot nem sikerült beállítani. Próbálja újra.</string>
+    <string name="phone_error_agent_failed">Az ügynököt nem sikerült beállítani. Próbálja újra.</string>
+    <string name="phone_error_agent_not_allowed">Ez a leírás nem használható. Módosítsa, és próbálja újra.</string>
+    <string name="phone_error_agent_language">Válasszon másik nyelvet az ügynöknek.</string>
+    <string name="phone_error_agent_limit">Jelenleg az ügynök nem módosítható tovább. Próbálja később.</string>
+    <string name="phone_error_purchase">A vásárlást még nem sikerült megerősíteni. Nyissa meg újra ezt a képernyőt néhány perc múlva.</string>
+    <string name="phone_error_purchase_in_use">Ez a vásárlás egy másik fiókhoz tartozik.</string>
+</resources>

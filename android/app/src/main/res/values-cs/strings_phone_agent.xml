@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">Moje číslo</string>
+    <string name="phone_own_title">Vlastní číslo s telefonním agentem</string>
+    <string name="phone_own_intro">Pořiďte si číslo ve Spojených státech nebo Kanadě. Popište vlastními slovy, co chcete, a agent bude přijímat hovory. Z každého hovoru dostanete shrnutí a přepis.</string>
+    <string name="phone_trial_offer">Bezplatná zkouška: %1$d dní a %2$d minut agenta. Bez platby.</string>
+    <string name="phone_number_country">Země čísla</string>
+    <string name="phone_number_area_code">Směrové číslo oblasti (volitelné)</string>
+    <string name="phone_number_get">Získat moje číslo</string>
+    <string name="phone_trial_confirm_title">Spustit bezplatnou zkoušku?</string>
+    <string name="phone_trial_confirm_body">Nyní se pro vás nastaví nové číslo. Zkouška trvá %1$d dní a zahrnuje %2$d minut agenta. Po skončení zkoušky nebo vyčerpání minut se číslo uvolní a nelze ho získat zpět.</string>
+    <string name="phone_trial_start">Spustit zkoušku</string>
+    <string name="phone_trial_status">Bezplatná zkouška do: %1$s. Zbývající minuty agenta: %2$d</string>
+    <string name="phone_plan_status">Zbývající minuty agenta: %1$d. Zbývající minuty hovorů: %2$d</string>
+    <string name="phone_plan_includes">Zahrnuje %1$d minut hovorů a %2$d minut agenta v každém zúčtovacím období.</string>
+    <string name="phone_subscribe">Předplatit za %1$s</string>
+    <string name="phone_trial_end">Ukončit zkoušku</string>
+    <string name="phone_trial_end_title">Ukončit bezplatnou zkoušku?</string>
+    <string name="phone_trial_end_body">Vaše číslo i agent budou nyní odstraněny. Číslo nelze získat zpět. Dřívější hovory a nahrávky zůstanou.</string>
+    <string name="phone_trial_ended">Bezplatná zkouška skončila. Dřívější hovory a nahrávky zůstávají v aplikaci.</string>
+    <string name="phone_number_removing">Vaše číslo se odstraňuje.</string>
+    <string name="phone_own_number_label">Vaše číslo Meeting Mind</string>
+    <string name="phone_number_answers_agent">Na hovory na toto číslo odpovídá váš agent.</string>
+    <string name="phone_number_rings_you">Hovory na toto číslo zvoní na vašem telefonu.</string>
+    <string name="phone_agent_title">Telefonní agent</string>
+    <string name="phone_agent_prompt_label">Co má váš agent dělat?</string>
+    <string name="phone_agent_prompt_hint">Například: převezmi vzkaz a zeptej se na jméno volajícího a číslo pro zpětné volání.</string>
+    <string name="phone_agent_language">Jazyk, kterým agent mluví</string>
+    <string name="phone_agent_recording_note">Volající uslyší upozornění, že se hovor nahrává. Hovory se přepisují, shrnují a ukládají mezi vaše nahrávky. Používejte agenta jen tam, kde smíte hovory nahrávat.</string>
+    <string name="phone_agent_create">Vytvořit agenta</string>
+    <string name="phone_agent_saving">Nastavujeme agenta. Může to trvat minutu i déle.</string>
+    <string name="phone_agent_delete">Smazat agenta</string>
+    <string name="phone_agent_delete_title">Smazat tohoto agenta?</string>
+    <string name="phone_agent_delete_body">Hovory na vaše číslo pak budou zvonit na vašem telefonu.</string>
+    <string name="phone_agent_left_out">Agent mluví, ptá se a přijímá vzkazy. Ostatní části popisu byly vynechány.</string>
+    <string name="phone_agent_results_hint">Hovory přijaté agentem najdete i s přepisem na kartě Hovory.</string>
+    <string name="phone_call_answered_by_agent">Přijal váš agent</string>
+    <string name="phone_result_collected">Získané údaje</string>
+    <string name="phone_result_agent">Agent</string>
+    <string name="phone_result_caller">Volající</string>
+    <string name="phone_error_trial_used">Bezplatná zkouška už byla využita.</string>
+    <string name="phone_error_trial_full">Momentálně není volné místo pro zkoušku. Zkuste to později.</string>
+    <string name="phone_error_no_number_found">V této oblasti není k dispozici žádné číslo. Zkuste jiné směrové číslo.</string>
+    <string name="phone_error_number_pending">Vaše číslo se nastavuje. Zkontrolujte ho za minutu.</string>
+    <string name="phone_error_number_failed">Číslo se nepodařilo nastavit. Zkuste to znovu.</string>
+    <string name="phone_error_agent_failed">Agenta se nepodařilo nastavit. Zkuste to znovu.</string>
+    <string name="phone_error_agent_not_allowed">Tento popis nelze použít. Upravte ho a zkuste to znovu.</string>
+    <string name="phone_error_agent_language">Vyberte pro agenta jiný jazyk.</string>
+    <string name="phone_error_agent_limit">Momentálně nelze provádět další změny agenta. Zkuste to později.</string>
+    <string name="phone_error_purchase">Nákup se zatím nepodařilo potvrdit. Otevřete tuto obrazovku znovu za několik minut.</string>
+    <string name="phone_error_purchase_in_use">Tento nákup patří k jinému účtu.</string>
+</resources>
