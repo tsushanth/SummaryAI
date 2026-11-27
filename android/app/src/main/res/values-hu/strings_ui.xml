@@ -56,7 +56,7 @@
     <string name="ui_active_links">Aktív hivatkozások</string>
     <string name="ui_revoke">Visszavonás</string>
     <string name="ui_name_optional">Név (nem kötelező)</string>
-    <string name="ui_names_replace_speaker_0_speaker">A nevek lecserélik a „Beszélő 0”, „Beszélő 1” stb. feliratokat az átiratban, az összefoglalóban és a megosztott exportokban. Hagyd üresen az alapértelmezett megtartásához.</string>
+    <string name="ui_names_replace_speaker_0_speaker">A nevek lecserélik a „Beszélő 1”, „Beszélő 2” stb. feliratokat az átiratban, az összefoglalóban és a megosztott exportokban. Hagyd üresen az alapértelmezett megtartásához.</string>
     <string name="ui_share_or_export">Megosztás vagy exportálás</string>
     <string name="ui_share_or_export_with_just">Oszd meg vagy exportáld egyetlen koppintással!</string>
     <string name="notif_channel_recording_name">Felvétel</string>

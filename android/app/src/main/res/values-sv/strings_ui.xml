@@ -56,7 +56,7 @@
     <string name="ui_active_links">Aktiva länkar</string>
     <string name="ui_revoke">Återkalla</string>
     <string name="ui_name_optional">Namn (valfritt)</string>
-    <string name="ui_names_replace_speaker_0_speaker">Namnen ersätter ”Talare 0”, ”Talare 1” osv. i transkriptionen, sammanfattningen och delade exporter. Lämna tomt för att behålla standardnamnet.</string>
+    <string name="ui_names_replace_speaker_0_speaker">Namnen ersätter ”Talare 1”, ”Talare 2” osv. i transkriptionen, sammanfattningen och delade exporter. Lämna tomt för att behålla standardnamnet.</string>
     <string name="ui_share_or_export">Dela eller exportera</string>
     <string name="ui_share_or_export_with_just">Dela eller exportera med ett enda tryck!</string>
     <string name="notif_channel_recording_name">Inspelning</string>

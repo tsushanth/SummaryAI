@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { authenticate } from '../middleware/auth.js';
 import { asyncHandler, Errors } from '../middleware/errorHandler.js';
 import { supabaseAdmin } from '../lib/supabase.js';
+import { displaySpeakerText } from '../lib/speakers.js';
 
 const router = Router();
 
@@ -66,6 +67,14 @@ router.get(
       throw Errors.internal('Search failed');
     }
 
+    // Summary snippets are read by a person: speaker names, else numbers from 1.
+    const names = new Map<string, Record<string, string>>();
+    const summaryIds = (summaries.data || []).map((s) => s.recording_id);
+    if (summaryIds.length) {
+      const { data } = await supabaseAdmin.from('transcripts').select('recording_id, speaker_names').in('recording_id', summaryIds);
+      for (const t of data || []) names.set(t.recording_id, t.speaker_names);
+    }
+
     // One hit per recording, best match first: title > summary > transcript.
     const hits = new Map<string, Hit>();
     for (const r of titles.data || []) {
@@ -73,7 +82,8 @@ router.get(
     }
     for (const s of summaries.data || []) {
       if (!hits.has(s.recording_id)) {
-        hits.set(s.recording_id, { recording_id: s.recording_id, match: 'summary', snippet: makeSnippet(s.summary, q) });
+        const shown = displaySpeakerText(s.summary, names.get(s.recording_id));
+        hits.set(s.recording_id, { recording_id: s.recording_id, match: 'summary', snippet: makeSnippet(shown, q) });
       }
     }
     for (const t of transcripts.data || []) {

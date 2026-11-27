@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">Pokračovat</string>
     <string name="recording_check_record_again">Nahrát znovu</string>
     <string name="recording_check_upload_anyway">Přesto odeslat</string>
+    <string name="delete_audio_title">Smazat tento zvuk?</string>
+    <string name="delete_audio_message">Tato nahrávka ještě nebyla nahrána. Po smazání ji nelze obnovit.</string>
 </resources>

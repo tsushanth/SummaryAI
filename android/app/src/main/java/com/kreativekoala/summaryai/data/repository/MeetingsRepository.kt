@@ -124,7 +124,9 @@ class MeetingsRepository @Inject constructor(
             Result.success(Pair(response.meeting.toDomain(), recordingId))
         } catch (e: HttpException) {
             // Over the monthly bot allowance: surface it as its own type so the screen can explain it.
-            val capError = runCatching { parseBotCapError(e.code(), e.response()?.errorBody()?.string()) }.getOrNull()
+            // Peeked, not read: any other refusal still needs the body for its message.
+            val body = runCatching { e.response()?.errorBody()?.source()?.peek()?.readUtf8() }.getOrNull()
+            val capError = parseBotCapError(e.code(), body)
             Result.failure(capError ?: e)
         } catch (e: Exception) {
             Result.failure(e)

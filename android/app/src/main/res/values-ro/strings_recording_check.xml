@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">Continuă</string>
     <string name="recording_check_record_again">Înregistrează din nou</string>
     <string name="recording_check_upload_anyway">Încarcă oricum</string>
+    <string name="delete_audio_title">Ștergi acest fișier audio?</string>
+    <string name="delete_audio_message">Această înregistrare nu a fost încărcată. După ștergere, nu poate fi recuperată.</string>
 </resources>

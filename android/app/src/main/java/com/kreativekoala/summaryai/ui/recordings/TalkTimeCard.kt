@@ -16,6 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.data.api.models.MeetingAnalyticsDto
+import com.kreativekoala.summaryai.data.api.models.SpeakerStatsDto
+import com.kreativekoala.summaryai.ui.recordings.share.speakerDisplayLabel
 import com.kreativekoala.summaryai.util.serverSpeakerLabel
 import kotlin.math.roundToInt
 
@@ -39,7 +41,7 @@ fun TalkTimeCard(analytics: MeetingAnalyticsDto, modifier: Modifier = Modifier) 
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(serverSpeakerLabel(s.name), style = MaterialTheme.typography.bodyMedium)
+                        Text(analyticsSpeakerName(s), style = MaterialTheme.typography.bodyMedium)
                         Text(
                             "${(s.talkShare * 100).roundToInt()}%",
                             style = MaterialTheme.typography.bodyMedium,
@@ -63,7 +65,8 @@ fun TalkTimeCard(analytics: MeetingAnalyticsDto, modifier: Modifier = Modifier) 
                 Text(
                     text = stringResource(
                         R.string.analytics_longest_monologue,
-                        serverSpeakerLabel(speaker),
+                        analytics.speakers.firstOrNull { it.name == speaker }?.let { analyticsSpeakerName(it) }
+                            ?: serverSpeakerLabel(speaker),
                         formatDuration(analytics.longestMonologueSeconds)
                     ),
                     style = MaterialTheme.typography.bodySmall,
@@ -73,6 +76,11 @@ fun TalkTimeCard(analytics: MeetingAnalyticsDto, modifier: Modifier = Modifier) 
         }
     }
 }
+
+/** The server sends names counted from 1; this also covers an older server that counts from 0. */
+@Composable
+private fun analyticsSpeakerName(s: SpeakerStatsDto): String =
+    serverSpeakerLabel(speakerDisplayLabel(s.name, s.speakerIndex, null) ?: s.name)
 
 private fun formatDuration(seconds: Double): String {
     val total = seconds.roundToInt()

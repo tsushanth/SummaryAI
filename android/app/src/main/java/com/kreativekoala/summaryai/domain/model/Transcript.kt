@@ -30,7 +30,10 @@ data class TranscriptSegment(
     val startTime: Double,
     val endTime: Double,
     val text: String,
-    val speaker: String?
+    /** Stored label, not what is shown: see `speakerDisplayLabel`. */
+    val speaker: String?,
+    /** 0-based; the key of [Transcript.speakerNames]. */
+    val speakerIndex: Int? = null
 ) {
     val formattedStartTime: String
         get() = formatTime(startTime)

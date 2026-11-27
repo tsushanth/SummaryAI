@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">계속 녹음</string>
     <string name="recording_check_record_again">다시 녹음</string>
     <string name="recording_check_upload_anyway">그래도 업로드</string>
+    <string name="delete_audio_title">이 오디오를 삭제할까요?</string>
+    <string name="delete_audio_message">이 녹음은 업로드되지 않았어요. 삭제하면 복구할 수 없어요.</string>
 </resources>

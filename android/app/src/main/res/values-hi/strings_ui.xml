@@ -56,7 +56,7 @@
     <string name="ui_active_links">सक्रिय लिंक</string>
     <string name="ui_revoke">रद्द करें</string>
     <string name="ui_name_optional">नाम (वैकल्पिक)</string>
-    <string name="ui_names_replace_speaker_0_speaker">ये नाम ट्रांसक्रिप्ट, सारांश और शेयर किए गए एक्सपोर्ट में “वक्ता 0”, “वक्ता 1” आदि की जगह लेते हैं। डिफ़ॉल्ट रखने के लिए खाली छोड़ें।</string>
+    <string name="ui_names_replace_speaker_0_speaker">ये नाम ट्रांसक्रिप्ट, सारांश और शेयर किए गए एक्सपोर्ट में “वक्ता 1”, “वक्ता 2” आदि की जगह लेते हैं। डिफ़ॉल्ट रखने के लिए खाली छोड़ें।</string>
     <string name="ui_share_or_export">शेयर या एक्सपोर्ट करें</string>
     <string name="ui_share_or_export_with_just">बस एक टैप से शेयर या एक्सपोर्ट करें!</string>
     <string name="notif_channel_recording_name">रिकॉर्डिंग</string>

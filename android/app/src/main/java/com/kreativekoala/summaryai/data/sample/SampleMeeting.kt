@@ -33,7 +33,7 @@ object SampleMeeting {
     private val speakers = mapOf("0" to "Maya", "1" to "Dev", "2" to "Priya", "3" to "Tomas")
 
     private fun seg(start: Int, end: Int, speaker: Int, text: String) =
-        TranscriptSegment(start.toDouble(), end.toDouble(), text, "Speaker ${speaker + 1}")
+        TranscriptSegment(start.toDouble(), end.toDouble(), text, "Speaker $speaker", speaker)
 
     private val segments = listOf(
         seg(0, 9, 0, "Okay, quick product sync. Three things today: the new onboarding flow, the sync bug, and the release date."),

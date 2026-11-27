@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">Continua</string>
     <string name="recording_check_record_again">Registra di nuovo</string>
     <string name="recording_check_upload_anyway">Carica comunque</string>
+    <string name="delete_audio_title">Eliminare questo audio?</string>
+    <string name="delete_audio_message">Questa registrazione non è stata caricata. Una volta eliminata, non può essere recuperata.</string>
 </resources>

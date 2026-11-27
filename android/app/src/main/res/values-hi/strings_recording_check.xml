@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">जारी रखें</string>
     <string name="recording_check_record_again">दोबारा रिकॉर्ड करें</string>
     <string name="recording_check_upload_anyway">फिर भी अपलोड करें</string>
+    <string name="delete_audio_title">यह ऑडियो हटाएँ?</string>
+    <string name="delete_audio_message">यह रिकॉर्डिंग अपलोड नहीं हुई है। हटाने के बाद इसे वापस नहीं लाया जा सकता।</string>
 </resources>

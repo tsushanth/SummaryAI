@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">Lanjutkan</string>
     <string name="recording_check_record_again">Rekam ulang</string>
     <string name="recording_check_upload_anyway">Tetap unggah</string>
+    <string name="delete_audio_title">Hapus audio ini?</string>
+    <string name="delete_audio_message">Rekaman ini belum diunggah. Setelah dihapus, rekaman tidak dapat dipulihkan.</string>
 </resources>

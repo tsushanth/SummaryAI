@@ -55,7 +55,7 @@
     <string name="ui_active_links">Active links</string>
     <string name="ui_revoke">Revoke</string>
     <string name="ui_name_optional">Name (optional)</string>
-    <string name="ui_names_replace_speaker_0_speaker">Names replace “Speaker 0”, “Speaker 1”, etc. in the transcript, summary, and shared exports. Leave blank to keep the default.</string>
+    <string name="ui_names_replace_speaker_0_speaker">Names replace “Speaker 1”, “Speaker 2”, etc. in the transcript, summary, and shared exports. Leave blank to keep the default.</string>
     <string name="ui_share_or_export">Share or Export</string>
     <string name="ui_share_or_export_with_just">Share or export with just a tap!</string>
     <!-- Notification shown while recording or uploading -->

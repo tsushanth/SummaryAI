@@ -25,6 +25,7 @@ import {
   createRateLimiter,
   tokenKey,
 } from '../lib/shareToken.js';
+import { displaySummary, speakerDisplayName } from '../lib/speakers.js';
 
 export const recordingSharesRouter = Router({ mergeParams: true });
 export const publicSharesRouter = Router();
@@ -205,24 +206,24 @@ publicSharesRouter.get(
       .eq('recording_id', share.recording_id)
       .maybeSingle();
 
+    // The speaker names are needed for the summary even when the transcript is not shared.
+    const { data: t } = await supabaseAdmin
+      .from('transcripts')
+      .select(share.include_transcript ? 'segments, speaker_names' : 'speaker_names')
+      .eq('recording_id', share.recording_id)
+      .maybeSingle<{ segments?: unknown; speaker_names?: Record<string, string> }>();
+    const names = t?.speaker_names;
     let transcript: any = null;
-    if (share.include_transcript) {
-      const { data: t } = await supabaseAdmin
-        .from('transcripts')
-        .select('segments, speaker_names')
-        .eq('recording_id', share.recording_id)
-        .maybeSingle();
-      if (t) {
-        const names: Record<string, string> = t.speaker_names || {};
-        transcript = {
-          segments: (Array.isArray(t.segments) ? t.segments : []).map((s: any) => ({
-            speaker: names[String(s.speaker_index)] || s.speaker_label || `Speaker ${(s.speaker_index ?? 0) + 1}`,
-            text: s.text ?? '',
-            start_time: s.start_time ?? 0,
-          })),
-        };
-      }
+    if (share.include_transcript && t) {
+      transcript = {
+        segments: (Array.isArray(t.segments) ? t.segments : []).map((s: any) => ({
+          speaker: speakerDisplayName(s.speaker_label, s.speaker_index, names),
+          text: s.text ?? '',
+          start_time: s.start_time ?? 0,
+        })),
+      };
     }
+    const shown = summary ? displaySummary(summary, names) : null;
 
     // Best-effort view counter; never block or fail the read.
     void Promise.resolve(supabaseAdmin.rpc('increment_share_view', { p_share_id: share.id })).catch(() => {});
@@ -236,12 +237,12 @@ publicSharesRouter.get(
         duration_seconds: recording.duration_seconds,
         language: recording.language,
       },
-      summary: summary
+      summary: shown
         ? {
-            summary: summary.summary,
-            key_points: summary.key_points || [],
-            action_items: (summary.action_items || []).map(actionItemText).filter(Boolean),
-            topics: summary.topics || [],
+            summary: shown.summary,
+            key_points: shown.key_points || [],
+            action_items: (shown.action_items || []).map(actionItemText).filter(Boolean),
+            topics: shown.topics || [],
           }
         : null,
       transcript,

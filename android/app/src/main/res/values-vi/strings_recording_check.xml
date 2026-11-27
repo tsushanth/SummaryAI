@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">Ghi tiếp</string>
     <string name="recording_check_record_again">Ghi lại</string>
     <string name="recording_check_upload_anyway">Vẫn tải lên</string>
+    <string name="delete_audio_title">Xóa âm thanh này?</string>
+    <string name="delete_audio_message">Bản ghi này chưa được tải lên. Sau khi xóa sẽ không thể khôi phục.</string>
 </resources>

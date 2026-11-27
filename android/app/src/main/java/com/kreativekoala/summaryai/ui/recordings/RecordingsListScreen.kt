@@ -1,5 +1,6 @@
 package com.kreativekoala.summaryai.ui.recordings
 
+import com.kreativekoala.summaryai.ui.components.ConfirmDeleteAudioDialog
 import com.kreativekoala.summaryai.util.LocaleDates
 import android.util.Log
 import androidx.compose.animation.core.LinearEasing
@@ -114,6 +115,8 @@ fun RecordingsListScreen(
     var showFolderManager by remember { mutableStateOf(false) }
     var folderManagerFocusId by remember { mutableStateOf<String?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
+    // Discard deletes audio that was never uploaded, so it asks first.
+    var discardTarget by remember { mutableStateOf<PendingUpload?>(null) }
 
     // Track if we need to scroll to top after refresh
     var shouldScrollToTop by remember { mutableStateOf(false) }
@@ -158,6 +161,16 @@ fun RecordingsListScreen(
         if (shouldLoadMore.value) {
             viewModel.loadMore()
         }
+    }
+
+    discardTarget?.let { target ->
+        ConfirmDeleteAudioDialog(
+            onDelete = {
+                discardTarget = null
+                viewModel.discardPendingUpload(target)
+            },
+            onKeep = { discardTarget = null }
+        )
     }
 
     organizeTarget?.let { target ->
@@ -339,7 +352,7 @@ fun RecordingsListScreen(
                 PendingUploadsBanner(
                     pending = pendingUploads,
                     onRetry = { viewModel.retryPendingUpload(it) },
-                    onDiscard = { viewModel.discardPendingUpload(it) }
+                    onDiscard = { discardTarget = it }
                 )
             }
 

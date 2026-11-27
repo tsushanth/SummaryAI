@@ -11,7 +11,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { dispatchRecordingCompleted } from './integrationsService.js';
 import { storeMeasuredDuration } from './recordingDuration.js';
 import { instrumentAnthropic, withFeature } from '../lib/llm.js';
-import { normalizeActionItems, type ParsedSummary } from './summaryService.js';
+import { normalizeActionItems, summaryWithStoredSpeakers, type ParsedSummary } from './summaryService.js';
 import { generateSummary, type CompleteFn } from './summaryGeneration.js';
 import { resolveSummaryTemplate } from './summaryTemplates.js';
 import { reportRecordingFailure } from '../lib/recordingFailure.js';
@@ -20,6 +20,7 @@ import { getRecordingLimits } from '../config/recordingLimits.js';
 import { evaluateSummaryEligibility, countSpeechUnits } from './shortRecordingGuard.js';
 import { languageHintForRecording } from './meetingLanguage.js';
 import { languageNameForCode, summaryLanguageCode } from '../lib/outputLanguage.js';
+import { speakersForSummary } from '../lib/speakers.js';
 import { transcribeAudio, isSttConfigured, getSttMode, type NormalizedTranscript, type TranscriptSegment } from './stt/index.js';
 
 export interface ProcessingJob {
@@ -459,12 +460,15 @@ export async function generateSummaryWithAnthropic(
 ): Promise<ParsedSummary> {
   const anthropic = instrumentAnthropic(new Anthropic({ apiKey: config.ANTHROPIC_API_KEY }));
 
+  // The model sees speakers counted from 1; summaryWithStoredSpeakers puts its reply back into the stored numbering.
+  const speakers = speakersForSummary(segments);
+
   // Speaker-labelled turns. Up to 100k characters this is one call; longer transcripts are summarised in
   // chunks (never truncated), see summaryGeneration.ts.
-  const turns = formatSpeakerTurns(segments);
+  const turns = formatSpeakerTurns(speakers.segments);
 
   // Get unique speakers for the prompt
-  const uniqueSpeakers = [...new Set(segments.map(s => s.speaker_label))];
+  const uniqueSpeakers = [...new Set(speakers.segments.map(s => s.speaker_label))];
 
   // One literal feature label per call site (the llm-usage source guard checks them).
   const complete: CompleteFn = async ({ kind, system, user, maxTokens }) => {
@@ -486,7 +490,7 @@ export async function generateSummaryWithAnthropic(
     };
   };
 
-  return generateSummary({
+  const parsed = await generateSummary({
     turns,
     speakers: uniqueSpeakers,
     templateId,
@@ -496,6 +500,7 @@ export async function generateSummaryWithAnthropic(
     source,
     model: config.SUMMARY_MODEL,
   });
+  return summaryWithStoredSpeakers(parsed, speakers.restore);
 }
 
 /**

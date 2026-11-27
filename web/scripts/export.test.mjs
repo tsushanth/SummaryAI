@@ -4,6 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   applySpeakerNames,
+  speakerDisplayName,
   actionItemText,
   summaryMarkdown,
   transcriptMarkdown,
@@ -33,21 +34,22 @@ const transcript = {
 };
 const off = { includeSpeakerNames: false, includeTimestamps: false, includeActionItems: false };
 
-test('applySpeakerNames ignores blank names and missing map', () => {
-  assert.equal(applySpeakerNames('Speaker 1 / Speaker 2', names), 'Ana / Speaker 2');
-  assert.equal(applySpeakerNames('Speaker 1', null), 'Speaker 1');
+test('applySpeakerNames names the stored index and counts the unnamed from 1', () => {
+  assert.equal(applySpeakerNames('Speaker 1 / Speaker 2', names), 'Ana / Speaker 3');
+  assert.equal(applySpeakerNames('Speaker 0', null), 'Speaker 1');
+  assert.equal(applySpeakerNames('Assigned to speaker 1.', {}), 'Assigned to speaker 2.');
 });
 
 test('summaryMarkdown includes detailed summary, actions and names by default', () => {
   const md = summaryMarkdown(rec, summary, names);
-  assert.match(md, /^# Weekly Sync\n\n## Summary\nAna led the call\.\n\nSpeaker 2 raised budget concerns\./);
-  assert.match(md, /• Send deck \(Speaker 2\)/);
+  assert.match(md, /^# Weekly Sync\n\n## Summary\nAna led the call\.\n\nSpeaker 3 raised budget concerns\./);
+  assert.match(md, /• Send deck \(Speaker 3\)/);
   assert.match(md, /## Topics\nbudget, launch\n$/);
 });
 
 test('summaryMarkdown honours options and omits absent detailed summary', () => {
   const md = summaryMarkdown(rec, { ...summary, detailed_summary: null }, names, off);
-  assert.ok(md.includes('Speaker 1 led the call.'));
+  assert.ok(md.includes('Speaker 2 led the call.'));
   assert.ok(!md.includes('Action Items'));
   assert.ok(!md.includes('budget concerns'));
 });
@@ -107,7 +109,7 @@ test('actionItemText reads task, title or legacy text', () => {
 test('applySpeakerNames tolerates missing text and keeps unnamed speakers', () => {
   assert.equal(applySpeakerNames(undefined, { '0': 'Maya' }), '');
   assert.equal(applySpeakerNames(null, null), '');
-  assert.equal(applySpeakerNames('Speaker 0 and Speaker 3', { '0': 'Maya' }), 'Maya and Speaker 3');
+  assert.equal(applySpeakerNames('Speaker 0 and Speaker 3', { '0': 'Maya' }), 'Maya and Speaker 4');
 });
 
 test('markdown export includes action items from the real payload shape', () => {
@@ -122,5 +124,24 @@ test('markdown export includes action items from the real payload shape', () => 
 test('applySpeakerNames collapses a name the model already wrote in parentheses', () => {
   assert.equal(applySpeakerNames('Speaker 2 (Alex) can deliver it.', { '2': 'Alex' }), 'Alex can deliver it.');
   assert.equal(applySpeakerNames('Speaker 2 (Alexandra) can.', { '2': 'Alex' }), 'Alex (Alexandra) can.');
+});
+
+// The same cases as backend/test/speakers.test.ts and Android SpeakerNamesTest.
+test('applySpeakerNames handles lists and recordings transcribed in parts', () => {
+  assert.equal(applySpeakerNames('Speakers 0 and 1 agreed.', null), 'Speakers 1 and 2 agreed.');
+  assert.equal(applySpeakerNames('Speakers 0, 1, and 2 met.', {}), 'Speakers 1, 2, and 3 met.');
+  assert.equal(applySpeakerNames('Speakers 0 and 1 agreed.', { 0: 'Ana' }), 'Ana and Speaker 2 agreed.');
+  assert.equal(applySpeakerNames('Part 2 speaker 0 left.', { 0: 'Ana' }), 'Part 2 speaker 1 left.');
+});
+
+test('speakerDisplayName counts generated labels from 1 and keeps real ones', () => {
+  assert.equal(speakerDisplayName('Speaker 0', 0), 'Speaker 1');
+  assert.equal(speakerDisplayName('Speaker 1', 1, { 1: 'Blake' }), 'Blake');
+  assert.equal(speakerDisplayName('Speaker 1', 1, { 0: 'Alex' }), 'Speaker 2');
+  assert.equal(speakerDisplayName('Jordan Lee', 0, null), 'Jordan Lee');
+  assert.equal(speakerDisplayName('Speaker 100', 0), 'Speaker 100');
+  assert.equal(speakerDisplayName('Speaker 1', 0), 'Speaker 1');
+  assert.equal(speakerDisplayName('Part 1 speaker 0', 0), 'Part 1 speaker 1');
+  assert.equal(speakerDisplayName(undefined, 2), 'Speaker 3');
 });
 

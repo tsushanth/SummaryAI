@@ -360,7 +360,7 @@ private fun GetRecordingResponse.toDomain() = RecordingDetail(
     summary = summary?.toDomain()
 )
 
-private fun TranscriptDto.toDomain() = Transcript(
+internal fun TranscriptDto.toDomain() = Transcript(
     id = id ?: "",
     fullText = fullText ?: "",
     segments = segments?.map { it.toDomain() } ?: emptyList(),
@@ -373,7 +373,8 @@ private fun TranscriptSegmentDto.toDomain() = TranscriptSegment(
     startTime = startTime ?: 0.0,
     endTime = endTime ?: 0.0,
     text = text ?: "",
-    speaker = speaker
+    speaker = speakerLabel,
+    speakerIndex = speakerIndex
 )
 
 private fun SummaryDto.toDomain() = Summary(

@@ -56,7 +56,7 @@
     <string name="ui_active_links">Etkin bağlantılar</string>
     <string name="ui_revoke">İptal et</string>
     <string name="ui_name_optional">Ad (isteğe bağlı)</string>
-    <string name="ui_names_replace_speaker_0_speaker">Adlar; döküm, özet ve paylaşılan dışa aktarmalarda “Konuşmacı 0”, “Konuşmacı 1” vb. yerine geçer. Varsayılanı korumak için boş bırak.</string>
+    <string name="ui_names_replace_speaker_0_speaker">Adlar; döküm, özet ve paylaşılan dışa aktarmalarda “Konuşmacı 1”, “Konuşmacı 2” vb. yerine geçer. Varsayılanı korumak için boş bırak.</string>
     <string name="ui_share_or_export">Paylaş veya Dışa Aktar</string>
     <string name="ui_share_or_export_with_just">Tek dokunuşla paylaş veya dışa aktar!</string>
     <string name="notif_channel_recording_name">Kayıt</string>

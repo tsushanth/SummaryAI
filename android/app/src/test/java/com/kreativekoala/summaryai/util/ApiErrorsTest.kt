@@ -62,6 +62,17 @@ class ApiErrorsTest {
         assertEquals(R.string.api_error_network, ApiErrors.resFor(IOException("Unable to resolve host")))
     }
 
+    @Test fun aRefusedRequestShowsTheServersWords() {
+        val e = http(400, envelope("BAD_REQUEST", "Unsupported meeting platform."))
+        assertEquals("Unsupported meeting platform.", ApiErrors.refusalMessage(e))
+    }
+
+    @Test fun otherStatusesAndFailuresAreNotRefusals() {
+        assertNull(ApiErrors.refusalMessage(http(500, envelope("INTERNAL_ERROR", "Failed to dispatch bot"))))
+        assertNull(ApiErrors.refusalMessage(http(400, "")))
+        assertNull(ApiErrors.refusalMessage(IOException("offline")))
+    }
+
     @Test fun otherFailuresKeepTheirOwnMessage() {
         assertNull(ApiErrors.resFor(IllegalStateException("boom")))
     }

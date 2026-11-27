@@ -20,6 +20,7 @@ import { config } from '../config/index.js';
 import { reportAlert, reportProviderFailure } from '../lib/alerts.js';
 import { sendEmail } from '../lib/email.js';
 import { actionItemLine, renderSummaryEmail, summarySubject } from '../lib/summaryEmail.js';
+import { displaySummary } from '../lib/speakers.js';
 
 export const summaryEmailRouter = Router({ mergeParams: true });
 
@@ -76,13 +77,20 @@ summaryEmailRouter.post(
       );
     }
 
+    const { data: transcript } = await supabaseAdmin
+      .from('transcripts')
+      .select('speaker_names')
+      .eq('recording_id', recordingId)
+      .maybeSingle();
+    const shown = displaySummary(summary, transcript?.speaker_names);
+
     const { html, text } = renderSummaryEmail({
       title: recording.title || 'Meeting',
       recordedAt: recording.created_at,
       durationSeconds: recording.duration_seconds,
-      summary: summary.summary || '',
-      keyPoints: Array.isArray(summary.key_points) ? summary.key_points.filter((k: unknown) => typeof k === 'string') : [],
-      actionItems: (Array.isArray(summary.action_items) ? summary.action_items : [])
+      summary: shown.summary || '',
+      keyPoints: Array.isArray(shown.key_points) ? shown.key_points.filter((k: unknown) => typeof k === 'string') : [],
+      actionItems: (Array.isArray(shown.action_items) ? shown.action_items : [])
         .map(actionItemLine)
         .filter((a: string | null): a is string => !!a),
       note: body.note || undefined,

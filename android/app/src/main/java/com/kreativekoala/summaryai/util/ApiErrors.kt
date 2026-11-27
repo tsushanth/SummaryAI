@@ -126,6 +126,13 @@ object ApiErrors {
         return null
     }
 
+    /**
+     * The server's own words for a request it refused as wrong (HTTP 400), when it says more than "bad request" would:
+     * a rejected meeting link is explained ("Unsupported meeting platform..."). English, as the server writes it.
+     * Null for every other failure, which keeps [userMessage].
+     */
+    fun refusalMessage(t: Throwable): String? = parse(t).takeIf { it.status == 400 }?.message
+
     /** Text for the user. Falls back to the server message for unknown codes, then to the exception's message. */
     fun userMessage(context: Context, t: Throwable): String? {
         resFor(t)?.let { return appLocaleContext(context).getString(it) }

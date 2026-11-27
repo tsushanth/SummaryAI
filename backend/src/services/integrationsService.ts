@@ -8,6 +8,7 @@ import crypto from 'node:crypto';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { safeFetch, validateOutboundUrl, SsrfError, type SafeFetchOptions } from '../lib/ssrfGuard.js';
 import { encryptToken, decryptToken } from './encryptionService.js';
+import { displaySummary } from '../lib/speakers.js';
 
 export type IntegrationKind = 'webhook' | 'slack' | 'notion';
 export const INTEGRATION_KINDS: IntegrationKind[] = ['webhook', 'slack', 'notion'];
@@ -360,12 +361,18 @@ export async function dispatchRecordingCompleted(recordingId: string, opts: Deli
       .select('summary,key_points,action_items')
       .eq('recording_id', recordingId)
       .maybeSingle();
+    const { data: transcript } = await supabaseAdmin
+      .from('transcripts')
+      .select('speaker_names')
+      .eq('recording_id', recordingId)
+      .maybeSingle();
+    const shown = displaySummary<Record<string, any>>(sum ?? {}, transcript?.speaker_names);
     const payload: RecordingPayload = {
       event: 'recording.completed',
       recording: { id: rec.id, title: rec.title, duration_seconds: rec.duration_seconds, created_at: rec.created_at },
-      summary: sum?.summary ?? '',
-      key_points: sum?.key_points ?? [],
-      action_items: sum?.action_items ?? [],
+      summary: shown.summary ?? '',
+      key_points: shown.key_points ?? [],
+      action_items: shown.action_items ?? [],
     };
     await Promise.all(
       rows.map(async (row) => {

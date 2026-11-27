@@ -9,6 +9,7 @@ import com.kreativekoala.summaryai.data.api.models.LiveLanguageRequest
 import com.kreativekoala.summaryai.data.api.models.MeetingDto
 import com.kreativekoala.summaryai.data.api.models.MeetingResponse
 import com.kreativekoala.summaryai.data.api.models.UpdateMeetingRequest
+import com.kreativekoala.summaryai.util.ApiErrors
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.ResponseBody
 import okhttp3.ResponseBody.Companion.toResponseBody
@@ -17,6 +18,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import retrofit2.HttpException
 import retrofit2.Response
 import java.io.IOException
 import java.lang.reflect.InvocationTargetException
@@ -83,6 +85,16 @@ class MeetingsRepositoryLanguageTest {
         assertTrue(repo.joinMeeting("https://zoom.us/j/1", null, "ja").isSuccess)
         assertEquals(null, sent[0].transcriptionLanguage)
         assertEquals("ja", sent[1].transcriptionLanguage)
+    }
+
+    @Test fun aRefusedJoinStillCarriesTheServersMessage() = runBlocking {
+        val body = """{"error":{"code":"BAD_REQUEST","message":"Unsupported meeting platform."}}"""
+        // 403 takes the same path as the monthly cap, which reads the body first.
+        for (status in listOf(400, 403)) {
+            val api = fakeApi { _, _ -> throw HttpException(Response.error<Any>(status, body.toResponseBody(json))) }
+            val failure = MeetingsRepository(api).joinMeeting("https://not-a-meeting-link", null, null).exceptionOrNull()!!
+            assertEquals("Unsupported meeting platform.", ApiErrors.parse(failure).message)
+        }
     }
 
     // ----- live-language response handling -----

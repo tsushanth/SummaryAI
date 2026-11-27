@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">Doorgaan</string>
     <string name="recording_check_record_again">Opnieuw opnemen</string>
     <string name="recording_check_upload_anyway">Toch uploaden</string>
+    <string name="delete_audio_title">Deze audio verwijderen?</string>
+    <string name="delete_audio_message">Deze opname is niet geüpload. Na verwijderen kan ze niet worden hersteld.</string>
 </resources>

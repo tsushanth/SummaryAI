@@ -56,7 +56,7 @@
     <string name="ui_active_links">有效链接</string>
     <string name="ui_revoke">撤销</string>
     <string name="ui_name_optional">名称（可选）</string>
-    <string name="ui_names_replace_speaker_0_speaker">这些名称将替换转写文本、摘要和分享导出内容中的“说话人 0”“说话人 1”等。留空则保留默认名称。</string>
+    <string name="ui_names_replace_speaker_0_speaker">这些名称将替换转写文本、摘要和分享导出内容中的“说话人 1”“说话人 2”等。留空则保留默认名称。</string>
     <string name="ui_share_or_export">分享或导出</string>
     <string name="ui_share_or_export_with_just">轻点一下即可分享或导出！</string>
     <string name="notif_channel_recording_name">录音</string>

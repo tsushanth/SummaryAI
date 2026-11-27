@@ -12,6 +12,7 @@
  *    summaries, which are what the app already shows the user.
  */
 import { supabaseAdmin } from '../../lib/supabase.js';
+import { displaySummary, type SpeakerNames } from '../../lib/speakers.js';
 
 export interface MeetingRef {
   key: string;
@@ -67,6 +68,12 @@ export function supabaseVoiceData(userId: string, db: typeof supabaseAdmin = sup
   if (!userId) throw new Error('voice data requires a user id');
   let cache: { at: number; refs: MeetingRef[]; idByKey: Map<string, string>; keyById: Map<string, string> } | null = null;
 
+  /** What is said back to the person uses their speaker names, else numbers from 1. */
+  async function speakerNames(ids: string[]): Promise<Map<string, SpeakerNames>> {
+    const { data } = await db.from('transcripts').select('recording_id, speaker_names').in('recording_id', ids);
+    return new Map((data ?? []).map((t: any) => [t.recording_id, t.speaker_names]));
+  }
+
   async function load() {
     if (cache && Date.now() - cache.at < 60_000) return cache;
     // The ONLY query that names a user: everything else is constrained to the ids it returns.
@@ -82,7 +89,8 @@ export function supabaseVoiceData(userId: string, db: typeof supabaseAdmin = sup
     const summaries = new Map<string, string>();
     if (ids.length) {
       const { data: sums } = await db.from('summaries').select('recording_id, summary').in('recording_id', ids);
-      for (const s of sums ?? []) summaries.set((s as any).recording_id, (s as any).summary);
+      const names = await speakerNames(ids);
+      for (const s of sums ?? []) summaries.set((s as any).recording_id, displaySummary(s as any, names.get((s as any).recording_id)).summary);
     }
     const idByKey = new Map<string, string>();
     const keyById = new Map<string, string>();
@@ -155,9 +163,10 @@ export function supabaseVoiceData(userId: string, db: typeof supabaseAdmin = sup
         .select('recording_id, summary, detailed_summary, key_points, action_items, topics').in('recording_id', [id]).limit(1);
       const s = (data ?? [])[0] as any;
       if (!s || s.recording_id !== id) return { meeting: key, date: ref.date, title: ref.title, minutes: ref.minutes, summary: 'no summary yet' };
+      const shown = displaySummary(s, (await speakerNames([id])).get(id));
       return {
-        meeting: key, date: ref.date, title: ref.title, minutes: ref.minutes, summary: s.summary,
-        detailedSummary: s.detailed_summary, keyPoints: s.key_points, actionItems: s.action_items, topics: s.topics,
+        meeting: key, date: ref.date, title: ref.title, minutes: ref.minutes, summary: shown.summary,
+        detailedSummary: shown.detailed_summary, keyPoints: shown.key_points, actionItems: shown.action_items, topics: shown.topics,
       };
     },
   };

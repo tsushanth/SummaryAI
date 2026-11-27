@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">Magpatuloy</string>
     <string name="recording_check_record_again">Mag-record muli</string>
     <string name="recording_check_upload_anyway">I-upload pa rin</string>
+    <string name="delete_audio_title">I-delete ang audio na ito?</string>
+    <string name="delete_audio_message">Hindi pa na-upload ang recording na ito. Kapag na-delete, hindi na ito mababawi.</string>
 </resources>

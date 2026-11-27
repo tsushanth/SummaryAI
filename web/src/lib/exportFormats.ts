@@ -2,9 +2,9 @@ import type { Recording, StitchedLiveTranscript, Summary, Transcript } from '@/t
 
 /**
  * Mirrors android ShareExporter (summaryMarkdown / transcriptMarkdown /
- * liveTranscriptMarkdown) so both clients produce equivalent output. Speaker
- * tokens ("Speaker N") are replaced with custom names exactly like
- * SpeakerNames.kt does.
+ * liveTranscriptMarkdown) so both clients produce equivalent output. Speakers
+ * are shown exactly like SpeakerNames.kt (and the backend's lib/speakers.ts)
+ * does: stored data counts from 0, people read numbers from 1.
  *
  * The pure formatters here are unit-tested by scripts/export.test.mjs
  * (`npm run test:export`); keep this file free of runtime imports so node can
@@ -16,23 +16,65 @@ export function actionItemText(item: { text?: string; task?: string; title?: str
   return item.task ?? item.title ?? item.text ?? '';
 }
 
-const SPEAKER_REGEX = /\bSpeaker\s+(\d+)\b/gi;
+type SpeakerNames = Record<string, string> | null | undefined;
 
+/** "Speakers 0 and 1" (a list), or one "Speaker 0", optionally as the "Part 2 speaker 0" of a recording transcribed in parts. */
+const MENTION =
+  /\bSpeakers\s+\d+(?:(?:\s*,\s*(?:and\s+|&\s*)?|\s+and\s+|\s*&\s*)\d+\b)+|\b(?:Part\s+\d+\s+)?Speaker\s+\d+\b/gi;
+const GENERATED_LABEL = /^Speaker (\d+)$/;
+const PART_LABEL = /^Part (\d+) speaker (\d+)$/;
+const LAST_NUMBER = /\d+$/;
+
+function nameFor(names: SpeakerNames, index: number | string): string | undefined {
+  return names?.[String(index)]?.trim() || undefined;
+}
+
+/**
+ * Stored summary text as a person should read it: "Speaker N" means speaker index N, shown as the owner's name for
+ * them, else as "Speaker N+1". Not for the words of a transcript, which are shown as spoken.
+ */
 export function applySpeakerNames(text: string | null | undefined, names?: Record<string, string> | null): string {
   if (!text) return '';
-  if (!names || Object.keys(names).length === 0) return text;
-  let out = text.replace(SPEAKER_REGEX, (match, idx: string) => {
-    const custom = names[idx]?.trim();
-    return custom ? custom : match;
+  let out = text.replace(MENTION, (mention) => {
+    if (/^Part/i.test(mention)) return mention.replace(LAST_NUMBER, (n) => String(Number(n) + 1));
+    if (/^Speakers/i.test(mention)) {
+      const numbers = mention.match(/\d+/g) ?? [];
+      if (!numbers.some((n) => nameFor(names, n))) return mention.replace(/\d+/g, (n) => String(Number(n) + 1));
+      return mention.replace(/^Speakers\s+/i, '').replace(/\d+/g, (n) => nameFor(names, n) ?? `Speaker ${Number(n) + 1}`);
+    }
+    const index = mention.match(LAST_NUMBER)![0];
+    return nameFor(names, index) ?? mention.replace(LAST_NUMBER, String(Number(index) + 1));
   });
-  // The model often writes the name it heard next to the label ("Speaker 2 (Alex)"), which would now read
+  // The model often writes the name it heard next to the label ("Speaker 1 (Alex)"), which would now read
   // "Alex (Alex)". Collapse a name that repeats itself in parentheses.
-  for (const raw of Object.values(names)) {
+  for (const raw of Object.values(names ?? {})) {
     const n = raw?.trim();
     if (!n) continue;
     out = out.split(`${n} (${n})`).join(n);
   }
   return out;
+}
+
+/**
+ * What to call the speaker of a segment: the owner's name for them, else a generated label counted from 1, else the
+ * stored label as it is (a meeting participant's name, "Document").
+ */
+export function speakerDisplayName(
+  label: string | null | undefined,
+  index: number | null | undefined,
+  names?: Record<string, string> | null
+): string {
+  const named = index === null || index === undefined ? undefined : nameFor(names, index);
+  if (named) return named;
+  if (!label) return `Speaker ${(index ?? 0) + 1}`;
+  const generated = GENERATED_LABEL.exec(label);
+  if (generated) {
+    const n = Number(generated[1]);
+    // A number that is not the index (a bot participant id, or a label the server already counted from 1) stays.
+    return index === null || index === undefined || n === index ? `Speaker ${n + 1}` : label;
+  }
+  const part = PART_LABEL.exec(label);
+  return part ? `Part ${part[1]} speaker ${Number(part[2]) + 1}` : label;
 }
 
 function mmss(seconds: number): string {
@@ -97,9 +139,8 @@ export function transcriptMarkdown(
   const names = options.includeSpeakerNames ? transcript.speaker_names : null;
   const lines: string[] = [`# ${recording.title} - Transcript`, ''];
   for (const seg of transcript.segments) {
-    const custom = names?.[String(seg.speaker_index)]?.trim();
-    const speaker = custom || applySpeakerNames(seg.speaker_label || `Speaker ${seg.speaker_index + 1}`, names);
-    lines.push(transcriptLine(seg.start_time, speaker, applySpeakerNames(seg.text, names), options.includeTimestamps), '');
+    const speaker = speakerDisplayName(seg.speaker_label, seg.speaker_index, names);
+    lines.push(transcriptLine(seg.start_time, speaker, seg.text, options.includeTimestamps), '');
   }
   return lines.join('\n');
 }

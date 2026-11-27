@@ -17,6 +17,7 @@ import { asyncHandler, AppError, Errors } from '../middleware/errorHandler.js';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { config } from '../config/index.js';
 import { normalizeActionItems } from '../services/summaryService.js';
+import { actionTitleForms, displayActionItem, displaySummary, withDisplaySpeakers, type SpeakerNames } from '../lib/speakers.js';
 import {
   completeDebriefText,
   extractJson,
@@ -90,6 +91,14 @@ async function loadOwned(recordingId: string, userId: string): Promise<OwnedReco
 
 const idParam = z.string().uuid();
 
+/** The owner's speaker names per recording: everything these tools return is read to a person. */
+async function speakerNamesFor(ids: string[]): Promise<Map<string, SpeakerNames>> {
+  const { data } = ids.length
+    ? await supabaseAdmin.from('transcripts').select('recording_id, speaker_names').in('recording_id', ids)
+    : { data: [] as any[] };
+  return new Map((data ?? []).map((t: any) => [t.recording_id, t.speaker_names]));
+}
+
 function dayOf(iso: string): string {
   return (iso ?? '').slice(0, 10);
 }
@@ -136,8 +145,12 @@ router.get(
     const { data: sums } = ids.length
       ? await supabaseAdmin.from('summaries').select('recording_id, summary').in('recording_id', ids)
       : { data: [] as any[] };
+    const names = await speakerNamesFor(ids);
     const first = new Map<string, string>();
-    for (const s of sums ?? []) first.set(s.recording_id, String(s.summary ?? '').split(/(?<=[.!?])\s/)[0]?.slice(0, 200) ?? '');
+    for (const row of sums ?? []) {
+      const s = displaySummary(row, names.get(row.recording_id));
+      first.set(s.recording_id, String(s.summary ?? '').split(/(?<=[.!?])\s/)[0]?.slice(0, 200) ?? '');
+    }
     res.json({
       meetings: recs.map((r) => ({
         id: r.id,
@@ -166,13 +179,18 @@ router.get(
       return;
     }
     const { data: todos } = await supabaseAdmin.from('todos').select('*').eq('user_id', userId).eq('recording_id', id);
+    const names = (await speakerNamesFor([id])).get(id);
+    const shown = displaySummary(summary, names);
     const items = normalizeActionItems(summary.action_items).map((i) => {
+      // The key stays on the stored wording, so it does not change when a speaker is renamed.
       const key = summaryItemKey(id, i.task);
-      const t = (todos ?? []).find((x: any) => x.summary_item_key === key || normalizeTitle(x.title) === normalizeTitle(i.task));
+      const said = displayActionItem(i, names);
+      const titles = actionTitleForms(i.task, names).map(normalizeTitle);
+      const t = (todos ?? []).find((x: any) => x.summary_item_key === key || titles.includes(normalizeTitle(x.title)));
       return {
         key,
-        task: i.task,
-        assignee: i.assignee,
+        task: said.task,
+        assignee: said.assignee,
         due_date: i.due_date,
         priority: i.priority,
         status: t ? (t.is_completed ? 'done' : 'open') : 'not_tracked',
@@ -184,8 +202,8 @@ router.get(
       title: rec.title,
       date: dayOf(rec.created_at),
       has_summary: true,
-      summary: summary.summary,
-      key_points: Array.isArray(summary.key_points) ? summary.key_points : [],
+      summary: shown.summary,
+      key_points: Array.isArray(shown.key_points) ? shown.key_points : [],
       // Null until the decisions column exists and has been filled; use POST /meetings/:id/debrief to extract them.
       decisions: Array.isArray(summary.decisions) ? summary.decisions : null,
       action_items: items,
@@ -220,12 +238,14 @@ router.post(
     const meta = new Map(recs.map((r) => [r.id, r]));
     const [{ data: sums }, { data: trs }] = await Promise.all([
       supabaseAdmin.from('summaries').select('recording_id, summary, key_points').in('recording_id', ids),
-      supabaseAdmin.from('transcripts').select('recording_id, full_text').in('recording_id', ids),
+      supabaseAdmin.from('transcripts').select('recording_id, full_text, speaker_names').in('recording_id', ids),
     ]);
+    const names = new Map((trs ?? []).map((t: any) => [t.recording_id, t.speaker_names as SpeakerNames]));
     const chunks: Chunk[] = [];
-    for (const s of sums ?? []) {
-      const m = meta.get(s.recording_id);
+    for (const row of sums ?? []) {
+      const m = meta.get(row.recording_id);
       if (!m) continue;
+      const s = displaySummary(row, names.get(row.recording_id));
       const kp = Array.isArray(s.key_points) ? s.key_points.join('. ') : '';
       for (const text of chunkText(`${s.summary ?? ''} ${kp}`)) chunks.push({ recording_id: s.recording_id, title: m.title, text });
     }
@@ -265,7 +285,7 @@ router.get(
     const q = snippetSchema.parse(req.query);
     if (q.query === undefined && q.from === undefined) throw Errors.badRequest('Give a query or a start time');
     const rec = await loadOwned(id, userId);
-    const { data: tr } = await supabaseAdmin.from('transcripts').select('segments, full_text').eq('recording_id', id).maybeSingle();
+    const { data: tr } = await supabaseAdmin.from('transcripts').select('segments, full_text, speaker_names').eq('recording_id', id).maybeSingle();
     const segs: any[] = Array.isArray(tr?.segments) ? tr.segments : [];
     let picked = segs;
     if (q.from !== undefined) {
@@ -275,7 +295,7 @@ router.get(
       const i = segs.findIndex((s) => String(s.text ?? '').toLowerCase().includes(needle));
       picked = i < 0 ? [] : segs.slice(Math.max(0, i - 1), i + 2);
     }
-    const lines = segmentTurns(picked).join('\n');
+    const lines = segmentTurns(withDisplaySpeakers(picked, tr?.speaker_names)).join('\n');
     res.json({ recording_id: id, title: rec.title, date: dayOf(rec.created_at), text: lines.slice(0, q.max_chars), found: picked.length > 0 });
   })
 );
@@ -343,17 +363,20 @@ router.get(
     // Summary action items nobody has turned into a todo yet (they count as open, and carry a stable key).
     const ids = recs.map((r) => r.id);
     const { data: sums } = ids.length ? await supabaseAdmin.from('summaries').select('recording_id, action_items').in('recording_id', ids) : { data: [] as any[] };
+    const names = await speakerNamesFor(ids);
     for (const s of sums ?? []) {
       const m = meta.get(s.recording_id);
       if (!m) continue;
       for (const it of normalizeActionItems(s.action_items)) {
         const key = summaryItemKey(s.recording_id, it.task);
-        if (tracked.has(`${s.recording_id}|${normalizeTitle(it.task)}`) || tracked.has(`${s.recording_id}|key|${key}`)) continue;
+        const said = displayActionItem(it, names.get(s.recording_id));
+        const forms = actionTitleForms(it.task, names.get(s.recording_id));
+        if (forms.some((t) => tracked.has(`${s.recording_id}|${normalizeTitle(t)}`)) || tracked.has(`${s.recording_id}|key|${key}`)) continue;
         rows.push({
           id: `item:${s.recording_id}:${key}`,
           kind: 'summary_item',
-          title: it.task,
-          assignee: it.assignee,
+          title: said.task,
+          assignee: said.assignee,
           due_date: it.due_date && /^\d{4}-\d{2}-\d{2}/.test(it.due_date) ? it.due_date.slice(0, 10) : null,
           priority: it.priority,
           is_completed: false,
@@ -472,11 +495,11 @@ router.post(
     const userId = req.user!.id;
     const id = idParam.parse(req.params.id);
     const rec = await loadOwned(id, userId);
-    const { data: tr } = await supabaseAdmin.from('transcripts').select('segments, full_text').eq('recording_id', id).maybeSingle();
+    const { data: tr } = await supabaseAdmin.from('transcripts').select('segments, full_text, speaker_names').eq('recording_id', id).maybeSingle();
     if (!tr) throw Errors.badRequest('Recording has no transcript yet');
     const segments: any[] = Array.isArray(tr.segments) ? tr.segments : [];
     const fullText: string = tr.full_text ?? '';
-    let turns = segments.length > 0 ? segmentTurns(segments) : [fullText];
+    let turns = segments.length > 0 ? segmentTurns(withDisplaySpeakers(segments, tr.speaker_names)) : [fullText];
     // One call only. A longer transcript is cut and the reply says so; no silent partial results.
     let joined = turns.join('\n');
     let truncated = false;

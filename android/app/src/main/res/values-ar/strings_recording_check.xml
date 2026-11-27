@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">متابعة</string>
     <string name="recording_check_record_again">التسجيل من جديد</string>
     <string name="recording_check_upload_anyway">الرفع على أي حال</string>
+    <string name="delete_audio_title">حذف هذا الصوت؟</string>
+    <string name="delete_audio_message">لم يُرفع هذا التسجيل بعد. لا يمكن استعادته بعد حذفه.</string>
 </resources>

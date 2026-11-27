@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { speakerColor } from '@/lib/utils/speakers';
 import type { MeetingAnalytics } from '@/lib/api/analytics';
+import { speakerDisplayName } from '@/lib/exportFormats';
 
 function formatSeconds(s: number): string {
   const total = Math.round(s);
@@ -12,6 +13,9 @@ function formatSeconds(s: number): string {
 /** Per-speaker talk share, words, questions and longest monologue. */
 export function TalkTimeCard({ analytics }: { analytics: MeetingAnalytics }) {
   if (analytics.speakers.length === 0) return null;
+  // The server already sends names counted from 1; this also covers an older server that counts from 0.
+  const nameOf = (s: MeetingAnalytics['speakers'][number]) => speakerDisplayName(s.name, s.speaker_index);
+  const longest = analytics.speakers.find((s) => s.name === analytics.longest_monologue_speaker);
   return (
     <Card>
       <CardHeader>
@@ -22,7 +26,7 @@ export function TalkTimeCard({ analytics }: { analytics: MeetingAnalytics }) {
           className="ribbon h-3 bg-muted"
           role="img"
           aria-label={analytics.speakers
-            .map((s) => `${s.name} ${Math.round(s.talk_share * 100)}%`)
+            .map((s) => `${nameOf(s)} ${Math.round(s.talk_share * 100)}%`)
             .join(', ')}
         >
           {analytics.speakers.map((s) => (
@@ -42,7 +46,7 @@ export function TalkTimeCard({ analytics }: { analytics: MeetingAnalytics }) {
                     style={{ backgroundColor: speakerColor(String(s.speaker_index)) }}
                     aria-hidden="true"
                   />
-                  {s.name}
+                  {nameOf(s)}
                 </span>
                 <span className="font-semibold tabular">{Math.round(s.talk_share * 100)}%</span>
               </div>
@@ -54,7 +58,7 @@ export function TalkTimeCard({ analytics }: { analytics: MeetingAnalytics }) {
         </ul>
         {analytics.longest_monologue_speaker && analytics.longest_monologue_seconds > 0 && (
           <p className="text-xs text-muted-foreground">
-            Longest monologue: {analytics.longest_monologue_speaker} ({formatSeconds(analytics.longest_monologue_seconds)})
+            Longest monologue: {longest ? nameOf(longest) : analytics.longest_monologue_speaker} ({formatSeconds(analytics.longest_monologue_seconds)})
           </p>
         )}
       </CardContent>
