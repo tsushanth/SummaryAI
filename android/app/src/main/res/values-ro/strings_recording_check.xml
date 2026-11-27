@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop found a recording that is too short or silent: the user chooses before anything is uploaded. -->
+<resources>
+    <string name="recording_check_short_title">A fost foarte scurtă</string>
+    <string name="recording_check_short_message">Înregistrările sub %1$d secunde nu sunt încărcate. Continuă pentru a completa această înregistrare sau înregistrează din nou pentru a o înlocui.</string>
+    <string name="recording_check_silent_title">Nu am auzit nimic</string>
+    <string name="recording_check_silent_message">Verifică să nu fie acoperit sau oprit microfonul. Continuă pentru a completa această înregistrare sau înregistrează din nou pentru a o înlocui.</string>
+    <string name="recording_check_keep_going">Continuă</string>
+    <string name="recording_check_record_again">Înregistrează din nou</string>
+    <string name="recording_check_upload_anyway">Încarcă oricum</string>
+</resources>

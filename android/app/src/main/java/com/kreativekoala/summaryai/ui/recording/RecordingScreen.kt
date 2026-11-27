@@ -34,6 +34,8 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.kreativekoala.summaryai.R
+import com.kreativekoala.summaryai.service.RecordingCheck
+import com.kreativekoala.summaryai.service.RecordingProblem
 import com.kreativekoala.summaryai.ui.components.LiveWaveform
 import com.kreativekoala.summaryai.ui.components.MmEmptyState
 import com.kreativekoala.summaryai.ui.theme.RecordingRed
@@ -63,24 +65,12 @@ fun RecordingScreen(
     val uiState by viewModel.uiState.collectAsState()
     val recordingState = uiState.recordingState
 
-    // First run: the big record button asks for the microphone and, once granted, starts recording (one tap
-    // fewer than "Grant Permission" followed by a second record tap).
-    var startAfterGrant by rememberSaveable { mutableStateOf(false) }
     var micDenied by rememberSaveable { mutableStateOf(false) }
 
-    // Permission handling
+    // Permission handling. Allowing the microphone only allows it: recording starts on the record button.
     val microphonePermission = rememberPermissionState(Manifest.permission.RECORD_AUDIO) { granted ->
-        Activation.track { micPermission(granted) }
-        if (granted) {
-            micDenied = false
-            if (startAfterGrant) {
-                startAfterGrant = false
-                viewModel.startRecording()
-            }
-        } else {
-            startAfterGrant = false
-            micDenied = true
-        }
+        viewModel.onMicPermission(granted)
+        micDenied = !granted
     }
 
     // Funnel: the first-run prompt is on screen (once per install; the tracker de-dupes).
@@ -124,6 +114,16 @@ fun RecordingScreen(
         label = "pulse_scale"
     )
 
+    uiState.held?.takeIf { recordingState.isRecording }?.let { held ->
+        RecordingCheckDialog(
+            held = held,
+            onKeepGoing = viewModel::keepGoing,
+            onRecordAgain = viewModel::recordAgain,
+            onUploadAnyway = viewModel::uploadAnyway,
+            onDismiss = viewModel::dismissRecordingCheck
+        )
+    }
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
@@ -151,7 +151,6 @@ fun RecordingScreen(
                 FirstRunRecordPrompt(
                     onRecord = {
                         viewModel.onRecordTapped()
-                        startAfterGrant = true
                         microphonePermission.launchPermissionRequest()
                     },
                     onOpenSample = onOpenSample
@@ -199,9 +198,50 @@ fun RecordingScreen(
     }
 }
 
+/** Stop found nothing worth uploading. Nothing has been deleted; dismissing leaves the recording paused. */
+@Composable
+private fun RecordingCheckDialog(
+    held: HeldRecording,
+    onKeepGoing: () -> Unit,
+    onRecordAgain: () -> Unit,
+    onUploadAnyway: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val short = held.problem == RecordingProblem.TOO_SHORT
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(stringResource(if (short) R.string.recording_check_short_title else R.string.recording_check_silent_title))
+        },
+        text = {
+            Text(
+                if (short) {
+                    stringResource(R.string.recording_check_short_message, RecordingCheck.MIN_SECONDS)
+                } else {
+                    stringResource(R.string.recording_check_silent_message)
+                }
+            )
+        },
+        confirmButton = {
+            Button(onClick = onKeepGoing) { Text(stringResource(R.string.recording_check_keep_going)) }
+        },
+        dismissButton = {
+            Column(horizontalAlignment = Alignment.End) {
+                TextButton(onClick = onRecordAgain) { Text(stringResource(R.string.recording_check_record_again)) }
+                if (held.canUploadAnyway) {
+                    TextButton(onClick = onUploadAnyway) {
+                        Text(stringResource(R.string.recording_check_upload_anyway))
+                    }
+                }
+            }
+        }
+    )
+}
+
 /**
  * First run, microphone not yet allowed: one line saying what to do, one big record button, one short consent line
- * and a way to see the product's output first. Tapping record asks for the microphone, then starts recording.
+ * and a way to see the product's output first. Tapping record asks for the microphone; the Record screen that follows
+ * starts the recording.
  */
 @Composable
 private fun FirstRunRecordPrompt(

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop found a recording that is too short or silent: the user chooses before anything is uploaded. -->
+<resources>
+    <string name="recording_check_short_title">Bản ghi quá ngắn</string>
+    <string name="recording_check_short_message">Bản ghi dưới %1$d giây không được tải lên. Ghi tiếp để bổ sung vào bản này, hoặc ghi lại để thay thế.</string>
+    <string name="recording_check_silent_title">Chúng tôi không nghe thấy gì</string>
+    <string name="recording_check_silent_message">Hãy kiểm tra xem micrô có bị che hoặc bị tắt không. Ghi tiếp để bổ sung vào bản này, hoặc ghi lại để thay thế.</string>
+    <string name="recording_check_keep_going">Ghi tiếp</string>
+    <string name="recording_check_record_again">Ghi lại</string>
+    <string name="recording_check_upload_anyway">Vẫn tải lên</string>
+</resources>

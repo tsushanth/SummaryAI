@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop found a recording that is too short or silent: the user chooses before anything is uploaded. -->
+<resources>
+    <string name="recording_check_short_title">Nahrávka je velmi krátká</string>
+    <string name="recording_check_short_message">Nahrávky kratší než %1$d sekund se nenahrávají na server. Pokračujte a doplňte tuto nahrávku, nebo ji nahrajte znovu a nahraďte.</string>
+    <string name="recording_check_silent_title">Nic jsme neslyšeli</string>
+    <string name="recording_check_silent_message">Zkontrolujte, že mikrofon není zakrytý ani vypnutý. Pokračujte a doplňte tuto nahrávku, nebo ji nahrajte znovu a nahraďte.</string>
+    <string name="recording_check_keep_going">Pokračovat</string>
+    <string name="recording_check_record_again">Nahrát znovu</string>
+    <string name="recording_check_upload_anyway">Přesto odeslat</string>
+</resources>

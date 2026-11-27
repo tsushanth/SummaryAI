@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop found a recording that is too short or silent: the user chooses before anything is uploaded. -->
+<resources>
+    <string name="recording_check_short_title">Dat was erg kort</string>
+    <string name="recording_check_short_message">Opnamen korter dan %1$d seconden worden niet geüpload. Ga door om deze opname aan te vullen, of neem opnieuw op om hem te vervangen.</string>
+    <string name="recording_check_silent_title">We konden niets horen</string>
+    <string name="recording_check_silent_message">Controleer of de microfoon niet is afgedekt of uitgeschakeld. Ga door om deze opname aan te vullen, of neem opnieuw op om hem te vervangen.</string>
+    <string name="recording_check_keep_going">Doorgaan</string>
+    <string name="recording_check_record_again">Opnieuw opnemen</string>
+    <string name="recording_check_upload_anyway">Toch uploaden</string>
+</resources>

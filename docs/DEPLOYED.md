@@ -7,6 +7,14 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 | Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v68 | `registry.fly.io/summary-ai-backend:deployment-01M8CNWRWY6SKY6DXHXFQHHCKR` | `origin/main` at `464634a` (squash merge of #119; `backend/` tree `20d83562f174ed6a595e0dd4dfe52b2e401e1b58` identical to main) | 2026-11-26 (UTC) |
 | Web (`web/`, meetingmind.org) | `meeting-mind-web` | v43 | `registry.fly.io/meeting-mind-web:deployment-01M8CNXBE7KE1AJAXTEMJHWPBE` | `origin/main` at `464634a` (#119, deployed by the web-deploy workflow; `web/` tree `eaca6a737c817ac6f6def0a61e7c0e477a68902b` identical to main) | 2026-11-26 (UTC) |
 
+## Android: merged, NOT released (next release: after 1.7.15, versionCode 68)
+
+- Stop no longer uploads a recording under 10 seconds, or one whose level never reached 1% of full scale. The recorder pauses and the user picks "Keep going" (same recording) or "Record again" (replaces it); closing the box leaves it paused. A silent recording of 10 seconds or more also offers "Upload anyway", so a wrong level reading cannot trap a real meeting. A recording stopped from the notification is not checked: it is not uploaded by itself and waits in the "not uploaded" banner as before.
+- Allowing the microphone on first run no longer starts a recording.
+- Android now posts anonymous record steps to `POST /api/activation/events` (platform `android`, no server change): `record_clicked` with `step` = tap, mic_granted, mic_denied, start_failed, stop_ok, held_short, held_silent, keep_going, record_again, upload_anyway or check_dismissed; `first_recording_started` (every start, `again` after Record again); `first_recording_done` (every upload: `ok`, `seconds`, `auto`). `test` is true on debug builds and Firebase Test Lab. The web funnel check filters `platform = 'web'`, so it is unaffected.
+- Before release: the privacy page names these steps for the website only; add the app.
+- Checks: `:app:testDebugUnitTest` 314 tests, 0 failures; `:app:assembleDebug`. No device run.
+
 ## 2026-11-26 Web sign-up fixes, step counts, first-recording report (#119): backend v68, web v43
 - Backend: `flyctl deploy --remote-only` from a clean detached worktree of `origin/main` at `464634a`. Web: `web-deploy.yml` on the merge (run 45885190510 succeeded, no rollback). No migration, no secret set or unset. Calendar settings untouched.
 - Quiet moment checked: no open bot run, no unfinished recording touched in 20 minutes, no live segment in 15 minutes, no auto-join due within 45 minutes, no open coaching session.

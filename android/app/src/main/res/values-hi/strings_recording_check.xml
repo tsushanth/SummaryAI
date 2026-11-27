@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop found a recording that is too short or silent: the user chooses before anything is uploaded. -->
+<resources>
+    <string name="recording_check_short_title">यह रिकॉर्डिंग बहुत छोटी थी</string>
+    <string name="recording_check_short_message">%1$d सेकंड से छोटी रिकॉर्डिंग अपलोड नहीं की जातीं। इसमें और जोड़ने के लिए जारी रखें, या इसे बदलने के लिए दोबारा रिकॉर्ड करें।</string>
+    <string name="recording_check_silent_title">हमें कुछ सुनाई नहीं दिया</string>
+    <string name="recording_check_silent_message">जाँचें कि माइक्रोफ़ोन ढका हुआ या बंद न हो। इसमें और जोड़ने के लिए जारी रखें, या इसे बदलने के लिए दोबारा रिकॉर्ड करें।</string>
+    <string name="recording_check_keep_going">जारी रखें</string>
+    <string name="recording_check_record_again">दोबारा रिकॉर्ड करें</string>
+    <string name="recording_check_upload_anyway">फिर भी अपलोड करें</string>
+</resources>

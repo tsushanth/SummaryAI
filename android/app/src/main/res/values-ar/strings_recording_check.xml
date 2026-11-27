@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop found a recording that is too short or silent: the user chooses before anything is uploaded. -->
+<resources>
+    <string name="recording_check_short_title">كان التسجيل قصيرًا جدًا</string>
+    <string name="recording_check_short_message">لا تُرفع التسجيلات التي تقل عن %1$d ثوانٍ. تابع للإضافة إلى هذا التسجيل، أو سجّل من جديد لاستبداله.</string>
+    <string name="recording_check_silent_title">لم نتمكن من سماع أي شيء</string>
+    <string name="recording_check_silent_message">تأكد من أن الميكروفون غير مغطى وغير متوقف. تابع للإضافة إلى هذا التسجيل، أو سجّل من جديد لاستبداله.</string>
+    <string name="recording_check_keep_going">متابعة</string>
+    <string name="recording_check_record_again">التسجيل من جديد</string>
+    <string name="recording_check_upload_anyway">الرفع على أي حال</string>
+</resources>

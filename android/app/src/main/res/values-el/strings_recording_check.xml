@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop found a recording that is too short or silent: the user chooses before anything is uploaded. -->
+<resources>
+    <string name="recording_check_short_title">Η εγγραφή ήταν πολύ σύντομη</string>
+    <string name="recording_check_short_message">Οι εγγραφές κάτω των %1$d δευτερολέπτων δεν μεταφορτώνονται. Συνεχίστε για να προσθέσετε σε αυτήν ή ηχογραφήστε ξανά για να την αντικαταστήσετε.</string>
+    <string name="recording_check_silent_title">Δεν ακούσαμε τίποτα</string>
+    <string name="recording_check_silent_message">Βεβαιωθείτε ότι το μικρόφωνο δεν καλύπτεται και δεν είναι απενεργοποιημένο. Συνεχίστε για να προσθέσετε σε αυτήν ή ηχογραφήστε ξανά για να την αντικαταστήσετε.</string>
+    <string name="recording_check_keep_going">Συνέχεια</string>
+    <string name="recording_check_record_again">Νέα ηχογράφηση</string>
+    <string name="recording_check_upload_anyway">Μεταφόρτωση παρ’ όλα αυτά</string>
+</resources>

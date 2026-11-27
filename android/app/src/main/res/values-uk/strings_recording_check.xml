@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop found a recording that is too short or silent: the user chooses before anything is uploaded. -->
+<resources>
+    <string name="recording_check_short_title">Запис дуже короткий</string>
+    <string name="recording_check_short_message">Записи коротші за %1$d секунд не завантажуються. Продовжте, щоб доповнити цей запис, або запишіть заново, щоб замінити його.</string>
+    <string name="recording_check_silent_title">Ми нічого не почули</string>
+    <string name="recording_check_silent_message">Переконайтеся, що мікрофон нічим не закритий і не вимкнений. Продовжте, щоб доповнити цей запис, або запишіть заново, щоб замінити його.</string>
+    <string name="recording_check_keep_going">Продовжити</string>
+    <string name="recording_check_record_again">Записати заново</string>
+    <string name="recording_check_upload_anyway">Усе одно завантажити</string>
+</resources>

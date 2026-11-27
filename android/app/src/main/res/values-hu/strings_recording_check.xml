@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop found a recording that is too short or silent: the user chooses before anything is uploaded. -->
+<resources>
+    <string name="recording_check_short_title">Ez nagyon rövid volt</string>
+    <string name="recording_check_short_message">A %1$d másodpercnél rövidebb felvételeket nem töltjük fel. Folytasd, hogy kiegészítsd ezt a felvételt, vagy vedd fel újra, hogy lecseréld.</string>
+    <string name="recording_check_silent_title">Nem hallottunk semmit</string>
+    <string name="recording_check_silent_message">Ellenőrizd, hogy semmi nem takarja-e a mikrofont, és nincs-e kikapcsolva. Folytasd, hogy kiegészítsd ezt a felvételt, vagy vedd fel újra, hogy lecseréld.</string>
+    <string name="recording_check_keep_going">Folytatás</string>
+    <string name="recording_check_record_again">Újrafelvétel</string>
+    <string name="recording_check_upload_anyway">Feltöltés így is</string>
+</resources>

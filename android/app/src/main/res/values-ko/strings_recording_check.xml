@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop found a recording that is too short or silent: the user chooses before anything is uploaded. -->
+<resources>
+    <string name="recording_check_short_title">녹음이 너무 짧아요</string>
+    <string name="recording_check_short_message">%1$d초 미만의 녹음은 업로드되지 않습니다. 계속 녹음해서 이어 붙이거나, 다시 녹음해서 바꾸세요.</string>
+    <string name="recording_check_silent_title">아무 소리도 들리지 않았어요</string>
+    <string name="recording_check_silent_message">마이크가 가려지거나 꺼져 있지 않은지 확인하세요. 계속 녹음해서 이어 붙이거나, 다시 녹음해서 바꾸세요.</string>
+    <string name="recording_check_keep_going">계속 녹음</string>
+    <string name="recording_check_record_again">다시 녹음</string>
+    <string name="recording_check_upload_anyway">그래도 업로드</string>
+</resources>

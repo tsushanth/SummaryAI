@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop found a recording that is too short or silent: the user chooses before anything is uploaded. -->
+<resources>
+    <string name="recording_check_short_title">Masyadong maikli iyon</string>
+    <string name="recording_check_short_message">Hindi ina-upload ang mga recording na wala pang %1$d segundo. Magpatuloy para madagdagan ito, o mag-record muli para palitan ito.</string>
+    <string name="recording_check_silent_title">Wala kaming narinig</string>
+    <string name="recording_check_silent_message">Tiyaking walang nakatakip sa mikropono at hindi ito naka-off. Magpatuloy para madagdagan ito, o mag-record muli para palitan ito.</string>
+    <string name="recording_check_keep_going">Magpatuloy</string>
+    <string name="recording_check_record_again">Mag-record muli</string>
+    <string name="recording_check_upload_anyway">I-upload pa rin</string>
+</resources>

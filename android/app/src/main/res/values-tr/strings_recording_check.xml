@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop found a recording that is too short or silent: the user chooses before anything is uploaded. -->
+<resources>
+    <string name="recording_check_short_title">Bu çok kısaydı</string>
+    <string name="recording_check_short_message">%1$d saniyeden kısa kayıtlar yüklenmez. Bu kayda eklemek için devam edin veya değiştirmek için yeniden kaydedin.</string>
+    <string name="recording_check_silent_title">Hiçbir şey duyamadık</string>
+    <string name="recording_check_silent_message">Mikrofonun önünde bir şey olmadığından ve kapalı olmadığından emin olun. Bu kayda eklemek için devam edin veya değiştirmek için yeniden kaydedin.</string>
+    <string name="recording_check_keep_going">Devam et</string>
+    <string name="recording_check_record_again">Yeniden kaydet</string>
+    <string name="recording_check_upload_anyway">Yine de yükle</string>
+</resources>
