@@ -3,12 +3,12 @@ package com.kreativekoala.summaryai.service.activation
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.util.Log
 import com.android.installreferrer.api.InstallReferrerClient
 import com.android.installreferrer.api.InstallReferrerStateListener
 import com.kreativekoala.summaryai.BuildConfig
 import com.kreativekoala.summaryai.service.FirebaseAnalyticsHelper
+import com.kreativekoala.summaryai.util.TestInstall
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
@@ -82,14 +82,9 @@ object ActivationBootstrap {
         } catch (_: Exception) { "fresh" }
         tracker.onAppStart(kind, PlayReferrerFetcher(app))
         RecordSteps.install(
-            RecordStepReporter(prefs, BuildConfig.VERSION_NAME, isTestDevice(app), ::postStep)
+            RecordStepReporter(prefs, BuildConfig.VERSION_NAME, TestInstall.isTest(app), ::postStep)
         )
     }
-
-    /** Firebase Test Lab devices (Play pre-launch reports) and our own debug builds are marked, not counted as people. */
-    private fun isTestDevice(context: Context): Boolean = BuildConfig.DEBUG ||
-        runCatching { Settings.System.getString(context.contentResolver, "firebase.test.lab") == "true" }
-            .getOrDefault(false)
 
     private val stepClient by lazy { OkHttpClient() }
 
