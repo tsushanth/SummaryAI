@@ -38,6 +38,20 @@ const LANGUAGE_NAMES: Record<string, string> = {
   ro: 'Romanian',
   sv: 'Swedish',
   uk: 'Ukrainian',
+  // The rest of the transcription languages (lib/transcriptionLanguage.ts): a summary follows the spoken language.
+  bg: 'Bulgarian',
+  ca: 'Catalan',
+  da: 'Danish',
+  et: 'Estonian',
+  he: 'Hebrew',
+  iw: 'Hebrew', // legacy Java/Android code
+  hr: 'Croatian',
+  lt: 'Lithuanian',
+  lv: 'Latvian',
+  no: 'Norwegian',
+  nb: 'Norwegian',
+  nn: 'Norwegian',
+  sk: 'Slovak',
 };
 
 /** Chinese written in Traditional characters, by market (wording differs: Taiwan 軟體/網路, Hong Kong 軟件/網絡). */
@@ -79,6 +93,19 @@ export function pickOutputLanguage(...candidates: Array<string | null | undefine
     if (languageNameForCode(c)) return c as string;
   }
   return null;
+}
+
+/**
+ * The language a summary is written in: the one chosen for the recording, else the language transcription detected
+ * ("same language as the recording"). A document has no detected language (it is stored as 'en' whatever it says), so
+ * null: the summary prompt then asks the model to follow the text.
+ */
+export function summaryLanguageCode(
+  recording: { output_language?: string | null; content_type?: string | null; file_path?: string | null },
+  detectedLanguage: string | null | undefined
+): string | null {
+  const isDocument = recording.content_type === 'application/pdf' || !!recording.file_path?.endsWith('.pdf');
+  return pickOutputLanguage(recording.output_language, isDocument ? null : detectedLanguage);
 }
 
 /**

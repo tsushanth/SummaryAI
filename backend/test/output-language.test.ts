@@ -54,6 +54,7 @@ function table(name: string) {
 vi.mock('../src/lib/supabase.js', () => ({ supabaseAdmin: { from: vi.fn((t: string) => table(t)), rpc: vi.fn() } }));
 
 import { languageNameForCode, languageInstruction, pickOutputLanguage } from '../src/lib/outputLanguage.js';
+import { TRANSCRIPTION_LANGUAGES } from '../src/lib/transcriptionLanguage.js';
 import { answerQuestion } from '../src/services/llmService.js';
 import { PERSONAS, personaSystemPrompt } from '../src/services/coachingPersonas.js';
 import { queueInsightGeneration, getMeetingOutputLanguage } from '../src/services/liveInsightsService.js';
@@ -70,6 +71,10 @@ describe('languageNameForCode', () => {
       ro: 'Romanian', ru: 'Russian', sv: 'Swedish', th: 'Thai', tl: 'Tagalog', tr: 'Turkish', uk: 'Ukrainian', vi: 'Vietnamese', zh: 'Simplified Chinese', en: 'English',
     };
     for (const [code, name] of Object.entries(expected)) expect(languageNameForCode(code), code).toBe(name);
+  });
+
+  it('names every language a recording can be transcribed in, so a summary can follow it', () => {
+    expect(TRANSCRIPTION_LANGUAGES.filter((l) => !languageNameForCode(l.code)).map((l) => l.code)).toEqual([]);
   });
 
   it('handles regions, underscores, case, legacy and Filipino codes', () => {

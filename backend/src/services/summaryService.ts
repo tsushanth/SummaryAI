@@ -132,9 +132,18 @@ export interface SummaryPrompts {
 export function buildSummaryPrompts(input: SummaryPromptInput): SummaryPrompts {
   const template = getSummaryTemplate(input.templateId);
   const speakerList = input.speakers.length > 1 ? `Participants: ${input.speakers.join(', ')}\n\n` : '';
-  const languageInstruction = input.languageName
-    ? `\n\nWrite the entire summary, detailed_summary, key_points, action_items, and topics in ${input.languageName}. JSON keys remain in English; only the values are translated.`
-    : '';
+  // `languageName` is the chosen summary language, else the detected spoken language. When neither is known (documents),
+  // the language still has to be asked for: the prompt is in English, and with no instruction the model answers in English.
+  const spoken = input.fromNotes ? 'meeting' : 'transcript';
+  const notesCaveat = input.fromNotes ? ' Judge it by what was said, not by the English headings in the notes.' : '';
+  const target = input.languageName
+    ? `${input.languageName}.`
+    : `the main language of the ${spoken}, even though these instructions are in English.${notesCaveat}`;
+  const languageInstruction = `\n\nWrite the entire summary, detailed_summary, key_points, action_items, and topics in ${target} JSON keys remain in English; only the values are translated. Section headings and stock phrases named in the template instructions (such as "Not discussed") are translated too. Priority values stay high, medium or low.`;
+  // Naming the language before writing in it keeps the model from drifting back to English. The parser ignores the field.
+  const languageField = input.languageName
+    ? ''
+    : `\n  "language": "name of the main language of the ${spoken}; write every other value in this language",`;
 
   const notesPreamble = input.fromNotes
     ? 'The meeting was too long to read in one pass, so the transcript was condensed, in order and in full, into the notes below (one block per consecutive part, each ending where the next begins). Treat the notes as the transcript: cover the whole meeting from the first block to the last, and do not mention that it was condensed.\n\n'
@@ -153,7 +162,7 @@ ${input.transcriptText}
 Important: reference speakers by name to show who said what. For action items, use the speaker's name as the assignee when they committed to do something.${languageInstruction}
 
 Respond with ONLY valid JSON in this format:
-{
+{${languageField}
   "summary": "Plain-text summary laid out as the template instructions describe (no markdown). Keep it short enough to read in under a minute.",
   "detailed_summary": "A fuller plain-text write-up in 3 to 6 short paragraphs separated by blank lines: the context, what was discussed topic by topic (who said what), decisions made, and open questions. No markdown, no bullet characters. Do not repeat the summary word for word.",
   "key_points": ["point 1", "point 2"],
@@ -163,7 +172,7 @@ Respond with ONLY valid JSON in this format:
 
   const system = input.languageName
     ? `You are a helpful assistant that summarizes meeting transcripts. Write all natural-language values in ${input.languageName}; keep JSON keys in English. Always respond with ONLY valid JSON, no additional text.`
-    : 'You are a helpful assistant that summarizes meeting transcripts. Always respond with ONLY valid JSON, no additional text.';
+    : `You are a helpful assistant that summarizes meeting transcripts. Write all natural-language values in the main language of the ${spoken}; keep JSON keys in English. Always respond with ONLY valid JSON, no additional text.`;
 
   return { system, user, template };
 }
