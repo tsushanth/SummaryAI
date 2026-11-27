@@ -38,6 +38,9 @@ export const USER_TABLES: { table: string; col: string }[] = [
   { table: 'live_insights', col: 'user_id' },
   { table: 'bot_runs', col: 'user_id' },
   { table: 'phone_calls', col: 'user_id' },
+  { table: 'phone_return_routes', col: 'user_id' },
+  { table: 'phone_subscriptions', col: 'user_id' },
+  { table: 'phone_numbers', col: 'user_id' },
   { table: 'verified_phones', col: 'user_id' },
   { table: 'recordings', col: 'user_id' },
   { table: 'meetings', col: 'user_id' },
@@ -65,6 +68,17 @@ export function carrierReferences(calls: PhoneCallRefs[], numbers: { twilio_call
   }
   for (const n of numbers) if (n.twilio_caller_id_sid) out.push(`callerid:${n.twilio_caller_id_sid}`);
   return out;
+}
+
+interface OwnedNumber { provider_sid?: string | null; status?: string | null; agent_id?: string | null }
+
+/** A personal number still rented and an agent still held at Calldesk go with the account. */
+export function ownedReferences(userId: string, owned: OwnedNumber[]): string[] {
+  const live = owned.filter((n) => n.status !== 'released');
+  return [
+    ...live.filter((n) => n.provider_sid).map((n) => `number:${n.provider_sid}`),
+    ...(owned.some((n) => n.agent_id) ? [`agent:${userId}`] : []),
+  ];
 }
 
 interface DbError { code?: string; message?: string; status?: number }
@@ -212,7 +226,9 @@ export function createPurgeDeps(overrides: Partial<PurgeDeps> = {}): PurgeDeps {
           supabaseAdmin.from('phone_calls').select('*').eq('user_id', userId).order('id').range(a, b));
         const numbers = await selectAll<{ twilio_caller_id_sid?: string | null }>((a, b) =>
           supabaseAdmin.from('verified_phones').select('*').eq('user_id', userId).order('id').range(a, b));
-        return { recordings, botRuns, twilioSids: carrierReferences(calls, numbers) };
+        const owned = await selectAll<OwnedNumber>((a, b) =>
+          supabaseAdmin.from('phone_numbers').select('*').eq('user_id', userId).order('id').range(a, b));
+        return { recordings, botRuns, twilioSids: [...carrierReferences(calls, numbers), ...ownedReferences(userId, owned)] };
       },
       async countRows(userId) {
         const out: Record<string, number> = {};

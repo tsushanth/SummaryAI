@@ -13,6 +13,8 @@ import calendarRoutes, { calendarCallbackRouter } from './calendar.js';
 import webhooksRoutes from './webhooks.js';
 import phoneRoutes from './phone.js';
 import phoneWebhookRoutes from './phoneWebhooks.js';
+import { createCalldeskWebhookRouter, createPhoneInternalRouter } from './phonePartner.js';
+import { supabaseAdmin } from '../lib/supabase.js';
 import subscriptionsRoutes from './subscriptions.js';
 import attributionRoutes from './attribution.js';
 import activationRoutes from './activation.js';
@@ -37,6 +39,16 @@ router.use('/webhooks/recall-assistant', voiceAssistantWebhookRouter);
 
 // Phone call webhooks: carrier signature required on every one. Mounted before /webhooks.
 router.use('/webhooks/twilio', phoneWebhookRoutes);
+
+// Agent call results from Calldesk: HMAC signature required.
+router.use('/webhooks/calldesk', createCalldeskWebhookRouter());
+
+// Owner actions of the phone feature (x-internal-secret, fails closed)
+router.use('/internal/phone', createPhoneInternalRouter(undefined, async (since) => {
+  const { data, error } = await supabaseAdmin.rpc('phone_funnel', { p_since: since });
+  if (error) throw new Error(`phone db phone_funnel: ${error.code ?? 'error'}`);
+  return data;
+}));
 
 // Webhooks (no auth required - verified by signature)
 router.use('/webhooks', webhooksRoutes);

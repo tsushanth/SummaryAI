@@ -69,11 +69,12 @@ app.use('/webhooks/stripe', express.raw({ type: 'application/json' }));
 // live-stt segment sink: signed over the exact bytes, 512 KB cap. Must come BEFORE express.json(). Mounted at the root and under the API prefix.
 app.use(['/internal/live-segments', `/${config.API_VERSION}/internal/live-segments`], liveSegmentsBodyParser);
 
-// Recall webhooks are signed over the exact bytes sent, so keep them next to the parsed body (req.rawBody) for those routes only.
+// Recall and Calldesk webhooks are signed over the exact bytes sent, so keep them next to the parsed body (req.rawBody) for those routes only.
 app.use(express.json({
   limit: '10mb',
   verify: (req, _res, buf) => {
-    if ((req as Request).originalUrl.split('?')[0]?.includes('/webhooks/recall')) (req as Request & { rawBody?: Buffer }).rawBody = buf;
+    const path = (req as Request).originalUrl.split('?')[0] ?? '';
+    if (path.includes('/webhooks/recall') || path.endsWith('/webhooks/calldesk')) (req as Request & { rawBody?: Buffer }).rawBody = buf;
   },
 }));
 // Twilio webhooks send application/x-www-form-urlencoded data

@@ -30,6 +30,7 @@ const REFUSALS: Record<string, [number, string, string]> = {
   service_limit: [429, 'PHONE_CALLS_BUSY', 'Calls are not available right now. Try again later.'],
   user_minutes_used: [429, 'PHONE_MINUTES_USED', 'You have used your call minutes for this month.'],
   budget_used: [429, 'PHONE_BUDGET_USED', 'Phone calls are used up for this month.'],
+  included_used: [429, 'PHONE_INCLUDED_USED', 'The included minutes of your subscription are used up.'],
 };
 
 export interface StartCallInput {
@@ -73,23 +74,39 @@ export async function startCall(d: PhoneDeps, userId: string, input: StartCallIn
     throw new Error('unreachable');
   }
   const mine = verifiedPhones(await d.store.phonesOfUser(userId));
-  const from = input.from_id === undefined || input.from_id === null ? mine[0] : mine.find((p) => p.id === input.from_id);
+  // from_id: one of the verified numbers (default), 'shared' for a shared number, or the id of the personal number.
+  const verified = input.from_id === undefined || input.from_id === null || input.from_id === 'shared' ? mine[0] : mine.find((p) => p.id === input.from_id);
+  const personal = !verified && d.extras && mine.length ? await d.extras.numbers.personalNumber(userId) : null;
+  const usePersonal = !!personal && personal.status === 'active' && personal.id === input.from_id;
+  const from = verified ?? (usePersonal ? mine[0] : undefined);
   if (!from) return refuse('no_verified_number', new PhoneError(403, 'PHONE_NOT_VERIFIED', 'Verify your phone number first.'));
-  const fromParsed = parsePhoneNumber(from.phone_number);
-  if (fromParsed.ok === false) return refuse('from_not_allowed', new PhoneError(403, 'PHONE_NOT_VERIFIED', 'Verify your phone number first.'));
+  const ownParsed = parsePhoneNumber(from.phone_number);
+  if (ownParsed.ok === false) return refuse('from_not_allowed', new PhoneError(403, 'PHONE_NOT_VERIFIED', 'Verify your phone number first.'));
+  const destHash = hashNumber(to.e164, d.settings.numberHashKey);
+  const fromHash = hashNumber(ownParsed.e164, d.settings.numberHashKey);
+
+  let callerId = ownParsed.e164;
+  if (input.from_id === 'shared') {
+    // The shared number and the person called are tied to this account, so a return call comes back here.
+    const route = d.extras ? await d.extras.numbers.assignRoute(userId, from.id, destHash, ownParsed.country) : null;
+    if (!route || route.ok === false) return refuse('no_shared_number', new PhoneError(409, 'PHONE_NO_SHARED_NUMBER', 'No shared number is free for this call. Use your own number.'));
+    callerId = route.phoneNumber;
+  } else if (usePersonal) callerId = personal!.phone_number!;
+  const fromParsed = { e164: callerId, country: ownParsed.country };
 
   const callId = d.newId();
-  const fromHash = hashNumber(fromParsed.e164, d.settings.numberHashKey);
-  const reserved = await d.store.reserveCall({
-    callId, userId, fromHash, destHash: hashNumber(to.e164, d.settings.numberHashKey), from: fromParsed.e164, to: to.e164,
-  }).catch((e) => {
+  const reserving = usePersonal
+    ? d.extras!.numbers.reserveLeg({ kind: 'call', callId, userId, numberId: personal!.id, userHash: fromHash, remoteHash: destHash, from: callerId, to: to.e164, callSid: null, company: false })
+      .then((r) => (r.ok === false ? r : { ...r, minutesLeft: Math.floor(r.limitSeconds / 60) }))
+    : d.store.reserveCall({ callId, userId, fromHash, destHash, from: callerId, to: to.e164 });
+  const reserved = await reserving.catch((e) => {
     // No ledger, no call.
     d.alert('LEDGER_UNAVAILABLE', { at: 'reserve' });
     throw e;
   });
   if (reserved.ok === false) {
     const [status, code, message] = REFUSALS[reserved.reason] ?? REFUSALS.service_limit!;
-    if (reserved.reason === 'user_minutes_used' || reserved.reason === 'budget_used') {
+    if (reserved.reason === 'user_minutes_used' || reserved.reason === 'budget_used' || reserved.reason === 'included_used') {
       await d.track('cap_hit', userId, { cap: reserved.reason === 'budget_used' ? 'month_budget' : 'user_minutes', country: fromParsed.country });
       if (reserved.reason === 'budget_used') d.alert('BUDGET_CAP_HIT', { at: 'call' });
     }
@@ -226,8 +243,13 @@ export async function settleCall(d: PhoneDeps, callId: string, ledger?: LedgerCa
     unknown = true;
   }
 
-  const talk = children.reduce((s, c) => s + c.durationSeconds, 0);
-  const result = await d.store.settleCall(callId, parent?.durationSeconds ?? 0, talk, unknown);
+  // An incoming call is billed on its own length; a call from the app on both legs.
+  const incoming = row.kind === 'inbound' || row.kind === 'agent';
+  if (incoming && !d.extras) return 'waiting';
+  const talk = row.kind === 'agent' ? parent?.durationSeconds ?? 0 : children.reduce((s, c) => s + c.durationSeconds, 0);
+  const result = incoming
+    ? await d.extras!.numbers.settleLeg(callId, parent?.durationSeconds ?? 0, unknown)
+    : await d.store.settleCall(callId, parent?.durationSeconds ?? 0, talk, unknown);
   if (result.ok === false) return 'nothing';
   if (result.overReservation) d.alert('COST_OVER_RESERVATION');
   if (unknown) d.alert('SETTLED_AT_FULL_RESERVATION');

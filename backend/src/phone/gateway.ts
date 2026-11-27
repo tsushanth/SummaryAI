@@ -21,6 +21,10 @@ export interface TelephonyGateway {
   downloadRecording(recordingSid: string): Promise<Buffer>;
   deleteRecording(recordingSid: string): Promise<'deleted' | 'not_found'>;
   isValidRequest(signature: string, url: string, params: Record<string, string>): boolean;
+  /** Local voice numbers the carrier can sell (United States and Canada need no registration). */
+  searchNumbers(country: 'US' | 'CA', areaCode?: string): Promise<string[]>;
+  buyNumber(e164: string, voiceUrl: string): Promise<string>;
+  releaseNumber(sid: string): Promise<void>;
 }
 
 /** A short, number-free description of a carrier error for logs and events. */
@@ -100,6 +104,17 @@ export function createTwilioGateway(s: PhoneSettings): TelephonyGateway {
     },
     isValidRequest(signature, url, params) {
       return !!signature && Twilio.validateRequest(s.authToken, signature, url, params);
+    },
+    async searchNumbers(country, areaCode) {
+      const found = await client.availablePhoneNumbers(country).local.list({ voiceEnabled: true, limit: 5, ...(areaCode ? { areaCode: Number(areaCode) } : {}) });
+      return found.filter((n) => n.addressRequirements === 'none').map((n) => n.phoneNumber);
+    },
+    async buyNumber(e164, voiceUrl) {
+      return (await client.incomingPhoneNumbers.create({ phoneNumber: e164, voiceUrl, voiceMethod: 'POST', friendlyName: 'MeetingMind' })).sid;
+    },
+    async releaseNumber(sid) {
+      try { await client.incomingPhoneNumbers(sid).remove(); }
+      catch (e) { if (!isNotFound(e)) throw e; }
     },
   };
 }

@@ -16,6 +16,9 @@ import { startCall, hangupCall, isUuid } from '../phone/calls.js';
 import { hashNumber } from '../phone/numbers.js';
 import { BUSINESS_ANSWERS, BUSINESS_TYPES, CALL_LANGUAGES, CONSENT_VERSION, MAX_VERIFIED_NUMBERS } from '../phone/constants.js';
 import { CLIENT_STEPS, type PhoneStep } from '../phone/events.js';
+import { verifySubscription, provisionPersonalNumber, isLive } from '../phone/provision.js';
+import { setAgent, removeAgent } from '../phone/agents.js';
+import type { PhoneExtras } from '../phone/deps.js';
 import type { CallRow, PhoneRow } from '../phone/store.js';
 
 const publicPhone = (p: PhoneRow) => ({ id: p.id, phone_number: p.phone_number, verified_at: p.verified_at, created_at: p.created_at });
@@ -24,6 +27,12 @@ const publicCall = (c: CallRow) => ({
   id: c.id, user_id: c.user_id, from_number: c.from_number, to_number: c.to_number, to_name: c.to_name, status: c.status,
   is_recording: c.status === 'recording', recording_duration: c.recording_duration, recording_id: c.recording_id,
   failure_reason: c.failure_reason, answered_at: c.answered_at, ended_at: c.ended_at, started_at: c.created_at, created_at: c.created_at,
+  direction: c.direction === 'in' ? 'in' : 'out',
+  // What the agent reported, when one took the call.
+  agent: c.agent_result ? {
+    summary: c.agent_result.summary, outcome: c.agent_result.outcome, ended_reason: c.agent_result.ended_reason,
+    duration_seconds: c.agent_result.duration_seconds, transcript: c.agent_result.transcript, analysis: c.agent_result.analysis,
+  } : null,
 });
 
 export function createPhoneRouter(getDeps: () => PhoneDeps | null = getPhoneDeps, authMw: any = authenticate): Router {
@@ -155,6 +164,55 @@ export function createPhoneRouter(getDeps: () => PhoneDeps | null = getPhoneDeps
     });
     res.status(204).end();
   }));
+
+  // ---- Numbers, subscription and agent (migration 033; absent until PHONE_NUMBERS_SCHEMA is on) ----
+  const extra = (fn: (req: Request, res: Response, d: PhoneDeps, x: PhoneExtras, userId: string) => Promise<void>) =>
+    route(async (req, res, d, userId) => {
+      if (!d.extras) throw new PhoneError(503, 'PHONE_NUMBERS_UNAVAILABLE', 'Your own number is not available yet.');
+      await eligible(d, userId);
+      await fn(req, res, d, d.extras, userId);
+    });
+
+  /** What the account has and what can be bought. Price and included amounts come from server configuration. */
+  router.get('/plan', extra(async (_req, res, d, x, userId) => {
+    const plan = x.plan();
+    const sub = await x.numbers.subscription(userId);
+    const number = await x.numbers.personalNumber(userId);
+    const live = isLive(sub, d.now());
+    res.json({
+      purchase_enabled: plan.purchaseEnabled,
+      product_id: plan.purchaseEnabled ? plan.productId : null,
+      price_label: plan.purchaseEnabled ? plan.priceLabel || null : null,
+      call_minutes: plan.callMinutes,
+      agent_minutes: plan.agentMinutes,
+      subscription: live ? {
+        expires_at: sub.expires_at,
+        call_minutes_left: Math.floor((await x.numbers.subLeft(userId, 'call')) / 60),
+        agent_minutes_left: Math.floor((await x.numbers.subLeft(userId, 'agent')) / 60),
+      } : null,
+      number: number?.status === 'active' ? { id: number.id, phone_number: number.phone_number, country: number.country } : null,
+      agents_available: !!x.calldesk,
+      agent: number?.agent_id ? { description: number.agent_description, language: number.agent_language } : null,
+    });
+  }));
+
+  router.get('/agent/languages', extra(async (_req, res, _d, x) => {
+    if (!x.calldesk) throw new PhoneError(503, 'PHONE_AGENT_UNAVAILABLE', 'Agents are not available right now.');
+    res.json({ languages: await x.calldesk.languages() });
+  }));
+
+  router.post('/subscription', extra(async (req, res, d, x, userId) => {
+    const row = await verifySubscription(d, x, userId, req.body ?? {});
+    res.status(201).json({ expires_at: row.expires_at, call_minutes: row.call_seconds / 60, agent_minutes: row.agent_seconds / 60 });
+  }));
+
+  router.post('/number', extra(async (req, res, d, x, userId) => {
+    const n = await provisionPersonalNumber(d, x, userId, req.body ?? {});
+    res.status(201).json({ id: n.id, phone_number: n.phone_number, country: n.country });
+  }));
+
+  router.put('/agent', extra(async (req, res, d, x, userId) => { res.json(await setAgent(d, x, userId, req.body ?? {})); }));
+  router.delete('/agent', extra(async (_req, res, d, x, userId) => { await removeAgent(d, x, userId); res.json({ deleted: true }); }));
 
   // Endpoints of app versions that predate the consent screen and carrier verification.
   router.all(['/verify/send', '/verify/check', '/voip/token', '/calls/:id/record'], (_req: Request, _res: Response, next: NextFunction) => {

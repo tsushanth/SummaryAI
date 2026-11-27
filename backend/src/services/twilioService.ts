@@ -6,12 +6,15 @@
  *   phone:RE...       a recording on the calls subaccount
  *   phonecall:CA...   every recording of one call on the calls subaccount
  *   callerid:PN...    a verified caller ID (the user's own number) on the calls subaccount
+ *   number:PN...      a rented personal number on the calls subaccount
+ *   agent:<user id>   the account's agents, transcripts and number record at Calldesk
  */
 
 import Twilio from 'twilio';
 import { config } from '../config/index.js';
 import { readPhoneSettings } from '../phone/settings.js';
 import { createTwilioGateway } from '../phone/gateway.js';
+import { createCalldeskClient, readCalldeskSettings } from '../phone/calldesk.js';
 
 export class TwilioService {
   private static client: Twilio.Twilio | null = null;
@@ -37,11 +40,17 @@ export class TwilioService {
         throw err;
       }
     }
+    if (kind === 'agent') {
+      const calldesk = readCalldeskSettings();
+      if (!calldesk) throw new Error('agent service not configured');
+      return createCalldeskClient(calldesk).deleteUser(sid);
+    }
     const settings = readPhoneSettings();
     if (!settings) throw new Error('calls subaccount not configured');
     const gateway = createTwilioGateway(settings);
     if (kind === 'phone') return gateway.deleteRecording(sid);
     if (kind === 'callerid') return gateway.deleteCallerId(sid);
+    if (kind === 'number') { await gateway.releaseNumber(sid); return 'deleted'; }
     if (kind === 'phonecall') {
       let result: 'deleted' | 'not_found' = 'not_found';
       for (const r of await gateway.listRecordings(sid)) {
