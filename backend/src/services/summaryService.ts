@@ -7,6 +7,24 @@ import { getSummaryTemplate, type SummaryTemplate } from './summaryTemplates.js'
 
 export type ActionPriority = 'high' | 'medium' | 'low';
 
+/** `recordings.source` of a call made or taken with the phone feature (set in phone/recordings.ts). */
+export const PHONE_CALL_SOURCE = 'phone_call';
+
+/** Every phone call recording has had the spoken notice (without it the audio is deleted unheard), so it is not news. */
+export const PHONE_CALL_NOTE = [
+  'This is a phone call. An automated notice that the call is being recorded was played to the people on it before the conversation, and the transcript may contain that notice.',
+  'That this call is recorded is not part of its content. Treat every remark about it as never said: the notice itself, anyone asking or telling whether the call is being recorded, plans to listen to or check the recording, and anyone\'s agreement, consent or objection to being recorded.',
+  'None of that may appear anywhere in what you write, neither on its own nor inside a sentence about something else: not in the summary, detailed summary, key points, topics, decisions, open questions or action items.',
+  'Summarize everything else that was said as you normally would, however brief or informal. Only if nothing else at all was said, write that there was no further conversation.',
+  'The words "record", "recording" and "recorded", and their translations, must not appear in your reply about this call being recorded; use them only if the people discuss something else, such as medical records or a music recording.',
+  'For example, write "said they would hang up", never "said they would hang up to check the recording".',
+].join(' ');
+
+/** What a prompt about this recording gets in addition: the note for a phone call, nothing at all for any other recording. */
+export function phoneCallNote(source: string | null | undefined): string {
+  return source === PHONE_CALL_SOURCE ? `\n\n${PHONE_CALL_NOTE}` : '';
+}
+
 export interface ActionItem {
   /** Canonical text of the action. Clients historically read either `task` or `title`; both are emitted. */
   task: string;
@@ -121,6 +139,8 @@ export interface SummaryPromptInput {
    * transcript itself. Omitted for normal meetings, which keep the exact prompt below unchanged.
    */
   fromNotes?: boolean;
+  /** `recordings.source`. Only a phone call changes the prompt. */
+  source?: string | null;
 }
 
 export interface SummaryPrompts {
@@ -159,7 +179,7 @@ Also provide action items (if any; include who committed to each as the assignee
 ${speakerList}${notesPreamble}${transcriptLabel}:
 ${input.transcriptText}
 
-Important: reference speakers by name to show who said what. For action items, use the speaker's name as the assignee when they committed to do something.${languageInstruction}
+Important: reference speakers by name to show who said what. For action items, use the speaker's name as the assignee when they committed to do something.${languageInstruction}${phoneCallNote(input.source)}
 
 Respond with ONLY valid JSON in this format:
 {${languageField}

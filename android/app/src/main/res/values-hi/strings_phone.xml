@@ -6,6 +6,9 @@
     <string name="phone_notification_title">कॉल जारी है</string>
     <string name="phone_minutes_left">इस महीने बचे मुफ़्त मिनट: %2$d में से %1$d</string>
     <string name="phone_service_used_up">इस महीने के फ़ोन कॉल खत्म हो गए हैं। कृपया अगले महीने फिर कोशिश करें।</string>
+    <string name="phone_more_minutes_low">इस महीने के मुफ़्त कॉल मिनट खत्म होने वाले हैं।</string>
+    <string name="phone_more_minutes_button">मुझे और मिनट चाहिए</string>
+    <string name="phone_more_minutes_thanks">धन्यवाद। हम और मिनट देने पर विचार करेंगे।</string>
     <string name="phone_your_number">आपका नंबर</string>
     <string name="phone_verify_intro">कॉल में आपका अपना नंबर दिखता है। इसे रजिस्टर करने के लिए हम इस पर कॉल करते हैं और आप अपने फ़ोन के कीपैड पर एक कोड टाइप करते हैं। केवल अमेरिका और कनाडा के नंबर।</string>
     <string name="phone_number_hint">देश कोड के साथ नंबर, उदाहरण के लिए +1 415 555 0100</string>

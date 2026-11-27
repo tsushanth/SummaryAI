@@ -6,6 +6,9 @@
     <string name="phone_notification_title">Kasalukuyang may tawag</string>
     <string name="phone_minutes_left">Natitirang libreng minuto ngayong buwan: %1$d sa %2$d</string>
     <string name="phone_service_used_up">Ubos na ang mga tawag sa telepono para sa buwang ito. Pakisubukan muli sa susunod na buwan.</string>
+    <string name="phone_more_minutes_low">Paubos na ang libreng minuto ng tawag mo para sa buwang ito.</string>
+    <string name="phone_more_minutes_button">Gusto ko ng mas maraming minuto</string>
+    <string name="phone_more_minutes_thanks">Salamat. Pag-iisipan namin ang pag-aalok ng mas maraming minuto.</string>
     <string name="phone_your_number">Ang numero mo</string>
     <string name="phone_verify_intro">Ipinapakita sa mga tawag ang sarili mong numero. Para irehistro ito, tatawagan namin ito at magta-type ka ng code sa keypad ng telepono mo. Mga numero sa Estados Unidos at Canada lang.</string>
     <string name="phone_number_hint">Numero na may country code, halimbawa +1 415 555 0100</string>

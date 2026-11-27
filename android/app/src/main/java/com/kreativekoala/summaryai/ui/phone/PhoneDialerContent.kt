@@ -83,6 +83,48 @@ internal fun PhoneHeader(
     }
 }
 
+/** Shown when free minutes are low or used and nothing can be bought: one button to say more would be welcome. */
+@Composable
+internal fun MoreMinutesCard(state: PhoneUiState, onAsk: () -> Unit) {
+    MmCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                stringResource(if (state.minutesLeft <= 0) R.string.phone_error_minutes_used else R.string.phone_more_minutes_low),
+                style = MaterialTheme.typography.bodyMedium
+            )
+            if (state.moreMinutesAsked) {
+                Text(stringResource(R.string.phone_more_minutes_thanks), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+            } else {
+                Button(onClick = onAsk, enabled = !state.sendingMoreMinutes, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.phone_more_minutes_button))
+                }
+            }
+        }
+    }
+}
+
+/** The same, for a call tried with no free minutes left. */
+@Composable
+internal fun NoMinutesDialog(state: PhoneUiState, onAsk: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.phone_error_minutes_used), style = MaterialTheme.typography.titleMedium) },
+        text = if (state.moreMinutesAsked) {
+            { Text(stringResource(R.string.phone_more_minutes_thanks)) }
+        } else null,
+        confirmButton = {
+            if (state.moreMinutesAsked) {
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.ok)) }
+            } else {
+                Button(onClick = onAsk, enabled = !state.sendingMoreMinutes) { Text(stringResource(R.string.phone_more_minutes_button)) }
+            }
+        },
+        dismissButton = if (state.moreMinutesAsked) null else {
+            { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } }
+        }
+    )
+}
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun DialerContent(

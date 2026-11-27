@@ -241,7 +241,8 @@ async function processRecordingAsync(
           userDefault: profile?.preferences?.default_summary_template,
           recordingType: recording.recording_type,
         }),
-        recordingId
+        recordingId,
+        recording.source
       );
     } else {
       console.warn(`[Processing] ${jobId}: No Anthropic API key, using mock summary`);
@@ -453,7 +454,8 @@ export async function generateSummaryWithAnthropic(
   segments: TranscriptSegment[],
   outputLanguage?: string | null,
   templateId?: string | null,
-  recordingId?: string | null
+  recordingId?: string | null,
+  source?: string | null
 ): Promise<ParsedSummary> {
   const anthropic = instrumentAnthropic(new Anthropic({ apiKey: config.ANTHROPIC_API_KEY }));
 
@@ -491,6 +493,7 @@ export async function generateSummaryWithAnthropic(
     languageName: languageNameForCode(outputLanguage),
     complete,
     recordingId,
+    source,
     model: config.SUMMARY_MODEL,
   });
 }

@@ -7,6 +7,7 @@ import { carrierCode } from './gateway.js';
 import { MIN_RECORDING_SECONDS } from './constants.js';
 import { isUuid } from './calls.js';
 import type { CallRow } from './store.js';
+import { PHONE_CALL_SOURCE } from '../services/summaryService.js';
 
 export const recordingTitle = (call: Pick<CallRow, 'to_name' | 'to_number'>): string =>
   // The Android app translates these two fixed forms (strings server_title_call_with / server_title_call_to).
@@ -63,7 +64,7 @@ export async function ingestRecording(
       file_size_bytes: audio.length,
       duration_seconds: Math.max(1, Math.round(rec.durationSeconds)),
       status: 'uploaded',
-      source: 'phone_call',
+      source: PHONE_CALL_SOURCE, // also what keeps the recording itself out of the summary
       recording_type: 'meeting',
       content_type: 'audio/mpeg',
       output_language: call.output_language,

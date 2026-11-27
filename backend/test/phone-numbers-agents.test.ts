@@ -463,6 +463,15 @@ describe('free trial', () => {
     expect(x.asked).toEqual([]);
   });
 
+  it('says in the status whether a purchase is offered', async () => {
+    x.state.purchaseEnabled = false;
+    expect((await status()).purchase_offered).toBe(false);
+    trialOn();
+    expect((await status()).purchase_offered).toBe(false); // the free trial is not a purchase
+    x.state.purchaseEnabled = true;
+    expect((await status()).purchase_offered).toBe(true);
+  });
+
   it('is offered by the server, and nothing is bought until the person confirms', async () => {
     trialOn();
     expect((await status()).own_number).toBe(true);

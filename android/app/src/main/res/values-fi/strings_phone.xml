@@ -6,6 +6,9 @@
     <string name="phone_notification_title">Puhelu käynnissä</string>
     <string name="phone_minutes_left">Ilmaisia minuutteja jäljellä tässä kuussa: %1$d/%2$d</string>
     <string name="phone_service_used_up">Tämän kuukauden puhelut on käytetty. Yritä uudelleen ensi kuussa.</string>
+    <string name="phone_more_minutes_low">Tämän kuukauden ilmaiset puheluminuutit ovat loppumassa.</string>
+    <string name="phone_more_minutes_button">Haluan lisää minuutteja</string>
+    <string name="phone_more_minutes_thanks">Kiitos. Harkitsemme lisäminuuttien tarjoamista.</string>
     <string name="phone_your_number">Numerosi</string>
     <string name="phone_verify_intro">Puheluissa näkyy oma numerosi. Rekisteröidäksesi sen soitamme siihen, ja näppäilet koodin puhelimen näppäimistöllä. Vain Yhdysvaltojen ja Kanadan numerot.</string>
     <string name="phone_number_hint">Numero maakoodin kanssa, esimerkiksi +1 415 555 0100</string>

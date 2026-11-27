@@ -6,6 +6,9 @@
     <string name="phone_notification_title">Görüşme devam ediyor</string>
     <string name="phone_minutes_left">Bu ay kalan ücretsiz dakika: %1$d / %2$d</string>
     <string name="phone_service_used_up">Bu ayki telefon araması hakkı tükendi. Lütfen gelecek ay tekrar deneyin.</string>
+    <string name="phone_more_minutes_low">Bu ayki ücretsiz arama dakikalarınız azalıyor.</string>
+    <string name="phone_more_minutes_button">Daha fazla dakika istiyorum</string>
+    <string name="phone_more_minutes_thanks">Teşekkür ederiz. Daha fazla dakika sunmayı değerlendireceğiz.</string>
     <string name="phone_your_number">Numaranız</string>
     <string name="phone_verify_intro">Aramalarda kendi numaranız görünür. Numarayı kaydetmek için onu ararız, siz de telefonunuzun tuş takımından bir kod girersiniz. Yalnızca Amerika Birleşik Devletleri ve Kanada numaraları.</string>
     <string name="phone_number_hint">Ülke koduyla birlikte numara, örneğin +1 415 555 0100</string>

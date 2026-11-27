@@ -6,6 +6,9 @@
     <string name="phone_notification_title">Panggilan sedang berlangsung</string>
     <string name="phone_minutes_left">Sisa menit gratis bulan ini: %1$d dari %2$d</string>
     <string name="phone_service_used_up">Jatah panggilan telepon bulan ini sudah habis. Silakan coba lagi bulan depan.</string>
+    <string name="phone_more_minutes_low">Menit panggilan gratis Anda untuk bulan ini hampir habis.</string>
+    <string name="phone_more_minutes_button">Saya ingin menit tambahan</string>
+    <string name="phone_more_minutes_thanks">Terima kasih. Kami akan mempertimbangkan untuk menawarkan menit tambahan.</string>
     <string name="phone_your_number">Nomor Anda</string>
     <string name="phone_verify_intro">Panggilan menampilkan nomor Anda sendiri. Untuk mendaftarkannya, kami akan menelepon nomor tersebut dan Anda mengetik kode di tombol angka telepon Anda. Hanya nomor Amerika Serikat dan Kanada.</string>
     <string name="phone_number_hint">Nomor dengan kode negara, misalnya +1 415 555 0100</string>

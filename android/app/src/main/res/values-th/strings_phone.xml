@@ -6,6 +6,9 @@
     <string name="phone_notification_title">กำลังอยู่ในสาย</string>
     <string name="phone_minutes_left">นาทีฟรีที่เหลือในเดือนนี้: %1$d จาก %2$d</string>
     <string name="phone_service_used_up">โควตาการโทรของเดือนนี้หมดแล้ว กรุณาลองอีกครั้งในเดือนหน้า</string>
+    <string name="phone_more_minutes_low">นาทีโทรฟรีของเดือนนี้ใกล้หมดแล้ว</string>
+    <string name="phone_more_minutes_button">ฉันต้องการนาทีเพิ่ม</string>
+    <string name="phone_more_minutes_thanks">ขอบคุณ เราจะพิจารณาเพิ่มนาทีให้</string>
     <string name="phone_your_number">หมายเลขของคุณ</string>
     <string name="phone_verify_intro">การโทรจะแสดงหมายเลขของคุณเอง หากต้องการลงทะเบียนหมายเลข เราจะโทรหาหมายเลขนั้น แล้วคุณพิมพ์รหัสบนแป้นกดของโทรศัพท์ รองรับเฉพาะหมายเลขของสหรัฐอเมริกาและแคนาดา</string>
     <string name="phone_number_hint">หมายเลขพร้อมรหัสประเทศ เช่น +1 415 555 0100</string>

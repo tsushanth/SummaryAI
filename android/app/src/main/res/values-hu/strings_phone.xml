@@ -6,6 +6,9 @@
     <string name="phone_notification_title">Hívás folyamatban</string>
     <string name="phone_minutes_left">Ebben a hónapban hátralévő ingyenes percek: %1$d / %2$d</string>
     <string name="phone_service_used_up">Az e havi telefonhívás-keret elfogyott. Próbáld újra a következő hónapban.</string>
+    <string name="phone_more_minutes_low">Fogytán vannak az e havi ingyenes hívásperceid.</string>
+    <string name="phone_more_minutes_button">Több percet szeretnék</string>
+    <string name="phone_more_minutes_thanks">Köszönjük. Megfontoljuk, hogy több percet kínáljunk.</string>
     <string name="phone_your_number">A telefonszámod</string>
     <string name="phone_verify_intro">A hívásoknál a saját telefonszámod jelenik meg. A regisztrálásához felhívjuk, és te beírsz egy kódot a telefon billentyűzetén. Csak egyesült államokbeli és kanadai számok.</string>
     <string name="phone_number_hint">Telefonszám országkóddal, például +1 415 555 0100</string>

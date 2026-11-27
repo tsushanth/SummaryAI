@@ -1,5 +1,5 @@
 /**
- * The spend control of phone calls (migration 032), run against a real local Postgres: monthly cap, per-user minutes,
+ * The spend control of phone calls (migration 032, with 037 and 038), run against a real local Postgres: monthly cap, per-user minutes,
  * rate limits, single-use claims, settlement, client access and the funnel. Skipped where no Postgres is installed.
  */
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
@@ -12,6 +12,7 @@ import { pgAvailable, startTestDb, type TestDb } from './helpers-pg.js';
 const MIGRATIONS = [
   'migrations/007_phone_calls.sql', 'migrations/022_phone_calls_updated_at.sql',
   'migrations/027_activation_events.sql', 'migrations/032_phone_calls_repair.sql', 'migrations/037_phone_minutes_shown.sql',
+  'migrations/038_phone_free_short_calls.sql',
 ];
 const CAP = 25_000_000;
 let db: TestDb;
@@ -91,7 +92,7 @@ run('phone spend control (SQL)', () => {
     expect(q(`select phone_minutes_used('${u}', null, phone_month())`)).toBe('30');
     q(`update phone_ledger set claimed_at = now() - interval '2 hours' where call_id = '${c.call}'`);
     expect(left()).toBe(0); // never past the reservation
-    settle(c.call, 20, 8);
+    settle(c.call, 30, 20);
     expect(left()).toBe(29);
   });
 
@@ -107,6 +108,7 @@ run('phone spend control (SQL)', () => {
     for (const role of ['anon', 'authenticated']) {
       expect(() => q(`set role ${role}; select phone_minutes_shown('${u}', null, phone_month())`)).toThrow(/permission denied/);
     }
+    q(file('migrations/038_phone_free_short_calls.sql')); // 037 put its older phone_minutes_shown() back
   });
 
   it('allows one call at a time; a reservation never connected is dropped by the next one', () => {
@@ -314,6 +316,7 @@ run('phone spend control (SQL)', () => {
     const file = (p: string) => readFileSync(join(__dirname, '..', 'supabase', p), 'utf8');
     const scratch = startTestDb([...MIGRATIONS, 'migrations/032_phone_calls_repair.sql']);
     try {
+      scratch.sql(file('rollbacks/038_phone_free_short_calls_down.sql'));
       scratch.sql(file('rollbacks/037_phone_minutes_shown_down.sql'));
       scratch.sql(file('rollbacks/032_phone_calls_repair_down.sql'));
       expect(scratch.sql("select count(*) from pg_proc where proname like 'phone\\_%'")).toBe('0');

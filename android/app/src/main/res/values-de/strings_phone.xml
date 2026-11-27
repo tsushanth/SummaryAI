@@ -6,6 +6,9 @@
     <string name="phone_notification_title">Anruf läuft</string>
     <string name="phone_minutes_left">Verbleibende Freiminuten in diesem Monat: %1$d von %2$d</string>
     <string name="phone_service_used_up">Das Kontingent für Telefonanrufe ist für diesen Monat aufgebraucht. Bitte versuchen Sie es nächsten Monat erneut.</string>
+    <string name="phone_more_minutes_low">Ihre kostenlosen Gesprächsminuten für diesen Monat gehen zur Neige.</string>
+    <string name="phone_more_minutes_button">Ich möchte mehr Minuten</string>
+    <string name="phone_more_minutes_thanks">Vielen Dank. Wir werden prüfen, ob wir mehr Minuten anbieten.</string>
     <string name="phone_your_number">Ihre Nummer</string>
     <string name="phone_verify_intro">Bei Anrufen wird Ihre eigene Nummer angezeigt. Um sie zu registrieren, rufen wir die Nummer an und Sie geben einen Code über die Tastatur Ihres Telefons ein. Nur Nummern aus den USA und Kanada.</string>
     <string name="phone_number_hint">Nummer mit Ländervorwahl, zum Beispiel +1 415 555 0100</string>

@@ -6,6 +6,9 @@
     <string name="phone_notification_title">Gesprek bezig</string>
     <string name="phone_minutes_left">Resterende gratis minuten deze maand: %1$d van %2$d</string>
     <string name="phone_service_used_up">Het tegoed voor telefoongesprekken is voor deze maand opgebruikt. Probeer het volgende maand opnieuw.</string>
+    <string name="phone_more_minutes_low">Je gratis belminuten voor deze maand zijn bijna op.</string>
+    <string name="phone_more_minutes_button">Ik wil graag meer minuten</string>
+    <string name="phone_more_minutes_thanks">Bedankt. We gaan bekijken of we meer minuten kunnen aanbieden.</string>
     <string name="phone_your_number">Je nummer</string>
     <string name="phone_verify_intro">Bij gesprekken wordt je eigen nummer weergegeven. Om het te registreren bellen we het en typ je een code op het toetsenblok van je telefoon. Alleen nummers uit de Verenigde Staten en Canada.</string>
     <string name="phone_number_hint">Nummer met landcode, bijvoorbeeld +1 415 555 0100</string>

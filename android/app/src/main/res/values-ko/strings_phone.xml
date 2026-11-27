@@ -6,6 +6,9 @@
     <string name="phone_notification_title">통화 중</string>
     <string name="phone_minutes_left">이번 달 남은 무료 통화 시간(분): %1$d / %2$d</string>
     <string name="phone_service_used_up">이번 달 전화 통화 이용량이 모두 소진되었습니다. 다음 달에 다시 시도해 주세요.</string>
+    <string name="phone_more_minutes_low">이번 달 무료 통화 시간이 얼마 남지 않았습니다.</string>
+    <string name="phone_more_minutes_button">통화 시간이 더 필요해요</string>
+    <string name="phone_more_minutes_thanks">감사합니다. 통화 시간을 더 제공하는 방안을 검토하겠습니다.</string>
     <string name="phone_your_number">내 번호</string>
     <string name="phone_verify_intro">전화를 걸면 본인의 번호가 표시됩니다. 번호를 등록하려면 저희가 해당 번호로 전화를 걸고, 휴대전화 키패드에 코드를 입력하시면 됩니다. 미국 및 캐나다 번호만 가능합니다.</string>
     <string name="phone_number_hint">국가 번호를 포함한 번호(예: +1 415 555 0100)</string>

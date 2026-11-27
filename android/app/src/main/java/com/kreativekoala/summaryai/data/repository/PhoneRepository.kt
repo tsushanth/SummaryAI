@@ -28,11 +28,27 @@ interface OwnNumberSource {
     suspend fun event(request: PhoneEventRequest)
 }
 
+/** What the Phone screen needs from the server. */
+interface PhoneSource {
+    suspend fun status(): Result<PhoneStatusResponse>
+    suspend fun startVerification(phoneNumber: String): Result<StartVerificationResponse>
+    suspend fun verification(id: String): Result<VerificationStatusResponse>
+    suspend fun deleteVerifiedPhone(id: String): Result<Unit>
+    suspend fun startCall(request: StartCallRequest): Result<StartCallResponse>
+    suspend fun calls(limit: Int = 50, offset: Int = 0): Result<List<PhoneCall>>
+    suspend fun phoneCall(callId: String): Result<PhoneCall>
+    suspend fun profile(request: PhoneProfileRequest): Result<Unit>
+    /** Measuring never fails or delays anything. */
+    suspend fun event(request: PhoneEventRequest)
+    /** A step the person is thanked for, so it has to have arrived. */
+    suspend fun confirmedEvent(request: PhoneEventRequest): Result<Unit>
+}
+
 /** Phone calls. The server decides everything; this only carries requests and answers. */
 @Singleton
 class PhoneRepository @Inject constructor(
     private val api: SummaryAIApi
-) : OwnNumberSource {
+) : OwnNumberSource, PhoneSource {
     private suspend fun <T> call(block: suspend () -> T): Result<T> = withContext(Dispatchers.IO) {
         try {
             Result.success(block())
@@ -43,28 +59,33 @@ class PhoneRepository @Inject constructor(
         }
     }
 
-    suspend fun status(): Result<PhoneStatusResponse> = call { api.getPhoneStatus() }
+    override suspend fun status(): Result<PhoneStatusResponse> = call { api.getPhoneStatus() }
 
-    suspend fun startVerification(phoneNumber: String): Result<StartVerificationResponse> =
+    override suspend fun startVerification(phoneNumber: String): Result<StartVerificationResponse> =
         call { api.startPhoneVerification(StartVerificationRequest(phoneNumber)) }
 
-    suspend fun verification(id: String): Result<VerificationStatusResponse> = call { api.getPhoneVerification(id) }
+    override suspend fun verification(id: String): Result<VerificationStatusResponse> = call { api.getPhoneVerification(id) }
 
-    suspend fun deleteVerifiedPhone(id: String): Result<Unit> = call {
+    override suspend fun deleteVerifiedPhone(id: String): Result<Unit> = call {
         val response = api.deleteVerifiedPhone(id)
         if (!response.isSuccessful) throw HttpException(response)
     }
 
-    suspend fun startCall(request: StartCallRequest): Result<StartCallResponse> = call { api.startPhoneCall(request) }
+    override suspend fun startCall(request: StartCallRequest): Result<StartCallResponse> = call { api.startPhoneCall(request) }
 
-    suspend fun calls(limit: Int = 50, offset: Int = 0): Result<List<PhoneCall>> =
+    override suspend fun calls(limit: Int, offset: Int): Result<List<PhoneCall>> =
         call { api.getPhoneCalls(limit, offset).calls.map { it.toDomain() } }
 
-    suspend fun phoneCall(callId: String): Result<PhoneCall> = call { api.getPhoneCall(callId).call.toDomain() }
+    override suspend fun phoneCall(callId: String): Result<PhoneCall> = call { api.getPhoneCall(callId).call.toDomain() }
 
     suspend fun hangup(callId: String): Result<Boolean> = call { api.hangupCall(callId).ended }
 
     override suspend fun event(request: PhoneEventRequest) { call { api.postPhoneEvent(request) } }
+
+    override suspend fun confirmedEvent(request: PhoneEventRequest): Result<Unit> = call {
+        val response = api.postPhoneEvent(request)
+        if (!response.isSuccessful) throw HttpException(response)
+    }
 
     override suspend fun plan(): Result<PhonePlanResponse> = call { api.getPhonePlan() }
 
@@ -93,7 +114,7 @@ class PhoneRepository @Inject constructor(
             )
         }
 
-    suspend fun profile(request: PhoneProfileRequest): Result<Unit> = call {
+    override suspend fun profile(request: PhoneProfileRequest): Result<Unit> = call {
         val response = api.postPhoneProfile(request)
         if (!response.isSuccessful) throw HttpException(response)
     }

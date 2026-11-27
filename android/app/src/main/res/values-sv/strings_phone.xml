@@ -6,6 +6,9 @@
     <string name="phone_notification_title">Samtal pågår</string>
     <string name="phone_minutes_left">Gratisminuter kvar den här månaden: %1$d av %2$d</string>
     <string name="phone_service_used_up">Månadens telefonsamtal är förbrukade. Försök igen nästa månad.</string>
+    <string name="phone_more_minutes_low">Dina gratis samtalsminuter för den här månaden håller på att ta slut.</string>
+    <string name="phone_more_minutes_button">Jag vill ha fler minuter</string>
+    <string name="phone_more_minutes_thanks">Tack. Vi ska överväga att erbjuda fler minuter.</string>
     <string name="phone_your_number">Ditt nummer</string>
     <string name="phone_verify_intro">Samtalen visar ditt eget nummer. För att registrera det ringer vi upp numret och du knappar in en kod på telefonens knappsats. Endast nummer i USA och Kanada.</string>
     <string name="phone_number_hint">Nummer med landskod, till exempel +1 415 555 0100</string>

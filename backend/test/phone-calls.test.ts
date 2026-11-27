@@ -499,6 +499,19 @@ describe('measuring', () => {
     ]);
     expect((await api('GET', '/status')).body.business_answered).toBe(true);
   });
+
+  it('records the asking for more minutes and the answer to it, without any number', async () => {
+    for (const step of ['more_minutes_shown', 'more_minutes_interest']) {
+      expect((await api('POST', '/events', { step, phone_number: MY_NUMBER, to: DEST })).status).toBe(204);
+    }
+    expect(world.events.map((e) => [e.step, e.user, e.props])).toEqual([
+      ['more_minutes_shown', USER, { country: 'US' }], ['more_minutes_interest', USER, { country: 'US' }],
+    ]);
+  });
+
+  it('says there is nothing to buy where numbers are not set up', async () => {
+    expect((await api('GET', '/status')).body.purchase_offered).toBe(false);
+  });
 });
 
 describe('account deletion', () => {

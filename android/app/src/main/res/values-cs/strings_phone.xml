@@ -6,6 +6,9 @@
     <string name="phone_notification_title">Probíhá hovor</string>
     <string name="phone_minutes_left">Zbývající bezplatné minuty v tomto měsíci: %1$d z %2$d</string>
     <string name="phone_service_used_up">Telefonní hovory jsou pro tento měsíc vyčerpané. Zkus to znovu příští měsíc.</string>
+    <string name="phone_more_minutes_low">Bezplatné minuty na volání pro tento měsíc docházejí.</string>
+    <string name="phone_more_minutes_button">Chci více minut</string>
+    <string name="phone_more_minutes_thanks">Děkujeme. Zvážíme, že nabídneme více minut.</string>
     <string name="phone_your_number">Tvoje číslo</string>
     <string name="phone_verify_intro">Při hovorech se zobrazuje tvoje vlastní číslo. Abychom ho zaregistrovali, zavoláme na něj a ty na klávesnici telefonu zadáš kód. Pouze čísla z USA a Kanady.</string>
     <string name="phone_number_hint">Číslo s předvolbou země, například +1 415 555 0100</string>

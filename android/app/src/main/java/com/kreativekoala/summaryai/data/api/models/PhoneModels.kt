@@ -23,7 +23,9 @@ data class PhoneStatusResponse(
     @SerializedName("business_answered") val businessAnswered: Boolean? = null,
     val phones: List<VerifiedPhoneDto>? = null,
     /** Whether the own-number screens are shown: the free trial or purchase is on, or the account has a number. */
-    @SerializedName("own_number") val ownNumber: Boolean? = null
+    @SerializedName("own_number") val ownNumber: Boolean? = null,
+    /** Whether anything can be bought. Absent from a server that does not say. */
+    @SerializedName("purchase_offered") val purchaseOffered: Boolean? = null
 )
 
 data class StartVerificationRequest(

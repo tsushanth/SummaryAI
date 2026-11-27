@@ -6,6 +6,9 @@
     <string name="phone_notification_title">Đang trong cuộc gọi</string>
     <string name="phone_minutes_left">Số phút miễn phí còn lại trong tháng này: %1$d trên %2$d</string>
     <string name="phone_service_used_up">Lượt gọi điện thoại của tháng này đã hết. Vui lòng thử lại vào tháng sau.</string>
+    <string name="phone_more_minutes_low">Số phút gọi miễn phí của tháng này sắp hết.</string>
+    <string name="phone_more_minutes_button">Tôi muốn có thêm phút gọi</string>
+    <string name="phone_more_minutes_thanks">Cảm ơn bạn. Chúng tôi sẽ cân nhắc cung cấp thêm phút gọi.</string>
     <string name="phone_your_number">Số của bạn</string>
     <string name="phone_verify_intro">Cuộc gọi sẽ hiển thị số của chính bạn. Để đăng ký số này, chúng tôi sẽ gọi đến số đó và bạn nhập một mã trên bàn phím điện thoại. Chỉ áp dụng cho số tại Hoa Kỳ và Canada.</string>
     <string name="phone_number_hint">Số điện thoại kèm mã quốc gia, ví dụ +1 415 555 0100</string>

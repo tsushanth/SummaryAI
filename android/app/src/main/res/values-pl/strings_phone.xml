@@ -6,6 +6,9 @@
     <string name="phone_notification_title">Trwa połączenie</string>
     <string name="phone_minutes_left">Pozostałe darmowe minuty w tym miesiącu: %1$d z %2$d</string>
     <string name="phone_service_used_up">Limit rozmów telefonicznych na ten miesiąc został wykorzystany. Spróbuj ponownie w przyszłym miesiącu.</string>
+    <string name="phone_more_minutes_low">Darmowe minuty połączeń na ten miesiąc się kończą.</string>
+    <string name="phone_more_minutes_button">Chcę więcej minut</string>
+    <string name="phone_more_minutes_thanks">Dziękujemy. Rozważymy zaoferowanie większej liczby minut.</string>
     <string name="phone_your_number">Twój numer</string>
     <string name="phone_verify_intro">Podczas połączeń wyświetla się Twój własny numer. Aby go zarejestrować, zadzwonimy na niego, a Ty wpiszesz kod na klawiaturze telefonu. Tylko numery ze Stanów Zjednoczonych i Kanady.</string>
     <string name="phone_number_hint">Numer z kodem kraju, na przykład +1 415 555 0100</string>

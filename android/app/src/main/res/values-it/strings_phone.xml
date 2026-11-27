@@ -6,6 +6,9 @@
     <string name="phone_notification_title">Chiamata in corso</string>
     <string name="phone_minutes_left">Minuti gratuiti rimasti questo mese: %1$d di %2$d</string>
     <string name="phone_service_used_up">Le telefonate disponibili per questo mese sono esaurite. Riprova il mese prossimo.</string>
+    <string name="phone_more_minutes_low">I tuoi minuti di chiamata gratuiti di questo mese stanno per finire.</string>
+    <string name="phone_more_minutes_button">Vorrei più minuti</string>
+    <string name="phone_more_minutes_thanks">Grazie. Valuteremo se offrire più minuti.</string>
     <string name="phone_your_number">Il tuo numero</string>
     <string name="phone_verify_intro">Nelle chiamate viene mostrato il tuo numero. Per registrarlo, lo chiamiamo e tu digiti un codice sulla tastiera del telefono. Solo numeri di Stati Uniti e Canada.</string>
     <string name="phone_number_hint">Numero con prefisso internazionale, ad esempio +1 415 555 0100</string>

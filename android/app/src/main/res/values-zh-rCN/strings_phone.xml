@@ -6,6 +6,9 @@
     <string name="phone_notification_title">通话进行中</string>
     <string name="phone_minutes_left">本月剩余免费分钟数：%1$d（共 %2$d）</string>
     <string name="phone_service_used_up">本月的电话通话额度已用完。请下个月再试。</string>
+    <string name="phone_more_minutes_low">您本月的免费通话分钟数即将用完。</string>
+    <string name="phone_more_minutes_button">我想要更多分钟数</string>
+    <string name="phone_more_minutes_thanks">谢谢您。我们会考虑提供更多分钟数。</string>
     <string name="phone_your_number">您的号码</string>
     <string name="phone_verify_intro">通话时会显示您本人的号码。要注册该号码，我们会拨打它，您需要在手机拨号键盘上输入一个代码。仅限美国和加拿大号码。</string>
     <string name="phone_number_hint">带国家/地区代码的号码，例如 +1 415 555 0100</string>

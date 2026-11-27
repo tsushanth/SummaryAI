@@ -53,6 +53,12 @@ run('phone usage counts (SQL)', () => {
     expect(funnel()).toBe('not_asked|US|1|0|0');
   });
 
+  it('counts the free-minutes card and its button like any step', () => {
+    const u = randomUUID();
+    seen(u, 'US'); add(u, { step: 'more_minutes_shown', country: 'US' }); add(u, { step: 'more_minutes_interest', country: 'US' });
+    expect(steps().split('\n')).toEqual(['feature_seen|US|country|1|1', 'more_minutes_interest|US||1|1', 'more_minutes_shown|US||1|1']);
+  });
+
   it('app clients reach none of it', () => {
     for (const role of ['anon', 'authenticated']) {
       for (const s of ['select * from phone_audience()', 'select * from phone_step_counts(now())', 'select * from phone_funnel(now())']) {

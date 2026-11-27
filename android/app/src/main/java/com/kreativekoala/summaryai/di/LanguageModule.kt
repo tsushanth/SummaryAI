@@ -20,5 +20,8 @@ abstract class LanguageModule {
     abstract fun bindOwnNumberSource(impl: com.kreativekoala.summaryai.data.repository.PhoneRepository): com.kreativekoala.summaryai.data.repository.OwnNumberSource
 
     @Binds
+    abstract fun bindPhoneSource(impl: com.kreativekoala.summaryai.data.repository.PhoneRepository): com.kreativekoala.summaryai.data.repository.PhoneSource
+
+    @Binds
     abstract fun bindPhonePurchases(impl: com.kreativekoala.summaryai.service.PlayPhonePurchases): com.kreativekoala.summaryai.service.PhonePurchases
 }
