@@ -50,6 +50,31 @@ describe('buildSummaryPrompts', () => {
     expect(p.system).toContain('Spanish');
   });
 
+  it('with no known language, asks the model to follow the transcript, headings included', () => {
+    for (const languageName of [undefined, null]) {
+      const p = buildSummaryPrompts({ templateId: 'standup', transcriptText: 'T', speakers: [], languageName });
+      expect(p.system).toContain('in the main language of the transcript');
+      expect(p.user).toContain('summary, detailed_summary, key_points, action_items, and topics in the main language of the transcript');
+      expect(p.user).toContain('even though these instructions are in English');
+      expect(p.user).toContain('Section headings');
+      expect(p.user).toContain('Priority values stay high, medium or low');
+      expect(p.user).toContain('"language": "name of the main language of the transcript');
+    }
+  });
+
+  it('a summary built from notes follows the meeting, not the English headings of the notes', () => {
+    const p = buildSummaryPrompts({ transcriptText: 'N', speakers: [], fromNotes: true });
+    expect(p.user).toContain('in the main language of the meeting');
+    expect(p.user).toContain('not by the English headings');
+  });
+
+  it('a known language is named, with no follow-the-transcript wording', () => {
+    const p = buildSummaryPrompts({ transcriptText: 'T', speakers: [], languageName: 'English' });
+    expect(p.user).toContain('topics in English.');
+    expect(p.system + p.user).not.toContain('main language');
+    expect(p.user).not.toContain('"language"');
+  });
+
   it('falls back to general for unknown template ids', () => {
     expect(buildSummaryPrompts({ templateId: 'nope', transcriptText: 'T', speakers: [] }).template.id).toBe('general');
   });

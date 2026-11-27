@@ -155,6 +155,30 @@ describe('other endpoints', () => {
     expect(db.recordings[0].summary_template).toBe('standup');
   });
 
+  it('regenerate-summary keeps the summary language chosen for the recording', async () => {
+    db.recordings[0].output_language = 'es';
+    llmReply = JSON.stringify({ summary: 'Nuevo', key_points: [], action_items: [], topics: [] });
+    const r = await call('POST', '/recordings/11111111-1111-4111-8111-111111111111/regenerate-summary', 'alice', { template: 'standup' });
+    expect(r.status).toBe(200);
+    expect(llmCalls[0].system).toContain('Spanish');
+    expect(llmCalls[0].user).toContain('topics in Spanish.');
+  });
+
+  it('regenerate-summary with no chosen language uses the language the transcript was detected in', async () => {
+    db.transcripts[0].language = 'fr';
+    llmReply = JSON.stringify({ summary: 'Neuf', key_points: [], action_items: [], topics: [] });
+    await call('POST', '/recordings/11111111-1111-4111-8111-111111111111/regenerate-summary', 'alice', { template: 'standup' });
+    expect(llmCalls[0].user).toContain('topics in French.');
+  });
+
+  it('regenerate-summary on a document ignores the placeholder language and follows the text', async () => {
+    db.recordings[0].content_type = 'application/pdf';
+    db.transcripts[0].language = 'en';
+    llmReply = JSON.stringify({ summary: 'New', key_points: [], action_items: [], topics: [] });
+    await call('POST', '/recordings/11111111-1111-4111-8111-111111111111/regenerate-summary', 'alice', { template: 'standup' });
+    expect(llmCalls[0].user).toContain('main language of the transcript');
+  });
+
   it('regenerate-summary on a 250k-char transcript is map-reduce and covers the end (no truncation)', async () => {
     db.transcripts[0].segments = Array.from({ length: 500 }, (_, i) => ({
       speaker_label: i % 2 ? 'Bob' : 'Alice',

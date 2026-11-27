@@ -19,6 +19,7 @@ import {
 } from '../services/summaryTemplates.js';
 import { normalizeActionItems } from '../services/summaryService.js';
 import { generateSummary } from '../services/summaryGeneration.js';
+import { languageNameForCode, summaryLanguageCode } from '../lib/outputLanguage.js';
 import {
   completeText,
   segmentTurns,
@@ -97,7 +98,7 @@ router.put(
 async function loadOwnedRecording(recordingId: string, userId: string) {
   const { data: recording } = await supabaseAdmin
     .from('recordings')
-    .select('id, title, status, recording_type, output_language, summary_template')
+    .select('id, title, status, recording_type, output_language, summary_template, content_type, file_path')
     .eq('id', recordingId)
     .eq('user_id', userId)
     .single();
@@ -122,7 +123,7 @@ router.post(
 
     const { data: transcript } = await supabaseAdmin
       .from('transcripts')
-      .select('full_text, segments')
+      .select('full_text, segments, language')
       .eq('recording_id', recordingId)
       .maybeSingle();
     if (!transcript) throw Errors.badRequest('Recording has no transcript yet');
@@ -138,7 +139,7 @@ router.post(
         turns,
         speakers,
         templateId: template,
-        languageName: null,
+        languageName: languageNameForCode(summaryLanguageCode(recording, transcript.language)),
         recordingId,
         model: config.SUMMARY_MODEL,
         // completeText carries one 'intelligence' feature label for all calls, and does not expose stop_reason

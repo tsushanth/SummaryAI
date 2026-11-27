@@ -19,7 +19,7 @@ import { reportAlert } from '../lib/alerts.js';
 import { getRecordingLimits } from '../config/recordingLimits.js';
 import { evaluateSummaryEligibility, countSpeechUnits } from './shortRecordingGuard.js';
 import { languageHintForRecording } from './meetingLanguage.js';
-import { languageNameForCode } from '../lib/outputLanguage.js';
+import { languageNameForCode, summaryLanguageCode } from '../lib/outputLanguage.js';
 import { transcribeAudio, isSttConfigured, getSttMode, type NormalizedTranscript, type TranscriptSegment } from './stt/index.js';
 
 export interface ProcessingJob {
@@ -235,7 +235,7 @@ async function processRecordingAsync(
       summary = await generateSummaryWithAnthropic(
         transcript.fullText,
         transcript.segments,
-        recording.output_language,
+        summaryLanguageCode(recording, transcript.detectedLanguage),
         resolveSummaryTemplate({
           recordingTemplate: recording.summary_template,
           userDefault: profile?.preferences?.default_summary_template,
