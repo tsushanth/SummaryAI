@@ -4,16 +4,28 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 
 | Component | Fly app | Release | Image | Built from | Date |
 |---|---|---|---|---|---|
-| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v68 | `registry.fly.io/summary-ai-backend:deployment-01M8CNWRWY6SKY6DXHXFQHHCKR` | `origin/main` at `464634a` (squash merge of #119; `backend/` tree `20d83562f174ed6a595e0dd4dfe52b2e401e1b58` identical to main) | 2026-11-26 (UTC) |
+| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v69 | `registry.fly.io/summary-ai-backend:deployment-01M8DCK0B7DR3NPH83WKK4ECJV` | the phone calls PR at `802f659` (`backend/` tree `3dcd08312acf35382cde654c722553f9d5ac7679`, identical to main after the merge) | 2026-11-27 (UTC) |
 | Web (`web/`, meetingmind.org) | `meeting-mind-web` | v43 | `registry.fly.io/meeting-mind-web:deployment-01M8CNXBE7KE1AJAXTEMJHWPBE` | `origin/main` at `464634a` (#119, deployed by the web-deploy workflow; `web/` tree `eaca6a737c817ac6f6def0a61e7c0e477a68902b` identical to main) | 2026-11-26 (UTC) |
 
 ## Android: merged, NOT released (next release: after 1.7.15, versionCode 68)
+
+- Phone calls: the Phone tab appears only when the server says the account has phone calls; verify own number, consent screen before every call, microphone foreground service during a call, business question, strings in all languages. No new permission. Checks: `:app:testDebugUnitTest` 318 tests, 0 failures; `:app:assembleDebug`; `lintDebug` 0 errors. No device run. Before release: the privacy page and Play data safety need the phone call wording.
 
 - Stop no longer uploads a recording under 10 seconds, or one whose level never reached 1% of full scale. The recorder pauses and the user picks "Keep going" (same recording) or "Record again" (replaces it); closing the box leaves it paused. A silent recording of 10 seconds or more also offers "Upload anyway", so a wrong level reading cannot trap a real meeting. A recording stopped from the notification is not checked: it is not uploaded by itself and waits in the "not uploaded" banner as before.
 - Allowing the microphone on first run no longer starts a recording.
 - Android now posts anonymous record steps to `POST /api/activation/events` (platform `android`, no server change): `record_clicked` with `step` = tap, mic_granted, mic_denied, start_failed, stop_ok, held_short, held_silent, keep_going, record_again, upload_anyway or check_dismissed; `first_recording_started` (every start, `again` after Record again); `first_recording_done` (every upload: `ok`, `seconds`, `auto`). `test` is true on debug builds and Firebase Test Lab. The web funnel check filters `platform = 'web'`, so it is unaffected.
 - Before release: the privacy page names these steps for the website only; add the app.
 - Checks: `:app:testDebugUnitTest` 314 tests, 0 failures; `:app:assembleDebug`. No device run.
+
+## 2026-11-27 Phone calls rebuilt, switched off (migration 032): backend v69
+- Change: `docs/superpowers/specs/2026-11-26-mm-phone-calls-design.md`, phase 1 (own number verified with the carrier, United States and Canada, server spend control, recording notice and consent, recordings into the app, funnel events). **Calling is off for everyone**: `FEATURE_PHONE_CALLS` and `PHONE_CALLS_TESTER_IDS` are unset. The notice wording is not approved.
+- Database: migration `032_phone_calls_repair` applied to Supabase `mlofjzlmncgnhxbiuemf` before the deploy (additive; dry run in a rolled-back transaction first). Reverse: `backend/supabase/rollbacks/032_phone_calls_repair_down.sql`.
+- Secrets added (new names only, none overwritten): `PHONE_TWILIO_ACCOUNT_SID`, `PHONE_TWILIO_AUTH_TOKEN`, `PHONE_TWILIO_API_KEY_SID`, `PHONE_TWILIO_API_KEY_SECRET`, `PHONE_TWILIO_TWIML_APP_SID` (Twilio subaccount "MeetingMind Calls", created for this) and `PHONE_NUMBER_HASH_KEY` (random). Subaccount: dialing limited to United States/Canada, monthly usage alarm to `/v1/webhooks/twilio/usage-alarm`.
+- Backend: `flyctl deploy --remote-only` from a clean detached worktree of the PR head (based on main `2727d9a`), merged to main right after. Quiet moment checked: no unfinished recording, bot run, live segment, due auto-join, coaching session or phone call.
+- Verified: backend `tsc` clean, vitest 1471 tests (SQL spend rules run on a local Postgres); `/health/detailed` healthy with all nine loops fresh; every carrier webhook refuses unsigned and forged requests (403); a correctly signed request is accepted; one real verification call from the subaccount to our own machine-answered number (40 s) completed, nobody entered the code, no caller ID was registered and the carrier's signed callback was accepted.
+- NOT verified: a real verification by a person, a real call from the app, the recording notice on a live call, recording and transcript from a live call, the settlement of a live call.
+- Rollback: `flyctl deploy -a summary-ai-backend --image registry.fly.io/summary-ai-backend:deployment-01M8CNWRWY6SKY6DXHXFQHHCKR` (v68); prefer fixing forward. To only switch calling off, unset the two switches.
+- Android changes are merged and NOT released (see below). Web unchanged (phone pages stay hidden).
 
 ## 2026-11-26 Web sign-up fixes, step counts, first-recording report (#119): backend v68, web v43
 - Backend: `flyctl deploy --remote-only` from a clean detached worktree of `origin/main` at `464634a`. Web: `web-deploy.yml` on the merge (run 45885190510 succeeded, no rollback). No migration, no secret set or unset. Calendar settings untouched.
