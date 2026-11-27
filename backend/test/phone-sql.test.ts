@@ -11,7 +11,7 @@ import { pgAvailable, startTestDb, type TestDb } from './helpers-pg.js';
 
 const MIGRATIONS = [
   'migrations/007_phone_calls.sql', 'migrations/022_phone_calls_updated_at.sql',
-  'migrations/027_activation_events.sql', 'migrations/032_phone_calls_repair.sql',
+  'migrations/027_activation_events.sql', 'migrations/032_phone_calls_repair.sql', 'migrations/037_phone_minutes_shown.sql',
 ];
 const CAP = 25_000_000;
 let db: TestDb;
@@ -79,10 +79,34 @@ run('phone spend control (SQL)', () => {
     expect(reserve(a, { from: 'another' })).toMatchObject({ ok: false, reason: 'user_minutes_used' });
   });
 
-  it('an unsettled call counts all its reserved minutes', () => {
+  it('shows only the time a call in progress has run, while the whole reservation still counts against a new call', () => {
+    const u = randomUUID();
+    const left = () => json(`phone_budget('${u}', '${hash(u)}')`).minutes_left;
+    const c = reserve(u);
+    expect(left()).toBe(30); // nothing dialled yet
+    claim(c.call, u);
+    q(`update phone_ledger set claimed_at = now() - interval '90 seconds' where call_id = '${c.call}'`);
+    expect(left()).toBe(28); // two started minutes so far
+    expect(reserve(u)).toMatchObject({ ok: false, reason: 'call_in_progress' });
+    expect(q(`select phone_minutes_used('${u}', null, phone_month())`)).toBe('30');
+    q(`update phone_ledger set claimed_at = now() - interval '2 hours' where call_id = '${c.call}'`);
+    expect(left()).toBe(0); // never past the reservation
+    settle(c.call, 20, 8);
+    expect(left()).toBe(29);
+  });
+
+  it('can be undone and applied again (037)', () => {
+    const file = (f: string) => readFileSync(join(__dirname, '..', 'supabase', f), 'utf8');
     const u = randomUUID();
     const c = reserve(u); claim(c.call, u);
-    expect(json(`phone_budget('${u}', null)`).minutes_left).toBe(0);
+    q(file('rollbacks/037_phone_minutes_shown_down.sql'));
+    expect(json(`phone_budget('${u}', null)`).minutes_left).toBe(0); // the old figure
+    q(file('migrations/037_phone_minutes_shown.sql'));
+    q(file('migrations/037_phone_minutes_shown.sql'));
+    expect(json(`phone_budget('${u}', null)`).minutes_left).toBeGreaterThanOrEqual(29);
+    for (const role of ['anon', 'authenticated']) {
+      expect(() => q(`set role ${role}; select phone_minutes_shown('${u}', null, phone_month())`)).toThrow(/permission denied/);
+    }
   });
 
   it('allows one call at a time; a reservation never connected is dropped by the next one', () => {
@@ -290,6 +314,7 @@ run('phone spend control (SQL)', () => {
     const file = (p: string) => readFileSync(join(__dirname, '..', 'supabase', p), 'utf8');
     const scratch = startTestDb([...MIGRATIONS, 'migrations/032_phone_calls_repair.sql']);
     try {
+      scratch.sql(file('rollbacks/037_phone_minutes_shown_down.sql'));
       scratch.sql(file('rollbacks/032_phone_calls_repair_down.sql'));
       expect(scratch.sql("select count(*) from pg_proc where proname like 'phone\\_%'")).toBe('0');
     } finally { scratch.stop(); }

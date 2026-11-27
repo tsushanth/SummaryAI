@@ -83,6 +83,11 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 - Rollback: `flyctl releases rollback 65 -a summary-ai-backend`.
 - Android #116 (automatic retry of a failed recording upload) is merged and NOT released; it needs a release after 1.7.15 (68). `testDebugUnitTest` 304 tests, 0 failures; `lintDebug` 0 errors; no device run.
 
+## 2026-11-27 Database: minutes shown during a call (migration 037, calling switched off for the public)
+- Found in the first real test: while a call was in progress the app showed no free minutes left and said they were used up, because the whole reservation counted. `phone_budget()` now shows finished calls plus the started minutes a connected call has run. What a new call may use is unchanged.
+- Dry run in a rolled-back transaction, then applied at 11:56 PT with no call open; read back: server access only. No server or app release. Backend tests: 1570 passed. Not yet watched during a live call after the change.
+- Running migration 032 again puts the old figure back. Reverse: `backend/supabase/rollbacks/037_phone_minutes_shown_down.sql`.
+
 ## 2026-11-27 Android 1.7.16 (69), Play internal testing track only
 - Owner approved on 27 November, to test the phone calling screens with a Play-signed build. Read back after commit (11:42 PT): internal 1.7.16 (69) `completed`; production, beta and alpha unchanged at 1.7.15 (68).
 - Built from `main` `b4d1245` (#134, version bump only) in a clean detached worktree; tag `play/1.7.16-69`. AAB sha256 `e32b4f82c5f0b708...`, upload-key signature (`jarsigner -verify` ok), targetSdk 36, no permission added compared with an installed Play build.
