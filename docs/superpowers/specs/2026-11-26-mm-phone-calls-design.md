@@ -148,4 +148,4 @@ failed, agent result stored, result opened, purchase started / completed / faile
 
 ## Not built yet
 Google Play product; real-time developer notifications (subscriptions are polled); outbound agent calls; a live test of
-any incoming call, agent session or number purchase.
+any incoming call or agent.

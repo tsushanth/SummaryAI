@@ -4,11 +4,12 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 
 | Component | Fly app | Release | Image | Built from | Date |
 |---|---|---|---|---|---|
-| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v71 | `registry.fly.io/summary-ai-backend:deployment-01M8DDS08NZYEDSB8TS3WHRR1P` | the phone numbers and agents PR at `9a76b87`, based on main `a85863d` (`backend/` tree `872c0406c5602e22ce9482ed52b220dbdef9ffca`, identical to main after the merge) | 2026-11-27 (UTC) |
+| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v72 | `registry.fly.io/summary-ai-backend:deployment-01M8DHZ8Z3FYNECDJASJCMQ80S` | `origin/main` at `7f30172` (#127; `backend/` tree `e717c247f220c9df40afc304671bf093416b6a09`) | 2026-11-27 (UTC) |
 | Web (`web/`, meetingmind.org) | `meeting-mind-web` | v43 | `registry.fly.io/meeting-mind-web:deployment-01M8CNXBE7KE1AJAXTEMJHWPBE` | `origin/main` at `464634a` (#119, deployed by the web-deploy workflow; `web/` tree `eaca6a737c817ac6f6def0a61e7c0e477a68902b` identical to main) | 2026-11-26 (UTC) |
 
 ## Android: merged, NOT released (next release: after 1.7.15, versionCode 68)
 
+- Own number and phone agent (#127): a "My number" tab on the Phone screen, shown only when the server says so; call results with summary, collected details and transcript; purchase hidden unless the server offers it; strings in all languages. No new permission. Checks: `:app:testDebugUnitTest` 330 tests, 0 failures; `lintDebug` 0 errors. Before release: the privacy page and Play data safety need the phone call wording.
 - Phone calls: the Phone tab appears only when the server says the account has phone calls; verify own number, consent screen before every call, microphone foreground service during a call, business question, strings in all languages. No new permission. Checks: `:app:testDebugUnitTest` 318 tests, 0 failures; `:app:assembleDebug`; `lintDebug` 0 errors. No device run. Before release: the privacy page and Play data safety need the phone call wording.
 
 - Stop no longer uploads a recording under 10 seconds, or one whose level never reached 1% of full scale. The recorder pauses and the user picks "Keep going" (same recording) or "Record again" (replaces it); closing the box leaves it paused. A silent recording of 10 seconds or more also offers "Upload anyway", so a wrong level reading cannot trap a real meeting. A recording stopped from the notification is not checked: it is not uploaded by itself and waits in the "not uploaded" banner as before.
@@ -16,6 +17,13 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 - Android now posts anonymous record steps to `POST /api/activation/events` (platform `android`, no server change): `record_clicked` with `step` = tap, mic_granted, mic_denied, start_failed, stop_ok, held_short, held_silent, keep_going, record_again, upload_anyway or check_dismissed; `first_recording_started` (every start, `again` after Record again); `first_recording_done` (every upload: `ok`, `seconds`, `auto`). `test` is true on debug builds and Firebase Test Lab. The web funnel check filters `platform = 'web'`, so it is unaffected.
 - Before release: the privacy page names these steps for the website only; add the app.
 - Checks: `:app:testDebugUnitTest` 314 tests, 0 failures; `:app:assembleDebug`. No device run.
+
+## 2026-11-27 Free agent trial, switched off, and collected call details (migration 034): backend v72
+- Change (#127): a free trial of an own number with an agent (design: `docs/superpowers/specs/2026-11-26-mm-phone-calls-design.md`), the agent result's collected details kept and returned, step counts and alerts. **All switches unset**, `PHONE_AGENT_TRIAL` included.
+- Database: migration `034_phone_agent_trial` applied before the deploy (dry run in a rolled-back transaction first). Reverse: `backend/supabase/rollbacks/034_phone_agent_trial_down.sql`.
+- Backend: `flyctl deploy --remote-only` from a clean detached worktree of `origin/main` at `7f30172`. No secret set or unset. Quiet moment checked: no unfinished recording, bot run, live segment, due auto-join, coaching session or phone call.
+- Verified: `tsc` clean, vitest 107 files / 1545 tests, build; `/health/detailed` healthy, nine loops fresh; all 141 compiled `.js` files on the machine identical to a fresh build of the same tree; trial and purchase off, numbers and agents not wired; no trial row; carrier and agent webhooks refuse unsigned requests (403); owner routes refuse without the secret (401) and answer with it; the calls subaccount holds no number, recording or caller ID.
+- Rollback: `flyctl deploy -a summary-ai-backend --image registry.fly.io/summary-ai-backend:deployment-01M8DDS08NZYEDSB8TS3WHRR1P` (v71).
 
 ## 2026-11-27 Phone numbers, subscription check, incoming calls and agents, switched off (migration 033): backend v71
 - Change: phases 2 and 3 of `docs/superpowers/specs/2026-11-26-mm-phone-calls-design.md`, server only. **All switches unset**: `PHONE_NUMBERS_SCHEMA`, `PHONE_PURCHASE_ENABLED`, `PHONE_PLAN_*`, `CALLDESK_PARTNER_*`, as well as `FEATURE_PHONE_CALLS` and `PHONE_CALLS_TESTER_IDS`. No number was bought, no agent exists, nothing can be purchased. No app screens for these yet.
