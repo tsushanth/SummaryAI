@@ -10,7 +10,7 @@ export default function PrivacyPage() {
     <div className="min-h-screen bg-background text-foreground py-16">
       <div className="max-w-[900px] mx-auto px-6">
         <h1 className="text-3xl md:text-4xl font-bold mb-2">Privacy Policy</h1>
-        <p className="text-muted-foreground text-sm mb-12">Last updated: 2026-11-26</p>
+        <p className="text-muted-foreground text-sm mb-12">Last updated: 2026-11-27</p>
 
         <section className="mb-10">
           <h2 className="text-xl font-semibold mb-4">Introduction</h2>
@@ -37,6 +37,8 @@ export default function PrivacyPage() {
             <li><strong>Analytics (Android):</strong> app usage events and device identifiers collected through Firebase Analytics.</li>
             <li><strong>Website visits (this site&apos;s public home page):</strong> we count visits with Gaugemint, our own analytics. It sets no cookies and stores no IP address. It records the page address, the referring page, your browser and your country.</li>
             <li><strong>Website steps:</strong> when you sign up and use this website, we count a few steps (page opened, sign-up started and finished, recording started and finished, summary viewed). They carry a random identifier kept in your browser and, once you sign up, are linked to your account with the page or campaign that brought you here. They hold no audio, text or file names, and are not sent when your browser asks not to be tracked (Do Not Track or Global Privacy Control).</li>
+            <li><strong>Android app steps:</strong> The Android app also sends a few recording steps to our server (record tapped, microphone allowed or not, recording started, held back as too short or silent, upload finished or failed). They carry a random identifier created on your phone and the app version, are not linked to your account, and hold no audio, text or file names.</li>
+            <li><strong>Country, for phone calls:</strong> When the app checks whether phone calls are available, and when you use them, it sends the country of your SIM card and mobile network, or your device&apos;s region setting if there is neither. We use it to decide whether to offer calling, and we keep the country with our counts of how the phone feature is used.</li>
             <li><strong>Error reports:</strong> error details, app version, device make and model, operating system version, and an account identifier.</li>
           </ul>
         </section>
@@ -93,6 +95,7 @@ export default function PrivacyPage() {
           <h3 className="text-lg font-medium text-foreground/80 mb-3">Analytics, Sign-in and Calendar</h3>
           <ul className="list-disc list-inside text-muted-foreground space-y-2">
             <li><strong>Google Firebase Analytics</strong> &mdash; usage analytics in the Android app</li>
+            <li><strong>Meta and TikTok</strong> &mdash; The Android app includes the Meta SDK and the TikTok Business SDK for advertising measurement. They receive app events, such as the screens you open, sign-up and purchase events, and when a recording is started, finished or uploaded, together with device identifiers, including your Android advertising ID where your phone provides one, and your approximate location through your IP address.</li>
             <li><strong>Google and Microsoft</strong> &mdash; Google sign-in, and read-only calendar access if you connect Google Calendar or Outlook</li>
             <li><strong>Slack, Notion or a webhook you set up</strong> &mdash; receive a recording&apos;s title, summary and action items only if you turn on that integration</li>
           </ul>
