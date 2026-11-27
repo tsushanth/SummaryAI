@@ -37,12 +37,18 @@ export interface CallRow {
   recording_deleted_at: string | null;
   transcript_result: string | null;
   failure_reason: string | null;
+  /** Added by migration 033; absent before it. */
+  direction?: string | null;
+  agent_id?: string | null;
+  agent_result?: import('./calldesk.js').AgentResult | null;
   answered_at: string | null;
   ended_at: string | null;
   created_at: string;
 }
 
 export interface LedgerCall {
+  /** 'call' (from the app), 'inbound' or 'agent' (incoming). */
+  kind?: string;
   call_id: string;
   user_id: string | null;
   state: 'reserved' | 'settled' | 'released';
@@ -105,11 +111,11 @@ export interface PhoneStore {
   hasAnsweredBusiness(userId: string): Promise<boolean>;
 }
 
-const CALL_COLUMNS =
-  'id, user_id, from_number, to_number, to_name, twilio_call_sid, status, twilio_account, output_language, call_language, recording_sid, recording_duration, recording_id, recording_stored_at, recording_deleted_at, transcript_result, failure_reason, answered_at, ended_at, created_at';
+/** '*' so that reading calls works before and after migration 033. */
+const CALL_COLUMNS = '*';
 const PHONE_COLUMNS =
   'id, user_id, phone_number, status, verified_at, verification_expires_at, twilio_caller_id_sid, validation_call_sid, failure_reason, created_at';
-const LEDGER_COLUMNS = 'call_id, user_id, state, call_sid, claimed_at, notice_served_at, reserved_seconds, actual_seconds';
+const LEDGER_COLUMNS = 'kind, call_id, user_id, state, call_sid, claimed_at, notice_served_at, reserved_seconds, actual_seconds';
 
 export function createSupabaseStore(db: SupabaseClient<any, any, any>, audioBucket: string): PhoneStore {
   // Error messages carry the database code only: a Postgres message can quote the row, numbers included.
@@ -152,7 +158,7 @@ export function createSupabaseStore(db: SupabaseClient<any, any, any>, audioBuck
     async budget(userId, numberHash) { return rpc<Budget>('phone_budget', { p_user: userId, p_number_hash: numberHash }); },
     async halt(reason) { await rpc('phone_halt', { p_reason: reason }); },
     async openCalls() {
-      return check(await db.from('phone_ledger').select(LEDGER_COLUMNS).eq('kind', 'call').eq('state', 'reserved').not('claimed_at', 'is', null).order('created_at').limit(100), 'open_calls') as unknown as LedgerCall[];
+      return check(await db.from('phone_ledger').select(LEDGER_COLUMNS).in('kind', ['call', 'inbound', 'agent']).eq('state', 'reserved').not('claimed_at', 'is', null).order('created_at').limit(100), 'open_calls') as unknown as LedgerCall[];
     },
     async ledgerCall(callId) {
       return check(await db.from('phone_ledger').select(LEDGER_COLUMNS).eq('call_id', callId).maybeSingle(), 'ledger_call') as unknown as LedgerCall | null;

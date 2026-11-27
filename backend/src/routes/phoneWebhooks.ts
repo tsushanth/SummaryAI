@@ -10,6 +10,7 @@ import { safeError } from '../phone/gateway.js';
 import { answerAppCall, calleeNotice, settleCall, isUuid } from '../phone/calls.js';
 import { ingestRecording } from '../phone/recordings.js';
 import { handleCallerIdStatus } from '../phone/verification.js';
+import { answerInboundCall } from '../phone/inbound.js';
 
 const xml = (res: Response, body: string) => { res.type('text/xml').send(body); };
 const EMPTY_TWIML = '<?xml version="1.0" encoding="UTF-8"?><Response><Hangup/></Response>';
@@ -40,6 +41,12 @@ export function createPhoneWebhookRouter(getDeps: () => PhoneDeps | null = getPh
   };
 
   router.post('/voip-outbound', handle(async (req, res, d) => xml(res, await answerAppCall(d, params(req)))));
+
+  // An incoming call on one of our numbers.
+  router.post('/voice-inbound', handle(async (req, res, d) => {
+    if (!d.extras) return xml(res, '<?xml version="1.0" encoding="UTF-8"?><Response><Reject/></Response>');
+    xml(res, await answerInboundCall(d, d.extras, params(req)));
+  }));
 
   router.post('/callee-notice', handle(async (req, res, d) => xml(res, await calleeNotice(d, query(req, 'cid'), params(req)))));
 

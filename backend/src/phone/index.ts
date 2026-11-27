@@ -13,13 +13,19 @@ import { createTwilioGateway } from './gateway.js';
 import { createPhoneTracker } from './events.js';
 import type { PhoneDeps } from './deps.js';
 import { PHONE_SWEEP_INTERVAL_MS, sweepPhoneCalls } from './sweeper.js';
+import { createSupabaseNumbersStore } from './numbersStore.js';
+import { createCalldeskClient, readCalldeskSettings } from './calldesk.js';
+import { readPhonePlan } from './plan.js';
+import { getSubscriptionPurchase, acknowledgeSubscription } from '../services/googlePlayBilling.js';
 
 let cached: { key: string; deps: PhoneDeps } | null = null;
 
 export function getPhoneDeps(): PhoneDeps | null {
   const settings = readPhoneSettings();
   if (!settings) return null;
-  const key = JSON.stringify(settings);
+  const calldeskSettings = readCalldeskSettings();
+  const numbersOn = ['1', 'true', 'on', 'yes'].includes(String(process.env.PHONE_NUMBERS_SCHEMA ?? '').trim().toLowerCase());
+  const key = JSON.stringify([settings, calldeskSettings, numbersOn]);
   if (cached?.key === key) return cached.deps;
   const store = createSupabaseStore(supabaseAdmin, config.STORAGE_BUCKET_AUDIO);
   const alert: PhoneDeps['alert'] = (code, context) => { reportAlert('phone_calls', code, context ?? {}); };
@@ -45,6 +51,13 @@ export function getPhoneDeps(): PhoneDeps | null {
     now: () => Date.now(),
     newId: () => randomUUID(),
     later: (ms, fn) => { setTimeout(() => { fn().catch(() => alert('DEFERRED_TASK_FAILED')); }, ms).unref?.(); },
+    // Numbers, subscriptions and agents need migration 033: switched on with PHONE_NUMBERS_SCHEMA once it is applied.
+    extras: numbersOn ? {
+      numbers: createSupabaseNumbersStore(supabaseAdmin),
+      play: { get: (token) => getSubscriptionPurchase(token), acknowledge: (product, token) => acknowledgeSubscription(product, token) },
+      calldesk: calldeskSettings ? createCalldeskClient(calldeskSettings) : null,
+      plan: () => readPhonePlan(),
+    } : undefined,
   };
   cached = { key, deps };
   return deps;

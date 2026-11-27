@@ -6,12 +6,18 @@ import type { PhoneDeps } from './deps.js';
 import { settleCall } from './calls.js';
 import { ingestRecording } from './recordings.js';
 import { carrierCode } from './gateway.js';
+import { maintainNumbers } from './provision.js';
+import { reconcileAgentResults } from './agents.js';
 
 export const PHONE_SWEEP_INTERVAL_MS = 60_000;
 const LOOKBACK_MS = 48 * 3600_000;
 /** The webhook normally saves a recording within seconds; the sweeper starts after this. */
 const RECORDING_GRACE_MS = 3 * 60_000;
 const RECORDING_MISSING_AFTER_MS = 3600_000;
+
+/** Slow jobs run on every tenth pass. */
+const MAINTAIN_EVERY = 10;
+let passes = 0;
 
 export async function sweepPhoneCalls(d: PhoneDeps): Promise<void> {
   await d.store.releaseStale();
@@ -56,5 +62,10 @@ export async function sweepPhoneCalls(d: PhoneDeps): Promise<void> {
       await d.track('call_transcribe_failed', call.user_id, { reason: rec?.error_code ?? 'unknown' });
       d.alert('CALL_TRANSCRIPT_FAILED', { code: String(rec?.error_code ?? 'unknown') });
     }
+  }
+
+  if (d.extras) {
+    await reconcileAgentResults(d, d.extras);
+    if (passes++ % MAINTAIN_EVERY === 0) await maintainNumbers(d, d.extras);
   }
 }

@@ -79,20 +79,33 @@ Failures raise `phone_calls` alerts. No number, name or code is stored in events
 Incoming calls; web or iOS calling; countries other than the United States and Canada; a live-call test of the Android
 app (needs a person with a phone).
 
-## Phase 2 (planned)
-- Numbers are bought only in countries where the carrier sells them without extra registration (United States, Canada).
-- **Shared pool numbers cannot take incoming calls for everyone.** A return call is routed by the pair (pool number,
-  caller): when a user calls someone from a pool number, that pair is assigned to the user, and a database uniqueness rule
-  means no other user can be given the same pair while it is active (another pool number is chosen instead, or the call is
-  refused). A return call is forwarded to the user's verified phone with the recording notice. An unknown caller hears
-  that the number cannot take the call. No agent on pool numbers.
-- **Personal numbers**: one per subscriber, bought when a Google Play subscription is verified on the server, released
-  after it ends. Subscription money pays only that user's number and included minutes, which stop when used up. Price and
-  amounts are server configuration; purchase is off until approved.
-- The company cap covers pool numbers and all free usage.
+## Phase 2: numbers (server built, switched off; no app screens yet)
+Migration 033. Nothing here works until `PHONE_NUMBERS_SCHEMA=1`; nothing can be bought until `PHONE_PURCHASE_ENABLED=1`
+and `PHONE_PLAN_PRODUCT_ID` names a Google Play subscription. Price and included minutes are server settings
+(`PHONE_PLAN_*`, bounded in code and in the database).
+- Numbers are bought only where the carrier sells them without extra registration (United States, Canada), local numbers
+  with no address requirement. A month is booked in the ledger before a number is bought.
+- **Shared pool numbers cannot take incoming calls for everyone.** A return call is routed by the pair (our number,
+  caller): calling someone from a shared number ties that pair to the user for 30 days, and the database allows one owner
+  per pair (another shared number is chosen, or the call is refused). A return call is forwarded to the user's verified
+  phone with the notice to both. Anyone else is rejected without being answered. No agent on shared numbers.
+  Shared numbers are added only by an owner action (`POST /v1/internal/phone/shared-number`, secret header), at most 4.
+- **Personal numbers**: one per account, after the server has confirmed the subscription with Google Play (token bound to
+  one account). Subscription money pays that user's number and included minutes, which stop when used up; it never counts
+  against the company cap. Rechecked every few hours; the number is released 3 days after the paid time ends.
+- The company cap covers shared numbers and all free usage.
 
-## Phase 3 (planned)
-- One prompt creates a Calldesk agent through a server-to-server partner API; no setup, no extra abilities.
-- Telephony, recording, the notice and the ledger stay in MeetingMind; the agent joins a call as a media stream.
-- Inbound agents on personal numbers only. Outbound agent calls stay off until the owner decides.
-- Call list shows transcript, summary and outcome as Calldesk reports them; agent minutes are reserved in the same ledger.
+## Phase 3: agent from one prompt (server built, switched off; no app screens yet)
+Needs the `CALLDESK_PARTNER_*` settings and the partner API to be deployed on the Calldesk side.
+- `PUT /v1/api/phone/agent` takes one description (10 to 2000 characters) and a language; the agent is attached to the
+  user's personal number. Each change is booked in the ledger first, a few per day.
+- An incoming call on that number: the notice is spoken, recording starts, then the agent joins as a media stream with a
+  one-time token and a time limit. If the agent cannot take the call it is forwarded to the user's phone.
+- Telephony, recording, the notice and the ledger stay in MeetingMind. Results arrive on a signed webhook (and are
+  fetched if lost); `GET /calls/:id` returns summary, outcome and transcript as reported.
+- Inbound only. Outbound agent calls are not built.
+- Account deletion releases the number, deletes the agent and its data at Calldesk, and keeps only unlinked ledger rows.
+
+## Not built yet
+Android screens for buying a number, the agent description and agent results (and their translations); Google Play
+product; real-time developer notifications (subscriptions are polled); a live test of any incoming call or agent.

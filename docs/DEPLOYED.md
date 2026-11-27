@@ -4,7 +4,7 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 
 | Component | Fly app | Release | Image | Built from | Date |
 |---|---|---|---|---|---|
-| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v70 | `registry.fly.io/summary-ai-backend:deployment-01M8DD2GF5V22JV71TY6SC4XZF` | `origin/main` at `2dbafb2` (#124; `backend/` tree `60f9d72ad4a49f282fd840b1a84a7895e5660595`) | 2026-11-27 (UTC) |
+| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v71 | `registry.fly.io/summary-ai-backend:deployment-01M8DDS08NZYEDSB8TS3WHRR1P` | the phone numbers and agents PR at `9a76b87`, based on main `a85863d` (`backend/` tree `872c0406c5602e22ce9482ed52b220dbdef9ffca`, identical to main after the merge) | 2026-11-27 (UTC) |
 | Web (`web/`, meetingmind.org) | `meeting-mind-web` | v43 | `registry.fly.io/meeting-mind-web:deployment-01M8CNXBE7KE1AJAXTEMJHWPBE` | `origin/main` at `464634a` (#119, deployed by the web-deploy workflow; `web/` tree `eaca6a737c817ac6f6def0a61e7c0e477a68902b` identical to main) | 2026-11-26 (UTC) |
 
 ## Android: merged, NOT released (next release: after 1.7.15, versionCode 68)
@@ -16,6 +16,14 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 - Android now posts anonymous record steps to `POST /api/activation/events` (platform `android`, no server change): `record_clicked` with `step` = tap, mic_granted, mic_denied, start_failed, stop_ok, held_short, held_silent, keep_going, record_again, upload_anyway or check_dismissed; `first_recording_started` (every start, `again` after Record again); `first_recording_done` (every upload: `ok`, `seconds`, `auto`). `test` is true on debug builds and Firebase Test Lab. The web funnel check filters `platform = 'web'`, so it is unaffected.
 - Before release: the privacy page names these steps for the website only; add the app.
 - Checks: `:app:testDebugUnitTest` 314 tests, 0 failures; `:app:assembleDebug`. No device run.
+
+## 2026-11-27 Phone numbers, subscription check, incoming calls and agents, switched off (migration 033): backend v71
+- Change: phases 2 and 3 of `docs/superpowers/specs/2026-11-26-mm-phone-calls-design.md`, server only. **All switches unset**: `PHONE_NUMBERS_SCHEMA`, `PHONE_PURCHASE_ENABLED`, `PHONE_PLAN_*`, `CALLDESK_PARTNER_*`, as well as `FEATURE_PHONE_CALLS` and `PHONE_CALLS_TESTER_IDS`. No number was bought, no agent exists, nothing can be purchased. No app screens for these yet.
+- Database: migration `033_phone_numbers_agents` applied before the deploy (dry run in a rolled-back transaction first). Reverse: `backend/supabase/rollbacks/033_phone_numbers_agents_down.sql`.
+- Backend: `flyctl deploy --remote-only` from a clean detached worktree of the PR head, merged right after. No secret set or unset. Quiet moment checked.
+- Verified: `tsc` clean, vitest 106 files / 1512 tests, build; `/health/detailed` healthy, nine loops fresh; carrier and Calldesk webhooks refuse unsigned and forged requests (403); owner routes refuse without the secret (401); funnel query answers; read-only number search returns US and Canada numbers; the calls subaccount holds no number, recording or caller ID.
+- NOT verified: any incoming call, any agent session or result, any Google Play purchase, any number purchase.
+- Rollback: `flyctl deploy -a summary-ai-backend --image registry.fly.io/summary-ai-backend:deployment-01M8DD2GF5V22JV71TY6SC4XZF` (v70).
 
 ## 2026-11-27 Summaries follow the recording's language (#124): backend v70
 - Cause: with no summary language chosen ("Same language as the recording" on the web; Android sends none) the English summary prompt named no language, so the model answered in English.
