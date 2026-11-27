@@ -83,6 +83,11 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 - Rollback: `flyctl releases rollback 65 -a summary-ai-backend`.
 - Android #116 (automatic retry of a failed recording upload) is merged and NOT released; it needs a release after 1.7.15 (68). `testDebugUnitTest` 304 tests, 0 failures; `lintDebug` 0 errors; no device run.
 
+## 2026-11-27 Database: free phone-agent trial places lowered to 3 (migration 036, switched off)
+- Owner decision. `phone_trial_limits()` now allows 3 trials open at once and 3 started in a calendar month (was 5 and 5); the other limits are unchanged. No server deploy, no setting change, no trial existed.
+- Dry run in a rolled-back transaction, then applied at 11:05 PT; read back 3 and 3, server access only. Backend tests: 1569 passed.
+- Running migration 034 again would put 5 back. Reverse: `backend/supabase/rollbacks/036_phone_trial_three_down.sql`.
+
 ## 2026-11-27 Android 1.7.15 (68) raised to 100% on Play production
 - Owner approved on 27 November. Read back after commit (10:53 PT): production 1.7.15 (68) `completed`; 1.7.13 (66) is no longer on the track. A completed release cannot be halted: rolling back means a new version code.
 - Before raising: no error report, error issue or text review for versionCode 68 since 11-25, and Play returned no crash or ANR rate rows. That is an absence of data at this install base, not a measured clean rate.
