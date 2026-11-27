@@ -6,6 +6,9 @@
     <string name="phone_notification_title">Appel en cours</string>
     <string name="phone_minutes_left">Minutes gratuites restantes ce mois-ci : %1$d sur %2$d</string>
     <string name="phone_service_used_up">Le quota d\'appels téléphoniques de ce mois-ci est épuisé. Veuillez réessayer le mois prochain.</string>
+    <string name="phone_more_minutes_low">Il vous reste peu de minutes d\'appel gratuites ce mois-ci.</string>
+    <string name="phone_more_minutes_button">Je voudrais plus de minutes</string>
+    <string name="phone_more_minutes_thanks">Merci. Nous étudierons la possibilité de proposer plus de minutes.</string>
     <string name="phone_your_number">Votre numéro</string>
     <string name="phone_verify_intro">Les appels affichent votre propre numéro. Pour l\'enregistrer, nous appelons ce numéro et vous saisissez un code sur le clavier de votre téléphone. Uniquement les numéros des États-Unis et du Canada.</string>
     <string name="phone_number_hint">Numéro avec l\'indicatif du pays, par exemple +1 415 555 0100</string>

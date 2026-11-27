@@ -6,6 +6,9 @@
     <string name="phone_notification_title">通話中</string>
     <string name="phone_minutes_left">今月の残り無料通話時間（分）: %1$d / %2$d</string>
     <string name="phone_service_used_up">今月の電話利用枠は使い切られました。来月もう一度お試しください。</string>
+    <string name="phone_more_minutes_low">今月の無料通話時間が残りわずかです。</string>
+    <string name="phone_more_minutes_button">通話時間を増やしてほしい</string>
+    <string name="phone_more_minutes_thanks">ありがとうございます。通話時間の追加提供を検討いたします。</string>
     <string name="phone_your_number">あなたの番号</string>
     <string name="phone_verify_intro">発信時にはご自身の番号が表示されます。番号を登録するには、こちらからその番号に電話をかけますので、電話のキーパッドでコードを入力してください。アメリカ合衆国とカナダの番号のみ対応しています。</string>
     <string name="phone_number_hint">国番号を含む番号（例: +1 415 555 0100）</string>

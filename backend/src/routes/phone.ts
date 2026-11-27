@@ -121,6 +121,8 @@ export function createPhoneRouter(getDeps: () => PhoneDeps | null = getPhoneDeps
       minutes_per_month: budget.minutes_per_month,
       minutes_left: budget.halted ? 0 : budget.minutes_left,
       service_available: !budget.halted && budget.month_spent_micro < budget.cap_micro,
+      // The app asks for interest in more minutes only when there is nothing to buy.
+      purchase_offered: d.extras?.plan().purchaseEnabled === true,
       business_answered: await d.store.hasAnsweredBusiness(userId),
       phones: phones.map(publicPhone),
     });

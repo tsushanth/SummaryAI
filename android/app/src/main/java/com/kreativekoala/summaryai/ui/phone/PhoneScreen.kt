@@ -114,6 +114,7 @@ fun PhoneScreen(
                                 onSelect = viewModel::selectPhone,
                                 onRemove = { removing = it }
                             )
+                            if (state.showMoreMinutes) MoreMinutesCard(state, viewModel::askForMoreMinutes)
                         }
                     }
                 )
@@ -158,6 +159,9 @@ fun PhoneScreen(
             },
             onDecline = viewModel::declineConsent
         )
+    }
+    if (state.noMinutesDialog) {
+        NoMinutesDialog(state, onAsk = viewModel::askForMoreMinutes, onDismiss = viewModel::closeNoMinutes)
     }
     removing?.let { phone ->
         AlertDialog(

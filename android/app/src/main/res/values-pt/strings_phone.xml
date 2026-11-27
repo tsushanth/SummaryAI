@@ -6,6 +6,9 @@
     <string name="phone_notification_title">Ligação em andamento</string>
     <string name="phone_minutes_left">Minutos grátis restantes neste mês: %1$d de %2$d</string>
     <string name="phone_service_used_up">As ligações telefônicas deste mês se esgotaram. Tente novamente no próximo mês.</string>
+    <string name="phone_more_minutes_low">Seus minutos grátis de ligação deste mês estão acabando.</string>
+    <string name="phone_more_minutes_button">Quero mais minutos</string>
+    <string name="phone_more_minutes_thanks">Obrigado. Vamos considerar a possibilidade de oferecer mais minutos.</string>
     <string name="phone_your_number">Seu número</string>
     <string name="phone_verify_intro">As ligações mostram o seu próprio número. Para registrá-lo, ligamos para ele e você digita um código no teclado do telefone. Somente números dos Estados Unidos e do Canadá.</string>
     <string name="phone_number_hint">Número com código do país, por exemplo +1 415 555 0100</string>

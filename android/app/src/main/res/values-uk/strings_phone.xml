@@ -6,6 +6,9 @@
     <string name="phone_notification_title">Триває дзвінок</string>
     <string name="phone_minutes_left">Залишилося безкоштовних хвилин цього місяця: %1$d із %2$d</string>
     <string name="phone_service_used_up">Ліміт телефонних дзвінків на цей місяць вичерпано. Спробуйте ще раз наступного місяця.</string>
+    <string name="phone_more_minutes_low">Безкоштовні хвилини дзвінків на цей місяць закінчуються.</string>
+    <string name="phone_more_minutes_button">Хочу більше хвилин</string>
+    <string name="phone_more_minutes_thanks">Дякуємо. Ми розглянемо можливість запропонувати більше хвилин.</string>
     <string name="phone_your_number">Ваш номер</string>
     <string name="phone_verify_intro">Під час дзвінків відображається ваш власний номер. Щоб зареєструвати його, ми зателефонуємо на нього, а ви введете код на клавіатурі телефону. Лише номери США та Канади.</string>
     <string name="phone_number_hint">Номер із кодом країни, наприклад +1 415 555 0100</string>

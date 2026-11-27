@@ -6,6 +6,9 @@
     <string name="phone_notification_title">Apel în curs</string>
     <string name="phone_minutes_left">Minute gratuite rămase luna aceasta: %1$d din %2$d</string>
     <string name="phone_service_used_up">Apelurile telefonice pentru luna aceasta au fost epuizate. Încearcă din nou luna viitoare.</string>
+    <string name="phone_more_minutes_low">Minutele gratuite de apel pentru luna aceasta sunt pe terminate.</string>
+    <string name="phone_more_minutes_button">Aș vrea mai multe minute</string>
+    <string name="phone_more_minutes_thanks">Mulțumim. Vom lua în considerare oferirea mai multor minute.</string>
     <string name="phone_your_number">Numărul tău</string>
     <string name="phone_verify_intro">La apeluri se afișează propriul tău număr. Pentru a-l înregistra, îl sunăm, iar tu introduci un cod pe tastatura telefonului. Numai numere din Statele Unite și Canada.</string>
     <string name="phone_number_hint">Număr cu prefixul țării, de exemplu +1 415 555 0100</string>

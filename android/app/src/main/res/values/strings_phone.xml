@@ -7,6 +7,9 @@
 
     <string name="phone_minutes_left">Free minutes left this month: %1$d of %2$d</string>
     <string name="phone_service_used_up">Phone calls are used up for this month. Please try again next month.</string>
+    <string name="phone_more_minutes_low">Your free call minutes for this month are running low.</string>
+    <string name="phone_more_minutes_button">I\'d like more minutes</string>
+    <string name="phone_more_minutes_thanks">Thank you. We\'ll consider offering more minutes.</string>
     <string name="phone_your_number">Your number</string>
     <string name="phone_verify_intro">Calls show your own number. To register it, we call it and you type a code on your phone keypad. United States and Canada numbers only.</string>
     <string name="phone_number_hint">Number with country code, for example +1 415 555 0100</string>

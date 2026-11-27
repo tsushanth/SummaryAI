@@ -7,6 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.kreativekoala.summaryai.data.local.PreferencesManager
 import com.kreativekoala.summaryai.data.local.TokenManager
 import com.kreativekoala.summaryai.data.sample.SampleMeetingStore
+import com.kreativekoala.summaryai.service.MoreMinutesMemory
 import com.kreativekoala.summaryai.ui.onboarding.FirstRunState
 import dagger.Module
 import dagger.Provides
@@ -51,6 +52,16 @@ object AppModule {
         @ApplicationContext context: Context
     ): FirstRunState = FirstRunState(
         context.getSharedPreferences(FirstRunState.PREFS_NAME, Context.MODE_PRIVATE)
+    )
+
+    @Provides
+    @Singleton
+    fun provideMoreMinutesMemory(
+        @ApplicationContext context: Context,
+        tokens: TokenManager
+    ): MoreMinutesMemory = MoreMinutesMemory(
+        context.getSharedPreferences(MoreMinutesMemory.PREFS_NAME, Context.MODE_PRIVATE),
+        account = { tokens.userId }
     )
 
     @Provides

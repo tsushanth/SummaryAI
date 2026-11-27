@@ -8,14 +8,16 @@ import com.kreativekoala.summaryai.data.api.models.PhoneEventRequest
 import com.kreativekoala.summaryai.data.api.models.PhoneProfileRequest
 import com.kreativekoala.summaryai.data.api.models.PhoneStatusResponse
 import com.kreativekoala.summaryai.data.api.models.StartCallRequest
-import com.kreativekoala.summaryai.data.repository.PhoneRepository
+import com.kreativekoala.summaryai.data.repository.PhoneSource
 import com.kreativekoala.summaryai.data.repository.toDomain
 import com.kreativekoala.summaryai.domain.model.PhoneCall
 import com.kreativekoala.summaryai.domain.model.PhoneCallStatus
 import com.kreativekoala.summaryai.domain.model.VerifiedPhone
 import com.kreativekoala.summaryai.service.CurrentCall
+import com.kreativekoala.summaryai.service.MoreMinutesMemory
 import com.kreativekoala.summaryai.service.VoipCallState
 import com.kreativekoala.summaryai.service.VoipService
+import com.kreativekoala.summaryai.util.ApiErrors
 import com.kreativekoala.summaryai.util.OutputLanguageSource
 import com.kreativekoala.summaryai.util.PhoneDevice
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -54,6 +56,9 @@ enum class CallStage { CONNECTING, CALLING, RECORDING, ENDED }
 
 data class ActiveCall(val call: CurrentCall, val stage: CallStage, @StringRes val endMessage: Int? = null)
 
+/** With this many free minutes or fewer, the person is asked whether they would like more. */
+const val LOW_MINUTES = 5
+
 data class PhoneUiState(
     val isLoading: Boolean = true,
     val minutesLeft: Int = 0,
@@ -78,8 +83,19 @@ data class PhoneUiState(
     val ownNumberAvailable: Boolean = false,
     /** The account's own number, which calls can show instead of a verified one. */
     val ownNumber: VerifiedPhone? = null,
-    val openCall: PhoneCall? = null
+    val openCall: PhoneCall? = null,
+    /** Whether the server offers anything to buy; null until it has said. */
+    val purchaseOffered: Boolean? = null,
+    /** This account asked for more minutes this month, on this device. */
+    val moreMinutesAsked: Boolean = false,
+    val sendingMoreMinutes: Boolean = false,
+    /** A call was tried with no free minutes left. */
+    val noMinutesDialog: Boolean = false
 ) {
+    /** Few or no free minutes and nothing to buy: the card that asks about more minutes. */
+    val showMoreMinutes: Boolean
+        get() = serviceAvailable && purchaseOffered == false && minutesLeft <= LOW_MINUTES
+
     /** Calls need a verified number; the own number can then be chosen as the one shown. */
     val selectedPhone: VerifiedPhone?
         get() = phones.firstOrNull { it.id == selectedPhoneId }
@@ -114,10 +130,11 @@ fun defaultCallLanguage(appLanguage: String, offered: List<String>): String =
 
 @HiltViewModel
 class PhoneViewModel @Inject constructor(
-    private val repository: PhoneRepository,
+    private val repository: PhoneSource,
     private val voip: VoipService,
     private val outputLanguage: OutputLanguageSource,
-    private val device: PhoneDevice
+    private val device: PhoneDevice,
+    private val moreMinutes: MoreMinutesMemory
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PhoneUiState())
@@ -131,6 +148,7 @@ class PhoneViewModel @Inject constructor(
     private var businessContext = "number"
     private var verificationJob: Job? = null
     private var callJob: Job? = null
+    private var moreMinutesCardCounted = false
 
     init {
         track("tab_opened")
@@ -138,8 +156,10 @@ class PhoneViewModel @Inject constructor(
         observeCall()
     }
 
-    private fun track(step: String) {
-        viewModelScope.launch { repository.event(PhoneEventRequest(step, device.region, device.isTest.takeIf { it })) }
+    private fun step(name: String) = PhoneEventRequest(name, device.region, device.isTest.takeIf { it })
+
+    private fun track(name: String) {
+        viewModelScope.launch { repository.event(step(name)) }
     }
 
     fun refresh() {
@@ -165,16 +185,20 @@ class PhoneViewModel @Inject constructor(
                 maxNumbers = status.maxVerifiedNumbers ?: 2,
                 phones = status.phones.orEmpty().map { p -> p.toDomain() },
                 ownNumberAvailable = status.ownNumber == true,
+                purchaseOffered = status.purchaseOffered,
+                moreMinutesAsked = moreMinutes.askedThisMonth(),
                 tab = if (it.tab == PhoneTab.NUMBER && status.ownNumber != true) PhoneTab.DIALER else it.tab,
                 callLanguages = languages,
                 callLanguage = if (it.isLoading) defaultCallLanguage(device.language, languages) else it.callLanguage
             )
         }
+        countMoreMinutesCard()
     }
 
     fun selectTab(tab: PhoneTab) {
         _uiState.update { it.copy(tab = tab) }
         if (tab == PhoneTab.CALLS) refresh()
+        countMoreMinutesCard()
     }
 
     fun selectPhone(id: String) = _uiState.update { it.copy(selectedPhoneId = id) }
@@ -201,6 +225,45 @@ class PhoneViewModel @Inject constructor(
     fun setDialerName(value: String) = _uiState.update { it.copy(dialerName = value.take(100)) }
     fun setCallLanguage(code: String) = _uiState.update { it.copy(callLanguage = code) }
     fun clearMessage() = _uiState.update { it.copy(message = null) }
+
+    // MARK: - More minutes
+
+    /** Counted once a visit, when the card and its button first come into view. */
+    private fun countMoreMinutesCard() {
+        val state = _uiState.value
+        if (moreMinutesCardCounted || state.tab != PhoneTab.DIALER || !state.showMoreMinutes || state.moreMinutesAsked) return
+        moreMinutesCardCounted = true
+        track("more_minutes_shown")
+    }
+
+    /** What a call with no free minutes shows instead of an error. Counted each time it asks. */
+    private fun openNoMinutes() {
+        if (_uiState.value.noMinutesDialog) return
+        val asked = moreMinutes.askedThisMonth()
+        _uiState.update { it.copy(noMinutesDialog = true, moreMinutesAsked = asked) }
+        if (!asked) track("more_minutes_shown")
+    }
+
+    fun closeNoMinutes() = _uiState.update { it.copy(noMinutesDialog = false) }
+
+    /** Thanked, and remembered for the month, only once the server has it. */
+    fun askForMoreMinutes() {
+        val state = _uiState.value
+        if (state.sendingMoreMinutes || state.moreMinutesAsked) return
+        _uiState.update { it.copy(sendingMoreMinutes = true) }
+        viewModelScope.launch {
+            repository.confirmedEvent(step("more_minutes_interest")).fold(
+                onSuccess = {
+                    moreMinutes.remember()
+                    _uiState.update { it.copy(sendingMoreMinutes = false, moreMinutesAsked = true) }
+                },
+                onFailure = { e ->
+                    // The dialog is closed so the reason can be read; the button is there again next time.
+                    _uiState.update { it.copy(sendingMoreMinutes = false, noMinutesDialog = false, message = PhoneMessage.Failure(e)) }
+                }
+            )
+        }
+    }
 
     // MARK: - Verification
 
@@ -284,6 +347,10 @@ class PhoneViewModel @Inject constructor(
             state.minutesLeft <= 0 -> R.string.phone_error_minutes_used
             else -> phoneNumberProblem(number)
         }
+        if (problem == R.string.phone_error_minutes_used && state.purchaseOffered == false) {
+            openNoMinutes()
+            return
+        }
         if (problem != null || from == null) {
             _uiState.update { it.copy(message = PhoneMessage.Resource(problem ?: R.string.error_verify_phone_first)) }
             return
@@ -327,7 +394,10 @@ class PhoneViewModel @Inject constructor(
                     }
                 },
                 onFailure = { e ->
-                    _uiState.update { it.copy(starting = false, message = PhoneMessage.Failure(e)) }
+                    // The server can find no minutes left when the screen still showed some.
+                    val noMinutes = ApiErrors.parse(e).code == "PHONE_MINUTES_USED" && _uiState.value.purchaseOffered == false
+                    _uiState.update { it.copy(starting = false, message = if (noMinutes) it.message else PhoneMessage.Failure(e)) }
+                    if (noMinutes) openNoMinutes()
                     refresh()
                 }
             )
