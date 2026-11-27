@@ -88,6 +88,33 @@ describe.skipIf(!pgAvailable)('test traffic (migrations 039 and 040)', () => {
     expect(db.sql(`SELECT reason FROM public.test_accounts_among(ARRAY['${id(3)}','${id(5)}','${id(5)}']::uuid[])`)).toBe('company');
   });
 
+  it('uses the Google network rule for counts only, never for what the backend asks before silencing an alert', () => {
+    expect(db.sql(`SELECT reason FROM public.test_accounts() WHERE user_id = '${id(13)}'`)).toBe('google_network');
+    expect(db.sql(`SELECT user_id FROM public.test_accounts_among(ARRAY['${id(13)}']::uuid[])`)).toBe('');
+    insert(anon(42), { user: 13 });
+    expect(rows(anon(42))).toEqual(['web|-']);
+  });
+
+  it('infers nothing about a browser a person has used: not their rows, not the browser\'s other rows', () => {
+    // A person signs up in a browser, then a test account does: nothing is swept, nothing later is inferred.
+    insert(anon(60));
+    db.sql(`INSERT INTO public.signup_attribution (user_id, anon_id) VALUES ('${id(3)}', '${anon(60)}')`);
+    db.sql(`INSERT INTO public.signup_attribution (user_id, anon_id) VALUES ('${id(8)}', '${anon(60)}')`);
+    insert(anon(60), { user: 8 });
+    insert(anon(60));
+    insert(anon(60), { user: 3 });
+    expect(rows(anon(60))).toEqual(['web|-', 'web_test|reserved_domain', 'web|-', 'web|-']);
+    // A row sent with a person's account is not marked by an earlier test row or by a listed browser.
+    insert(anon(61), { props: { test: true } });
+    insert(anon(61), { user: 15 });  // declared 'not_test'
+    insert(anon(61));                // the browser is now known to be shared
+    expect(rows(anon(61))).toEqual(['web_test|client', 'web|-', 'web|-']);
+    insert(anon(50), { user: 3 });
+    insert(anon(50), { user: 15 });
+    insert(anon(50));                // listed by the owner: rows without an account are still ours
+    expect(rows(anon(50))).toEqual(['web|-', 'web|-', 'web_test|deploy_check']);
+  });
+
   it('is closed to app users and anonymous callers', () => {
     for (const role of ['anon', 'authenticated']) {
       for (const q of ['SELECT * FROM public.test_traffic_rules', 'SELECT * FROM public.test_accounts()',
@@ -184,6 +211,15 @@ describe.skipIf(!pgAvailable)('test traffic (migrations 039 and 040)', () => {
     insert(anon(26), { platform: 'android', props: { test: true } });
     insert(anon(26), { platform: 'android' });                                 // same install
     insert(SERVER, { user: 3, platform: 'server' });
+    insert(anon(27), { user: 1, platform: 'android', props: { test: false } });   // said it was not a test
+    insert(anon(28), { platform: 'android', props: { test: true } });
+    insert(anon(28), { platform: 'android', props: { test: false, seconds: 4 } }); // same install
+    insert(anon(29));                                                              // a browser two people share
+    db.sql(`INSERT INTO public.signup_attribution (user_id, anon_id) VALUES ('${id(3)}', '${anon(29)}'), ('${id(12)}', '${anon(29)}')`);
+    insert(anon(31), { props: { test: true } });
+    insert(anon(31), { user: 15 });                                                // declared 'not_test'
+    insert(anon(31));
+    insert(anon(50), { user: 3 });                                                 // a person's row in a listed browser
     db.sql('ALTER TABLE public.activation_events ENABLE TRIGGER activation_events_mark_test');
     db.sql('ALTER TABLE public.signup_attribution ENABLE TRIGGER signup_attribution_mark_test');
     const snapshot = () => db.sql('SELECT id, platform, props::text FROM public.activation_events ORDER BY id');
@@ -194,7 +230,11 @@ describe.skipIf(!pgAvailable)('test traffic (migrations 039 and 040)', () => {
     expect(rows(anon(20))).toEqual(['web|-']);
     expect(rows(anon(21))).toEqual(['android_test|-']);
     expect(rows(anon(22))).toEqual(['android_test|owner']);
-    expect(rows(anon(50))).toEqual(['web_test|deploy_check']);
+    expect(rows(anon(50))).toEqual(['web_test|deploy_check', 'web|-']);
+    expect(rows(anon(27))).toEqual(['android_test|owner']);
+    expect(rows(anon(28))).toEqual(['android_test|-', 'android_test|same_install']);
+    expect(rows(anon(29))).toEqual(['web|-']);
+    expect(rows(anon(31))).toEqual(['web_test|-', 'web|-', 'web|-']);
     expect(rows(anon(23))).toEqual(['web_test|reserved_domain', 'web_test|reserved_domain']);
     expect(rows(anon(24))).toEqual(['android_test|internal_build']);
     expect(rows(anon(25))).toEqual(['android|-']);
@@ -204,8 +244,10 @@ describe.skipIf(!pgAvailable)('test traffic (migrations 039 and 040)', () => {
       SELECT count(*) FILTER (WHERE is_internal_or_test), count(*) FILTER (WHERE NOT is_internal_or_test), count(*) FILTER (WHERE is_synthetic)
         FROM harness.activation_users`)).toBe('9|6|1');
 
+    expect(db.sql(`SELECT props->>'test_was' FROM public.activation_events WHERE anon_id = '${anon(27)}'`)).toBe('false');
+
     db.sql(file('rollbacks/040_test_traffic_history_down.sql'));
-    expect(snapshot()).toBe(before);
+    expect(snapshot()).toBe(before); // including the rows that had test: false
   });
 
   it('refuses to re-mark history before any account rule exists', () => {

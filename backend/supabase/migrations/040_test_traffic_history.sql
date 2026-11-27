@@ -3,7 +3,8 @@
 -- Undo: ../rollbacks/040_test_traffic_history_down.sql.
 --
 -- Every changed row carries props.test_backfill: 'moved' (it already said test; only its platform was renamed) or
--- 'marked' (newly marked here). Nothing is deleted. To preview, run it with the last line changed to ROLLBACK.
+-- 'marked' (newly marked here; a test value it had before is kept in props.test_was for the rollback). Nothing is
+-- deleted. To preview, run it with the last line changed to ROLLBACK.
 
 BEGIN;
 SET LOCAL lock_timeout = '5s';
@@ -20,33 +21,48 @@ UPDATE public.activation_events
    SET platform = platform || '_test', props = props || '{"test_backfill": "moved"}'::jsonb
  WHERE props->>'test' = 'true' AND platform IN ('web', 'android', 'ios');
 
--- 2. Rows the rules cover: by account, by browser or install, by the account that signed up in that browser, or by a
---    test-only build while its rule ran.
-WITH why AS (
-    SELECT e.id, COALESCE(
-             CASE WHEN e.user_id IS NOT NULL THEN public.test_account_reason(e.user_id, false) END,
-             (SELECT r.label FROM public.test_traffic_rules r WHERE r.kind = 'anon_id' AND r.value = e.anon_id LIMIT 1),
-             (SELECT public.test_account_reason(a.user_id, false) FROM public.signup_attribution a
-               WHERE a.anon_id = e.anon_id AND public.test_account_reason(a.user_id, false) IS NOT NULL LIMIT 1),
-             (SELECT 'internal_build' FROM public.test_traffic_rules r
-               WHERE r.kind = 'android_version' AND e.platform = 'android' AND r.value = e.app_version AND e.created_at < r.ends_at LIMIT 1)
-           ) AS reason
+-- 2. Rows the rules cover: by account, by test-only build while its rule ran, by listed browser or install, or by the
+--    test account that signed up in that browser. Nothing is taken from a browser or install for a row that carries a
+--    person's account, and a sign-up says nothing about a browser a person has used too.
+WITH who AS (
+    SELECT e.id, e.anon_id, e.platform, e.app_version, e.created_at,
+           CASE WHEN e.user_id IS NOT NULL THEN public.test_account_reason(e.user_id, false) END AS account,
+           e.user_id IS NOT NULL AND public.test_account_reason(e.user_id, false) IS NULL AS person
       FROM public.activation_events e
      WHERE COALESCE(e.props->>'test', '') <> 'true'
+),
+why AS (
+    SELECT w.id, COALESCE(
+             w.account,
+             (SELECT r.label FROM public.test_traffic_rules r
+               WHERE NOT w.person AND r.kind = 'anon_id' AND r.value = w.anon_id LIMIT 1),
+             (SELECT public.test_account_reason(a.user_id, false) FROM public.signup_attribution a
+               WHERE NOT w.person AND a.anon_id = w.anon_id AND public.test_account_reason(a.user_id, false) IS NOT NULL
+                 AND NOT public.test_anon_has_person(w.anon_id) LIMIT 1),
+             (SELECT 'internal_build' FROM public.test_traffic_rules r
+               WHERE r.kind = 'android_version' AND w.platform = 'android' AND r.value = w.app_version AND w.created_at < r.ends_at LIMIT 1)
+           ) AS reason
+      FROM who w
 )
 UPDATE public.activation_events e
-   SET props = e.props || jsonb_build_object('test', true, 'test_reason', why.reason, 'test_backfill', 'marked'),
+   SET props = e.props
+               || CASE WHEN e.props ? 'test' THEN jsonb_build_object('test_was', e.props->'test') ELSE '{}'::jsonb END
+               || jsonb_build_object('test', true, 'test_reason', why.reason, 'test_backfill', 'marked'),
        platform = CASE WHEN e.platform IN ('web', 'android', 'ios') THEN e.platform || '_test' ELSE e.platform END
   FROM why
  WHERE e.id = why.id AND why.reason IS NOT NULL;
 
--- 3. The other rows of those browsers and installs.
+-- 3. The other rows of those browsers and installs, where no person has used them.
 UPDATE public.activation_events e
-   SET props = e.props || '{"test": true, "test_reason": "same_install", "test_backfill": "marked"}'::jsonb,
+   SET props = e.props
+               || CASE WHEN e.props ? 'test' THEN jsonb_build_object('test_was', e.props->'test') ELSE '{}'::jsonb END
+               || '{"test": true, "test_reason": "same_install", "test_backfill": "marked"}'::jsonb,
        platform = CASE WHEN e.platform IN ('web', 'android', 'ios') THEN e.platform || '_test' ELSE e.platform END
  WHERE COALESCE(e.props->>'test', '') <> 'true' AND e.anon_id <> 'server-phone-events'
+   AND (e.user_id IS NULL OR public.test_account_reason(e.user_id, false) IS NOT NULL)
    AND EXISTS (SELECT 1 FROM public.activation_events t
-                WHERE t.anon_id = e.anon_id AND t.props->>'test' = 'true' AND COALESCE(t.props->>'test_reason', '') <> 'internal_build');
+                WHERE t.anon_id = e.anon_id AND t.props->>'test' = 'true' AND COALESCE(t.props->>'test_reason', '') <> 'internal_build')
+   AND NOT public.test_anon_has_person(e.anon_id);
 
 -- 4. The activation harness reads accounts through this view (ops-notes harness/sql/harness_readonly_role.sql). Same
 --    columns; "internal or test" now means the rule above. Re-applying that file would put its older pattern back.

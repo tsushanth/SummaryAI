@@ -9,6 +9,7 @@ DROP TRIGGER IF EXISTS activation_events_mark_test ON public.activation_events;
 DROP FUNCTION IF EXISTS public.signup_attribution_mark_test();
 DROP FUNCTION IF EXISTS public.activation_events_mark_test();
 DROP FUNCTION IF EXISTS public.test_mark_anon(text, text);
+DROP FUNCTION IF EXISTS public.test_anon_has_person(text);
 DROP FUNCTION IF EXISTS public.test_accounts_among(uuid[]);
 DROP FUNCTION IF EXISTS public.test_accounts();
 DROP FUNCTION IF EXISTS public.test_account_reason(uuid, boolean);

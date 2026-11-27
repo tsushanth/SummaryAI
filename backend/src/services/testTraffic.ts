@@ -14,7 +14,12 @@ export const TEST_ACCOUNT_RE = /@example\.(com|org|net)$|@cloudtestlabaccounts\.
 /** The fallback reads one account per call, so it is bounded. */
 const FALLBACK_MAX_LOOKUPS = 200;
 
-/** The ids among `userIds` that are not people to count. Never throws; an account that cannot be read counts as a person. */
+/**
+ * The ids among `userIds` that are ours or automated for certain: listed rules and automated address shapes. This is
+ * the call for anything that leaves someone out of an alert, a report or a stored row. It does not include the
+ * database's "only ever signed in from Google's network" rule, which can change and is for counts only
+ * (SQL: public.test_accounts()). Never throws; an account that cannot be read counts as a person.
+ */
 export async function testAccountsAmong(userIds: Array<string | null | undefined>): Promise<Set<string>> {
   const ids = [...new Set(userIds.filter((id): id is string => !!id))];
   if (ids.length === 0) return new Set();
@@ -32,6 +37,7 @@ export async function testAccountsAmong(userIds: Array<string | null | undefined
   return found;
 }
 
+/** One account, same rule: `if (await isTestAccount(userId)) skip the alert`. */
 export async function isTestAccount(userId: string): Promise<boolean> {
   return (await testAccountsAmong([userId])).has(userId);
 }

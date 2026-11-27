@@ -14,13 +14,20 @@ of ours.**
 | `play_test_lab` | `@cloudtestlabaccounts.com` | built in |
 | `play_robot` | Gmail address ending `.NNNNN` | built in |
 | `synthetic` | address with `+mmsynth...` | built in |
-| `google_network` | every sign-in session from Google's network (counts only, never stored on a row) | built in |
+| `google_network` | every sign-in session from Google's network. **Counts only** (`public.test_accounts()`): it never silences an alert and is never stored on a row | built in |
 | `automation`, `marker` | browser driven by automation; `?mm_test=1` | web app |
 | `automated_agent` | headless browser, script-running crawler, curl or Python | backend, from the user agent (not stored) |
 | `client` | debug build, Test Lab, emulator, adb install | Android app |
-| `same_install` | same browser or install as an earlier test row | database |
+| `same_install` | same browser or install as an earlier test row, if no person has used it | database |
 
 A real person matched by mistake: insert `('user_id', '<id>', 'not_test')`.
+
+**Alerts and reports** in the backend ask `isTestAccount(userId)` or `testAccountsAmong(ids)`
+(`backend/src/services/testTraffic.ts`): listed rules and automated shapes only.
+
+**Shared browsers.** Nothing is inferred from a browser or install for a row that carries a person's account. A browser
+in which a person has signed up is not marked because a test account used it too. Rows sent there before the person's
+sign-up was recorded can already be marked.
 
 ## How a row looks
 

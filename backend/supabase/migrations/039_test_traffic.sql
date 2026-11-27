@@ -39,7 +39,8 @@ CREATE OR REPLACE FUNCTION public.test_email_key(p_email text) RETURNS text LANG
 $$;
 
 -- Why an account is not a person to count, or NULL. p_network also applies the rule that can change as a person signs
--- in again (every session from Google's own network, as in the outcome checks): used for counts, never stored on a row.
+-- in again (every session from Google's own network, as in the outcome checks). It is for counts only
+-- (test_accounts()): it never silences an alert (test_accounts_among) and is never stored on a row.
 CREATE OR REPLACE FUNCTION public.test_account_reason(p_user uuid, p_network boolean DEFAULT true) RETURNS text
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
     SELECT CASE
@@ -81,20 +82,33 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
      WHERE w.reason IS NOT NULL
 $$;
 
--- The same for a handful of accounts (what the backend asks).
+-- For a handful of accounts: what the backend asks before leaving someone out of an alert, a report or a stored row.
+-- Without the network rule, so that a person who only ever signed in through Google's network is still heard.
 CREATE OR REPLACE FUNCTION public.test_accounts_among(p_users uuid[]) RETURNS TABLE (user_id uuid, reason text)
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
     SELECT x.id, w.reason
-      FROM (SELECT DISTINCT unnest(p_users) AS id) x CROSS JOIN LATERAL (SELECT public.test_account_reason(x.id) AS reason) w
+      FROM (SELECT DISTINCT unnest(p_users) AS id) x CROSS JOIN LATERAL (SELECT public.test_account_reason(x.id, false) AS reason) w
      WHERE w.reason IS NOT NULL
 $$;
 
--- Marks every earlier row of one browser or install. The server's own phone rows share one anon_id and are never swept.
+-- Whether an account that counts as a person has used this browser or install (it signed up in it, or sent a row with
+-- its account). Such an anon_id is shared: nothing is inferred about its other rows.
+CREATE OR REPLACE FUNCTION public.test_anon_has_person(p_anon text) RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
+    SELECT EXISTS (SELECT 1 FROM public.signup_attribution a
+                    WHERE a.anon_id = p_anon AND public.test_account_reason(a.user_id, false) IS NULL)
+        OR EXISTS (SELECT 1 FROM public.activation_events e
+                    WHERE e.anon_id = p_anon AND e.user_id IS NOT NULL AND public.test_account_reason(e.user_id, false) IS NULL)
+$$;
+
+-- Marks every earlier row of one browser or install, unless a person has used it too. Never a row that carries a
+-- person's account. The server's own phone rows share one anon_id and are never swept.
 CREATE OR REPLACE FUNCTION public.test_mark_anon(p_anon text, p_reason text) RETURNS integer
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 DECLARE n integer;
 BEGIN
     IF p_anon IS NULL OR p_anon = 'server-phone-events' OR p_reason IS NULL THEN RETURN 0; END IF;
+    IF public.test_anon_has_person(p_anon) THEN RETURN 0; END IF;
     UPDATE public.activation_events
        SET props = props || jsonb_build_object('test', true, 'test_reason', p_reason),
            platform = CASE WHEN platform IN ('web', 'android', 'ios') THEN platform || '_test' ELSE platform END
@@ -105,24 +119,36 @@ END $$;
 
 CREATE OR REPLACE FUNCTION public.activation_events_mark_test() RETURNS trigger
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
-DECLARE why text;
+DECLARE
+    why text;
+    account text;
+    person boolean := false;
 BEGIN
     BEGIN
         IF NEW.props->>'test' = 'true' THEN
             -- Said by the sender: debug or side-loaded build, Test Lab, browser automation, the server's own check.
             why := COALESCE(NEW.props->>'test_reason', 'client');
         ELSE
+            IF NEW.user_id IS NOT NULL THEN
+                account := public.test_account_reason(NEW.user_id, false);
+                person := account IS NULL;  -- includes an account declared 'not_test'
+            END IF;
             why := COALESCE(
-              CASE WHEN NEW.user_id IS NOT NULL THEN public.test_account_reason(NEW.user_id, false) END,
+              account,
+              -- A browser or install listed by the owner. Never applied to a row that carries a person's account.
               (SELECT r.label FROM public.test_traffic_rules r
-                WHERE r.kind = 'anon_id' AND r.value = NEW.anon_id AND (r.ends_at IS NULL OR r.ends_at > now()) LIMIT 1),
+                WHERE NOT person AND r.kind = 'anon_id' AND r.value = NEW.anon_id AND (r.ends_at IS NULL OR r.ends_at > now()) LIMIT 1),
               (SELECT 'internal_build' FROM public.test_traffic_rules r
-                WHERE r.kind = 'android_version' AND NEW.platform = 'android' AND r.value = NEW.app_version AND r.ends_at > now() LIMIT 1),
-              -- The same browser or install as an earlier test row. Not after a version rule alone: that install
-              -- counts again once its build is a published one.
-              (SELECT 'same_install' FROM public.activation_events e
-                WHERE NEW.anon_id <> 'server-phone-events' AND e.anon_id = NEW.anon_id AND e.props->>'test' = 'true'
-                  AND COALESCE(e.props->>'test_reason', '') <> 'internal_build' LIMIT 1));
+                WHERE r.kind = 'android_version' AND NEW.platform = 'android' AND r.value = NEW.app_version AND r.ends_at > now() LIMIT 1));
+            -- The same browser or install as an earlier test row, unless a person has used it too. Not after a version
+            -- rule alone: that install counts again once its build is a published one.
+            IF why IS NULL AND NOT person AND NEW.anon_id <> 'server-phone-events'
+               AND EXISTS (SELECT 1 FROM public.activation_events e
+                            WHERE e.anon_id = NEW.anon_id AND e.props->>'test' = 'true'
+                              AND COALESCE(e.props->>'test_reason', '') <> 'internal_build')
+               AND NOT public.test_anon_has_person(NEW.anon_id) THEN
+                why := 'same_install';
+            END IF;
         END IF;
         IF why IS NOT NULL THEN
             NEW.props := COALESCE(NEW.props, '{}'::jsonb) || jsonb_build_object('test', true, 'test_reason', why);
@@ -160,7 +186,8 @@ DECLARE f record;
 BEGIN
     FOR f IN SELECT p.oid::regprocedure AS sig FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
              WHERE n.nspname = 'public' AND p.proname IN ('test_email_key', 'test_account_reason', 'test_accounts',
-                 'test_accounts_among', 'test_mark_anon', 'activation_events_mark_test', 'signup_attribution_mark_test')
+                 'test_accounts_among', 'test_anon_has_person', 'test_mark_anon', 'activation_events_mark_test',
+                 'signup_attribution_mark_test')
     LOOP
         EXECUTE format('REVOKE ALL ON FUNCTION %s FROM PUBLIC, anon, authenticated', f.sig);
         EXECUTE format('GRANT EXECUTE ON FUNCTION %s TO service_role', f.sig);

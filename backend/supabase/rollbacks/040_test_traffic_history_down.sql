@@ -6,7 +6,8 @@ BEGIN;
 SET LOCAL lock_timeout = '5s';
 
 UPDATE public.activation_events
-   SET props = props - 'test' - 'test_reason' - 'test_backfill',
+   SET props = (props - 'test' - 'test_reason' - 'test_backfill' - 'test_was')
+               || CASE WHEN props ? 'test_was' THEN jsonb_build_object('test', props->'test_was') ELSE '{}'::jsonb END,
        platform = CASE WHEN platform IN ('web_test', 'android_test', 'ios_test') THEN left(platform, -5) ELSE platform END
  WHERE props->>'test_backfill' = 'marked';
 
