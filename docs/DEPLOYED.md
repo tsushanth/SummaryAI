@@ -4,8 +4,16 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 
 | Component | Fly app | Release | Image | Built from | Date |
 |---|---|---|---|---|---|
-| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v73 | `registry.fly.io/summary-ai-backend:deployment-01M8DMBSHZRNPKZ2JD071FSDAG` | `origin/main` at `7f3672a` (#129; `backend/` tree `4af7e2a61ec023ee860d221c6a531f15d4d03789`) | 2026-11-27 (UTC) |
-| Web (`web/`, meetingmind.org) | `meeting-mind-web` | v43 | `registry.fly.io/meeting-mind-web:deployment-01M8CNXBE7KE1AJAXTEMJHWPBE` | `origin/main` at `464634a` (#119, deployed by the web-deploy workflow; `web/` tree `eaca6a737c817ac6f6def0a61e7c0e477a68902b` identical to main) | 2026-11-26 (UTC) |
+| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v79 | `registry.fly.io/summary-ai-backend:deployment-01M8FNANH58YCSRQ4VNAX3K0NP` | `origin/main` at `ef0c285` (#143; `backend/` tree `ded8495a0e4d6fb58b3033fbab3b8307863a11e6`) | 2026-11-27 (UTC) |
+| Web (`web/`, meetingmind.org) | `meeting-mind-web` | v47 | `registry.fly.io/meeting-mind-web:deployment-01M8FNBGBYVHFRE0DW6JGA6E2Y` | `origin/main` at `ef0c285` (#143, deployed by the web-deploy workflow; `web/` tree `6ccc7ccbe9fa5e15009bbda184df98e783936746`) | 2026-11-27 (UTC) |
+
+## 2026-11-27 Release fixes: AI Coach, sign-in, test traffic, release-check defects (#140 to #143, migrations 039 and 040): backend v77 to v79, web v44 to v47
+- #142 AI Coach follows the meeting bot; #140 sign-in retries and calendar connect results; #141 our own and robot traffic left out of counts, web holds short or silent recordings; #143 speaker names on Android, keyboard insets, speaker numbers from 1, pending uploads shown to their owner, confirmation before deleting audio, join errors, Slack and Notion action items.
+- Database: 039 and 040 dry run in a rolled-back transaction, then applied (about 15:12 PT). The account rules are private and not in this repository. Event rows were saved first. After: 488 accounts count as real; anonymous and signed-in roles cannot run the new functions or read the rules table. Rollback: `backend/supabase/rollbacks/040_test_traffic_history_down.sql`, then 039.
+- Backend: from a clean detached checkout of `origin/main`, with no recording, bot run, coach session or phone call open. v77 at `1095aee` (`deployment-01M8FJYS2A03FYD91X4C1R9H49`), v78 at `10d5225` (`deployment-01M8FMJY710BZ8JNNP0P5S9Z3G`), v79 at `ef0c285`. Detailed health healthy, no stale loop. No secret change. Rollback to before today's fixes: image `deployment-01M8FC4JQA89YT218EGX6KV64P` (v76).
+- Web: deployed by the workflow on each merge; each run's health watch passed.
+- Checks: backend 1693 tests; web 225; Android 406 unit tests, lint 0 errors (branch runs before merge).
+- NOT verified: a live meeting with AI Coach, a real Google sign-in or calendar connect, a real Slack or Notion delivery.
 
 ## Android: merged, NOT released (next release: after 1.7.15, versionCode 68)
 
