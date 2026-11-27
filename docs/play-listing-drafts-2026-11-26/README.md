@@ -1,6 +1,6 @@
 # Google Play listing drafts, 26 November 2026
 
-Drafts only. Nothing here has been published, and the Fastfile does not upload listing text. The English text needs the owner's approval first.
+Folder `A/` was approved by the owner and published to the default listing (short and full description, all 21 locales; titles unchanged) on 27 November 2026 at 10:48 PT, and read back identical. `B/` and `B-optional/` are not published. The Fastfile does not upload listing text.
 
 | Folder | What it is | When it may be published |
 |---|---|---|
