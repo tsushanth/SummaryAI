@@ -11,9 +11,13 @@ import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.data.local.TokenManager
 import com.kreativekoala.summaryai.service.AudioRecordingService
 import com.kreativekoala.summaryai.service.LiveSpeechRecognizer
+import com.kreativekoala.summaryai.service.RecordingCheck
+import com.kreativekoala.summaryai.service.RecordingProblem
 import com.kreativekoala.summaryai.service.RecordingState
 import com.kreativekoala.summaryai.service.UploadState
 import com.kreativekoala.summaryai.service.activation.Activation
+import com.kreativekoala.summaryai.service.activation.RecordStepNames
+import com.kreativekoala.summaryai.service.activation.RecordSteps
 import com.kreativekoala.summaryai.ui.onboarding.FirstRunState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -35,8 +39,14 @@ data class RecordingUiState(
     val liveTranscript: String = "",
     val liveTranscribeError: String? = null,
     /** Brand-new user who has not started a recording yet: the Record screen shows its one-line prompt. */
-    val firstRun: Boolean = false
+    val firstRun: Boolean = false,
+    /** Set when Stop found a recording not worth uploading; the recorder is paused until the user chooses. */
+    val held: HeldRecording? = null
 )
+
+data class HeldRecording(val problem: RecordingProblem, val durationSeconds: Int) {
+    val canUploadAnyway: Boolean get() = RecordingCheck.canUploadAnyway(problem, durationSeconds)
+}
 
 @HiltViewModel
 class RecordingViewModel @Inject constructor(
@@ -71,9 +81,14 @@ class RecordingViewModel @Inject constructor(
                     if (state.isRecording && startRequested) {
                         startRequested = false
                         Activation.track { recordingStarted() }
+                        RecordSteps.track(RecordStepNames.STARTED, "again" to false)
                         firstRunState.finish()
                     }
-                    _uiState.value = _uiState.value.copy(recordingState = state)
+                    _uiState.value = _uiState.value.copy(
+                        recordingState = state,
+                        // A recording stopped from the notification has nothing left to ask about.
+                        held = _uiState.value.held.takeIf { state.isRecording }
+                    )
                     syncLiveTranscribe()
                 }
             }
@@ -138,6 +153,13 @@ class RecordingViewModel @Inject constructor(
     /** The user tapped a record button (funnel event only; the caller then starts or requests permission). */
     fun onRecordTapped() {
         Activation.track { recordTapped() }
+        RecordSteps.step("tap")
+    }
+
+    /** The microphone permission answer. Granting it never starts a recording by itself. */
+    fun onMicPermission(granted: Boolean) {
+        Activation.track { micPermission(granted) }
+        RecordSteps.step(if (granted) "mic_granted" else "mic_denied")
     }
 
     fun startRecording() {
@@ -177,8 +199,61 @@ class RecordingViewModel @Inject constructor(
             return
         }
 
-        val title = _uiState.value.title.ifBlank { context.getString(R.string.untitled_recording) }
         val duration = _uiState.value.recordingState.durationSeconds
+        val peak = service.peakAmplitude()
+
+        val problem = RecordingCheck.problem(duration, peak)
+        if (problem != null) {
+            // Pause only: the audio is not finalised, uploaded or deleted until the user chooses.
+            if (!service.recordingState.value.isPaused) service.pauseRecording()
+            _uiState.value = _uiState.value.copy(held = HeldRecording(problem, duration))
+            RecordSteps.step(
+                if (problem == RecordingProblem.TOO_SHORT) "held_short" else "held_silent",
+                "seconds" to duration,
+                "peak" to (peak ?: -1)
+            )
+            return
+        }
+        RecordSteps.step("stop_ok", "seconds" to duration, "peak" to (peak ?: -1))
+        finishAndUpload(service, duration)
+    }
+
+    /** Continue the same recording; what was already said stays in it. */
+    fun keepGoing() {
+        val held = _uiState.value.held ?: return
+        _uiState.value = _uiState.value.copy(held = null)
+        RecordSteps.step("keep_going", "seconds" to held.durationSeconds)
+        val service = recordingService ?: return
+        if (service.recordingState.value.isPaused) service.resumeRecording()
+    }
+
+    /** The user's choice to replace the held recording with a new one. */
+    fun recordAgain() {
+        val held = _uiState.value.held ?: return
+        _uiState.value = _uiState.value.copy(held = null)
+        RecordSteps.step("record_again", "seconds" to held.durationSeconds)
+        val service = recordingService ?: return
+        service.restartRecording()
+        if (service.recordingState.value.isRecording) RecordSteps.track(RecordStepNames.STARTED, "again" to true)
+    }
+
+    fun uploadAnyway() {
+        val held = _uiState.value.held?.takeIf { it.canUploadAnyway } ?: return
+        val service = recordingService ?: return
+        _uiState.value = _uiState.value.copy(held = null)
+        RecordSteps.step("upload_anyway", "seconds" to held.durationSeconds)
+        finishAndUpload(service, held.durationSeconds)
+    }
+
+    /** Dialog closed without a choice: the recording stays paused, with Resume and Stop on screen. */
+    fun dismissRecordingCheck() {
+        val held = _uiState.value.held ?: return
+        _uiState.value = _uiState.value.copy(held = null)
+        RecordSteps.step("check_dismissed", "seconds" to held.durationSeconds)
+    }
+
+    private fun finishAndUpload(service: AudioRecordingService, duration: Int) {
+        val title = _uiState.value.title.ifBlank { context.getString(R.string.untitled_recording) }
 
         val outputFile = service.stopRecording()
         if (outputFile != null && outputFile.exists()) {

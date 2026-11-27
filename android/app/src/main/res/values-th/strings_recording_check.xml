@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop found a recording that is too short or silent: the user chooses before anything is uploaded. -->
+<resources>
+    <string name="recording_check_short_title">การบันทึกสั้นมาก</string>
+    <string name="recording_check_short_message">การบันทึกที่สั้นกว่า %1$d วินาทีจะไม่ถูกอัปโหลด บันทึกต่อเพื่อเพิ่มในรายการนี้ หรือบันทึกใหม่เพื่อแทนที่</string>
+    <string name="recording_check_silent_title">เราไม่ได้ยินเสียงใดเลย</string>
+    <string name="recording_check_silent_message">ตรวจสอบว่าไม่มีสิ่งใดบังไมโครโฟนและไมโครโฟนไม่ได้ปิดอยู่ บันทึกต่อเพื่อเพิ่มในรายการนี้ หรือบันทึกใหม่เพื่อแทนที่</string>
+    <string name="recording_check_keep_going">บันทึกต่อ</string>
+    <string name="recording_check_record_again">บันทึกใหม่</string>
+    <string name="recording_check_upload_anyway">อัปโหลดต่อไป</string>
+</resources>

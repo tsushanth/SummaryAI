@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop found a recording that is too short or silent: the user chooses before anything is uploaded. -->
+<resources>
+    <string name="recording_check_short_title">這段錄音太短了</string>
+    <string name="recording_check_short_message">少於 %1$d 秒的錄音不會上傳。按「繼續錄音」可接著錄，按「重新錄音」會取代這段錄音。</string>
+    <string name="recording_check_silent_title">我們聽不到任何聲音</string>
+    <string name="recording_check_silent_message">請確認麥克風沒有被遮住，也沒有被關閉。按「繼續錄音」可接著錄，按「重新錄音」會取代這段錄音。</string>
+    <string name="recording_check_keep_going">繼續錄音</string>
+    <string name="recording_check_record_again">重新錄音</string>
+    <string name="recording_check_upload_anyway">仍要上傳</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop found a recording that is too short or silent: the user chooses before anything is uploaded. -->
+<resources>
+    <string name="recording_check_short_title">Foi muito curta</string>
+    <string name="recording_check_short_message">As gravações com menos de %1$d segundos não são enviadas. Continue para acrescentar a esta, ou grave novamente para a substituir.</string>
+    <string name="recording_check_silent_title">Não conseguimos ouvir nada</string>
+    <string name="recording_check_silent_message">Verifique se nada tapa o microfone e se não está desativado. Continue para acrescentar a esta, ou grave novamente para a substituir.</string>
+    <string name="recording_check_keep_going">Continuar</string>
+    <string name="recording_check_record_again">Gravar novamente</string>
+    <string name="recording_check_upload_anyway">Enviar mesmo assim</string>
+</resources>

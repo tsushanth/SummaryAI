@@ -19,6 +19,8 @@ import com.kreativekoala.summaryai.MainActivity
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.data.local.TokenManager
 import com.kreativekoala.summaryai.data.repository.RecordingsRepository
+import com.kreativekoala.summaryai.service.activation.RecordStepNames
+import com.kreativekoala.summaryai.service.activation.RecordSteps
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -134,6 +136,9 @@ class AudioRecordingService : Service() {
     private var timerJob: Job? = null
     private var amplitudeJob: Job? = null
     private var uploadJob: Job? = null
+
+    private var peakLevel = 0
+    private var levelSamples = 0
 
     // SupervisorJob so a failed upload doesn't take down the timer scope
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -278,6 +283,8 @@ class AudioRecordingService : Service() {
             )
 
             busyFiles.recording = outputFile
+            peakLevel = 0
+            levelSamples = 0
             startForegroundAs(ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE, createRecordingNotification())
             startTimer()
             startAmplitudeMonitor()
@@ -285,8 +292,48 @@ class AudioRecordingService : Service() {
             _recordingState.value = _recordingState.value.copy(
                 error = getString(R.string.recording_error_start, e.message)
             )
+            RecordSteps.step("start_failed")
+            com.kreativekoala.summaryai.FailureReporter.failure(
+                flow = "recording_start",
+                t = e,
+                message = "Recording did not start: ${e.javaClass.simpleName}", // i18n-ok
+            )
             stopSelf()
         }
+    }
+
+    /**
+     * The user chose "Record again": the held recording is replaced by a new one. The service stays in the
+     * foreground, so this is the only path that deletes a recording without stopping.
+     */
+    fun restartRecording() {
+        timerJob?.cancel()
+        amplitudeJob?.cancel()
+        val old = _recordingState.value.outputFile
+        mediaRecorder?.apply {
+            runCatching { stop() }
+            release()
+        }
+        mediaRecorder = null
+        busyFiles.recording = null
+        old?.let {
+            it.delete()
+            PendingUploadMeta.fileFor(it).delete()
+        }
+        _recordingState.value = RecordingState()
+        startRecording()
+    }
+
+    /** Loudest level of the recording in progress (0..32767), or null when it was never measured. */
+    fun peakAmplitude(): Int? {
+        readLevel()
+        return peakLevel.takeIf { levelSamples >= RecordingCheck.MIN_LEVEL_SAMPLES }
+    }
+
+    /** MediaRecorder reports the loudest level since the previous read, so no sound is missed between reads. */
+    private fun readLevel(): Int? = runCatching { mediaRecorder?.maxAmplitude }.getOrNull()?.also {
+        peakLevel = maxOf(peakLevel, it)
+        levelSamples++
     }
 
     fun pauseRecording() {
@@ -432,6 +479,13 @@ class AudioRecordingService : Service() {
                 )
             }.getOrElse { Result.failure(it) }
 
+            RecordSteps.track(
+                RecordStepNames.DONE,
+                "ok" to result.isSuccess,
+                "seconds" to durationSeconds,
+                "auto" to automatic,
+            )
+
             result.fold(
                 onSuccess = { recording ->
                     if (!automatic) {
@@ -489,7 +543,7 @@ class AudioRecordingService : Service() {
             while (isActive) {
                 delay(100)
                 try {
-                    val amplitude = mediaRecorder?.maxAmplitude ?: 0
+                    val amplitude = readLevel() ?: 0
                     val normalized = (amplitude.toFloat() / 32767f).coerceIn(0f, 1f)
 
                     val currentAmplitudes = _recordingState.value.amplitudes.toMutableList()

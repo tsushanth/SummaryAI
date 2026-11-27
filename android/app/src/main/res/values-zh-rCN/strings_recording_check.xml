@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop found a recording that is too short or silent: the user chooses before anything is uploaded. -->
+<resources>
+    <string name="recording_check_short_title">这段录音太短了</string>
+    <string name="recording_check_short_message">短于 %1$d 秒的录音不会上传。点“继续录音”可接着录，点“重新录音”会替换这段录音。</string>
+    <string name="recording_check_silent_title">我们没有听到任何声音</string>
+    <string name="recording_check_silent_message">请检查麦克风是否被遮挡或已关闭。点“继续录音”可接着录，点“重新录音”会替换这段录音。</string>
+    <string name="recording_check_keep_going">继续录音</string>
+    <string name="recording_check_record_again">重新录音</string>
+    <string name="recording_check_upload_anyway">仍然上传</string>
+</resources>

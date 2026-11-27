@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop found a recording that is too short or silent: the user chooses before anything is uploaded. -->
+<resources>
+    <string name="recording_check_short_title">Det var väldigt kort</string>
+    <string name="recording_check_short_message">Inspelningar under %1$d sekunder laddas inte upp. Fortsätt för att lägga till i den här, eller spela in igen för att ersätta den.</string>
+    <string name="recording_check_silent_title">Vi kunde inte höra något</string>
+    <string name="recording_check_silent_message">Kontrollera att inget täcker mikrofonen och att den inte är avstängd. Fortsätt för att lägga till i den här, eller spela in igen för att ersätta den.</string>
+    <string name="recording_check_keep_going">Fortsätt</string>
+    <string name="recording_check_record_again">Spela in igen</string>
+    <string name="recording_check_upload_anyway">Ladda upp ändå</string>
+</resources>

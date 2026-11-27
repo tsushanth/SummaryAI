@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop found a recording that is too short or silent: the user chooses before anything is uploaded. -->
+<resources>
+    <string name="recording_check_short_title">Rekaman ini sangat singkat</string>
+    <string name="recording_check_short_message">Rekaman di bawah %1$d detik tidak diunggah. Lanjutkan untuk menambah rekaman ini, atau rekam ulang untuk menggantinya.</string>
+    <string name="recording_check_silent_title">Kami tidak mendengar apa pun</string>
+    <string name="recording_check_silent_message">Pastikan mikrofon tidak tertutup dan tidak dimatikan. Lanjutkan untuk menambah rekaman ini, atau rekam ulang untuk menggantinya.</string>
+    <string name="recording_check_keep_going">Lanjutkan</string>
+    <string name="recording_check_record_again">Rekam ulang</string>
+    <string name="recording_check_upload_anyway">Tetap unggah</string>
+</resources>

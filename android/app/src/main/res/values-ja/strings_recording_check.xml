@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop found a recording that is too short or silent: the user chooses before anything is uploaded. -->
+<resources>
+    <string name="recording_check_short_title">録音が短すぎます</string>
+    <string name="recording_check_short_message">%1$d秒未満の録音はアップロードされません。続けて録音して追加するか、録り直して置き換えてください。</string>
+    <string name="recording_check_silent_title">音声が聞き取れませんでした</string>
+    <string name="recording_check_silent_message">マイクがふさがれていないか、オフになっていないか確認してください。続けて録音して追加するか、録り直して置き換えてください。</string>
+    <string name="recording_check_keep_going">録音を続ける</string>
+    <string name="recording_check_record_again">録り直す</string>
+    <string name="recording_check_upload_anyway">このままアップロード</string>
+</resources>

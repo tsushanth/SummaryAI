@@ -3,10 +3,20 @@ package com.kreativekoala.summaryai.service.activation
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.util.Log
 import com.android.installreferrer.api.InstallReferrerClient
 import com.android.installreferrer.api.InstallReferrerStateListener
+import com.kreativekoala.summaryai.BuildConfig
 import com.kreativekoala.summaryai.service.FirebaseAnalyticsHelper
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
+import java.io.IOException
 
 private const val TAG = "Activation"
 
@@ -71,5 +81,26 @@ object ActivationBootstrap {
             installKind(info.firstInstallTime, info.lastUpdateTime)
         } catch (_: Exception) { "fresh" }
         tracker.onAppStart(kind, PlayReferrerFetcher(app))
+        RecordSteps.install(
+            RecordStepReporter(prefs, BuildConfig.VERSION_NAME, isTestDevice(app), ::postStep)
+        )
+    }
+
+    /** Firebase Test Lab devices (Play pre-launch reports) and our own debug builds are marked, not counted as people. */
+    private fun isTestDevice(context: Context): Boolean = BuildConfig.DEBUG ||
+        runCatching { Settings.System.getString(context.contentResolver, "firebase.test.lab") == "true" }
+            .getOrDefault(false)
+
+    private val stepClient by lazy { OkHttpClient() }
+
+    private fun postStep(json: String) {
+        val request = Request.Builder()
+            .url(BuildConfig.API_BASE_URL + "/api/activation/events")
+            .post(json.toRequestBody("application/json".toMediaType()))
+            .build()
+        stepClient.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) = Unit
+            override fun onResponse(call: Call, response: Response) = response.close()
+        })
     }
 }

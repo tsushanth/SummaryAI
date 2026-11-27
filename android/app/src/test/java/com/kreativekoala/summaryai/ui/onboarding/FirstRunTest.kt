@@ -71,6 +71,15 @@ class FirstRunTest {
         assertTrue(File(sources, "ui/onboarding/OnboardingScreen.kt").readText().contains("EmailCaptureScreen"))
     }
 
+    @Test fun answeringTheMicrophonePermissionNeverStartsARecording() {
+        val screen = File(sources, "ui/recording/RecordingScreen.kt").readText()
+        val answer = screen.substringAfter("rememberPermissionState(Manifest.permission.RECORD_AUDIO)")
+            .substringBefore("// Funnel")
+        assertTrue(answer.contains("onMicPermission"))
+        assertFalse(answer.contains("startRecording"))
+        assertFalse(screen.contains("startAfterGrant"))
+    }
+
     @Test fun noBillingOrPaywallCodeWasReintroduced() {
         val nav = File(sources, "ui/navigation/NavGraph.kt").readText()
         for (token in listOf("Paywall", "paywall", "isPaidFeatureLocked")) assertFalse(nav.contains(token))

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stop found a recording that is too short or silent: the user chooses before anything is uploaded. -->
+<resources>
+    <string name="recording_check_short_title">Äänite oli hyvin lyhyt</string>
+    <string name="recording_check_short_message">Alle %1$d sekunnin äänitteitä ei lähetetä. Jatka lisätäksesi tähän äänitteeseen tai äänitä uudelleen korvataksesi sen.</string>
+    <string name="recording_check_silent_title">Emme kuulleet mitään</string>
+    <string name="recording_check_silent_message">Tarkista, ettei mikrofonin edessä ole mitään eikä sitä ole poistettu käytöstä. Jatka lisätäksesi tähän äänitteeseen tai äänitä uudelleen korvataksesi sen.</string>
+    <string name="recording_check_keep_going">Jatka</string>
+    <string name="recording_check_record_again">Äänitä uudelleen</string>
+    <string name="recording_check_upload_anyway">Lähetä silti</string>
+</resources>
