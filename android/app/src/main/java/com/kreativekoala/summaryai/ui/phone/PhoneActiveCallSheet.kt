@@ -18,57 +18,33 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.kreativekoala.summaryai.domain.model.PhoneCall
+import com.kreativekoala.summaryai.domain.model.formatPhoneNumber
 import java.util.*
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ActiveCallSheet(
-    call: PhoneCall?,
-    callState: ActiveCallState,
+    active: ActiveCall,
     isMuted: Boolean,
     isSpeakerOn: Boolean,
     onToggleMute: () -> Unit,
     onToggleSpeaker: () -> Unit,
-    onHangup: () -> Unit,
-    onDismiss: () -> Unit
+    onHangup: () -> Unit
 ) {
-    if (call == null) return
+    val isCallActive = active.stage != CallStage.ENDED
 
-    // Determine if call is still active (not ended/failed)
-    val isCallActive = callState in listOf(
-        ActiveCallState.INITIATING,
-        ActiveCallState.RINGING,
-        ActiveCallState.CONNECTED,
-        ActiveCallState.RECORDING
-    )
-
-    // Create sheet state with skip partially expanded for better UX
+    // Cannot be swiped away while the call is on.
+    val stillActive by rememberUpdatedState(isCallActive)
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
-        confirmValueChange = { sheetValue ->
-            // Prevent dismissing by swipe/outside click when call is active
-            if (isCallActive) {
-                sheetValue != SheetValue.Hidden
-            } else {
-                true
-            }
-        }
+        confirmValueChange = { value -> !stillActive || value != SheetValue.Hidden }
     )
 
     ModalBottomSheet(
-        onDismissRequest = {
-            // Only allow dismiss if call is not active
-            if (!isCallActive) {
-                onDismiss()
-            }
-        },
+        onDismissRequest = {},
         sheetState = sheetState,
-        // Hide drag handle during active call to discourage swiping
-        dragHandle = if (isCallActive) {
-            { /* No drag handle during active call */ }
-        } else null
+        dragHandle = null
     ) {
         Column(
             modifier = Modifier
@@ -76,8 +52,7 @@ internal fun ActiveCallSheet(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Recording indicator - always show when connected (auto-recording)
-            if (callState == ActiveCallState.CONNECTED || callState == ActiveCallState.RECORDING) {
+            if (active.stage == CallStage.RECORDING) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -97,33 +72,24 @@ internal fun ActiveCallSheet(
                 }
             }
 
-            // Status with appropriate color for different states
-            val statusText = when (callState) {
-                ActiveCallState.INITIATING -> stringResource(R.string.phone_call_connecting)
-                ActiveCallState.RINGING -> stringResource(R.string.phone_call_ringing)
-                ActiveCallState.CONNECTED, ActiveCallState.RECORDING -> stringResource(R.string.phone_call_connected_recording)
-                ActiveCallState.ENDED -> stringResource(R.string.phone_call_ended)
-                ActiveCallState.DECLINED -> stringResource(R.string.phone_call_declined)
-                ActiveCallState.BUSY -> stringResource(R.string.phone_call_line_busy)
-                ActiveCallState.NO_ANSWER -> stringResource(R.string.status_no_answer)
-                ActiveCallState.ERROR -> stringResource(R.string.phone_call_failed)
-                else -> ""
+            val statusText = when (active.stage) {
+                CallStage.CONNECTING -> stringResource(R.string.phone_call_connecting)
+                CallStage.CALLING -> stringResource(R.string.phone_call_calling)
+                CallStage.RECORDING -> stringResource(R.string.phone_call_connected_recording)
+                CallStage.ENDED -> stringResource(active.endMessage ?: R.string.phone_call_ended)
             }
-
-            val statusColor = when (callState) {
-                ActiveCallState.DECLINED, ActiveCallState.BUSY, ActiveCallState.NO_ANSWER, ActiveCallState.ERROR ->
-                    MaterialTheme.colorScheme.error
-                ActiveCallState.ENDED -> MaterialTheme.colorScheme.onSurfaceVariant
-                else -> MaterialTheme.colorScheme.onSurfaceVariant
-            }
-
             Text(
                 text = statusText,
                 style = MaterialTheme.typography.bodyMedium,
-                color = statusColor,
-                fontWeight = if (callState in listOf(ActiveCallState.DECLINED, ActiveCallState.BUSY, ActiveCallState.NO_ANSWER, ActiveCallState.ERROR))
-                    FontWeight.Bold else FontWeight.Normal
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            if (isCallActive) {
+                Text(
+                    text = stringResource(R.string.phone_call_time_limit, active.call.timeLimitSeconds / 60),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -147,14 +113,14 @@ internal fun ActiveCallSheet(
 
             // Name/number
             Text(
-                text = call.toName ?: call.formattedToNumber,
+                text = active.call.toName ?: formatPhoneNumber(active.call.toNumber),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
 
-            if (call.toName != null) {
+            if (active.call.toName != null) {
                 Text(
-                    text = call.formattedToNumber,
+                    text = formatPhoneNumber(active.call.toNumber),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -191,7 +157,7 @@ internal fun ActiveCallSheet(
                 // Hangup button
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     FloatingActionButton(
-                        onClick = onHangup,
+                        onClick = { if (isCallActive) onHangup() },
                         containerColor = MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(72.dp)
                     ) {

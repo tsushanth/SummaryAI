@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,8 +42,10 @@ class MainActivity : AppCompatActivity() {
     @Inject lateinit var billingManager: BillingManager
     @Inject lateinit var firstRunState: FirstRunState
     @Inject lateinit var sampleMeetingStore: SampleMeetingStore
+    @Inject lateinit var phoneAvailability: com.kreativekoala.summaryai.service.PhoneAvailability
 
     private var startRecordingRequested by mutableStateOf(false)
+    private var resumes by mutableStateOf(0)
 
     companion object {
         /** Sent by the quick-settings tile and the home-screen widget. */
@@ -59,6 +62,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        resumes++
         // Show Play billing in-app messages (subscription management, lapsed sub recovery)
         billingManager.showInAppMessages(this)
     }
@@ -114,7 +118,13 @@ class MainActivity : AppCompatActivity() {
                             CircularProgressIndicator()
                         }
                     } else {
+                        val phoneEnabled by phoneAvailability.enabled.collectAsState()
+                        val account = authState.user?.id?.takeIf { authState.isAuthenticated }
+                        // Asked again every time the app comes to the front, so switching the feature needs no restart.
+                        LaunchedEffect(account, resumes) { phoneAvailability.refresh(account) }
+
                         MeetingMindNavGraph(
+                            phoneEnabled = phoneEnabled,
                             isAuthenticated = authState.isAuthenticated,
                             hasCompletedOnboarding = authState.hasCompletedOnboarding,
                             emailMissing = FirstRunRouting.emailMissing(authState.user?.email),

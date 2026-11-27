@@ -163,6 +163,9 @@ async function startServer(): Promise<void> {
     startLoopWatchdog();
     startPipelineInvariantLoop();
     startFirstRecordingAlertLoop();
+    // Phone calls: only when the calls subaccount is configured (settles calls, saves recordings, frees reservations).
+    import('./phone/index.js').then((m) => m.startPhoneSweepLoop())
+      .catch((e) => { console.error('[PhoneCalls] init failed:', e instanceof Error ? e.name : 'error'); reportLoopInitFailure('PhoneCalls'); });
     // Backstop for the Recall bot.status_change webhook subscription gap:
     // auto-stitches live_transcripts into the transcripts table for any
     // recording stuck in `pending` for >10 min.

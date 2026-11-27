@@ -1,22 +1,18 @@
 package com.kreativekoala.summaryai.ui.phone
 
-import com.kreativekoala.summaryai.R
-import androidx.compose.ui.res.stringResource
 import android.Manifest
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import java.util.*
-
+import com.kreativekoala.summaryai.R
+import com.kreativekoala.summaryai.domain.model.VerifiedPhone
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
@@ -24,144 +20,126 @@ fun PhoneScreen(
     viewModel: PhoneViewModel = hiltViewModel(),
     onRecordingClick: (String) -> Unit = {}
 ) {
-    val context = LocalContext.current
-    val uiState by viewModel.uiState.collectAsState()
-
-    // Microphone permission required by Twilio Voice SDK
-    var pendingCallAfterPermission by remember { mutableStateOf(false) }
-    val micPermission = rememberPermissionState(Manifest.permission.RECORD_AUDIO) { granted ->
-        if (granted && pendingCallAfterPermission) {
-            pendingCallAfterPermission = false
-            viewModel.initiateCall()
-        }
-    }
-
-    // Error handling
-    val snackbarHostState = remember { SnackbarHostState() }
-    LaunchedEffect(uiState.error) {
-        uiState.error?.let {
-            snackbarHostState.showSnackbar(it)
-            viewModel.clearError()
-        }
-    }
-
-    // Function to make native phone call
-    fun makeNativeCall(phoneNumber: String) {
-        val cleanNumber = phoneNumber.filter { it.isDigit() || it == '+' }
-        if (cleanNumber.isNotEmpty()) {
-            val intent = Intent(Intent.ACTION_DIAL).apply {
-                data = Uri.parse("tel:$cleanNumber")
-            }
-            context.startActivity(intent)
-            viewModel.updateDialerNumber("") // Clear after dialing
-        }
-    }
-
-    // Track if we should show the verification sheet (for AI recording feature)
-    var showVerificationSheet by remember { mutableStateOf(false) }
-
-    // Collect VoIP state
+    val state by viewModel.uiState.collectAsState()
     val isMuted by viewModel.isMuted.collectAsState()
     val isSpeakerOn by viewModel.isSpeakerOn.collectAsState()
 
-    // Show active call sheet when VoIP call is in progress
-    if (uiState.hasActiveCall) {
-        ActiveCallSheet(
-            call = uiState.activeCall,
-            callState = uiState.activeCallState,
-            isMuted = isMuted,
-            isSpeakerOn = isSpeakerOn,
-            onToggleMute = { viewModel.toggleMute() },
-            onToggleSpeaker = { viewModel.toggleSpeaker() },
-            onHangup = { viewModel.hangupCall() },
-            onDismiss = { viewModel.clearActiveCall() }
-        )
+    // The calling SDK needs the microphone; asked for only after the recording consent.
+    var acceptedWaitingForMic by remember { mutableStateOf(false) }
+    val micPermission = rememberPermissionState(Manifest.permission.RECORD_AUDIO) { granted ->
+        if (acceptedWaitingForMic) {
+            acceptedWaitingForMic = false
+            if (granted) viewModel.acceptConsent() else viewModel.microphoneRefused()
+        }
     }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val messageText = state.message?.let { phoneMessageText(it) }
+    LaunchedEffect(messageText) {
+        if (messageText != null) {
+            snackbarHostState.showSnackbar(messageText)
+            viewModel.clearMessage()
+        }
+    }
+
+    var removing by remember { mutableStateOf<VerifiedPhone?>(null) }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.phone),
-                        style = MaterialTheme.typography.headlineMedium
-                    )
-                }
+                title = { Text(stringResource(R.string.phone), style = MaterialTheme.typography.headlineMedium) }
             )
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            // Tab selector - only Calls and Dialer for now
-            TabRow(
-                selectedTabIndex = if (uiState.selectedTab == PhoneTab.SETTINGS) 0 else uiState.selectedTab.ordinal,
-                modifier = Modifier.fillMaxWidth()
-            ) {
+    ) { padding ->
+        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            TabRow(selectedTabIndex = state.tab.ordinal, modifier = Modifier.fillMaxWidth()) {
                 Tab(
-                    selected = uiState.selectedTab == PhoneTab.CALLS,
-                    onClick = { viewModel.selectTab(PhoneTab.CALLS) },
-                    text = { Text(stringResource(R.string.calls)) }
-                )
-                Tab(
-                    selected = uiState.selectedTab == PhoneTab.DIALER,
+                    selected = state.tab == PhoneTab.DIALER,
                     onClick = { viewModel.selectTab(PhoneTab.DIALER) },
                     text = { Text(stringResource(R.string.dialer)) }
                 )
-            }
-
-            // Content
-            when (uiState.selectedTab) {
-                PhoneTab.CALLS -> CallsContent(
-                    calls = uiState.phoneCalls,
-                    isLoading = uiState.isLoading,
-                    isRefreshing = uiState.isRefreshing,
-                    hasVerifiedPhone = uiState.hasVerifiedPhones,
-                    onRefresh = { viewModel.refresh() },
-                    onLoadMore = { viewModel.loadMoreCalls() },
-                    onRecordingClick = onRecordingClick,
-                    onCallClick = { call -> viewModel.callFromHistory(call) }
+                Tab(
+                    selected = state.tab == PhoneTab.CALLS,
+                    onClick = { viewModel.selectTab(PhoneTab.CALLS) },
+                    text = { Text(stringResource(R.string.calls)) }
                 )
-                PhoneTab.DIALER, PhoneTab.SETTINGS -> NativeDialerContent(
-                    dialerNumber = uiState.dialerNumber,
-                    hasVerifiedPhone = uiState.hasVerifiedPhones,
-                    onNumberChange = { viewModel.updateDialerNumber(it) },
-                    onDigitClick = { viewModel.appendDialerDigit(it) },
-                    onDeleteClick = { viewModel.deleteDialerDigit() },
-                    onCallClick = { makeNativeCall(uiState.dialerNumber) },
-                    onStartCall = {
-                        if (micPermission.status.isGranted) {
-                            viewModel.initiateCall()
-                        } else {
-                            pendingCallAfterPermission = true
-                            micPermission.launchPermissionRequest()
+            }
+            if (state.isLoading) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            when (state.tab) {
+                PhoneTab.DIALER -> DialerContent(
+                    state = state,
+                    onNumberChange = viewModel::setDialerNumber,
+                    onNameChange = viewModel::setDialerName,
+                    onDigit = viewModel::appendDigit,
+                    onDelete = viewModel::deleteDigit,
+                    onLanguage = viewModel::setCallLanguage,
+                    onCall = { viewModel.requestCall() },
+                    header = {
+                        if (!state.isLoading) {
+                            PhoneHeader(
+                                state = state,
+                                onVerify = viewModel::openVerification,
+                                onSelect = viewModel::selectPhone,
+                                onRemove = { removing = it }
+                            )
                         }
-                    },
-                    onVerifyPhoneClick = { showVerificationSheet = true }
+                    }
+                )
+                PhoneTab.CALLS -> CallsContent(
+                    calls = state.calls,
+                    isLoading = state.isLoading,
+                    onRecordingClick = onRecordingClick,
+                    onCallClick = viewModel::callFromHistory
                 )
             }
         }
     }
 
-    // Verification bottom sheet (keep for future AI recording feature)
-    if (showVerificationSheet) {
+    if (state.verification != Verification.Hidden && !state.askBusiness) {
         VerificationBottomSheet(
-            verificationState = uiState.verificationState,
-            verificationPhoneNumber = uiState.verificationPhoneNumber,
-            verificationCode = uiState.verificationCode,
-            verificationError = uiState.verificationError,
-            onPhoneNumberChange = { viewModel.updateVerificationPhoneNumber(it) },
-            onCodeChange = { viewModel.updateVerificationCode(it) },
-            onSendCode = { viewModel.sendVerificationCode() },
-            onVerify = { viewModel.checkVerificationCode() },
-            onReset = { viewModel.resetVerification() },
-            onDismiss = {
-                showVerificationSheet = false
-                viewModel.resetVerification()
-            }
+            state = state.verification,
+            onStart = viewModel::startVerification,
+            onRetry = viewModel::openVerification,
+            onDismiss = viewModel::closeVerification
+        )
+    }
+    if (state.askBusiness) {
+        BusinessQuestionSheet(onAnswer = viewModel::answerBusiness)
+    }
+    state.consent?.let { consent ->
+        RecordingConsentDialog(
+            consent = consent,
+            onAccept = {
+                if (micPermission.status.isGranted) {
+                    viewModel.acceptConsent()
+                } else {
+                    acceptedWaitingForMic = true
+                    micPermission.launchPermissionRequest()
+                }
+            },
+            onDecline = viewModel::declineConsent
+        )
+    }
+    removing?.let { phone ->
+        AlertDialog(
+            onDismissRequest = { removing = null },
+            title = { Text(stringResource(R.string.phone_remove_number_title)) },
+            text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { Text(phone.formattedPhoneNumber); Text(stringResource(R.string.phone_remove_number_message)) } },
+            confirmButton = {
+                TextButton(onClick = { viewModel.removePhone(phone); removing = null }) { Text(stringResource(R.string.phone_remove)) }
+            },
+            dismissButton = { TextButton(onClick = { removing = null }) { Text(stringResource(R.string.cancel)) } }
+        )
+    }
+    state.activeCall?.let { active ->
+        ActiveCallSheet(
+            active = active,
+            isMuted = isMuted,
+            isSpeakerOn = isSpeakerOn,
+            onToggleMute = viewModel::toggleMute,
+            onToggleSpeaker = viewModel::toggleSpeaker,
+            onHangup = viewModel::hangUp
         )
     }
 }

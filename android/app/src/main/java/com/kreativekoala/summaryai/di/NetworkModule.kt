@@ -56,7 +56,7 @@ object NetworkModule {
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(authInterceptor)
-            .addInterceptor(loggingInterceptor)
+            .addInterceptor(com.kreativekoala.summaryai.data.api.UnloggedPhonePaths(loggingInterceptor))
             .addInterceptor(com.kreativekoala.summaryai.FailureReporterInterceptor())
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)

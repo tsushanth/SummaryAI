@@ -19,6 +19,11 @@ export const EXPECTED_LOOPS = [
   'BotJoinReconciler', 'StuckRecovery', 'BotRecordingReconciler', 'OrphanRecovery', 'PipelineInvariants', 'AbandonedUploads', 'AccountPurgeRetry', 'FirstRecordingAlert',
 ] as const;
 
+/** Loops that only exist when their feature is configured: watched from the moment they are announced. */
+const optionalLoops = new Set<string>();
+export function expectLoop(name: string): void { optionalLoops.add(name); }
+const allExpected = (): string[] => [...EXPECTED_LOOPS, ...optionalLoops];
+
 export function registerLoop(name: string, intervalMs: number): void {
   const now = Date.now();
   if (!loops.has(name)) loops.set(name, { intervalMs, lastHeartbeat: now, lastError: null, registeredAt: now });
@@ -55,7 +60,7 @@ export function reportLoopInitFailure(name: string): void {
 
 export interface LoopStatus { name: string; minutesSinceHeartbeat: number | null; stale: boolean }
 
-export function getLoopStatus(now: number = Date.now(), expected: readonly string[] = EXPECTED_LOOPS): LoopStatus[] {
+export function getLoopStatus(now: number = Date.now(), expected: readonly string[] = allExpected()): LoopStatus[] {
   return expected.map((name) => {
     const l = loops.get(name);
     if (!l) {
@@ -67,7 +72,7 @@ export function getLoopStatus(now: number = Date.now(), expected: readonly strin
   });
 }
 
-export function checkLoops(now: number = Date.now(), expected: readonly string[] = EXPECTED_LOOPS): LoopStatus[] {
+export function checkLoops(now: number = Date.now(), expected: readonly string[] = allExpected()): LoopStatus[] {
   const status = getLoopStatus(now, expected);
   for (const s of status) {
     if (!s.stale) continue;
@@ -88,5 +93,6 @@ export function startLoopWatchdog(): void {
 /** Test hook. */
 export function resetLoopMonitor(): void {
   loops.clear();
+  optionalLoops.clear();
   if (watchdog) { clearInterval(watchdog); watchdog = null; }
 }

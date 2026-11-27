@@ -61,7 +61,6 @@ import com.kreativekoala.summaryai.ui.recordings.RecordingsListScreen
 import com.kreativekoala.summaryai.ui.search.SearchScreen
 import com.kreativekoala.summaryai.ui.settings.SettingsScreen
 import com.kreativekoala.summaryai.ui.todos.TodosScreen
-import com.kreativekoala.summaryai.util.FeatureFlags
 
 // CompositionLocal to communicate tab re-selection for scroll-to-top behavior
 val LocalTabReselection = compositionLocalOf { TabReselectionState() }
@@ -108,7 +107,8 @@ data class BottomNavItem(
     val icon: NavIcon
 )
 
-val bottomNavItems = listOfNotNull(
+/** The Phone tab exists only while the server says this account has phone calls (service/PhoneAvailability). */
+fun bottomNavItems(phoneEnabled: Boolean): List<BottomNavItem> = listOfNotNull(
     BottomNavItem(
         screen = Screen.Recordings,
         titleRes = R.string.recordings,
@@ -128,7 +128,7 @@ val bottomNavItems = listOfNotNull(
         screen = Screen.Phone,
         titleRes = R.string.phone,
         icon = NavIcon.Vector(Icons.Filled.Phone, Icons.Outlined.Phone)
-    ).takeIf { FeatureFlags.PHONE_CALLS },
+    ).takeIf { phoneEnabled },
     BottomNavItem(
         screen = Screen.Settings,
         titleRes = R.string.settings,
@@ -147,6 +147,7 @@ fun MeetingMindNavGraph(
     // Set by the quick-settings tile / home-screen widget; consumed once.
     startRecordingRequested: Boolean = false,
     onStartRecordingHandled: () -> Unit = {},
+    phoneEnabled: Boolean = false,
     navController: NavHostController = rememberNavController()
 ) {
     // Only compute startDestination once on initial composition.
@@ -245,7 +246,7 @@ fun MeetingMindNavGraph(
             bottomBar = {
                 if (showBottomNav) {
                     NavigationBar {
-                        bottomNavItems.forEach { item ->
+                        bottomNavItems(phoneEnabled).forEach { item ->
                             val selected = currentDestination?.hierarchy?.any {
                                 it.route == item.screen.route
                             } == true
@@ -469,7 +470,7 @@ fun MeetingMindNavGraph(
             // Phone. The route stays registered while phone calls are off, so a restored back stack or a leftover
             // navigation to it cannot crash; it goes to the recordings list instead.
             composable(Screen.Phone.route) {
-                if (FeatureFlags.PHONE_CALLS) {
+                if (phoneEnabled) {
                     PhoneScreen(
                         onRecordingClick = { recordingId ->
                             navController.navigate(Screen.RecordingDetail.createRoute(recordingId))

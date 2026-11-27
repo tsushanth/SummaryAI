@@ -36,10 +36,6 @@ import java.util.*
 internal fun CallsContent(
     calls: List<PhoneCall>,
     isLoading: Boolean,
-    isRefreshing: Boolean,
-    hasVerifiedPhone: Boolean,
-    onRefresh: () -> Unit,
-    onLoadMore: () -> Unit,
     onRecordingClick: (String) -> Unit,
     onCallClick: (PhoneCall) -> Unit
 ) {
@@ -57,14 +53,8 @@ internal fun CallsContent(
                 PhoneCallCard(
                     call = call,
                     onRecordingClick = onRecordingClick,
-                    onCallClick = if (hasVerifiedPhone) onCallClick else null
+                    onCallClick = onCallClick
                 )
-            }
-
-            item {
-                LaunchedEffect(Unit) {
-                    onLoadMore()
-                }
             }
         }
     }
@@ -135,22 +125,6 @@ internal fun PhoneCallCard(
                         )
                     }
 
-                    if (call.isRecording) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.error)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = stringResource(R.string.recording_fallback),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    }
                 }
             }
 
@@ -221,7 +195,8 @@ internal fun callStatusColor(status: PhoneCallStatus): Color {
 
 internal fun formatCallDate(context: Context, dateString: String): String {
     return try {
-        val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+        // Server times are UTC; shown in the device's time zone.
+        val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).apply { timeZone = TimeZone.getTimeZone("UTC") }
         val date = parser.parse(dateString) ?: return dateString
 
         val now = Calendar.getInstance()

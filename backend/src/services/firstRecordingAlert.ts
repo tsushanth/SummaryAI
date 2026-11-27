@@ -21,7 +21,7 @@ export const CHANGED_WINDOW_MS = 30 * 60_000;
 /** Older recordings are history: renaming an old failed one must not report it again. Covers the 24 h upload sweeper. */
 export const MAX_RECORDING_AGE_MS = 72 * 3600_000;
 /** Automated and our own test accounts: reserved test domain, Play pre-launch devices. */
-const TEST_ACCOUNT_RE = /@example\.(com|org|net)$|cloudtestlabaccounts|\.[0-9]{5}@gmail\.com$/i;
+export const TEST_ACCOUNT_RE = /@example\.(com|org|net)$|cloudtestlabaccounts|\.[0-9]{5}@gmail\.com$/i;
 
 interface Row {
   id: string;

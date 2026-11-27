@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const log: string[] = [];
+const updates: { table: string; values: Record<string, unknown> }[] = [];
 let missing = new Set<string>();
 let tree: Record<string, { name: string; id: string | null }[]> = {};
 
@@ -8,6 +9,7 @@ function table(name: string) {
   const q: any = {};
   q.delete = vi.fn(() => q);
   q.select = vi.fn(() => q);
+  q.update = vi.fn((values: Record<string, unknown>) => { updates.push({ table: name, values }); return q; });
   q.eq = vi.fn((col: string, val: string) => {
     log.push(`${name}.${col}=${val}`);
     return q;
@@ -37,13 +39,16 @@ vi.mock('../src/lib/loopMonitor.js', () => ({ registerLoop: vi.fn(), runLoopPass
 
 const { createPurgeDeps, USER_TABLES } = await import('../src/services/accountPurgeAdapters.js');
 
-beforeEach(() => { log.length = 0; missing = new Set(); tree = {}; });
+beforeEach(() => { updates.length = 0; log.length = 0; missing = new Set(); tree = {}; });
 
 describe('purge adapters', () => {
   it('every row delete is scoped to the one user id, children before profiles', async () => {
     const deps = createPurgeDeps();
     const res = await deps.db.deleteRows('U1');
-    expect(log).toHaveLength(USER_TABLES.length);
+    // plus the spend ledger, which is kept for the month's budget but no longer points at the account
+    expect(log).toHaveLength(USER_TABLES.length + 1);
+    expect(log[0]).toBe('phone_ledger.user_id=U1');
+    expect(updates).toEqual([{ table: 'phone_ledger', values: { user_id: null } }]);
     expect(log.every((l) => l.endsWith('=U1'))).toBe(true);
     expect(USER_TABLES[USER_TABLES.length - 1].table).toBe('profiles');
     expect(res.deleted).toBe(2 * USER_TABLES.length);

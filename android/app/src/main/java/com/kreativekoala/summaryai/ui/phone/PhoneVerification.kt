@@ -1,312 +1,189 @@
 package com.kreativekoala.summaryai.ui.phone
 
-import com.kreativekoala.summaryai.R
-import androidx.compose.ui.res.stringResource
-import androidx.compose.foundation.background
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.util.*
+import com.kreativekoala.summaryai.R
+import com.kreativekoala.summaryai.util.ApiErrors
 
-
+/** The text of a message in the app's language. */
 @Composable
-internal fun NoVerifiedPhoneContent(
-    modifier: Modifier = Modifier,
-    onVerifyClick: () -> Unit
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        // Icon with gradient-like background
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape)
-                .background(
-                    brush = androidx.compose.ui.graphics.Brush.linearGradient(
-                        colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.tertiary)
-                    )
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                Icons.Default.PhoneEnabled,
-                contentDescription = null,
-                modifier = Modifier.size(50.dp),
-                tint = Color.White
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = stringResource(R.string.ui_verify_your_phone),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Text(
-            text = stringResource(R.string.ui_to_make_calls_through_the),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Button(
-            onClick = onVerifyClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            shape = MaterialTheme.shapes.medium
-        ) {
-            Icon(
-                Icons.Default.Phone,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                stringResource(R.string.ui_verify_phone_number),
-                style = MaterialTheme.typography.titleMedium
-            )
-        }
-    }
+internal fun phoneMessageText(message: PhoneMessage): String = when (message) {
+    is PhoneMessage.Resource -> stringResource(message.res)
+    is PhoneMessage.Failure -> ApiErrors.userMessage(LocalContext.current, message.error)
+        ?: stringResource(R.string.api_error_server)
 }
 
+/** Registering the user's own number: type it, answer the call, type the shown code on the keypad. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun VerificationBottomSheet(
-    verificationState: VerificationState,
-    verificationPhoneNumber: String,
-    verificationCode: String,
-    verificationError: String?,
-    onPhoneNumberChange: (String) -> Unit,
-    onCodeChange: (String) -> Unit,
-    onSendCode: () -> Unit,
-    onVerify: () -> Unit,
-    onReset: () -> Unit,
+    state: Verification,
+    onStart: (String) -> Unit,
+    onRetry: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss
-    ) {
+    var number by rememberSaveable { mutableStateOf("") }
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .verticalScroll(rememberScrollState())
+                .imePadding()
+                .padding(start = 24.dp, end = 24.dp, bottom = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
                 text = stringResource(R.string.ui_verify_phone_number),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            when (verificationState) {
-                VerificationState.IDLE, VerificationState.SENDING_CODE -> {
-                    Text(
-                        text = stringResource(R.string.ui_enter_your_phone_number_we),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
+            when (state) {
+                Verification.Hidden -> Unit
+                is Verification.Entry -> {
+                    BodyText(R.string.phone_verify_intro)
                     OutlinedTextField(
-                        value = verificationPhoneNumber,
-                        onValueChange = onPhoneNumberChange,
+                        value = number,
+                        onValueChange = { number = it.take(20) },
                         label = { Text(stringResource(R.string.ui_phone_number)) },
-                        placeholder = { Text("+1 (555) 123-4567") },
+                        supportingText = { Text(stringResource(R.string.phone_number_hint)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Button(
-                        onClick = onSendCode,
-                        enabled = verificationPhoneNumber.isNotBlank() && verificationState != VerificationState.SENDING_CODE,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        shape = MaterialTheme.shapes.medium
-                    ) {
-                        if (verificationState == VerificationState.SENDING_CODE) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                color = Color.White
-                            )
-                        } else {
-                            Text(stringResource(R.string.ui_call_me_with_code))
-                        }
-                    }
-                }
-
-                VerificationState.CODE_SENT, VerificationState.VERIFYING -> {
-                    Text(
-                        text = stringResource(R.string.ui_answer_your_phone_enter_the),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = verificationPhoneNumber,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Medium
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    OutlinedTextField(
-                        value = verificationCode,
-                        onValueChange = { if (it.length <= 6) onCodeChange(it) },
-                        label = { Text(stringResource(R.string.ui_verification_code)) },
-                        placeholder = { Text("123456") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        textStyle = LocalTextStyle.current.copy(
-                            fontSize = 24.sp,
-                            textAlign = TextAlign.Center,
-                            letterSpacing = 8.sp
-                        )
+                        isError = state.error != null
                     )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Button(
-                        onClick = onVerify,
-                        enabled = verificationCode.length == 6 && verificationState != VerificationState.VERIFYING,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        shape = MaterialTheme.shapes.medium
-                    ) {
-                        if (verificationState == VerificationState.VERIFYING) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                color = Color.White
-                            )
-                        } else {
-                            Text(stringResource(R.string.ui_verify))
-                        }
+                    state.error?.let {
+                        Text(phoneMessageText(it), color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center)
                     }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    TextButton(onClick = onReset) {
-                        Text(stringResource(R.string.ui_request_new_code))
+                    BodyText(R.string.phone_verify_call_in_english)
+                    Button(
+                        onClick = { onStart(number) },
+                        enabled = number.isNotBlank() && !state.sending,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
+                    ) {
+                        if (state.sending) CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        else Text(stringResource(R.string.phone_verify_start))
                     }
                 }
-
-                VerificationState.VERIFIED -> {
-                    Icon(
-                        Icons.Default.CheckCircle,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(64.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
+                is Verification.Waiting -> {
+                    Text(state.phoneNumber, style = MaterialTheme.typography.titleMedium)
+                    BodyText(R.string.phone_verify_instruction)
                     Text(
-                        text = stringResource(R.string.ui_phone_verified),
-                        style = MaterialTheme.typography.headlineSmall,
+                        text = state.code,
+                        style = MaterialTheme.typography.displayMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        letterSpacing = 6.sp
                     )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = stringResource(R.string.ui_you_can_now_make_calls),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Button(
-                        onClick = onDismiss,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        shape = MaterialTheme.shapes.medium
-                    ) {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    BodyText(R.string.phone_verify_waiting)
+                }
+                Verification.Done -> {
+                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(64.dp))
+                    BodyText(R.string.ui_phone_verified_successfully)
+                    Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
                         Text(stringResource(R.string.voice_close))
                     }
                 }
-
-                VerificationState.ERROR -> {
-                    Icon(
-                        Icons.Default.Error,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(64.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
-                        text = stringResource(R.string.ui_verification_failed),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.error
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = verificationError ?: "Something went wrong. Please try again.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Button(
-                        onClick = onReset,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        shape = MaterialTheme.shapes.medium
-                    ) {
+                is Verification.Failed -> {
+                    Icon(Icons.Default.Error, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(64.dp))
+                    BodyText(state.reason)
+                    Button(onClick = onRetry, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
                         Text(stringResource(R.string.ui_try_again))
                     }
                 }
             }
+        }
+    }
+}
 
-            Spacer(modifier = Modifier.height(32.dp))
+@Composable
+private fun BodyText(@StringRes res: Int) {
+    Text(
+        text = stringResource(res),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center
+    )
+}
+
+/** Wire value to label, in the order offered. */
+internal val BUSINESS_TYPES: List<Pair<String, Int>> = listOf(
+    "home_services" to R.string.phone_business_home_services,
+    "health" to R.string.phone_business_health,
+    "beauty" to R.string.phone_business_beauty,
+    "food" to R.string.phone_business_food,
+    "real_estate" to R.string.phone_business_real_estate,
+    "professional" to R.string.phone_business_professional,
+    "retail" to R.string.phone_business_retail,
+    "automotive" to R.string.phone_business_automotive,
+    "education" to R.string.phone_business_education,
+    "other" to R.string.phone_business_other
+)
+
+/** "Is this for a business?" Asked once, skippable; closing the sheet counts as skipping. */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+internal fun BusinessQuestionSheet(onAnswer: (business: String, type: String?) -> Unit) {
+    var isBusiness by rememberSaveable { mutableStateOf(false) }
+    var type by rememberSaveable { mutableStateOf<String?>(null) }
+    ModalBottomSheet(
+        onDismissRequest = { onAnswer(if (isBusiness) "business" else "skipped", type) },
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(start = 24.dp, end = 24.dp, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = stringResource(if (isBusiness) R.string.phone_business_type else R.string.phone_business_question),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            if (!isBusiness) {
+                Button(onClick = { isBusiness = true }, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.phone_business_yes))
+                }
+                OutlinedButton(onClick = { onAnswer("personal", null) }, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.phone_business_no))
+                }
+                TextButton(onClick = { onAnswer("skipped", null) }, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.phone_business_skip))
+                }
+            } else {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    BUSINESS_TYPES.forEach { (value, label) ->
+                        FilterChip(
+                            selected = type == value,
+                            onClick = { type = if (type == value) null else value },
+                            label = { Text(stringResource(label)) }
+                        )
+                    }
+                }
+                Button(onClick = { onAnswer("business", type) }, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.phone_business_continue))
+                }
+            }
         }
     }
 }
