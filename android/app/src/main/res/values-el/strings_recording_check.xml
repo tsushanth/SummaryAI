@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">Συνέχεια</string>
     <string name="recording_check_record_again">Νέα ηχογράφηση</string>
     <string name="recording_check_upload_anyway">Μεταφόρτωση παρ’ όλα αυτά</string>
+    <string name="delete_audio_title">Διαγραφή αυτού του ήχου;</string>
+    <string name="delete_audio_message">Αυτή η ηχογράφηση δεν έχει μεταφορτωθεί. Μετά τη διαγραφή δεν μπορεί να ανακτηθεί.</string>
 </resources>

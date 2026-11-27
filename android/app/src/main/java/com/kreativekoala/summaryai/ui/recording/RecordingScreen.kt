@@ -5,6 +5,8 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -36,6 +38,7 @@ import com.google.accompanist.permissions.shouldShowRationale
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.service.RecordingCheck
 import com.kreativekoala.summaryai.service.RecordingProblem
+import com.kreativekoala.summaryai.ui.components.ConfirmDeleteAudioDialog
 import com.kreativekoala.summaryai.ui.components.LiveWaveform
 import com.kreativekoala.summaryai.ui.components.MmEmptyState
 import com.kreativekoala.summaryai.ui.theme.RecordingRed
@@ -114,14 +117,29 @@ fun RecordingScreen(
         label = "pulse_scale"
     )
 
-    uiState.held?.takeIf { recordingState.isRecording }?.let { held ->
-        RecordingCheckDialog(
-            held = held,
-            onKeepGoing = viewModel::keepGoing,
-            onRecordAgain = viewModel::recordAgain,
-            onUploadAnyway = viewModel::uploadAnyway,
-            onDismiss = viewModel::dismissRecordingCheck
-        )
+    // "Record again" deletes the held audio, so it asks first; saying no returns to the choice.
+    var confirmRecordAgain by rememberSaveable { mutableStateOf(false) }
+    val heldRecording = uiState.held?.takeIf { recordingState.isRecording }
+    // A recording stopped elsewhere while the question was open must not leave it waiting for the next one.
+    LaunchedEffect(uiState.held == null) { if (uiState.held == null) confirmRecordAgain = false }
+    heldRecording?.let { held ->
+        if (confirmRecordAgain) {
+            ConfirmDeleteAudioDialog(
+                onDelete = {
+                    confirmRecordAgain = false
+                    viewModel.recordAgain()
+                },
+                onKeep = { confirmRecordAgain = false }
+            )
+        } else {
+            RecordingCheckDialog(
+                held = held,
+                onKeepGoing = viewModel::keepGoing,
+                onRecordAgain = { confirmRecordAgain = true },
+                onUploadAnyway = viewModel::uploadAnyway,
+                onDismiss = viewModel::dismissRecordingCheck
+            )
+        }
     }
 
     Scaffold(
@@ -146,6 +164,9 @@ fun RecordingScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                // Edge to edge: nothing moves out of the keyboard's way unless asked to.
+                .consumeWindowInsets(paddingValues)
+                .imePadding()
         ) {
             if (!microphonePermission.status.isGranted && uiState.firstRun && !micDenied) {
                 FirstRunRecordPrompt(
@@ -352,6 +373,7 @@ private fun ReadyToRecordContent(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ReadyToRecordContentIOS(
     title: String,
@@ -360,6 +382,8 @@ private fun ReadyToRecordContentIOS(
     firstRun: Boolean = false,
     onOpenSample: () -> Unit = {}
 ) {
+    // While the title is being typed only the field and the record button need the room.
+    val typing = WindowInsets.isImeVisible
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -368,7 +392,7 @@ private fun ReadyToRecordContentIOS(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (firstRun) {
+        if (firstRun && !typing) {
             Text(
                 text = stringResource(R.string.first_run_prompt),
                 style = MaterialTheme.typography.titleMedium,
@@ -403,26 +427,28 @@ private fun ReadyToRecordContentIOS(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Large timer display (00:00)
-        Text(
-            text = "00 : 00",
-            style = MaterialTheme.typography.displayLarge.copy(
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Light,
-                letterSpacing = 8.sp
-            ),
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        if (!typing) {
+            // Large timer display (00:00)
+            Text(
+                text = "00 : 00",
+                style = MaterialTheme.typography.displayLarge.copy(
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Light,
+                    letterSpacing = 8.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurface
+            )
 
-        Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-        // Ready to record text
-        Text(
-            text = stringResource(R.string.ready_to_record),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+            // Ready to record text
+            Text(
+                text = stringResource(R.string.ready_to_record),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+        }
 
         // Large red circular record button
         val startDescription = stringResource(R.string.start_recording)
@@ -455,7 +481,7 @@ private fun ReadyToRecordContentIOS(
             }
         }
 
-        if (firstRun) {
+        if (firstRun && !typing) {
             Spacer(modifier = Modifier.height(8.dp))
             TextButton(onClick = onOpenSample, modifier = Modifier.heightIn(min = 48.dp)) {
                 Text(stringResource(R.string.first_run_see_sample))
@@ -466,6 +492,7 @@ private fun ReadyToRecordContentIOS(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun RecordingContent(
     durationSeconds: Int,
@@ -482,83 +509,96 @@ private fun RecordingContent(
     onResume: () -> Unit,
     onStop: () -> Unit
 ) {
+    // While the title is being typed the waveform makes way, and Pause and Stop stay above the keyboard.
+    val typing = WindowInsets.isImeVisible
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(horizontal = 24.dp, vertical = if (typing) 8.dp else 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Live Transcribe toggle — hidden on Android (see LIVE_TRANSCRIBE_ENABLED).
-        if (LIVE_TRANSCRIBE_ENABLED) {
+        // Everything above the buttons scrolls when the screen is too short for it; the buttons never leave the screen.
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Live Transcribe toggle — hidden on Android (see LIVE_TRANSCRIBE_ENABLED).
+            if (LIVE_TRANSCRIBE_ENABLED) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.live_transcribe),
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Switch(
+                        checked = liveTranscribeEnabled,
+                        onCheckedChange = onLiveTranscribeToggle
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // Recording indicator
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = stringResource(R.string.live_transcribe),
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.weight(1f)
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .scale(pulseScale)
+                        .clip(CircleShape)
+                        .background(if (isPaused) MaterialTheme.colorScheme.onSurfaceVariant else RecordingRed)
                 )
-                Switch(
-                    checked = liveTranscribeEnabled,
-                    onCheckedChange = onLiveTranscribeToggle
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (isPaused) stringResource(R.string.recording_state_paused) else stringResource(R.string.recording_state_recording),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (isPaused) MaterialTheme.colorScheme.onSurfaceVariant else RecordingRed
                 )
             }
-            Spacer(modifier = Modifier.height(16.dp))
-        }
 
-        // Recording indicator
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(12.dp)
-                    .scale(pulseScale)
-                    .clip(CircleShape)
-                    .background(if (isPaused) MaterialTheme.colorScheme.onSurfaceVariant else RecordingRed)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.height(if (typing) 8.dp else 24.dp))
+
+            // Duration
             Text(
-                text = if (isPaused) stringResource(R.string.recording_state_paused) else stringResource(R.string.recording_state_recording),
-                style = MaterialTheme.typography.labelLarge,
-                color = if (isPaused) MaterialTheme.colorScheme.onSurfaceVariant else RecordingRed
+                text = formatDuration(durationSeconds),
+                style = MaterialTheme.typography.displayMedium
             )
+
+            Spacer(modifier = Modifier.height(if (typing) 8.dp else 32.dp))
+
+            // Title input
+            OutlinedTextField(
+                value = title,
+                onValueChange = onTitleChange,
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text(stringResource(R.string.recording_title)) },
+                placeholder = { Text(stringResource(R.string.untitled_recording)) },
+                shape = MaterialTheme.shapes.medium,
+                singleLine = true
+            )
+
+            if (!typing) {
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Waveform
+                LiveWaveform(
+                    amplitudes = amplitudes,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                )
+            }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Duration
-        Text(
-            text = formatDuration(durationSeconds),
-            style = MaterialTheme.typography.displayMedium
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Title input
-        OutlinedTextField(
-            value = title,
-            onValueChange = onTitleChange,
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text(stringResource(R.string.recording_title)) },
-            placeholder = { Text(stringResource(R.string.untitled_recording)) },
-            shape = MaterialTheme.shapes.medium,
-            singleLine = true
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Waveform
-        LiveWaveform(
-            amplitudes = amplitudes,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp)
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Control buttons
         Row(
@@ -630,7 +670,7 @@ private fun RecordingContent(
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(if (typing) 0.dp else 32.dp))
     }
 }
 

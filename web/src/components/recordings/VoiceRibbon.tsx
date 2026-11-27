@@ -5,6 +5,7 @@ import type { TranscriptSegment } from '@/types/api';
 import { speakerColor } from '@/lib/utils/speakers';
 import { formatDuration } from '@/lib/utils/audio';
 import { cn } from '@/lib/utils/cn';
+import { speakerDisplayName } from '@/lib/exportFormats';
 
 interface TimelineProps {
   segments: TranscriptSegment[];
@@ -23,20 +24,20 @@ export function SpeakerTimeline({ segments, speakerNames, currentTime = 0, onSee
     const sorted = [...segments].sort((a, b) => a.start_time - b.start_time);
     const end = sorted.reduce((m, s) => Math.max(m, s.end_time), 0);
     // Merge adjacent segments of the same speaker so the bar stays light in the DOM.
-    const merged: { speaker: number; start: number; end: number }[] = [];
+    const merged: { speaker: number; label: string; start: number; end: number }[] = [];
     for (const s of sorted) {
       const last = merged[merged.length - 1];
       if (last && last.speaker === s.speaker_index && s.start_time - last.end <= 1.5) {
         last.end = Math.max(last.end, s.end_time);
       } else {
-        merged.push({ speaker: s.speaker_index, start: s.start_time, end: s.end_time });
+        merged.push({ speaker: s.speaker_index, label: s.speaker_label, start: s.start_time, end: s.end_time });
       }
     }
     return { total: end, runs: merged };
   }, [segments]);
 
   if (total <= 0 || runs.length === 0) return null;
-  const nameOf = (i: number) => speakerNames?.[String(i)] || `Speaker ${i + 1}`;
+  const nameOf = (r: (typeof runs)[number]) => speakerDisplayName(r.label, r.speaker, speakerNames);
   const playhead = Math.min(100, Math.max(0, (currentTime / total) * 100));
 
   return (
@@ -48,8 +49,8 @@ export function SpeakerTimeline({ segments, speakerNames, currentTime = 0, onSee
             type="button"
             onClick={() => onSeek?.(r.start)}
             disabled={!onSeek}
-            title={`${nameOf(r.speaker)}, ${formatDuration(r.start)}`}
-            aria-label={`${nameOf(r.speaker)} at ${formatDuration(r.start)}`}
+            title={`${nameOf(r)}, ${formatDuration(r.start)}`}
+            aria-label={`${nameOf(r)} at ${formatDuration(r.start)}`}
             className="absolute inset-y-0 border-r border-background/60 focus-visible:z-10 disabled:cursor-default"
             style={{
               left: `${(r.start / total) * 100}%`,

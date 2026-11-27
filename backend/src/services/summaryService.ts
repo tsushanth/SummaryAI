@@ -124,6 +124,23 @@ export function parseSummaryResponseDetailed(responseText: string): ParsedSummar
   }
 }
 
+/** Applies lib/speakers `restore` to every piece of text in a reply, so it is saved in the stored speaker numbering. */
+export function summaryWithStoredSpeakers(summary: ParsedSummary, restore: (text: string) => string): ParsedSummary {
+  const optional = (text: string | null) => (text === null ? null : restore(text));
+  return {
+    summary: restore(summary.summary),
+    detailedSummary: optional(summary.detailedSummary),
+    keyPoints: summary.keyPoints.map(restore),
+    actionItems: summary.actionItems.map((a) => ({
+      ...a,
+      task: restore(a.task),
+      title: restore(a.title),
+      assignee: optional(a.assignee),
+    })),
+    topics: summary.topics.map(restore),
+  };
+}
+
 /** Parse the model's reply (raw JSON, or JSON inside a code fence). Falls back to plain text. */
 export function parseSummaryResponse(responseText: string): ParsedSummary {
   return parseSummaryResponseDetailed(responseText).summary;

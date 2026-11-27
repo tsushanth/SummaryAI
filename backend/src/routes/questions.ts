@@ -24,6 +24,7 @@ import type {
   ErrorResponse,
 } from '../types/api.js';
 import type { TranscriptSegment } from '../types/database.js';
+import { withDisplaySpeakers } from '../lib/speakers.js';
 
 const router = Router({ mergeParams: true }); // mergeParams to access :id from parent router
 
@@ -115,7 +116,7 @@ router.post(
       // Fetch transcript with full_text as fallback
       const { data: transcript, error: transcriptError } = await supabaseAdmin
         .from('transcripts')
-        .select('segments, full_text')
+        .select('segments, full_text, speaker_names')
         .eq('recording_id', recordingId)
         .single();
 
@@ -123,9 +124,10 @@ router.post(
         throw Errors.unprocessable('Transcript not found for this recording', undefined, 'TRANSCRIPT_NOT_FOUND');
       }
 
-      // Parse segments (stored as JSONB)
+      // Parse segments (stored as JSONB). The answer goes straight to a person, so the model reads the owner's
+      // speaker names, else numbers from 1.
       segments = Array.isArray(transcript.segments)
-        ? transcript.segments
+        ? withDisplaySpeakers<TranscriptSegment>(transcript.segments, transcript.speaker_names)
         : [];
 
       // If no segments but we have full_text, create a single segment from it

@@ -17,7 +17,8 @@ import {
   DEFAULT_SUMMARY_TEMPLATE,
   isSummaryTemplateId,
 } from '../services/summaryTemplates.js';
-import { normalizeActionItems } from '../services/summaryService.js';
+import { normalizeActionItems, summaryWithStoredSpeakers } from '../services/summaryService.js';
+import { actionTitleForms, displayActionItem, displaySummary, speakersForSummary, type SpeakerNames } from '../lib/speakers.js';
 import { generateSummary } from '../services/summaryGeneration.js';
 import { languageNameForCode, summaryLanguageCode } from '../lib/outputLanguage.js';
 import {
@@ -106,6 +107,11 @@ async function loadOwnedRecording(recordingId: string, userId: string) {
   return recording;
 }
 
+async function speakerNamesOf(recordingId: string): Promise<SpeakerNames> {
+  const { data } = await supabaseAdmin.from('transcripts').select('speaker_names').eq('recording_id', recordingId).maybeSingle();
+  return data?.speaker_names;
+}
+
 // ---------------------------------------------------------------------------
 // Regenerate summary
 // ---------------------------------------------------------------------------
@@ -128,14 +134,16 @@ router.post(
       .maybeSingle();
     if (!transcript) throw Errors.badRequest('Recording has no transcript yet');
 
-    const segments = Array.isArray(transcript.segments) ? transcript.segments : [];
+    // Same as the first summary: the model counts speakers from 1, the stored reply from 0.
+    const shown = speakersForSummary<any>(Array.isArray(transcript.segments) ? transcript.segments : []);
+    const segments = shown.segments;
     const speakers = [...new Set(segments.map((s: any) => s.speaker_label).filter(Boolean))] as string[];
     // Same long-transcript handling as the first summary: <= 100k chars is one call, longer is map-reduce (no truncation).
     const turns: string[] = segments.length > 0 ? segmentTurns(segments) : [transcript.full_text ?? ''];
 
     let parsed;
     try {
-      parsed = await generateSummary({
+      const reply = await generateSummary({
         turns,
         speakers,
         templateId: template,
@@ -149,6 +157,7 @@ router.post(
           text: await completeText({ feature: 'summary', system, user, maxTokens, model: config.SUMMARY_MODEL }),
         }),
       });
+      parsed = summaryWithStoredSpeakers(reply, shown.restore);
     } catch (e) {
       console.error('regenerate-summary failed:', e);
       throw Errors.internal('Failed to generate summary');
@@ -228,11 +237,12 @@ router.post(
       .maybeSingle();
     if (!summary) throw Errors.badRequest('Recording has no summary yet');
 
-    const items = normalizeActionItems(summary.action_items);
+    const shown = displaySummary(summary, await speakerNamesOf(recordingId));
+    const items = normalizeActionItems(shown.action_items);
     const { system, user } = buildFollowUpPrompt({
       title: recording.title,
-      summary: summary.summary,
-      keyPoints: Array.isArray(summary.key_points) ? summary.key_points : [],
+      summary: shown.summary,
+      keyPoints: Array.isArray(shown.key_points) ? shown.key_points : [],
       actionItems: items,
       tone: body.tone,
       recipient: body.recipient,
@@ -287,7 +297,12 @@ router.post(
       .eq('recording_id', recordingId);
     const have = new Set((existing ?? []).map((t: { title: string }) => t.title.trim().toLowerCase()));
 
-    const fresh = items.filter((i) => !have.has(i.task.toLowerCase()));
+    // A to-do is a copy people read, so it is saved with names or numbers from 1.
+    const names = await speakerNamesOf(recordingId);
+    const key = (title: string) => title.slice(0, 500).trim().toLowerCase();
+    const fresh = items
+      .filter((i) => !actionTitleForms(i.task, names).some((t) => have.has(key(t))))
+      .map((i) => displayActionItem(i, names));
     const rows = fresh.map((i) => ({
       id: uuidv4(),
       user_id: userId,
@@ -350,13 +365,15 @@ router.post(
     // 2. Retrieve, constrained to those ids (and re-checked against the owned set).
     const [{ data: summaries }, { data: transcripts }] = await Promise.all([
       supabaseAdmin.from('summaries').select('recording_id, summary, key_points').in('recording_id', ids),
-      supabaseAdmin.from('transcripts').select('recording_id, full_text').in('recording_id', ids),
+      supabaseAdmin.from('transcripts').select('recording_id, full_text, speaker_names').in('recording_id', ids),
     ]);
 
+    const names = new Map((transcripts ?? []).map((t) => [t.recording_id, t.speaker_names as SpeakerNames]));
     const chunks: Chunk[] = [];
-    for (const s of summaries ?? []) {
-      const title = titles.get(s.recording_id);
+    for (const row of summaries ?? []) {
+      const title = titles.get(row.recording_id);
       if (title === undefined) continue;
+      const s = displaySummary(row, names.get(row.recording_id));
       const kp = Array.isArray(s.key_points) ? s.key_points.join('. ') : '';
       for (const text of chunkText(`${s.summary} ${kp}`)) chunks.push({ recording_id: s.recording_id, title, text });
     }

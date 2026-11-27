@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">Fortsätt</string>
     <string name="recording_check_record_again">Spela in igen</string>
     <string name="recording_check_upload_anyway">Ladda upp ändå</string>
+    <string name="delete_audio_title">Radera det här ljudet?</string>
+    <string name="delete_audio_message">Inspelningen har inte laddats upp. Den kan inte återställas efter att den raderats.</string>
 </resources>

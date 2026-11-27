@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">Kontynuuj</string>
     <string name="recording_check_record_again">Nagraj ponownie</string>
     <string name="recording_check_upload_anyway">Prześlij mimo to</string>
+    <string name="delete_audio_title">Usunąć to nagranie audio?</string>
+    <string name="delete_audio_message">To nagranie nie zostało przesłane. Po usunięciu nie można go odzyskać.</string>
 </resources>

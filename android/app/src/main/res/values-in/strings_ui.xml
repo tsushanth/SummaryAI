@@ -56,7 +56,7 @@
     <string name="ui_active_links">Tautan aktif</string>
     <string name="ui_revoke">Cabut</string>
     <string name="ui_name_optional">Nama (opsional)</string>
-    <string name="ui_names_replace_speaker_0_speaker">Nama menggantikan “Pembicara 0”, “Pembicara 1”, dan seterusnya di transkrip, ringkasan, dan ekspor yang dibagikan. Biarkan kosong untuk memakai default.</string>
+    <string name="ui_names_replace_speaker_0_speaker">Nama menggantikan “Pembicara 1”, “Pembicara 2”, dan seterusnya di transkrip, ringkasan, dan ekspor yang dibagikan. Biarkan kosong untuk memakai default.</string>
     <string name="ui_share_or_export">Bagikan atau Ekspor</string>
     <string name="ui_share_or_export_with_just">Bagikan atau ekspor hanya dengan satu ketukan!</string>
     <string name="notif_channel_recording_name">Rekaman</string>

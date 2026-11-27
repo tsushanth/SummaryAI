@@ -25,6 +25,7 @@ import {
   createRateLimiter,
   tokenKey,
 } from '../lib/shareToken.js';
+import { displaySummary, speakerDisplayName } from '../lib/speakers.js';
 
 export const recordingSharesRouter = Router({ mergeParams: true });
 export const publicSharesRouter = Router();
@@ -213,16 +214,17 @@ publicSharesRouter.get(
         .eq('recording_id', share.recording_id)
         .maybeSingle();
       if (t) {
-        const names: Record<string, string> = t.speaker_names || {};
         transcript = {
           segments: (Array.isArray(t.segments) ? t.segments : []).map((s: any) => ({
-            speaker: names[String(s.speaker_index)] || s.speaker_label || `Speaker ${(s.speaker_index ?? 0) + 1}`,
+            speaker: speakerDisplayName(s.speaker_label, s.speaker_index, t.speaker_names),
             text: s.text ?? '',
             start_time: s.start_time ?? 0,
           })),
         };
       }
     }
+    // The owner's speaker names reach a viewer only on the lines of a shared transcript. The summary gets numbers.
+    const shown = summary ? displaySummary(summary) : null;
 
     // Best-effort view counter; never block or fail the read.
     void Promise.resolve(supabaseAdmin.rpc('increment_share_view', { p_share_id: share.id })).catch(() => {});
@@ -236,12 +238,12 @@ publicSharesRouter.get(
         duration_seconds: recording.duration_seconds,
         language: recording.language,
       },
-      summary: summary
+      summary: shown
         ? {
-            summary: summary.summary,
-            key_points: summary.key_points || [],
-            action_items: (summary.action_items || []).map(actionItemText).filter(Boolean),
-            topics: summary.topics || [],
+            summary: shown.summary,
+            key_points: shown.key_points || [],
+            action_items: (shown.action_items || []).map(actionItemText).filter(Boolean),
+            topics: shown.topics || [],
           }
         : null,
       transcript,

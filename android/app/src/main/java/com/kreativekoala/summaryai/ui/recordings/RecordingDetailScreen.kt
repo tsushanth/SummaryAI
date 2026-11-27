@@ -2,6 +2,11 @@ package com.kreativekoala.summaryai.ui.recordings
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,7 +44,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.unit.dp
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun RecordingDetailScreen(
     recordingId: String,
@@ -179,10 +184,14 @@ fun RecordingDetailScreen(
                 )
             }
         } else {
+            // The chat question is typed at the bottom: keep it above the keyboard, and give it the player's room.
+            val typing = WindowInsets.isImeVisible
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
+                    .consumeWindowInsets(paddingValues)
+                    .imePadding()
             ) {
                 if (isSample) {
                     Text(
@@ -191,7 +200,7 @@ fun RecordingDetailScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
                     )
-                } else {
+                } else if (!(typing && uiState.selectedTab == DetailTab.CHAT)) {
                     // Audio player area
                     AudioPlayerCard(
                         audioPlayerState = uiState.audioPlayerState,

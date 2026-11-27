@@ -141,7 +141,7 @@ class RecordingsListViewModel @Inject constructor(
     }
 
     fun refreshPendingUploads() {
-        _pendingUploads.value = AudioRecordingService.listPendingUploads(context)
+        _pendingUploads.value = AudioRecordingService.listPendingUploads(context, tokenManager.userId)
             .map { file -> readPendingUpload(file) }
     }
 
@@ -183,9 +183,13 @@ class RecordingsListViewModel @Inject constructor(
         }
     }
 
+    /** Deletes the audio for good. The screen asks for confirmation first. */
     fun discardPendingUpload(pending: PendingUpload) {
-        pending.file.delete()
-        File(pending.file.parentFile, pending.file.nameWithoutExtension + ".meta").delete()
+        // An automatic retry may have started sending it while the confirmation was open.
+        if (!AudioRecordingService.isBeingSent(pending.file)) {
+            pending.file.delete()
+            PendingUploadMeta.fileFor(pending.file).delete()
+        }
         _pendingUploads.value = _pendingUploads.value.filterNot { it.file == pending.file }
     }
 

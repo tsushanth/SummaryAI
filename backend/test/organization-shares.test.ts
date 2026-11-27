@@ -409,6 +409,50 @@ describe('share links (public)', () => {
     expect(calls.some((c) => c.table === 'summaries' || c.table === 'transcripts')).toBe(false);
   });
 
+  const speakerSummary = {
+    summary: 'Speaker 0 asked Speaker 1.',
+    key_points: ['Speaker 1 agreed'],
+    action_items: [{ title: 'Speaker 1 sends it' }],
+    topics: ['Speaker 0 budget'],
+  };
+  const numberedSummary = {
+    summary: 'Speaker 1 asked Speaker 2.',
+    key_points: ['Speaker 2 agreed'],
+    action_items: ['Speaker 2 sends it'],
+    topics: ['Speaker 1 budget'],
+  };
+
+  it('numbers speakers from 1 and never shows the owner\'s speaker names when the transcript is not shared', async () => {
+    queue('recording_shares', { data: validShare, error: null });
+    queue('recordings', { data: { id: UUID, title: 'T' }, error: null });
+    queue('summaries', { data: speakerSummary, error: null });
+    // Waiting to be read: nothing of it may reach the viewer.
+    queue('transcripts', { data: { segments: [], speaker_names: { '0': 'Ana', '1': 'Blake' } }, error: null });
+    const r = await request('GET', `/api/public/shares/${token}`);
+    expect(r.body.summary).toEqual(numberedSummary);
+    expect(JSON.stringify(r.body)).not.toMatch(/Ana|Blake/);
+    expect(calls.some((c) => c.table === 'transcripts')).toBe(false);
+  });
+
+  it('with the transcript shared, names appear on its lines only and the summary stays numbered', async () => {
+    queue('recording_shares', { data: { ...validShare, include_transcript: true }, error: null });
+    queue('recordings', { data: { id: UUID, title: 'T' }, error: null });
+    queue('summaries', { data: speakerSummary, error: null });
+    queue('transcripts', {
+      data: {
+        segments: [
+          { speaker_index: 0, speaker_label: 'Speaker 0', text: 'hi', start_time: 1 },
+          { speaker_index: 1, speaker_label: 'Speaker 1', text: 'yo', start_time: 2 },
+        ],
+        speaker_names: { '0': 'Ana' },
+      },
+      error: null,
+    });
+    const r = await request('GET', `/api/public/shares/${token}`);
+    expect(r.body.transcript.segments.map((s: any) => s.speaker)).toEqual(['Ana', 'Speaker 2']);
+    expect(r.body.summary).toEqual(numberedSummary);
+  });
+
   it('includes the transcript with custom speaker names when opted in', async () => {
     queue('recording_shares', { data: { ...validShare, include_transcript: true }, error: null });
     queue('recordings', { data: { id: UUID, title: 'T' }, error: null });

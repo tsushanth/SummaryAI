@@ -147,6 +147,47 @@ describe('deliverToIntegration', () => {
   });
 });
 
+describe('action items as they are stored', () => {
+  // processingService and regenerate write {task, title, ...}; rows from before `title` was added have only `task`.
+  const stored: any = {
+    ...payload,
+    action_items: [
+      { task: 'Send the deck', title: 'Send the deck', assignee: 'Speaker 2', priority: 'high', due_date: null },
+      { task: 'Book the room', assignee: null, priority: 'medium' },
+      'Old plain line',
+      { assignee: 'Ann' },
+    ],
+  };
+  const texts = ['Send the deck', 'Book the room', 'Old plain line'];
+
+  it('Slack lists each task with its owner', () => {
+    const body = JSON.stringify(svc.buildSlackMessage(stored));
+    expect(body).not.toContain('undefined');
+    expect(svc.buildSlackMessage(stored).blocks.at(-1).text.text).toBe(
+      '*Action items*\n• Send the deck (Speaker 2)\n• Book the room\n• Old plain line'
+    );
+  });
+
+  it('Slack leaves the section out when no item has any text', () => {
+    expect(svc.buildSlackMessage({ ...stored, action_items: [{ assignee: 'Ann' }] }).blocks).toHaveLength(2);
+  });
+
+  it('Notion adds a to-do per task', () => {
+    const page: any = svc.buildNotionPage('db', stored);
+    expect(page.children.filter((c: any) => c.type === 'to_do').map((c: any) => c.to_do.rich_text[0].text.content)).toEqual(texts);
+  });
+
+  it('delivers to Notion', async () => {
+    const fetchImpl = vi.fn(async () => ({ status: 200, body: '' }));
+    const r = await svc.deliverToIntegration('notion', { secret: 'tok', config: { database_id: 'd'.repeat(32) } }, stored, {
+      fetchImpl,
+      sleep: async () => {},
+    });
+    expect(r.ok).toBe(true);
+    expect((fetchImpl.mock.calls[0] as any)[1].body).toContain('Send the deck');
+  });
+});
+
 describe('publicView', () => {
   it('never exposes ciphertext', () => {
     const v = svc.publicView({

@@ -56,7 +56,7 @@
     <string name="ui_active_links">Mga aktibong link</string>
     <string name="ui_revoke">Bawiin</string>
     <string name="ui_name_optional">Pangalan (opsyonal)</string>
-    <string name="ui_names_replace_speaker_0_speaker">Pinapalitan ng mga pangalan ang “Speaker 0”, “Speaker 1”, atbp. sa transcript, buod, at mga ibinahaging export. Iwanang blangko para manatili ang default.</string>
+    <string name="ui_names_replace_speaker_0_speaker">Pinapalitan ng mga pangalan ang “Speaker 1”, “Speaker 2”, atbp. sa transcript, buod, at mga ibinahaging export. Iwanang blangko para manatili ang default.</string>
     <string name="ui_share_or_export">Ibahagi o I-export</string>
     <string name="ui_share_or_export_with_just">Magbahagi o mag-export sa isang tap lang!</string>
     <string name="notif_channel_recording_name">Recording</string>

@@ -56,7 +56,7 @@
     <string name="ui_active_links">Aktive Links</string>
     <string name="ui_revoke">Widerrufen</string>
     <string name="ui_name_optional">Name (optional)</string>
-    <string name="ui_names_replace_speaker_0_speaker">Die Namen ersetzen „Sprecher 0“, „Sprecher 1“ usw. im Transkript, in der Zusammenfassung und in geteilten Exporten. Lass das Feld leer, um den Standard beizubehalten.</string>
+    <string name="ui_names_replace_speaker_0_speaker">Die Namen ersetzen „Sprecher 1“, „Sprecher 2“ usw. im Transkript, in der Zusammenfassung und in geteilten Exporten. Lass das Feld leer, um den Standard beizubehalten.</string>
     <string name="ui_share_or_export">Teilen oder exportieren</string>
     <string name="ui_share_or_export_with_just">Teilen oder exportieren mit nur einem Tippen!</string>
     <string name="notif_channel_recording_name">Aufnahme</string>

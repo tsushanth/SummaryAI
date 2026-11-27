@@ -7,19 +7,24 @@ import java.io.IOException
 /**
  * The sidecar next to a recording that is not uploaded yet (`recording_x.meta`, one `key=value` per line).
  *
- * A sidecar written by an older build has only the title and length: its recording is offered in the "not uploaded"
- * banner but never sent automatically.
+ * The owner is written when the recording starts. Released builds (up to 1.7.15) wrote no owner: their sidecar has only
+ * the title and length, if there is one at all. Such a recording is offered to whoever is signed in, as before, because
+ * hiding it could keep it from the person who made it. It is never sent automatically and never given an owner by
+ * guesswork.
  */
 internal data class PendingUploadMeta(
     val title: String? = null,
     val durationSeconds: Int = 0,
-    /** Account that sent it. An automatic retry only ever uploads to this account. */
+    /** Account that recorded it. Only this account is offered the recording and only to it is it ever uploaded. */
     val owner: String? = null,
     /** True after a failure that left no audio on the server and may succeed later. */
     val retryAutomatically: Boolean = false,
     val automaticAttempts: Int = 0,
     val lastFailureMs: Long = 0,
 ) {
+    /** False for another account's recording. True when no owner was recorded (see above). */
+    fun mayBeSentBy(userId: String?): Boolean = owner == null || owner == userId
+
     fun writeFor(audio: File) {
         runCatching { fileFor(audio).writeText(encode()) }
     }
@@ -51,6 +56,9 @@ internal data class PendingUploadMeta(
         }
     }
 }
+
+/** Of [this] recording files, those [userId] may see and send. The others stay on disk for their owner. */
+internal fun List<File>.offeredTo(userId: String?): List<File> = filter { PendingUploadMeta.read(it).mayBeSentBy(userId) }
 
 /** When a recording whose upload failed is sent again without the user tapping Retry. */
 internal object AutomaticUploadRetry {

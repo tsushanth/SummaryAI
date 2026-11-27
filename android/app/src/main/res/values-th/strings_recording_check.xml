@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">บันทึกต่อ</string>
     <string name="recording_check_record_again">บันทึกใหม่</string>
     <string name="recording_check_upload_anyway">อัปโหลดต่อไป</string>
+    <string name="delete_audio_title">ลบเสียงนี้หรือไม่</string>
+    <string name="delete_audio_message">การบันทึกนี้ยังไม่ได้อัปโหลด เมื่อลบแล้วจะกู้คืนไม่ได้</string>
 </resources>

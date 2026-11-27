@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">Продовжити</string>
     <string name="recording_check_record_again">Записати заново</string>
     <string name="recording_check_upload_anyway">Усе одно завантажити</string>
+    <string name="delete_audio_title">Видалити це аудіо?</string>
+    <string name="delete_audio_message">Цей запис не завантажено. Після видалення відновити його неможливо.</string>
 </resources>

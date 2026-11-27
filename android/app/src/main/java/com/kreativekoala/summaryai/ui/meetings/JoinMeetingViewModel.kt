@@ -16,6 +16,7 @@ import com.kreativekoala.summaryai.data.repository.buildBotCapMessage
 import com.kreativekoala.summaryai.data.repository.TranscriptionLanguagesRepository
 import com.kreativekoala.summaryai.service.BillingManager
 import com.kreativekoala.summaryai.ui.coaching.ActiveCoachingSession
+import com.kreativekoala.summaryai.util.ApiErrors
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -159,7 +160,9 @@ class JoinMeetingViewModel @Inject constructor(
                                 withoutDate = { context.getString(R.string.error_bot_cap_reached_no_date) }
                             )
                         } else {
-                            error.message ?: context.getString(R.string.error_join_meeting_failed)
+                            ApiErrors.refusalMessage(error)
+                                ?: ApiErrors.userMessage(context, error)
+                                ?: context.getString(R.string.error_join_meeting_failed)
                         }
                     )
                 }

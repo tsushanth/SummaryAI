@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">Folytatás</string>
     <string name="recording_check_record_again">Újrafelvétel</string>
     <string name="recording_check_upload_anyway">Feltöltés így is</string>
+    <string name="delete_audio_title">Törlöd ezt a hanganyagot?</string>
+    <string name="delete_audio_message">Ez a felvétel még nincs feltöltve. Törlés után nem állítható vissza.</string>
 </resources>

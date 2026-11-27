@@ -266,6 +266,7 @@ class RecordingDetailViewModel @Inject constructor(
                             recordingDetail = detail.copy(transcript = updatedTranscript)
                         )
                     }
+                    loadAnalytics() // talk time carries speaker names too
                 },
                 onFailure = { error ->
                     _uiState.value = _uiState.value.copy(error = ApiErrors.userMessage(context, error))

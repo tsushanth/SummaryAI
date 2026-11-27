@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">继续录音</string>
     <string name="recording_check_record_again">重新录音</string>
     <string name="recording_check_upload_anyway">仍然上传</string>
+    <string name="delete_audio_title">删除这段音频？</string>
+    <string name="delete_audio_message">这段录音尚未上传。删除后无法恢复。</string>
 </resources>

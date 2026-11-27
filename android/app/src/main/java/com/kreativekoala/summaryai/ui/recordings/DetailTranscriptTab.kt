@@ -41,7 +41,7 @@ import com.kreativekoala.summaryai.domain.model.TranscriptSegment
 import com.kreativekoala.summaryai.ui.components.MmEmptyState
 import com.kreativekoala.summaryai.ui.components.SpeakerAvatar
 import com.kreativekoala.summaryai.ui.meetings.LiveTranscriptView
-import com.kreativekoala.summaryai.ui.recordings.share.applyingSpeakerNames
+import com.kreativekoala.summaryai.ui.recordings.share.speakerDisplayLabel
 import com.kreativekoala.summaryai.util.serverSpeakerLabel
 import com.kreativekoala.summaryai.ui.theme.speakerColor
 
@@ -180,9 +180,11 @@ private fun TranscriptSegmentItem(
     canSeek: Boolean,
     onSeek: () -> Unit
 ) {
-    val speakerLabel = segment.speaker
-    val displayName = speakerLabel?.applyingSpeakerNames(speakerNames)?.let { serverSpeakerLabel(it) }
-    val text = segment.text.applyingSpeakerNames(speakerNames)
+    // Drives the speaker's colour, so it must not change on a rename.
+    val speakerLabel = segment.speaker ?: segment.speakerIndex?.let { "Speaker $it" }
+    val displayName = speakerDisplayLabel(segment.speaker, segment.speakerIndex, speakerNames)?.let { serverSpeakerLabel(it) }
+    // The words as spoken: only labels and summaries carry speaker numbers to translate.
+    val text = segment.text
     val time = segment.formattedStartTime
 
     val spoken = if (displayName != null) {

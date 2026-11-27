@@ -128,8 +128,9 @@ object ShareExporter {
         val names = transcript.speakerNames
         appendLine("# " + context.getString(R.string.share_export_title_transcript, recording.title)).appendLine()
         transcript.segments.forEach { seg ->
-            val speaker = ServerText.speakerLabel(context, (seg.speaker ?: context.getString(R.string.share_export_speaker)).applyingSpeakerNames(names))
-            appendLine("[${seg.formattedStartTime}] $speaker: ${seg.text.applyingSpeakerNames(names)}").appendLine()
+            val speaker = speakerDisplayLabel(seg.speaker, seg.speakerIndex, names)?.let { ServerText.speakerLabel(context, it) }
+                ?: context.getString(R.string.share_export_speaker)
+            appendLine("[${seg.formattedStartTime}] $speaker: ${seg.text}").appendLine()
         }
     }
 

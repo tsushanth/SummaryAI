@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">Teruskan</string>
     <string name="recording_check_record_again">Rakam semula</string>
     <string name="recording_check_upload_anyway">Muat naik juga</string>
+    <string name="delete_audio_title">Padam audio ini?</string>
+    <string name="delete_audio_message">Rakaman ini belum dimuat naik. Selepas dipadam, ia tidak boleh dipulihkan.</string>
 </resources>

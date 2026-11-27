@@ -102,14 +102,19 @@ class AudioRecordingService : Service() {
         /** Which files this process is writing or sending right now. Lost with the process, which is what makes them "pending". */
         internal val busyFiles = BusyRecordingFiles()
 
-        /** Returns audio files that finished recording but haven't been uploaded. */
-        fun listPendingUploads(context: Context): List<File> {
+        /**
+         * Returns audio files that finished recording but haven't been uploaded and that [userId] may see: their own,
+         * and those with no recorded owner.
+         */
+        fun listPendingUploads(context: Context, userId: String?): List<File> {
             val files = recordingsDir(context)
                 .listFiles { f -> f.isFile && f.name.endsWith(".m4a") }
                 ?.sortedByDescending { it.lastModified() }
                 ?: emptyList()
-            return busyFiles.pendingAmong(files)
+            return busyFiles.pendingAmong(files).offeredTo(userId)
         }
+
+        fun isBeingSent(file: File): Boolean = busyFiles.uploading == file
 
         /**
          * A recording to send again by itself now, or null (nothing due, or a recording or upload is running). The file
@@ -117,7 +122,7 @@ class AudioRecordingService : Service() {
          */
         internal fun claimAutomaticRetry(context: Context, userId: String?): AutomaticUploadRetry.Claim? {
             if (busyFiles.recording != null || busyFiles.uploading != null) return null
-            return AutomaticUploadRetry.claim(listPendingUploads(context), userId, System.currentTimeMillis())
+            return AutomaticUploadRetry.claim(listPendingUploads(context, userId), userId, System.currentTimeMillis())
                 ?.also { busyFiles.uploading = it.file }
         }
 
@@ -283,6 +288,8 @@ class AudioRecordingService : Service() {
             )
 
             busyFiles.recording = outputFile
+            // Recorded now, so that a recording cut off before its first upload is still known to be this account's.
+            tokenManager.userId?.let { PendingUploadMeta(owner = it).writeFor(outputFile) }
             peakLevel = 0
             levelSamples = 0
             startForegroundAs(ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE, createRecordingNotification())
@@ -444,11 +451,24 @@ class AudioRecordingService : Service() {
         }
 
         val previous = PendingUploadMeta.read(file)
+        // Another account's recording (the account changed while it was being recorded, or an out-of-date list): keep
+        // it for them. The service was started to go to the foreground, so it does that before it stops.
+        if (!previous.mayBeSentBy(tokenManager.userId)) {
+            Log.w(TAG, "Upload refused: the recording belongs to another account")
+            busyFiles.finishedUploading(file)
+            startForegroundAs(ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC, createUploadNotification(0))
+            if (busyFiles.uploading == null) {
+                ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+                stopSelf()
+            }
+            return
+        }
         // Not due again until this attempt fails: if the process dies mid-upload the audio may already be on the server.
         val meta = PendingUploadMeta(
             title = title,
             durationSeconds = durationSeconds,
-            owner = if (automatic) previous.owner else tokenManager.userId,
+            // The recorder, never whoever tapped Retry on a recording with no owner.
+            owner = previous.owner,
             automaticAttempts = if (automatic) previous.automaticAttempts else 0,
         )
         meta.writeFor(file)

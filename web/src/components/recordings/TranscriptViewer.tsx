@@ -6,6 +6,7 @@ import type { Transcript } from '@/types/api';
 import { formatDuration } from '@/lib/utils/audio';
 import { cn } from '@/lib/utils/cn';
 import { speakerColor, speakerInitials } from '@/lib/utils/speakers';
+import { speakerDisplayName } from '@/lib/exportFormats';
 
 interface TranscriptViewerProps {
   transcript: Transcript;
@@ -48,10 +49,9 @@ export function TranscriptViewer({
         existing.wordCount += words;
         existing.segmentCount += 1;
       } else {
-        const customName = transcript.speaker_names?.[String(segment.speaker_index)];
         info.set(segment.speaker_index, {
           index: segment.speaker_index,
-          name: customName || segment.speaker_label || `Speaker ${segment.speaker_index + 1}`,
+          name: speakerDisplayName(segment.speaker_label, segment.speaker_index, transcript.speaker_names),
           talkTime: duration,
           wordCount: words,
           segmentCount: 1,
@@ -82,12 +82,6 @@ export function TranscriptViewer({
     }
     return transcript.segments.filter(s => selectedSpeakers.has(s.speaker_index));
   }, [transcript.segments, selectedSpeakers, speakerInfo.length]);
-
-  // Get display name for a speaker
-  const getSpeakerName = (speakerIndex: number): string => {
-    const customName = transcript.speaker_names?.[String(speakerIndex)];
-    return customName || `Speaker ${speakerIndex + 1}`;
-  };
 
   // Handle speaker filter toggle
   const toggleSpeaker = (speakerIndex: number) => {
@@ -281,7 +275,7 @@ export function TranscriptViewer({
         {filteredSegments.map((segment, index) => {
           const isActive =
             currentTime >= segment.start_time && currentTime < segment.end_time;
-          const name = getSpeakerName(segment.speaker_index);
+          const name = speakerDisplayName(segment.speaker_label, segment.speaker_index, transcript.speaker_names);
           const color = speakerColor(String(segment.speaker_index));
 
           return (

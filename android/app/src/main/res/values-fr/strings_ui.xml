@@ -56,7 +56,7 @@
     <string name="ui_active_links">Liens actifs</string>
     <string name="ui_revoke">Révoquer</string>
     <string name="ui_name_optional">Nom (facultatif)</string>
-    <string name="ui_names_replace_speaker_0_speaker">Les noms remplacent « Intervenant 0 », « Intervenant 1 », etc. dans la transcription, le résumé et les exports partagés. Laisse vide pour conserver le nom par défaut.</string>
+    <string name="ui_names_replace_speaker_0_speaker">Les noms remplacent « Intervenant 1 », « Intervenant 2 », etc. dans la transcription, le résumé et les exports partagés. Laisse vide pour conserver le nom par défaut.</string>
     <string name="ui_share_or_export">Partager ou exporter</string>
     <string name="ui_share_or_export_with_just">Partage ou exporte en un seul appui !</string>
     <string name="notif_channel_recording_name">Enregistrement</string>

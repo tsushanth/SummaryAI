@@ -8,4 +8,7 @@
     <string name="recording_check_keep_going">Keep going</string>
     <string name="recording_check_record_again">Record again</string>
     <string name="recording_check_upload_anyway">Upload anyway</string>
+    <!-- Asked before "Record again" or "Discard" deletes audio that was never uploaded. -->
+    <string name="delete_audio_title">Delete this audio?</string>
+    <string name="delete_audio_message">This recording has not been uploaded. Once deleted, it cannot be recovered.</string>
 </resources>

@@ -56,7 +56,7 @@
     <string name="ui_active_links">Liên kết đang hoạt động</string>
     <string name="ui_revoke">Thu hồi</string>
     <string name="ui_name_optional">Tên (không bắt buộc)</string>
-    <string name="ui_names_replace_speaker_0_speaker">Tên sẽ thay cho “Người nói 0”, “Người nói 1”, v.v. trong bản chép lời, bản tóm tắt và các bản xuất được chia sẻ. Để trống để giữ mặc định.</string>
+    <string name="ui_names_replace_speaker_0_speaker">Tên sẽ thay cho “Người nói 1”, “Người nói 2”, v.v. trong bản chép lời, bản tóm tắt và các bản xuất được chia sẻ. Để trống để giữ mặc định.</string>
     <string name="ui_share_or_export">Chia sẻ hoặc xuất</string>
     <string name="ui_share_or_export_with_just">Chia sẻ hoặc xuất chỉ với một lần chạm!</string>
     <string name="notif_channel_recording_name">Bản ghi âm</string>

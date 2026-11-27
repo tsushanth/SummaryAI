@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">録音を続ける</string>
     <string name="recording_check_record_again">録り直す</string>
     <string name="recording_check_upload_anyway">このままアップロード</string>
+    <string name="delete_audio_title">この音声を削除しますか？</string>
+    <string name="delete_audio_message">この録音はアップロードされていません。削除すると元に戻せません。</string>
 </resources>

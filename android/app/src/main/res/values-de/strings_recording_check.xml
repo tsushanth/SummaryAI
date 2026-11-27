@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">Weiter aufnehmen</string>
     <string name="recording_check_record_again">Neu aufnehmen</string>
     <string name="recording_check_upload_anyway">Trotzdem hochladen</string>
+    <string name="delete_audio_title">Diese Audiodatei löschen?</string>
+    <string name="delete_audio_message">Diese Aufnahme wurde noch nicht hochgeladen. Nach dem Löschen kann sie nicht wiederhergestellt werden.</string>
 </resources>

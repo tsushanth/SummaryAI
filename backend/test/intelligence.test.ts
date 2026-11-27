@@ -139,6 +139,49 @@ describe('cross-meeting chat data scoping', () => {
   });
 });
 
+describe('speaker numbering', () => {
+  const REC = '11111111-1111-4111-8111-111111111111';
+  const seg = (i: number) => ({ speaker_label: `Speaker ${i}`, speaker_index: i, start_time: i, text: `line ${i}` });
+
+  it('regenerate-summary shows the model numbers from 1 and stores them from 0', async () => {
+    db.transcripts[0].segments = [seg(0), seg(1)];
+    llmReply = JSON.stringify({ summary: 'Speaker 2 will send it.', key_points: [], action_items: [{ task: 'Send', assignee: 'Speaker 2' }], topics: [] });
+    const r = await call('POST', `/recordings/${REC}/regenerate-summary`, 'alice', { template: 'standup' });
+    expect(r.status).toBe(200);
+    expect(llmCalls[0].user).toContain('Speaker 1: line 0');
+    expect(llmCalls[0].user).not.toContain('Speaker 0');
+    expect(db.summaries[0].summary).toBe('Speaker 1 will send it.');
+    expect(db.summaries[0].action_items[0].assignee).toBe('Speaker 1');
+  });
+
+  it('to-dos are made with names, else numbers from 1, and are not made twice', async () => {
+    db.transcripts[0].speaker_names = { '0': 'Alex' };
+    db.summaries[0].action_items = [
+      { task: 'Speaker 0 books the room', assignee: 'Speaker 0' },
+      { task: 'Reply to Speaker 1', assignee: 'Speaker 1' },
+      { task: 'Speaker 1 sends the deck', assignee: null },
+    ];
+    // Made before this change, in the stored wording.
+    db.todos = [{ recording_id: REC, user_id: 'alice', title: 'Speaker 1 sends the deck' }];
+    const r = await call('POST', `/recordings/${REC}/action-items-to-todos`, 'alice', {});
+    expect(r.status).toBe(201);
+    expect(r.json.todos.map((t: any) => [t.title, t.assignee])).toEqual([
+      ['Alex books the room', 'Alex'],
+      ['Reply to Speaker 2', 'Speaker 2'],
+    ]);
+    const again = await call('POST', `/recordings/${REC}/action-items-to-todos`, 'alice', {});
+    expect(again.json.todos).toEqual([]);
+    expect(db.summaries[0].action_items[0].assignee).toBe('Speaker 0');
+  });
+
+  it('the follow-up email draft is written from the summary as the owner reads it', async () => {
+    db.transcripts[0].speaker_names = { '0': 'Alex' };
+    db.summaries[0].summary = 'Speaker 0 asked Speaker 1.';
+    await call('POST', `/recordings/${REC}/follow-up-email`, 'alice', {});
+    expect(llmCalls[0].user).toContain('Alex asked Speaker 2.');
+  });
+});
+
 describe('other endpoints', () => {
   it('regenerate-summary 404s for another user\'s recording', async () => {
     const r = await call('POST', '/recordings/11111111-1111-4111-8111-111111111111/regenerate-summary', 'bob', { template: 'standup' });

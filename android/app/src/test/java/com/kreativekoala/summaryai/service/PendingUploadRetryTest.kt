@@ -72,6 +72,20 @@ class PendingUploadRetryTest {
         assertEquals(failed(), PendingUploadMeta.read(file))
     }
 
+    @Test fun `an account is offered its own recordings and those with no recorded owner`() {
+        val mine = recording("mine", PendingUploadMeta(owner = "user-1"))
+        val theirs = recording("theirs", PendingUploadMeta(owner = "user-2"))
+        val released = recording("released", meta = null)
+        PendingUploadMeta.fileFor(released).writeText("title=Old\nduration=7\n")
+        val bare = recording("bare", meta = null)
+        val all = listOf(mine, theirs, released, bare)
+
+        assertEquals(listOf(mine, released, bare), all.offeredTo("user-1"))
+        assertEquals(listOf(theirs, released, bare), all.offeredTo("user-2"))
+        assertEquals(listOf(released, bare), all.offeredTo(null))
+        assertTrue("nothing is deleted", all.all { it.exists() })
+    }
+
     @Test fun `waits between attempts and stops after the limit`() {
         assertNull(claim(recording("recent", failed(at = now - AutomaticUploadRetry.MIN_GAP_MS + 1))))
         assertNotNull(claim(recording("waited", failed(at = now - AutomaticUploadRetry.MIN_GAP_MS))))

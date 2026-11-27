@@ -62,7 +62,10 @@ data class TranscriptSegmentDto(
     @SerializedName("start_time") val startTime: Double? = null,
     @SerializedName("end_time") val endTime: Double? = null,
     val text: String? = null,
-    val speaker: String? = null,
+    /** The server's name for the speaker: a generated "Speaker 0" (counted from 0) or a meeting participant's name. */
+    @SerializedName("speaker_label") val speakerLabel: String? = null,
+    /** 0-based; the key of `speaker_names`. */
+    @SerializedName("speaker_index") val speakerIndex: Int? = null,
     val confidence: Double? = null
 )
 

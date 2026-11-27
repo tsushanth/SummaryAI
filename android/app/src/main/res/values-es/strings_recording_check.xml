@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">Seguir grabando</string>
     <string name="recording_check_record_again">Grabar de nuevo</string>
     <string name="recording_check_upload_anyway">Subir de todos modos</string>
+    <string name="delete_audio_title">¿Eliminar este audio?</string>
+    <string name="delete_audio_message">Esta grabación no se ha subido. Una vez eliminada, no se puede recuperar.</string>
 </resources>

@@ -48,11 +48,7 @@ fun EditSpeakerNamesSheet(
         val initial = mutableStateMapOf<String, String>()
         transcript.speakerNames?.forEach { (k, v) -> initial[k] = v }
         transcript.segments.forEach { seg ->
-            seg.speaker?.let { label ->
-                Regex("""\d+""").find(label)?.value?.let { key ->
-                    if (key !in initial) initial[key] = ""
-                }
-            }
+            speakerKey(seg)?.let { key -> if (key !in initial) initial[key] = "" }
         }
         if (initial.isEmpty()) {
             for (i in 0 until 2) initial[i.toString()] = "" // default 2 slots
@@ -104,12 +100,15 @@ fun EditSpeakerNamesSheet(
                     .verticalScroll(rememberScrollState())
             ) {
                 sortedKeys.forEach { key ->
+                    val participant = participantName(transcript.segments, key)
                     Row(
                         Modifier.fillMaxWidth().padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = stringResource(R.string.speaker_edit_row_label, key),
+                            // A meeting participant is known by name; everyone else by a number counted from 1.
+                            text = participant
+                                ?: stringResource(R.string.speaker_edit_row_label, speakerNumber(key)),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.width(96.dp)

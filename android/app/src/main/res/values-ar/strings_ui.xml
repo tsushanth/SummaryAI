@@ -56,7 +56,7 @@
     <string name="ui_active_links">الروابط النشطة</string>
     <string name="ui_revoke">إلغاء</string>
     <string name="ui_name_optional">الاسم (اختياري)</string>
-    <string name="ui_names_replace_speaker_0_speaker">تحل الأسماء محل «المتحدث 0» و«المتحدث 1» وغيرها في النص والملخص والتصديرات المشتركة. اتركه فارغًا للإبقاء على الإعداد الافتراضي.</string>
+    <string name="ui_names_replace_speaker_0_speaker">تحل الأسماء محل «المتحدث 1» و«المتحدث 2» وغيرها في النص والملخص والتصديرات المشتركة. اتركه فارغًا للإبقاء على الإعداد الافتراضي.</string>
     <string name="ui_share_or_export">المشاركة أو التصدير</string>
     <string name="ui_share_or_export_with_just">شارك أو صدّر بلمسة واحدة!</string>
     <string name="notif_channel_recording_name">التسجيل</string>

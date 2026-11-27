@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">Devam et</string>
     <string name="recording_check_record_again">Yeniden kaydet</string>
     <string name="recording_check_upload_anyway">Yine de yükle</string>
+    <string name="delete_audio_title">Bu ses silinsin mi?</string>
+    <string name="delete_audio_message">Bu kayıt yüklenmedi. Silindikten sonra geri getirilemez.</string>
 </resources>

@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">繼續錄音</string>
     <string name="recording_check_record_again">重新錄音</string>
     <string name="recording_check_upload_anyway">仍要上載</string>
+    <string name="delete_audio_title">要刪除這段音訊嗎？</string>
+    <string name="delete_audio_message">這段錄音尚未上載。刪除後無法復原。</string>
 </resources>

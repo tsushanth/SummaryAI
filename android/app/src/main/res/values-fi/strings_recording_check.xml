@@ -8,4 +8,6 @@
     <string name="recording_check_keep_going">Jatka</string>
     <string name="recording_check_record_again">Äänitä uudelleen</string>
     <string name="recording_check_upload_anyway">Lähetä silti</string>
+    <string name="delete_audio_title">Poistetaanko tämä äänite?</string>
+    <string name="delete_audio_message">Tätä tallennetta ei ole ladattu palvelimelle. Poistettua tallennetta ei voi palauttaa.</string>
 </resources>

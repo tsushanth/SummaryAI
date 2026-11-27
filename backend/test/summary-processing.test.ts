@@ -45,6 +45,29 @@ beforeEach(() => {
 afterEach(() => vi.restoreAllMocks());
 
 describe('generateSummaryWithAnthropic', () => {
+  it('shows the model speakers counted from 1 and returns the reply in the stored numbering', async () => {
+    create.mockResolvedValue(
+      reply(JSON.stringify({
+        summary: 'Speaker 1 opened.',
+        detailed_summary: 'Speakers 1 and 2 met.',
+        key_points: ['Speaker 2 agreed'],
+        action_items: [{ task: 'Speaker 2 sends it', assignee: 'Speaker 2' }],
+        topics: [],
+      }))
+    );
+    const stored = segs(2, 5).map((s) => ({ ...s, speaker_label: `Speaker ${s.speaker_index}` }));
+    const out = await generateSummaryWithAnthropic('', stored as any, 'en', 'general', 'rec-1');
+    const prompt = create.mock.calls[0][0].messages[0].content;
+    expect(prompt).toContain('Participants: Speaker 1, Speaker 2');
+    expect(prompt).toContain('[0:00] Speaker 1: TURN-0 ');
+    expect(prompt).not.toContain('Speaker 0');
+    expect(out.summary).toBe('Speaker 0 opened.');
+    expect(out.detailedSummary).toBe('Speakers 0 and 1 met.');
+    expect(out.keyPoints).toEqual(['Speaker 1 agreed']);
+    expect(out.actionItems[0]).toMatchObject({ task: 'Speaker 1 sends it', title: 'Speaker 1 sends it', assignee: 'Speaker 1' });
+    expect(stored[0]!.speaker_label).toBe('Speaker 0');
+  });
+
   it('short meeting: one "summary" call, model + 8192 cap, speaker-formatted transcript', async () => {
     create.mockResolvedValue(reply(GOOD));
     const s = segs(20, 100);
