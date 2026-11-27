@@ -1,0 +1,46 @@
+Meeting Mind: AI meeting notes sa maraming wika
+
+Mag-record ng meeting, lecture, interview o tawag sa telepono mula sa app at makakuha ng transcript, buod, at listahan ng mga dapat gawin. Libre ang pag-record, mga transcript at buod.
+
+ANO ANG MAGAGAWA MO
+- Mag-record nang personal gamit ang mikropono ng iyong telepono.
+- Tumawag mula sa app sa mga numero sa Estados Unidos at Canada at i-record ang tawag.
+- Ipadala ang Meeting Mind bot sa isang Zoom, Google Meet, o Microsoft Teams meeting. Sumasali ang bot bilang nakikitang kalahok na may pangalang Meeting Mind. May buwanang limitasyon ang oras ng bot.
+- Makakuha ng buod, mahahalagang punto, at mga gawain para sa bawat recording.
+- Maghanap sa iyong mga recording at magtanong tungkol sa isang meeting.
+- Alamin kung sino ang nagsabi ng ano: nilalagyan ng label ng transcript ang mga nagsasalita, at puwede mo silang palitan ng pangalan.
+- Gamitin ang web app sa meetingmind.org gamit ang parehong account. Doon ay puwede ka ring mag-upload ng mga audio file na mayroon ka na.
+
+MGA TAWAG: MGA NUMERO SA ESTADOS UNIDOS AT CANADA LAMANG
+- I-verify nang isang beses ang sarili mong numero sa US o Canada. Makikita ito ng tinatawagan mo.
+- Bago magkakonekta, maririnig mo at ng tinatawagan mo ang abiso na nire-record ang tawag.
+- Pagkatapos ng tawag, makukuha mo ang recording, transcript at buod.
+- Hanggang 30 libreng minuto ng tawag bawat buwan, at hanggang 30 minuto bawat tawag. May buwanang limitasyon sa tawag na pinaghahatian ng lahat ng user, kaya maaaring hindi makatawag hanggang matapos ang buwan.
+- Palabas na tawag lamang, gamit ang iyong internet. Hindi makakatawag sa emergency.
+- Hindi suportado ang toll-free, premium at espesyal na numero, Alaska, mga teritoryo ng Canada at mga teritoryo ng US.
+
+PHONE AGENT
+- Mag-set up ng phone agent gamit ang isang prompt: isulat kung ano ang gusto mong gawin nito.
+
+MGA TRANSCRIPT SA 30 WIKA
+Paalala: hindi sinusuportahan ang pag-transcribe ng pananalitang Filipino o Tagalog.
+Tinutukoy ng Meeting Mind ang wikang sinasalita at isinusulat ang transcript sa wikang iyon. Mga sinusuportahang wika: Bulgarian, Catalan, Chinese (Mandarin), Czech, Danish, Dutch, Finnish, French, German, Greek, Hindi, Hungarian, Indonesian, Ingles, Italian, Japanese, Korean, Lithuanian, Malay, Norwegian, Polish, Portuguese, Russian, Slovak, Spanish, Swedish, Thai, Turkish, Ukrainian, at Vietnamese.
+- Isang pangunahing wika ang tinutukoy sa bawat recording.
+- Sa online meeting, puwede mo ring piliin ang wika bago sumali ang bot.
+
+WIKA NG BUOD
+Nakasulat sa Ingles ang mga buod maliban kung pumili ka ng ibang wika. Kapag nagre-record o nag-a-upload sa web app, puwede kang pumili sa 15 wika ng buod. Hindi kasama ang Filipino.
+
+ANG APP SA WIKA MO
+Available ang Android app sa 27 wika, kasama ang Filipino. Mapapalitan mo ang wika ng app sa Settings.
+
+AI COACH
+Opsyonal ang live coaching ng AI Coach sa mga meeting na may bot at gumagamit ito ng hiwalay na credits.
+
+DAPAT MONG MALAMAN
+- Ikaw ang responsable sa pagsasabi sa mga tao na nagre-record ka at sa pagsunod sa mga batas sa pagre-record kung nasaan ka. May mga lugar na nangangailangan ng pahintulot ng lahat.
+- Nakadepende sa audio ang kalidad ng transcript: pinakamaganda ang resulta kapag malinaw ang pagsasalita at kaunti ang ingay.
+- Hindi nabibigyan ng buod ang napakaikling recording. Magsalita nang kaunti pa, o mag-upload ng mas mahabang audio sa web app.
+- Pino-proseso ang mga recording ng mga serbisyo ng AI at transcription na nakalista sa aming patakaran sa privacy.
+
+May tanong o feedback: support@kreativekoala.llc

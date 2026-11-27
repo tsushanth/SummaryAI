@@ -1,0 +1,45 @@
+Meeting Mind: notas de reuniões com IA em vários idiomas
+
+Grave uma reunião, uma aula, uma entrevista ou uma ligação feita pelo app e receba uma transcrição, um resumo e uma lista de tarefas. Gravações, transcrições e resumos são grátis.
+
+O QUE VOCÊ PODE FAZER
+- Grave presencialmente com o microfone do celular.
+- Ligue pelo app para números dos Estados Unidos e do Canadá e grave as ligações.
+- Envie o bot do Meeting Mind para uma reunião no Zoom, Google Meet ou Microsoft Teams. O bot entra como um participante visível chamado Meeting Mind. O tempo do bot tem um limite mensal.
+- Receba um resumo, os pontos principais e as tarefas de cada gravação.
+- Pesquise suas gravações e faça perguntas sobre uma reunião.
+- Veja quem disse o quê: a transcrição identifica os participantes, e você pode renomeá-los.
+- Use o app web em meetingmind.org com a mesma conta. Lá você também pode enviar arquivos de áudio que já tenha.
+
+LIGAÇÕES: SOMENTE NÚMEROS DOS ESTADOS UNIDOS E DO CANADÁ
+- Verifique uma vez o seu próprio número dos Estados Unidos ou do Canadá. Quem recebe a ligação vê esse número.
+- Antes de a ligação ser conectada, você e a outra pessoa ouvem um aviso de que a ligação está sendo gravada.
+- Depois da ligação, você recebe a gravação, uma transcrição e um resumo.
+- Até 30 minutos de ligações grátis por mês e até 30 minutos por ligação. Há um limite mensal de ligações compartilhado por todos os usuários, então as ligações podem ficar indisponíveis pelo resto do mês.
+- Somente ligações feitas por você, usando sua conexão com a internet. Não é possível ligar para serviços de emergência.
+- Números gratuitos, tarifados ou especiais, o Alasca, os territórios canadenses e os territórios dos Estados Unidos não são compatíveis.
+
+AGENTE DE TELEFONE
+- Configure um agente de telefone com um único comando: escreva o que ele deve fazer.
+
+TRANSCRIÇÕES EM 30 IDIOMAS
+O Meeting Mind detecta o idioma falado e escreve a transcrição nesse idioma: alemão, búlgaro, catalão, chinês (mandarim), coreano, dinamarquês, eslovaco, espanhol, finlandês, francês, grego, hindi, holandês, húngaro, indonésio, inglês, italiano, japonês, lituano, malaio, norueguês, polonês, português, russo, sueco, tailandês, tcheco, turco, ucraniano e vietnamita.
+- Um idioma principal é detectado em cada gravação.
+- Em uma reunião online, você também pode escolher o idioma antes de o bot entrar.
+
+IDIOMA DO RESUMO
+Os resumos são escritos em inglês, a menos que você escolha outro idioma. Ao gravar ou enviar um arquivo no app web, você pode escolher entre 15 idiomas de resumo, incluindo o português.
+
+O APP NO SEU IDIOMA
+O app para Android está disponível em 27 idiomas. Você pode mudar o idioma do app nas Configurações.
+
+AI COACH
+O coaching ao vivo do AI Coach durante reuniões com o bot é opcional e usa créditos separados.
+
+BOM SABER
+- Você é responsável por avisar as pessoas de que está gravando e por seguir as leis de gravação do lugar onde está. Alguns lugares exigem o consentimento de todos.
+- A qualidade da transcrição depende do áudio: fala clara e pouco ruído de fundo funcionam melhor.
+- Gravações muito curtas não recebem resumo. Fale um pouco mais ou envie um áudio mais longo no app web.
+- As gravações são processadas pelos serviços de IA e de transcrição listados na nossa política de privacidade.
+
+Dúvidas ou sugestões: support@kreativekoala.llc

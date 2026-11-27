@@ -1,0 +1,34 @@
+Meeting Mind: AI meeting notes sa maraming wika
+
+Mag-record ng meeting, lecture o interview at makakuha ng transcript, buod, at listahan ng mga dapat gawin. Libre ang Meeting Mind: walang card at walang subscription.
+
+ANO ANG MAGAGAWA MO
+- Mag-record nang personal gamit ang mikropono ng iyong telepono.
+- Ipadala ang Meeting Mind bot sa isang Zoom, Google Meet, o Microsoft Teams meeting. Sumasali ang bot bilang nakikitang kalahok na may pangalang Meeting Mind. May buwanang limitasyon ang oras ng bot.
+- Makakuha ng buod, mahahalagang punto, at mga gawain para sa bawat recording.
+- Maghanap sa iyong mga recording at magtanong tungkol sa isang meeting.
+- Alamin kung sino ang nagsabi ng ano: nilalagyan ng label ng transcript ang mga nagsasalita, at puwede mo silang palitan ng pangalan.
+- Gamitin ang web app sa meetingmind.org gamit ang parehong account. Doon ay puwede ka ring mag-upload ng mga audio file na mayroon ka na.
+
+MGA TRANSCRIPT SA 30 WIKA
+Paalala: hindi sinusuportahan ang pag-transcribe ng pananalitang Filipino o Tagalog.
+Tinutukoy ng Meeting Mind ang wikang sinasalita at isinusulat ang transcript sa wikang iyon. Mga sinusuportahang wika: Bulgarian, Catalan, Chinese (Mandarin), Czech, Danish, Dutch, Finnish, French, German, Greek, Hindi, Hungarian, Indonesian, Ingles, Italian, Japanese, Korean, Lithuanian, Malay, Norwegian, Polish, Portuguese, Russian, Slovak, Spanish, Swedish, Thai, Turkish, Ukrainian, at Vietnamese.
+- Isang pangunahing wika ang tinutukoy sa bawat recording.
+- Sa online meeting, puwede mo ring piliin ang wika bago sumali ang bot.
+
+WIKA NG BUOD
+Nakasulat sa Ingles ang mga buod maliban kung pumili ka ng ibang wika. Kapag nagre-record o nag-a-upload sa web app, puwede kang pumili sa 15 wika ng buod. Hindi kasama ang Filipino.
+
+ANG APP SA WIKA MO
+Available ang Android app sa 27 wika, kasama ang Filipino. Mapapalitan mo ang wika ng app sa Settings.
+
+AI COACH
+Opsyonal ang live coaching ng AI Coach sa mga meeting na may bot at gumagamit ito ng hiwalay na credits. Libre ang lahat ng iba pa sa itaas.
+
+DAPAT MONG MALAMAN
+- Ikaw ang responsable sa pagsasabi sa mga tao na nagre-record ka at sa pagsunod sa mga batas sa pagre-record kung nasaan ka. May mga lugar na nangangailangan ng pahintulot ng lahat.
+- Nakadepende sa audio ang kalidad ng transcript: pinakamaganda ang resulta kapag malinaw ang pagsasalita at kaunti ang ingay.
+- Hindi nabibigyan ng buod ang napakaikling recording. Magsalita nang kaunti pa, o mag-upload ng mas mahabang audio sa web app.
+- Pino-proseso ang mga recording ng mga serbisyo ng AI at transcription na nakalista sa aming patakaran sa privacy.
+
+May tanong o feedback: support@kreativekoala.llc

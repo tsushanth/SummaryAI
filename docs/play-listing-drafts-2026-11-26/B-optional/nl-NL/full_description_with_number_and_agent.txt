@@ -1,0 +1,48 @@
+Meeting Mind: AI-notities in veel talen
+
+Neem een vergadering, een college, een interview of een telefoongesprek via de app op en krijg een transcript, een samenvatting en een lijst met actiepunten. Opnemen, transcripts en samenvattingen zijn gratis. Voor een eigen telefoonnummer betaal je.
+
+WAT JE KUNT DOEN
+- Neem live op met de microfoon van je telefoon.
+- Bel vanuit de app naar nummers in de Verenigde Staten en Canada en laat de gesprekken opnemen.
+- Stuur de Meeting Mind-bot naar een Zoom-, Google Meet- of Microsoft Teams-vergadering. De bot neemt deel als zichtbare deelnemer met de naam Meeting Mind. De bottijd heeft een maandelijkse limiet.
+- Krijg een samenvatting, kernpunten en actiepunten bij elke opname.
+- Zoek in je opnames en stel vragen over een vergadering.
+- Zie wie wat zei: transcripties labelen de sprekers en je kunt ze hernoemen.
+- Gebruik de webapp op meetingmind.org met hetzelfde account. Daar kun je ook audiobestanden uploaden die je al hebt.
+
+TELEFOONGESPREKKEN: ALLEEN NUMMERS IN DE VS EN CANADA
+- Verifieer één keer je eigen nummer uit de VS of Canada. Degene die je belt, ziet dat nummer.
+- Voordat de verbinding tot stand komt, horen jij en degene die je belt een melding dat het gesprek wordt opgenomen.
+- Na het gesprek krijg je de opname, een transcript en een samenvatting.
+- Tot 30 gratis belminuten per maand en maximaal 30 minuten per gesprek. Alle gebruikers delen een maandelijkse bellimiet, dus bellen kan de rest van een maand niet beschikbaar zijn.
+- Alleen uitgaande gesprekken, via je internetverbinding. Noodoproepen zijn niet mogelijk.
+- Gratis nummers, betaalnummers en speciale nummers, Alaska, de Canadese territoria en de Amerikaanse territoria worden niet ondersteund.
+
+JE EIGEN NUMMER
+- Koop in de app een eigen nummer uit de VS of Canada en gebruik het in Meeting Mind. Voor het nummer betaal je.
+
+TELEFOONAGENT
+- Stel een telefoonagent in met één prompt: schrijf op wat hij moet doen.
+
+TRANSCRIPTS IN 30 TALEN
+Meeting Mind herkent de gesproken taal en schrijft het transcript in die taal: Bulgaars, Catalaans, Chinees (Mandarijn), Deens, Duits, Engels, Fins, Frans, Grieks, Hindi, Hongaars, Indonesisch, Italiaans, Japans, Koreaans, Litouws, Maleis, Nederlands, Noors, Oekraïens, Pools, Portugees, Russisch, Slowaaks, Spaans, Thai, Tsjechisch, Turks, Vietnamees en Zweeds.
+- Per opname wordt één hoofdtaal herkend.
+- Bij een online vergadering kun je de taal ook kiezen voordat de bot deelneemt.
+
+TAAL VAN DE SAMENVATTING
+Samenvattingen worden in het Engels geschreven, tenzij je een andere taal kiest. Bij het opnemen of uploaden in de webapp kun je kiezen uit 15 talen voor de samenvatting, waaronder Nederlands.
+
+DE APP IN JE EIGEN TAAL
+De Android-app is beschikbaar in 27 talen. Je kunt de taal van de app wijzigen bij Instellingen.
+
+AI COACH
+Live coaching met AI Coach tijdens vergaderingen met de bot is optioneel en gebruikt aparte credits.
+
+GOED OM TE WETEN
+- Je bent zelf verantwoordelijk voor het melden dat je opneemt en voor het naleven van de opnamewetten waar je bent. Op sommige plekken is toestemming van iedereen nodig.
+- De kwaliteit van het transcript hangt af van het geluid: duidelijke spraak en weinig achtergrondgeluid werken het best.
+- Hele korte opnames krijgen geen samenvatting. Praat wat langer, of upload langere audio in de webapp.
+- Opnames worden verwerkt door de AI- en transcriptiediensten die in ons privacybeleid staan.
+
+Vragen of feedback: support@kreativekoala.llc

@@ -1,0 +1,45 @@
+Meeting Mind: birçok dilde yapay zeka toplantı notları
+
+Bir toplantıyı, dersi, röportajı veya uygulamadan yaptığınız bir telefon görüşmesini kaydedin; dökümünü, özetini ve yapılacaklar listesini alın. Kayıt, döküm ve özetler ücretsizdir.
+
+NELER YAPABİLİRSİNİZ
+- Telefonunuzun mikrofonuyla yüz yüze kayıt yapın.
+- Uygulamadan ABD ve Kanada numaralarını arayın; görüşmeler kaydedilsin.
+- Meeting Mind botunu bir Zoom, Google Meet veya Microsoft Teams toplantısına gönderin. Bot, Meeting Mind adıyla görünen bir katılımcı olarak katılır. Bot süresinin aylık bir sınırı vardır.
+- Her kayıt için özet, ana noktalar ve yapılacaklar alın.
+- Kayıtlarınızda arama yapın ve bir toplantı hakkında sorular sorun.
+- Kimin ne dediğini görün: dökümlerde konuşmacılar etiketlenir ve adlarını değiştirebilirsiniz.
+- Aynı hesapla meetingmind.org adresindeki web uygulamasını kullanın. Orada hazır ses dosyalarınızı da yükleyebilirsiniz.
+
+TELEFON ARAMALARI: YALNIZCA ABD VE KANADA NUMARALARI
+- Kendi ABD veya Kanada numaranızı bir kez doğrulayın. Aradığınız kişiler bu numarayı görür.
+- Bağlantı kurulmadan önce siz ve aradığınız kişi, görüşmenin kaydedildiğine dair bir uyarı duyarsınız.
+- Görüşmeden sonra kaydı, dökümü ve özeti alırsınız.
+- Ayda 30 dakikaya kadar ücretsiz arama, her görüşme en fazla 30 dakika. Tüm kullanıcıların paylaştığı aylık bir arama sınırı vardır; bu yüzden ayın kalanında arama yapılamayabilir.
+- Yalnızca giden aramalar, internet bağlantınız üzerinden. Acil durum araması yapılamaz.
+- Ücretsiz, katma değerli ve özel numaralar ile Alaska, Kanada'nın kuzey toprakları ve ABD'ye bağlı bölgeler desteklenmez.
+
+TELEFON ASİSTANI
+- Tek bir istemle telefon asistanı kurun: ne yapmasını istediğinizi yazın.
+
+30 DİLDE YAZIYA DÖKÜM
+Meeting Mind konuşulan dili algılar ve dökümü o dilde yazar. Desteklenen diller: Almanca, Bulgarca, Çekçe, Çince (Mandarin), Danca, Endonezce, Felemenkçe, Fince, Fransızca, Hintçe, İngilizce, İspanyolca, İsveççe, İtalyanca, Japonca, Katalanca, Korece, Lehçe, Litvanca, Macarca, Malayca, Norveççe, Portekizce, Rusça, Slovakça, Tayca, Türkçe, Ukraynaca, Vietnamca ve Yunanca.
+- Her kayıtta tek bir ana dil algılanır.
+- Çevrimiçi toplantılarda bot katılmadan önce dili de seçebilirsiniz.
+
+ÖZET DİLİ
+Başka bir dil seçmediğiniz sürece özetler İngilizce yazılır. Web uygulamasında kayıt yaparken veya dosya yüklerken, Türkçe dahil 15 özet dilinden birini seçebilirsiniz.
+
+UYGULAMA KENDİ DİLİNİZDE
+Android uygulaması 27 dilde kullanılabilir. Uygulama dilini Ayarlar bölümünden değiştirebilirsiniz.
+
+AI COACH
+Bot ile yapılan toplantılarda AI Coach canlı koçluğu isteğe bağlıdır ve ayrı kredi kullanır.
+
+BİLMENİZDE FAYDA VAR
+- Kayıt yaptığınızı insanlara söylemek ve bulunduğunuz yerdeki kayıt yasalarına uymak sizin sorumluluğunuzdadır. Bazı yerlerde herkesin onayı gerekir.
+- Dökümün kalitesi sese bağlıdır: en iyi sonuç net konuşma ve az arka plan gürültüsüyle alınır.
+- Çok kısa kayıtlara özet çıkarılmaz. Biraz daha uzun konuşun ya da web uygulamasında daha uzun bir ses yükleyin.
+- Kayıtlar, gizlilik politikamızda belirtilen yapay zeka ve yazıya dökme hizmetleri tarafından işlenir.
+
+Sorular ve geri bildirim: support@kreativekoala.llc

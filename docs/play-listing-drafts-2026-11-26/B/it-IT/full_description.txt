@@ -1,0 +1,42 @@
+Meeting Mind: appunti AI per riunioni in molte lingue
+
+Registra una riunione, una lezione, un'intervista o una chiamata fatta dall'app e ricevi una trascrizione, un riassunto e un elenco di azioni da fare. Meeting Mind è gratuito: niente carta e nessun abbonamento.
+
+COSA PUOI FARE
+- Registra di persona con il microfono del telefono.
+- Chiama dall'app numeri degli Stati Uniti e del Canada e registra le chiamate.
+- Invia il bot di Meeting Mind a una riunione su Zoom, Google Meet o Microsoft Teams. Il bot entra come partecipante visibile con il nome Meeting Mind. Il tempo del bot ha un limite mensile.
+- Ricevi un riassunto, i punti chiave e le azioni da fare per ogni registrazione.
+- Cerca tra le tue registrazioni e fai domande su una riunione.
+- Scopri chi ha detto cosa: la trascrizione distingue chi parla e puoi rinominare le persone.
+- Usa l'app web su meetingmind.org con lo stesso account. Lì puoi anche caricare i file audio che hai già.
+
+CHIAMATE: SOLO NUMERI DI STATI UNITI E CANADA
+- Verifica una sola volta il tuo numero degli Stati Uniti o del Canada. Chi chiami vede quel numero.
+- Prima del collegamento, tu e la persona chiamata sentite un avviso che la chiamata viene registrata.
+- Dopo la chiamata ricevi la registrazione, una trascrizione e un riassunto.
+- Fino a 30 minuti di chiamate gratuite al mese e fino a 30 minuti per chiamata. C'è un limite mensile di chiamate condiviso tra tutti gli utenti, quindi le chiamate possono non essere disponibili per il resto del mese.
+- Solo chiamate in uscita, tramite la tua connessione internet. Non è possibile chiamare i numeri di emergenza.
+- Non sono supportati numeri verdi, a sovrapprezzo o speciali, né l'Alaska, i territori canadesi e i territori degli Stati Uniti.
+
+TRASCRIZIONI IN 30 LINGUE
+Meeting Mind riconosce la lingua parlata e scrive la trascrizione in quella lingua: bulgaro, catalano, ceco, cinese (mandarino), coreano, danese, finlandese, francese, giapponese, greco, hindi, indonesiano, inglese, italiano, lituano, malese, norvegese, olandese, polacco, portoghese, russo, slovacco, spagnolo, svedese, tedesco, thailandese, turco, ucraino, ungherese e vietnamita.
+- In ogni registrazione viene rilevata una lingua principale.
+- Per una riunione online puoi anche scegliere la lingua prima che entri il bot.
+
+LINGUA DEL RIASSUNTO
+I riassunti sono scritti in inglese, a meno che tu non scelga un'altra lingua. Quando registri o carichi un file nell'app web puoi scegliere tra 15 lingue per il riassunto, tra cui l'italiano.
+
+L'APP NELLA TUA LINGUA
+L'app Android è disponibile in 27 lingue. Puoi cambiare la lingua dell'app nelle Impostazioni.
+
+AI COACH
+Il coaching dal vivo di AI Coach durante le riunioni con il bot è facoltativo e usa crediti separati. Tutto il resto qui sopra è gratuito.
+
+DA SAPERE
+- Sei tu a dover avvisare le persone che stai registrando e a rispettare le leggi sulle registrazioni del luogo in cui ti trovi. In alcuni luoghi serve il consenso di tutti.
+- La qualità della trascrizione dipende dall'audio: voci chiare e poco rumore di fondo danno i risultati migliori.
+- Le registrazioni molto brevi non ricevono un riassunto. Parla un po' di più oppure carica un audio più lungo nell'app web.
+- Le registrazioni vengono elaborate dai servizi di AI e di trascrizione elencati nella nostra informativa sulla privacy.
+
+Domande o feedback: support@kreativekoala.llc

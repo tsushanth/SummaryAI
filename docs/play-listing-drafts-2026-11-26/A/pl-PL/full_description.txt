@@ -1,0 +1,33 @@
+Meeting Mind: notatki AI w wielu językach
+
+Nagraj spotkanie, wykład lub wywiad i otrzymaj transkrypcję, streszczenie oraz listę zadań do wykonania. Meeting Mind jest darmowy: bez karty i bez subskrypcji.
+
+CO MOŻESZ ZROBIĆ
+- Nagrywać na żywo mikrofonem telefonu.
+- Wysłać bota Meeting Mind na spotkanie w Zoom, Google Meet lub Microsoft Teams. Bot dołącza jako widoczny uczestnik o nazwie Meeting Mind. Czas działania bota ma miesięczny limit.
+- Otrzymać streszczenie, najważniejsze punkty i zadania do każdego nagrania.
+- Przeszukiwać nagrania i zadawać pytania o spotkanie.
+- Zobaczyć, kto co powiedział: transkrypcje oznaczają rozmówców, a ich nazwy możesz zmienić.
+- Korzystać z aplikacji internetowej meetingmind.org na tym samym koncie. Możesz tam też przesłać pliki audio, które już masz.
+
+TRANSKRYPCJE W 30 JĘZYKACH
+Meeting Mind wykrywa język mówiony i zapisuje transkrypcję w tym języku. Obsługiwane języki: angielski, bułgarski, chiński (mandaryński), czeski, duński, fiński, francuski, grecki, hindi, hiszpański, indonezyjski, japoński, kataloński, koreański, litewski, malajski, niderlandzki, niemiecki, norweski, polski, portugalski, rosyjski, słowacki, szwedzki, tajski, turecki, ukraiński, węgierski, wietnamski i włoski.
+- W każdym nagraniu wykrywany jest jeden główny język.
+- W przypadku spotkania online możesz też wybrać język, zanim bot dołączy.
+
+JĘZYK STRESZCZENIA
+Streszczenia powstają po angielsku, chyba że wybierzesz inny język. Nagrywając lub przesyłając plik w aplikacji internetowej, możesz wybrać jeden z 15 języków streszczenia, w tym polski.
+
+APLIKACJA W TWOIM JĘZYKU
+Aplikacja na Androida jest dostępna w 27 językach. Język aplikacji możesz zmienić w ustawieniach.
+
+AI COACH
+Coaching na żywo AI Coach podczas spotkań z botem jest opcjonalny i zużywa osobne kredyty. Wszystko inne powyżej jest darmowe.
+
+WARTO WIEDZIEĆ
+- To Ty odpowiadasz za poinformowanie osób, że nagrywasz, i za przestrzeganie przepisów o nagrywaniu obowiązujących tam, gdzie jesteś. W niektórych miejscach wymagana jest zgoda wszystkich.
+- Jakość transkrypcji zależy od dźwięku: najlepsze efekty daje wyraźna mowa i mało hałasu w tle.
+- Bardzo krótkie nagrania nie dostają streszczenia. Mów trochę dłużej albo prześlij dłuższe nagranie w aplikacji internetowej.
+- Nagrania przetwarzają usługi AI i transkrypcji wymienione w naszej polityce prywatności.
+
+Pytania lub uwagi: support@kreativekoala.llc
