@@ -206,24 +206,25 @@ publicSharesRouter.get(
       .eq('recording_id', share.recording_id)
       .maybeSingle();
 
-    // The speaker names are needed for the summary even when the transcript is not shared.
-    const { data: t } = await supabaseAdmin
-      .from('transcripts')
-      .select(share.include_transcript ? 'segments, speaker_names' : 'speaker_names')
-      .eq('recording_id', share.recording_id)
-      .maybeSingle<{ segments?: unknown; speaker_names?: Record<string, string> }>();
-    const names = t?.speaker_names;
     let transcript: any = null;
-    if (share.include_transcript && t) {
-      transcript = {
-        segments: (Array.isArray(t.segments) ? t.segments : []).map((s: any) => ({
-          speaker: speakerDisplayName(s.speaker_label, s.speaker_index, names),
-          text: s.text ?? '',
-          start_time: s.start_time ?? 0,
-        })),
-      };
+    if (share.include_transcript) {
+      const { data: t } = await supabaseAdmin
+        .from('transcripts')
+        .select('segments, speaker_names')
+        .eq('recording_id', share.recording_id)
+        .maybeSingle();
+      if (t) {
+        transcript = {
+          segments: (Array.isArray(t.segments) ? t.segments : []).map((s: any) => ({
+            speaker: speakerDisplayName(s.speaker_label, s.speaker_index, t.speaker_names),
+            text: s.text ?? '',
+            start_time: s.start_time ?? 0,
+          })),
+        };
+      }
     }
-    const shown = summary ? displaySummary(summary, names) : null;
+    // The owner's speaker names reach a viewer only on the lines of a shared transcript. The summary gets numbers.
+    const shown = summary ? displaySummary(summary) : null;
 
     // Best-effort view counter; never block or fail the read.
     void Promise.resolve(supabaseAdmin.rpc('increment_share_view', { p_share_id: share.id })).catch(() => {});

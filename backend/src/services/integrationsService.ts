@@ -31,7 +31,8 @@ export interface RecordingPayload {
   recording: { id: string; title: string; duration_seconds?: number | null; created_at?: string | null };
   summary: string;
   key_points: string[];
-  action_items: Array<{ text: string; assignee?: string | null; due_date?: string | null }>;
+  /** As stored in `summaries`: `task` and `title` (older rows only `task`). Webhooks receive them unchanged. */
+  action_items: Array<string | { task?: string; title?: string; text?: string; assignee?: string | null; due_date?: string | null }>;
 }
 
 export interface DeliveryResult {
@@ -83,14 +84,26 @@ export function signWebhookBody(secret: string, timestamp: number, body: string)
   return 'sha256=' + crypto.createHmac('sha256', secret).update(`${timestamp}.${body}`).digest('hex');
 }
 
+/** The action items that have any wording, for the services that get formatted text rather than the stored rows. */
+function actionLines(items: RecordingPayload['action_items']): { text: string; assignee: string | null }[] {
+  return items
+    .map((a) =>
+      typeof a === 'string'
+        ? { text: a.trim(), assignee: null }
+        : { text: (a?.task || a?.title || a?.text || '').trim(), assignee: a?.assignee ?? null }
+    )
+    .filter((a) => a.text);
+}
+
 export function buildSlackMessage(p: RecordingPayload): { text: string; blocks: any[] } {
   const clip = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
   const blocks: any[] = [
     { type: 'header', text: { type: 'plain_text', text: clip(p.recording.title || 'Meeting', 150) } },
   ];
   if (p.summary) blocks.push({ type: 'section', text: { type: 'mrkdwn', text: clip(p.summary, 2800) } });
-  if (p.action_items.length) {
-    const lines = p.action_items.slice(0, 10).map((a) => `• ${a.text}${a.assignee ? ` (${a.assignee})` : ''}`);
+  const actions = actionLines(p.action_items);
+  if (actions.length) {
+    const lines = actions.slice(0, 10).map((a) => `• ${a.text}${a.assignee ? ` (${a.assignee})` : ''}`);
     blocks.push({ type: 'section', text: { type: 'mrkdwn', text: clip('*Action items*\n' + lines.join('\n'), 2800) } });
   }
   return { text: `${p.recording.title || 'Meeting'} summary`, blocks };
@@ -103,7 +116,7 @@ export function buildNotionPage(databaseId: string, p: RecordingPayload): Record
   for (const k of p.key_points.slice(0, 20)) {
     children.push({ object: 'block', type: 'bulleted_list_item', bulleted_list_item: { rich_text: rt(k) } });
   }
-  for (const a of p.action_items.slice(0, 20)) {
+  for (const a of actionLines(p.action_items).slice(0, 20)) {
     children.push({ object: 'block', type: 'to_do', to_do: { checked: false, rich_text: rt(a.text) } });
   }
   return {
