@@ -1,5 +1,6 @@
 package com.kreativekoala.summaryai.ui.calendar
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.*
@@ -40,6 +41,29 @@ fun CalendarIntegrationScreen(
         }
     }
 
+    // The browser came back with a result: say how it went. A failure must not look like nothing happened.
+    val calendarReturn by viewModel.calendarReturn.collectAsState()
+    val returnMessage = when (val result = calendarReturn) {
+        is CalendarReturn.Connected -> stringResource(
+            R.string.calendar_return_connected,
+            stringResource(
+                when (result.provider) {
+                    "google" -> R.string.google_calendar
+                    "microsoft" -> R.string.microsoft_outlook
+                    else -> R.string.calendar_integration
+                }
+            )
+        )
+        is CalendarReturn.Failed -> stringResource(CalendarReturn.errorMessage(result.code))
+        null -> null
+    }
+    LaunchedEffect(calendarReturn) {
+        returnMessage?.let {
+            snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Long)
+            viewModel.consumeCalendarReturn()
+        }
+    }
+
     // Sign-in happens in the browser: reload on return, so a calendar that was just connected shows up.
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -54,7 +78,11 @@ fun CalendarIntegrationScreen(
     LaunchedEffect(uiState.oauthUrl) {
         uiState.oauthUrl?.let { url ->
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            context.startActivity(intent)
+            try {
+                context.startActivity(intent)
+            } catch (e: ActivityNotFoundException) {
+                viewModel.onNoBrowser()
+            }
             viewModel.clearOAuthUrl()
         }
     }

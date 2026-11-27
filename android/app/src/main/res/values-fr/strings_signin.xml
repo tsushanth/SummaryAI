@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">La connexion n’a pas été acceptée (%1$s). Veuillez réessayer.</string>
+    <string name="calendar_return_connected">%1$s connecté.</string>
+    <string name="calendar_return_cancelled">Agenda non connecté : l’accès n’a pas été accordé.</string>
+    <string name="calendar_return_expired">Agenda non connecté : la connexion a pris trop de temps ou a déjà été utilisée. Veuillez recommencer.</string>
+    <string name="calendar_return_admin_approval">Votre compte professionnel ou scolaire nécessite qu’un administrateur approuve Meeting Mind. Demandez à votre service informatique ou connectez un compte personnel.</string>
+    <string name="calendar_return_failed">Agenda non connecté. Veuillez réessayer dans quelques minutes.</string>
+    <string name="calendar_no_browser">Aucun navigateur web n’a été trouvé pour ouvrir la page de connexion.</string>
+</resources>

@@ -16,6 +16,7 @@ import com.kreativekoala.summaryai.domain.model.AuthProvider
 import com.kreativekoala.summaryai.domain.model.AuthState
 import com.kreativekoala.summaryai.domain.model.SubscriptionStatus
 import com.kreativekoala.summaryai.domain.model.User
+import com.kreativekoala.summaryai.util.appLocaleContext
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
@@ -200,29 +201,49 @@ class AuthService @Inject constructor(
     }
 
     /**
-     * Handle Google Sign-In result
+     * Handle Google Sign-In result. Every way this can fail ends with a message the person can act on and a failure report;
+     * closing the picker is neither.
      */
     suspend fun handleGoogleSignInResult(data: Intent?): Result<Unit> {
+        // Step 1: Google Play services. Nothing on screen changes until there is an account to work with.
+        val account = try {
+            GoogleSignIn.getSignedInAccountFromIntent(data).getResult(ApiException::class.java)
+        } catch (e: ApiException) {
+            Log.e(TAG, "Google sign-in API exception: ${e.statusCode}", e)
+            if (SignInFailure.isGoogleCancel(e.statusCode)) return Result.failure(Exception())
+            report(e, "Google sign-in failed: status ${e.statusCode}", mapOf("status" to e.statusCode.toString()))
+            return signInFailed(
+                if (e.statusCode == SignInFailure.GOOGLE_NETWORK_ERROR) text(R.string.api_error_network)
+                else text(R.string.auth_error_google_failed, e.statusCode),
+                e
+            )
+        }
+
+        val idToken = account?.idToken
+        if (idToken == null) {
+            report(null, "Google sign-in returned no ID token")
+            return signInFailed(text(R.string.auth_error_no_id_token))
+        }
+
+        // Step 2: exchange the Google ID token with Supabase (no web redirect).
+        _authState.value = _authState.value.copy(isLoading = true, error = null)
+        val started = System.currentTimeMillis()
+        var tries = 0
         return try {
-            _authState.value = _authState.value.copy(isLoading = true, error = null)
-
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            val account = task.getResult(ApiException::class.java)
-
-            // Get Google ID token
-            val idToken = account?.idToken
-                ?: return Result.failure(Exception(context.getString(R.string.auth_error_no_id_token)))
-
             Log.d(TAG, "Got Google ID token, exchanging with Supabase...")
-
-            // Exchange Google ID token directly with Supabase (no web redirect)
-            supabase.auth.signInWith(IDToken) {
-                this.idToken = idToken
-                provider = Google
+            SignInFailure.retryUnreachable {
+                tries++
+                supabase.auth.signInWith(IDToken) {
+                    this.idToken = idToken
+                    provider = Google
+                }
             }
 
             val session = supabase.auth.currentSessionOrNull()
-                ?: return Result.failure(Exception(context.getString(R.string.auth_error_no_session)))
+            if (session == null) {
+                report(null, "Google sign-in ended with no session", mapOf("tries" to tries.toString()))
+                return signInFailed(text(R.string.auth_error_no_session))
+            }
 
             Log.d(TAG, "Got Supabase session for user: ${session.user?.email}")
 
@@ -253,38 +274,48 @@ class AuthService @Inject constructor(
             )
 
             Result.success(Unit)
-        } catch (e: ApiException) {
-            Log.e(TAG, "Google sign-in API exception: ${e.statusCode}", e)
-            // 12501 = the user closed the picker, 12502 = a sign-in already in progress: not failures.
-            if (e.statusCode != 12501 && e.statusCode != 12502) {
-                com.kreativekoala.summaryai.FailureReporter.failure(
-                    flow = "google_sign_in",
-                    t = e,
-                    message = "Google sign-in failed: status ${e.statusCode}",
-                    context = mapOf("status" to e.statusCode.toString()),
-                )
-            }
-            _authState.value = _authState.value.copy(
-                isLoading = false,
-                error = context.getString(R.string.auth_error_google_failed, e.statusCode)
-            )
-            Result.failure(e)
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            _authState.value = _authState.value.copy(isLoading = false)
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "Sign-in exception: ${e.message}", e)
-            if (e !is kotlinx.coroutines.CancellationException) {
-                com.kreativekoala.summaryai.FailureReporter.failure(
-                    flow = "google_sign_in",
-                    t = e,
-                    message = "Google sign-in token exchange failed: ${e.javaClass.simpleName}",
-                )
-            }
-            _authState.value = _authState.value.copy(
-                isLoading = false,
-                error = e.message
+            // A refusal carries the request headers in its message, so only the fields picked in reportContext are sent.
+            report(
+                e.takeUnless { it is io.github.jan.supabase.exceptions.RestException },
+                "Google sign-in token exchange failed: ${e.javaClass.simpleName}",
+                SignInFailure.reportContext(e, tries, System.currentTimeMillis() - started)
             )
-            Result.failure(e)
+            signInFailed(
+                when (SignInFailure.kindOf(e)) {
+                    SignInFailure.Kind.UNREACHABLE -> text(R.string.api_error_network)
+                    SignInFailure.Kind.REJECTED -> text(R.string.auth_error_server_rejected, SignInFailure.serverCode(e) ?: "")
+                    SignInFailure.Kind.UNKNOWN -> text(R.string.auth_error_server_rejected, e.javaClass.simpleName)
+                },
+                e
+            )
         }
     }
+
+    private fun text(res: Int, vararg args: Any): String {
+        val localized = appLocaleContext(context)
+        return if (args.isEmpty()) localized.getString(res) else localized.getString(res, *args)
+    }
+
+    private fun report(t: Throwable?, message: String, context: Map<String, String> = emptyMap()) {
+        com.kreativekoala.summaryai.FailureReporter.failure(
+            flow = "google_sign_in", t = t, message = message, context = context
+        )
+    }
+
+    /** Shows [message] on the sign-in screen. The screen reads it from [authState], which outlives the loading spinner. */
+    private fun signInFailed(message: String, cause: Throwable? = null): Result<Unit> {
+        _authState.value = _authState.value.copy(isLoading = false, error = message)
+        return Result.failure(Exception(message, cause))
+    }
+
+    /** The exception's own text names addresses and library classes; an unreachable server gets plain words instead. */
+    private fun emailErrorMessage(e: Exception): String? =
+        if (SignInFailure.kindOf(e) == SignInFailure.Kind.UNREACHABLE) text(R.string.api_error_network) else e.message
 
     /**
      * Sign out
@@ -354,8 +385,8 @@ class AuthService @Inject constructor(
                 // Check if user already exists
                 val errorMsg = signupError.message?.lowercase() ?: ""
                 if (errorMsg.contains("already") || errorMsg.contains("exists") || errorMsg.contains("registered")) {
-                    _authState.value = _authState.value.copy(isLoading = false)
-                    return Result.failure(Exception(context.getString(R.string.auth_error_account_exists)))
+                    // Set on authState: the spinner replaced the screen, so a returned failure alone is never seen.
+                    return signInFailed(text(R.string.auth_error_account_exists))
                 }
                 throw signupError
             }
@@ -374,7 +405,7 @@ class AuthService @Inject constructor(
             }
 
             if (session == null) {
-                return Result.failure(Exception(context.getString(R.string.auth_error_signin_after_signup)))
+                return signInFailed(text(R.string.auth_error_signin_after_signup))
             }
 
             Log.d(TAG, "Got Supabase session for user: ${session.user?.email}")
@@ -406,11 +437,7 @@ class AuthService @Inject constructor(
             Result.success(Unit)
         } catch (e: Exception) {
             Log.e(TAG, "Email sign-up exception: ${e.message}", e)
-            _authState.value = _authState.value.copy(
-                isLoading = false,
-                error = e.message ?: context.getString(R.string.auth_error_signup_failed)
-            )
-            Result.failure(e)
+            signInFailed(emailErrorMessage(e) ?: context.getString(R.string.auth_error_signup_failed), e)
         }
     }
 
@@ -429,7 +456,7 @@ class AuthService @Inject constructor(
             }
 
             val session = supabase.auth.currentSessionOrNull()
-                ?: return Result.failure(Exception(context.getString(R.string.auth_error_no_session)))
+                ?: return signInFailed(text(R.string.auth_error_no_session))
 
             Log.d(TAG, "Got Supabase session for user: ${session.user?.email}")
 
@@ -460,11 +487,7 @@ class AuthService @Inject constructor(
             Result.success(Unit)
         } catch (e: Exception) {
             Log.e(TAG, "Email sign-in exception: ${e.message}", e)
-            _authState.value = _authState.value.copy(
-                isLoading = false,
-                error = e.message ?: "Sign in failed"
-            )
-            Result.failure(e)
+            signInFailed(emailErrorMessage(e) ?: "Sign in failed", e)
         }
     }
 

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">Proses masuk tidak diterima (%1$s). Silakan coba lagi.</string>
+    <string name="calendar_return_connected">%1$s terhubung.</string>
+    <string name="calendar_return_cancelled">Kalender tidak terhubung: akses tidak diberikan.</string>
+    <string name="calendar_return_expired">Kalender tidak terhubung: proses masuk terlalu lama atau sudah dipakai. Silakan hubungkan lagi.</string>
+    <string name="calendar_return_admin_approval">Akun kantor atau sekolah Anda memerlukan persetujuan administrator untuk Meeting Mind. Mintalah ke tim TI, atau hubungkan akun pribadi.</string>
+    <string name="calendar_return_failed">Kalender tidak terhubung. Silakan coba lagi dalam beberapa menit.</string>
+    <string name="calendar_no_browser">Tidak ditemukan browser web untuk membuka halaman masuk.</string>
+</resources>

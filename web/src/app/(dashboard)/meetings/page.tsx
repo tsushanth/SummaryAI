@@ -11,6 +11,8 @@ import {
   useDisconnectCalendar,
   useSyncCalendars,
 } from '@/hooks/useCalendar';
+import { calendarConnectMessage } from '@/lib/calendarConnect';
+import { reportUnexpectedWebFailure } from '@/components/WebFailureReporter';
 import { useMeetings, useCreateMeeting, useJoinMeeting, useUpdateMeeting } from '@/hooks/useMeetings';
 import { CalendarConnectionCard } from '@/components/meetings/CalendarConnectionCard';
 import { ConnectCalendarButton } from '@/components/meetings/ConnectCalendarButton';
@@ -58,6 +60,17 @@ export default function MeetingsPage() {
     }
     prevConnectionCount.current = connections.length;
   }, [connections.length, isLoadingConnections, refreshMeetings]);
+
+  // A sign-in that cannot start says why; it used to fail without a word.
+  const handleConnect = async (provider: 'google' | 'microsoft') => {
+    setBanner(null);
+    try {
+      await connect(provider);
+    } catch (error) {
+      setBanner(calendarConnectMessage(error));
+      reportUnexpectedWebFailure('calendar_connect', error, { provider });
+    }
+  };
 
   const handleAddMeeting = async (data: CreateMeetingRequest) => {
     const result = await create(data);
@@ -150,12 +163,12 @@ export default function MeetingsPage() {
             <div className="flex justify-center gap-3">
               <ConnectCalendarButton
                 provider="google"
-                onConnect={connect}
+                onConnect={handleConnect}
                 isConnecting={isConnecting}
               />
               <ConnectCalendarButton
                 provider="microsoft"
-                onConnect={connect}
+                onConnect={handleConnect}
                 isConnecting={isConnecting}
               />
             </div>
@@ -176,14 +189,14 @@ export default function MeetingsPage() {
               {!hasGoogleConnection && (
                 <ConnectCalendarButton
                   provider="google"
-                  onConnect={connect}
+                  onConnect={handleConnect}
                   isConnecting={isConnecting}
                 />
               )}
               {!hasMicrosoftConnection && (
                 <ConnectCalendarButton
                   provider="microsoft"
-                  onConnect={connect}
+                  onConnect={handleConnect}
                   isConnecting={isConnecting}
                 />
               )}

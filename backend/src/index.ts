@@ -18,6 +18,7 @@ import { checkStartupConfig } from './lib/startupConfig.js';
 import { startLoopWatchdog, reportLoopInitFailure } from './lib/loopMonitor.js';
 import { startPipelineInvariantLoop } from './services/pipelineInvariants.js';
 import { startFirstRecordingAlertLoop } from './services/firstRecordingAlert.js';
+import { startCalendarConnectAlertLoop } from './services/calendarConnectAlert.js';
 import { testConnection } from './lib/supabase.js';
 import { flushLlmUsage } from './lib/llm.js';
 import { requestTiming, startRuntimeMonitor } from './lib/requestTiming.js';
@@ -164,6 +165,7 @@ async function startServer(): Promise<void> {
     startLoopWatchdog();
     startPipelineInvariantLoop();
     startFirstRecordingAlertLoop();
+    startCalendarConnectAlertLoop();
     // Phone calls: only when the calls subaccount is configured (settles calls, saves recordings, frees reservations).
     import('./phone/index.js').then((m) => m.startPhoneSweepLoop())
       .catch((e) => { console.error('[PhoneCalls] init failed:', e instanceof Error ? e.name : 'error'); reportLoopInitFailure('PhoneCalls'); });

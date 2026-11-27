@@ -3,6 +3,7 @@ package com.kreativekoala.summaryai.ui.calendar
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kreativekoala.summaryai.FailureReporter
 import com.kreativekoala.summaryai.R
 import com.kreativekoala.summaryai.data.local.TokenManager
 import com.kreativekoala.summaryai.util.ApiErrors
@@ -28,8 +29,21 @@ data class CalendarUiState(
 class CalendarViewModel @Inject constructor(
     private val calendarRepository: CalendarRepository,
     private val tokenManager: TokenManager,
+    private val calendarReturnStore: CalendarReturnStore,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
+
+    /** How the last browser sign-in ended, until the screen has shown it. */
+    val calendarReturn: StateFlow<CalendarReturn?> = calendarReturnStore.pending
+
+    fun consumeCalendarReturn() = calendarReturnStore.consume()
+
+    /** The phone has nothing that can open the sign-in page. */
+    fun onNoBrowser() {
+        // i18n-ok: the failure report's text, never shown
+        FailureReporter.failure("calendar_connect", message = "Calendar connect failed: no app can open the sign-in page")
+        _uiState.value = _uiState.value.copy(error = appLocaleContext(context).getString(R.string.calendar_no_browser))
+    }
 
     private val isDemoMode: Boolean
         get() = tokenManager.userId?.startsWith("demo-user-") == true

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">登录未被接受（%1$s）。请重试。</string>
+    <string name="calendar_return_connected">已连接 %1$s。</string>
+    <string name="calendar_return_cancelled">日历未连接：未授予访问权限。</string>
+    <string name="calendar_return_expired">日历未连接：登录耗时过长或已被使用。请重新连接。</string>
+    <string name="calendar_return_admin_approval">您的工作或学校账号需要管理员批准 Meeting Mind。请联系 IT 团队，或改用个人账号连接。</string>
+    <string name="calendar_return_failed">日历未连接。请几分钟后重试。</string>
+    <string name="calendar_no_browser">找不到可打开登录页面的网络浏览器。</string>
+</resources>

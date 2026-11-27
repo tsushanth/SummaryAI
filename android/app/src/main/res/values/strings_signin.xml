@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">Sign-in was not accepted (%1$s). Please try again.</string>
+    <string name="calendar_return_connected">%1$s connected.</string>
+    <string name="calendar_return_cancelled">Calendar not connected: access was not given.</string>
+    <string name="calendar_return_expired">Calendar not connected: the sign-in took too long or was already used. Please connect again.</string>
+    <string name="calendar_return_admin_approval">Your work or school account needs an administrator to approve Meeting Mind. Ask your IT team, or connect a personal account.</string>
+    <string name="calendar_return_failed">Calendar not connected. Please try again in a few minutes.</string>
+    <string name="calendar_no_browser">No web browser was found to open the sign-in page.</string>
+</resources>

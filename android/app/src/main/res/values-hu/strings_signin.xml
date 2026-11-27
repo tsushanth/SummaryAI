@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">A bejelentkezést nem fogadták el (%1$s). Próbáld újra.</string>
+    <string name="calendar_return_connected">%1$s csatlakoztatva.</string>
+    <string name="calendar_return_cancelled">A naptár nincs csatlakoztatva: nem kaptunk hozzáférést.</string>
+    <string name="calendar_return_expired">A naptár nincs csatlakoztatva: a bejelentkezés túl sokáig tartott, vagy már felhasználták. Csatlakoztasd újra.</string>
+    <string name="calendar_return_admin_approval">A munkahelyi vagy iskolai fiókodnál egy rendszergazdának kell jóváhagynia a Meeting Mindot. Kérd meg az IT-csapatot, vagy csatlakoztass személyes fiókot.</string>
+    <string name="calendar_return_failed">A naptár nincs csatlakoztatva. Próbáld újra néhány perc múlva.</string>
+    <string name="calendar_no_browser">Nem található webböngésző a bejelentkezési oldal megnyitásához.</string>
+</resources>

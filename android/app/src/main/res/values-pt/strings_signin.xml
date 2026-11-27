@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">O início de sessão não foi aceite (%1$s). Tente novamente.</string>
+    <string name="calendar_return_connected">%1$s ligado.</string>
+    <string name="calendar_return_cancelled">Calendário não ligado: o acesso não foi concedido.</string>
+    <string name="calendar_return_expired">Calendário não ligado: o início de sessão demorou demasiado ou já foi usado. Ligue novamente.</string>
+    <string name="calendar_return_admin_approval">A sua conta profissional ou escolar precisa que um administrador aprove o Meeting Mind. Peça à equipa de TI ou ligue uma conta pessoal.</string>
+    <string name="calendar_return_failed">Calendário não ligado. Tente novamente dentro de alguns minutos.</string>
+    <string name="calendar_no_browser">Não foi encontrado nenhum navegador web para abrir a página de início de sessão.</string>
+</resources>

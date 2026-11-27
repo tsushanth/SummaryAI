@@ -17,6 +17,7 @@ let watchdog: NodeJS.Timeout | null = null;
 
 export const EXPECTED_LOOPS = [
   'BotJoinReconciler', 'StuckRecovery', 'BotRecordingReconciler', 'OrphanRecovery', 'PipelineInvariants', 'AbandonedUploads', 'AccountPurgeRetry', 'FirstRecordingAlert',
+  'CalendarConnectAlert',
 ] as const;
 
 /** Loops that only exist when their feature is configured: watched from the moment they are announced. */

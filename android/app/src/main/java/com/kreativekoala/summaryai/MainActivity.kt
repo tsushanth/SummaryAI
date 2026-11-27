@@ -24,6 +24,7 @@ import com.kreativekoala.summaryai.data.preferences.ThemeMode
 import com.kreativekoala.summaryai.data.preferences.ThemePreferences
 import com.kreativekoala.summaryai.service.AuthService
 import com.kreativekoala.summaryai.service.BillingManager
+import com.kreativekoala.summaryai.ui.calendar.CalendarReturnStore
 import com.kreativekoala.summaryai.data.sample.SampleMeetingStore
 import com.kreativekoala.summaryai.ui.onboarding.FirstRunRouting
 import com.kreativekoala.summaryai.ui.onboarding.FirstRunState
@@ -43,6 +44,7 @@ class MainActivity : AppCompatActivity() {
     @Inject lateinit var firstRunState: FirstRunState
     @Inject lateinit var sampleMeetingStore: SampleMeetingStore
     @Inject lateinit var phoneAvailability: com.kreativekoala.summaryai.service.PhoneAvailability
+    @Inject lateinit var calendarReturnStore: CalendarReturnStore
 
     private var startRecordingRequested by mutableStateOf(false)
     private var resumes by mutableStateOf(0)
@@ -57,6 +59,8 @@ class MainActivity : AppCompatActivity() {
         setIntent(intent)
         // singleTop: links and tile/widget taps now arrive here instead of a second instance.
         PromoCodeManager.handleIntent(intent)
+        // The browser coming back from a calendar sign-in, connected or not.
+        calendarReturnStore.offer(intent.dataString)
         if (intent.action == ACTION_START_RECORDING) startRecordingRequested = true
     }
 
@@ -70,6 +74,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         PromoCodeManager.handleIntent(intent)
+        // Only on a real start: a recreated activity still carries the intent whose message was already shown.
+        if (savedInstanceState == null) calendarReturnStore.offer(intent?.dataString)
         if (intent?.action == ACTION_START_RECORDING) startRecordingRequested = true
         enableEdgeToEdge()
 
@@ -123,7 +129,10 @@ class MainActivity : AppCompatActivity() {
                         // Asked again every time the app comes to the front, so switching the feature needs no restart.
                         LaunchedEffect(account, resumes) { phoneAvailability.refresh(account) }
 
+                        val calendarReturn by calendarReturnStore.pending.collectAsState()
+
                         MeetingMindNavGraph(
+                            calendarReturnPending = calendarReturn != null,
                             phoneEnabled = phoneEnabled,
                             isAuthenticated = authState.isAuthenticated,
                             hasCompletedOnboarding = authState.hasCompletedOnboarding,

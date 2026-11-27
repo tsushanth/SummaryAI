@@ -8,6 +8,7 @@ import {
   disconnectCalendar,
   syncCalendars,
 } from '@/lib/api/calendar';
+import { openCalendarSignIn } from '@/lib/calendarConnect';
 import type { CalendarProvider } from '@/types/api';
 
 // Global message handler for OAuth callbacks
@@ -50,18 +51,15 @@ export function useConnectCalendar() {
     async (provider: CalendarProvider) => {
       setIsConnecting(true);
       try {
-        const { auth_url } = await connectCalendar(provider);
-
         // Open OAuth popup
         const width = 500;
         const height = 600;
         const left = window.screenX + (window.outerWidth - width) / 2;
         const top = window.screenY + (window.outerHeight - height) / 2;
 
-        const popup = window.open(
-          auth_url,
-          'calendar-oauth',
-          `width=${width},height=${height},left=${left},top=${top},popup=yes`
+        const popup = await openCalendarSignIn(
+          () => window.open('', 'calendar-oauth', `width=${width},height=${height},left=${left},top=${top},popup=yes`),
+          async () => (await connectCalendar(provider)).auth_url
         );
 
         // Cleanup function
