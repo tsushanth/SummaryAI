@@ -83,6 +83,11 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 - Rollback: `flyctl releases rollback 65 -a summary-ai-backend`.
 - Android #116 (automatic retry of a failed recording upload) is merged and NOT released; it needs a release after 1.7.15 (68). `testDebugUnitTest` 304 tests, 0 failures; `lintDebug` 0 errors; no device run.
 
+## 2026-11-27 Android 1.7.15 (68) raised to 100% on Play production
+- Owner approved on 27 November. Read back after commit (10:53 PT): production 1.7.15 (68) `completed`; 1.7.13 (66) is no longer on the track. A completed release cannot be halted: rolling back means a new version code.
+- Before raising: no error report, error issue or text review for versionCode 68 since 11-25, and Play returned no crash or ANR rate rows. That is an absence of data at this install base, not a measured clean rate.
+- The listing text published the same day (#131) was read back unchanged after this commit.
+
 ## 2026-11-25 Android 1.7.15 (68), Play production, staged 20% (replaces the 20% rollout of 67)
 - Tag `play/1.7.15-68` = `main` at `44d946c` (#113, version bump only on top of `253aac4`). Built from exactly this commit in a clean detached worktree; the `paywallkit`, `ratingkit` and `crosspromokit` library modules come from their local checkouts, as before.
 - Play read back after commit: production 1.7.15 (68) `inProgress` userFraction 0.2, 1.7.13 (66) `completed`; 1.7.14 (67) is no longer on the track. Beta, alpha and internal moved to 68 `completed` (they held 54, 54 and 60). Uploaded with the Play edit API.
