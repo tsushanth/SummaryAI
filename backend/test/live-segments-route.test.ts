@@ -452,6 +452,25 @@ describe('voice assistant wake source (VOICE_ASSISTANT_WAKE_SOURCE=live_stt)', (
     expect((handleLive.mock.calls[1] as any[])[1].map((x: any) => x.text)).toEqual(['third']);
   });
 
+  it('MEETING_ASSISTANT_MULTILINGUAL: a Soniox-primary bot is forwarded without the wake-source flag, with each segment language tag; a shadow bot is not', async () => {
+    delete process.env.VOICE_ASSISTANT_WAKE_SOURCE;
+    const savedMl = process.env.MEETING_ASSISTANT_MULTILINGUAL;
+    process.env.MEETING_ASSISTANT_MULTILINGUAL = '1';
+    try {
+      await start();
+      expect((await post(payload([seg(0, { segment_text: 'привет', language: 'ru' })]))).status).toBe(200);
+      await vi.waitFor(() => expect(handleLive).toHaveBeenCalledTimes(1));
+      expect((handleLive.mock.calls[0] as any[])[1]).toMatchObject([{ text: 'привет', language: 'ru' }]);
+      handleLive.mockClear();
+      state.botRun = { ...state.botRun, live_stt_provider: 'shadow' };
+      expect((await post(payload([seg(7, { segment_text: 'shadow row' })]))).status).toBe(200);
+      await settle();
+      expect(handleLive).not.toHaveBeenCalled();
+    } finally {
+      if (savedMl === undefined) delete process.env.MEETING_ASSISTANT_MULTILINGUAL; else process.env.MEETING_ASSISTANT_MULTILINGUAL = savedMl;
+    }
+  });
+
   it('live_stt: a bot run without a stored Recall bot id is skipped, and an assistant failure never fails the sink', async () => {
     process.env.VOICE_ASSISTANT_WAKE_SOURCE = 'live_stt';
     await start();

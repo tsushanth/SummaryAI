@@ -12,6 +12,7 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { reportAlert } from '../../lib/alerts.js';
 import { decideEnabled } from './config.js';
+import { getLanguagePack, isNonEnglishConfigured, isSupportedLanguage } from './languages.js';
 import { getConfig, loadVoicePreference, phraseAudio } from './runtime.js';
 import { INTRO_TEXT } from './tts.js';
 
@@ -29,8 +30,11 @@ export function isValidAssistantToken(provided: string | undefined, secret: stri
 }
 
 export interface AssistantBotPlan {
-  /** Entry to append to recording_config.realtime_endpoints. */
-  endpoint: { type: 'webhook'; url: string; events: string[] };
+  /**
+   * Entry to append to recording_config.realtime_endpoints. Null only for a Soniox-primary bot in multilingual mode: the transcript
+   * is the live-stt stream, there is no Recall transcript to listen to, so no endpoint is added (the intro still plays).
+   */
+  endpoint: { type: 'webhook'; url: string; events: string[] } | null;
   /** Recall `automatic_audio_output` field, or undefined when the intro is off / could not be synthesized in time. */
   automaticAudioOutput?: { in_call_recording: { data: { kind: 'mp3'; b64_data: string } } };
 }
@@ -41,17 +45,21 @@ export interface PlanInput {
   internalSecret: string | undefined;
   /** Real-time transcript is on and Recall's own transcript is the live source (not the Soniox-only path). */
   realtimeRecallTranscript: boolean;
+  /** Multilingual mode only. Which live-stt stream this bot has: 'soniox' (primary), 'shadow' (next to Recall's transcript) or 'recall' / absent (none). */
+  liveStreamProvider?: 'recall' | 'shadow' | 'soniox';
+  /** Multilingual mode only. The meeting language from settings ('auto' / null = none). */
+  meetingLanguage?: string | null;
   /** Test seams. */
   preference?: (userId: string) => Promise<boolean | undefined>;
-  intro?: () => Promise<string | null>;
+  intro?: (text: string, language?: string) => Promise<string | null>;
 }
 
 const INTRO_WAIT_MS = 2500;
 
-async function introB64(): Promise<string | null> {
+async function introB64(text: string, language?: string): Promise<string | null> {
   try {
     const audio = await Promise.race([
-      phraseAudio(INTRO_TEXT),
+      language ? phraseAudio(text, language) : phraseAudio(text),
       new Promise<null>((resolve) => setTimeout(() => resolve(null), INTRO_WAIT_MS)),
     ]);
     return audio ? audio.b64 : null;
@@ -68,6 +76,34 @@ export async function planVoiceAssistant(input: PlanInput): Promise<AssistantBot
     const preference = await (input.preference ?? loadVoicePreference)(input.userId);
     const decision = decideEnabled(cfg, input.userId, preference);
     if (!decision.enabled) return null;
+
+    // Multilingual mode (MEETING_ASSISTANT_MULTILINGUAL). Everything in this block is skipped while the flag is off.
+    let introText = INTRO_TEXT;
+    let introLang: string | undefined;
+    if (cfg.multilingual) {
+      const stream = input.liveStreamProvider ?? 'recall';
+      const nonEnglish = isNonEnglishConfigured(input.meetingLanguage);
+      const lang = nonEnglish ? input.meetingLanguage!.trim().toLowerCase().split(/[-_]/)[0]! : null;
+      if (nonEnglish && stream === 'recall') {
+        // Recall's live transcript is English only (and arrives minutes late otherwise): a non-English meeting needs a live-stt stream.
+        console.warn('[VoiceAssistant] non-English meeting without a live-stt stream; bot created without the assistant');
+        return null;
+      }
+      if (nonEnglish && stream === 'shadow' && cfg.wakeSource !== 'live_stt') {
+        console.warn('[VoiceAssistant] non-English meeting, shadow stream but VOICE_ASSISTANT_WAKE_SOURCE is not live_stt; bot created without the assistant');
+        return null;
+      }
+      if (lang && isSupportedLanguage(cfg, lang)) {
+        const pack = getLanguagePack(lang);
+        if (pack) { introText = pack.strings.intro; introLang = lang; }
+      }
+      if (stream === 'soniox') {
+        // Soniox primary: the transcript is the live-stt stream. No Recall endpoint (nothing would arrive on it), the intro still plays.
+        const b64 = cfg.intro ? await (input.intro ?? introB64)(introText, introLang) : null;
+        return { endpoint: null, automaticAudioOutput: b64 ? { in_call_recording: { data: { kind: 'mp3', b64_data: b64 } } } : undefined };
+      }
+    }
+
     if (!input.realtimeRecallTranscript || !input.serviceUrl) {
       console.warn('[VoiceAssistant] enabled for this user but the Recall real-time transcript is not available; bot created without the assistant');
       return null;
@@ -78,7 +114,7 @@ export async function planVoiceAssistant(input: PlanInput): Promise<AssistantBot
       return null;
     }
     const url = `${input.serviceUrl.replace(/\/+$/, '')}${ASSISTANT_WEBHOOK_PATH}?vt=${assistantWebhookToken(input.internalSecret)}`;
-    const b64 = cfg.intro ? await (input.intro ?? introB64)() : null;
+    const b64 = cfg.intro ? await (input.intro ?? introB64)(introText, introLang) : null;
     return {
       endpoint: { type: 'webhook', url, events: ['transcript.data', 'transcript.partial_data'] },
       automaticAudioOutput: b64 ? { in_call_recording: { data: { kind: 'mp3', b64_data: b64 } } } : undefined,

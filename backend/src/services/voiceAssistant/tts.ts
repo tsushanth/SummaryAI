@@ -12,6 +12,8 @@
  * Cost is an ESTIMATE: characters x VOICE_ASSISTANT_TTS_USD_PER_1K_CHARS.
  */
 import type { VoiceAssistantConfig } from './config.js';
+import { voiceFor } from './languages.js';
+import { synthesizeReadAloud, TtsError, type ReadAloudDeps } from './readaloudTts.js';
 
 export interface SpeechAudio {
   b64: string;
@@ -22,7 +24,19 @@ export interface SpeechAudio {
   ms: number;
 }
 
-export type Synthesize = (text: string) => Promise<SpeechAudio>;
+/** `language`: BCP-47 primary subtag of the text. Omitted or 'en' = the English provider, exactly as before. */
+export type Synthesize = (text: string, language?: string) => Promise<SpeechAudio>;
+
+export type TtsProviderId = 'deepgram' | 'openai' | 'readaloud';
+
+/**
+ * Which speech provider renders this text. English (and everything while MEETING_ASSISTANT_MULTILINGUAL is off) uses the configured
+ * English provider; any other language uses the multilingual provider.
+ */
+export function selectTtsProvider(cfg: Pick<VoiceAssistantConfig, 'ttsProvider' | 'multilingual'>, language?: string): TtsProviderId {
+  if (cfg.multilingual && language && language !== 'en') return 'readaloud';
+  return cfg.ttsProvider;
+}
 
 const BITRATES_V1_L3 = [0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320];
 const BITRATES_V2_L3 = [0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160];
@@ -83,9 +97,24 @@ async function openai(text: string, cfg: VoiceAssistantConfig, fetchFn: typeof f
   return Buffer.from(await res.arrayBuffer());
 }
 
-export function createSynthesizer(getConfig: () => VoiceAssistantConfig, fetchFn: typeof fetch = fetch): Synthesize {
-  return async (text: string): Promise<SpeechAudio> => {
+async function multilingual(text: string, language: string, cfg: VoiceAssistantConfig, deps: ReadAloudDeps): Promise<SpeechAudio> {
+  const voice = voiceFor(cfg, language);
+  if (!voice) throw new TtsError('unsupported');
+  const t0 = Date.now();
+  const r = await synthesizeReadAloud({ text: text.slice(0, 1000), voice, language, normalize: cfg.numberNormalize[language] === 'numbers' ? 'numbers' : 'none' }, deps);
+  return {
+    b64: r.audio.toString('base64'),
+    seconds: mp3DurationSeconds(r.audio),
+    chars: r.chars,
+    usd: (r.chars / 1000) * cfg.readaloudUsdPer1kChars,
+    ms: Date.now() - t0,
+  };
+}
+
+export function createSynthesizer(getConfig: () => VoiceAssistantConfig, fetchFn: typeof fetch = fetch, readAloudDeps: ReadAloudDeps = {}): Synthesize {
+  return async (text: string, language?: string): Promise<SpeechAudio> => {
     const cfg = getConfig();
+    if (selectTtsProvider(cfg, language) === 'readaloud') return multilingual(text, language!, cfg, { fetchFn, ...readAloudDeps });
     const clipped = text.slice(0, 1000);
     const t0 = Date.now();
     const audio = cfg.ttsProvider === 'openai' ? await openai(clipped, cfg, fetchFn) : await deepgram(clipped, cfg, fetchFn);
@@ -101,14 +130,14 @@ export function createSynthesizer(getConfig: () => VoiceAssistantConfig, fetchFn
 }
 
 /** Fixed phrases (intro, "Let me check", apology) are synthesized once per voice and kept for the life of the process. */
-export function cachedPhrases(synth: Synthesize, getConfig: () => VoiceAssistantConfig): (text: string) => Promise<SpeechAudio> {
+export function cachedPhrases(synth: Synthesize, getConfig: () => VoiceAssistantConfig): (text: string, language?: string) => Promise<SpeechAudio> {
   const cache = new Map<string, Promise<SpeechAudio>>();
-  return (text: string) => {
+  return (text: string, language?: string) => {
     const cfg = getConfig();
-    const k = `${cfg.ttsProvider}|${cfg.ttsVoice}|${text}`;
+    const k = language && language !== 'en' ? `${language}|${voiceFor(cfg, language)}|${text}` : `${cfg.ttsProvider}|${cfg.ttsVoice}|${text}`;
     let p = cache.get(k);
     if (!p) {
-      p = synth(text);
+      p = language && language !== 'en' ? synth(text, language) : synth(text);
       cache.set(k, p);
       p.catch(() => cache.delete(k)); // do not cache a failure
     }

@@ -14,6 +14,9 @@
  *   VOICE_ASSISTANT_WAKE_SOURCE       recall (default) | live_stt
  *       live_stt = for a bot that has a live-stt stream (LIVE_STT_SHADOW user or LIVE_STT_PROVIDER=soniox), the wake phrase and the
  *       question come from that stream's final segments; Recall's events then only supply barge-in signals. Other bots: unchanged.
+ *   MEETING_ASSISTANT_MULTILINGUAL    off (default) | on. Language-aware assistant (see docs/VOICE_ASSISTANT.md, "Other languages"). OFF changes nothing.
+ *       MEETING_ASSISTANT_LANGUAGES (default "ru"), MEETING_ASSISTANT_TTS_VOICES ("ru=aria"), MEETING_ASSISTANT_WAKE_PHRASES (JSON),
+ *       MEETING_ASSISTANT_TTS_USD_PER_1K_CHARS (cost estimate) refine it; the speech provider key is READALOUD_API_KEY.
  */
 
 export type VoiceAssistantMode = 'off' | 'opt_in' | 'all';
@@ -50,7 +53,31 @@ export interface VoiceAssistantConfig {
   ttsUsdPer1kChars: number;
   intro: boolean;
   cue: boolean;
+  /** MEETING_ASSISTANT_MULTILINGUAL, default OFF. Every non-English behaviour sits behind it; OFF = the English-only assistant exactly as before. */
+  multilingual: boolean;
+  /** Languages other than English the assistant may answer in (needs a language pack and a voice). Default ['ru']. */
+  languages: string[];
+  /** language code -> voice id for the non-English TTS provider. Entries override the built-in defaults. */
+  languageVoices: Record<string, string>;
+  /** Extra wake phrases per language code (literal phrases, matched at the start of an utterance). */
+  extraWakePhrases: Record<string, string[]>;
+  /** Estimate only: USD per 1,000 characters for the non-English TTS provider. */
+  readaloudUsdPer1kChars: number;
+  /** language code -> whether the speech request asks the provider to normalise numbers. See NUMBER_NORMALIZE_DEFAULTS. */
+  numberNormalize: Record<string, 'numbers' | 'none'>;
 }
+
+/**
+ * Per-language policy for the provider's own number reading (measured on production, 2026-11-14). Only these languages may send
+ * normalize:'numbers'; it is never sent for en, ja or ru (ru measured worse with it), pt is on hold. Every language NOT listed as
+ * 'numbers' gets its answer text with numbers spelled as words (prompt rule plus a digit post-check before speech).
+ * Known engine limits: OTP-like codes are read as one big number in es/fr/it/pt, percent decimals lose the decimal without
+ * normalisation in de/fr/it/pt/ru, ordinals are only right in English.
+ */
+export const NUMBER_NORMALIZE_DEFAULTS: Readonly<Record<string, 'numbers' | 'none'>> = {
+  de: 'numbers', fr: 'numbers', it: 'numbers', es: 'numbers',
+  en: 'none', ja: 'none', ru: 'none', pt: 'none',
+};
 
 const TRUE = new Set(['1', 'true', 'yes', 'on']);
 export const truthy = (v: string | undefined): boolean => TRUE.has((v ?? '').trim().toLowerCase());
@@ -72,6 +99,50 @@ function parsePolicy(v: string | undefined): HistoryPolicy {
 
 function parseWakeSource(v: string | undefined): WakeSource {
   return (v ?? 'recall').trim().toLowerCase() === 'live_stt' ? 'live_stt' : 'recall';
+}
+
+/** 'ru,de' -> ['ru','de'] (lowercase primary subtags, de-duplicated; 'en' is always supported and is not listed). */
+function parseLanguages(v: string | undefined): string[] {
+  const raw = v === undefined ? 'ru' : v;
+  const out = raw.split(',').map((s) => s.trim().toLowerCase().split(/[-_]/)[0] ?? '').filter((s) => /^[a-z]{2,3}$/.test(s) && s !== 'en');
+  return [...new Set(out)];
+}
+
+/** 'ru=aria,de=kai' -> { ru: 'aria', de: 'kai' }. Malformed pairs are skipped. */
+function parseVoiceMap(v: string | undefined): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const pair of (v ?? '').split(',')) {
+    const [k, val] = pair.split('=').map((s) => s.trim());
+    if (k && val && /^[a-z]{2,3}$/i.test(k) && /^[A-Za-z0-9_.-]{1,64}$/.test(val)) out[k.toLowerCase()] = val;
+  }
+  return out;
+}
+
+/** 'de=numbers,ru=none' on top of NUMBER_NORMALIZE_DEFAULTS. A language never listed resolves to 'none' (digits are spelled out). */
+function parseNormalize(v: string | undefined): Record<string, 'numbers' | 'none'> {
+  const out: Record<string, 'numbers' | 'none'> = { ...NUMBER_NORMALIZE_DEFAULTS };
+  for (const pair of (v ?? '').split(',')) {
+    const [k, val] = pair.split('=').map((x) => x.trim().toLowerCase());
+    if (k && /^[a-z]{2,3}$/.test(k) && (val === 'numbers' || val === 'none')) out[k] = val;
+  }
+  return out;
+}
+
+/** JSON {"ru": ["phrase", ...]}. Anything malformed is ignored (the built-in phrases still work). */
+function parseWakeMap(v: string | undefined): Record<string, string[]> {
+  if (!v || !v.trim()) return {};
+  try {
+    const j = JSON.parse(v) as unknown;
+    const out: Record<string, string[]> = {};
+    if (j && typeof j === 'object' && !Array.isArray(j)) {
+      for (const [k, arr] of Object.entries(j as Record<string, unknown>)) {
+        if (!/^[a-z]{2,3}$/i.test(k) || !Array.isArray(arr)) continue;
+        const phrases = arr.filter((x): x is string => typeof x === 'string').map((x) => x.trim()).filter((x) => x.length >= 4 && x.length <= 60);
+        if (phrases.length) out[k.toLowerCase()] = phrases.slice(0, 20);
+      }
+    }
+    return out;
+  } catch { return {}; }
 }
 
 export function loadVoiceAssistantConfig(env: NodeJS.ProcessEnv = process.env): VoiceAssistantConfig {
@@ -98,6 +169,13 @@ export function loadVoiceAssistantConfig(env: NodeJS.ProcessEnv = process.env): 
     ttsUsdPer1kChars: posNumber(env.VOICE_ASSISTANT_TTS_USD_PER_1K_CHARS, 0.015),
     intro: env.VOICE_ASSISTANT_INTRO === undefined ? true : truthy(env.VOICE_ASSISTANT_INTRO),
     cue: env.VOICE_ASSISTANT_CUE === undefined ? true : truthy(env.VOICE_ASSISTANT_CUE),
+    multilingual: truthy(env.MEETING_ASSISTANT_MULTILINGUAL),
+    languages: parseLanguages(env.MEETING_ASSISTANT_LANGUAGES),
+    languageVoices: parseVoiceMap(env.MEETING_ASSISTANT_TTS_VOICES),
+    extraWakePhrases: parseWakeMap(env.MEETING_ASSISTANT_WAKE_PHRASES),
+    // Unverified list-price estimate for the higher-priced tier; set the real figure. Only used for the cost counters.
+    readaloudUsdPer1kChars: posNumber(env.MEETING_ASSISTANT_TTS_USD_PER_1K_CHARS, 0.01),
+    numberNormalize: parseNormalize(env.MEETING_ASSISTANT_TTS_NORMALIZE),
   };
 }
 
