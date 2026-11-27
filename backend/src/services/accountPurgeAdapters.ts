@@ -51,6 +51,22 @@ export const USER_TABLES: { table: string; col: string }[] = [
   { table: 'profiles', col: 'id' },
 ];
 
+interface PhoneCallRefs { recording_sid?: string | null; twilio_call_sid?: string | null; twilio_account?: string | null; recording_deleted_at?: string | null }
+
+/** What the carrier may still hold for these rows (formats: services/twilioService.ts). */
+export function carrierReferences(calls: PhoneCallRefs[], numbers: { twilio_caller_id_sid?: string | null }[]): string[] {
+  const out: string[] = [];
+  for (const c of calls) {
+    if (c.twilio_account === 'phone') {
+      if (c.recording_deleted_at) continue;
+      if (c.twilio_call_sid) out.push(`phonecall:${c.twilio_call_sid}`);
+      else if (c.recording_sid) out.push(`phone:${c.recording_sid}`);
+    } else if (c.recording_sid) out.push(c.recording_sid);
+  }
+  for (const n of numbers) if (n.twilio_caller_id_sid) out.push(`callerid:${n.twilio_caller_id_sid}`);
+  return out;
+}
+
 interface DbError { code?: string; message?: string; status?: number }
 
 function isMissingTable(e: DbError | null | undefined): boolean {
@@ -191,9 +207,12 @@ export function createPurgeDeps(overrides: Partial<PurgeDeps> = {}): PurgeDeps {
           supabaseAdmin.from('recordings').select('id, file_path').eq('user_id', userId).order('id').range(a, b));
         const botRuns = await selectAll<{ recall_bot_id: string; status: string }>((a, b) =>
           supabaseAdmin.from('bot_runs').select('recall_bot_id, status').eq('user_id', userId).order('id').range(a, b));
-        const calls = await selectAll<{ recording_sid: string | null }>((a, b) =>
-          supabaseAdmin.from('phone_calls').select('recording_sid').eq('user_id', userId).not('recording_sid', 'is', null).order('id').range(a, b));
-        return { recordings, botRuns, twilioSids: calls.map((c) => c.recording_sid).filter((s): s is string => !!s) };
+        // '*' because the columns added by migration 032 may not exist yet.
+        const calls = await selectAll<PhoneCallRefs>((a, b) =>
+          supabaseAdmin.from('phone_calls').select('*').eq('user_id', userId).order('id').range(a, b));
+        const numbers = await selectAll<{ twilio_caller_id_sid?: string | null }>((a, b) =>
+          supabaseAdmin.from('verified_phones').select('*').eq('user_id', userId).order('id').range(a, b));
+        return { recordings, botRuns, twilioSids: carrierReferences(calls, numbers) };
       },
       async countRows(userId) {
         const out: Record<string, number> = {};
@@ -206,6 +225,9 @@ export function createPurgeDeps(overrides: Partial<PurgeDeps> = {}): PurgeDeps {
       async deleteRows(userId) {
         let deleted = 0;
         const failedTables: string[] = [];
+        // The spend ledger is kept (the month's budget must stay true) but no longer points at the account.
+        const { error: ledgerError } = await supabaseAdmin.from('phone_ledger').update({ user_id: null }).eq('user_id', userId);
+        if (ledgerError && !isMissingTable(ledgerError)) failedTables.push('phone_ledger');
         for (const { table, col } of USER_TABLES) {
           const { count, error } = await supabaseAdmin.from(table).delete({ count: 'exact' }).eq(col, userId);
           if (error) {
@@ -238,16 +260,7 @@ export function createPurgeDeps(overrides: Partial<PurgeDeps> = {}): PurgeDeps {
     },
     twilio: {
       isConfigured: () => !!(config.TWILIO_ACCOUNT_SID && config.TWILIO_AUTH_TOKEN),
-      async deleteRecording(sid) {
-        try {
-          await TwilioService.deleteRecording(sid);
-          return 'deleted';
-        } catch (err) {
-          const e = err as { status?: number; code?: number };
-          if (e?.status === 404 || e?.code === 20404) return 'not_found';
-          throw err;
-        }
-      },
+      deleteRecording: (ref) => TwilioService.deleteReference(ref),
     },
     ledger: new SupabaseLedger(),
     alert: (code, context) => { reportAlert('account_purge', code, context ?? {}); },

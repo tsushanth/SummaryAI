@@ -1,611 +1,167 @@
 /**
- * Phone Routes
- * Handles phone verification and call management
+ * Phone call API for the app (/api/phone). The server decides everything: who has the feature, which numbers, whether a
+ * call may be placed and for how long. Rules and spend limits: phone/ and migration 032.
  */
-
-import { Router, Request, Response } from 'express';
-import { z } from 'zod';
+import { Router, type Request, type Response, type NextFunction } from 'express';
 import { authenticate } from '../middleware/auth.js';
-import { asyncHandler, Errors } from '../middleware/errorHandler.js';
+import { asyncHandler, AppError, Errors } from '../middleware/errorHandler.js';
 import { phoneCallsApiGate } from '../middleware/phoneCallsGate.js';
-import { supabaseAdmin } from '../lib/supabase.js';
-import { TwilioService } from '../services/twilioService.js';
+import { hasPhoneCalls } from '../config/featureFlags.js';
+import { createLimiter } from '../services/activationEvents.js';
+import { PhoneError, type PhoneDeps } from '../phone/deps.js';
+import { getPhoneDeps } from '../phone/index.js';
+import { safeError } from '../phone/gateway.js';
+import { startVerification, verificationStatus, removeNumber, verifiedPhones, countryOf } from '../phone/verification.js';
+import { startCall, hangupCall, isUuid } from '../phone/calls.js';
+import { hashNumber } from '../phone/numbers.js';
+import { BUSINESS_ANSWERS, BUSINESS_TYPES, CALL_LANGUAGES, CONSENT_VERSION, MAX_VERIFIED_NUMBERS } from '../phone/constants.js';
+import { CLIENT_STEPS, type PhoneStep } from '../phone/events.js';
+import type { CallRow, PhoneRow } from '../phone/store.js';
 
-const router = Router();
+const publicPhone = (p: PhoneRow) => ({ id: p.id, phone_number: p.phone_number, verified_at: p.verified_at, created_at: p.created_at });
 
-// All routes require authentication
-router.use(authenticate);
-
-// Off unless FEATURE_PHONE_CALLS is set: nothing below runs then.
-router.use(phoneCallsApiGate);
-
-// ============================================================================
-// Schemas
-// ============================================================================
-
-const phoneNumberSchema = z.object({
-  phone_number: z.string().min(10).max(20),
+const publicCall = (c: CallRow) => ({
+  id: c.id, user_id: c.user_id, from_number: c.from_number, to_number: c.to_number, to_name: c.to_name, status: c.status,
+  is_recording: c.status === 'recording', recording_duration: c.recording_duration, recording_id: c.recording_id,
+  failure_reason: c.failure_reason, answered_at: c.answered_at, ended_at: c.ended_at, started_at: c.created_at, created_at: c.created_at,
 });
 
-const verifyCodeSchema = z.object({
-  phone_number: z.string().min(10).max(20),
-  code: z.string().length(6),
-});
+export function createPhoneRouter(getDeps: () => PhoneDeps | null = getPhoneDeps, authMw: any = authenticate): Router {
+  const router = Router();
+  router.use(authMw);
 
-const initiateCallSchema = z.object({
-  from: z.string().min(10).max(20), // User's verified number
-  to: z.string().min(10).max(20), // Destination number
-  to_name: z.string().max(100).optional(),
-  server_initiated: z.boolean().optional(), // If true, backend places the call (for clients without VoIP SDK)
-});
-
-// ============================================================================
-// Phone Verification
-// ============================================================================
-
-/**
- * Send verification code to phone number
- * POST /api/phone/verify/send
- */
-router.post(
-  '/verify/send',
-  asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user!.id;
-    const parsed = phoneNumberSchema.safeParse(req.body);
-
-    if (!parsed.success) {
-      throw Errors.badRequest('Invalid phone number');
-    }
-
-    if (!TwilioService.isConfigured()) {
-      throw Errors.internal('Phone service not configured');
-    }
-
-    const phoneNumber = TwilioService.formatPhoneNumber(parsed.data.phone_number);
-
-    if (!TwilioService.isValidPhoneNumber(phoneNumber)) {
-      throw Errors.badRequest('Invalid phone number format');
-    }
-
-    // Check rate limiting (max 10 verifications per day)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const { count } = await supabaseAdmin
-      .from('verified_phones')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .gte('created_at', today.toISOString());
-
-    if ((count || 0) >= 10) {
-      throw Errors.badRequest('Too many verification attempts today');
-    }
-
-    // Generate verification code
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-    console.log(`[Phone Verify Send] Generated code: ${code}, expires: ${expiresAt.toISOString()}`);
-
-    // Check if this phone is already being verified
-    const { data: existing, error: existingError } = await supabaseAdmin
-      .from('verified_phones')
-      .select('id, verified_at')
-      .eq('user_id', userId)
-      .eq('phone_number', phoneNumber)
-      .single();
-
-    console.log(`[Phone Verify Send] Existing record: ${JSON.stringify(existing)}, error: ${JSON.stringify(existingError)}`);
-
-    if (existing?.verified_at) {
-      throw Errors.badRequest('This phone number is already verified');
-    }
-
-    // Upsert verification record
-    if (existing) {
-      console.log(`[Phone Verify Send] Updating existing record id: ${existing.id}`);
-      const { error: updateError } = await supabaseAdmin
-        .from('verified_phones')
-        .update({
-          verification_code: code,
-          verification_expires_at: expiresAt.toISOString(),
-        })
-        .eq('id', existing.id);
-
-      if (updateError) {
-        console.error(`[Phone Verify Send] Update error: ${JSON.stringify(updateError)}`);
-        throw Errors.internal('Failed to update verification record');
+  const available = (userId: string): PhoneDeps | null => (hasPhoneCalls(userId) ? getDeps() : null);
+  const deps = () => {
+    const d = getDeps();
+    if (!d) throw new AppError(503, 'PHONE_NOT_CONFIGURED', 'Phone calls are not available right now.');
+    return d;
+  };
+  const route = (fn: (req: Request, res: Response, d: PhoneDeps, userId: string) => Promise<void>) =>
+    asyncHandler(async (req: Request, res: Response) => {
+      try { await fn(req, res, deps(), req.user!.id); }
+      catch (e) {
+        if (e instanceof PhoneError) throw new AppError(e.status, e.code, e.message);
+        if (e instanceof AppError) throw e;
+        throw safeError(e);
       }
-      console.log(`[Phone Verify Send] Updated record successfully`);
-    } else {
-      console.log(`[Phone Verify Send] Inserting new record`);
-      const { error: insertError } = await supabaseAdmin.from('verified_phones').insert({
-        user_id: userId,
-        phone_number: phoneNumber,
-        verification_code: code,
-        verification_expires_at: expiresAt.toISOString(),
-      });
-
-      if (insertError) {
-        console.error(`[Phone Verify Send] Insert error: ${JSON.stringify(insertError)}`);
-        throw Errors.internal('Failed to create verification record');
-      }
-      console.log(`[Phone Verify Send] Inserted record successfully`);
-    }
-
-    // Send verification code via phone call
-    try {
-      const callSid = await TwilioService.sendVerificationCall(phoneNumber, code);
-      console.log(`Verification call initiated: ${callSid} to ${phoneNumber}`);
-    } catch (error: any) {
-      console.error('Failed to initiate verification call:', error.message);
-      throw Errors.internal('Failed to send verification code');
-    }
-
-    res.json({ message: 'Verification call initiated - answer your phone!' });
-  })
-);
-
-/**
- * Check verification code
- * POST /api/phone/verify/check
- */
-router.post(
-  '/verify/check',
-  asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user!.id;
-    const parsed = verifyCodeSchema.safeParse(req.body);
-
-    if (!parsed.success) {
-      throw Errors.badRequest('Invalid request');
-    }
-
-    const phoneNumber = TwilioService.formatPhoneNumber(parsed.data.phone_number);
-    const code = parsed.data.code;
-
-    console.log(`[Phone Verify] Checking code for phone: ${phoneNumber}, submitted code: ${code}`);
-
-    // Check our stored code (from the verification call)
-    const { data: phone, error: fetchError } = await supabaseAdmin
-      .from('verified_phones')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('phone_number', phoneNumber)
-      .is('verified_at', null)
-      .single();
-
-    console.log(`[Phone Verify] DB lookup result - phone: ${JSON.stringify(phone)}, error: ${JSON.stringify(fetchError)}`);
-
-    if (!phone) {
-      throw Errors.notFound('Verification not found. Please request a new verification call.');
-    }
-
-    console.log(`[Phone Verify] Stored code: ${phone.verification_code}, submitted: ${code}, expires: ${phone.verification_expires_at}`);
-
-    if (new Date(phone.verification_expires_at) < new Date()) {
-      throw Errors.badRequest('Verification code expired. Please request a new call.');
-    }
-
-    if (phone.verification_code !== code) {
-      console.log(`[Phone Verify] Code mismatch! stored='${phone.verification_code}' vs submitted='${code}'`);
-      throw Errors.badRequest('Invalid verification code');
-    }
-
-    // Mark as verified
-    const { data: updatedPhone, error: updateError } = await supabaseAdmin
-      .from('verified_phones')
-      .update({
-        verified_at: new Date().toISOString(),
-        verification_code: null, // Clear code
-        verification_expires_at: null,
-      })
-      .eq('id', phone.id) // Use the id from the phone record we already found
-      .select()
-      .single();
-
-    if (updateError || !updatedPhone) {
-      console.error('Failed to update verified phone:', updateError);
-      throw Errors.internal('Failed to verify phone number');
-    }
-
-    res.json({
-      verified: true,
-      phone: {
-        id: updatedPhone.id,
-        phone_number: updatedPhone.phone_number,
-        verified_at: updatedPhone.verified_at,
-        created_at: updatedPhone.created_at,
-      },
     });
-  })
-);
+  /** Signed in with a real account that is not blocked. */
+  const eligible = async (d: PhoneDeps, userId: string): Promise<void> => {
+    const info = await d.store.userInfo(userId);
+    if (!info || info.isAnonymous || info.banned || !info.email) {
+      throw new PhoneError(403, 'PHONE_ACCOUNT_NOT_ELIGIBLE', 'Sign in with an email, Google or Apple account to use phone calls.');
+    }
+  };
 
-/**
- * List verified phone numbers
- * GET /api/phone/verified
- */
-router.get(
-  '/verified',
-  asyncHandler(async (req: Request, res: Response) => {
+  /** Whether to show the Phone tab, and what it needs. Never refused: the app asks this on every start. */
+  router.get('/status', asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
+    const d = available(userId);
+    if (!d) return void res.json({ enabled: false });
+    try { await sendStatus(res, d, userId); } catch (e) { throw safeError(e); }
+  }));
 
-    const { data: phones, error } = await supabaseAdmin
-      .from('verified_phones')
-      .select('id, phone_number, verified_at, created_at')
-      .eq('user_id', userId)
-      .not('verified_at', 'is', null)
-      .order('created_at', { ascending: false });
+  const sendStatus = async (res: Response, d: PhoneDeps, userId: string): Promise<void> => {
+    const phones = verifiedPhones(await d.store.phonesOfUser(userId));
+    const budget = await d.store.budget(userId, phones[0] ? hashNumber(phones[0].phone_number, d.settings.numberHashKey) : null);
+    res.json({
+      enabled: true,
+      consent_version: CONSENT_VERSION,
+      countries: ['US', 'CA'],
+      call_languages: CALL_LANGUAGES,
+      max_verified_numbers: MAX_VERIFIED_NUMBERS,
+      minutes_per_month: budget.minutes_per_month,
+      minutes_left: budget.halted ? 0 : budget.minutes_left,
+      service_available: !budget.halted && budget.month_spent_micro < budget.cap_micro,
+      business_answered: await d.store.hasAnsweredBusiness(userId),
+      phones: phones.map(publicPhone),
+    });
+  };
 
-    if (error) throw error;
-
-    res.json({ phones: phones || [] });
-  })
-);
-
-/**
- * Delete verified phone number
- * DELETE /api/phone/verified/:id
- */
-router.delete(
-  '/verified/:id',
-  asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user!.id;
-    const phoneId = req.params.id;
-
-    const { error } = await supabaseAdmin
-      .from('verified_phones')
-      .delete()
-      .eq('id', phoneId)
-      .eq('user_id', userId);
-
-    if (error) throw error;
-
+  // Removing one's own number works whenever the service is configured, also with the feature switched off.
+  router.delete('/verified/:id', route(async (req, res, d, userId) => {
+    if (!isUuid(req.params.id)) throw new PhoneError(404, 'PHONE_NUMBER_NOT_FOUND', 'Number not found.');
+    await removeNumber(d, userId, req.params.id!);
     res.json({ deleted: true });
-  })
-);
+  }));
 
-// ============================================================================
-// VoIP Access Token
-// ============================================================================
+  // Off for this account unless the feature or the tester list says otherwise: nothing below runs then.
+  router.use(phoneCallsApiGate);
 
-/**
- * Get Twilio access token for VoIP calling
- * GET /api/phone/voip/token
- */
-router.get(
-  '/voip/token',
-  asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user!.id;
+  router.get('/verified', route(async (_req, res, d, userId) => {
+    res.json({ phones: verifiedPhones(await d.store.phonesOfUser(userId)).map(publicPhone) });
+  }));
 
-    if (!TwilioService.isVoipConfigured()) {
-      throw Errors.internal('VoIP service not configured');
-    }
+  router.post('/verify/start', route(async (req, res, d, userId) => {
+    await eligible(d, userId);
+    res.status(201).json(await startVerification(d, userId, req.body?.phone_number));
+  }));
 
-    // Use user ID as the identity for the Twilio client
-    const token = TwilioService.generateVoiceAccessToken(userId);
+  router.get('/verify/:id', route(async (req, res, d, userId) => {
+    if (!isUuid(req.params.id)) throw new PhoneError(404, 'PHONE_VERIFICATION_NOT_FOUND', 'Verification not found.');
+    const s = await verificationStatus(d, userId, req.params.id!);
+    res.json({ status: s.status, reason: s.reason, phone: s.status === 'verified' && s.phone ? publicPhone(s.phone) : null });
+  }));
 
-    res.json({ token });
-  })
-);
+  router.post('/calls', route(async (req, res, d, userId) => {
+    await eligible(d, userId);
+    res.status(201).json(await startCall(d, userId, req.body ?? {}));
+  }));
 
-// ============================================================================
-// Phone Calls
-// ============================================================================
+  router.get('/calls', route(async (req, res, d, userId) => {
+    const limit = Math.min(Math.max(parseInt(String(req.query.limit), 10) || 50, 1), 100);
+    const offset = Math.max(parseInt(String(req.query.offset), 10) || 0, 0);
+    const { calls, total } = await d.store.listCalls(userId, limit, offset);
+    res.json({ calls: calls.map(publicCall), total, limit, offset });
+  }));
 
-/**
- * Create a phone call record (for VoIP calls)
- * The actual call is initiated by the Twilio Voice SDK on the client
- * POST /api/phone/calls
- */
-router.post(
-  '/calls',
-  asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user!.id;
+  router.get('/calls/:id', route(async (req, res, d, userId) => {
+    const call = isUuid(req.params.id) ? await d.store.getCall(req.params.id!) : null;
+    if (!call || call.user_id !== userId) throw new PhoneError(404, 'PHONE_CALL_NOT_FOUND', 'Call not found.');
+    res.json({ call: publicCall(call) });
+  }));
 
-    console.log(`[Phone Calls] Create call request body:`, JSON.stringify(req.body));
-
-    const parsed = initiateCallSchema.safeParse(req.body);
-
-    if (!parsed.success) {
-      console.log(`[Phone Calls] Validation failed:`, JSON.stringify(parsed.error.errors));
-      throw Errors.badRequest('Invalid request');
-    }
-
-    if (!TwilioService.isConfigured()) {
-      throw Errors.internal('Phone service not configured');
-    }
-
-    const fromNumber = TwilioService.formatPhoneNumber(parsed.data.from);
-    const toNumber = TwilioService.formatPhoneNumber(parsed.data.to);
-
-    // Verify the "from" number belongs to this user
-    const { data: verifiedPhone } = await supabaseAdmin
-      .from('verified_phones')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('phone_number', fromNumber)
-      .not('verified_at', 'is', null)
-      .single();
-
-    if (!verifiedPhone) {
-      throw Errors.badRequest('From number is not verified');
-    }
-
-    // Generate conference name for auto-recording
-    const conferenceName = `phone-call-${Date.now()}`;
-
-    // Create phone call record with auto-recording enabled
-    const { data: phoneCall, error: insertError } = await supabaseAdmin
-      .from('phone_calls')
-      .insert({
-        user_id: userId,
-        from_number: fromNumber,
-        to_number: toNumber,
-        to_name: parsed.data.to_name,
-        status: 'initiated',
-        started_at: new Date().toISOString(),
-        is_recording: true, // Auto-recording enabled from start
-        conference_name: conferenceName,
-      })
-      .select()
-      .single();
-
-    if (insertError) throw insertError;
-
-    let twilioCallSid: string | null = null;
-
-    // If server_initiated is true, place the call directly via Twilio REST API
-    // This is for clients without the Twilio Voice SDK (iOS currently)
-    if (parsed.data.server_initiated) {
-      try {
-        console.log(`[Phone Calls] Server-initiated call requested, placing call to ${toNumber}`);
-
-        // Place the call using Twilio REST API
-        twilioCallSid = await TwilioService.initiateCall({
-          from: fromNumber,
-          to: toNumber,
-          userId,
-          callId: phoneCall.id,
-        });
-
-        // Update call with Twilio SID
-        await supabaseAdmin
-          .from('phone_calls')
-          .update({
-            twilio_call_sid: twilioCallSid,
-            status: 'ringing',
-          })
-          .eq('id', phoneCall.id);
-
-        console.log(`[Phone Calls] Server-initiated call placed: ${twilioCallSid}`);
-      } catch (error: any) {
-        console.error(`[Phone Calls] Failed to place server-initiated call:`, error.message);
-
-        // Update call status to failed
-        await supabaseAdmin
-          .from('phone_calls')
-          .update({ status: 'failed' })
-          .eq('id', phoneCall.id);
-
-        throw Errors.internal('Failed to place call: ' + error.message);
-      }
-    }
-
-    // Return call record
-    res.status(201).json({
-      call_id: phoneCall.id,
-      status: parsed.data.server_initiated ? 'ringing' : 'initiated',
-      conference_name: conferenceName,
-      to_number: toNumber,
-      twilio_call_sid: twilioCallSid,
-    });
-  })
-);
-
-/**
- * List phone calls
- * GET /api/phone/calls
- */
-router.get(
-  '/calls',
-  asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user!.id;
-    const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
-    const offset = parseInt(req.query.offset as string) || 0;
-
-    const { data: calls, error, count } = await supabaseAdmin
-      .from('phone_calls')
-      .select('*', { count: 'exact' })
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
-
-    if (error) throw error;
-
-    res.json({
-      calls: calls || [],
-      total: count || 0,
-      limit,
-      offset,
-    });
-  })
-);
-
-/**
- * Get phone call details
- * GET /api/phone/calls/:id
- */
-router.get(
-  '/calls/:id',
-  asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user!.id;
-    const callId = req.params.id;
-
-    const { data: call, error } = await supabaseAdmin
-      .from('phone_calls')
-      .select('*')
-      .eq('id', callId)
-      .eq('user_id', userId)
-      .single();
-
-    if (error || !call) {
-      throw Errors.notFound('Call not found');
-    }
-
-    res.json({ call });
-  })
-);
-
-/**
- * Start recording a call
- * POST /api/phone/calls/:id/record
- */
-router.post(
-  '/calls/:id/record',
-  asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user!.id;
-    const callId = req.params.id;
-
-    const { data: call, error } = await supabaseAdmin
-      .from('phone_calls')
-      .select('*')
-      .eq('id', callId)
-      .eq('user_id', userId)
-      .single();
-
-    if (error || !call) {
-      throw Errors.notFound('Call not found');
-    }
-
-    if (call.status !== 'in_progress') {
-      throw Errors.badRequest('Call is not in progress');
-    }
-
-    if (call.is_recording) {
-      throw Errors.badRequest('Already recording');
-    }
-
-    if (!call.twilio_call_sid) {
-      throw Errors.badRequest('Call SID not available');
-    }
-
-    try {
-      // Start recording via conference
-      const { conferenceName } = await TwilioService.startRecording(
-        call.twilio_call_sid,
-        callId
-      );
-
-      // Update call record
-      await supabaseAdmin
-        .from('phone_calls')
-        .update({
-          is_recording: true,
-          conference_name: conferenceName,
-          recording_started_at: new Date().toISOString(),
-          status: 'recording',
-        })
-        .eq('id', callId);
-
-      res.json({
-        recording: true,
-        conference_name: conferenceName,
-      });
-    } catch (error: any) {
-      console.error('Failed to start recording:', error.message);
-      throw Errors.internal('Failed to start recording');
-    }
-  })
-);
-
-/**
- * Stop recording a call
- * DELETE /api/phone/calls/:id/record
- */
-router.delete(
-  '/calls/:id/record',
-  asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user!.id;
-    const callId = req.params.id;
-
-    const { data: call, error } = await supabaseAdmin
-      .from('phone_calls')
-      .select('*')
-      .eq('id', callId)
-      .eq('user_id', userId)
-      .single();
-
-    if (error || !call) {
-      throw Errors.notFound('Call not found');
-    }
-
-    if (!call.is_recording) {
-      throw Errors.badRequest('Not recording');
-    }
-
-    if (call.conference_sid) {
-      try {
-        await TwilioService.stopRecording(call.conference_sid);
-      } catch (error: any) {
-        console.error('Failed to stop recording:', error.message);
-        // Continue anyway - recording may have already stopped
-      }
-    }
-
-    // Update call record
-    await supabaseAdmin
-      .from('phone_calls')
-      .update({
-        is_recording: false,
-        status: 'in_progress',
-      })
-      .eq('id', callId);
-
-    res.json({ recording: false });
-  })
-);
-
-/**
- * Hang up a call
- * POST /api/phone/calls/:id/hangup
- */
-router.post(
-  '/calls/:id/hangup',
-  asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user!.id;
-    const callId = req.params.id;
-
-    const { data: call, error } = await supabaseAdmin
-      .from('phone_calls')
-      .select('*')
-      .eq('id', callId)
-      .eq('user_id', userId)
-      .single();
-
-    if (error || !call) {
-      throw Errors.notFound('Call not found');
-    }
-
-    if (call.twilio_call_sid) {
-      try {
-        await TwilioService.endCall(call.twilio_call_sid);
-      } catch (error: any) {
-        console.error('Failed to end call:', error.message);
-        // Continue anyway - call may have already ended
-      }
-    }
-
-    // Update call record
-    await supabaseAdmin
-      .from('phone_calls')
-      .update({
-        status: 'completed',
-        ended_at: new Date().toISOString(),
-      })
-      .eq('id', callId);
-
+  router.post('/calls/:id/hangup', route(async (req, res, d, userId) => {
+    await hangupCall(d, userId, req.params.id!);
     res.json({ ended: true });
-  })
-);
+  }));
 
-export default router;
+  const limiter = createLimiter();
+  const limited = (userId: string) => {
+    if (!limiter.take(userId, 1, 60, 3_600_000)) throw new PhoneError(429, 'RATE_LIMITED', 'Too many requests');
+  };
+  /** The device's two-letter region, only ever used to split the funnel. */
+  const region = (v: unknown) => (typeof v === 'string' && /^[A-Za-z]{2}$/.test(v) ? v.toUpperCase() : undefined);
+
+  router.post('/events', route(async (req, res, d, userId) => {
+    limited(userId);
+    const step = req.body?.step as PhoneStep;
+    if (!CLIENT_STEPS.includes(step)) throw Errors.badRequest('Unknown step');
+    await d.track(step, userId, { country: region(req.body?.country), ...(req.body?.test === true ? { test: true } : {}) });
+    res.status(204).end();
+  }));
+
+  /** "Is this for a business?" Skippable; stored only as a funnel event. */
+  router.post('/profile', route(async (req, res, d, userId) => {
+    limited(userId);
+    const answer = req.body?.business;
+    if (!BUSINESS_ANSWERS.includes(answer)) throw Errors.badRequest('Unknown answer');
+    const type = answer === 'business' && BUSINESS_TYPES.includes(req.body?.business_type) ? req.body.business_type : undefined;
+    const mine = verifiedPhones(await d.store.phonesOfUser(userId))[0];
+    await d.track('business_answer', userId, {
+      answer, business_type: type, context: req.body?.context === 'agent' ? 'agent' : 'number',
+      country: (mine ? countryOf(mine.phone_number) : undefined) ?? region(req.body?.country),
+      ...(req.body?.test === true ? { test: true } : {}),
+    });
+    res.status(204).end();
+  }));
+
+  // Endpoints of app versions that predate the consent screen and carrier verification.
+  router.all(['/verify/send', '/verify/check', '/voip/token', '/calls/:id/record'], (_req: Request, _res: Response, next: NextFunction) => {
+    next(new AppError(410, 'APP_UPDATE_REQUIRED', 'Update Meeting Mind to make phone calls.'));
+  });
+
+  return router;
+}
+
+export default createPhoneRouter();

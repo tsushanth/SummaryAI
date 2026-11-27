@@ -12,6 +12,7 @@ import meetingsRoutes, { meetingsWorkerRouter } from './meetings.js';
 import calendarRoutes, { calendarCallbackRouter } from './calendar.js';
 import webhooksRoutes from './webhooks.js';
 import phoneRoutes from './phone.js';
+import phoneWebhookRoutes from './phoneWebhooks.js';
 import subscriptionsRoutes from './subscriptions.js';
 import attributionRoutes from './attribution.js';
 import activationRoutes from './activation.js';
@@ -33,6 +34,9 @@ router.use('/health', healthRoutes);
 
 // In-meeting voice assistant transcript webhook (URL token or Recall signature; fails closed). Mounted before /webhooks.
 router.use('/webhooks/recall-assistant', voiceAssistantWebhookRouter);
+
+// Phone call webhooks: carrier signature required on every one. Mounted before /webhooks.
+router.use('/webhooks/twilio', phoneWebhookRoutes);
 
 // Webhooks (no auth required - verified by signature)
 router.use('/webhooks', webhooksRoutes);
