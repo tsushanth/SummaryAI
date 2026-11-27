@@ -31,7 +31,7 @@ Meeting Mind erkennt die gesprochene Sprache und schreibt das Transkript in dies
 - Bei einem Online-Meeting kannst du die Sprache auch wählen, bevor der Bot beitritt.
 
 SPRACHE DER ZUSAMMENFASSUNG
-Zusammenfassungen werden auf Englisch geschrieben, wenn du keine andere Sprache wählst. Beim Aufnehmen oder Hochladen in der Web-App kannst du eine von 15 Sprachen für die Zusammenfassung wählen, darunter Deutsch.
+Zusammenfassungen werden in der Sprache der Aufnahme geschrieben. Beim Aufnehmen oder Hochladen in der Web-App kannst du stattdessen eine von 15 Sprachen für die Zusammenfassung wählen, darunter Deutsch.
 
 DIE APP IN DEINER SPRACHE
 Die Android-App gibt es in 27 Sprachen. Die App-Sprache kannst du in den Einstellungen ändern.

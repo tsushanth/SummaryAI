@@ -16,7 +16,7 @@ Meeting Mind detects the spoken language and writes the transcript in it: Bulgar
 - For an online meeting you can also choose its language before the bot joins.
 
 SUMMARY LANGUAGE
-Summaries are written in English unless you choose another language. When you record or upload on the web app, you can pick one of 15 summary languages.
+Summaries are written in the language of the recording. When you record or upload on the web app, you can choose one of 15 summary languages instead.
 
 THE APP IN YOUR LANGUAGE
 The Android app is available in 27 languages. You can change the app language in Settings.

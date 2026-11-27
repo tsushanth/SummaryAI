@@ -25,7 +25,7 @@ Meeting Mind riconosce la lingua parlata e scrive la trascrizione in quella ling
 - Per una riunione online puoi anche scegliere la lingua prima che entri il bot.
 
 LINGUA DEL RIASSUNTO
-I riassunti sono scritti in inglese, a meno che tu non scelga un'altra lingua. Quando registri o carichi un file nell'app web puoi scegliere tra 15 lingue per il riassunto, tra cui l'italiano.
+I riassunti sono scritti nella lingua della registrazione. Quando registri o carichi un file nell'app web puoi invece scegliere tra 15 lingue per il riassunto, tra cui l'italiano.
 
 L'APP NELLA TUA LINGUA
 L'app Android è disponibile in 27 lingue. Puoi cambiare la lingua dell'app nelle Impostazioni.

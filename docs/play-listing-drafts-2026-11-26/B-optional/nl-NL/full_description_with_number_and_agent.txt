@@ -31,7 +31,7 @@ Meeting Mind herkent de gesproken taal en schrijft het transcript in die taal: B
 - Bij een online vergadering kun je de taal ook kiezen voordat de bot deelneemt.
 
 TAAL VAN DE SAMENVATTING
-Samenvattingen worden in het Engels geschreven, tenzij je een andere taal kiest. Bij het opnemen of uploaden in de webapp kun je kiezen uit 15 talen voor de samenvatting, waaronder Nederlands.
+Samenvattingen worden geschreven in de taal van de opname. Bij het opnemen of uploaden in de webapp kun je in plaats daarvan kiezen uit 15 talen voor de samenvatting, waaronder Nederlands.
 
 DE APP IN JE EIGEN TAAL
 De Android-app is beschikbaar in 27 talen. Je kunt de taal van de app wijzigen bij Instellingen.

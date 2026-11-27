@@ -29,7 +29,7 @@ Tinutukoy ng Meeting Mind ang wikang sinasalita at isinusulat ang transcript sa 
 - Sa online meeting, puwede mo ring piliin ang wika bago sumali ang bot.
 
 WIKA NG BUOD
-Nakasulat sa Ingles ang mga buod maliban kung pumili ka ng ibang wika. Kapag nagre-record o nag-a-upload sa web app, puwede kang pumili sa 15 wika ng buod. Hindi kasama ang Filipino.
+Nakasulat ang mga buod sa wika ng recording. Kapag nagre-record o nag-a-upload sa web app, puwede ka ring pumili na lang ng isa sa 15 wika ng buod. Hindi kasama ang Filipino.
 
 ANG APP SA WIKA MO
 Available ang Android app sa 27 wika, kasama ang Filipino. Mapapalitan mo ang wika ng app sa Settings.

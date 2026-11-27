@@ -25,7 +25,7 @@ Meeting Mind wykrywa język mówiony i zapisuje transkrypcję w tym języku. Obs
 - W przypadku spotkania online możesz też wybrać język, zanim bot dołączy.
 
 JĘZYK STRESZCZENIA
-Streszczenia powstają po angielsku, chyba że wybierzesz inny język. Nagrywając lub przesyłając plik w aplikacji internetowej, możesz wybrać jeden z 15 języków streszczenia, w tym polski.
+Streszczenia powstają w języku nagrania. Nagrywając lub przesyłając plik w aplikacji internetowej, możesz zamiast tego wybrać jeden z 15 języków streszczenia, w tym polski.
 
 APLIKACJA W TWOIM JĘZYKU
 Aplikacja na Androida jest dostępna w 27 językach. Język aplikacji możesz zmienić w ustawieniach.

@@ -25,7 +25,7 @@ Meeting Mind mendeteksi bahasa yang diucapkan dan menulis transkrip dalam bahasa
 - Untuk rapat online, Anda juga bisa memilih bahasanya sebelum bot bergabung.
 
 BAHASA RINGKASAN
-Ringkasan ditulis dalam bahasa Inggris, kecuali Anda memilih bahasa lain. Saat merekam atau mengunggah di aplikasi web, Anda bisa memilih salah satu dari 15 bahasa ringkasan. Bahasa Indonesia tidak termasuk di dalamnya.
+Ringkasan ditulis dalam bahasa rekaman. Saat merekam atau mengunggah di aplikasi web, Anda bisa memilih salah satu dari 15 bahasa ringkasan sebagai gantinya. Bahasa Indonesia tidak termasuk di dalamnya.
 
 APLIKASI DALAM BAHASA ANDA
 Aplikasi Android tersedia dalam 27 bahasa. Anda bisa mengubah bahasa aplikasi di Setelan.

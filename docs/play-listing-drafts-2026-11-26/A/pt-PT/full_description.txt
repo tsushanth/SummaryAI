@@ -16,7 +16,7 @@ O Meeting Mind deteta o idioma falado e escreve a transcrição nesse idioma: al
 - Numa reunião online, também pode escolher o idioma antes de o bot entrar.
 
 IDIOMA DO RESUMO
-Os resumos são escritos em inglês, salvo se escolher outro idioma. Ao gravar ou carregar um ficheiro na aplicação web, pode escolher entre 15 idiomas de resumo, incluindo o português.
+Os resumos são escritos no idioma da gravação. Ao gravar ou carregar um ficheiro na aplicação web, pode, em alternativa, escolher um de 15 idiomas de resumo, incluindo o português.
 
 A APLICAÇÃO NO SEU IDIOMA
 A aplicação Android está disponível em 27 idiomas. Pode mudar o idioma da aplicação nas Definições.

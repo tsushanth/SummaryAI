@@ -16,7 +16,7 @@ Meeting Mind mengesan bahasa yang dituturkan dan menulis transkrip dalam bahasa 
 - Untuk mesyuarat dalam talian, anda juga boleh memilih bahasanya sebelum bot menyertai.
 
 BAHASA RINGKASAN
-Ringkasan ditulis dalam bahasa Inggeris melainkan anda memilih bahasa lain. Semasa merakam atau memuat naik di aplikasi web, anda boleh memilih satu daripada 15 bahasa ringkasan. Bahasa Melayu tidak termasuk dalam senarai itu.
+Ringkasan ditulis dalam bahasa rakaman. Semasa merakam atau memuat naik di aplikasi web, anda boleh memilih salah satu daripada 15 bahasa ringkasan sebagai ganti. Bahasa Melayu tidak termasuk dalam senarai itu.
 
 APLIKASI DALAM BAHASA ANDA
 Aplikasi Android tersedia dalam 27 bahasa. Anda boleh menukar bahasa aplikasi di Tetapan.

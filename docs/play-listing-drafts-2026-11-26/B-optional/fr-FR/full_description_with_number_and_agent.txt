@@ -31,7 +31,7 @@ Meeting Mind détecte la langue parlée et rédige la transcription dans cette l
 - Pour une réunion en ligne, vous pouvez aussi choisir la langue avant l'arrivée du bot.
 
 LANGUE DU RÉSUMÉ
-Les résumés sont rédigés en anglais, sauf si vous choisissez une autre langue. Lorsque vous enregistrez ou importez un fichier dans l'application web, vous pouvez choisir parmi 15 langues de résumé, dont le français.
+Les résumés sont rédigés dans la langue de l'enregistrement. Lorsque vous enregistrez ou importez un fichier dans l'application web, vous pouvez choisir à la place l'une des 15 langues de résumé, dont le français.
 
 L'APPLICATION DANS VOTRE LANGUE
 L'application Android est disponible en 27 langues. Vous pouvez changer la langue de l'application dans les paramètres.

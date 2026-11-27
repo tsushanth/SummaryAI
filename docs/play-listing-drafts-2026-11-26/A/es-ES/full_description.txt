@@ -16,7 +16,7 @@ Meeting Mind detecta el idioma hablado y escribe la transcripción en ese idioma
 - En una reunión en línea también puedes elegir el idioma antes de que entre el bot.
 
 IDIOMA DEL RESUMEN
-Los resúmenes se escriben en inglés salvo que elijas otro idioma. Al grabar o subir un archivo en la app web, puedes escoger entre 15 idiomas de resumen, incluido el español.
+Los resúmenes se escriben en el idioma de la grabación. Al grabar o subir un archivo en la app web, puedes escoger en su lugar uno de 15 idiomas de resumen, incluido el español.
 
 LA APP EN TU IDIOMA
 La app para Android está disponible en 27 idiomas. Puedes cambiar el idioma de la app en Ajustes.

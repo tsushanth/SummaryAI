@@ -28,7 +28,7 @@ Meeting Mind nhận diện ngôn ngữ được nói và viết bản ghi lời 
 - Với cuộc họp trực tuyến, bạn cũng có thể chọn ngôn ngữ trước khi bot tham gia.
 
 NGÔN NGỮ CỦA BẢN TÓM TẮT
-Bản tóm tắt được viết bằng tiếng Anh trừ khi bạn chọn ngôn ngữ khác. Khi ghi âm hoặc tải lên trên ứng dụng web, bạn có thể chọn một trong 15 ngôn ngữ tóm tắt. Tiếng Việt không nằm trong số đó.
+Bản tóm tắt được viết bằng ngôn ngữ của bản ghi âm. Khi ghi âm hoặc tải lên trên ứng dụng web, bạn có thể chọn một trong 15 ngôn ngữ tóm tắt để thay thế. Tiếng Việt không nằm trong số đó.
 
 ỨNG DỤNG BẰNG NGÔN NGỮ CỦA BẠN
 Ứng dụng Android có 27 ngôn ngữ. Bạn có thể đổi ngôn ngữ ứng dụng trong phần Cài đặt.

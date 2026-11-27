@@ -28,7 +28,7 @@ Meeting Mind konuşulan dili algılar ve dökümü o dilde yazar. Desteklenen di
 - Çevrimiçi toplantılarda bot katılmadan önce dili de seçebilirsiniz.
 
 ÖZET DİLİ
-Başka bir dil seçmediğiniz sürece özetler İngilizce yazılır. Web uygulamasında kayıt yaparken veya dosya yüklerken, Türkçe dahil 15 özet dilinden birini seçebilirsiniz.
+Özetler kaydın dilinde yazılır. Web uygulamasında kayıt yaparken veya dosya yüklerken bunun yerine, Türkçe dahil 15 özet dilinden birini seçebilirsiniz.
 
 UYGULAMA KENDİ DİLİNİZDE
 Android uygulaması 27 dilde kullanılabilir. Uygulama dilini Ayarlar bölümünden değiştirebilirsiniz.
