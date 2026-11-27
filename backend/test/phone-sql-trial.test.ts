@@ -1,4 +1,4 @@
-/** The free trial's own limits and the spend rules around it (migration 034). */
+/** The free trial's own limits and the spend rules around it (migrations 034 and 036). */
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
@@ -8,7 +8,7 @@ import { pgAvailable, startTestDb, type TestDb } from './helpers-pg.js';
 const MIGRATIONS = [
   'migrations/007_phone_calls.sql', 'migrations/022_phone_calls_updated_at.sql', 'migrations/027_activation_events.sql',
   'migrations/032_phone_calls_repair.sql', 'migrations/033_phone_numbers_agents.sql', 'migrations/034_phone_agent_trial.sql',
-  'migrations/034_phone_agent_trial.sql',
+  'migrations/034_phone_agent_trial.sql', 'migrations/036_phone_trial_three.sql',
 ];
 const CAP = 25_000_000;
 let db: TestDb;
@@ -38,16 +38,16 @@ run('phone free trial (SQL)', () => {
   };
   const settle = (call: string, seconds: number) => json(`phone_settle_leg('${call}', ${seconds})`);
 
-  it('has at most five trials open, and at most five started in a month', () => {
-    const users = Array.from({ length: 5 }, () => randomUUID());
+  it('has at most three trials open, and at most three started in a month', () => {
+    const users = Array.from({ length: 3 }, () => randomUUID());
     for (const u of users) expect(start(u)).toMatchObject({ ok: true });
     expect(start(randomUUID())).toMatchObject({ ok: false, reason: 'trial_full' });
     expect(yes(`phone_trial_end('${users[0]}', 'ended_by_user')`)).toBe(true);
     expect(yes(`phone_trial_end('${users[0]}', 'ended_by_user')`)).toBe(false);
-    expect(start(randomUUID())).toMatchObject({ ok: false, reason: 'trial_full' }); // five already started this month
+    expect(start(randomUUID())).toMatchObject({ ok: false, reason: 'trial_full' }); // three already started this month
     q("update phone_trials set started_at = started_at - interval '40 days'");
     expect(start(randomUUID())).toMatchObject({ ok: true }); // a place is free and the month is new
-    expect(start(randomUUID())).toMatchObject({ ok: false, reason: 'trial_full' }); // five are open again
+    expect(start(randomUUID())).toMatchObject({ ok: false, reason: 'trial_full' }); // three are open again
   });
 
   it('is had once per account and once per phone number', () => {
@@ -142,7 +142,7 @@ run('phone free trial (SQL)', () => {
 
   it('ends trials that hold no number', () => {
     const [kept, expired, abandoned, fresh] = [randomUUID(), randomUUID(), randomUUID(), randomUUID()];
-    for (const u of [kept, expired, abandoned, fresh]) start(u);
+    for (const u of [kept, expired, abandoned]) expect(start(u)).toMatchObject({ ok: true });
     number(kept);
     q(`update phone_trials set ends_at = now() - interval '1 minute' where user_id in ('${kept}', '${expired}')`);
     q(`update phone_trials set started_at = now() - interval '2 hours' where user_id = '${abandoned}'`);
@@ -150,10 +150,13 @@ run('phone free trial (SQL)', () => {
     expect(state(expired).end_reason).toBe('expired');
     expect(state(abandoned).end_reason).toBe('no_number');
     expect(state(kept).ended_at).toBeNull();
+    // Only three trials start in a month: count the ended ones to an earlier month so a fourth can start.
+    q("update phone_trials set started_at = started_at - interval '40 days' where ended_at is not null");
+    expect(start(fresh)).toMatchObject({ ok: true });
     expect(Number(q('select phone_trial_sweep(true)'))).toBe(1);
     expect(state(fresh).end_reason).toBe('switched_off');
     const gone = randomUUID();
-    start(gone);
+    expect(start(gone)).toMatchObject({ ok: true });
     q(`update phone_trials set user_id = null where user_id = '${gone}'`); // account deleted
     expect(Number(q('select phone_trial_sweep(false)'))).toBe(1);
   });
@@ -183,5 +186,13 @@ run('phone free trial (SQL)', () => {
     expect(q("select to_regclass('public.phone_trials') is null")).toBe('t');
     q(file('migrations/034_phone_agent_trial.sql'));
     expect(start(randomUUID())).toMatchObject({ ok: true });
+    const places = () => q("select concat(phone_trial_limits()->>'max_running', '/', phone_trial_limits()->>'max_per_month')");
+    expect(places()).toBe('5/5'); // 034 run again puts the old limits back
+    q(file('migrations/036_phone_trial_three.sql'));
+    q(file('migrations/036_phone_trial_three.sql'));
+    expect(places()).toBe('3/3');
+    q(file('rollbacks/036_phone_trial_three_down.sql'));
+    expect(places()).toBe('5/5');
+    q(file('migrations/036_phone_trial_three.sql'));
   });
 });
