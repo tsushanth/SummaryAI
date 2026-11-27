@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">Bot sedang bergabung</string>
+    <string name="bot_status_joining_body">Biasanya kurang dari satu menit.</string>
+    <string name="bot_status_waiting_title">Izinkan bot masuk</string>
+    <string name="bot_status_waiting_body">Bot sedang menunggu untuk diizinkan masuk. Di rapat Anda, terima Meeting Mind (atau nama bot yang Anda pilih). Bot akan menyerah setelah 10 menit.</string>
+    <string name="bot_status_in_call_title">Hampir siap</string>
+    <string name="bot_status_in_call_body">Bot sudah berada di rapat dan belum merekam. Jika rapat meminta izin merekam, izinkan.</string>
+    <string name="bot_failed_title">Bot tidak merekam rapat ini</string>
+    <string name="bot_failed_not_admitted">Tidak ada yang mengizinkan bot masuk dari ruang tunggu tepat waktu. Bergabung lagi dan terima bot saat diminta.</string>
+    <string name="bot_failed_removed_waiting">Bot dikeluarkan dari ruang tunggu. Minta host untuk mengizinkannya masuk, lalu bergabung lagi.</string>
+    <string name="bot_failed_not_started">Rapat belum dimulai. Mulai rapat, lalu bergabung lagi.</string>
+    <string name="bot_failed_passcode">Kode sandi rapat salah atau tidak ada. Tempelkan tautan undangan lengkap beserta kode sandinya, lalu bergabung lagi.</string>
+    <string name="bot_failed_link">Rapat tidak ditemukan. Periksa tautannya dan bergabung lagi.</string>
+    <string name="bot_failed_sign_in">Rapat ini hanya mengizinkan orang yang sudah masuk akun atau terdaftar. Minta host untuk mengizinkan tamu, lalu bergabung lagi.</string>
+    <string name="bot_failed_blocked">Rapat tidak mengizinkan bot bergabung. Minta host untuk mengizinkannya, lalu bergabung lagi.</string>
+    <string name="bot_failed_permission">Perekaman tidak diizinkan. Minta host untuk mengizinkan perekaman, lalu bergabung lagi.</string>
+    <string name="bot_failed_generic">Bot tidak dapat bergabung. Periksa tautan rapat dan bergabung lagi.</string>
+    <string name="coach_starting">Memulai Pelatih AI…</string>
+    <string name="coach_listening_hint">Tips muncul sekitar setiap 30 detik setelah bot berada di rapat dan orang-orang mulai berbicara.</string>
+    <string name="coach_reconnecting">Menyambung kembali…</string>
+    <string name="coach_stop">Hentikan</string>
+    <string name="coach_ended">Pelatih AI telah berakhir.</string>
+    <string name="coach_ended_not_admitted">Pelatih AI berhenti karena bot tidak diizinkan masuk ke rapat.</string>
+    <string name="coach_ended_bot_failed">Pelatih AI berhenti karena bot tidak dapat bergabung ke rapat.</string>
+    <string name="coach_ended_no_speech">Pelatih AI berakhir tanpa mendengar ucapan apa pun.</string>
+    <string name="coach_ended_model_failed">Pelatih AI tidak dapat membuat tips karena ada masalah di pihak kami.</string>
+    <string name="coach_credit_returned">Kredit sesi Anda telah dikembalikan.</string>
+    <string name="coach_no_credit_used">Tidak ada kredit yang digunakan.</string>
+    <string name="coach_error_no_credits">Pelatih AI tidak dimulai karena Anda tidak memiliki sesi tersisa.</string>
+    <string name="coach_error_meeting_over">Pelatih AI tidak dimulai karena bot sudah tidak berada di rapat.</string>
+    <string name="coach_error_generic">Pelatih AI tidak dapat dimulai. Periksa koneksi Anda dan coba lagi.</string>
+    <string name="coach_join_hint">Tips muncul di aplikasi ini, pada tab Transkrip rapat. Terima bot saat meminta untuk bergabung.</string>
+    <string name="coach_delayed_language">Dalam bahasa ini transkrip langsung tiba beberapa menit lebih lambat, sehingga tips juga akan terlambat.</string>
+</resources>

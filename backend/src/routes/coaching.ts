@@ -3,7 +3,8 @@
  *
  * Endpoints (all require auth):
  *   GET    /api/coaching/credits                    — current credit balance
- *   POST   /api/coaching/sessions                   — start a session (debits 1 credit)
+ *   POST   /api/coaching/sessions                   — start a session (debits 1 credit; returns the open one if any)
+ *   GET    /api/coaching/recordings/:id/session     — latest session on a recording, with its insights
  *   GET    /api/coaching/sessions/:id/stream        — SSE: live insights for the session
  *   POST   /api/coaching/sessions/:id/end           — end the session (auto-refunds if light)
  *   GET    /api/coaching/sessions/:id/insights      — full insight list for post-meeting view
@@ -26,6 +27,9 @@ import {
   grantCredits,
   NoCreditsError,
   InvalidPersonaError,
+  MeetingNotLiveError,
+  getLatestSession,
+  noInsightOutcome,
 } from '../services/coachingService.js';
 import { PERSONAS } from '../services/coachingPersonas.js';
 import { reportAlert, reportProviderFailure } from '../lib/alerts.js';
@@ -98,13 +102,33 @@ router.post('/sessions', asyncHandler(async (req: Request, res: Response) => {
   if (!recording) throw Errors.notFound('Recording not found.');
 
   try {
-    const { sessionId } = await startSession(userId, body.recording_id, body.persona, body.output_language);
-    res.status(201).json({ session_id: sessionId, persona: body.persona });
+    const { sessionId, resumed } = await startSession(userId, body.recording_id, body.persona, body.output_language);
+    res.status(201).json({ session_id: sessionId, persona: body.persona, resumed: !!resumed });
   } catch (err) {
+    if (err instanceof MeetingNotLiveError) return res.status(409).json({ error: 'meeting_not_live', reason: err.code, end_reason: err.endReason, message: 'The meeting bot is no longer in this meeting. No credit was used.' });
     if (err instanceof NoCreditsError) return res.status(402).json({ error: 'no_credits', message: 'No coaching credits available.' });
     if (err instanceof InvalidPersonaError) return res.status(400).json({ error: 'invalid_persona', message: err.message, available: Object.keys(PERSONAS) });
     throw err;
   }
+}));
+
+// ----- GET /api/coaching/recordings/:recordingId/session -----
+
+router.get('/recordings/:recordingId/session', asyncHandler(async (req: Request, res: Response) => {
+  const userId = (req as any).user.id;
+  const recordingId = req.params.recordingId!;
+  const { data: recording } = await supabaseAdmin
+    .from('recordings')
+    .select('id')
+    .eq('id', recordingId)
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (!recording) throw Errors.notFound('Recording');
+
+  const latest = await getLatestSession(userId, recordingId);
+  if (!latest) return res.json({ session: null, insights: [] });
+  const { refund_reason, ...session } = latest;
+  res.json({ session: { ...session, end_reason: noInsightOutcome(refund_reason) }, insights: await getInsights(latest.id) });
 }));
 
 // ----- GET /api/coaching/sessions/:id/stream (SSE) -----
@@ -129,27 +153,38 @@ router.get('/sessions/:id/stream', asyncHandler(async (req: Request, res: Respon
   res.setHeader('X-Accel-Buffering', 'no');
   res.flushHeaders?.();
 
-  const emit = (event: string, data: unknown) => {
-    res.write(`event: ${event}\n`);
-    res.write(`data: ${JSON.stringify(data)}\n\n`);
-  };
-
-  // Hand any insights already emitted on session start (in case of reconnect)
-  const existing = await getInsights(sessionId);
-  for (const i of existing) emit('insight', i);
-
-  // Subscribe to new insights
-  const unsubscribe = subscribe(sessionId, emit);
-
-  // Heartbeat every 20s to keep proxies happy
-  const heartbeat = setInterval(() => {
-    res.write(': heartbeat\n\n');
-  }, 20_000);
-
-  req.on('close', () => {
+  // `ended` is the last event: the server closes the stream after it.
+  const sent = new Set<string>();
+  let heartbeat: NodeJS.Timeout | undefined;
+  let unsubscribe = () => {};
+  const close = () => {
     clearInterval(heartbeat);
     unsubscribe();
-  });
+  };
+  const emit = (event: string, data: unknown) => {
+    if (res.writableEnded) return;
+    const id = event === 'insight' ? (data as { id?: string }).id : undefined;
+    if (id) {
+      if (sent.has(id)) return; // the app lists tips by id: never send one twice on a stream
+      sent.add(id);
+    }
+    res.write(`event: ${event}\n`);
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
+    if (event === 'ended') {
+      close();
+      res.end();
+    }
+  };
+
+  // Subscribe first so nothing emitted during the replay is missed, then hand over what already exists (reconnect).
+  unsubscribe = subscribe(sessionId, emit);
+  // Heartbeat every 20s to keep proxies happy
+  heartbeat = setInterval(() => {
+    res.write(': heartbeat\n\n');
+  }, 20_000);
+  req.on('close', close);
+
+  for (const i of await getInsights(sessionId)) emit('insight', i);
 }));
 
 // ----- POST /api/coaching/sessions/:id/end -----

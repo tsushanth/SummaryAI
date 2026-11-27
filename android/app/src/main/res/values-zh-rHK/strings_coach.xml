@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">機器人正在加入</string>
+    <string name="bot_status_joining_body">通常不到一分鐘。</string>
+    <string name="bot_status_waiting_title">請讓機器人進入</string>
+    <string name="bot_status_waiting_body">機器人正在等候進入。請在會議中允許 Meeting Mind（或您所設定的機器人名稱）加入。若10分鐘內未獲准入，機器人將自動放棄。</string>
+    <string name="bot_status_in_call_title">即將就緒</string>
+    <string name="bot_status_in_call_body">機器人已進入會議，尚未開始錄製。如會議詢問是否允許錄製，請選擇允許。</string>
+    <string name="bot_failed_title">機器人未能錄製此會議</string>
+    <string name="bot_failed_not_admitted">未有人及時從等候室讓機器人進入。請重新加入並在提示時允許其進入。</string>
+    <string name="bot_failed_removed_waiting">機器人已被從等候室移除。請要求主持人讓其進入，然後重新加入。</string>
+    <string name="bot_failed_not_started">會議尚未開始。請先開始會議，然後重新加入。</string>
+    <string name="bot_failed_passcode">會議密碼錯誤或缺失。請貼上包含密碼的完整邀請連結，然後重新加入。</string>
+    <string name="bot_failed_link">找不到會議。請檢查連結後重新加入。</string>
+    <string name="bot_failed_sign_in">此會議只允許已登入或已註冊的人士加入。請要求主持人允許訪客加入，然後重新加入。</string>
+    <string name="bot_failed_blocked">會議不允許機器人加入。請要求主持人允許，然後重新加入。</string>
+    <string name="bot_failed_permission">不允許錄製。請要求主持人允許錄製，然後重新加入。</string>
+    <string name="bot_failed_generic">機器人未能加入。請檢查會議連結後重新加入。</string>
+    <string name="coach_starting">正在啟動 AI 教練…</string>
+    <string name="coach_listening_hint">機器人進入會議且有人發言後，約每30秒顯示一次提示。</string>
+    <string name="coach_reconnecting">正在重新連線…</string>
+    <string name="coach_stop">停止</string>
+    <string name="coach_ended">AI 教練已結束。</string>
+    <string name="coach_ended_not_admitted">AI 教練已停止，因為機器人未獲准進入會議。</string>
+    <string name="coach_ended_bot_failed">AI 教練已停止，因為機器人未能加入會議。</string>
+    <string name="coach_ended_no_speech">AI 教練未偵測到任何發言，已結束。</string>
+    <string name="coach_ended_model_failed">AI 教練因我們系統的問題而未能生成提示。</string>
+    <string name="coach_credit_returned">您的課次點數已退回。</string>
+    <string name="coach_no_credit_used">未使用任何點數。</string>
+    <string name="coach_error_no_credits">AI 教練未能啟動，因為您已沒有剩餘課次。</string>
+    <string name="coach_error_meeting_over">AI 教練未能啟動，因為機器人已不在會議中。</string>
+    <string name="coach_error_generic">AI 教練未能啟動。請檢查您的網絡連線後再試。</string>
+    <string name="coach_join_hint">提示將顯示於此應用程式中會議的「轉錄文本」分頁。機器人請求加入時，請允許其進入。</string>
+    <string name="coach_delayed_language">此語言的即時轉錄會延遲數分鐘，提示亦會相應延遲。</string>
+</resources>

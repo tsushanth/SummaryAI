@@ -119,3 +119,10 @@ test('contract: every never-admitted code the backend stores has its own sentenc
   }
 });
 
+
+test('a bot in the waiting room tells the user to let it in', async () => {
+  const { botJoiningText, BOT_WAITING, BOT_ON_ITS_WAY } = await import('../src/lib/meetingFailure.ts');
+  assert.equal(botJoiningText({ bot_state: { state: 'waiting_room' } }), BOT_WAITING);
+  assert.equal(botJoiningText({ bot_state: { state: 'joining' } }), BOT_ON_ITS_WAY);
+  assert.equal(botJoiningText({}), BOT_ON_ITS_WAY);
+});

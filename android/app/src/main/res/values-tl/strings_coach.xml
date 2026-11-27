@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">Sumasali na ang bot</string>
+    <string name="bot_status_joining_body">Karaniwang tumatagal ng wala pang isang minuto.</string>
+    <string name="bot_status_waiting_title">Papasukin ang bot</string>
+    <string name="bot_status_waiting_body">Naghihintay ang bot na papasukin. Sa iyong pulong, tanggapin ang Meeting Mind (o ang pangalang pinili mo para sa bot). Susuko ito pagkatapos ng 10 minuto.</string>
+    <string name="bot_status_in_call_title">Halos handa na</string>
+    <string name="bot_status_in_call_body">Nasa pulong na ang bot ngunit hindi pa nagre-record. Kung tatanungin ng pulong kung maaari itong mag-record, payagan ito.</string>
+    <string name="bot_failed_title">Hindi nai-record ng bot ang pulong na ito</string>
+    <string name="bot_failed_not_admitted">Walang nagpasok sa bot mula sa waiting room sa tamang oras. Sumali muli at tanggapin ito kapag humingi.</string>
+    <string name="bot_failed_removed_waiting">Tinanggal ang bot mula sa waiting room. Hilingin sa host na papasukin ito, pagkatapos ay sumali muli.</string>
+    <string name="bot_failed_not_started">Hindi pa nagsisimula ang pulong. Simulan ang pulong, pagkatapos ay sumali muli.</string>
+    <string name="bot_failed_passcode">Mali o kulang ang passcode ng pulong. I-paste ang buong invite link kasama ang passcode, at sumali muli.</string>
+    <string name="bot_failed_link">Hindi nahanap ang pulong. Suriin ang link at sumali muli.</string>
+    <string name="bot_failed_sign_in">Ang pulong na ito ay para lamang sa mga naka-sign in o rehistradong kalahok. Hilingin sa host na payagan ang mga bisita, pagkatapos ay sumali muli.</string>
+    <string name="bot_failed_blocked">Hindi pinayagan ng pulong ang bot na sumali. Hilingin sa host na payagan ito, pagkatapos ay sumali muli.</string>
+    <string name="bot_failed_permission">Hindi pinayagan ang pag-record. Hilingin sa host na payagan ang pag-record, pagkatapos ay sumali muli.</string>
+    <string name="bot_failed_generic">Hindi nakasali ang bot. Suriin ang meeting link at sumali muli.</string>
+    <string name="coach_starting">Sinisimula ang AI Coach…</string>
+    <string name="coach_listening_hint">Lumalabas ang mga tip mga bawat 30 segundo kapag nasa pulong na ang bot at may nagsasalita.</string>
+    <string name="coach_reconnecting">Muling kumukonekta…</string>
+    <string name="coach_stop">Itigil</string>
+    <string name="coach_ended">Natapos na ang AI Coach.</string>
+    <string name="coach_ended_not_admitted">Natapos ang AI Coach dahil hindi pinasok ang bot sa pulong.</string>
+    <string name="coach_ended_bot_failed">Natapos ang AI Coach dahil hindi nakasali ang bot sa pulong.</string>
+    <string name="coach_ended_no_speech">Natapos ang AI Coach nang walang narinig na pagsasalita.</string>
+    <string name="coach_ended_model_failed">Hindi makagawa ng mga tip ang AI Coach dahil sa problema sa aming panig.</string>
+    <string name="coach_credit_returned">Ibinalik ang iyong session credit.</string>
+    <string name="coach_no_credit_used">Walang credit na nagamit.</string>
+    <string name="coach_error_no_credits">Hindi nagsimula ang AI Coach dahil wala ka nang natitirang session.</string>
+    <string name="coach_error_meeting_over">Hindi nagsimula ang AI Coach dahil wala na ang bot sa pulong.</string>
+    <string name="coach_error_generic">Hindi masimulaan ang AI Coach. Suriin ang iyong koneksyon at subukang muli.</string>
+    <string name="coach_join_hint">Lumalabas ang mga tip sa app na ito, sa Transcript tab ng pulong. Tanggapin ang bot kapag humingi itong sumali.</string>
+    <string name="coach_delayed_language">Sa wikang ito, huli ng ilang minuto ang live transcript, kaya mahuhuli rin ang mga tip.</string>
+</resources>

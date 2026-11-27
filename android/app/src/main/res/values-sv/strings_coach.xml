@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">Boten ansluter</string>
+    <string name="bot_status_joining_body">Det brukar ta mindre än en minut.</string>
+    <string name="bot_status_waiting_title">Släpp in boten</string>
+    <string name="bot_status_waiting_body">Boten väntar på att bli insläppt. Godkänn Meeting Mind (eller det botnamn du valde) i ditt möte. Den ger upp efter 10 minuter.</string>
+    <string name="bot_status_in_call_title">Nästan klar</string>
+    <string name="bot_status_in_call_body">Boten är i mötet men spelar inte in ännu. Om mötet frågar om det får spelas in, tillåt det.</string>
+    <string name="bot_failed_title">Boten spelade inte in det här mötet</string>
+    <string name="bot_failed_not_admitted">Ingen släppte in boten från väntrummet i tid. Gå med igen och godkänn den när den ber om det.</string>
+    <string name="bot_failed_removed_waiting">Boten togs bort från väntrummet. Be värden släppa in den och gå sedan med igen.</string>
+    <string name="bot_failed_not_started">Mötet hade inte startat. Starta mötet och gå sedan med igen.</string>
+    <string name="bot_failed_passcode">Mötets lösenkod var fel eller saknades. Klistra in hela inbjudningslänken med lösenkoden och gå med igen.</string>
+    <string name="bot_failed_link">Mötet hittades inte. Kontrollera länken och gå med igen.</string>
+    <string name="bot_failed_sign_in">Det här mötet tillåter bara inloggade eller registrerade deltagare. Be värden tillåta gäster och gå sedan med igen.</string>
+    <string name="bot_failed_blocked">Mötet tillät inte boten att ansluta. Be värden tillåta det och gå sedan med igen.</string>
+    <string name="bot_failed_permission">Inspelning var inte tillåten. Be värden tillåta inspelning och gå sedan med igen.</string>
+    <string name="bot_failed_generic">Boten kunde inte ansluta. Kontrollera möteslänken och gå med igen.</string>
+    <string name="coach_starting">Startar AI-coach…</string>
+    <string name="coach_listening_hint">Tips visas ungefär var 30:e sekund när boten är i mötet och folk pratar.</string>
+    <string name="coach_reconnecting">Återansluter…</string>
+    <string name="coach_stop">Stoppa</string>
+    <string name="coach_ended">AI-coach har avslutats.</string>
+    <string name="coach_ended_not_admitted">AI-coach stoppades eftersom boten inte släpptes in i mötet.</string>
+    <string name="coach_ended_bot_failed">AI-coach stoppades eftersom boten inte kunde ansluta till mötet.</string>
+    <string name="coach_ended_no_speech">AI-coach avslutades utan att uppfatta något tal.</string>
+    <string name="coach_ended_model_failed">AI-coach kunde inte skapa tips på grund av ett problem hos oss.</string>
+    <string name="coach_credit_returned">Din sessionskredit har återbetalats.</string>
+    <string name="coach_no_credit_used">Ingen kredit användes.</string>
+    <string name="coach_error_no_credits">AI-coach startade inte eftersom du inte har några sessioner kvar.</string>
+    <string name="coach_error_meeting_over">AI-coach startade inte eftersom boten inte längre är i mötet.</string>
+    <string name="coach_error_generic">AI-coach kunde inte starta. Kontrollera din anslutning och försök igen.</string>
+    <string name="coach_join_hint">Tips visas i den här appen, på mötets Transkription-flik. Godkänn boten när den ber om att få ansluta.</string>
+    <string name="coach_delayed_language">På det här språket anländer direkttranskriptionen flera minuter försenat, så tipsen kommer också att dröja.</string>
+</resources>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">Bot se připojuje</string>
+    <string name="bot_status_joining_body">Obvykle to trvá méně než minutu.</string>
+    <string name="bot_status_waiting_title">Pusťte bota dál</string>
+    <string name="bot_status_waiting_body">Bot čeká v čekárně. Ve svém hovoru přijměte Meeting Mind (nebo název bota, který jste zvolili). Po 10 minutách to vzdá.</string>
+    <string name="bot_status_in_call_title">Téměř připraveno</string>
+    <string name="bot_status_in_call_body">Bot je v hovoru a zatím nenahrává. Pokud hovor žádá povolení k nahrávání, povolte ho.</string>
+    <string name="bot_failed_title">Bot tento hovor nenahrál</string>
+    <string name="bot_failed_not_admitted">Nikdo bota včas nepustil z čekárny. Připojte se znovu a přijměte ho, až požádá.</string>
+    <string name="bot_failed_removed_waiting">Bot byl odebrán z čekárny. Požádejte hostitele, aby ho pustil dál, a připojte se znovu.</string>
+    <string name="bot_failed_not_started">Hovor ještě nezačal. Spusťte hovor a připojte se znovu.</string>
+    <string name="bot_failed_passcode">Přístupový kód hovoru byl chybný nebo chyběl. Vložte celý odkaz na pozvánku včetně kódu a připojte se znovu.</string>
+    <string name="bot_failed_link">Hovor nebyl nalezen. Zkontrolujte odkaz a připojte se znovu.</string>
+    <string name="bot_failed_sign_in">Tento hovor povoluje pouze přihlášeným nebo registrovaným účastníkům. Požádejte hostitele, aby povolil hosty, a připojte se znovu.</string>
+    <string name="bot_failed_blocked">Hovor neumožnil botovi připojit se. Požádejte hostitele, aby to povolil, a připojte se znovu.</string>
+    <string name="bot_failed_permission">Nahrávání nebylo povoleno. Požádejte hostitele, aby povolil nahrávání, a připojte se znovu.</string>
+    <string name="bot_failed_generic">Bot se nemohl připojit. Zkontrolujte odkaz na hovor a připojte se znovu.</string>
+    <string name="coach_starting">Spouštím AI kouče…</string>
+    <string name="coach_listening_hint">Tipy se zobrazují přibližně každých 30 sekund, jakmile je bot v hovoru a lidé mluví.</string>
+    <string name="coach_reconnecting">Znovu se připojuji…</string>
+    <string name="coach_stop">Zastavit</string>
+    <string name="coach_ended">AI kouč skončil.</string>
+    <string name="coach_ended_not_admitted">AI kouč se zastavil, protože bot nebyl vpuštěn do hovoru.</string>
+    <string name="coach_ended_bot_failed">AI kouč se zastavil, protože bot se nemohl připojit k hovoru.</string>
+    <string name="coach_ended_no_speech">AI kouč skončil, aniž zachytil jakoukoli řeč.</string>
+    <string name="coach_ended_model_failed">AI kouč nemohl vytvořit tipy kvůli problému na naší straně.</string>
+    <string name="coach_credit_returned">Kredit za sezení vám byl vrácen.</string>
+    <string name="coach_no_credit_used">Žádný kredit nebyl použit.</string>
+    <string name="coach_error_no_credits">AI kouč se nespustil, protože nemáte žádná zbývající sezení.</string>
+    <string name="coach_error_meeting_over">AI kouč se nespustil, protože bot už není v hovoru.</string>
+    <string name="coach_error_generic">AI kouč se nemohl spustit. Zkontrolujte připojení a zkuste to znovu.</string>
+    <string name="coach_join_hint">Tipy se zobrazují v této aplikaci na záložce Přepis hovoru. Přijměte bota, až požádá o připojení.</string>
+    <string name="coach_delayed_language">V tomto jazyce přichází živý přepis s několikaminutovým zpožděním, takže tipy budou také opožděné.</string>
+</resources>

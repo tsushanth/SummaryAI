@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">A bot csatlakozik</string>
+    <string name="bot_status_joining_body">Ez általában kevesebb mint egy percet vesz igénybe.</string>
+    <string name="bot_status_waiting_title">Engedje be a botot</string>
+    <string name="bot_status_waiting_body">A bot a váróteremben vár. Az értekezleten engedje be a Meeting Mind nevű résztvevőt (vagy a választott botnevet). 10 perc után feladja.</string>
+    <string name="bot_status_in_call_title">Majdnem kész</string>
+    <string name="bot_status_in_call_body">A bot az értekezleten van, de még nem rögzít. Ha az értekezlet rákérdez a rögzítésre, engedélyezze.</string>
+    <string name="bot_failed_title">A bot nem rögzítette ezt az értekezletet</string>
+    <string name="bot_failed_not_admitted">Senki nem engedte be a botot a váróteremből időben. Csatlakozzon újra, és engedje be, amikor kéri.</string>
+    <string name="bot_failed_removed_waiting">A botot eltávolították a váróteremből. Kérje meg a házigazdát, hogy engedje be, majd csatlakozzon újra.</string>
+    <string name="bot_failed_not_started">Az értekezlet még nem kezdődött el. Indítsa el az értekezletet, majd csatlakozzon újra.</string>
+    <string name="bot_failed_passcode">Az értekezlet jelszava hibás vagy hiányzik. Illessze be a teljes meghívólinket a jelszóval együtt, majd csatlakozzon újra.</string>
+    <string name="bot_failed_link">Az értekezlet nem található. Ellenőrizze a linket, majd csatlakozzon újra.</string>
+    <string name="bot_failed_sign_in">Ez az értekezlet csak bejelentkezett vagy regisztrált személyeket enged be. Kérje meg a házigazdát, hogy engedélyezze a vendégeket, majd csatlakozzon újra.</string>
+    <string name="bot_failed_blocked">Az értekezlet nem engedte a botot csatlakozni. Kérje meg a házigazdát, hogy engedélyezze, majd csatlakozzon újra.</string>
+    <string name="bot_failed_permission">A rögzítés nem volt engedélyezett. Kérje meg a házigazdát, hogy engedélyezze a rögzítést, majd csatlakozzon újra.</string>
+    <string name="bot_failed_generic">A bot nem tudott csatlakozni. Ellenőrizze az értekezlet linkjét, majd csatlakozzon újra.</string>
+    <string name="coach_starting">MI-coach indítása…</string>
+    <string name="coach_listening_hint">Tippek körülbelül 30 másodpercenként jelennek meg, miután a bot az értekezleten van és a résztvevők beszélnek.</string>
+    <string name="coach_reconnecting">Újracsatlakozás…</string>
+    <string name="coach_stop">Leállítás</string>
+    <string name="coach_ended">A MI-coach befejezte a munkát.</string>
+    <string name="coach_ended_not_admitted">A MI-coach leállt, mert a botot nem engedték be az értekezletre.</string>
+    <string name="coach_ended_bot_failed">A MI-coach leállt, mert a bot nem tudott csatlakozni az értekezlethez.</string>
+    <string name="coach_ended_no_speech">A MI-coach úgy ért véget, hogy nem hallott beszédet.</string>
+    <string name="coach_ended_model_failed">A MI-coach nem tudott tippeket létrehozni egy nálunk felmerült hiba miatt.</string>
+    <string name="coach_credit_returned">A munkamenet-kreditje visszakerült.</string>
+    <string name="coach_no_credit_used">Nem lett felhasználva kredit.</string>
+    <string name="coach_error_no_credits">A MI-coach nem indult el, mert nincs több munkamenete.</string>
+    <string name="coach_error_meeting_over">A MI-coach nem indult el, mert a bot már nincs az értekezleten.</string>
+    <string name="coach_error_generic">A MI-coach nem indult el. Ellenőrizze a kapcsolatot, majd próbálja újra.</string>
+    <string name="coach_join_hint">A tippek ebben az alkalmazásban jelennek meg, az értekezlet Átirat lapján. Engedje be a botot, amikor csatlakozni kér.</string>
+    <string name="coach_delayed_language">Ezen a nyelven az élő átirat percekkel késve érkezik, ezért a tippek is késni fognak.</string>
+</resources>

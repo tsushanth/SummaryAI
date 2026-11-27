@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">Bot dołącza</string>
+    <string name="bot_status_joining_body">Zazwyczaj zajmuje to mniej niż minutę.</string>
+    <string name="bot_status_waiting_title">Wpuść bota</string>
+    <string name="bot_status_waiting_body">Bot czeka na wpuszczenie. W swoim spotkaniu wpuść Meeting Mind (lub wybraną przez Ciebie nazwę bota). Bot zrezygnuje po 10 minutach.</string>
+    <string name="bot_status_in_call_title">Prawie gotowe</string>
+    <string name="bot_status_in_call_body">Bot jest na spotkaniu i jeszcze nie nagrywa. Jeśli spotkanie pyta, czy może nagrywać, zezwól na to.</string>
+    <string name="bot_failed_title">Bot nie nagrał tego spotkania</string>
+    <string name="bot_failed_not_admitted">Nikt nie wpuścił bota z poczekalni na czas. Dołącz ponownie i wpuść go, gdy poprosi.</string>
+    <string name="bot_failed_removed_waiting">Bot został usunięty z poczekalni. Poproś organizatora, aby go wpuścił, a następnie dołącz ponownie.</string>
+    <string name="bot_failed_not_started">Spotkanie jeszcze się nie rozpoczęło. Rozpocznij spotkanie i dołącz ponownie.</string>
+    <string name="bot_failed_passcode">Kod dostępu do spotkania był nieprawidłowy lub brakowało go. Wklej pełny link z zaproszenia wraz z kodem i dołącz ponownie.</string>
+    <string name="bot_failed_link">Nie znaleziono spotkania. Sprawdź link i dołącz ponownie.</string>
+    <string name="bot_failed_sign_in">To spotkanie dopuszcza tylko zalogowanych lub zarejestrowanych uczestników. Poproś organizatora, aby zezwolił na gości, a następnie dołącz ponownie.</string>
+    <string name="bot_failed_blocked">Spotkanie nie zezwoliło botowi na dołączenie. Poproś organizatora, aby to umożliwił, i dołącz ponownie.</string>
+    <string name="bot_failed_permission">Nagrywanie nie było dozwolone. Poproś organizatora o zezwolenie na nagrywanie i dołącz ponownie.</string>
+    <string name="bot_failed_generic">Bot nie mógł dołączyć. Sprawdź link do spotkania i dołącz ponownie.</string>
+    <string name="coach_starting">Uruchamianie Trenera AI…</string>
+    <string name="coach_listening_hint">Wskazówki pojawiają się mniej więcej co 30 sekund, gdy bot jest na spotkaniu i uczestnicy mówią.</string>
+    <string name="coach_reconnecting">Ponowne łączenie…</string>
+    <string name="coach_stop">Zatrzymaj</string>
+    <string name="coach_ended">Trener AI zakończył sesję.</string>
+    <string name="coach_ended_not_admitted">Trener AI zatrzymał się, ponieważ bot nie został wpuszczony na spotkanie.</string>
+    <string name="coach_ended_bot_failed">Trener AI zatrzymał się, ponieważ bot nie mógł dołączyć do spotkania.</string>
+    <string name="coach_ended_no_speech">Trener AI zakończył sesję bez wykrycia mowy.</string>
+    <string name="coach_ended_model_failed">Trener AI nie mógł wygenerować wskazówek z powodu błędu po naszej stronie.</string>
+    <string name="coach_credit_returned">Twój kredyt sesji został zwrócony.</string>
+    <string name="coach_no_credit_used">Nie wykorzystano żadnego kredytu.</string>
+    <string name="coach_error_no_credits">Trener AI nie uruchomił się, ponieważ nie masz już żadnych sesji.</string>
+    <string name="coach_error_meeting_over">Trener AI nie uruchomił się, ponieważ bot nie jest już na spotkaniu.</string>
+    <string name="coach_error_generic">Trener AI nie mógł się uruchomić. Sprawdź połączenie i spróbuj ponownie.</string>
+    <string name="coach_join_hint">Wskazówki pojawiają się w tej aplikacji, na karcie Transkrypcja spotkania. Wpuść bota, gdy poprosi o dołączenie.</string>
+    <string name="coach_delayed_language">W tym języku transkrypcja na żywo dociera z kilkuminutowym opóźnieniem, więc wskazówki również będą opóźnione.</string>
+</resources>

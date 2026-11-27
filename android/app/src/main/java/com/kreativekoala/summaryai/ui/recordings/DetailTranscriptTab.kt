@@ -54,7 +54,8 @@ internal fun TranscriptTab(
     onToggleLive: (Boolean) -> Unit = {},
     currentPositionMs: Long = 0L,
     canSeek: Boolean = false,
-    onSeekTo: (Long) -> Unit = {}
+    onSeekTo: (Long) -> Unit = {},
+    botInMeeting: Boolean = true
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         if (isLiveMeeting && meetingId != null) {
@@ -64,7 +65,8 @@ internal fun TranscriptTab(
         if (isLiveMeeting && meetingId != null && showLiveTranscript) {
             LiveTranscriptView(
                 meetingId = meetingId,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                botInMeeting = botInMeeting
             )
         } else if (transcript == null || transcript.segments.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

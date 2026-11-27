@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Meeting bot status on the recording screen. "Meeting Mind" is the product name: do not translate. -->
+    <string name="bot_status_joining_title">The bot is joining</string>
+    <string name="bot_status_joining_body">This usually takes less than a minute.</string>
+    <string name="bot_status_waiting_title">Let the bot in</string>
+    <string name="bot_status_waiting_body">The bot is waiting to be let in. In your meeting, admit Meeting Mind (or the bot name you chose). It gives up after 10 minutes.</string>
+    <string name="bot_status_in_call_title">Almost ready</string>
+    <string name="bot_status_in_call_body">The bot is in the meeting and not recording yet. If your meeting asks whether it may record, allow it.</string>
+    <string name="bot_failed_title">The bot did not record this meeting</string>
+    <string name="bot_failed_not_admitted">Nobody let the bot in from the waiting room in time. Join again and admit it when it asks.</string>
+    <string name="bot_failed_removed_waiting">The bot was removed from the waiting room. Ask the host to let it in, then join again.</string>
+    <string name="bot_failed_not_started">The meeting had not started. Start the meeting, then join again.</string>
+    <string name="bot_failed_passcode">The meeting passcode was wrong or missing. Paste the full invite link, with the passcode, and join again.</string>
+    <string name="bot_failed_link">The meeting was not found. Check the link and join again.</string>
+    <string name="bot_failed_sign_in">This meeting only admits signed-in or registered people. Ask the host to allow guests, then join again.</string>
+    <string name="bot_failed_blocked">The meeting did not allow the bot to join. Ask the host to allow it, then join again.</string>
+    <string name="bot_failed_permission">Recording was not allowed. Ask the host to allow recording, then join again.</string>
+    <string name="bot_failed_generic">The bot could not join. Check the meeting link and join again.</string>
+
+    <!-- AI Coach -->
+    <string name="coach_starting">Starting AI Coach…</string>
+    <string name="coach_listening_hint">Tips appear about every 30 seconds once the bot is in the meeting and people are talking.</string>
+    <string name="coach_reconnecting">Reconnecting…</string>
+    <string name="coach_stop">Stop</string>
+    <string name="coach_ended">AI Coach has ended.</string>
+    <string name="coach_ended_not_admitted">AI Coach stopped because the bot was not let into the meeting.</string>
+    <string name="coach_ended_bot_failed">AI Coach stopped because the bot could not join the meeting.</string>
+    <string name="coach_ended_no_speech">AI Coach ended without hearing any speech.</string>
+    <string name="coach_ended_model_failed">AI Coach could not create tips because of a problem on our side.</string>
+    <string name="coach_credit_returned">Your session credit was returned.</string>
+    <string name="coach_no_credit_used">No credit was used.</string>
+    <string name="coach_error_no_credits">AI Coach did not start because you have no sessions left.</string>
+    <string name="coach_error_meeting_over">AI Coach did not start because the bot is no longer in the meeting.</string>
+    <string name="coach_error_generic">AI Coach could not start. Check your connection and try again.</string>
+    <string name="coach_join_hint">Tips appear in this app, on the meeting\'s Transcript tab. Admit the bot when it asks to join.</string>
+    <string name="coach_delayed_language">In this language the live transcript arrives minutes late, so tips will be late too.</string>
+</resources>

@@ -278,6 +278,8 @@ export interface MeetingDetailResponse {
   status: MeetingStatus;
   recording_id: string | null;
   bot_run: BotRunResponse | null;
+  /** What the latest bot is doing, for the app to tell the user (services/meetingBotState.ts). Null before a bot exists. */
+  bot_state: import('../services/meetingBotState.js').MeetingBotState | null;
   error_message: string | null;
   created_at: string;
   /** 'auto' or the language chosen for this meeting. */

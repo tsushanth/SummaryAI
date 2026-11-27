@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">Bot sedang menyertai</string>
+    <string name="bot_status_joining_body">Ini biasanya mengambil masa kurang daripada seminit.</string>
+    <string name="bot_status_waiting_title">Benarkan bot masuk</string>
+    <string name="bot_status_waiting_body">Bot sedang menunggu untuk dibenarkan masuk. Dalam mesyuarat anda, benarkan Meeting Mind (atau nama bot yang anda pilih). Ia akan berhenti cuba selepas 10 minit.</string>
+    <string name="bot_status_in_call_title">Hampir sedia</string>
+    <string name="bot_status_in_call_body">Bot sudah berada dalam mesyuarat dan belum mula merakam. Jika mesyuarat anda meminta kebenaran untuk merakam, benarkan.</string>
+    <string name="bot_failed_title">Bot tidak merakam mesyuarat ini</string>
+    <string name="bot_failed_not_admitted">Tiada siapa yang membenarkan bot masuk dari bilik menunggu dalam masa yang ditetapkan. Sertai semula dan benarkan bot apabila ia meminta.</string>
+    <string name="bot_failed_removed_waiting">Bot telah dikeluarkan dari bilik menunggu. Minta hos untuk membenarkannya masuk, kemudian sertai semula.</string>
+    <string name="bot_failed_not_started">Mesyuarat belum dimulakan. Mulakan mesyuarat, kemudian sertai semula.</string>
+    <string name="bot_failed_passcode">Kod laluan mesyuarat salah atau tiada. Tampal pautan jemputan penuh beserta kod laluan, kemudian sertai semula.</string>
+    <string name="bot_failed_link">Mesyuarat tidak ditemui. Semak pautan dan sertai semula.</string>
+    <string name="bot_failed_sign_in">Mesyuarat ini hanya membenarkan pengguna yang telah log masuk atau berdaftar. Minta hos untuk membenarkan tetamu, kemudian sertai semula.</string>
+    <string name="bot_failed_blocked">Mesyuarat tidak membenarkan bot menyertai. Minta hos untuk membenarkannya, kemudian sertai semula.</string>
+    <string name="bot_failed_permission">Rakaman tidak dibenarkan. Minta hos untuk membenarkan rakaman, kemudian sertai semula.</string>
+    <string name="bot_failed_generic">Bot tidak dapat menyertai. Semak pautan mesyuarat dan sertai semula.</string>
+    <string name="coach_starting">Memulakan Jurulatih AI…</string>
+    <string name="coach_listening_hint">Petua muncul lebih kurang setiap 30 saat setelah bot berada dalam mesyuarat dan orang ramai mula bercakap.</string>
+    <string name="coach_reconnecting">Menyambung semula…</string>
+    <string name="coach_stop">Henti</string>
+    <string name="coach_ended">Jurulatih AI telah tamat.</string>
+    <string name="coach_ended_not_admitted">Jurulatih AI berhenti kerana bot tidak dibenarkan masuk ke dalam mesyuarat.</string>
+    <string name="coach_ended_bot_failed">Jurulatih AI berhenti kerana bot tidak dapat menyertai mesyuarat.</string>
+    <string name="coach_ended_no_speech">Jurulatih AI tamat tanpa mendengar sebarang pertuturan.</string>
+    <string name="coach_ended_model_failed">Jurulatih AI tidak dapat menjana petua disebabkan masalah pada pihak kami.</string>
+    <string name="coach_credit_returned">Kredit sesi anda telah dipulangkan.</string>
+    <string name="coach_no_credit_used">Tiada kredit digunakan.</string>
+    <string name="coach_error_no_credits">Jurulatih AI tidak dimulakan kerana anda tidak mempunyai sesi yang tinggal.</string>
+    <string name="coach_error_meeting_over">Jurulatih AI tidak dimulakan kerana bot sudah tidak berada dalam mesyuarat.</string>
+    <string name="coach_error_generic">Jurulatih AI tidak dapat dimulakan. Semak sambungan anda dan cuba lagi.</string>
+    <string name="coach_join_hint">Petua muncul dalam apl ini, pada tab Transkrip mesyuarat. Benarkan bot masuk apabila ia meminta untuk menyertai.</string>
+    <string name="coach_delayed_language">Dalam bahasa ini, transkrip langsung tiba beberapa minit lewat, jadi petua juga akan lewat.</string>
+</resources>

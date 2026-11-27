@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">De bot doet mee</string>
+    <string name="bot_status_joining_body">Dit duurt meestal minder dan een minuut.</string>
+    <string name="bot_status_waiting_title">Laat de bot binnen</string>
+    <string name="bot_status_waiting_body">De bot wacht om toegelaten te worden. Laat in je vergadering Meeting Mind (of de botnaam die je hebt gekozen) binnen. Na 10 minuten geeft de bot het op.</string>
+    <string name="bot_status_in_call_title">Bijna klaar</string>
+    <string name="bot_status_in_call_body">De bot is in de vergadering maar neemt nog niet op. Als je vergadering vraagt of er opgenomen mag worden, sta dit dan toe.</string>
+    <string name="bot_failed_title">De bot heeft deze vergadering niet opgenomen</string>
+    <string name="bot_failed_not_admitted">Niemand heeft de bot op tijd uit de wachtkamer toegelaten. Doe opnieuw mee en laat de bot binnen wanneer het daarom vraagt.</string>
+    <string name="bot_failed_removed_waiting">De bot is uit de wachtkamer verwijderd. Vraag de host om de bot toe te laten en doe dan opnieuw mee.</string>
+    <string name="bot_failed_not_started">De vergadering was nog niet begonnen. Start de vergadering en doe dan opnieuw mee.</string>
+    <string name="bot_failed_passcode">De toegangscode van de vergadering was onjuist of ontbrak. Plak de volledige uitnodigingslink met de toegangscode en doe opnieuw mee.</string>
+    <string name="bot_failed_link">De vergadering is niet gevonden. Controleer de link en doe opnieuw mee.</string>
+    <string name="bot_failed_sign_in">Deze vergadering laat alleen aangemelde of geregistreerde deelnemers toe. Vraag de host om gasten toe te staan en doe dan opnieuw mee.</string>
+    <string name="bot_failed_blocked">De vergadering stond de bot niet toe om deel te nemen. Vraag de host om dit toe te staan en doe dan opnieuw mee.</string>
+    <string name="bot_failed_permission">Opnemen was niet toegestaan. Vraag de host om opnemen toe te staan en doe dan opnieuw mee.</string>
+    <string name="bot_failed_generic">De bot kon niet deelnemen. Controleer de vergaderlink en doe opnieuw mee.</string>
+    <string name="coach_starting">AI-coach wordt gestart…</string>
+    <string name="coach_listening_hint">Tips verschijnen ongeveer elke 30 seconden zodra de bot in de vergadering is en mensen praten.</string>
+    <string name="coach_reconnecting">Opnieuw verbinden…</string>
+    <string name="coach_stop">Stoppen</string>
+    <string name="coach_ended">AI-coach is beëindigd.</string>
+    <string name="coach_ended_not_admitted">AI-coach is gestopt omdat de bot niet in de vergadering is toegelaten.</string>
+    <string name="coach_ended_bot_failed">AI-coach is gestopt omdat de bot niet kon deelnemen aan de vergadering.</string>
+    <string name="coach_ended_no_speech">AI-coach is beëindigd zonder spraak te hebben gehoord.</string>
+    <string name="coach_ended_model_failed">AI-coach kon geen tips maken vanwege een probleem aan onze kant.</string>
+    <string name="coach_credit_returned">Je sessietegoed is teruggestort.</string>
+    <string name="coach_no_credit_used">Er is geen tegoed gebruikt.</string>
+    <string name="coach_error_no_credits">AI-coach is niet gestart omdat je geen sessies meer hebt.</string>
+    <string name="coach_error_meeting_over">AI-coach is niet gestart omdat de bot niet meer in de vergadering is.</string>
+    <string name="coach_error_generic">AI-coach kon niet starten. Controleer je verbinding en probeer het opnieuw.</string>
+    <string name="coach_join_hint">Tips verschijnen in deze app, op het tabblad Transcript van de vergadering. Laat de bot binnen wanneer het vraagt om deel te nemen.</string>
+    <string name="coach_delayed_language">In deze taal komt het live transcript met enkele minuten vertraging binnen, waardoor tips ook later verschijnen.</string>
+</resources>

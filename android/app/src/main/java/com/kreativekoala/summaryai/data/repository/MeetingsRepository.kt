@@ -160,6 +160,12 @@ class MeetingsRepository @Inject constructor(
         catch (e: Exception) { Result.failure(e) }
     }
 
+    /** What the meeting's bot is doing now; null when there is none or the server does not say. */
+    suspend fun getBotState(meetingId: String): Result<BotStateDto?> = withContext(Dispatchers.IO) {
+        try { Result.success(api.getMeetingDetail(meetingId).botState) }
+        catch (e: Exception) { Result.failure(e) }
+    }
+
     /**
      * Switch the language a live meeting is transcribed in ("auto" or a primary subtag).
      * A 409 comes back as [LiveLanguageResult.NotSwitchable], not an exception.

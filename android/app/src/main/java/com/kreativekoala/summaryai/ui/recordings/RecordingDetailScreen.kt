@@ -30,6 +30,11 @@ import com.kreativekoala.summaryai.ui.recordings.share.ShareExportSheet
 import kotlinx.coroutines.launch
 import com.kreativekoala.summaryai.data.sample.SampleMeeting
 import com.kreativekoala.summaryai.service.activation.Activation
+import com.kreativekoala.summaryai.ui.coaching.CoachingLivePanel
+import com.kreativekoala.summaryai.ui.coaching.CoachingPhase
+import com.kreativekoala.summaryai.ui.meetings.BotStatusCard
+import com.kreativekoala.summaryai.ui.meetings.botIsInMeeting
+import com.kreativekoala.summaryai.ui.meetings.botNotice
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.unit.dp
@@ -44,6 +49,7 @@ fun RecordingDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val detail = uiState.recordingDetail
+    val coachingState by viewModel.coachingState.collectAsState()
     // The bundled sample is local-only and read-only: no star, no template regeneration, no to-do sync, no audio.
     val isSample = SampleMeeting.isSample(recordingId)
 
@@ -197,9 +203,28 @@ fun RecordingDetailScreen(
                     )
                 }
 
-                // Processing indicator
-                if (detail.recording.isProcessing) {
+                // Meeting bot: waiting to be let in, or why it failed and what to do.
+                val botNotice = botNotice(uiState.botState)
+                if (botNotice != null) {
+                    BotStatusCard(botNotice, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                }
+
+                // Processing indicator (the bot card replaces it while it has something more exact to say)
+                if (detail.recording.isProcessing && botNotice == null) {
                     ProcessingIndicator(status = stringResource(detail.recording.status.labelRes))
+                }
+
+                // After the meeting: the coach's tips, or why there are none. While live they sit above the transcript.
+                if (!detail.recording.isLiveMeeting && coachingState.meetingId != null &&
+                    coachingState.meetingId == detail.recording.meetingId &&
+                    (coachingState.phase == CoachingPhase.ENDED || coachingState.phase == CoachingPhase.NOT_STARTED)
+                ) {
+                    CoachingLivePanel(
+                        state = coachingState,
+                        onStop = viewModel::stopCoaching,
+                        onRetry = viewModel::retryCoaching,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
                 }
 
                 // Styled tab picker with icons
@@ -238,7 +263,8 @@ fun RecordingDetailScreen(
                         onToggleLive = { viewModel.toggleLiveTranscript(it) },
                         currentPositionMs = uiState.audioPlayerState.currentPositionMs,
                         canSeek = detail.recording.audioUrl != null,
-                        onSeekTo = viewModel::seekTo
+                        onSeekTo = viewModel::seekTo,
+                        botInMeeting = botIsInMeeting(uiState.botState)
                     )
                     DetailTab.CHAT -> if (isSample) {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
