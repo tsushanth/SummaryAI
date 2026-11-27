@@ -62,8 +62,9 @@ A rule must have an end date, so a forgotten one lets test events be counted aga
 
 ## Not covered
 
-- Our own use of a published build from an ordinary phone or browser while signed out or without a listed id: insert
-  its `anon_id`, or use `?mm_test=1` on the web. Events carry no account, by design.
+- Our own use of a published build from an ordinary phone or browser, even when signed in to a test account: events
+  carry no account, by design (only a test **sign-up** marks its browser). Insert the `anon_id` as a rule, or open the
+  web home page with `?mm_test=1` once.
 - Failure reports sent by the apps to the failure reporter, and its report-based checks (only Play test devices are
   left out there).
 - Voice assistant daily gauges and spend figures include test use (they track cost and health).
