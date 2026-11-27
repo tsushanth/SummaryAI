@@ -83,6 +83,12 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 - Rollback: `flyctl releases rollback 65 -a summary-ai-backend`.
 - Android #116 (automatic retry of a failed recording upload) is merged and NOT released; it needs a release after 1.7.15 (68). `testDebugUnitTest` 304 tests, 0 failures; `lintDebug` 0 errors; no device run.
 
+## 2026-11-27 Android 1.7.16 (69), Play internal testing track only
+- Owner approved on 27 November, to test the phone calling screens with a Play-signed build. Read back after commit (11:42 PT): internal 1.7.16 (69) `completed`; production, beta and alpha unchanged at 1.7.15 (68).
+- Built from `main` `b4d1245` (#134, version bump only) in a clean detached worktree; tag `play/1.7.16-69`. AAB sha256 `e32b4f82c5f0b708...`, upload-key signature (`jarsigner -verify` ok), targetSdk 36, no permission added compared with an installed Play build.
+- Checks: `testDebugUnitTest` 337 tests, 0 failures; `lintDebug` 0 errors; `bundleRelease`.
+- NOT verified: any device run, a real call. Not for beta or production before the privacy page and the Play data safety form cover phone calls.
+
 ## 2026-11-27 Database: free phone-agent trial places lowered to 3 (migration 036, switched off)
 - Owner decision. `phone_trial_limits()` now allows 3 trials open at once and 3 started in a calendar month (was 5 and 5); the other limits are unchanged. No server deploy, no setting change, no trial existed.
 - Dry run in a rolled-back transaction, then applied at 11:05 PT; read back 3 and 3, server access only. Backend tests: 1569 passed.
