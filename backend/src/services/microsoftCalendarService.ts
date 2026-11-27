@@ -108,7 +108,9 @@ export class MicrosoftCalendarService {
       scope: SCOPES.join(' '),
       response_mode: 'query',
       state,
-      prompt: 'consent', // Always show consent to ensure refresh token
+      // Not 'consent': it makes a work or school user consent again even after their administrator approved the app, which
+      // they cannot do where user consent is off. The refresh token comes from the offline_access scope.
+      prompt: 'select_account',
     });
 
     return `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/authorize?${params}`;

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">साइन-इन स्वीकार नहीं हुआ (%1$s)। कृपया फिर से कोशिश करें।</string>
+    <string name="calendar_return_connected">%1$s कनेक्ट हो गया।</string>
+    <string name="calendar_return_cancelled">कैलेंडर कनेक्ट नहीं हुआ: एक्सेस की अनुमति नहीं दी गई।</string>
+    <string name="calendar_return_expired">कैलेंडर कनेक्ट नहीं हुआ: साइन-इन में बहुत समय लगा या वह पहले ही इस्तेमाल हो चुका है। कृपया फिर से कनेक्ट करें।</string>
+    <string name="calendar_return_admin_approval">आपके ऑफ़िस या स्कूल खाते के लिए एडमिन को Meeting Mind को मंज़ूरी देनी होगी। अपनी IT टीम से कहें, या कोई निजी खाता कनेक्ट करें।</string>
+    <string name="calendar_return_failed">कैलेंडर कनेक्ट नहीं हुआ। कृपया कुछ मिनट बाद फिर से कोशिश करें।</string>
+    <string name="calendar_no_browser">साइन-इन पेज खोलने के लिए कोई वेब ब्राउज़र नहीं मिला।</string>
+</resources>

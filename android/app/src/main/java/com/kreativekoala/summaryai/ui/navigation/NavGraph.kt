@@ -148,6 +148,8 @@ fun MeetingMindNavGraph(
     startRecordingRequested: Boolean = false,
     onStartRecordingHandled: () -> Unit = {},
     phoneEnabled: Boolean = false,
+    // A calendar sign-in just came back from the browser; the calendar screen shows how it went.
+    calendarReturnPending: Boolean = false,
     navController: NavHostController = rememberNavController()
 ) {
     // Only compute startDestination once on initial composition.
@@ -210,6 +212,14 @@ fun MeetingMindNavGraph(
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+
+    // The NavHost below sets its graph only once the Scaffold lays it out; a link that starts the app arrives earlier.
+    val graphReady = navBackStackEntry != null
+    LaunchedEffect(calendarReturnPending, isAuthenticated, hasCompletedOnboarding, graphReady) {
+        if (calendarReturnPending && graphReady && isAuthenticated && hasCompletedOnboarding) {
+            navController.navigate(Screen.CalendarIntegration.route) { launchSingleTop = true }
+        }
+    }
 
     // Activation funnel: leaving the first-run Record screen without ever tapping record counts as a skip.
     var previousRoute by remember { mutableStateOf<String?>(null) }

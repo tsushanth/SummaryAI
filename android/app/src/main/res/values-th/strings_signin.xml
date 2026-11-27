@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">ระบบไม่ยอมรับการลงชื่อเข้าใช้ (%1$s) โปรดลองอีกครั้ง</string>
+    <string name="calendar_return_connected">เชื่อมต่อ %1$s แล้ว</string>
+    <string name="calendar_return_cancelled">ยังไม่ได้เชื่อมต่อปฏิทิน: ไม่ได้ให้สิทธิ์เข้าถึง</string>
+    <string name="calendar_return_expired">ยังไม่ได้เชื่อมต่อปฏิทิน: การลงชื่อเข้าใช้ใช้เวลานานเกินไปหรือถูกใช้ไปแล้ว โปรดเชื่อมต่ออีกครั้ง</string>
+    <string name="calendar_return_admin_approval">บัญชีที่ทำงานหรือสถานศึกษาของคุณต้องให้ผู้ดูแลระบบอนุมัติ Meeting Mind โปรดติดต่อทีมไอที หรือเชื่อมต่อบัญชีส่วนตัว</string>
+    <string name="calendar_return_failed">ยังไม่ได้เชื่อมต่อปฏิทิน โปรดลองอีกครั้งในอีกไม่กี่นาที</string>
+    <string name="calendar_no_browser">ไม่พบเว็บเบราว์เซอร์สำหรับเปิดหน้าลงชื่อเข้าใช้</string>
+</resources>

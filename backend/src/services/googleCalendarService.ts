@@ -298,17 +298,22 @@ export function isVideoMeeting(event: GoogleCalendarEvent): boolean {
   return extractMeetingUrl(event) !== null;
 }
 
+/** Where the sign-in was started: the website (a popup) or one of the apps (a deep link back). */
+export type OAuthClient = 'web' | 'app';
+
 /**
  * Generate OAuth state token for CSRF protection
  */
 export function generateOAuthState(
   userId: string,
-  nonce?: string
+  nonce?: string,
+  client?: OAuthClient
 ): string {
   const stateData = {
     userId,
     timestamp: Date.now(),
     nonce: nonce || Math.random().toString(36).substring(2),
+    ...(client ? { client } : {}),
   };
 
   return Buffer.from(JSON.stringify(stateData)).toString('base64url');
@@ -321,6 +326,7 @@ export function parseOAuthState(state: string): {
   userId: string;
   timestamp: number;
   nonce: string;
+  client?: OAuthClient;
 } | null {
   try {
     const decoded = Buffer.from(state, 'base64url').toString('utf8');

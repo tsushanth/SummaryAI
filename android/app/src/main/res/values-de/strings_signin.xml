@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">Die Anmeldung wurde nicht angenommen (%1$s). Bitte versuche es erneut.</string>
+    <string name="calendar_return_connected">%1$s verbunden.</string>
+    <string name="calendar_return_cancelled">Kalender nicht verbunden: Der Zugriff wurde nicht erlaubt.</string>
+    <string name="calendar_return_expired">Kalender nicht verbunden: Die Anmeldung hat zu lange gedauert oder wurde bereits verwendet. Bitte verbinde ihn erneut.</string>
+    <string name="calendar_return_admin_approval">Dein Arbeits- oder Schulkonto benötigt die Freigabe von Meeting Mind durch einen Administrator. Wende dich an dein IT-Team oder verbinde ein privates Konto.</string>
+    <string name="calendar_return_failed">Kalender nicht verbunden. Bitte versuche es in ein paar Minuten erneut.</string>
+    <string name="calendar_no_browser">Es wurde kein Webbrowser gefunden, um die Anmeldeseite zu öffnen.</string>
+</resources>

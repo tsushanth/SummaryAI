@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">Η σύνδεση δεν έγινε δεκτή (%1$s). Δοκιμάστε ξανά.</string>
+    <string name="calendar_return_connected">Έγινε σύνδεση: %1$s.</string>
+    <string name="calendar_return_cancelled">Το ημερολόγιο δεν συνδέθηκε: δεν δόθηκε πρόσβαση.</string>
+    <string name="calendar_return_expired">Το ημερολόγιο δεν συνδέθηκε: η σύνδεση άργησε πολύ ή έχει ήδη χρησιμοποιηθεί. Συνδέστε το ξανά.</string>
+    <string name="calendar_return_admin_approval">Ο λογαριασμός εργασίας ή σχολείου σας χρειάζεται έγκριση του Meeting Mind από διαχειριστή. Ρωτήστε το τμήμα IT ή συνδέστε προσωπικό λογαριασμό.</string>
+    <string name="calendar_return_failed">Το ημερολόγιο δεν συνδέθηκε. Δοκιμάστε ξανά σε λίγα λεπτά.</string>
+    <string name="calendar_no_browser">Δεν βρέθηκε πρόγραμμα περιήγησης για να ανοίξει η σελίδα σύνδεσης.</string>
+</resources>

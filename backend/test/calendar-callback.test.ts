@@ -55,7 +55,7 @@ const google = {
 vi.mock('../src/services/googleCalendarService.js', () => ({
   GoogleCalendarService: google,
   generateOAuthState: () => 's',
-  parseOAuthState: (s: string) => (s === 'garbage' ? null : { userId: 'u' }),
+  parseOAuthState: (s: string) => (s === 'garbage' ? null : { userId: 'u', client: s.match(/^(web|app)-/)?.[1] }),
   extractMeetingUrl: () => 'https://meet.google.com/abc-defg-hij',
   detectPlatformFromUrl: () => 'google_meet',
 }));
@@ -204,6 +204,54 @@ describe('web popup pages', () => {
     expect(r.body.match(/<\/script>/g)).toHaveLength(1);
     const script = r.body.split(/<script[^>]*>/)[1]!.split('</script>')[0]!;
     expect(() => new Function(script)).not.toThrow();
+  });
+});
+
+describe('where the result is sent', () => {
+  for (const provider of ['google', 'microsoft']) {
+    it(`${provider}: the website used on a phone gets a page, not an app link`, async () => {
+      validState();
+      const r = await callback('error=access_denied&state=web-1', provider, ANDROID);
+      expect(r.location).toBeNull();
+      expect(r.body).toContain('Access to your calendar was not given');
+    });
+    it(`${provider}: a sign-in started in the app returns to the app even with a desktop user agent`, async () => {
+      validState();
+      const r = await callback('error=access_denied&state=app-1', provider, DESKTOP);
+      expect(r.location).toBe('summaryai://calendar/error?message=access_denied');
+    });
+    it(`${provider}: an organisation that needs an administrator is told so`, async () => {
+      validState();
+      const r = await callback('error=access_denied&error_description=AADSTS90094%3A+admin+needed&state=app-1', provider);
+      expect(r.location).toBe('summaryai://calendar/error?message=admin_consent_required');
+      validState();
+      const page = await callback('error=consent_required&state=web-1', provider);
+      expect(page.body).toContain('needs an administrator');
+    });
+  }
+  it('a user saying no is not mistaken for an administrator block', async () => {
+    validState();
+    const r = await callback('error=access_denied&error_description=AADSTS65004%3A+declined&state=app-1', 'microsoft');
+    expect(r.location).toBe('summaryai://calendar/error?message=access_denied');
+  });
+});
+
+describe('the web error page', () => {
+  it('says what happened in words and stays open so it can be read', async () => {
+    const r = await callback('code=c&state=unknown', 'google', DESKTOP);
+    expect(r.body).toContain('This sign-in took too long or was already used');
+    expect(r.body).not.toContain('>invalid_state<');
+    expect(r.body).not.toContain('Closing window');
+    const script = r.body.split(/<script[^>]*>/)[1]!.split('</script>')[0]!;
+    const closes: string[] = [];
+    const button = { addEventListener: () => {} };
+    new Function('window', 'document', script)({ close: () => closes.push('closed'), opener: null }, { getElementById: () => button });
+    expect(closes).toEqual([]);
+  });
+  it('never shows an unknown code from the query string', async () => {
+    const r = await callback('error=Call+this+number&state=web-1', 'google', DESKTOP);
+    expect(r.body.split('<script')[0]).not.toContain('Call this number');
+    expect(r.body).toContain('Something went wrong while connecting your calendar');
   });
 });
 

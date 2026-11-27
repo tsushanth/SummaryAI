@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">Oturum açma kabul edilmedi (%1$s). Lütfen tekrar deneyin.</string>
+    <string name="calendar_return_connected">%1$s bağlandı.</string>
+    <string name="calendar_return_cancelled">Takvim bağlanmadı: erişim izni verilmedi.</string>
+    <string name="calendar_return_expired">Takvim bağlanmadı: oturum açma çok uzun sürdü veya daha önce kullanıldı. Lütfen yeniden bağlayın.</string>
+    <string name="calendar_return_admin_approval">İş veya okul hesabınız için bir yöneticinin Meeting Mind’ı onaylaması gerekiyor. BT ekibinize danışın veya kişisel bir hesap bağlayın.</string>
+    <string name="calendar_return_failed">Takvim bağlanmadı. Lütfen birkaç dakika sonra tekrar deneyin.</string>
+    <string name="calendar_no_browser">Oturum açma sayfasını açacak bir web tarayıcısı bulunamadı.</string>
+</resources>

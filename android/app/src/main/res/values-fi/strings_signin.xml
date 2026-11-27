@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">Kirjautumista ei hyväksytty (%1$s). Yritä uudelleen.</string>
+    <string name="calendar_return_connected">%1$s yhdistetty.</string>
+    <string name="calendar_return_cancelled">Kalenteria ei yhdistetty: käyttöoikeutta ei annettu.</string>
+    <string name="calendar_return_expired">Kalenteria ei yhdistetty: kirjautuminen kesti liian kauan tai se oli jo käytetty. Yhdistä uudelleen.</string>
+    <string name="calendar_return_admin_approval">Työ- tai koulutilisi vaatii, että järjestelmänvalvoja hyväksyy Meeting Mindin. Kysy IT-tuelta tai yhdistä henkilökohtainen tili.</string>
+    <string name="calendar_return_failed">Kalenteria ei yhdistetty. Yritä uudelleen muutaman minuutin kuluttua.</string>
+    <string name="calendar_no_browser">Verkkoselainta ei löytynyt kirjautumissivun avaamiseen.</string>
+</resources>

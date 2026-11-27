@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">Logowanie nie zostało zaakceptowane (%1$s). Spróbuj ponownie.</string>
+    <string name="calendar_return_connected">Połączono: %1$s.</string>
+    <string name="calendar_return_cancelled">Kalendarz niepołączony: nie przyznano dostępu.</string>
+    <string name="calendar_return_expired">Kalendarz niepołączony: logowanie trwało zbyt długo lub zostało już użyte. Połącz ponownie.</string>
+    <string name="calendar_return_admin_approval">Twoje konto służbowe lub szkolne wymaga zatwierdzenia Meeting Mind przez administratora. Poproś dział IT albo połącz konto osobiste.</string>
+    <string name="calendar_return_failed">Kalendarz niepołączony. Spróbuj ponownie za kilka minut.</string>
+    <string name="calendar_no_browser">Nie znaleziono przeglądarki internetowej do otwarcia strony logowania.</string>
+</resources>

@@ -1,6 +1,5 @@
 package com.kreativekoala.summaryai.ui.auth
 
-import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -73,9 +72,9 @@ fun AuthScreen(
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            viewModel.handleGoogleSignInResult(result.data)
-        }
+        // Google answers most failures as "canceled" with the reason in the data, so the result code cannot be used.
+        // No data at all means the screen was simply closed.
+        result.data?.let { viewModel.handleGoogleSignInResult(it) }
     }
 
     // Error snackbar
@@ -83,7 +82,7 @@ fun AuthScreen(
     LaunchedEffect(uiState.error, authState.error) {
         val error = uiState.error ?: authState.error
         error?.let {
-            snackbarHostState.showSnackbar(it)
+            snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Long)
             viewModel.clearError()
         }
     }
