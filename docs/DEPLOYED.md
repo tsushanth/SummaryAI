@@ -4,7 +4,7 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 
 | Component | Fly app | Release | Image | Built from | Date |
 |---|---|---|---|---|---|
-| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v69 | `registry.fly.io/summary-ai-backend:deployment-01M8DCK0B7DR3NPH83WKK4ECJV` | the phone calls PR at `802f659` (`backend/` tree `3dcd08312acf35382cde654c722553f9d5ac7679`, identical to main after the merge) | 2026-11-27 (UTC) |
+| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v70 | `registry.fly.io/summary-ai-backend:deployment-01M8DD2GF5V22JV71TY6SC4XZF` | `origin/main` at `2dbafb2` (#124; `backend/` tree `60f9d72ad4a49f282fd840b1a84a7895e5660595`) | 2026-11-27 (UTC) |
 | Web (`web/`, meetingmind.org) | `meeting-mind-web` | v43 | `registry.fly.io/meeting-mind-web:deployment-01M8CNXBE7KE1AJAXTEMJHWPBE` | `origin/main` at `464634a` (#119, deployed by the web-deploy workflow; `web/` tree `eaca6a737c817ac6f6def0a61e7c0e477a68902b` identical to main) | 2026-11-26 (UTC) |
 
 ## Android: merged, NOT released (next release: after 1.7.15, versionCode 68)
@@ -16,6 +16,14 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 - Android now posts anonymous record steps to `POST /api/activation/events` (platform `android`, no server change): `record_clicked` with `step` = tap, mic_granted, mic_denied, start_failed, stop_ok, held_short, held_silent, keep_going, record_again, upload_anyway or check_dismissed; `first_recording_started` (every start, `again` after Record again); `first_recording_done` (every upload: `ok`, `seconds`, `auto`). `test` is true on debug builds and Firebase Test Lab. The web funnel check filters `platform = 'web'`, so it is unaffected.
 - Before release: the privacy page names these steps for the website only; add the app.
 - Checks: `:app:testDebugUnitTest` 314 tests, 0 failures; `:app:assembleDebug`. No device run.
+
+## 2026-11-27 Summaries follow the recording's language (#124): backend v70
+- Cause: with no summary language chosen ("Same language as the recording" on the web; Android sends none) the English summary prompt named no language, so the model answered in English.
+- Change: the detected spoken language is named in the prompt; a PDF (no detected language) is asked to follow its text; a chosen language still wins; regenerate summary no longer drops the chosen language. Stored summaries are not rewritten. No migration, no secret change, no web or Android change.
+- Backend: `flyctl deploy --remote-only` from a clean detached worktree of `origin/main` at `2dbafb2`, on top of v69. Quiet moment checked: no unfinished recording, bot run, live segment, due auto-join, coaching session or phone call.
+- Verified: `tsc` clean, vitest 104 files / 1481 tests. In production with a throwaway example.com account and synthetic speech (since deleted): no choice gave Spanish, French, Hindi and English summaries in those languages; Spanish audio with English chosen gave English, also after regenerate; a French PDF gave French; regenerate of the French recording stayed French. `/health/detailed` healthy with all nine loops fresh; all 134 compiled `.js` files on the machine identical to a fresh build of the same tree. Calling still off: `/api/phone/status` answers `enabled: false`, `verify/start` 404, both switches unset, unsigned voip webhook 403.
+- NOT verified: real speech from a person, mixed-language audio in production, a very long recording in production (checked against the model with a made-up transcript only), transcription languages other than those above, live insights, Q&A, coaching and follow-up email language (unchanged).
+- Rollback: `flyctl deploy -a summary-ai-backend --image registry.fly.io/summary-ai-backend:deployment-01M8DCK0B7DR3NPH83WKK4ECJV` (v69), then revert #124 on main.
 
 ## 2026-11-27 Phone calls rebuilt, switched off (migration 032): backend v69
 - Change: `docs/superpowers/specs/2026-11-26-mm-phone-calls-design.md`, phase 1 (own number verified with the carrier, United States and Canada, server spend control, recording notice and consent, recordings into the app, funnel events). **Calling is off for everyone**: `FEATURE_PHONE_CALLS` and `PHONE_CALLS_TESTER_IDS` are unset. The notice wording is not approved.
