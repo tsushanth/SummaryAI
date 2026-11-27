@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -46,6 +47,8 @@ class ActiveCoachingSessionTest {
         @Volatile var startCalls = 0
         @Volatile var streamCalls = 0
         val ended = ConcurrentLinkedQueue<String>()
+        val endFailures = ConcurrentLinkedQueue<Exception>()
+        @Volatile var endCalls = 0
 
         override suspend fun claimFreeCredits() = throw UnsupportedOperationException()
         override suspend fun getCredits() = throw UnsupportedOperationException()
@@ -57,6 +60,8 @@ class ActiveCoachingSessionTest {
             }
         }
         override suspend fun endSession(sessionId: String): CoachingEndResponse {
+            endCalls++
+            endFailures.poll()?.let { throw it }
             ended.add(sessionId)
             return CoachingEndResponse(ended = true, refunded = true)
         }
@@ -74,7 +79,13 @@ class ActiveCoachingSessionTest {
 
     private val api = FakeApi()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private val coach = ActiveCoachingSession(CoachingRepository(api, OutputLanguageSource { null }), scope)
+    private val signedOut = MutableSharedFlow<Unit>()
+    private val coach = ActiveCoachingSession(CoachingRepository(api, OutputLanguageSource { null }), scope, signedOut)
+
+    private fun signOut() = runBlocking {
+        withTimeout(5_000) { signedOut.subscriptionCount.first { it > 0 } }
+        signedOut.emit(Unit)
+    }
 
     @After fun tearDown() = scope.cancel()
 
@@ -196,6 +207,63 @@ class ActiveCoachingSessionTest {
         runBlocking { delay(300) }
         assertEquals(CoachingPhase.IDLE, coach.state.value.phase)
         assertNull(coach.state.value.meetingId)
+    }
+
+    @Test fun aStopThatCannotReachTheServerIsRepeatedUntilItDoes() {
+        api.streams.add(LiveStream())
+        start()
+        await { it.phase == CoachingPhase.LIVE }
+        api.endFailures.add(IOException("offline"))
+        api.endFailures.add(refusal(503))
+        coach.stop()
+        await { it.phase == CoachingPhase.ENDED && it.refunded }
+        assertEquals(3, api.endCalls)
+        assertEquals(listOf("s1"), api.ended.toList())
+    }
+
+    @Test fun anUnacknowledgedStopIsNotShownAsRunningAgain() {
+        api.streams.add(LiveStream())
+        start()
+        await { it.phase == CoachingPhase.LIVE }
+        repeat(5) { api.endFailures.add(IOException("offline")) }
+        coach.stop()
+        // Another meeting is looked at, then this one again, while the server still has the session open.
+        api.latest = CoachingLatestSessionResponse(CoachingLatestSession("s0", "2026-01-01T00:10:00", false, null), emptyList())
+        coach.attach("meet-0", "rec-0")
+        await { it.meetingId == "meet-0" }
+        api.latest = CoachingLatestSessionResponse(CoachingLatestSession("s1", null, false, null), emptyList())
+        coach.attach("meet-1", "rec-1")
+        val s = await { it.meetingId == "meet-1" && it.phase == CoachingPhase.ENDED }
+        assertEquals(ActiveCoachingSession.REASON_STOPPED, s.endReason)
+        assertEquals(1, api.streamCalls)
+    }
+
+    @Test fun signingOutForgetsTheSessionAndStopsReconnecting() {
+        val stream = LiveStream().also { api.streams.add(it) }
+        start()
+        await { it.phase == CoachingPhase.LIVE }
+        stream.tip("t1", 1)
+        await { it.insights.size == 1 }
+        api.latest = CoachingLatestSessionResponse(CoachingLatestSession("s1", null, false, null), emptyList())
+        stream.drop()
+        await { it.phase == CoachingPhase.RECONNECTING }
+        signOut()
+        val s = await { it.phase == CoachingPhase.IDLE }
+        assertTrue(s.insights.isEmpty())
+        assertNull(s.meetingId)
+        runBlocking { delay(2_500) }
+        assertEquals(1, api.streamCalls)
+        assertEquals(CoachingPhase.IDLE, coach.state.value.phase)
+    }
+
+    @Test fun aRefusedAccountStopsReconnecting() {
+        for (status in listOf(401, 403)) {
+            api.streams.add(refusal(status))
+            start()
+            await { it.phase == CoachingPhase.IDLE }
+        }
+        runBlocking { delay(2_500) }
+        assertEquals(2, api.streamCalls)
     }
 
     @Test fun onlyTheUsersStopEndsTheSession() {

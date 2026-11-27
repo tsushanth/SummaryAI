@@ -6,15 +6,21 @@ import com.kreativekoala.summaryai.data.api.coaching.CoachingLatestSessionRespon
 import com.kreativekoala.summaryai.data.api.coaching.CoachingPersonaKey
 import com.kreativekoala.summaryai.data.repository.CoachingRepository
 import com.kreativekoala.summaryai.data.repository.CoachingStreamEvent
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.gotrue.SessionStatus
+import io.github.jan.supabase.gotrue.auth
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -40,15 +46,19 @@ data class CoachingState(
 /**
  * App-wide store for the AI Coach session. It lives as long as the app does, not as long as any screen: only the user
  * ([stop]) or the server (the meeting ended, the bot failed or was not let in) ends a session. Leaving a screen,
- * switching tabs or losing the connection does not.
+ * switching tabs or losing the connection does not. Signing out forgets it.
  */
 @Singleton
 class ActiveCoachingSession internal constructor(
     private val repository: CoachingRepository,
     private val scope: CoroutineScope,
+    signedOut: Flow<Unit>,
 ) {
-    @Inject constructor(repository: CoachingRepository) :
-        this(repository, CoroutineScope(SupervisorJob() + Dispatchers.Default))
+    @Inject constructor(repository: CoachingRepository, supabase: SupabaseClient) : this(
+        repository,
+        CoroutineScope(SupervisorJob() + Dispatchers.Default),
+        supabase.auth.sessionStatus.filterIsInstance<SessionStatus.NotAuthenticated>().map { },
+    )
 
     private val _state = MutableStateFlow(CoachingState())
     val state: StateFlow<CoachingState> = _state.asStateFlow()
@@ -56,6 +66,14 @@ class ActiveCoachingSession internal constructor(
     private var job: Job? = null
     private var sessionId: String? = null
     private var request: Triple<String, String, CoachingPersonaKey>? = null
+
+    /** Stops the server has not acknowledged yet, by session id. */
+    private val stops = mutableMapOf<String, Job>()
+    private var signOuts = 0
+
+    init {
+        scope.launch { signedOut.collect { reset() } }
+    }
 
     /** Starts coaching for a meeting. Safe to call from a screen that is about to close. */
     @Synchronized
@@ -66,6 +84,8 @@ class ActiveCoachingSession internal constructor(
         _state.value = CoachingState(meetingId, CoachingPhase.STARTING)
         job = scope.launch {
             val id = startSession(meetingId, recordingId, persona) ?: return@launch
+            // Asking for coaching again overrides a stop that never reached the server.
+            synchronized(this@ActiveCoachingSession) { stops.remove(id)?.cancel() }
             sessionId = id
             follow(meetingId, recordingId, id)
         }
@@ -83,11 +103,12 @@ class ActiveCoachingSession internal constructor(
      */
     fun attach(meetingId: String, recordingId: String) {
         if (knows(meetingId)) return
+        val account = signOuts
         scope.launch {
             val latest = latest(recordingId) ?: return@launch
             val session = latest.session ?: return@launch
             synchronized(this@ActiveCoachingSession) {
-                if (knows(meetingId)) return@synchronized
+                if (knows(meetingId) || account != signOuts) return@synchronized
                 // Looking at an earlier meeting must not interrupt a session that is running for another one.
                 if (session.endedAt != null && _state.value.phase in RUNNING) return@synchronized
                 job?.cancel()
@@ -96,6 +117,8 @@ class ActiveCoachingSession internal constructor(
                 _state.value = CoachingState(meetingId, CoachingPhase.RECONNECTING, newestFirst(latest.insights.orEmpty()))
                 if (session.endedAt != null) {
                     ended(meetingId, session.endReason, session.refunded == true)
+                } else if (stops[session.id]?.isActive == true) {
+                    ended(meetingId, REASON_STOPPED, refunded = false)
                 } else {
                     job = scope.launch { follow(meetingId, recordingId, session.id) }
                 }
@@ -103,17 +126,53 @@ class ActiveCoachingSession internal constructor(
         }
     }
 
-    /** The user's own stop. */
+    /** The user's own stop. Repeated until the server has it: until then it keeps listening and calling the model. */
     @Synchronized
     fun stop() {
         val id = sessionId ?: return
         val meetingId = _state.value.meetingId ?: return
         job?.cancel()
         ended(meetingId, REASON_STOPPED, refunded = false)
-        scope.launch {
-            val response = runCatching { repository.endSession(id) }.getOrNull() ?: return@launch
-            update(meetingId) { it.copy(refunded = response.refunded) }
+        stops[id]?.cancel()
+        stops[id] = scope.launch { endOnServer(meetingId, id) }
+    }
+
+    private suspend fun endOnServer(meetingId: String, id: String) {
+        var attempt = 0
+        while (true) {
+            try {
+                val response = repository.endSession(id)
+                update(meetingId) { if (it.phase == CoachingPhase.ENDED) it.copy(refunded = response.refunded) else it }
+                return
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // Signed out, or no such session: repeating cannot help.
+                val status = (e as? HttpException)?.code()
+                if (status == 401 || status == 403 || status == 404) return
+                delay(RECONNECT_MS[minOf(attempt++, RECONNECT_MS.lastIndex)])
+            }
         }
+    }
+
+    /** Signed out: the session belongs to the account that left. Forget it and stop talking to the server. */
+    @Synchronized
+    private fun reset() {
+        signOuts++
+        job?.cancel()
+        stops.values.forEach { it.cancel() }
+        stops.clear()
+        sessionId = null
+        request = null
+        _state.value = CoachingState()
+    }
+
+    /** The server refuses this account: stop following. Idle, so that opening the meeting again looks afresh. */
+    @Synchronized
+    private fun forget(meetingId: String) {
+        if (_state.value.meetingId != meetingId) return
+        sessionId = null
+        _state.value = CoachingState()
     }
 
     private fun knows(meetingId: String): Boolean =
@@ -172,8 +231,13 @@ class ActiveCoachingSession internal constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                val status = (e as? HttpException)?.code()
+                if (status == 401 || status == 403) {
+                    forget(meetingId)
+                    return
+                }
                 // 400: already ended. 404: gone. Anything else is the connection.
-                refused = (e as? HttpException)?.code().let { it == 400 || it == 404 }
+                refused = status == 400 || status == 404
             }
             if (over) return
             val latest = latest(recordingId)

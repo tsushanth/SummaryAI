@@ -40,6 +40,13 @@ class BotStatusTest {
         assertNull(notice("ended", joined = true))
     }
 
+    @Test fun aBotThatFailedAfterJoiningIsNeverSaidToHaveBeenUnableToJoin() {
+        assertNull(notice("failed", null, joined = true))
+        assertNull(notice("failed", "bot_fatal", joined = true))
+        assertNull(notice("failed", "meeting_not_found", joined = true))
+        assertEquals(R.string.bot_failed_permission, notice("failed", "recording_permission_denied", joined = true)!!.body)
+    }
+
     @Test fun nothingToSayWhileRecordingOrWithoutAServerState() {
         assertNull(notice("recording", joined = true))
         assertNull(botNotice(null))

@@ -12,7 +12,7 @@ fun botNotice(bot: BotStateDto?): BotNotice? = when (bot?.state) {
     "joining" -> BotNotice(R.string.bot_status_joining_title, R.string.bot_status_joining_body)
     "waiting_room" -> BotNotice(R.string.bot_status_waiting_title, R.string.bot_status_waiting_body)
     "in_call" -> BotNotice(R.string.bot_status_in_call_title, R.string.bot_status_in_call_body)
-    "failed" -> failedNotice(bot.code)
+    "failed" -> if (bot.joined == true) failedAfterJoining(bot.code) else failedNotice(bot.code)
     // Over without ever getting in.
     "ended" -> if (bot.joined == false) failedNotice(bot.code) else null
     else -> null
@@ -22,6 +22,13 @@ fun botNotice(bot: BotStateDto?): BotNotice? = when (bot?.state) {
 fun botIsInMeeting(bot: BotStateDto?): Boolean = bot?.state !in setOf("joining", "waiting_room", "failed")
 
 private fun failedNotice(code: String?) = BotNotice(R.string.bot_failed_title, botFailureText(code), failed = true)
+
+/**
+ * The bot got in and something failed later (the recording could not be stored, say): none of the joining advice is true.
+ * Only a refused recording permission is still worth saying; otherwise the recording's own failed state speaks.
+ */
+private fun failedAfterJoining(code: String?): BotNotice? =
+    failedNotice(code).takeIf { it.body == R.string.bot_failed_permission }
 
 /** Recall sub codes and the server's own. Keep in step with web/src/lib/meetingFailure.ts. */
 @StringRes

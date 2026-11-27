@@ -23,7 +23,7 @@ export class LiveDb {
 
   from = (table: string) => {
     const db = this;
-    let op: 'select' | 'insert' | 'update' | 'upsert' = 'select';
+    let op: 'select' | 'insert' | 'update' | 'upsert' | 'delete' = 'select';
     let cols: string[] = ['*'];
     let payload: any = {};
     let opts: any = {};
@@ -53,6 +53,7 @@ export class LiveDb {
         return { data: inserted, error: null };
       }
       let matched = db.rows(table).filter((r) => filters.every((f) => f(r)));
+      if (op === 'delete') { db.tables[table] = db.rows(table).filter((r) => !matched.includes(r)); return { data: null, error: null }; }
       if (op === 'update') {
         matched.forEach((r) => Object.assign(r, payload));
         return { data: returning ? (one ? matched[0] ?? null : matched) : null, error: null };
@@ -69,6 +70,7 @@ export class LiveDb {
       insert: (row: Row) => { op = 'insert'; payload = row; return q; },
       upsert: (rows: Row[], o: any) => { op = 'upsert'; payload = rows; opts = o ?? {}; return q; },
       update: (p: Row) => { op = 'update'; payload = p; return q; },
+      delete: () => { op = 'delete'; return q; },
       eq: (c: string, v: any) => { filters.push((r) => r[c] === v); return q; },
       in: (c: string, vs: any[]) => { filters.push((r) => vs.includes(r[c])); return q; },
       gte: (c: string, v: any) => { filters.push((r) => r[c] >= v); return q; },

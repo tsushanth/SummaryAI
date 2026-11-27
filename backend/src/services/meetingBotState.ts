@@ -29,7 +29,8 @@ export interface BotRunStateColumns {
 const CODE = /^[a-z][a-z0-9]*(_[a-z0-9]+)+$/;
 
 export function deriveBotState(run: BotRunStateColumns): MeetingBotState {
-  const joined = !!run.joined_at;
+  // The in-call status counts too: it is written together with joined_at, and either one proves the bot got in.
+  const joined = !!run.joined_at || !!run.recall_status?.startsWith('in_call');
   const of = (state: BotStateName, code: string | null = null): MeetingBotState => ({ state, code, joined });
   if (run.status === 'failed' || run.status === 'cancelled') {
     return of('failed', [run.error_code, run.error_message].find((c) => !!c && CODE.test(c)) ?? null);
@@ -43,11 +44,14 @@ export function deriveBotState(run: BotRunStateColumns): MeetingBotState {
   return of('joining');
 }
 
-/** Null while the bot is still on its way or in the meeting. */
+/**
+ * Null while the bot is still on its way or in the meeting. A bot that got in and failed later (the recording could not be
+ * stored, say) was in the meeting until it was over: it must never be reported as unable to join.
+ */
 export function botEndReason(bot: MeetingBotState): BotEndReason | null {
-  if (bot.state === 'failed') return bot.code && NOT_ADMITTED_SUB_CODES.includes(bot.code) ? 'bot_not_admitted' : 'bot_failed';
-  if (bot.state === 'ended') return bot.joined ? 'meeting_ended' : 'bot_failed';
-  return null;
+  if (bot.state !== 'failed' && bot.state !== 'ended') return null;
+  if (bot.joined) return 'meeting_ended';
+  return bot.code && NOT_ADMITTED_SUB_CODES.includes(bot.code) ? 'bot_not_admitted' : 'bot_failed';
 }
 
 /** The latest bot run's state, or null when the meeting has no bot run (or it cannot be read). */

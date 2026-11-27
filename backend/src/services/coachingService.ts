@@ -477,8 +477,9 @@ async function runTick(sessionId: string, persona: CoachingPersona): Promise<voi
   const lastSegment = segments[segments.length - 1];
   const offset = Math.floor(lastSegment?.end_timestamp ?? 0);
 
-  // Insert + emit. Count only rows that were actually persisted: the count drives the end-of-session
-  // auto-refund and the "insights delivered" figure, so it must not include rejected or failed rows.
+  // Insert, count, then emit, one tip at a time. The count drives the end-of-session auto-refund, so it must be exactly the
+  // tips delivered: no rejected or failed rows, and never behind what the user has already been shown.
+  const countBefore: number = session.insight_count;
   let persisted = 0;
   for (const i of insights) {
     if (!isValidInsight(i)) continue;
@@ -499,18 +500,27 @@ async function runTick(sessionId: string, persona: CoachingPersona): Promise<voi
       reportAlert('coaching', 'INSIGHT_INSERT_FAILED', { code: (error as { code?: string } | null)?.code });
       continue;
     }
+    // Counted only while the session is open. Ending it closes the same row and reads the count in one write, so a tip is
+    // either counted before the refund decision or not delivered at all.
+    const { data: counted, error: countError } = await supabaseAdmin
+      .from('coaching_sessions')
+      .update({ insight_count: countBefore + persisted + 1 })
+      .eq('id', sessionId)
+      .is('ended_at', null)
+      .select('id')
+      .maybeSingle();
+    if (!counted) {
+      await supabaseAdmin.from('coaching_insights').delete().eq('id', data.id);
+      if (!countError) break; // ended meanwhile
+      console.error(`[Coaching] could not count an insight for session ${sessionId}:`, countError.message);
+      reportAlert('coaching', 'INSIGHT_COUNT_FAILED', { code: countError.code });
+      continue;
+    }
     persisted++;
     const subs = subscribers.get(sessionId);
     subs?.forEach(emit => emit('insight', data));
   }
   console.log(`[Coaching] persisted ${persisted}/${insights.length} insights for session ${sessionId}`);
-  if (persisted === 0) return;
-
-  // Bump insight_count
-  await supabaseAdmin
-    .from('coaching_sessions')
-    .update({ insight_count: session.insight_count + persisted })
-    .eq('id', sessionId);
 }
 
 function isValidInsight(i: any): i is { type: string; text: string; urgency: string } {

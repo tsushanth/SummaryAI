@@ -97,6 +97,12 @@ describe('what the bot is doing', () => {
     expect(botEndReason(state({ status: 'processing', joined_at: 'x' }))).toBe('meeting_ended');
     expect(botEndReason(state({ status: 'processing', joined_at: null }))).toBe('bot_failed');
   });
+  it('a bot that failed after getting in (storing the recording, say) did not fail to join', () => {
+    const stored = state({ status: 'failed', joined_at: 'x', error_message: 'Recording could not be stored: too large' });
+    expect(botEndReason(stored)).toBe('meeting_ended');
+    expect(botEndReason(state({ status: 'failed', recall_status: 'in_call_recording', joined_at: null }))).toBe('meeting_ended');
+    expect(state({ status: 'failed', recall_status: 'in_call_recording' }).joined).toBe(true);
+  });
 });
 
 describe('starting a session', () => {
@@ -196,6 +202,48 @@ describe('the ticker follows the bot', () => {
   });
 });
 
+describe('ending while tips are being delivered', () => {
+  const five = () => reply('One', 'Two', 'Three', 'Four', 'Five');
+
+  it('never refunds a session that has delivered three tips', async () => {
+    seed();
+    const { sessionId } = await start();
+    say('We need this live before January');
+    h.claude.mockResolvedValue(five());
+    let delivered = 0;
+    let ended: Promise<{ refunded: boolean }> | undefined;
+    coaching.subscribe(sessionId, (event) => { if (event === 'insight' && ++delivered === 3) ended = coaching.endSession(sessionId); });
+    await tick();
+    expect((await ended!).refunded).toBe(false);
+    expect(balance()).toBe(2);
+    expect(session().insight_count).toBeGreaterThanOrEqual(3);
+    expect(db.rows('coaching_insights')).toHaveLength(session().insight_count);
+  });
+
+  it('keeps no tip it could not count: what is stored is what the refund was decided on', async () => {
+    seed();
+    const { sessionId } = await start();
+    say('We need this live before January');
+    h.claude.mockResolvedValue(five());
+    // The session is ended between the third tip being stored and being counted.
+    const from = db.from;
+    let inserts = 0;
+    let ended: Promise<{ refunded: boolean }> | undefined;
+    db.from = (t: string) => {
+      const q = from(t);
+      if (t === 'coaching_insights') {
+        const insert = q.insert;
+        q.insert = (row: any) => { if (++inserts === 3) ended = coaching.endSession(sessionId); return insert(row); };
+      }
+      return q;
+    };
+    await tick();
+    expect((await ended!).refunded).toBe(true);
+    expect(session().insight_count).toBe(2);
+    expect(db.rows('coaching_insights').map((i) => i.text)).toEqual(['One', 'Two']);
+  });
+});
+
 describe('why a session produced nothing', () => {
   const reason = async () => { await coaching.endSession(session().id, 'client'); return session().refund_reason; };
   it('nobody spoke', async () => { seed(); await start(); await tick(); expect(await reason()).toBe('insight_count_below_threshold:no_speech'); });
@@ -224,7 +272,7 @@ describe('routes', () => {
   const post = (path: string, body?: unknown) => fetch(base + path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body ?? {}) });
 
   it('answers 409 with the reason for a bot that already failed', async () => {
-    seed({ status: 'failed', error_code: 'meeting_not_found', joined_at: null });
+    seed({ status: 'failed', recall_status: 'fatal', error_code: 'meeting_not_found', joined_at: null });
     const r = await post('/sessions', { recording_id: REC, persona: 'sales_discovery' });
     expect(r.status).toBe(409);
     expect(await r.json()).toMatchObject({ error: 'meeting_not_live', reason: 'meeting_not_found', end_reason: 'bot_failed' });
