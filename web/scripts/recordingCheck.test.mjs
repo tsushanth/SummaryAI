@@ -142,8 +142,11 @@ test('every held case says why and offers only what is possible', () => {
   assert.match(short.message, /under 10 seconds are not uploaded\. Keep going/);
   assert.doesNotMatch(short.message, /upload it anyway/);
   const silent = recordingCheckText({ problem: 'silent', seconds: 30, canUploadAnyway: true }, 'recording', false);
-  assert.match(silent.message, /Record again[\s\S]*upload it anyway/);
+  assert.match(silent.message, /kept in this browser\. Record again[\s\S]*upload it anyway/);
   assert.doesNotMatch(silent.message, /Keep going/);
+  const unsaved = recordingCheckText({ problem: 'silent', seconds: 30, canUploadAnyway: true }, 'recording', false, false);
+  assert.match(unsaved.message, /could not save a copy, so keep this page open/);
+  assert.doesNotMatch(unsaved.message, /kept in this browser/);
   assert.match(recordingCheckText({ problem: 'silent', seconds: 30, canUploadAnyway: true }, 'file').message, /upload it anyway/);
   assert.match(recordingCheckText({ problem: 'too_short', seconds: 3, canUploadAnyway: false }, 'file').message, /Choose a longer file/);
   assert.match(recordingCheckText({ problem: 'too_short', seconds: 3, canUploadAnyway: true }, 'file').message, /upload it anyway/);
@@ -164,4 +167,26 @@ test('the page stops, submits and shows the notice through the check', () => {
   assert.match(page, /source="recording"/);
   assert.match(page, /source="file"/);
   assert.match(page, /canSubmit = hasAudio && !isSubmitting && !held && !checking/);
+});
+
+const source = (f) => readFileSync(new URL(`../src/${f}`, import.meta.url), 'utf8');
+
+test('a recording held as silent is finished and saved; only a very short one stays paused', () => {
+  const page = source('app/(dashboard)/recordings/new/page.tsx');
+  assert.match(page, /if \(held\?\.problem === 'too_short'\) recorder\.pauseRecording\(\);\s*else recorder\.stopRecording\(\);/);
+});
+
+test('nothing that was not uploaded is thrown away without asking', () => {
+  const page = source('app/(dashboard)/recordings/new/page.tsx');
+  assert.match(page, /const recordAgain = async \(\) => \{\s*if \(!window\.confirm\(DISCARD_QUESTION\)\) return;/);
+  assert.match(page, /if \(recorder\.audioBlob && !window\.confirm\(DISCARD_QUESTION\)\) return;/);
+  assert.equal(page.match(/recorder\.restartRecording\(\)/g).length, 1, 'only Record again restarts');
+});
+
+test('the recorder looks at MediaRecorder.state and finishes the recording in onstop', () => {
+  const hook = source('hooks/useAudioRecorder.ts');
+  assert.match(hook, /recorder\?\.state !== 'recording'\) return;/);
+  assert.match(hook, /recorder\?\.state !== 'paused'\) return;/);
+  assert.match(hook, /if \(recorder\.state !== 'inactive'\) recorder\.stop\(\);/);
+  assert.match(hook, /mediaRecorder\.onstop = \(\) => \{[\s\S]*?isRecording: false,\s*isPaused: false,[\s\S]*?audioBlob: blob/);
 });

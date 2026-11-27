@@ -57,16 +57,29 @@ export function useAudioRecorder() {
       const sampling = startLevelSampling(levelContext, stream, meterRef.current, () => mediaRecorder.state === 'recording');
       samplingRef.current = sampling;
 
+      // Reached after Stop, and when the recorder stops by itself (microphone unplugged or taken away). The recording is
+      // finished here in both cases, so that the audio is always handed on to be saved.
       mediaRecorder.onstop = () => {
         sampling.stop();
+        // Stop all tracks
+        stream.getTracks().forEach((track) => track.stop());
+        if (mediaRecorderRef.current !== mediaRecorder) return; // a newer recording has taken over
+
         const blob = new Blob(chunksRef.current, {
           type: mediaRecorder.mimeType,
         });
         clockRef.current.stop();
-        setState((prev) => ({ ...prev, audioBlob: blob, recordedSeconds: sanitizeDurationSeconds(clockRef.current.seconds()) }));
-
-        // Stop all tracks
-        stream.getTracks().forEach((track) => track.stop());
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+        }
+        setState((prev) => ({
+          ...prev,
+          isRecording: false,
+          isPaused: false,
+          duration: clockRef.current.seconds(),
+          audioBlob: blob,
+          recordedSeconds: sanitizeDurationSeconds(clockRef.current.seconds()),
+        }));
       };
 
       mediaRecorder.start(1000);
@@ -98,53 +111,58 @@ export function useAudioRecorder() {
     }
   }, []);
 
+  // MediaRecorder.state, not only ours, decides what may be called: it turns 'inactive' by itself when the microphone
+  // goes away, and pause() or resume() on an inactive recorder throws.
   const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && state.isRecording) {
-      clockRef.current.stop();
-      mediaRecorderRef.current.stop();
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-      setState((prev) => ({ ...prev, isRecording: false, isPaused: false }));
+    const recorder = mediaRecorderRef.current;
+    if (!recorder || !state.isRecording) return;
+    clockRef.current.stop();
+    if (recorder.state !== 'inactive') recorder.stop(); // an inactive one has stopped already: onstop finishes it
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
     }
+    setState((prev) => ({ ...prev, isRecording: false, isPaused: false }));
   }, [state.isRecording]);
 
   const pauseRecording = useCallback(() => {
-    if (mediaRecorderRef.current && state.isRecording && !state.isPaused) {
-      clockRef.current.pause();
-      mediaRecorderRef.current.pause();
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-      setState((prev) => ({ ...prev, isPaused: true }));
+    const recorder = mediaRecorderRef.current;
+    if (recorder?.state !== 'recording') return;
+    clockRef.current.pause();
+    recorder.pause();
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
     }
-  }, [state.isRecording, state.isPaused]);
+    setState((prev) => ({ ...prev, isPaused: true }));
+  }, []);
 
   const resumeRecording = useCallback(() => {
-    if (mediaRecorderRef.current && state.isRecording && state.isPaused) {
-      mediaRecorderRef.current.resume();
-      clockRef.current.resume();
-      timerRef.current = setInterval(() => {
-        setState((prev) => ({
-          ...prev,
-          duration: clockRef.current.seconds(),
-        }));
-      }, 1000);
-      setState((prev) => ({ ...prev, isPaused: false }));
-    }
-  }, [state.isRecording, state.isPaused]);
+    const recorder = mediaRecorderRef.current;
+    if (recorder?.state !== 'paused') return;
+    recorder.resume();
+    clockRef.current.resume();
+    timerRef.current = setInterval(() => {
+      setState((prev) => ({
+        ...prev,
+        duration: clockRef.current.seconds(),
+      }));
+    }, 1000);
+    setState((prev) => ({ ...prev, isPaused: false }));
+  }, []);
 
-  /** Throws away the recording in progress and starts a new one. */
+  /**
+   * Starts a new recording in place of the current one; the caller has asked the user first. A finished recording is only
+   * replaced once the new one has started. One still in progress is thrown away at once.
+   */
   const restartRecording = useCallback(async (): Promise<boolean> => {
     const old = mediaRecorderRef.current;
-    if (timerRef.current) clearInterval(timerRef.current);
     if (old && old.state !== 'inactive') {
+      if (timerRef.current) clearInterval(timerRef.current);
       old.ondataavailable = null;
       old.onstop = () => old.stream.getTracks().forEach((track) => track.stop());
       old.stop();
+      samplingRef.current?.stop();
+      setState((prev) => ({ ...prev, isRecording: false, isPaused: false, duration: 0, recordedSeconds: undefined, audioBlob: null }));
     }
-    // The old recording is gone even if the microphone cannot be opened again.
-    setState((prev) => ({ ...prev, isRecording: false, isPaused: false, duration: 0, recordedSeconds: undefined, audioBlob: null }));
     return startRecording();
   }, [startRecording]);
 

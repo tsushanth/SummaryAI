@@ -236,7 +236,9 @@ export function openAudioContext(): LevelContext | null {
 export function recordingCheckText(
   held: HeldRecording,
   source: 'recording' | 'file',
-  canKeepGoing = false
+  canKeepGoing = false,
+  /** A finished recording: whether a copy is saved in this browser. */
+  saved = true
 ): { title: string; message: string } {
   if (source === 'file') {
     if (held.problem === 'silent') {
@@ -253,8 +255,13 @@ export function recordingCheckText(
   if (held.problem === 'too_short') {
     return { title: 'That was very short', message: `Recordings under ${MIN_SECONDS} seconds are not uploaded. ${next}` };
   }
+  const kept = canKeepGoing
+    ? ''
+    : saved
+      ? 'It was not uploaded and is kept in this browser. '
+      : 'It was not uploaded, and this browser could not save a copy, so keep this page open. ';
   return {
     title: 'We could not hear anything',
-    message: `Check that nothing covers the microphone and that it is not switched off. ${next} If you know there is speech in it, you can upload it anyway.`,
+    message: `Check that nothing covers the microphone and that it is not switched off. ${kept}${next} If you know there is speech in it, you can upload it anyway.`,
   };
 }

@@ -10,11 +10,13 @@ interface RecordingCheckNoticeProps {
   onKeepGoing?: () => void;
   onRecordAgain?: () => void;
   onUploadAnyway: () => void;
+  /** False when this browser could not save a copy of the recording. */
+  saved?: boolean;
 }
 
 /** Shown when a recording or file is held back from upload: says why, and what the user can do. */
-export function RecordingCheckNotice({ held, source, onKeepGoing, onRecordAgain, onUploadAnyway }: RecordingCheckNoticeProps) {
-  const { title, message } = recordingCheckText(held, source, !!onKeepGoing);
+export function RecordingCheckNotice({ held, source, onKeepGoing, onRecordAgain, onUploadAnyway, saved }: RecordingCheckNoticeProps) {
+  const { title, message } = recordingCheckText(held, source, !!onKeepGoing, saved);
   return (
     <div role="alert" className="rounded-lg border border-warning/50 bg-warning/10 p-4">
       <div className="flex items-center gap-2 font-semibold text-foreground">

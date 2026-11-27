@@ -52,6 +52,9 @@ type InputMode = 'record' | 'upload';
 /** The step counts the Android app sends for the same choices (record_clicked / upload_chosen with a step). */
 const heldStep = (held: HeldRecording) => (held.problem === 'too_short' ? 'held_short' : 'held_silent');
 
+/** Asked before a recording that has not been uploaded is thrown away. */
+const DISCARD_QUESTION = 'Discard this recording and start a new one? It cannot be recovered.';
+
 export default function NewRecordingPage() {
   const router = useRouter();
   const [mode, setMode] = useState<InputMode>('record');
@@ -75,14 +78,15 @@ export default function NewRecordingPage() {
   const [heldFile, setHeldFile] = useState<HeldRecording | null>(null);
   const [checkingFile, setCheckingFile] = useState(false);
   const recordingApprovedRef = useRef(false); // "Upload anyway" for the current recording
-  const submitWhenStoppedRef = useRef(false);
+  const [saveFailed, setSaveFailed] = useState(false); // this browser could not keep a copy of the finished recording
   const chosenFileRef = useRef<File | null>(null);
   const approvedFileRef = useRef<File | null>(null);
 
-  // Don't let a tab close/reload lose a recording in progress or an upload in flight.
-  useBeforeUnloadGuard(
-    shouldBlockUnload({ isRecording: recorder.isRecording, isPaused: recorder.isPaused, isSubmitting })
-  );
+  // Don't let a tab close/reload lose a recording in progress, an upload in flight, or a recording that could not be saved.
+  const wouldLoseAudio =
+    shouldBlockUnload({ isRecording: recorder.isRecording, isPaused: recorder.isPaused, isSubmitting }) ||
+    (saveFailed && !!recorder.audioBlob);
+  useBeforeUnloadGuard(wouldLoseAudio);
 
   // Keep the finished recording in IndexedDB until the upload succeeds (see lib/pendingUpload.ts).
   const pendingIdRef = useRef<string | null>(null);
@@ -100,11 +104,15 @@ export default function NewRecordingPage() {
         fileSize: blob.size,
         durationSeconds: recorder.recordedSeconds,
         createdAt: Date.now(),
-      }).catch(() => {}); // best effort: private mode / quota
+      }).then(
+        () => setSaveFailed(false),
+        () => setSaveFailed(true) // private mode / quota: the page then warns before it is left
+      );
     } else if (!recorder.audioBlob && pendingIdRef.current) {
       // A new recording was started or the old one was reset: drop the saved copy of the discarded one.
       discardPending(createIndexedDbStore(), pendingIdRef.current).catch(() => {});
       pendingIdRef.current = null;
+      setSaveFailed(false);
     }
   }, [recorder.audioBlob, recorder.isRecording, recorder.recordedSeconds]);
 
@@ -139,16 +147,13 @@ export default function NewRecordingPage() {
 
   const handleStop = () => {
     const seconds = recorder.activeSeconds();
-    const held = recordingApprovedRef.current ? null : checkMicRecording(seconds, recorder.measuredPeak());
-    if (held) {
-      // Pause only: nothing is finished, saved or thrown away until the user chooses.
-      recorder.pauseRecording();
-      setHeldRecording(held);
-      track('record_clicked', { step: heldStep(held), seconds });
-      return;
-    }
-    setHeldRecording(null);
-    recorder.stopRecording();
+    const held = checkMicRecording(seconds, recorder.measuredPeak());
+    if (held) track('record_clicked', { step: heldStep(held), seconds });
+    setHeldRecording(held);
+    // Under 10 seconds there is next to nothing to lose: pause, so the user can add to it. Anything else is finished and
+    // saved in this browser, also when it sounds silent: only its upload waits for the user.
+    if (held?.problem === 'too_short') recorder.pauseRecording();
+    else recorder.stopRecording();
   };
 
   const keepGoing = () => {
@@ -158,23 +163,22 @@ export default function NewRecordingPage() {
   };
 
   const recordAgain = async () => {
-    setHeldRecording(null);
-    recordingApprovedRef.current = false;
+    if (!window.confirm(DISCARD_QUESTION)) return;
+    const inProgress = recorder.isRecording;
     track('record_clicked', { step: 'record_again' });
-    await recorder.restartRecording();
+    // If the microphone does not open, a finished recording stays, and so does its notice.
+    if ((await recorder.restartRecording()) || inProgress) {
+      setHeldRecording(null);
+      recordingApprovedRef.current = false;
+    }
   };
 
   const uploadRecordingAnyway = () => {
-    if (!heldRecording?.canUploadAnyway) return;
+    if (!heldRecording?.canUploadAnyway || !recorder.audioBlob) return;
     recordingApprovedRef.current = true;
     setHeldRecording(null);
     track('record_clicked', { step: 'upload_anyway' });
-    if (recorder.isRecording) {
-      submitWhenStoppedRef.current = true; // submitted once the audio is ready
-      recorder.stopRecording();
-    } else {
-      void handleSubmit();
-    }
+    void handleSubmit();
   };
 
   const uploadFileAnyway = () => {
@@ -275,15 +279,6 @@ export default function NewRecordingPage() {
     }
   };
 
-  useEffect(() => {
-    if (submitWhenStoppedRef.current && recorder.audioBlob && !recorder.isRecording) {
-      submitWhenStoppedRef.current = false;
-      void handleSubmit();
-    }
-    // Only when the audio becomes ready: handleSubmit is the one of that render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recorder.audioBlob, recorder.isRecording]);
-
   const hasAudio = mode === 'record' ? !!recorder.audioBlob && !recorder.isRecording : !!selectedFile;
   const held = mode === 'record' ? !!heldRecording : !!heldFile;
   const checking = mode === 'upload' && checkingFile;
@@ -296,10 +291,7 @@ export default function NewRecordingPage() {
         <Link
           href="/recordings"
           onClick={(e) => {
-            if (
-              shouldBlockUnload({ isRecording: recorder.isRecording, isPaused: recorder.isPaused, isSubmitting }) &&
-              !window.confirm('Leave this page? Your recording in progress will be lost.')
-            ) {
+            if (wouldLoseAudio && !window.confirm('Leave this page? Your recording will be lost.')) {
               e.preventDefault();
             }
           }}
@@ -398,11 +390,15 @@ export default function NewRecordingPage() {
                   duration={recorder.duration}
                   error={recorder.error}
                   onStart={async () => {
-                    setHeldRecording(null);
-                    recordingApprovedRef.current = false;
+                    // A finished recording that was not uploaded is replaced by the new one: ask first.
+                    if (recorder.audioBlob && !window.confirm(DISCARD_QUESTION)) return;
                     track('record_clicked');
                     // Counted only once the microphone opened: the gap from record_clicked is permission or device trouble.
-                    if ((await recorder.startRecording()) && firstRecording()) track('first_recording_started', { mode: 'record' });
+                    if (await recorder.startRecording()) {
+                      if (firstRecording()) track('first_recording_started', { mode: 'record' });
+                      setHeldRecording(null);
+                      recordingApprovedRef.current = false;
+                    }
                   }}
                   onStop={handleStop}
                   onPause={recorder.pauseRecording}
@@ -411,10 +407,11 @@ export default function NewRecordingPage() {
                     recorder.resumeRecording();
                   }}
                 />
-                {heldRecording && !isSubmitting && (
+                {heldRecording && !isSubmitting && (recorder.isPaused || !!recorder.audioBlob) && (
                   <RecordingCheckNotice
                     held={heldRecording}
                     source="recording"
+                    saved={!saveFailed}
                     onKeepGoing={recorder.isRecording ? keepGoing : undefined}
                     onRecordAgain={recordAgain}
                     onUploadAnyway={uploadRecordingAnyway}
