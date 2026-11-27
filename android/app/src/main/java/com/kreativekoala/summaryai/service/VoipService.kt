@@ -2,61 +2,64 @@ package com.kreativekoala.summaryai.service
 
 import android.content.Context
 import android.media.AudioManager
-import androidx.annotation.StringRes
-import com.kreativekoala.summaryai.R
 import android.util.Log
+import androidx.annotation.StringRes
+import com.kreativekoala.summaryai.FailureReporter
+import com.kreativekoala.summaryai.R
+import com.kreativekoala.summaryai.data.repository.PhoneRepository
 import com.twilio.voice.Call
 import com.twilio.voice.CallException
 import com.twilio.voice.ConnectOptions
 import com.twilio.voice.Voice
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Reason why a call ended
- */
+/** Why a call ended, as far as the app's own leg can tell. */
 enum class CallEndReason(@StringRes val messageRes: Int) {
     COMPLETED(R.string.call_end_completed),
-    DECLINED(R.string.call_end_declined),
     BUSY(R.string.call_end_busy),
-    NO_ANSWER(R.string.no_answer),
     CANCELLED(R.string.call_end_cancelled),
-    FAILED(R.string.call_end_failed),
-    UNKNOWN(R.string.call_end_completed)
+    FAILED(R.string.call_end_failed)
 }
 
-/**
- * VoIP call state
- */
 sealed class VoipCallState {
     object Idle : VoipCallState()
     object Connecting : VoipCallState()
-    object Ringing : VoipCallState()
+    /** The app's leg is up: the notice plays and the other number rings or is talking (the server knows which). */
     object Connected : VoipCallState()
-    data class Disconnected(val reason: CallEndReason, val message: String? = null) : VoipCallState()
-    data class Failed(val error: String) : VoipCallState()
+    data class Disconnected(val reason: CallEndReason) : VoipCallState()
 }
 
+/** The call the screen shows, kept here so it survives leaving the Phone screen. */
+data class CurrentCall(val callId: String, val toNumber: String, val toName: String?, val timeLimitSeconds: Int)
+
 /**
- * Service for managing VoIP calls using Twilio Voice SDK
+ * The app's leg of a phone call (Twilio Voice SDK). The server tells it nothing but a one-call token and the call id:
+ * who is dialled, with which caller ID and for how long is decided on the server. No number is logged.
  */
 @Singleton
 class VoipService @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val repository: PhoneRepository
 ) {
-    companion object {
-        private const val TAG = "VoipService"
-    }
+    private companion object { const val TAG = "VoipService" }
 
     private var activeCall: Call? = null
-    private var accessToken: String? = null
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private val _callState = MutableStateFlow<VoipCallState>(VoipCallState.Idle)
     val callState: StateFlow<VoipCallState> = _callState.asStateFlow()
+
+    private val _currentCall = MutableStateFlow<CurrentCall?>(null)
+    val currentCall: StateFlow<CurrentCall?> = _currentCall.asStateFlow()
 
     private val _isMuted = MutableStateFlow(false)
     val isMuted: StateFlow<Boolean> = _isMuted.asStateFlow()
@@ -64,199 +67,125 @@ class VoipService @Inject constructor(
     private val _isSpeakerOn = MutableStateFlow(false)
     val isSpeakerOn: StateFlow<Boolean> = _isSpeakerOn.asStateFlow()
 
-    private val audioManager: AudioManager by lazy {
-        context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-    }
+    private val audioManager: AudioManager by lazy { context.getSystemService(Context.AUDIO_SERVICE) as AudioManager }
 
-    // Saved to restore on call end. Without this, the device gets left in
-    // MODE_IN_COMMUNICATION after the call which mutes media streams.
+    // Saved to restore on call end. Without this the device is left in MODE_IN_COMMUNICATION, which mutes media.
     private var savedAudioMode: Int = AudioManager.MODE_NORMAL
     private var savedSpeakerphoneOn: Boolean = false
+    private var audioPrepared = false
 
-    /**
-     * Set the access token for VoIP calls
-     */
-    fun setAccessToken(token: String) {
-        accessToken = token
-        Log.d(TAG, "Access token set")
-    }
+    fun hasActiveCall(): Boolean = activeCall != null
 
-    /**
-     * Make an outbound VoIP call
-     * @param callId The call ID from our backend
-     * @param toNumber The phone number to call (for display purposes)
-     */
-    fun makeCall(callId: String, toNumber: String): Boolean {
-        val token = accessToken
-        if (token == null) {
-            Log.e(TAG, "No access token set")
-            _callState.value = VoipCallState.Failed(context.getString(R.string.voip_error_no_token))
-            return false
-        }
-
-        if (activeCall != null) {
-            Log.w(TAG, "Call already in progress")
-            return false
-        }
-
-        try {
+    /** Connects the call the server just reserved. Must be called while the app is in the foreground. */
+    fun makeCall(call: CurrentCall, token: String): Boolean {
+        if (activeCall != null) return false
+        return try {
+            _currentCall.value = call
             _callState.value = VoipCallState.Connecting
-
-            // Audio routing must be configured BEFORE Voice.connect — Twilio's
-            // audio stack snapshots the AudioManager state on connect. Setting
-            // these after onConnected leaves the device in MODE_NORMAL routing
-            // to the earpiece at a low level, which is why callers reported
-            // "I can't hear the other end".
+            // Audio routing must be set BEFORE Voice.connect: the SDK's audio stack reads it on connect.
             savedAudioMode = audioManager.mode
             savedSpeakerphoneOn = audioManager.isSpeakerphoneOn
+            audioPrepared = true
             audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
             audioManager.isSpeakerphoneOn = true
             _isSpeakerOn.value = true
-            Log.d(TAG, "Audio prepared: mode=IN_COMMUNICATION, speaker=true (was mode=$savedAudioMode, speaker=$savedSpeakerphoneOn)")
-
-            // Build connect options with call_id parameter
-            // This will be passed to our TwiML App webhook
-            val params = HashMap<String, String>()
-            params["call_id"] = callId
-            params["to"] = toNumber
-
-            val connectOptions = ConnectOptions.Builder(token)
-                .params(params)
-                .build()
-
-            Log.d(TAG, "Making VoIP call to $toNumber with call_id=$callId")
-
-            activeCall = Voice.connect(context, connectOptions, callListener)
-            return true
+            CallForegroundService.start(context)
+            val options = ConnectOptions.Builder(token).params(hashMapOf("call_id" to call.callId)).build()
+            activeCall = Voice.connect(context, options, listener)
+            true
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to make call", e)
-            _callState.value = VoipCallState.Failed(e.message ?: context.getString(R.string.voip_error_unknown))
-            return false
+            report("connect", e.javaClass.simpleName)
+            finish(call.callId, CallEndReason.FAILED)
+            false
         }
     }
 
-    /**
-     * Disconnect the active call (user initiated)
-     */
+    /** The user hangs up. */
     fun disconnect() {
-        activeCall?.disconnect()
+        val call = activeCall ?: return
+        val id = _currentCall.value?.callId
         activeCall = null
-        _callState.value = VoipCallState.Disconnected(CallEndReason.CANCELLED)
-        resetAudio()
+        call.disconnect()
+        finish(id, CallEndReason.CANCELLED)
     }
 
-    /**
-     * Toggle mute
-     */
+    /** The screen has shown how the call ended. */
+    fun acknowledgeEnd() {
+        if (activeCall != null) return
+        _currentCall.value = null
+        _callState.value = VoipCallState.Idle
+    }
+
     fun toggleMute() {
         activeCall?.let { call ->
-            val newMuteState = !_isMuted.value
-            call.mute(newMuteState)
-            _isMuted.value = newMuteState
-            Log.d(TAG, "Mute toggled: $newMuteState")
+            val muted = !_isMuted.value
+            call.mute(muted)
+            _isMuted.value = muted
         }
     }
 
-    /**
-     * Toggle speaker
-     */
     fun toggleSpeaker() {
-        val newSpeakerState = !_isSpeakerOn.value
-        audioManager.isSpeakerphoneOn = newSpeakerState
-        _isSpeakerOn.value = newSpeakerState
-        Log.d(TAG, "Speaker toggled: $newSpeakerState")
+        val on = !_isSpeakerOn.value
+        audioManager.isSpeakerphoneOn = on
+        _isSpeakerOn.value = on
     }
 
-    /**
-     * Check if there's an active call
-     */
-    fun hasActiveCall(): Boolean = activeCall != null
+    private fun finish(callId: String?, reason: CallEndReason) {
+        activeCall = null
+        _callState.value = VoipCallState.Disconnected(reason)
+        CallForegroundService.stop(context)
+        resetAudio()
+        // Tells the server: frees the reservation if nothing was dialled, ends the call otherwise.
+        if (callId != null) scope.launch { repository.hangup(callId) }
+    }
 
     private fun resetAudio() {
         _isMuted.value = false
         _isSpeakerOn.value = false
-        // Restore the audio state we snapshotted before the call so the device
-        // doesn't get stuck in MODE_IN_COMMUNICATION (which mutes the MEDIA
-        // stream and breaks subsequent music/TTS playback).
+        if (!audioPrepared) return
+        audioPrepared = false
         audioManager.isSpeakerphoneOn = savedSpeakerphoneOn
         audioManager.mode = savedAudioMode
     }
 
-    /**
-     * Twilio Call listener
-     */
-    private val callListener = object : Call.Listener {
+    private fun report(stage: String, code: String) {
+        Log.w(TAG, "call problem at $stage: $code")
+        // i18n-ok: an error report, never shown to the user
+        FailureReporter.failure("phone_call_$stage", message = "phone call $stage failed", context = mapOf("code" to code))
+    }
+
+    /** Callbacks for a call that is no longer the active one (already hung up here) are ignored. */
+    private val listener = object : Call.Listener {
         override fun onConnectFailure(call: Call, callException: CallException) {
-            Log.e(TAG, "Connect failure: ${callException.message}", callException)
-            activeCall = null
-            _callState.value = VoipCallState.Failed(callException.message ?: context.getString(R.string.voip_error_connect_failed))
-            resetAudio()
+            if (activeCall !== call) return
+            report("connect", callException.errorCode.toString())
+            finish(_currentCall.value?.callId, CallEndReason.FAILED)
         }
 
-        override fun onRinging(call: Call) {
-            Log.d(TAG, "Call ringing")
-            _callState.value = VoipCallState.Ringing
-        }
+        override fun onRinging(call: Call) = Unit
 
         override fun onConnected(call: Call) {
-            Log.d(TAG, "Call connected")
-            _callState.value = VoipCallState.Connected
-            // Audio mode + speaker were configured BEFORE Voice.connect in
-            // makeCall(). Touching them here would fight Twilio's audio stack.
+            if (activeCall === call) _callState.value = VoipCallState.Connected
         }
 
-        override fun onReconnecting(call: Call, callException: CallException) {
-            Log.d(TAG, "Call reconnecting: ${callException.message}")
-        }
+        override fun onReconnecting(call: Call, callException: CallException) = Unit
 
         override fun onReconnected(call: Call) {
-            Log.d(TAG, "Call reconnected")
-            _callState.value = VoipCallState.Connected
+            if (activeCall === call) _callState.value = VoipCallState.Connected
         }
 
         override fun onDisconnected(call: Call, callException: CallException?) {
-            Log.d(TAG, "Call disconnected: ${callException?.message}, errorCode: ${callException?.errorCode}")
-            activeCall = null
-
-            // Parse the disconnect reason from the exception
-            val reason = parseDisconnectReason(callException)
-            _callState.value = VoipCallState.Disconnected(reason, callException?.message)
-
-            // resetAudio() already restores mode + speakerphone via the
-            // savedAudioMode / savedSpeakerphoneOn snapshot. Don't force
-            // MODE_NORMAL here — that overwrites whatever was running before.
-            resetAudio()
+            if (activeCall !== call) return
+            if (callException != null) report("dropped", callException.errorCode.toString())
+            finish(_currentCall.value?.callId, callEndReason(callException?.errorCode))
         }
     }
+}
 
-    /**
-     * Parse the disconnect reason from Twilio exception
-     * Twilio error codes: https://www.twilio.com/docs/api/errors
-     */
-    private fun parseDisconnectReason(exception: CallException?): CallEndReason {
-        if (exception == null) {
-            return CallEndReason.COMPLETED
-        }
-
-        val message = exception.message?.lowercase() ?: ""
-        val errorCode = exception.errorCode
-
-        return when {
-            // Check for specific Twilio error codes
-            errorCode == 31005 -> CallEndReason.DECLINED // Call rejected
-            errorCode == 31486 -> CallEndReason.BUSY // Busy
-            errorCode == 31480 -> CallEndReason.NO_ANSWER // Timeout/No answer
-            errorCode == 31487 -> CallEndReason.CANCELLED // Cancelled
-
-            // Fall back to message parsing
-            message.contains("rejected") || message.contains("declined") -> CallEndReason.DECLINED
-            message.contains("busy") -> CallEndReason.BUSY
-            message.contains("no answer") || message.contains("timeout") -> CallEndReason.NO_ANSWER
-            message.contains("cancel") -> CallEndReason.CANCELLED
-            message.contains("failed") || message.contains("error") -> CallEndReason.FAILED
-
-            // No exception means normal completion
-            else -> CallEndReason.UNKNOWN
-        }
-    }
+/** Voice SDK error codes: 31486 busy, 31487 cancelled; any other error is a failure; none is a normal end. */
+fun callEndReason(errorCode: Int?): CallEndReason = when (errorCode) {
+    null -> CallEndReason.COMPLETED
+    31486 -> CallEndReason.BUSY
+    31487 -> CallEndReason.CANCELLED
+    else -> CallEndReason.FAILED
 }

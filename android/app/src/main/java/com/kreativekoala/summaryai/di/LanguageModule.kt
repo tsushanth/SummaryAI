@@ -12,4 +12,7 @@ import dagger.hilt.components.SingletonComponent
 abstract class LanguageModule {
     @Binds
     abstract fun bindOutputLanguageSource(impl: PreferenceOutputLanguage): OutputLanguageSource
+
+    @Binds
+    abstract fun bindPhoneDevice(impl: com.kreativekoala.summaryai.util.AndroidPhoneDevice): com.kreativekoala.summaryai.util.PhoneDevice
 }

@@ -2,102 +2,76 @@ package com.kreativekoala.summaryai.data.api.models
 
 import com.google.gson.annotations.SerializedName
 
-// MARK: - Phone Call Status
-
-enum class PhoneCallStatus {
-    @SerializedName("initiated") INITIATED,
-    @SerializedName("ringing") RINGING,
-    @SerializedName("in_progress") IN_PROGRESS,
-    @SerializedName("recording") RECORDING,
-    @SerializedName("completed") COMPLETED,
-    @SerializedName("failed") FAILED,
-    @SerializedName("busy") BUSY,
-    @SerializedName("no_answer") NO_ANSWER,
-    @SerializedName("cancelled") CANCELLED
-}
-
-// MARK: - Verified Phone
+// MARK: - Phone calls (backend: /api/phone)
 
 data class VerifiedPhoneDto(
     val id: String,
     @SerializedName("phone_number") val phoneNumber: String,
     @SerializedName("verified_at") val verifiedAt: String?,
-    @SerializedName("created_at") val createdAt: String
+    @SerializedName("created_at") val createdAt: String?
 )
 
-// MARK: - Phone Call
-
-data class PhoneCallDto(
-    val id: String,
-    @SerializedName("user_id") val userId: String,
-    @SerializedName("from_number") val fromNumber: String,
-    @SerializedName("to_number") val toNumber: String,
-    @SerializedName("to_name") val toName: String?,
-    @SerializedName("twilio_call_sid") val twilioCallSid: String?,
-    @SerializedName("conference_sid") val conferenceSid: String?,
-    @SerializedName("conference_name") val conferenceName: String?,
-    @SerializedName("recording_sid") val recordingSid: String?,
-    val status: PhoneCallStatus,
-    @SerializedName("is_recording") val isRecording: Boolean,
-    @SerializedName("recording_url") val recordingUrl: String?,
-    @SerializedName("recording_duration") val recordingDuration: Int?,
-    @SerializedName("recording_id") val recordingId: String?,
-    @SerializedName("started_at") val startedAt: String?,
-    @SerializedName("answered_at") val answeredAt: String?,
-    @SerializedName("recording_started_at") val recordingStartedAt: String?,
-    @SerializedName("ended_at") val endedAt: String?,
-    @SerializedName("created_at") val createdAt: String,
-    @SerializedName("updated_at") val updatedAt: String?
+/** What the server allows this account. `enabled = false` hides the Phone tab; every other field is then absent. */
+data class PhoneStatusResponse(
+    val enabled: Boolean = false,
+    @SerializedName("consent_version") val consentVersion: String? = null,
+    @SerializedName("call_languages") val callLanguages: List<String>? = null,
+    @SerializedName("max_verified_numbers") val maxVerifiedNumbers: Int? = null,
+    @SerializedName("minutes_per_month") val minutesPerMonth: Int? = null,
+    @SerializedName("minutes_left") val minutesLeft: Int? = null,
+    @SerializedName("service_available") val serviceAvailable: Boolean? = null,
+    @SerializedName("business_answered") val businessAnswered: Boolean? = null,
+    val phones: List<VerifiedPhoneDto>? = null
 )
 
-// MARK: - API Requests
-
-data class SendVerificationRequest(
+data class StartVerificationRequest(
     @SerializedName("phone_number") val phoneNumber: String
 )
 
-data class CheckVerificationRequest(
-    @SerializedName("phone_number") val phoneNumber: String,
-    val code: String
+data class StartVerificationResponse(
+    @SerializedName("verification_id") val verificationId: String,
+    /** The person types this on the phone keypad during the verification call. Never stored or logged. */
+    val code: String,
+    @SerializedName("expires_in_seconds") val expiresInSeconds: Int,
+    @SerializedName("phone_number") val phoneNumber: String
 )
 
-data class InitiateCallRequest(
-    val from: String,
+data class VerificationStatusResponse(
+    /** pending, verified or failed */
+    val status: String,
+    val reason: String? = null,
+    val phone: VerifiedPhoneDto? = null
+)
+
+data class StartCallRequest(
     val to: String,
-    @SerializedName("to_name") val toName: String? = null
+    @SerializedName("from_id") val fromId: String?,
+    @SerializedName("to_name") val toName: String?,
+    @SerializedName("consent_version") val consentVersion: String,
+    @SerializedName("output_language") val outputLanguage: String?,
+    @SerializedName("call_language") val callLanguage: String
 )
 
-// MARK: - API Responses
-
-data class SendVerificationResponse(
-    val message: String
-)
-
-data class CheckVerificationResponse(
-    val verified: Boolean,
-    val phone: VerifiedPhoneDto?
-)
-
-data class VerifiedPhonesResponse(
-    val phones: List<VerifiedPhoneDto>
-)
-
-data class InitiateCallResponse(
+data class StartCallResponse(
     @SerializedName("call_id") val callId: String,
-    val status: String,
-    @SerializedName("twilio_call_sid") val twilioCallSid: String?
+    /** Short-lived token for the calling SDK, valid for this call only. */
+    val token: String,
+    @SerializedName("to_number") val toNumber: String,
+    @SerializedName("from_number") val fromNumber: String,
+    @SerializedName("time_limit_seconds") val timeLimitSeconds: Int,
+    @SerializedName("minutes_left") val minutesLeft: Int
 )
 
-// VoIP response - returns call details for client-side VoIP calling
-data class CreateCallResponse(
-    @SerializedName("call_id") val callId: String,
-    val status: String,
-    @SerializedName("conference_name") val conferenceName: String,
-    @SerializedName("to_number") val toNumber: String
-)
-
-data class VoipTokenResponse(
-    val token: String
+data class PhoneCallDto(
+    val id: String,
+    @SerializedName("from_number") val fromNumber: String,
+    @SerializedName("to_number") val toNumber: String,
+    @SerializedName("to_name") val toName: String?,
+    val status: String?,
+    @SerializedName("recording_duration") val recordingDuration: Int?,
+    @SerializedName("recording_id") val recordingId: String?,
+    @SerializedName("started_at") val startedAt: String?,
+    @SerializedName("created_at") val createdAt: String
 )
 
 data class ListPhoneCallsResponse(
@@ -111,15 +85,21 @@ data class PhoneCallResponse(
     val call: PhoneCallDto
 )
 
-data class RecordingControlResponse(
-    val recording: Boolean,
-    @SerializedName("conference_name") val conferenceName: String?
-)
-
 data class HangupResponse(
     val ended: Boolean
 )
 
-data class DeletePhoneResponse(
-    val deleted: Boolean
+data class PhoneEventRequest(
+    val step: String,
+    val country: String?,
+    val test: Boolean?
+)
+
+/** "Is this for a business?": business, personal or skipped. */
+data class PhoneProfileRequest(
+    val business: String,
+    @SerializedName("business_type") val businessType: String?,
+    val context: String,
+    val country: String?,
+    val test: Boolean?
 )

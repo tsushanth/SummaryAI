@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Phone calls -->
+    <string name="service_description_call">Keeps a phone call going while you use other apps</string>
+    <string name="phone_notification_channel">Phone calls</string>
+    <string name="phone_notification_title">Call in progress</string>
+
+    <string name="phone_minutes_left">Free minutes left this month: %1$d of %2$d</string>
+    <string name="phone_service_used_up">Phone calls are used up for this month. Please try again next month.</string>
+    <string name="phone_your_number">Your number</string>
+    <string name="phone_verify_intro">Calls show your own number. To register it, we call it and you type a code on your phone keypad. United States and Canada numbers only.</string>
+    <string name="phone_number_hint">Number with country code, for example +1 415 555 0100</string>
+    <string name="phone_verify_start">Call my number</string>
+    <string name="phone_verify_instruction">Answer the call and type this code on your phone keypad:</string>
+    <string name="phone_verify_call_in_english">The verification call is in English.</string>
+    <string name="phone_verify_waiting">Waiting for you to enter the code…</string>
+    <string name="phone_verify_wrong_code">The call was not answered, or the code was not entered correctly. Try again.</string>
+    <string name="phone_verify_expired">The verification timed out. Try again.</string>
+    <string name="phone_remove_number_title">Remove this number?</string>
+    <string name="phone_remove_number_message">Calls can no longer show it until you verify it again.</string>
+    <string name="phone_remove">Remove</string>
+
+    <string name="phone_error_country_code">Start the number with + and the country code, for example +1.</string>
+    <string name="phone_error_invalid_number">That is not a complete phone number.</string>
+    <string name="phone_error_country_unsupported">Calls work with United States and Canada numbers only.</string>
+    <string name="phone_error_number_not_allowed">Toll-free, premium and special-rate numbers cannot be used.</string>
+    <string name="phone_error_too_soon">Wait a minute before asking for another call.</string>
+    <string name="phone_error_verify_limit">Too many verification calls. Try again tomorrow.</string>
+    <string name="phone_error_number_busy">A verification call to this number is already under way. Try again in 10 minutes.</string>
+    <string name="phone_error_unavailable">Phone calls are not available right now. Try again later.</string>
+    <string name="phone_error_minutes_used">You have used your free call minutes for this month.</string>
+    <string name="phone_error_number_in_use">This number is already registered to another account. Contact support if it is yours.</string>
+    <string name="phone_error_already_verified">This number is already verified.</string>
+    <string name="phone_error_too_many_numbers">Remove a verified number before adding another.</string>
+    <string name="phone_error_verify_call_failed">The verification call could not be placed. Try again later.</string>
+    <string name="phone_error_call_in_progress">Another call is still in progress.</string>
+    <string name="phone_error_call_limit">Too many calls in a short time. Try again later.</string>
+    <string name="phone_error_destination_limit">This number has been called too many times today. Try again tomorrow.</string>
+    <string name="phone_error_update_app">Update the app to make phone calls.</string>
+    <string name="phone_error_account">Sign in with an email, Google or Apple account to make phone calls.</string>
+    <string name="phone_error_remove_failed">The number could not be removed. Try again.</string>
+
+    <string name="phone_consent_title">This call will be recorded</string>
+    <string name="phone_consent_numbers">You are calling %1$s and showing your number %2$s.</string>
+    <string name="phone_consent_body">Both of you hear a spoken notice that the call is being recorded before you can talk. The call is transcribed, summarized and saved to your recordings.</string>
+    <string name="phone_consent_responsibility">Continue only if you are allowed to record this call. If the other person objects, hang up.</string>
+    <string name="phone_consent_accept">Record and call</string>
+    <string name="phone_no_emergency">This cannot call emergency services such as 911. Use your phone app in an emergency.</string>
+    <string name="phone_call_language">Language of the recording notice</string>
+    <string name="phone_call_language_note">A notice in another language is followed by the same notice in English.</string>
+    <string name="phone_call_calling">Calling…</string>
+    <string name="phone_call_time_limit">This call can last up to %1$d min</string>
+    <string name="phone_call_saved_hint">The recording and summary will appear in your recordings in a few minutes.</string>
+
+    <string name="phone_business_question">Is this for a business?</string>
+    <string name="phone_business_yes">Yes, for a business</string>
+    <string name="phone_business_no">No, personal</string>
+    <string name="phone_business_skip">Skip</string>
+    <string name="phone_business_type">Type of business (optional)</string>
+    <string name="phone_business_continue">Continue</string>
+    <string name="phone_business_home_services">Home services</string>
+    <string name="phone_business_health">Health</string>
+    <string name="phone_business_beauty">Beauty and wellness</string>
+    <string name="phone_business_food">Restaurant or food</string>
+    <string name="phone_business_real_estate">Real estate</string>
+    <string name="phone_business_professional">Professional services</string>
+    <string name="phone_business_retail">Shop or retail</string>
+    <string name="phone_business_automotive">Automotive</string>
+    <string name="phone_business_education">Education</string>
+    <string name="phone_business_other">Other</string>
+</resources>

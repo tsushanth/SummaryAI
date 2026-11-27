@@ -292,37 +292,22 @@ interface SummaryAIApi {
     @DELETE("api/users/account")
     suspend fun deleteAccount(): Response<Unit>
 
-    // MARK: - Phone Verification
+    // MARK: - Phone calls
 
-    @POST("api/phone/verify/send")
-    suspend fun sendVerificationCode(
-        @Body request: SendVerificationRequest
-    ): SendVerificationResponse
+    @GET("api/phone/status")
+    suspend fun getPhoneStatus(): PhoneStatusResponse
 
-    @POST("api/phone/verify/check")
-    suspend fun checkVerificationCode(
-        @Body request: CheckVerificationRequest
-    ): CheckVerificationResponse
+    @POST("api/phone/verify/start")
+    suspend fun startPhoneVerification(@Body request: StartVerificationRequest): StartVerificationResponse
 
-    @GET("api/phone/verified")
-    suspend fun getVerifiedPhones(): VerifiedPhonesResponse
+    @GET("api/phone/verify/{id}")
+    suspend fun getPhoneVerification(@Path("id") id: String): VerificationStatusResponse
 
     @DELETE("api/phone/verified/{id}")
-    suspend fun deleteVerifiedPhone(
-        @Path("id") id: String
-    ): Response<Unit>
-
-    // MARK: - VoIP
-
-    @GET("api/phone/voip/token")
-    suspend fun getVoipToken(): VoipTokenResponse
-
-    // MARK: - Phone Calls
+    suspend fun deleteVerifiedPhone(@Path("id") id: String): Response<Unit>
 
     @POST("api/phone/calls")
-    suspend fun createCall(
-        @Body request: InitiateCallRequest
-    ): CreateCallResponse
+    suspend fun startPhoneCall(@Body request: StartCallRequest): StartCallResponse
 
     @GET("api/phone/calls")
     suspend fun getPhoneCalls(
@@ -331,24 +316,16 @@ interface SummaryAIApi {
     ): ListPhoneCallsResponse
 
     @GET("api/phone/calls/{id}")
-    suspend fun getPhoneCall(
-        @Path("id") id: String
-    ): PhoneCallResponse
-
-    @POST("api/phone/calls/{id}/record")
-    suspend fun startCallRecording(
-        @Path("id") callId: String
-    ): RecordingControlResponse
-
-    @DELETE("api/phone/calls/{id}/record")
-    suspend fun stopCallRecording(
-        @Path("id") callId: String
-    ): RecordingControlResponse
+    suspend fun getPhoneCall(@Path("id") id: String): PhoneCallResponse
 
     @POST("api/phone/calls/{id}/hangup")
-    suspend fun hangupCall(
-        @Path("id") callId: String
-    ): HangupResponse
+    suspend fun hangupCall(@Path("id") id: String): HangupResponse
+
+    @POST("api/phone/events")
+    suspend fun postPhoneEvent(@Body request: PhoneEventRequest): Response<Unit>
+
+    @POST("api/phone/profile")
+    suspend fun postPhoneProfile(@Body request: PhoneProfileRequest): Response<Unit>
 
     // MARK: - Organization (folders, tags, public share links, search)
 

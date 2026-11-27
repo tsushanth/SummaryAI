@@ -31,84 +31,45 @@ enum class PhoneCallStatus {
             CANCELLED -> R.string.status_cancelled
         }
 
-    val isActive: Boolean
-        get() = when (this) {
-            INITIATED, RINGING, IN_PROGRESS, RECORDING -> true
-            COMPLETED, FAILED, BUSY, NO_ANSWER, CANCELLED -> false
-        }
-}
-
-/**
- * Verified phone number domain model
- */
-data class VerifiedPhone(
-    val id: String,
-    val phoneNumber: String,
-    val verifiedAt: String?,
-    val createdAt: String
-) {
-    val formattedPhoneNumber: String
-        get() = formatPhoneNumber(phoneNumber)
-
-    private fun formatPhoneNumber(phone: String): String {
-        return if (phone.startsWith("+1") && phone.length == 12) {
-            val area = phone.substring(2, 5)
-            val prefix = phone.substring(5, 8)
-            val line = phone.substring(8)
-            "($area) $prefix-$line"
-        } else {
-            phone
-        }
+    companion object {
+        /** The server's wire value; anything unknown reads as failed. */
+        fun fromWire(value: String?): PhoneCallStatus =
+            entries.firstOrNull { it.name.equals(value, ignoreCase = true) } ?: FAILED
     }
 }
 
-/**
- * Phone call domain model
- */
+/** US and Canada numbers as (415) 555-0100; anything else unchanged. */
+fun formatPhoneNumber(phone: String): String =
+    if (phone.startsWith("+1") && phone.length == 12) {
+        "+1 (${phone.substring(2, 5)}) ${phone.substring(5, 8)}-${phone.substring(8)}"
+    } else {
+        phone
+    }
+
+/** A number the server has registered as the user's own caller ID. */
+data class VerifiedPhone(
+    val id: String,
+    val phoneNumber: String
+) {
+    val formattedPhoneNumber: String get() = formatPhoneNumber(phoneNumber)
+}
+
 data class PhoneCall(
     val id: String,
-    val userId: String,
     val fromNumber: String,
     val toNumber: String,
     val toName: String?,
-    val twilioCallSid: String?,
-    val conferenceSid: String?,
-    val conferenceName: String?,
-    val recordingSid: String?,
     val status: PhoneCallStatus,
-    val isRecording: Boolean,
-    val recordingUrl: String?,
     val recordingDuration: Int?,
     val recordingId: String?,
     val startedAt: String?,
-    val answeredAt: String?,
-    val recordingStartedAt: String?,
-    val endedAt: String?,
-    val createdAt: String,
-    val updatedAt: String?
+    val createdAt: String
 ) {
-    val formattedToNumber: String
-        get() = formatPhoneNumber(toNumber)
-
-    val formattedFromNumber: String
-        get() = formatPhoneNumber(fromNumber)
+    val formattedToNumber: String get() = formatPhoneNumber(toNumber)
 
     val formattedDuration: String
         get() {
             val duration = recordingDuration ?: return "--:--"
-            val mins = duration / 60
-            val secs = duration % 60
-            return String.format("%d:%02d", mins, secs)
+            return String.format(java.util.Locale.US, "%d:%02d", duration / 60, duration % 60)
         }
-
-    private fun formatPhoneNumber(phone: String): String {
-        return if (phone.startsWith("+1") && phone.length == 12) {
-            val area = phone.substring(2, 5)
-            val prefix = phone.substring(5, 8)
-            val line = phone.substring(8)
-            "($area) $prefix-$line"
-        } else {
-            phone
-        }
-    }
 }
