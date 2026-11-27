@@ -51,11 +51,34 @@ Canada from the numbering plan administrator's list. Refused: every other +1 des
 ### Switches (all off in production)
 | Setting | Effect |
 |---|---|
-| `FEATURE_PHONE_CALLS=1` | on for every signed-in user |
-| `PHONE_CALLS_TESTER_IDS` | on for the listed account ids only |
+| `FEATURE_PHONE_CALLS=1` | on for signed-in users the country rule below allows |
+| `PHONE_CALLS_TESTER_IDS` | on for the listed account ids, in any country |
+| `PHONE_COUNTRIES` | countries the feature is shown in; default `US,CA` (does not enable anything by itself) |
 | `PHONE_TWILIO_ACCOUNT_SID`, `PHONE_TWILIO_AUTH_TOKEN`, `PHONE_TWILIO_API_KEY_SID`, `PHONE_TWILIO_API_KEY_SECRET`, `PHONE_TWILIO_TWIML_APP_SID`, `PHONE_NUMBER_HASH_KEY` | required for either switch to do anything |
 
 The web phone pages stay hidden (their own flag). iOS is out of scope.
+
+### Who is shown the feature (`backend/src/phone/availability.ts`)
+The server decides on every `/api/phone` request, in this order:
+
+1. Neither switch covers the account: hidden.
+2. Tester account: shown.
+3. The request carries no country (every released app version up to 1.7.15, and the web): hidden.
+4. SIM country or network country is in `PHONE_COUNTRIES`: shown. The device region counts only when the app has
+   neither.
+5. The account has a verified number: shown, also abroad.
+
+The app sends two-letter codes as headers (`x-mm-sim-country`, `x-mm-network-country`, `x-mm-device-region`, and
+`x-mm-test` from test devices), read with no permission. Hidden answers are the same as with the switch off:
+`/status` says `enabled: false` (the app then shows no tab and no other mention), the two lists that versions up to
+1.7.13 load are empty pages, everything else is 404 `FEATURE_DISABLED`. No answer asks anyone to update; the endpoints
+only old versions use answer `FEATURE_DISABLED` for everyone. Versions up to 1.7.13 draw their old Phone tab whatever
+the server says. Removing a verified number and ending a trial work even while hidden.
+
+`PHONE_COUNTRIES` changes with a server setting (the machine restarts), without an app release. It only changes what
+is shown: the countries come from the device and can be forged, and which numbers can be verified, called or bought is
+enforced by the number rules and the carrier settings, which stay United States and Canada. Adding a country to the list
+shows the screens there but allows no number of that country.
 
 ### Android
 Permissions used by calling (all already declared by the app): `RECORD_AUDIO`, `INTERNET`, `ACCESS_NETWORK_STATE`,
@@ -67,6 +90,9 @@ already merged. None added; the old phone-only permissions stay removed. The scr
 verification started / ok / failed with reason, call started / refused / connected / ended / recorded / discarded /
 transcribed / failed, cap hit, answer to "Is this for a business?" (skippable, with optional type). Test accounts and
 test devices are marked. `phone_funnel(since)` splits by business answer and country and counts week-2 repeat use.
+Since migration 035 both counts include only accounts that were shown the feature (step `feature_seen`, written by the
+server at most about once a day per account and country), split by the country that showed it: the supported SIM,
+network or region country, or for a verified account abroad the first one sent. `phone_funnel` adds `could_see`.
 Failures raise `phone_calls` alerts. No number, name or code is stored in events or alerts.
 
 ### Languages

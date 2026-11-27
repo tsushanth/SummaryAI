@@ -9,6 +9,7 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 
 ## Android: merged, NOT released (next release: after 1.7.15, versionCode 68)
 
+- Phone calls by country: the app sends the SIM and network country (device region only without either) on phone requests, no new permission; the server decides whether the Phone tab is shown (design: "Who is shown the feature"). Builds without this are told "not available" unless the account is a tester. Checks: `:app:testDebugUnitTest` 337 tests, 0 failures; `lintDebug` 0 errors. No device run.
 - Own number and phone agent (#127): a "My number" tab on the Phone screen, shown only when the server says so; call results with summary, collected details and transcript; purchase hidden unless the server offers it; strings in all languages. No new permission. Checks: `:app:testDebugUnitTest` 330 tests, 0 failures; `lintDebug` 0 errors. Before release: the privacy page and Play data safety need the phone call wording.
 - Phone calls: the Phone tab appears only when the server says the account has phone calls; verify own number, consent screen before every call, microphone foreground service during a call, business question, strings in all languages. No new permission. Checks: `:app:testDebugUnitTest` 318 tests, 0 failures; `:app:assembleDebug`; `lintDebug` 0 errors. No device run. Before release: the privacy page and Play data safety need the phone call wording.
 

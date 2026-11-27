@@ -164,7 +164,7 @@ beforeEach(async () => {
 afterEach(() => { server.close(); vi.restoreAllMocks(); process.env = { ...env }; });
 
 const api = async (method: string, path: string, body?: unknown, headers: Record<string, string> = {}) => {
-  const r = await fetch(`${base}${path}`, { method, headers: { 'content-type': 'application/json', ...headers }, body: body ? JSON.stringify(body) : undefined });
+  const r = await fetch(`${base}${path}`, { method, headers: { 'content-type': 'application/json', 'x-mm-sim-country': 'US', ...headers }, body: body ? JSON.stringify(body) : undefined });
   const text = await r.text();
   return { status: r.status, body: text ? JSON.parse(text) : null };
 };

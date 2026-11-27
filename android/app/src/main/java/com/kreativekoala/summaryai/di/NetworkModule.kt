@@ -52,10 +52,12 @@ object NetworkModule {
     @Singleton
     fun provideOkHttpClient(
         authInterceptor: AuthInterceptor,
-        loggingInterceptor: HttpLoggingInterceptor
+        loggingInterceptor: HttpLoggingInterceptor,
+        phoneDevice: com.kreativekoala.summaryai.util.PhoneDevice
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(authInterceptor)
+            .addInterceptor(com.kreativekoala.summaryai.data.api.PhoneCountryHeaders(phoneDevice))
             .addInterceptor(com.kreativekoala.summaryai.data.api.SlowPhonePaths())
             .addInterceptor(com.kreativekoala.summaryai.data.api.UnloggedPhonePaths(loggingInterceptor))
             .addInterceptor(com.kreativekoala.summaryai.FailureReporterInterceptor())

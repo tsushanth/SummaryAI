@@ -48,8 +48,9 @@ beforeEach(async () => {
 });
 afterEach(() => { server.close(); vi.restoreAllMocks(); process.env = { ...env }; });
 
+/** As the app with a United States SIM sends it; who sees what by country is in phone-availability.test.ts. */
 const api = async (method: string, path: string, body?: unknown) => {
-  const r = await fetch(`${base}/api/phone${path}`, { method, headers: { 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+  const r = await fetch(`${base}/api/phone${path}`, { method, headers: { 'content-type': 'application/json', 'x-mm-sim-country': 'US' }, body: body ? JSON.stringify(body) : undefined });
   const text = await r.text();
   return { status: r.status, body: text ? JSON.parse(text) : null };
 };
@@ -131,11 +132,6 @@ describe('who has the feature', () => {
     expect((await api('POST', '/verify/start', { phone_number: MY_NUMBER })).body.error.code).toBe('PHONE_ACCOUNT_NOT_ELIGIBLE');
     expect((await startCall()).status).toBe(403);
     expect(world.asked).toEqual([]);
-  });
-  it('tells old app versions to update', async () => {
-    for (const [m, p] of [['POST', '/verify/send'], ['POST', '/verify/check'], ['GET', '/voip/token']] as const) {
-      expect((await api(m, p, m === 'POST' ? {} : undefined)).body.error.code).toBe('APP_UPDATE_REQUIRED');
-    }
   });
 });
 
@@ -495,10 +491,11 @@ describe('measuring', () => {
     expect((await api('POST', '/profile', { business: 'business', business_type: 'health' })).status).toBe(204);
     expect((await api('POST', '/profile', { business: 'skipped', business_type: 'health' })).status).toBe(204);
     expect((await api('POST', '/profile', { business: 'maybe' })).status).toBe(400);
+    // The country is the one the server decided by (the headers), whatever the body says.
     expect(world.events.map((e) => e.props)).toEqual([
-      { country: 'CA', test: true },
-      { answer: 'business', business_type: 'health', context: 'number', country: undefined },
-      { answer: 'skipped', business_type: undefined, context: 'number', country: undefined },
+      { country: 'US', test: true },
+      { answer: 'business', business_type: 'health', context: 'number', country: 'US' },
+      { answer: 'skipped', business_type: undefined, context: 'number', country: 'US' },
     ]);
     expect((await api('GET', '/status')).body.business_answered).toBe(true);
   });

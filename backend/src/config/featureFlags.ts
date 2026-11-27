@@ -6,6 +6,7 @@
  *   PHONE_CALLS_TESTER_IDS   Comma separated account ids that have phone calls while the switch above is off.
  *
  * Either one also needs the calls subaccount settings (phone/settings.ts); without them nobody has the feature.
+ * These say which accounts have it; who is shown it also depends on the country (phone/availability.ts).
  */
 const ON = new Set(['1', 'true', 'on', 'yes']);
 

@@ -10,8 +10,8 @@ export const PHONE_STEPS = [
   // reported by the app (allow-list for POST /api/phone/events)
   'tab_opened', 'number_requested', 'consent_shown', 'consent_declined', 'purchase_started',
   'own_number_opened', 'own_number_confirm_shown', 'own_number_confirm_declined', 'agent_form_opened', 'call_result_opened',
-  // written by the server
-  'verify_started', 'verify_ok', 'verify_failed', 'number_removed', 'business_answer',
+  // written by the server; feature_seen = this account was shown phone calls (migration 035 counts only those)
+  'feature_seen', 'verify_started', 'verify_ok', 'verify_failed', 'number_removed', 'business_answer',
   'call_started', 'call_refused', 'call_connected', 'call_ended', 'call_recorded', 'call_discarded',
   'call_transcribed', 'call_transcribe_failed', 'cap_hit', 'purchase_completed', 'agent_created',
   'purchase_failed', 'trial_started', 'trial_refused', 'trial_ended', 'own_number_added', 'own_number_failed', 'own_number_released',
