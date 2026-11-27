@@ -6,7 +6,7 @@ import { reportAlert } from '../lib/alerts.js';
 import { expectLoop, registerLoop, runLoopPass } from '../lib/loopMonitor.js';
 import { hasPhoneCalls, isPhoneTester } from '../config/featureFlags.js';
 import { triggerProcessing } from '../services/processingService.js';
-import { TEST_ACCOUNT_RE } from '../services/firstRecordingAlert.js';
+import { isTestAccount as isListedTestAccount } from '../services/testTraffic.js';
 import { readPhoneSettings } from './settings.js';
 import { createSupabaseStore } from './store.js';
 import { createTwilioGateway } from './gateway.js';
@@ -29,17 +29,8 @@ export function getPhoneDeps(): PhoneDeps | null {
   if (cached?.key === key) return cached.deps;
   const store = createSupabaseStore(supabaseAdmin, config.STORAGE_BUCKET_AUDIO);
   const alert: PhoneDeps['alert'] = (code, context) => { reportAlert('phone_calls', code, context ?? {}); };
-  const testCache = new Map<string, boolean>();
-  const isTestAccount = async (userId: string): Promise<boolean> => {
-    if (isPhoneTester(userId)) return true;
-    const known = testCache.get(userId);
-    if (known !== undefined) return known;
-    const info = await store.userInfo(userId);
-    const test = TEST_ACCOUNT_RE.test(info?.email ?? '');
-    if (testCache.size > 5000) testCache.clear();
-    if (info) testCache.set(userId, test);
-    return test;
-  };
+  // Asked again each time: the rules are data and can change while the process runs.
+  const isTestAccount = async (userId: string): Promise<boolean> => isPhoneTester(userId) || isListedTestAccount(userId);
   const deps: PhoneDeps = {
     settings,
     store,

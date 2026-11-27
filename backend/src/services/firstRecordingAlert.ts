@@ -5,14 +5,15 @@
  * One scan instead of a call at every failure site: failures are written by processing, the upload sweepers, the bot
  * webhooks and the recovery loops, and a scan sees all of them.
  *
- * Context holds only non-content values (code, source, client, length, size) plus the opaque account id. Clear test
- * accounts are skipped. Dedupe is per process: a restart inside the window can report one recording twice (the reporter
+ * Context holds only non-content values (code, source, client, length, size) plus the opaque account id. Test
+ * accounts (services/testTraffic.ts) are skipped. Dedupe is per process: a restart inside the window can report one recording twice (the reporter
  * collapses repeats of the same message within its window).
  */
 import { supabaseAdmin } from '../lib/supabase.js';
 import { reportFailure } from '../lib/failureReporter.js';
 import { registerLoop, runLoopPass, reportLoopScanError } from '../lib/loopMonitor.js';
 import { NO_SPEECH_CODE } from './shortRecordingGuard.js';
+import { isTestAccount } from './testTraffic.js';
 
 const LOOP = 'FirstRecordingAlert';
 export const FIRST_RECORDING_SCAN_INTERVAL_MS = 5 * 60_000;
@@ -20,8 +21,6 @@ export const FIRST_RECORDING_SCAN_INTERVAL_MS = 5 * 60_000;
 export const CHANGED_WINDOW_MS = 30 * 60_000;
 /** Older recordings are history: renaming an old failed one must not report it again. Covers the 24 h upload sweeper. */
 export const MAX_RECORDING_AGE_MS = 72 * 3600_000;
-/** Automated and our own test accounts: reserved test domain, Play pre-launch devices. */
-export const TEST_ACCOUNT_RE = /@example\.(com|org|net)$|cloudtestlabaccounts|\.[0-9]{5}@gmail\.com$/i;
 
 interface Row {
   id: string;
@@ -73,8 +72,7 @@ export async function scanFirstRecordingFailures(now: number = Date.now()): Prom
     if ((earlier.count ?? 0) > 0) { reported.add(r.id); continue; }
 
     // An unreadable account is reported anyway: a missed real user is worse than one extra email.
-    const account = await supabaseAdmin.auth.admin.getUserById(r.user_id).catch(() => null);
-    if (TEST_ACCOUNT_RE.test(account?.data?.user?.email ?? '')) {
+    if (await isTestAccount(r.user_id)) {
       reported.add(r.id);
       console.log('[FirstRecordingAlert] skipped a test account');
       continue;

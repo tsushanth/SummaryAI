@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '../lib/supabase.js';
 import { outreachAttribution, reportActivationForUser, type ActivationLookups } from './outreachEvents.js';
+import { isTestAccount } from './testTraffic.js';
 
 /** Reads the first-touch attribution (signup_attribution) and the account email with the service role. */
 export const activationLookups: ActivationLookups = {
@@ -9,7 +10,7 @@ export const activationLookups: ActivationLookups = {
       .select('utm_source, utm_campaign')
       .eq('user_id', userId)
       .maybeSingle();
-    if (error || !data) return null;
+    if (error || !data || (await isTestAccount(userId))) return null;
     return outreachAttribution(data as { utm_source?: string; utm_campaign?: string });
   },
   async getEmail(userId) {

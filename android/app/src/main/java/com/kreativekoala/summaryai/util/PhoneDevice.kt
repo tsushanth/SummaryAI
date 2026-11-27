@@ -1,10 +1,8 @@
 package com.kreativekoala.summaryai.util
 
 import android.content.Context
-import android.provider.Settings
 import android.telephony.TelephonyManager
 import androidx.core.app.LocaleManagerCompat
-import com.kreativekoala.summaryai.BuildConfig
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -16,7 +14,7 @@ interface PhoneDevice {
     val countries: CountrySignals
     /** The language the app is shown in. */
     val language: String
-    /** Our own debug builds and Firebase Test Lab devices, which are not counted as people. */
+    /** Installs that are not counted as people (see [TestInstall]). */
     val isTest: Boolean
 }
 
@@ -35,7 +33,5 @@ class AndroidPhoneDevice @Inject constructor(@ApplicationContext private val con
         }
 
     override val language: String get() = appLocaleContext(context).resources.configuration.locales[0].toLanguageTag()
-    override val isTest: Boolean
-        get() = BuildConfig.DEBUG ||
-            runCatching { Settings.System.getString(context.contentResolver, "firebase.test.lab") == "true" }.getOrDefault(false)
+    override val isTest: Boolean by lazy { TestInstall.isTest(context) }
 }

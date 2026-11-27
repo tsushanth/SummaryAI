@@ -5,15 +5,15 @@
  * months with nothing reported.
  *
  * The sign: the callback removes its oauth_states row on every path, so a row that outlives its expiry never came back.
- * Rows are only read. Context holds the provider and the client plus the opaque account id. Clear test accounts are
- * skipped, and so is anyone who has connected that provider since. Dedupe is per process: a restart inside the window can
- * report one attempt twice.
+ * Rows are only read. Context holds the provider and the client plus the opaque account id. Test accounts
+ * (services/testTraffic.ts) are skipped, and so is anyone who has connected that provider since. Dedupe is per process:
+ * a restart inside the window can report one attempt twice.
  */
 import { supabaseAdmin } from '../lib/supabase.js';
 import { reportFailure } from '../lib/failureReporter.js';
 import { registerLoop, runLoopPass, reportLoopScanError } from '../lib/loopMonitor.js';
 import { parseOAuthState } from './googleCalendarService.js';
-import { TEST_ACCOUNT_RE } from './firstRecordingAlert.js';
+import { isTestAccount } from './testTraffic.js';
 
 const LOOP = 'CalendarConnectAlert';
 export const CALENDAR_SCAN_INTERVAL_MS = 5 * 60_000;
@@ -57,8 +57,7 @@ export async function scanUnfinishedCalendarConnects(now: number = Date.now()): 
     if ((connected.count ?? 0) > 0) { reported.add(r.id); continue; }
 
     // An unreadable account is reported anyway: a missed real user is worse than one extra email.
-    const account = await supabaseAdmin.auth.admin.getUserById(r.user_id).catch(() => null);
-    if (TEST_ACCOUNT_RE.test(account?.data?.user?.email ?? '')) {
+    if (await isTestAccount(r.user_id)) {
       reported.add(r.id);
       console.log('[CalendarConnectAlert] skipped a test account');
       continue;

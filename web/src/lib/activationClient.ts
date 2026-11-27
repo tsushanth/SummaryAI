@@ -2,8 +2,8 @@
 
 import { apiClient } from '@/lib/api/client';
 import {
-  attributionProps, buildEvent, getOrCreateAnonId, isFreshSignup, parseUtm, rememberAttribution, shouldEmitOnce, trackingAllowed,
-  SIGNUP_DONE_KEY, type ActivationEventName, type Props,
+  attributionProps, buildEvent, getOrCreateAnonId, isFreshSignup, parseUtm, rememberAttribution, shouldEmitOnce, testBrowserReason,
+  trackingAllowed, SIGNUP_DONE_KEY, type ActivationEventName, type Props,
 } from '@/lib/activation';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -17,11 +17,16 @@ function enabled(): boolean {
 const local = (): Storage | null => { try { return window.localStorage; } catch { return null; } };
 const session = (): Storage | null => { try { return window.sessionStorage; } catch { return null; } };
 
+const testReason = () =>
+  testBrowserReason(local(), window.location.search, (navigator as Navigator & { webdriver?: boolean }).webdriver);
+
 /** Fire-and-forget. Silent unless the build flag is on and the browser has not opted out. Never throws, never blocks. */
 export function track(name: ActivationEventName, props: Props = {}): void {
   try {
     if (!enabled()) return;
-    const ev = buildEvent(name, getOrCreateAnonId(local()), props);
+    const why = testReason();
+    // First, so the property limit can never drop the mark.
+    const ev = buildEvent(name, getOrCreateAnonId(local()), why ? { test: true, test_reason: why, ...props } : props);
     fetch(`${API_URL}/api/activation/events`, {
       method: 'POST', keepalive: true, credentials: 'omit',
       headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ev),
@@ -38,6 +43,7 @@ export function captureAttribution() {
 export function trackLanded(page: 'landing' | 'auth'): void {
   if (!enabled()) return;
   const attr = captureAttribution();
+  testReason(); // remembers ?mm_test=1 even when this tab already counted its landing
   if (!shouldEmitOnce(session(), `mm_act_landed_${page}`)) return;
   track('landed', { page, ...attributionProps(attr) });
 }

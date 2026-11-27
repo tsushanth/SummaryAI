@@ -13,6 +13,7 @@ with params as (
   select w.w, w.days, count(u.id) as signups
   from windows w
   left join auth.users u on u.created_at >= w.lo and u.created_at < w.hi
+                          and u.id not in (select user_id from public.test_accounts())   -- people only (migration 039)
   group by w.w, w.days
 )
 select b.signups                                                            as signups_before,
@@ -24,7 +25,9 @@ from counted b join counted a on a.w = 'after' where b.w = 'before';
 
 -- Day by day around the send (to see whether the lift is a spike on send day or a level shift).
 -- select (u.created_at at time zone 'utc')::date as day, count(*) from auth.users u, (select send_at from (select timestamptz '2026-11-13 17:00:00+00' as send_at) p) p
---  where u.created_at >= p.send_at - interval '14 days' and u.created_at < p.send_at + interval '14 days' group by 1 order by 1;
+--  where u.created_at >= p.send_at - interval '14 days' and u.created_at < p.send_at + interval '14 days'
+--    and u.id not in (select user_id from public.test_accounts()) group by 1 order by 1;
 
 -- Once links carry utm (signup_attribution exists when ACTIVATION_EVENTS_ENABLED is on): attributed signups per campaign.
--- select utm_campaign, count(*) as signups from signup_attribution where utm_source = 'outreach' group by 1 order by 2 desc;
+-- select utm_campaign, count(*) as signups from signup_attribution where utm_source = 'outreach'
+--  and user_id not in (select user_id from public.test_accounts()) group by 1 order by 2 desc;
