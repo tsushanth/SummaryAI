@@ -6,7 +6,7 @@
  * means index N (released apps apply the names to it that way).
  *
  * People read numbers from 1. Whatever shows stored text goes through the display functions below (web:
- * lib/exportFormats.ts, Android: SpeakerNames.kt). The summary model is also shown numbers from 1, so that a label it
+ * lib/exportFormats.ts, Android: SpeakerNames.kt). Talk-time analytics send stored labels; both apps convert them. The summary model is also shown numbers from 1, so that a label it
  * translates counts like the rest of the app, and its reply is put back into the stored convention before saving.
  */
 

@@ -3,8 +3,6 @@
  * Pure functions over transcript segments so they are easy to test.
  */
 
-import { speakerDisplayName } from '../lib/speakers.js';
-
 export interface AnalyticsSegment {
   speaker_label?: string;
   speaker_index?: number;
@@ -49,20 +47,26 @@ export function countQuestions(text: string): number {
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
+interface Acc extends SpeakerStats {
+  label: string;
+}
+
 export function computeMeetingAnalytics(
   segments: AnalyticsSegment[] | null | undefined,
   speakerNames: Record<string, string> | null | undefined = {}
 ): MeetingAnalytics {
   const segs = (segments ?? []).filter((s) => s && typeof s.text === 'string');
-  const bySpeaker = new Map<number, SpeakerStats>();
+  const names = speakerNames ?? {};
+  const bySpeaker = new Map<number, Acc>();
   const idxOf = (s: AnalyticsSegment) => (Number.isFinite(s.speaker_index) ? (s.speaker_index as number) : 0);
 
-  const statFor = (idx: number, label: string | undefined) => {
+  const statFor = (idx: number, label: string) => {
     let s = bySpeaker.get(idx);
     if (!s) {
       s = {
         speaker_index: idx,
-        name: speakerDisplayName(label, idx, speakerNames),
+        label,
+        name: names[String(idx)] || label,
         talk_time_seconds: 0,
         talk_share: 0,
         word_count: 0,
@@ -77,7 +81,7 @@ export function computeMeetingAnalytics(
   let anyTimed = false;
   for (const seg of segs) {
     const idx = idxOf(seg);
-    const s = statFor(idx, seg.speaker_label);
+    const s = statFor(idx, seg.speaker_label || `Speaker ${idx + 1}`);
     const dur = Math.max(0, (seg.end_time ?? 0) - (seg.start_time ?? 0));
     if (dur > 0) anyTimed = true;
     s.talk_time_seconds += dur;

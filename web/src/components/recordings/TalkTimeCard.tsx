@@ -13,7 +13,7 @@ function formatSeconds(s: number): string {
 /** Per-speaker talk share, words, questions and longest monologue. */
 export function TalkTimeCard({ analytics }: { analytics: MeetingAnalytics }) {
   if (analytics.speakers.length === 0) return null;
-  // The server already sends names counted from 1; this also covers an older server that counts from 0.
+  // The server sends the owner's name for a speaker, else the stored label counted from 0.
   const nameOf = (s: MeetingAnalytics['speakers'][number]) => speakerDisplayName(s.name, s.speaker_index);
   const longest = analytics.speakers.find((s) => s.name === analytics.longest_monologue_speaker);
   return (

@@ -77,7 +77,7 @@ fun TalkTimeCard(analytics: MeetingAnalyticsDto, modifier: Modifier = Modifier) 
     }
 }
 
-/** The server sends names counted from 1; this also covers an older server that counts from 0. */
+/** The server sends the owner's name for a speaker, else the stored label counted from 0. */
 @Composable
 private fun analyticsSpeakerName(s: SpeakerStatsDto): String =
     serverSpeakerLabel(speakerDisplayLabel(s.name, s.speakerIndex, null) ?: s.name)

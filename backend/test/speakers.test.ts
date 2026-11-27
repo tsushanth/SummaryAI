@@ -7,7 +7,6 @@ import {
   speakersForSummary,
   withDisplaySpeakers,
 } from '../src/lib/speakers.js';
-import { computeMeetingAnalytics } from '../src/services/meetingAnalytics.js';
 
 // The same display cases as web scripts/export.test.mjs and Android SpeakerNamesTest.
 describe('displaySpeakerText', () => {
@@ -107,19 +106,5 @@ describe('segments for answers read straight by a person', () => {
       { '0': 'Alex' }
     );
     expect(out.map((s) => s.speaker_label)).toEqual(['Alex', 'Speaker 2']);
-  });
-});
-
-describe('talk time', () => {
-  it('names speakers from 1', () => {
-    const a = computeMeetingAnalytics(
-      [
-        { speaker_label: 'Speaker 0', speaker_index: 0, text: 'a b c', start_time: 0, end_time: 9 },
-        { speaker_label: 'Speaker 1', speaker_index: 1, text: 'd', start_time: 10, end_time: 11 },
-      ],
-      { '1': 'Blake' }
-    );
-    expect(a.speakers.map((s) => s.name)).toEqual(['Speaker 1', 'Blake']);
-    expect(a.longest_monologue_speaker).toBe('Speaker 1');
   });
 });
