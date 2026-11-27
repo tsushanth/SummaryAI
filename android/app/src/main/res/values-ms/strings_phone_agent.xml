@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">Nombor saya</string>
+    <string name="phone_own_title">Nombor anda sendiri dengan ejen telefon</string>
+    <string name="phone_own_intro">Dapatkan nombor di Amerika Syarikat atau Kanada. Terangkan kehendak anda dengan kata-kata sendiri, dan ejen akan menjawab panggilannya. Anda menerima ringkasan dan transkrip setiap panggilan.</string>
+    <string name="phone_trial_offer">Percubaan percuma: %1$d hari dengan %2$d minit ejen. Tiada bayaran diperlukan.</string>
+    <string name="phone_number_country">Negara nombor</string>
+    <string name="phone_number_area_code">Kod kawasan (pilihan)</string>
+    <string name="phone_number_get">Dapatkan nombor saya</string>
+    <string name="phone_trial_confirm_title">Mulakan percubaan percuma?</string>
+    <string name="phone_trial_confirm_body">Nombor baharu akan disediakan untuk anda sekarang. Percubaan berlangsung %1$d hari dan merangkumi %2$d minit ejen. Apabila percubaan tamat atau minit habis digunakan, nombor dilepaskan dan tidak boleh diperoleh semula.</string>
+    <string name="phone_trial_start">Mula percubaan</string>
+    <string name="phone_trial_status">Percubaan percuma hingga %1$s. Baki minit ejen: %2$d</string>
+    <string name="phone_plan_status">Baki minit ejen: %1$d. Baki minit panggilan: %2$d</string>
+    <string name="phone_plan_includes">Merangkumi %1$d minit panggilan dan %2$d minit ejen bagi setiap tempoh bil.</string>
+    <string name="phone_subscribe">Langgan pada harga %1$s</string>
+    <string name="phone_trial_end">Tamatkan percubaan</string>
+    <string name="phone_trial_end_title">Tamatkan percubaan percuma?</string>
+    <string name="phone_trial_end_body">Nombor dan ejen anda dibuang sekarang. Nombor tidak boleh diperoleh semula. Panggilan dan rakaman lalu kekal.</string>
+    <string name="phone_trial_ended">Percubaan percuma anda telah tamat. Panggilan dan rakaman lalu kekal dalam aplikasi.</string>
+    <string name="phone_number_removing">Nombor anda sedang dibuang.</string>
+    <string name="phone_own_number_label">Nombor Meeting Mind anda</string>
+    <string name="phone_number_answers_agent">Ejen anda menjawab panggilan ke nombor ini.</string>
+    <string name="phone_number_rings_you">Panggilan ke nombor ini berdering pada telefon anda.</string>
+    <string name="phone_agent_title">Ejen telefon</string>
+    <string name="phone_agent_prompt_label">Apakah yang perlu dilakukan oleh ejen anda?</string>
+    <string name="phone_agent_prompt_hint">Contoh: Ambil pesanan, dan tanya nama pemanggil serta nombor untuk dihubungi semula.</string>
+    <string name="phone_agent_language">Bahasa pertuturan ejen</string>
+    <string name="phone_agent_recording_note">Pemanggil mendengar makluman bahawa panggilan dirakam. Panggilan ditranskripsi, diringkaskan dan disimpan dalam rakaman anda. Gunakan ejen hanya jika anda dibenarkan merakam panggilan.</string>
+    <string name="phone_agent_create">Cipta ejen</string>
+    <string name="phone_agent_saving">Ejen anda sedang disediakan. Ini boleh mengambil masa seminit atau lebih.</string>
+    <string name="phone_agent_delete">Padam ejen</string>
+    <string name="phone_agent_delete_title">Padam ejen ini?</string>
+    <string name="phone_agent_delete_body">Panggilan ke nombor anda akan berdering pada telefon anda.</string>
+    <string name="phone_agent_left_out">Ejen bercakap, bertanya soalan dan mengambil pesanan. Perkara lain dalam penerangan anda tidak disertakan.</string>
+    <string name="phone_agent_results_hint">Panggilan yang dijawab ejen dipaparkan bersama transkrip dalam tab Panggilan.</string>
+    <string name="phone_call_answered_by_agent">Dijawab oleh ejen anda</string>
+    <string name="phone_result_collected">Butiran yang dikumpul</string>
+    <string name="phone_result_agent">Ejen</string>
+    <string name="phone_result_caller">Pemanggil</string>
+    <string name="phone_error_trial_used">Percubaan percuma telah digunakan.</string>
+    <string name="phone_error_trial_full">Tiada tempat percubaan percuma sekarang. Semak semula kemudian.</string>
+    <string name="phone_error_no_number_found">Tiada nombor tersedia di kawasan itu. Cuba kod kawasan lain.</string>
+    <string name="phone_error_number_pending">Nombor anda sedang disediakan. Semak semula dalam seminit.</string>
+    <string name="phone_error_number_failed">Nombor tidak dapat disediakan. Cuba lagi.</string>
+    <string name="phone_error_agent_failed">Ejen tidak dapat disediakan. Cuba lagi.</string>
+    <string name="phone_error_agent_not_allowed">Penerangan ini tidak boleh digunakan. Ubah dan cuba lagi.</string>
+    <string name="phone_error_agent_language">Pilih bahasa lain untuk ejen.</string>
+    <string name="phone_error_agent_limit">Ejen tidak boleh diubah lagi buat masa ini. Cuba lagi kemudian.</string>
+    <string name="phone_error_purchase">Pembelian belum dapat disahkan. Buka skrin ini semula beberapa minit lagi.</string>
+    <string name="phone_error_purchase_in_use">Pembelian itu milik akaun lain.</string>
+</resources>

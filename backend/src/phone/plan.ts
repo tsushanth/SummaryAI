@@ -31,3 +31,10 @@ export function readPhonePlan(env: Record<string, string | undefined> = process.
     agentMinutes: bounded(env.PHONE_PLAN_AGENT_MINUTES, 30, 90),
   };
 }
+
+/**
+ * The free trial of an own number with an agent. Off unless PHONE_AGENT_TRIAL is an explicit yes. This only switches it on
+ * or off: how many people, how long and how much agent time are fixed in the database (phone_trial_limits()).
+ */
+export const readAgentTrial = (env: Record<string, string | undefined> = process.env): boolean =>
+  ['1', 'true', 'on', 'yes'].includes(String(env.PHONE_AGENT_TRIAL ?? '').trim().toLowerCase());

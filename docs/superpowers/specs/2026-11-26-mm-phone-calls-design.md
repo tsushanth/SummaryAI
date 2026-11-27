@@ -79,7 +79,7 @@ Failures raise `phone_calls` alerts. No number, name or code is stored in events
 Incoming calls; web or iOS calling; countries other than the United States and Canada; a live-call test of the Android
 app (needs a person with a phone).
 
-## Phase 2: numbers (server built, switched off; no app screens yet)
+## Phase 2: numbers (server and Android screens built, switched off)
 Migration 033. Nothing here works until `PHONE_NUMBERS_SCHEMA=1`; nothing can be bought until `PHONE_PURCHASE_ENABLED=1`
 and `PHONE_PLAN_PRODUCT_ID` names a Google Play subscription. Price and included minutes are server settings
 (`PHONE_PLAN_*`, bounded in code and in the database).
@@ -95,17 +95,57 @@ and `PHONE_PLAN_PRODUCT_ID` names a Google Play subscription. Price and included
   against the company cap. Rechecked every few hours; the number is released 3 days after the paid time ends.
 - The company cap covers shared numbers and all free usage.
 
-## Phase 3: agent from one prompt (server built, switched off; no app screens yet)
+## Phase 3: agent from one prompt (server and Android screens built, switched off)
 Needs the `CALLDESK_PARTNER_*` settings and the partner API to be deployed on the Calldesk side.
 - `PUT /v1/api/phone/agent` takes one description (10 to 2000 characters) and a language; the agent is attached to the
   user's personal number. Each change is booked in the ledger first, a few per day.
 - An incoming call on that number: the notice is spoken, recording starts, then the agent joins as a media stream with a
   one-time token and a time limit. If the agent cannot take the call it is forwarded to the user's phone.
 - Telephony, recording, the notice and the ledger stay in MeetingMind. Results arrive on a signed webhook (and are
-  fetched if lost); `GET /calls/:id` returns summary, outcome and transcript as reported.
+  fetched if lost); `GET /calls/:id` returns summary, outcome, transcript and the collected details as reported.
+  Collected details are kept as at most 40 name and value pairs.
+- `GET /v1/api/phone/agent` returns the current description so that it can be edited.
 - Inbound only. Outbound agent calls are not built.
 - Account deletion releases the number, deletes the agent and its data at Calldesk, and keeps only unlinked ledger rows.
 
+## Free trial of an own number with an agent (migration 034; off)
+`PHONE_AGENT_TRIAL=1` switches it on. It also needs `PHONE_NUMBERS_SCHEMA=1`, the `CALLDESK_PARTNER_*` settings and phone
+calls for the account. The setting only switches: the limits are in the database function `phone_trial_limits()`.
+
+| Limit | Value |
+|---|---|
+| Trials open at once / started per calendar month | 5 / 5 |
+| Own numbers held at once, paid ones included | 5 |
+| Agent time per trial | 15 minutes, in started minutes |
+| Length | 14 days |
+| Agent creations and changes per trial | 6 |
+| Trials per account and per verified phone number | 1 |
+
+- All trial spend (number rent, agent changes, agent time, forwarded calls) is company money inside the monthly cap; a
+  trial cannot start, and a number is not kept into a new month, without room in it.
+- A number is bought only on `POST /number` with `confirm_trial: true`, sent after the person confirms the trial screen.
+  A purchase that fails does not use up the trial.
+- A trial number behaves like a paid one: the agent answers, calls it cannot take ring the verified phone and calls can
+  show the number; both of those use the free call minutes.
+- It ends after 14 days, when the agent time is used, when the person ends it (`DELETE /number`), when the setting is
+  switched off, or when the month's rent no longer fits the cap. The number and the agent are then released (checked
+  every 10 minutes, after any call under way and its result). A failed release is repeated and alerted.
+- A subscription bought during a trial keeps the number.
+- Account deletion keeps an unlinked trial record (a keyed hash of the number), so the one-per-number rule holds.
+
+## Android: own number, agent and results
+A third tab on the Phone screen, shown only when `GET /status` answers `own_number: true`: get a number (country, optional
+area code, trial confirmation), describe the agent and pick its language, edit or delete it, see the time left, end the
+trial. Calls an agent took open a sheet with summary, collected details, transcript and recording. Purchase appears only
+when `GET /plan` has `purchase_enabled`, a product id starting with `mm_phone_` and Google Play returns its price; those
+purchases are confirmed and acknowledged by the server and never unlock MM Pro.
+
+## Measurement of these steps
+`phone_step` events (counts only; never a number or typed text): screen opened, confirmation shown or declined, trial
+started / refused / ended, number added / failed / released, agent form opened, agent created / updated / removed /
+failed, agent result stored, result opened, purchase started / completed / failed. Owner reads:
+`GET /v1/internal/phone/funnel` and `/v1/internal/phone/steps` (secret header).
+
 ## Not built yet
-Android screens for buying a number, the agent description and agent results (and their translations); Google Play
-product; real-time developer notifications (subscriptions are polled); a live test of any incoming call or agent.
+Google Play product; real-time developer notifications (subscriptions are polled); outbound agent calls; a live test of
+any incoming call, agent session or number purchase.

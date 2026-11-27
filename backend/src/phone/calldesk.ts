@@ -30,6 +30,8 @@ export interface AgentResult {
   transcript: { role: string; text: string }[];
   summary: string | null;
   analysis: unknown;
+  /** What the agent was asked to collect, as name and value. */
+  collected: Record<string, string> | null;
 }
 
 export class CalldeskError extends Error {
@@ -44,10 +46,23 @@ export interface CalldeskClient {
   createAgent(a: { userId: string; prompt: string; language: string; idempotencyKey: string }): Promise<Agent>;
   updateAgent(agentId: string, a: { userId: string; prompt: string; language: string }): Promise<Agent>;
   deleteAgent(agentId: string, userId: string): Promise<void>;
+  /** The description the agent was made from. */
+  agentPrompt(agentId: string, userId: string): Promise<string>;
   attachNumber(userId: string, number: string, agentId: string): Promise<void>;
   createSession(a: { userId: string; agentId: string; callId: string; language: string; maxSeconds: number; remoteNumber: string }): Promise<AgentSession>;
   result(callId: string, userId: string): Promise<AgentResult | null>;
   deleteUser(userId: string): Promise<'deleted' | 'not_found'>;
+}
+
+/** At most 40 name and value pairs; anything nested is kept as its JSON text. */
+function cleanCollected(raw: unknown): Record<string, string> | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const out: Record<string, string> = {};
+  for (const [name, value] of Object.entries(raw as Record<string, unknown>).slice(0, 40)) {
+    if (value === null || value === undefined || value === '') continue;
+    out[name.slice(0, 80)] = (typeof value === 'object' ? JSON.stringify(value) : String(value)).slice(0, 500);
+  }
+  return Object.keys(out).length ? out : null;
 }
 
 /** Only the known fields, with bounded sizes. Null when it is not a result. */
@@ -68,6 +83,7 @@ export function cleanResult(raw: unknown): AgentResult | null {
     transcript: turns.map((t) => ({ role: (t as { role?: unknown })?.role === 'agent' ? 'agent' : 'caller', text: str((t as { text?: unknown })?.text, 2000) })),
     summary: str(r.summary, 4000) || null,
     analysis,
+    collected: cleanCollected(r.collected),
   };
 }
 
@@ -102,7 +118,7 @@ export function createCalldeskClient(s: CalldeskSettings, fetchImpl: typeof fetc
     if (typeof j?.agent_id !== 'string') throw new CalldeskError(502, 'bad_answer');
     return {
       agentId: j.agent_id, description: String(j.description ?? '').slice(0, 2000), language: String(j.language ?? ''),
-      warnings: Array.isArray(j.warnings) ? j.warnings.slice(0, 10).map((w: any) => String(w?.message ?? '').slice(0, 300)) : [],
+      warnings: Array.isArray(j.warnings) ? j.warnings.slice(0, 10).map((w: any) => String(w?.code ?? '').slice(0, 40)).filter(Boolean) : [],
     };
   };
   const enc = encodeURIComponent;
@@ -120,6 +136,10 @@ export function createCalldeskClient(s: CalldeskSettings, fetchImpl: typeof fetc
     async deleteAgent(agentId, userId) {
       try { await call('DELETE', `/agents/${enc(agentId)}?external_user_id=${enc(userId)}`); }
       catch (e) { if (!(e instanceof CalldeskError && e.status === 404)) throw e; }
+    },
+    async agentPrompt(agentId, userId) {
+      const j = await call('GET', `/agents/${enc(agentId)}?external_user_id=${enc(userId)}`);
+      return typeof j?.prompt === 'string' ? j.prompt.slice(0, 2000) : '';
     },
     async attachNumber(userId, number, agentId) { await call('PUT', `/users/${enc(userId)}/number`, { number, agent_id: agentId }); },
     async createSession(a) {

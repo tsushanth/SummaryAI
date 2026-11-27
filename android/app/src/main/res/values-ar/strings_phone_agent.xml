@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">رقمي</string>
+    <string name="phone_own_title">رقمك الخاص مع وكيل هاتفي</string>
+    <string name="phone_own_intro">احصل على رقم في الولايات المتحدة أو كندا. صف ما تريده بكلماتك، وسيرد وكيل على مكالماته. تصلك خلاصة ونص لكل مكالمة.</string>
+    <string name="phone_trial_offer">تجربة مجانية: %1$d يومًا مع %2$d دقيقة للوكيل. لا حاجة إلى الدفع.</string>
+    <string name="phone_number_country">بلد الرقم</string>
+    <string name="phone_number_area_code">رمز المنطقة (اختياري)</string>
+    <string name="phone_number_get">الحصول على رقمي</string>
+    <string name="phone_trial_confirm_title">هل تبدأ التجربة المجانية؟</string>
+    <string name="phone_trial_confirm_body">سيتم إعداد رقم جديد لك الآن. تستمر التجربة %1$d يومًا وتشمل %2$d دقيقة للوكيل. عند انتهاء التجربة أو نفاد الدقائق يتم التخلي عن الرقم ولا يمكن استعادته.</string>
+    <string name="phone_trial_start">بدء التجربة</string>
+    <string name="phone_trial_status">تجربة مجانية حتى %1$s. دقائق الوكيل المتبقية: %2$d</string>
+    <string name="phone_plan_status">دقائق الوكيل المتبقية: %1$d. دقائق المكالمات المتبقية: %2$d</string>
+    <string name="phone_plan_includes">يشمل %1$d دقيقة مكالمات و%2$d دقيقة للوكيل في كل فترة فوترة.</string>
+    <string name="phone_subscribe">اشترك مقابل %1$s</string>
+    <string name="phone_trial_end">إنهاء التجربة</string>
+    <string name="phone_trial_end_title">هل تنهي التجربة المجانية؟</string>
+    <string name="phone_trial_end_body">يُحذف رقمك ووكيلك الآن. لا يمكن استعادة الرقم. تبقى مكالماتك وتسجيلاتك السابقة.</string>
+    <string name="phone_trial_ended">انتهت تجربتك المجانية. تبقى مكالماتك وتسجيلاتك السابقة في التطبيق.</string>
+    <string name="phone_number_removing">جارٍ حذف رقمك.</string>
+    <string name="phone_own_number_label">رقمك في Meeting Mind</string>
+    <string name="phone_number_answers_agent">يرد وكيلك على المكالمات الواردة إلى هذا الرقم.</string>
+    <string name="phone_number_rings_you">المكالمات الواردة إلى هذا الرقم ترن على هاتفك.</string>
+    <string name="phone_agent_title">الوكيل الهاتفي</string>
+    <string name="phone_agent_prompt_label">ماذا يجب أن يفعل وكيلك؟</string>
+    <string name="phone_agent_prompt_hint">مثال: دوّن رسالة واسأل عن اسم المتصل ورقم لمعاودة الاتصال به.</string>
+    <string name="phone_agent_language">لغة حديث الوكيل</string>
+    <string name="phone_agent_recording_note">يسمع المتصلون تنبيهًا بأن المكالمة تُسجَّل. تُحوَّل المكالمات إلى نص وتُلخَّص وتُحفظ في تسجيلاتك. استخدم الوكيل فقط حيث يُسمح لك بتسجيل المكالمات.</string>
+    <string name="phone_agent_create">إنشاء الوكيل</string>
+    <string name="phone_agent_saving">جارٍ إعداد وكيلك. قد يستغرق ذلك دقيقة أو أكثر.</string>
+    <string name="phone_agent_delete">حذف الوكيل</string>
+    <string name="phone_agent_delete_title">هل تحذف هذا الوكيل؟</string>
+    <string name="phone_agent_delete_body">سترن المكالمات الواردة إلى رقمك على هاتفك بدلًا من ذلك.</string>
+    <string name="phone_agent_left_out">الوكيل يتحدث ويطرح الأسئلة ويدوّن الرسائل. لم تُضمَّن بقية الطلبات الواردة في وصفك.</string>
+    <string name="phone_agent_results_hint">تظهر المكالمات التي يرد عليها وكيلك مع نصها في تبويب المكالمات.</string>
+    <string name="phone_call_answered_by_agent">ردّ عليها وكيلك</string>
+    <string name="phone_result_collected">التفاصيل المجمّعة</string>
+    <string name="phone_result_agent">الوكيل</string>
+    <string name="phone_result_caller">المتصل</string>
+    <string name="phone_error_trial_used">سبق استخدام التجربة المجانية.</string>
+    <string name="phone_error_trial_full">لا يوجد مكان متاح للتجربة المجانية الآن. يرجى المحاولة لاحقًا.</string>
+    <string name="phone_error_no_number_found">لا يوجد رقم متاح في هذه المنطقة. جرّب رمز منطقة آخر.</string>
+    <string name="phone_error_number_pending">جارٍ إعداد رقمك. تحقق بعد دقيقة.</string>
+    <string name="phone_error_number_failed">تعذّر إعداد الرقم. حاول مرة أخرى.</string>
+    <string name="phone_error_agent_failed">تعذّر إعداد الوكيل. حاول مرة أخرى.</string>
+    <string name="phone_error_agent_not_allowed">لا يمكن استخدام هذا الوصف. غيّره وحاول مرة أخرى.</string>
+    <string name="phone_error_agent_language">اختر لغة أخرى للوكيل.</string>
+    <string name="phone_error_agent_limit">لا يمكن إجراء مزيد من التغييرات على الوكيل الآن. حاول لاحقًا.</string>
+    <string name="phone_error_purchase">تعذّر تأكيد الشراء بعد. افتح هذه الشاشة مرة أخرى بعد بضع دقائق.</string>
+    <string name="phone_error_purchase_in_use">هذه العملية تخص حسابًا آخر.</string>
+</resources>

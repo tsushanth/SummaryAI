@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">Numaram</string>
+    <string name="phone_own_title">Telefon asistanlı kendi numaranız</string>
+    <string name="phone_own_intro">Amerika Birleşik Devletleri veya Kanada’dan bir numara alın. Ne istediğinizi kendi sözlerinizle anlatın, aramaları bir asistan yanıtlasın. Her aramanın özetini ve dökümünü alırsınız.</string>
+    <string name="phone_trial_offer">Ücretsiz deneme: %1$d gün ve %2$d asistan dakikası. Ödeme gerekmez.</string>
+    <string name="phone_number_country">Numaranın ülkesi</string>
+    <string name="phone_number_area_code">Alan kodu (isteğe bağlı)</string>
+    <string name="phone_number_get">Numaramı al</string>
+    <string name="phone_trial_confirm_title">Ücretsiz deneme başlatılsın mı?</string>
+    <string name="phone_trial_confirm_body">Şimdi sizin için yeni bir numara kurulacak. Deneme %1$d gün sürer ve %2$d asistan dakikası içerir. Deneme bittiğinde veya dakikalar tükendiğinde numara bırakılır ve geri alınamaz.</string>
+    <string name="phone_trial_start">Denemeyi başlat</string>
+    <string name="phone_trial_status">Ücretsiz deneme bitişi: %1$s. Kalan asistan dakikası: %2$d</string>
+    <string name="phone_plan_status">Kalan asistan dakikası: %1$d. Kalan arama dakikası: %2$d</string>
+    <string name="phone_plan_includes">Her faturalandırma döneminde %1$d arama dakikası ve %2$d asistan dakikası içerir.</string>
+    <string name="phone_subscribe">%1$s karşılığında abone ol</string>
+    <string name="phone_trial_end">Denemeyi bitir</string>
+    <string name="phone_trial_end_title">Ücretsiz deneme bitirilsin mi?</string>
+    <string name="phone_trial_end_body">Numaranız ve asistanınız şimdi kaldırılır. Numara geri alınamaz. Geçmiş aramalarınız ve kayıtlarınız kalır.</string>
+    <string name="phone_trial_ended">Ücretsiz denemeniz sona erdi. Geçmiş aramalarınız ve kayıtlarınız uygulamada kalır.</string>
+    <string name="phone_number_removing">Numaranız kaldırılıyor.</string>
+    <string name="phone_own_number_label">Meeting Mind numaranız</string>
+    <string name="phone_number_answers_agent">Bu numaraya gelen aramaları asistanınız yanıtlar.</string>
+    <string name="phone_number_rings_you">Bu numaraya gelen aramalar telefonunuzu çaldırır.</string>
+    <string name="phone_agent_title">Telefon asistanı</string>
+    <string name="phone_agent_prompt_label">Asistanınız ne yapmalı?</string>
+    <string name="phone_agent_prompt_hint">Örneğin: mesaj al, arayanın adını ve geri aranacağı numarayı sor.</string>
+    <string name="phone_agent_language">Asistanın konuştuğu dil</string>
+    <string name="phone_agent_recording_note">Arayanlar aramanın kaydedildiğine dair bir bildirim duyar. Aramalar yazıya dökülür, özetlenir ve kayıtlarınıza eklenir. Asistanı yalnızca arama kaydetmenize izin verilen yerlerde kullanın.</string>
+    <string name="phone_agent_create">Asistan oluştur</string>
+    <string name="phone_agent_saving">Asistanınız kuruluyor. Bu bir dakika veya daha uzun sürebilir.</string>
+    <string name="phone_agent_delete">Asistanı sil</string>
+    <string name="phone_agent_delete_title">Bu asistan silinsin mi?</string>
+    <string name="phone_agent_delete_body">Numaranıza gelen aramalar telefonunuzu çaldırır.</string>
+    <string name="phone_agent_left_out">Asistan konuşur, soru sorar ve mesaj alır. Açıklamanızdaki diğer istekler dışarıda bırakıldı.</string>
+    <string name="phone_agent_results_hint">Asistanınızın yanıtladığı aramalar dökümleriyle birlikte Aramalar sekmesinde görünür.</string>
+    <string name="phone_call_answered_by_agent">Asistanınız yanıtladı</string>
+    <string name="phone_result_collected">Toplanan bilgiler</string>
+    <string name="phone_result_agent">Asistan</string>
+    <string name="phone_result_caller">Arayan</string>
+    <string name="phone_error_trial_used">Ücretsiz deneme zaten kullanıldı.</string>
+    <string name="phone_error_trial_full">Şu anda boş deneme yeri yok. Daha sonra tekrar bakın.</string>
+    <string name="phone_error_no_number_found">O bölgede uygun numara yok. Başka bir alan kodu deneyin.</string>
+    <string name="phone_error_number_pending">Numaranız kuruluyor. Bir dakika sonra tekrar bakın.</string>
+    <string name="phone_error_number_failed">Numara kurulamadı. Tekrar deneyin.</string>
+    <string name="phone_error_agent_failed">Asistan kurulamadı. Tekrar deneyin.</string>
+    <string name="phone_error_agent_not_allowed">Bu açıklama kullanılamaz. Değiştirip tekrar deneyin.</string>
+    <string name="phone_error_agent_language">Asistan için başka bir dil seçin.</string>
+    <string name="phone_error_agent_limit">Şu anda asistanda daha fazla değişiklik yapılamıyor. Daha sonra deneyin.</string>
+    <string name="phone_error_purchase">Satın alma henüz doğrulanamadı. Birkaç dakika sonra bu ekranı yeniden açın.</string>
+    <string name="phone_error_purchase_in_use">Bu satın alma başka bir hesaba ait.</string>
+</resources>

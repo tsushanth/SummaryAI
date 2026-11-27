@@ -48,6 +48,10 @@ router.use('/internal/phone', createPhoneInternalRouter(undefined, async (since)
   const { data, error } = await supabaseAdmin.rpc('phone_funnel', { p_since: since });
   if (error) throw new Error(`phone db phone_funnel: ${error.code ?? 'error'}`);
   return data;
+}, undefined, async (since) => {
+  const { data, error } = await supabaseAdmin.rpc('phone_step_counts', { p_since: since });
+  if (error) throw new Error(`phone db phone_step_counts: ${error.code ?? 'error'}`);
+  return data;
 }));
 
 // Webhooks (no auth required - verified by signature)

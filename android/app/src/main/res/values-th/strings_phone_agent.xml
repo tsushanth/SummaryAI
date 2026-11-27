@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">หมายเลขของฉัน</string>
+    <string name="phone_own_title">หมายเลขของคุณพร้อมผู้ช่วยรับสาย</string>
+    <string name="phone_own_intro">รับหมายเลขในสหรัฐอเมริกาหรือแคนาดา อธิบายสิ่งที่ต้องการด้วยคำพูดของคุณเอง แล้วผู้ช่วยจะรับสายให้ คุณจะได้รับสรุปและข้อความถอดเสียงของทุกสาย</string>
+    <string name="phone_trial_offer">ทดลองใช้ฟรี: %1$d วัน พร้อมเวลาผู้ช่วย %2$d นาที ไม่ต้องชำระเงิน</string>
+    <string name="phone_number_country">ประเทศของหมายเลข</string>
+    <string name="phone_number_area_code">รหัสพื้นที่ (ไม่บังคับ)</string>
+    <string name="phone_number_get">รับหมายเลขของฉัน</string>
+    <string name="phone_trial_confirm_title">เริ่มทดลองใช้ฟรีไหม</string>
+    <string name="phone_trial_confirm_body">ระบบจะตั้งค่าหมายเลขใหม่ให้คุณตอนนี้ ช่วงทดลองใช้นาน %1$d วันและรวมเวลาผู้ช่วย %2$d นาที เมื่อหมดช่วงทดลองหรือใช้นาทีครบ หมายเลขจะถูกคืนและนำกลับมาไม่ได้</string>
+    <string name="phone_trial_start">เริ่มทดลองใช้</string>
+    <string name="phone_trial_status">ทดลองใช้ฟรีถึง %1$s นาทีผู้ช่วยที่เหลือ: %2$d</string>
+    <string name="phone_plan_status">นาทีผู้ช่วยที่เหลือ: %1$d นาทีโทรที่เหลือ: %2$d</string>
+    <string name="phone_plan_includes">รวมเวลาโทร %1$d นาทีและเวลาผู้ช่วย %2$d นาทีในแต่ละรอบการเรียกเก็บเงิน</string>
+    <string name="phone_subscribe">สมัครใช้ในราคา %1$s</string>
+    <string name="phone_trial_end">สิ้นสุดการทดลอง</string>
+    <string name="phone_trial_end_title">สิ้นสุดการทดลองใช้ฟรีไหม</string>
+    <string name="phone_trial_end_body">หมายเลขและผู้ช่วยของคุณจะถูกลบตอนนี้ และนำหมายเลขกลับมาไม่ได้ สายและการบันทึกที่ผ่านมายังคงอยู่</string>
+    <string name="phone_trial_ended">ช่วงทดลองใช้ฟรีสิ้นสุดแล้ว สายและการบันทึกที่ผ่านมายังอยู่ในแอป</string>
+    <string name="phone_number_removing">กำลังลบหมายเลขของคุณ</string>
+    <string name="phone_own_number_label">หมายเลข Meeting Mind ของคุณ</string>
+    <string name="phone_number_answers_agent">ผู้ช่วยของคุณรับสายที่โทรมายังหมายเลขนี้</string>
+    <string name="phone_number_rings_you">สายที่โทรมายังหมายเลขนี้จะดังที่โทรศัพท์ของคุณ</string>
+    <string name="phone_agent_title">ผู้ช่วยรับสาย</string>
+    <string name="phone_agent_prompt_label">ต้องการให้ผู้ช่วยทำอะไร</string>
+    <string name="phone_agent_prompt_hint">ตัวอย่าง: รับฝากข้อความ และถามชื่อผู้โทรกับหมายเลขสำหรับโทรกลับ</string>
+    <string name="phone_agent_language">ภาษาที่ผู้ช่วยพูด</string>
+    <string name="phone_agent_recording_note">ผู้โทรจะได้ยินประกาศว่ามีการบันทึกการสนทนา สายจะถูกถอดเป็นข้อความ สรุป และบันทึกไว้ในรายการบันทึกของคุณ ใช้ผู้ช่วยเฉพาะในที่ที่คุณได้รับอนุญาตให้บันทึกสาย</string>
+    <string name="phone_agent_create">สร้างผู้ช่วย</string>
+    <string name="phone_agent_saving">กำลังตั้งค่าผู้ช่วยของคุณ อาจใช้เวลาหนึ่งนาทีหรือนานกว่านั้น</string>
+    <string name="phone_agent_delete">ลบผู้ช่วย</string>
+    <string name="phone_agent_delete_title">ลบผู้ช่วยนี้ไหม</string>
+    <string name="phone_agent_delete_body">สายที่โทรมายังหมายเลขของคุณจะดังที่โทรศัพท์ของคุณแทน</string>
+    <string name="phone_agent_left_out">ผู้ช่วยพูดคุย ถามคำถาม และรับฝากข้อความ ส่วนอื่นในคำอธิบายของคุณไม่ได้ถูกรวมไว้</string>
+    <string name="phone_agent_results_hint">สายที่ผู้ช่วยรับจะแสดงในแท็บการโทรพร้อมข้อความถอดเสียง</string>
+    <string name="phone_call_answered_by_agent">ผู้ช่วยของคุณรับสาย</string>
+    <string name="phone_result_collected">ข้อมูลที่เก็บได้</string>
+    <string name="phone_result_agent">ผู้ช่วย</string>
+    <string name="phone_result_caller">ผู้โทร</string>
+    <string name="phone_error_trial_used">ใช้สิทธิ์ทดลองใช้ฟรีไปแล้ว</string>
+    <string name="phone_error_trial_full">ขณะนี้ไม่มีที่ว่างสำหรับทดลองใช้ฟรี โปรดกลับมาดูภายหลัง</string>
+    <string name="phone_error_no_number_found">ไม่มีหมายเลขว่างในพื้นที่นั้น ลองรหัสพื้นที่อื่น</string>
+    <string name="phone_error_number_pending">กำลังตั้งค่าหมายเลขของคุณ กลับมาดูในอีกหนึ่งนาที</string>
+    <string name="phone_error_number_failed">ตั้งค่าหมายเลขไม่สำเร็จ โปรดลองอีกครั้ง</string>
+    <string name="phone_error_agent_failed">ตั้งค่าผู้ช่วยไม่สำเร็จ โปรดลองอีกครั้ง</string>
+    <string name="phone_error_agent_not_allowed">ใช้คำอธิบายนี้ไม่ได้ โปรดแก้ไขแล้วลองอีกครั้ง</string>
+    <string name="phone_error_agent_language">เลือกภาษาอื่นสำหรับผู้ช่วย</string>
+    <string name="phone_error_agent_limit">ขณะนี้เปลี่ยนแปลงผู้ช่วยเพิ่มไม่ได้ โปรดลองภายหลัง</string>
+    <string name="phone_error_purchase">ยังยืนยันการซื้อไม่ได้ เปิดหน้าจอนี้อีกครั้งในอีกสักครู่</string>
+    <string name="phone_error_purchase_in_use">การซื้อนั้นเป็นของบัญชีอื่น</string>
+</resources>

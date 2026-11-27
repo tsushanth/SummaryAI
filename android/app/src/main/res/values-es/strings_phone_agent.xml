@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">Mi número</string>
+    <string name="phone_own_title">Tu propio número con un agente telefónico</string>
+    <string name="phone_own_intro">Consigue un número de Estados Unidos o Canadá. Describe con tus palabras lo que quieres y un agente contestará sus llamadas. Recibirás un resumen y la transcripción de cada llamada.</string>
+    <string name="phone_trial_offer">Prueba gratis: %1$d días con %2$d minutos de agente. No necesitas pagar.</string>
+    <string name="phone_number_country">País del número</string>
+    <string name="phone_number_area_code">Código de área (opcional)</string>
+    <string name="phone_number_get">Obtener mi número</string>
+    <string name="phone_trial_confirm_title">¿Empezar la prueba gratis?</string>
+    <string name="phone_trial_confirm_body">Ahora se configurará un número nuevo para ti. La prueba dura %1$d días e incluye %2$d minutos de agente. Cuando la prueba termine o se gasten los minutos, el número se libera y no se puede recuperar.</string>
+    <string name="phone_trial_start">Empezar prueba</string>
+    <string name="phone_trial_status">Prueba gratis hasta %1$s. Minutos de agente restantes: %2$d</string>
+    <string name="phone_plan_status">Minutos de agente restantes: %1$d. Minutos de llamada restantes: %2$d</string>
+    <string name="phone_plan_includes">Incluye %1$d minutos de llamada y %2$d minutos de agente en cada periodo de facturación.</string>
+    <string name="phone_subscribe">Suscribirse por %1$s</string>
+    <string name="phone_trial_end">Terminar prueba</string>
+    <string name="phone_trial_end_title">¿Terminar la prueba gratis?</string>
+    <string name="phone_trial_end_body">Tu número y tu agente se eliminan ahora. El número no se puede recuperar. Tus llamadas y grabaciones anteriores se conservan.</string>
+    <string name="phone_trial_ended">Tu prueba gratis ha terminado. Tus llamadas y grabaciones anteriores siguen en la app.</string>
+    <string name="phone_number_removing">Se está eliminando tu número.</string>
+    <string name="phone_own_number_label">Tu número de Meeting Mind</string>
+    <string name="phone_number_answers_agent">Tu agente contesta las llamadas a este número.</string>
+    <string name="phone_number_rings_you">Las llamadas a este número suenan en tu teléfono.</string>
+    <string name="phone_agent_title">Agente telefónico</string>
+    <string name="phone_agent_prompt_label">¿Qué debe hacer tu agente?</string>
+    <string name="phone_agent_prompt_hint">Por ejemplo: toma un mensaje y pide el nombre de quien llama y un número para devolver la llamada.</string>
+    <string name="phone_agent_language">Idioma que habla el agente</string>
+    <string name="phone_agent_recording_note">Quienes llaman oyen un aviso de que la llamada se graba. Las llamadas se transcriben, se resumen y se guardan en tus grabaciones. Usa el agente solo donde esté permitido grabar llamadas.</string>
+    <string name="phone_agent_create">Crear agente</string>
+    <string name="phone_agent_saving">Configurando tu agente. Puede tardar un minuto o más.</string>
+    <string name="phone_agent_delete">Eliminar agente</string>
+    <string name="phone_agent_delete_title">¿Eliminar este agente?</string>
+    <string name="phone_agent_delete_body">Las llamadas a tu número sonarán en tu teléfono.</string>
+    <string name="phone_agent_left_out">El agente conversa, hace preguntas y toma mensajes. Lo demás de tu descripción se ha omitido.</string>
+    <string name="phone_agent_results_hint">Las llamadas que contesta tu agente aparecen en la pestaña Llamadas con su transcripción.</string>
+    <string name="phone_call_answered_by_agent">Contestada por tu agente</string>
+    <string name="phone_result_collected">Datos recogidos</string>
+    <string name="phone_result_agent">Agente</string>
+    <string name="phone_result_caller">Persona que llama</string>
+    <string name="phone_error_trial_used">La prueba gratis ya se ha usado.</string>
+    <string name="phone_error_trial_full">Ahora no hay plazas de prueba gratis. Vuelve a mirar más tarde.</string>
+    <string name="phone_error_no_number_found">No hay números disponibles en esa zona. Prueba otro código de área.</string>
+    <string name="phone_error_number_pending">Se está configurando tu número. Vuelve a mirar en un minuto.</string>
+    <string name="phone_error_number_failed">No se pudo configurar el número. Inténtalo de nuevo.</string>
+    <string name="phone_error_agent_failed">No se pudo configurar el agente. Inténtalo de nuevo.</string>
+    <string name="phone_error_agent_not_allowed">Esta descripción no se puede usar. Cámbiala e inténtalo de nuevo.</string>
+    <string name="phone_error_agent_language">Elige otro idioma para el agente.</string>
+    <string name="phone_error_agent_limit">Ahora no se pueden hacer más cambios en el agente. Inténtalo más tarde.</string>
+    <string name="phone_error_purchase">Aún no se pudo confirmar la compra. Abre esta pantalla de nuevo en unos minutos.</string>
+    <string name="phone_error_purchase_in_use">Esa compra pertenece a otra cuenta.</string>
+</resources>

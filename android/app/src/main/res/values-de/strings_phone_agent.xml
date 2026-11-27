@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">Meine Nummer</string>
+    <string name="phone_own_title">Deine eigene Nummer mit Telefonagent</string>
+    <string name="phone_own_intro">Hol dir eine Nummer in den USA oder Kanada. Beschreibe mit eigenen Worten, was du möchtest, und ein Agent nimmt die Anrufe an. Zu jedem Anruf bekommst du eine Zusammenfassung und eine Abschrift.</string>
+    <string name="phone_trial_offer">Kostenlos testen: %1$d Tage mit %2$d Agentenminuten. Keine Zahlung nötig.</string>
+    <string name="phone_number_country">Land der Nummer</string>
+    <string name="phone_number_area_code">Vorwahl (optional)</string>
+    <string name="phone_number_get">Meine Nummer holen</string>
+    <string name="phone_trial_confirm_title">Kostenlosen Test starten?</string>
+    <string name="phone_trial_confirm_body">Jetzt wird eine neue Nummer für dich eingerichtet. Der Test dauert %1$d Tage und enthält %2$d Agentenminuten. Wenn der Test endet oder die Minuten verbraucht sind, wird die Nummer freigegeben und kann nicht wiederhergestellt werden.</string>
+    <string name="phone_trial_start">Test starten</string>
+    <string name="phone_trial_status">Kostenloser Test bis %1$s. Verbleibende Agentenminuten: %2$d</string>
+    <string name="phone_plan_status">Verbleibende Agentenminuten: %1$d. Verbleibende Anrufminuten: %2$d</string>
+    <string name="phone_plan_includes">Enthält %1$d Anrufminuten und %2$d Agentenminuten pro Abrechnungszeitraum.</string>
+    <string name="phone_subscribe">Für %1$s abonnieren</string>
+    <string name="phone_trial_end">Test beenden</string>
+    <string name="phone_trial_end_title">Kostenlosen Test beenden?</string>
+    <string name="phone_trial_end_body">Deine Nummer und dein Agent werden jetzt entfernt. Die Nummer kann nicht wiederhergestellt werden. Frühere Anrufe und Aufnahmen bleiben erhalten.</string>
+    <string name="phone_trial_ended">Dein kostenloser Test ist beendet. Frühere Anrufe und Aufnahmen bleiben in der App.</string>
+    <string name="phone_number_removing">Deine Nummer wird entfernt.</string>
+    <string name="phone_own_number_label">Deine Meeting-Mind-Nummer</string>
+    <string name="phone_number_answers_agent">Dein Agent nimmt Anrufe an diese Nummer an.</string>
+    <string name="phone_number_rings_you">Anrufe an diese Nummer klingeln auf deinem Telefon.</string>
+    <string name="phone_agent_title">Telefonagent</string>
+    <string name="phone_agent_prompt_label">Was soll dein Agent tun?</string>
+    <string name="phone_agent_prompt_hint">Zum Beispiel: Nimm eine Nachricht auf und frage nach dem Namen und einer Rückrufnummer.</string>
+    <string name="phone_agent_language">Sprache des Agenten</string>
+    <string name="phone_agent_recording_note">Anrufende hören den Hinweis, dass das Gespräch aufgezeichnet wird. Anrufe werden abgeschrieben, zusammengefasst und in deinen Aufnahmen gespeichert. Nutze den Agenten nur dort, wo du Anrufe aufzeichnen darfst.</string>
+    <string name="phone_agent_create">Agent erstellen</string>
+    <string name="phone_agent_saving">Dein Agent wird eingerichtet. Das kann eine Minute oder länger dauern.</string>
+    <string name="phone_agent_delete">Agent löschen</string>
+    <string name="phone_agent_delete_title">Diesen Agenten löschen?</string>
+    <string name="phone_agent_delete_body">Anrufe an deine Nummer klingeln dann auf deinem Telefon.</string>
+    <string name="phone_agent_left_out">Der Agent spricht, stellt Fragen und nimmt Nachrichten auf. Anderes aus deiner Beschreibung wurde weggelassen.</string>
+    <string name="phone_agent_results_hint">Von deinem Agenten angenommene Anrufe erscheinen mit Abschrift im Tab Anrufe.</string>
+    <string name="phone_call_answered_by_agent">Von deinem Agenten angenommen</string>
+    <string name="phone_result_collected">Erfasste Angaben</string>
+    <string name="phone_result_agent">Agent</string>
+    <string name="phone_result_caller">Anrufer</string>
+    <string name="phone_error_trial_used">Der kostenlose Test wurde bereits genutzt.</string>
+    <string name="phone_error_trial_full">Gerade ist kein Testplatz frei. Schau später noch einmal vorbei.</string>
+    <string name="phone_error_no_number_found">In diesem Gebiet ist keine Nummer verfügbar. Versuche eine andere Vorwahl.</string>
+    <string name="phone_error_number_pending">Deine Nummer wird eingerichtet. Schau in einer Minute wieder nach.</string>
+    <string name="phone_error_number_failed">Die Nummer konnte nicht eingerichtet werden. Versuche es erneut.</string>
+    <string name="phone_error_agent_failed">Der Agent konnte nicht eingerichtet werden. Versuche es erneut.</string>
+    <string name="phone_error_agent_not_allowed">Diese Beschreibung kann nicht verwendet werden. Ändere sie und versuche es erneut.</string>
+    <string name="phone_error_agent_language">Wähle eine andere Sprache für den Agenten.</string>
+    <string name="phone_error_agent_limit">Gerade sind keine weiteren Änderungen am Agenten möglich. Versuche es später erneut.</string>
+    <string name="phone_error_purchase">Der Kauf konnte noch nicht bestätigt werden. Öffne diesen Bildschirm in ein paar Minuten erneut.</string>
+    <string name="phone_error_purchase_in_use">Dieser Kauf gehört zu einem anderen Konto.</string>
+</resources>

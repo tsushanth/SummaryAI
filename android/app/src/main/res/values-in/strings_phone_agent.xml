@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">Nomor saya</string>
+    <string name="phone_own_title">Nomor Anda sendiri dengan agen telepon</string>
+    <string name="phone_own_intro">Dapatkan nomor di Amerika Serikat atau Kanada. Jelaskan keinginan Anda dengan kata-kata sendiri, lalu agen akan menjawab panggilannya. Anda menerima ringkasan dan transkrip setiap panggilan.</string>
+    <string name="phone_trial_offer">Uji coba gratis: %1$d hari dengan %2$d menit agen. Tidak perlu membayar.</string>
+    <string name="phone_number_country">Negara nomor</string>
+    <string name="phone_number_area_code">Kode area (opsional)</string>
+    <string name="phone_number_get">Dapatkan nomor saya</string>
+    <string name="phone_trial_confirm_title">Mulai uji coba gratis?</string>
+    <string name="phone_trial_confirm_body">Nomor baru akan disiapkan untuk Anda sekarang. Uji coba berlangsung %1$d hari dan mencakup %2$d menit agen. Saat uji coba berakhir atau menit habis, nomor dilepas dan tidak dapat diambil kembali.</string>
+    <string name="phone_trial_start">Mulai uji coba</string>
+    <string name="phone_trial_status">Uji coba gratis sampai %1$s. Sisa menit agen: %2$d</string>
+    <string name="phone_plan_status">Sisa menit agen: %1$d. Sisa menit panggilan: %2$d</string>
+    <string name="phone_plan_includes">Mencakup %1$d menit panggilan dan %2$d menit agen setiap periode penagihan.</string>
+    <string name="phone_subscribe">Berlangganan seharga %1$s</string>
+    <string name="phone_trial_end">Akhiri uji coba</string>
+    <string name="phone_trial_end_title">Akhiri uji coba gratis?</string>
+    <string name="phone_trial_end_body">Nomor dan agen Anda dihapus sekarang. Nomor tidak dapat diambil kembali. Panggilan dan rekaman sebelumnya tetap ada.</string>
+    <string name="phone_trial_ended">Uji coba gratis Anda telah berakhir. Panggilan dan rekaman sebelumnya tetap ada di aplikasi.</string>
+    <string name="phone_number_removing">Nomor Anda sedang dihapus.</string>
+    <string name="phone_own_number_label">Nomor Meeting Mind Anda</string>
+    <string name="phone_number_answers_agent">Agen Anda menjawab panggilan ke nomor ini.</string>
+    <string name="phone_number_rings_you">Panggilan ke nomor ini berdering di ponsel Anda.</string>
+    <string name="phone_agent_title">Agen telepon</string>
+    <string name="phone_agent_prompt_label">Apa yang harus dilakukan agen Anda?</string>
+    <string name="phone_agent_prompt_hint">Contoh: Catat pesan, lalu tanyakan nama penelepon dan nomor untuk dihubungi kembali.</string>
+    <string name="phone_agent_language">Bahasa yang digunakan agen</string>
+    <string name="phone_agent_recording_note">Penelepon mendengar pemberitahuan bahwa panggilan direkam. Panggilan ditranskripsi, diringkas, dan disimpan di rekaman Anda. Gunakan agen hanya jika Anda diizinkan merekam panggilan.</string>
+    <string name="phone_agent_create">Buat agen</string>
+    <string name="phone_agent_saving">Sedang menyiapkan agen Anda. Ini bisa memakan waktu satu menit atau lebih.</string>
+    <string name="phone_agent_delete">Hapus agen</string>
+    <string name="phone_agent_delete_title">Hapus agen ini?</string>
+    <string name="phone_agent_delete_body">Panggilan ke nomor Anda akan berdering di ponsel Anda.</string>
+    <string name="phone_agent_left_out">Agen berbicara, bertanya, dan mencatat pesan. Hal lain dalam deskripsi Anda tidak disertakan.</string>
+    <string name="phone_agent_results_hint">Panggilan yang dijawab agen muncul beserta transkripnya di tab Panggilan.</string>
+    <string name="phone_call_answered_by_agent">Dijawab oleh agen Anda</string>
+    <string name="phone_result_collected">Detail yang dikumpulkan</string>
+    <string name="phone_result_agent">Agen</string>
+    <string name="phone_result_caller">Penelepon</string>
+    <string name="phone_error_trial_used">Uji coba gratis sudah digunakan.</string>
+    <string name="phone_error_trial_full">Saat ini tidak ada tempat uji coba gratis. Periksa lagi nanti.</string>
+    <string name="phone_error_no_number_found">Tidak ada nomor tersedia di area itu. Coba kode area lain.</string>
+    <string name="phone_error_number_pending">Nomor Anda sedang disiapkan. Periksa lagi dalam satu menit.</string>
+    <string name="phone_error_number_failed">Nomor tidak dapat disiapkan. Coba lagi.</string>
+    <string name="phone_error_agent_failed">Agen tidak dapat disiapkan. Coba lagi.</string>
+    <string name="phone_error_agent_not_allowed">Deskripsi ini tidak dapat digunakan. Ubah lalu coba lagi.</string>
+    <string name="phone_error_agent_language">Pilih bahasa lain untuk agen.</string>
+    <string name="phone_error_agent_limit">Saat ini agen tidak dapat diubah lagi. Coba lagi nanti.</string>
+    <string name="phone_error_purchase">Pembelian belum dapat dikonfirmasi. Buka layar ini lagi beberapa menit lagi.</string>
+    <string name="phone_error_purchase_in_use">Pembelian itu milik akun lain.</string>
+</resources>

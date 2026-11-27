@@ -1,7 +1,7 @@
-/** The agent on a personal number: created from one prompt, and what it reports after a call. Inbound only. */
+/** The agent on a personal number (paid or on the free trial): created from one prompt, and what it reports after a call. Inbound only. */
 import { PhoneError, type PhoneDeps, type PhoneExtras } from './deps.js';
 import { CalldeskError, cleanResult, type AgentResult, type CalldeskClient } from './calldesk.js';
-import { isLive, sha256 } from './provision.js';
+import { numberFunding, sha256 } from './provision.js';
 import { isUuid } from './calls.js';
 import type { NumberRow } from './numbersStore.js';
 
@@ -12,7 +12,7 @@ const need = (x: PhoneExtras): CalldeskClient => {
 
 async function ownNumber(d: PhoneDeps, x: PhoneExtras, userId: string): Promise<NumberRow> {
   const number = await x.numbers.personalNumber(userId);
-  if (number?.status !== 'active' || !isLive(await x.numbers.subscription(userId), d.now())) {
+  if (number?.status !== 'active' || !(await numberFunding(d, x, userId))) {
     throw new PhoneError(403, 'PHONE_NUMBER_REQUIRED', 'An agent needs your own number.');
   }
   return number;
@@ -37,6 +37,7 @@ export async function setAgent(d: PhoneDeps, x: PhoneExtras, userId: string, inp
   const booked = await x.numbers.reserveDraft(userId);
   if (booked.ok === false) {
     if (booked.reason === 'budget_used') { await d.track('cap_hit', userId, { cap: 'agent_budget' }); d.alert('BUDGET_CAP_HIT', { at: 'agent' }); }
+    await d.track('agent_failed', userId, { reason: booked.reason });
     throw new PhoneError(429, booked.reason === 'budget_used' ? 'PHONE_BUDGET_USED' : 'PHONE_AGENT_LIMIT', 'No more agent changes are possible right now.');
   }
   const isNew = !number.agent_id;
@@ -46,10 +47,32 @@ export async function setAgent(d: PhoneDeps, x: PhoneExtras, userId: string, inp
       : await client.createAgent({ userId, prompt, language, idempotencyKey: sha256(`${userId}\n${language}\n${prompt}`) });
     await client.attachNumber(userId, number.phone_number!, agent.agentId);
     await x.numbers.updateNumber(number.id, { agent_id: agent.agentId, agent_language: agent.language || language, agent_description: agent.description });
-    if (isNew) await d.track('agent_created', userId, { language });
-    return { description: agent.description, language: agent.language || language, warnings: agent.warnings };
+    await d.track(isNew ? 'agent_created' : 'agent_updated', userId, { language });
+    // Only what changes what the agent will do is passed on.
+    return { description: agent.description, language: agent.language || language, warnings: agent.warnings.filter((w) => w === 'ability_removed') };
   } catch (e) {
-    d.alert('AGENT_SETUP_FAILED', { code: e instanceof CalldeskError ? e.code : 'error' });
+    const code = e instanceof CalldeskError ? e.code : 'error';
+    if (e instanceof CalldeskError && NOTHING_SPENT.has(e.status) && booked.ledgerId) {
+      await x.numbers.releaseDraft(booked.ledgerId).catch(() => d.alert('LEDGER_UNAVAILABLE', { at: 'draft_release' }));
+    }
+    await d.track('agent_failed', userId, { reason: code });
+    d.alert('AGENT_SETUP_FAILED', { code });
+    throw refusal(e);
+  }
+}
+
+/** Answers with which the agent service refuses before doing any work. */
+const NOTHING_SPENT = new Set([401, 403, 409, 429, 503]);
+
+/** The current description, to edit it. */
+export async function getAgent(d: PhoneDeps, x: PhoneExtras, userId: string): Promise<{ prompt: string; language: string; description: string }> {
+  const client = need(x);
+  const number = await ownNumber(d, x, userId);
+  if (!number.agent_id) throw new PhoneError(404, 'PHONE_AGENT_NOT_FOUND', 'There is no agent yet.');
+  try {
+    return { prompt: await client.agentPrompt(number.agent_id, userId), language: number.agent_language ?? 'en', description: number.agent_description ?? '' };
+  } catch (e) {
+    d.alert('AGENT_READ_FAILED', { code: e instanceof CalldeskError ? e.code : 'error' });
     throw refusal(e);
   }
 }
@@ -60,6 +83,7 @@ export async function removeAgent(d: PhoneDeps, x: PhoneExtras, userId: string):
   try { await need(x).deleteAgent(number.agent_id, userId); }
   catch (e) { d.alert('AGENT_DELETE_FAILED'); throw refusal(e); }
   await x.numbers.updateNumber(number.id, { agent_id: null, agent_language: null, agent_description: null });
+  await d.track('agent_removed', userId, {});
 }
 
 /** Stores a result only on the call it belongs to: our id, the same account and the same agent. */
@@ -73,7 +97,26 @@ export async function storeAgentResult(d: PhoneDeps, x: PhoneExtras, raw: unknow
     return false;
   }
   await x.numbers.saveAgentResult(call.id, result);
+  // Counted once, however often the result is delivered.
+  if (!call.agent_result) {
+    await d.track('agent_result', call.user_id, {
+      turns: result.transcript.length, seconds: result.duration_seconds, fields: Object.keys(result.collected ?? {}).length, summary: !!result.summary,
+    });
+  }
   return true;
+}
+
+/** Before a number is given up: saves any result of this account that is still waiting at the agent service. */
+export async function fetchResultsOf(d: PhoneDeps, x: PhoneExtras, userId: string): Promise<void> {
+  if (!x.calldesk) return;
+  const now = new Date(d.now()).toISOString();
+  for (const c of await x.numbers.agentCallsWithoutResult(new Date(d.now() - 3600_000).toISOString(), now)) {
+    if (c.user_id !== userId) continue;
+    try {
+      const result = await x.calldesk.result(c.id, userId);
+      if (result) await storeAgentResult(d, x, result);
+    } catch { d.alert('AGENT_RESULT_FETCH_FAILED'); }
+  }
 }
 
 /** Fetches results whose delivery was lost. */

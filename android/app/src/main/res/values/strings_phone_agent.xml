@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">My number</string>
+    <string name="phone_own_title">Your own number with a phone agent</string>
+    <string name="phone_own_intro">Get a number in the United States or Canada. Describe what you want in your own words, and an agent answers its calls. You get a summary and transcript of every call.</string>
+    <string name="phone_trial_offer">Free trial: %1$d days with %2$d agent minutes. No payment needed.</string>
+    <string name="phone_number_country">Country of the number</string>
+    <string name="phone_number_area_code">Area code (optional)</string>
+    <string name="phone_number_get">Get my number</string>
+    <string name="phone_trial_confirm_title">Start your free trial?</string>
+    <string name="phone_trial_confirm_body">A new number is set up for you now. The trial lasts %1$d days and includes %2$d agent minutes. When the trial ends or the minutes are used, the number is released and cannot be recovered.</string>
+    <string name="phone_trial_start">Start trial</string>
+    <string name="phone_trial_status">Free trial until %1$s. Agent minutes left: %2$d</string>
+    <string name="phone_plan_status">Agent minutes left: %1$d. Call minutes left: %2$d</string>
+    <string name="phone_plan_includes">Includes %1$d call minutes and %2$d agent minutes each billing period.</string>
+    <string name="phone_subscribe">Subscribe for %1$s</string>
+    <string name="phone_trial_end">End trial</string>
+    <string name="phone_trial_end_title">End the free trial?</string>
+    <string name="phone_trial_end_body">Your number and agent are removed now. The number cannot be recovered. Your past calls and recordings stay.</string>
+    <string name="phone_trial_ended">Your free trial has ended. Your past calls and recordings stay in the app.</string>
+    <string name="phone_number_removing">Your number is being removed.</string>
+    <string name="phone_own_number_label">Your Meeting Mind number</string>
+    <string name="phone_number_answers_agent">Your agent answers calls to this number.</string>
+    <string name="phone_number_rings_you">Calls to this number ring your phone.</string>
+    <string name="phone_agent_title">Phone agent</string>
+    <string name="phone_agent_prompt_label">What should your agent do?</string>
+    <string name="phone_agent_prompt_hint">For example: Take a message, and ask for the caller\'s name and a number to call back.</string>
+    <string name="phone_agent_language">Language the agent speaks</string>
+    <string name="phone_agent_recording_note">Callers hear a notice that the call is recorded. Calls are transcribed, summarized and saved to your recordings. Use the agent only where you are allowed to record calls.</string>
+    <string name="phone_agent_create">Create agent</string>
+    <string name="phone_agent_saving">Setting up your agent. This can take a minute or more.</string>
+    <string name="phone_agent_delete">Delete agent</string>
+    <string name="phone_agent_delete_title">Delete this agent?</string>
+    <string name="phone_agent_delete_body">Calls to your number will ring your phone instead.</string>
+    <string name="phone_agent_left_out">The agent talks, asks questions and takes messages. Other things in your description were left out.</string>
+    <string name="phone_agent_results_hint">Calls answered by your agent appear in the Calls tab with their transcript.</string>
+    <string name="phone_call_answered_by_agent">Answered by your agent</string>
+    <string name="phone_result_collected">Collected details</string>
+    <string name="phone_result_agent">Agent</string>
+    <string name="phone_result_caller">Caller</string>
+    <string name="phone_error_trial_used">The free trial has already been used.</string>
+    <string name="phone_error_trial_full">No free trial place is open right now. Please check again later.</string>
+    <string name="phone_error_no_number_found">No number is available in that area. Try another area code.</string>
+    <string name="phone_error_number_pending">Your number is being set up. Check again in a minute.</string>
+    <string name="phone_error_number_failed">The number could not be set up. Try again.</string>
+    <string name="phone_error_agent_failed">The agent could not be set up. Try again.</string>
+    <string name="phone_error_agent_not_allowed">This description cannot be used. Change it and try again.</string>
+    <string name="phone_error_agent_language">Choose another language for the agent.</string>
+    <string name="phone_error_agent_limit">No more agent changes are possible right now. Try again later.</string>
+    <string name="phone_error_purchase">The purchase could not be confirmed yet. Open this screen again in a few minutes.</string>
+    <string name="phone_error_purchase_in_use">That purchase belongs to another account.</string>
+</resources>

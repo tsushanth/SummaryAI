@@ -45,10 +45,10 @@ describe('purge adapters', () => {
   it('every row delete is scoped to the one user id, children before profiles', async () => {
     const deps = createPurgeDeps();
     const res = await deps.db.deleteRows('U1');
-    // plus the spend ledger, which is kept for the month's budget but no longer points at the account
-    expect(log).toHaveLength(USER_TABLES.length + 1);
-    expect(log[0]).toBe('phone_ledger.user_id=U1');
-    expect(updates).toEqual([{ table: 'phone_ledger', values: { user_id: null } }]);
+    // plus the spend ledger (kept for the month's budget) and the trial record (one per phone number), unlinked
+    expect(log).toHaveLength(USER_TABLES.length + 2);
+    expect(log.slice(0, 2)).toEqual(['phone_ledger.user_id=U1', 'phone_trials.user_id=U1']);
+    expect(updates).toEqual([{ table: 'phone_ledger', values: { user_id: null } }, { table: 'phone_trials', values: { user_id: null } }]);
     expect(log.every((l) => l.endsWith('=U1'))).toBe(true);
     expect(USER_TABLES[USER_TABLES.length - 1].table).toBe('profiles');
     expect(res.deleted).toBe(2 * USER_TABLES.length);

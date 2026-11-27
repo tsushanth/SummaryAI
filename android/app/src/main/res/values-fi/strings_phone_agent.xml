@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">Oma numero</string>
+    <string name="phone_own_title">Oma numerosi ja puhelinagentti</string>
+    <string name="phone_own_intro">Hanki numero Yhdysvalloista tai Kanadasta. Kuvaile omin sanoin, mitä haluat, niin agentti vastaa numeron puheluihin. Saat jokaisesta puhelusta tiivistelmän ja tekstivastineen.</string>
+    <string name="phone_trial_offer">Ilmainen kokeilu: %1$d päivää ja %2$d agenttiminuuttia. Maksua ei tarvita.</string>
+    <string name="phone_number_country">Numeron maa</string>
+    <string name="phone_number_area_code">Suuntanumero (valinnainen)</string>
+    <string name="phone_number_get">Hanki numeroni</string>
+    <string name="phone_trial_confirm_title">Aloitetaanko ilmainen kokeilu?</string>
+    <string name="phone_trial_confirm_body">Sinulle otetaan nyt käyttöön uusi numero. Kokeilu kestää %1$d päivää ja sisältää %2$d agenttiminuuttia. Kun kokeilu päättyy tai minuutit on käytetty, numero vapautetaan eikä sitä voi saada takaisin.</string>
+    <string name="phone_trial_start">Aloita kokeilu</string>
+    <string name="phone_trial_status">Ilmainen kokeilu päättyy: %1$s. Agenttiminuutteja jäljellä: %2$d</string>
+    <string name="phone_plan_status">Agenttiminuutteja jäljellä: %1$d. Puheluminuutteja jäljellä: %2$d</string>
+    <string name="phone_plan_includes">Sisältää %1$d puheluminuuttia ja %2$d agenttiminuuttia laskutuskautta kohden.</string>
+    <string name="phone_subscribe">Tilaa hintaan %1$s</string>
+    <string name="phone_trial_end">Lopeta kokeilu</string>
+    <string name="phone_trial_end_title">Lopetetaanko ilmainen kokeilu?</string>
+    <string name="phone_trial_end_body">Numerosi ja agenttisi poistetaan nyt. Numeroa ei voi saada takaisin. Aiemmat puhelut ja tallenteet säilyvät.</string>
+    <string name="phone_trial_ended">Ilmainen kokeilusi on päättynyt. Aiemmat puhelut ja tallenteet säilyvät sovelluksessa.</string>
+    <string name="phone_number_removing">Numeroasi poistetaan.</string>
+    <string name="phone_own_number_label">Meeting Mind -numerosi</string>
+    <string name="phone_number_answers_agent">Agenttisi vastaa tähän numeroon tuleviin puheluihin.</string>
+    <string name="phone_number_rings_you">Tähän numeroon tulevat puhelut soivat puhelimessasi.</string>
+    <string name="phone_agent_title">Puhelinagentti</string>
+    <string name="phone_agent_prompt_label">Mitä agentin pitää tehdä?</string>
+    <string name="phone_agent_prompt_hint">Esimerkiksi: ota viesti vastaan ja kysy soittajan nimi ja takaisinsoittonumero.</string>
+    <string name="phone_agent_language">Agentin puhuma kieli</string>
+    <string name="phone_agent_recording_note">Soittajat kuulevat ilmoituksen, että puhelu tallennetaan. Puhelut kirjoitetaan tekstiksi, tiivistetään ja tallennetaan tallenteisiisi. Käytä agenttia vain siellä, missä saat tallentaa puheluita.</string>
+    <string name="phone_agent_create">Luo agentti</string>
+    <string name="phone_agent_saving">Agenttia otetaan käyttöön. Tämä voi kestää minuutin tai enemmän.</string>
+    <string name="phone_agent_delete">Poista agentti</string>
+    <string name="phone_agent_delete_title">Poistetaanko tämä agentti?</string>
+    <string name="phone_agent_delete_body">Numeroosi tulevat puhelut soivat silloin puhelimessasi.</string>
+    <string name="phone_agent_left_out">Agentti keskustelee, kysyy kysymyksiä ja ottaa viestejä. Muu kuvauksesi sisältö jätettiin pois.</string>
+    <string name="phone_agent_results_hint">Agentin vastaamat puhelut näkyvät tekstivastineineen Puhelut-välilehdellä.</string>
+    <string name="phone_call_answered_by_agent">Agenttisi vastasi</string>
+    <string name="phone_result_collected">Kerätyt tiedot</string>
+    <string name="phone_result_agent">Agentti</string>
+    <string name="phone_result_caller">Soittaja</string>
+    <string name="phone_error_trial_used">Ilmainen kokeilu on jo käytetty.</string>
+    <string name="phone_error_trial_full">Kokeilupaikkoja ei ole juuri nyt vapaana. Katso myöhemmin uudelleen.</string>
+    <string name="phone_error_no_number_found">Alueella ei ole vapaita numeroita. Kokeile toista suuntanumeroa.</string>
+    <string name="phone_error_number_pending">Numeroasi otetaan käyttöön. Katso uudelleen minuutin kuluttua.</string>
+    <string name="phone_error_number_failed">Numeroa ei voitu ottaa käyttöön. Yritä uudelleen.</string>
+    <string name="phone_error_agent_failed">Agenttia ei voitu ottaa käyttöön. Yritä uudelleen.</string>
+    <string name="phone_error_agent_not_allowed">Tätä kuvausta ei voi käyttää. Muuta sitä ja yritä uudelleen.</string>
+    <string name="phone_error_agent_language">Valitse agentille toinen kieli.</string>
+    <string name="phone_error_agent_limit">Agenttiin ei voi juuri nyt tehdä enempää muutoksia. Yritä myöhemmin.</string>
+    <string name="phone_error_purchase">Ostosta ei voitu vielä vahvistaa. Avaa tämä näkymä uudelleen muutaman minuutin kuluttua.</string>
+    <string name="phone_error_purchase_in_use">Tuo ostos kuuluu toiselle tilille.</string>
+</resources>

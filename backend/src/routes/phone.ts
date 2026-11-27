@@ -16,8 +16,8 @@ import { startCall, hangupCall, isUuid } from '../phone/calls.js';
 import { hashNumber } from '../phone/numbers.js';
 import { BUSINESS_ANSWERS, BUSINESS_TYPES, CALL_LANGUAGES, CONSENT_VERSION, MAX_VERIFIED_NUMBERS } from '../phone/constants.js';
 import { CLIENT_STEPS, type PhoneStep } from '../phone/events.js';
-import { verifySubscription, provisionPersonalNumber, isLive } from '../phone/provision.js';
-import { setAgent, removeAgent } from '../phone/agents.js';
+import { verifySubscription, provisionPersonalNumber, endTrialByUser, isLive } from '../phone/provision.js';
+import { setAgent, getAgent, removeAgent, fetchResultsOf } from '../phone/agents.js';
 import type { PhoneExtras } from '../phone/deps.js';
 import type { CallRow, PhoneRow } from '../phone/store.js';
 
@@ -32,6 +32,7 @@ const publicCall = (c: CallRow) => ({
   agent: c.agent_result ? {
     summary: c.agent_result.summary, outcome: c.agent_result.outcome, ended_reason: c.agent_result.ended_reason,
     duration_seconds: c.agent_result.duration_seconds, transcript: c.agent_result.transcript, analysis: c.agent_result.analysis,
+    collected: c.agent_result.collected ?? null,
   } : null,
 });
 
@@ -70,11 +71,21 @@ export function createPhoneRouter(getDeps: () => PhoneDeps | null = getPhoneDeps
     try { await sendStatus(res, d, userId); } catch (e) { throw safeError(e); }
   }));
 
+  /** Whether the app shows the own-number screens: the trial or purchase is on, or the account already has a number. */
+  const ownNumberShown = async (d: PhoneDeps, userId: string): Promise<boolean> => {
+    const x = d.extras;
+    if (!x) return false;
+    if (x.plan().purchaseEnabled || (x.trialOn() && x.calldesk)) return true;
+    try { return (await x.numbers.personalNumber(userId))?.status === 'active'; }
+    catch { d.alert('OWN_NUMBER_CHECK_FAILED'); return false; }
+  };
+
   const sendStatus = async (res: Response, d: PhoneDeps, userId: string): Promise<void> => {
     const phones = verifiedPhones(await d.store.phonesOfUser(userId));
     const budget = await d.store.budget(userId, phones[0] ? hashNumber(phones[0].phone_number, d.settings.numberHashKey) : null);
     res.json({
       enabled: true,
+      own_number: await ownNumberShown(d, userId),
       consent_version: CONSENT_VERSION,
       countries: ['US', 'CA'],
       call_languages: CALL_LANGUAGES,
@@ -92,6 +103,13 @@ export function createPhoneRouter(getDeps: () => PhoneDeps | null = getPhoneDeps
     if (!isUuid(req.params.id)) throw new PhoneError(404, 'PHONE_NUMBER_NOT_FOUND', 'Number not found.');
     await removeNumber(d, userId, req.params.id!);
     res.json({ deleted: true });
+  }));
+
+  // Ending the free trial gives the number back; like removing one's own number, it works with the feature switched off.
+  router.delete('/number', route(async (_req, res, d, userId) => {
+    if (!d.extras) throw new PhoneError(503, 'PHONE_NUMBERS_UNAVAILABLE', 'Your own number is not available yet.');
+    await fetchResultsOf(d, d.extras, userId);
+    res.json(await endTrialByUser(d, d.extras, userId));
   }));
 
   // Off for this account unless the feature or the tester list says otherwise: nothing below runs then.
@@ -173,12 +191,24 @@ export function createPhoneRouter(getDeps: () => PhoneDeps | null = getPhoneDeps
       await fn(req, res, d, d.extras, userId);
     });
 
-  /** What the account has and what can be bought. Price and included amounts come from server configuration. */
+  /** What the account has, and what it can get: the free trial or a purchase. Amounts come from the server. */
   router.get('/plan', extra(async (_req, res, d, x, userId) => {
     const plan = x.plan();
     const sub = await x.numbers.subscription(userId);
     const number = await x.numbers.personalNumber(userId);
     const live = isLive(sub, d.now());
+    let trial = null;
+    if (x.trialOn() && !live) {
+      const state = await x.numbers.trialState(userId);
+      const limits = await x.numbers.trialLimits();
+      trial = {
+        offered: !state && !!x.calldesk,
+        days: limits.days,
+        agent_minutes: limits.agentMinutes,
+        active: state?.running ? { ends_at: state.ends_at, agent_minutes_left: Math.floor(state.seconds_left / 60) } : null,
+        used: !!state && !state.running,
+      };
+    }
     res.json({
       purchase_enabled: plan.purchaseEnabled,
       product_id: plan.purchaseEnabled ? plan.productId : null,
@@ -190,8 +220,9 @@ export function createPhoneRouter(getDeps: () => PhoneDeps | null = getPhoneDeps
         call_minutes_left: Math.floor((await x.numbers.subLeft(userId, 'call')) / 60),
         agent_minutes_left: Math.floor((await x.numbers.subLeft(userId, 'agent')) / 60),
       } : null,
+      trial,
       number: number?.status === 'active' ? { id: number.id, phone_number: number.phone_number, country: number.country } : null,
-      agents_available: !!x.calldesk,
+      agents_available: !!x.calldesk && (live || !!trial?.active),
       agent: number?.agent_id ? { description: number.agent_description, language: number.agent_language } : null,
     });
   }));
@@ -211,6 +242,7 @@ export function createPhoneRouter(getDeps: () => PhoneDeps | null = getPhoneDeps
     res.status(201).json({ id: n.id, phone_number: n.phone_number, country: n.country });
   }));
 
+  router.get('/agent', extra(async (_req, res, d, x, userId) => { res.json(await getAgent(d, x, userId)); }));
   router.put('/agent', extra(async (req, res, d, x, userId) => { res.json(await setAgent(d, x, userId, req.body ?? {})); }));
   router.delete('/agent', extra(async (_req, res, d, x, userId) => { await removeAgent(d, x, userId); res.json({ deleted: true }); }));
 

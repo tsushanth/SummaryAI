@@ -18,9 +18,11 @@ import com.kreativekoala.summaryai.domain.model.VerifiedPhone
 @Composable
 fun PhoneScreen(
     viewModel: PhoneViewModel = hiltViewModel(),
-    onRecordingClick: (String) -> Unit = {}
+    onRecordingClick: (String) -> Unit = {},
+    numberViewModel: OwnNumberViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    val number by numberViewModel.uiState.collectAsState()
     val isMuted by viewModel.isMuted.collectAsState()
     val isSpeakerOn by viewModel.isSpeakerOn.collectAsState()
 
@@ -44,6 +46,25 @@ fun PhoneScreen(
 
     var removing by remember { mutableStateOf<VerifiedPhone?>(null) }
 
+    // The own number is loaded when the server shows it, and again whenever the verified numbers change.
+    LaunchedEffect(state.ownNumberAvailable, state.phones.size) {
+        if (state.ownNumberAvailable) numberViewModel.refresh()
+    }
+    val ownNumber = usableNumber(number.plan)
+    LaunchedEffect(ownNumber) {
+        viewModel.setOwnNumber(ownNumber?.let { VerifiedPhone(it.id, it.phoneNumber) })
+    }
+    LaunchedEffect(number.agentsSaved) {
+        if (number.agentsSaved > 0) viewModel.askBusinessForAgent()
+    }
+    val numberMessage = number.message?.let { phoneMessageText(it) }
+    LaunchedEffect(numberMessage) {
+        if (numberMessage != null) {
+            snackbarHostState.showSnackbar(numberMessage)
+            numberViewModel.clearMessage()
+        }
+    }
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
@@ -64,6 +85,16 @@ fun PhoneScreen(
                     onClick = { viewModel.selectTab(PhoneTab.CALLS) },
                     text = { Text(stringResource(R.string.calls)) }
                 )
+                if (state.ownNumberAvailable) {
+                    Tab(
+                        selected = state.tab == PhoneTab.NUMBER,
+                        onClick = {
+                            viewModel.selectTab(PhoneTab.NUMBER)
+                            numberViewModel.opened()
+                        },
+                        text = { Text(stringResource(R.string.phone_tab_my_number), maxLines = 1) }
+                    )
+                }
             }
             if (state.isLoading) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             when (state.tab) {
@@ -90,7 +121,14 @@ fun PhoneScreen(
                     calls = state.calls,
                     isLoading = state.isLoading,
                     onRecordingClick = onRecordingClick,
-                    onCallClick = viewModel::callFromHistory
+                    onCallClick = viewModel::callFromHistory,
+                    onDetails = viewModel::openCall
+                )
+                PhoneTab.NUMBER -> OwnNumberContent(
+                    state = number,
+                    hasVerifiedPhone = state.phones.isNotEmpty(),
+                    actions = numberViewModel,
+                    onVerify = viewModel::openVerification
                 )
             }
         }
@@ -130,6 +168,14 @@ fun PhoneScreen(
                 TextButton(onClick = { viewModel.removePhone(phone); removing = null }) { Text(stringResource(R.string.phone_remove)) }
             },
             dismissButton = { TextButton(onClick = { removing = null }) { Text(stringResource(R.string.cancel)) } }
+        )
+    }
+    state.openCall?.let { call ->
+        CallResultSheet(
+            call = call,
+            onRecordingClick = { id -> viewModel.closeCall(); onRecordingClick(id) },
+            onCallBack = { viewModel.callFromHistory(call) },
+            onDismiss = viewModel::closeCall
         )
     }
     state.activeCall?.let { active ->

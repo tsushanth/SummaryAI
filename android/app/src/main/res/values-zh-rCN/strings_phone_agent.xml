@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">我的号码</string>
+    <string name="phone_own_title">带电话助理的专属号码</string>
+    <string name="phone_own_intro">获取一个美国或加拿大号码。用您自己的话描述需求，助理会接听来电。每通电话都会生成摘要和文字记录。</string>
+    <string name="phone_trial_offer">免费试用：%1$d 天，含 %2$d 分钟助理时长。无需付款。</string>
+    <string name="phone_number_country">号码所在国家/地区</string>
+    <string name="phone_number_area_code">区号（选填）</string>
+    <string name="phone_number_get">获取我的号码</string>
+    <string name="phone_trial_confirm_title">开始免费试用？</string>
+    <string name="phone_trial_confirm_body">现在将为您开通一个新号码。试用期 %1$d 天，含 %2$d 分钟助理时长。试用结束或时长用完后，号码会被释放且无法找回。</string>
+    <string name="phone_trial_start">开始试用</string>
+    <string name="phone_trial_status">免费试用至 %1$s。剩余助理分钟数：%2$d</string>
+    <string name="phone_plan_status">剩余助理分钟数：%1$d。剩余通话分钟数：%2$d</string>
+    <string name="phone_plan_includes">每个结算周期包含 %1$d 分钟通话和 %2$d 分钟助理时长。</string>
+    <string name="phone_subscribe">以 %1$s 订阅</string>
+    <string name="phone_trial_end">结束试用</string>
+    <string name="phone_trial_end_title">结束免费试用？</string>
+    <string name="phone_trial_end_body">您的号码和助理将立即删除。号码无法找回。过往通话和录音会保留。</string>
+    <string name="phone_trial_ended">免费试用已结束。过往通话和录音仍保留在应用中。</string>
+    <string name="phone_number_removing">正在删除您的号码。</string>
+    <string name="phone_own_number_label">您的 Meeting Mind 号码</string>
+    <string name="phone_number_answers_agent">拨打此号码的电话由您的助理接听。</string>
+    <string name="phone_number_rings_you">拨打此号码的电话会在您的手机上响铃。</string>
+    <string name="phone_agent_title">电话助理</string>
+    <string name="phone_agent_prompt_label">您希望助理做什么？</string>
+    <string name="phone_agent_prompt_hint">例如：记录留言，并询问来电者的姓名和回拨号码。</string>
+    <string name="phone_agent_language">助理使用的语言</string>
+    <string name="phone_agent_recording_note">来电者会听到通话将被录音的提示。通话会转为文字、生成摘要并保存到您的录音中。请仅在允许录音的情况下使用助理。</string>
+    <string name="phone_agent_create">创建助理</string>
+    <string name="phone_agent_saving">正在设置您的助理，可能需要一分钟或更长时间。</string>
+    <string name="phone_agent_delete">删除助理</string>
+    <string name="phone_agent_delete_title">删除此助理？</string>
+    <string name="phone_agent_delete_body">之后拨打您号码的电话会在您的手机上响铃。</string>
+    <string name="phone_agent_left_out">助理可以交谈、提问和记录留言。描述中的其他内容未包含在内。</string>
+    <string name="phone_agent_results_hint">助理接听的通话及其文字记录显示在“通话”标签页中。</string>
+    <string name="phone_call_answered_by_agent">由您的助理接听</string>
+    <string name="phone_result_collected">收集到的信息</string>
+    <string name="phone_result_agent">助理</string>
+    <string name="phone_result_caller">来电者</string>
+    <string name="phone_error_trial_used">免费试用已使用过。</string>
+    <string name="phone_error_trial_full">目前没有空余的试用名额，请稍后再看。</string>
+    <string name="phone_error_no_number_found">该地区没有可用号码，请尝试其他区号。</string>
+    <string name="phone_error_number_pending">正在开通您的号码，请一分钟后再查看。</string>
+    <string name="phone_error_number_failed">无法开通号码，请重试。</string>
+    <string name="phone_error_agent_failed">无法设置助理，请重试。</string>
+    <string name="phone_error_agent_not_allowed">无法使用这段描述，请修改后重试。</string>
+    <string name="phone_error_agent_language">请为助理选择其他语言。</string>
+    <string name="phone_error_agent_limit">目前无法再修改助理，请稍后重试。</string>
+    <string name="phone_error_purchase">暂时无法确认此次购买，请几分钟后重新打开此页面。</string>
+    <string name="phone_error_purchase_in_use">该购买属于另一个账号。</string>
+</resources>

@@ -32,6 +32,8 @@ export interface PhoneExtras {
   /** Null when the Calldesk partner settings are absent. */
   calldesk: CalldeskClient | null;
   plan: () => PhonePlan;
+  /** Whether the free trial of an own number is switched on. */
+  trialOn: () => boolean;
 }
 
 /** A refusal the app can render: `code` is stable, `message` is English for logs and old clients. */

@@ -15,7 +15,7 @@ import type { PhoneDeps } from './deps.js';
 import { PHONE_SWEEP_INTERVAL_MS, sweepPhoneCalls } from './sweeper.js';
 import { createSupabaseNumbersStore } from './numbersStore.js';
 import { createCalldeskClient, readCalldeskSettings } from './calldesk.js';
-import { readPhonePlan } from './plan.js';
+import { readAgentTrial, readPhonePlan } from './plan.js';
 import { getSubscriptionPurchase, acknowledgeSubscription } from '../services/googlePlayBilling.js';
 
 let cached: { key: string; deps: PhoneDeps } | null = null;
@@ -57,6 +57,7 @@ export function getPhoneDeps(): PhoneDeps | null {
       play: { get: (token) => getSubscriptionPurchase(token), acknowledge: (product, token) => acknowledgeSubscription(product, token) },
       calldesk: calldeskSettings ? createCalldeskClient(calldeskSettings) : null,
       plan: () => readPhonePlan(),
+      trialOn: () => readAgentTrial(),
     } : undefined,
   };
   cached = { key, deps };

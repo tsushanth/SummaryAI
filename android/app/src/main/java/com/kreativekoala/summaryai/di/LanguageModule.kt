@@ -15,4 +15,10 @@ abstract class LanguageModule {
 
     @Binds
     abstract fun bindPhoneDevice(impl: com.kreativekoala.summaryai.util.AndroidPhoneDevice): com.kreativekoala.summaryai.util.PhoneDevice
+
+    @Binds
+    abstract fun bindOwnNumberSource(impl: com.kreativekoala.summaryai.data.repository.PhoneRepository): com.kreativekoala.summaryai.data.repository.OwnNumberSource
+
+    @Binds
+    abstract fun bindPhonePurchases(impl: com.kreativekoala.summaryai.service.PlayPhonePurchases): com.kreativekoala.summaryai.service.PhonePurchases
 }

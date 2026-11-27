@@ -35,16 +35,20 @@ export function createPhoneInternalRouter(
   getDeps: () => PhoneDeps | null = getPhoneDeps,
   funnel: (sinceIso: string) => Promise<unknown>,
   secret = () => process.env.INTERNAL_SECRET ?? '',
+  stepCounts: (sinceIso: string) => Promise<unknown> = async () => [],
 ): Router {
   const router = Router();
   router.use((req, res, next) => {
     if (!secretMatches(req.get('x-internal-secret') ?? '', secret())) return void res.status(401).json({ error: { code: 'UNAUTHORIZED', message: 'Missing or invalid secret' } });
     next();
   });
-  router.get('/funnel', (req, res, next) => {
+  /** /funnel: people per stage and segment. /steps: how often each step happened and why it failed. Counts only. */
+  const counts = (path: string, read: (sinceIso: string) => Promise<unknown>) => router.get(path, (req, res, next) => {
     const days = Math.min(Math.max(parseInt(String(req.query.days), 10) || 30, 1), 365);
-    funnel(new Date(Date.now() - days * 86_400_000).toISOString()).then((rows) => res.json({ days, rows })).catch((e) => next(safeError(e)));
+    read(new Date(Date.now() - days * 86_400_000).toISOString()).then((rows) => res.json({ days, rows })).catch((e) => next(safeError(e)));
   });
+  counts('/funnel', funnel);
+  counts('/steps', stepCounts);
   router.post('/shared-number', (req, res, next) => {
     const d = getDeps();
     const country = req.body?.country;

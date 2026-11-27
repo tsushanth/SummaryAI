@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Own number and phone agent -->
+    <string name="phone_tab_my_number">Mitt nummer</string>
+    <string name="phone_own_title">Ditt eget nummer med en telefonagent</string>
+    <string name="phone_own_intro">Skaffa ett nummer i USA eller Kanada. Beskriv med egna ord vad du vill så svarar en agent på samtalen. Du får en sammanfattning och utskrift av varje samtal.</string>
+    <string name="phone_trial_offer">Gratis provperiod: %1$d dagar med %2$d agentminuter. Ingen betalning behövs.</string>
+    <string name="phone_number_country">Numrets land</string>
+    <string name="phone_number_area_code">Riktnummer (valfritt)</string>
+    <string name="phone_number_get">Hämta mitt nummer</string>
+    <string name="phone_trial_confirm_title">Starta gratis provperiod?</string>
+    <string name="phone_trial_confirm_body">Ett nytt nummer ställs in åt dig nu. Provperioden varar i %1$d dagar och innehåller %2$d agentminuter. När perioden slutar eller minuterna är förbrukade släpps numret och kan inte återfås.</string>
+    <string name="phone_trial_start">Starta provperioden</string>
+    <string name="phone_trial_status">Gratis provperiod till %1$s. Agentminuter kvar: %2$d</string>
+    <string name="phone_plan_status">Agentminuter kvar: %1$d. Samtalsminuter kvar: %2$d</string>
+    <string name="phone_plan_includes">Innehåller %1$d samtalsminuter och %2$d agentminuter per faktureringsperiod.</string>
+    <string name="phone_subscribe">Prenumerera för %1$s</string>
+    <string name="phone_trial_end">Avsluta provperioden</string>
+    <string name="phone_trial_end_title">Avsluta gratis provperiod?</string>
+    <string name="phone_trial_end_body">Ditt nummer och din agent tas bort nu. Numret kan inte återfås. Tidigare samtal och inspelningar finns kvar.</string>
+    <string name="phone_trial_ended">Din gratis provperiod är slut. Tidigare samtal och inspelningar finns kvar i appen.</string>
+    <string name="phone_number_removing">Ditt nummer tas bort.</string>
+    <string name="phone_own_number_label">Ditt Meeting Mind-nummer</string>
+    <string name="phone_number_answers_agent">Din agent svarar på samtal till det här numret.</string>
+    <string name="phone_number_rings_you">Samtal till det här numret ringer på din telefon.</string>
+    <string name="phone_agent_title">Telefonagent</string>
+    <string name="phone_agent_prompt_label">Vad ska din agent göra?</string>
+    <string name="phone_agent_prompt_hint">Till exempel: ta emot ett meddelande och fråga efter namn och ett nummer att ringa tillbaka till.</string>
+    <string name="phone_agent_language">Språk som agenten talar</string>
+    <string name="phone_agent_recording_note">Den som ringer hör att samtalet spelas in. Samtalen skrivs ut, sammanfattas och sparas bland dina inspelningar. Använd agenten bara där du får spela in samtal.</string>
+    <string name="phone_agent_create">Skapa agent</string>
+    <string name="phone_agent_saving">Din agent ställs in. Det kan ta en minut eller mer.</string>
+    <string name="phone_agent_delete">Ta bort agent</string>
+    <string name="phone_agent_delete_title">Ta bort den här agenten?</string>
+    <string name="phone_agent_delete_body">Samtal till ditt nummer ringer då på din telefon.</string>
+    <string name="phone_agent_left_out">Agenten pratar, ställer frågor och tar emot meddelanden. Övrigt i din beskrivning har utelämnats.</string>
+    <string name="phone_agent_results_hint">Samtal som din agent besvarar visas med utskrift på fliken Samtal.</string>
+    <string name="phone_call_answered_by_agent">Besvarat av din agent</string>
+    <string name="phone_result_collected">Insamlade uppgifter</string>
+    <string name="phone_result_agent">Agent</string>
+    <string name="phone_result_caller">Uppringare</string>
+    <string name="phone_error_trial_used">Gratis provperioden har redan använts.</string>
+    <string name="phone_error_trial_full">Ingen provplats är ledig just nu. Titta igen senare.</string>
+    <string name="phone_error_no_number_found">Inget nummer finns i det området. Prova ett annat riktnummer.</string>
+    <string name="phone_error_number_pending">Ditt nummer ställs in. Titta igen om en minut.</string>
+    <string name="phone_error_number_failed">Numret kunde inte ställas in. Försök igen.</string>
+    <string name="phone_error_agent_failed">Agenten kunde inte ställas in. Försök igen.</string>
+    <string name="phone_error_agent_not_allowed">Den här beskrivningen kan inte användas. Ändra den och försök igen.</string>
+    <string name="phone_error_agent_language">Välj ett annat språk för agenten.</string>
+    <string name="phone_error_agent_limit">Det går inte att göra fler ändringar av agenten just nu. Försök senare.</string>
+    <string name="phone_error_purchase">Köpet kunde inte bekräftas ännu. Öppna skärmen igen om några minuter.</string>
+    <string name="phone_error_purchase_in_use">Det köpet hör till ett annat konto.</string>
+</resources>

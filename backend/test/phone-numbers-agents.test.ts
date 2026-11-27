@@ -8,7 +8,7 @@ import { createHmac } from 'node:crypto';
 import type { AddressInfo } from 'node:net';
 import type { Server } from 'node:http';
 import { fakeWorld, sign, SETTINGS, USER, OTHER, MY_NUMBER, DEST } from './helpers-phone.js';
-import type { NumbersStore, NumberRow, SubscriptionRow } from '../src/phone/numbersStore.js';
+import type { NumbersStore, NumberRow, SubscriptionRow, TrialState } from '../src/phone/numbersStore.js';
 import type { CalldeskClient } from '../src/phone/calldesk.js';
 import type { PlaySubscription } from '../src/phone/provision.js';
 
@@ -21,9 +21,9 @@ const { createPhoneRouter } = await import('../src/routes/phone.js');
 const { createPhoneWebhookRouter } = await import('../src/routes/phoneWebhooks.js');
 const { createCalldeskWebhookRouter, createPhoneInternalRouter } = await import('../src/routes/phonePartner.js');
 const { errorHandler } = await import('../src/middleware/errorHandler.js');
-const { readPhonePlan } = await import('../src/phone/plan.js');
+const { readPhonePlan, readAgentTrial } = await import('../src/phone/plan.js');
 const { maintainNumbers, sha256 } = await import('../src/phone/provision.js');
-const { createCalldeskClient, readCalldeskSettings, verifyCalldeskSignature } = await import('../src/phone/calldesk.js');
+const { createCalldeskClient, readCalldeskSettings, verifyCalldeskSignature, cleanResult, CalldeskError } = await import('../src/phone/calldesk.js');
 const { ownedReferences } = await import('../src/services/accountPurgeAdapters.js');
 const { CONSENT_VERSION } = await import('../src/phone/constants.js');
 
@@ -41,10 +41,33 @@ function extrasWorld(w: ReturnType<typeof fakeWorld>) {
   const state = {
     rentRefusal: null as string | null, legRefusal: null as Record<string, string> | null, draftRefusal: null as string | null,
     sessionFails: false, buyFails: false, searchResult: [OUR], purchaseEnabled: true,
+    trialOn: false, trialRefusal: null as string | null, draftError: null as unknown, releaseFails: false,
+    pending: [] as { id: string; user_id: string; agent_id: string; created_at: string }[],
     play: { subscriptionState: 'SUBSCRIPTION_STATE_ACTIVE', startTime: new Date(w.state.now - 86_400_000).toISOString(), acknowledgementState: 'ACKNOWLEDGEMENT_STATE_PENDING', lineItems: [{ productId: 'own_number', expiryTime: new Date(w.state.now + 30 * 86_400_000).toISOString() }] } as PlaySubscription,
   };
   let n = 0;
+  const trials = new Map<string, TrialState>();
+  const trialOf = () => ({ ends_at: new Date(w.state.now + 14 * 86_400_000).toISOString(), ended_at: null, end_reason: null, running: true, seconds_left: 900, open_call: false });
   const store: NumbersStore = {
+    async trialLimits() { return { days: 14, agentMinutes: 15 }; },
+    async startTrial(u, hash, dry) {
+      asked.push(`start-trial dry=${dry}`);
+      if (hash.includes('+')) throw new Error('a number, not its hash');
+      if (state.trialRefusal) return { ok: false, reason: state.trialRefusal };
+      const t = trials.get(u);
+      if (t) return t.running ? { ok: true, already: true } : { ok: false, reason: 'trial_used' };
+      if (!dry) trials.set(u, trialOf());
+      return { ok: true };
+    },
+    async cancelTrial(u) { asked.push('cancel-trial'); trials.delete(u); },
+    async endTrial(u, reason) {
+      const t = trials.get(u);
+      if (!t || t.ended_at) return false;
+      Object.assign(t, { ended_at: new Date(w.state.now).toISOString(), end_reason: reason, running: false }); asked.push(`end-trial ${reason}`); return true;
+    },
+    async sweepTrials(off) { asked.push(`sweep ${off}`); return 0; },
+    async trialState(u) { const t = trials.get(u); return t ? { ...t, running: !t.ended_at && Date.parse(t.ends_at) > w.state.now } : null; },
+    async releaseDraft(id) { asked.push(`release-draft ${id}`); },
     async numberByE164(e) { return numbers.find((x) => x.phone_number === e && x.status === 'active') ?? null; },
     async personalNumber(u) { return numbers.find((x) => x.user_id === u && x.kind === 'personal' && x.status !== 'released') ?? null; },
     async liveNumbers() { return numbers.filter((x) => x.status !== 'released').map((x) => ({ ...x })); },
@@ -75,33 +98,35 @@ function extrasWorld(w: ReturnType<typeof fakeWorld>) {
       l.state = 'settled'; l.actual_seconds = seconds; asked.push(`settle ${l.kind} ${seconds}`);
       return { ok: true, costMicro: 1, talkSeconds: seconds, overReservation: false };
     },
-    async reserveDraft() { asked.push('reserve draft'); return state.draftRefusal ? { ok: false, reason: state.draftRefusal } : { ok: true }; },
+    async reserveDraft() { asked.push('reserve draft'); return state.draftRefusal ? { ok: false, reason: state.draftRefusal } : { ok: true, ledgerId: 7 }; },
     async subLeft() { return 1800; },
     async subscription(u) { return subs.find((s) => s.user_id === u) ?? null; },
     async subscriptionOwner(h) { return subs.find((s) => s.token_hash === h)?.user_id ?? null; },
     async saveSubscription(row) { const i = subs.findIndex((s) => s.user_id === row.user_id); if (i >= 0) subs[i] = row; else subs.push(row); },
     async subscriptionsToCheck(before) { return subs.filter((s) => s.checked_at < before); },
     async saveAgentResult(id, r) { results[id] = r; Object.assign(w.calls.find((c) => c.id === id)!, { agent_result: r }); },
-    async agentCallsWithoutResult() { return []; },
+    async agentCallsWithoutResult() { return state.pending; },
   };
   const calldesk: CalldeskClient = {
     async languages() { return [{ code: 'es', name: 'Spanish', level: 'phone_verified' }]; },
-    async createAgent(a) { asked.push(`create-agent ${a.language}`); return { agentId: 'agent-1', description: 'Takes a message.', language: a.language, warnings: [] }; },
+    async agentPrompt() { return 'Take a message.'; },
+    async createAgent(a) { if (state.draftError) throw state.draftError; asked.push(`create-agent ${a.language}`); return { agentId: 'agent-1', description: 'Takes a message.', language: a.language, warnings: [] }; },
     async updateAgent(id, a) { asked.push(`update-agent ${id}`); return { agentId: id, description: 'Updated.', language: a.language, warnings: [] }; },
     async deleteAgent(id) { asked.push(`delete-agent ${id}`); },
     async attachNumber(_u, number, id) { asked.push(`attach ${number === OUR} ${id}`); },
     async createSession(a) { if (state.sessionFails) throw new Error('down'); asked.push(`session ${a.maxSeconds}`); return { streamUrl: 'wss://agent.example.test/partner-stream', token: 'one-time-token', maxSeconds: a.maxSeconds }; },
     async result() { return null; },
-    async deleteUser() { return 'deleted'; },
+    async deleteUser() { asked.push('delete-user'); return 'deleted'; },
   };
   Object.assign(w.gateway, {
     async searchNumbers() { return state.searchResult; },
     async buyNumber(number: string, url: string) { if (state.buyFails) throw Object.assign(new Error(number), { code: 21422 }); asked.push(`buy ${url.endsWith('/v1/webhooks/twilio/voice-inbound')}`); return 'PNnew'; },
-    async releaseNumber(sid: string) { asked.push(`release ${sid}`); },
+    async releaseNumber(sid: string) { if (state.releaseFails) throw new Error('carrier down'); asked.push(`release ${sid}`); },
   });
   w.deps.extras = {
     numbers: store, calldesk,
     play: { async get() { return state.play; }, async acknowledge() { asked.push('acknowledge'); } },
+    trialOn: () => state.trialOn,
     plan: () => readPhonePlan({ PHONE_PLAN_PRODUCT_ID: 'own_number', PHONE_PURCHASE_ENABLED: state.purchaseEnabled ? '1' : '' }),
   };
   const addNumber = (kind: 'pool' | 'personal', user: string | null, extra: Partial<NumberRow> = {}) => {
@@ -109,7 +134,8 @@ function extrasWorld(w: ReturnType<typeof fakeWorld>) {
     numbers.push(row); return row;
   };
   const subscribe = (user = USER) => subs.push({ user_id: user, product_id: 'own_number', token_hash: sha256('x' + user), purchase_token: 't', state: 'SUBSCRIPTION_STATE_ACTIVE', period_start: new Date(w.state.now).toISOString(), expires_at: new Date(w.state.now + 86_400_000 * 10).toISOString(), call_seconds: 6000, agent_seconds: 1800, checked_at: new Date(w.state.now).toISOString() });
-  return { numbers, subs, routes, asked, state, results, addNumber, subscribe };
+  const startedTrial = (user = USER, over: Partial<TrialState> = {}) => { const t = { ...trialOf(), ...over }; trials.set(user, t); return t; };
+  return { numbers, subs, routes, asked, state, results, addNumber, subscribe, trials, startedTrial };
 }
 
 let w: ReturnType<typeof fakeWorld>;
@@ -130,7 +156,7 @@ beforeEach(async () => {
   app.use('/v1/api/phone', createPhoneRouter(() => w.deps, (req: any, _res: any, next: any) => { req.user = { id: user }; next(); }));
   app.use('/v1/webhooks/twilio', createPhoneWebhookRouter(() => w.deps));
   app.use('/v1/webhooks/calldesk', createCalldeskWebhookRouter(() => w.deps, () => SECRET));
-  app.use('/v1/internal/phone', createPhoneInternalRouter(() => w.deps, async () => [{ segment: 'business' }], () => 'internal-secret'));
+  app.use('/v1/internal/phone', createPhoneInternalRouter(() => w.deps, async () => [{ segment: 'business' }], () => 'internal-secret', async () => [{ step: 'trial_started', users: 1 }]));
   app.use(errorHandler);
   await new Promise<void>((r) => (server = app.listen(0, '127.0.0.1', () => r())));
   base = `http://127.0.0.1:${(server.address() as AddressInfo).port}/v1`;
@@ -338,6 +364,7 @@ describe('incoming calls', () => {
     x.state.sessionFails = true;
     expect(await inbound()).toContain('<Dial');
     expect(x.asked).toEqual(['reserve agent company=false', 'settle agent 0', 'reserve inbound company=false']);
+    expect(w.events).toContainEqual(expect.objectContaining({ step: 'agent_failed', props: { reason: 'session_error' } }));
     w.ledger.length = 0; x.state.legRefusal = { agent: 'included_used' };
     expect(await inbound()).toContain('<Dial');
   });
@@ -414,5 +441,224 @@ describe('agents', () => {
   it('account deletion hands back the number and the agent', () => {
     expect(ownedReferences(USER, [{ provider_sid: 'PN1', status: 'active', agent_id: 'a' }, { provider_sid: 'PN0', status: 'released' }])).toEqual(['number:PN1', `agent:${USER}`]);
     expect(ownedReferences(USER, [])).toEqual([]);
+  });
+});
+
+describe('free trial', () => {
+  const get = (body: Record<string, unknown> = { country: 'US', confirm_trial: true }) => api('POST', '/api/phone/number', body);
+  const plan = async () => (await api('GET', '/api/phone/plan')).body;
+  const status = async () => (await api('GET', '/api/phone/status')).body;
+  const maintain = () => maintainNumbers(w.deps, w.deps.extras!);
+  const bought = () => x.asked.filter((a) => a.startsWith('buy')).length;
+  const trialOn = () => { x.state.trialOn = true; x.state.purchaseEnabled = false; };
+
+  it('is off unless switched on by an explicit yes', async () => {
+    expect(readAgentTrial({})).toBe(false);
+    expect(readAgentTrial({ PHONE_AGENT_TRIAL: '0' })).toBe(false);
+    expect(readAgentTrial({ PHONE_AGENT_TRIAL: 'yes' })).toBe(true);
+    x.state.purchaseEnabled = false; w.addVerified();
+    expect((await get()).body.error.code).toBe('PHONE_PURCHASE_OFF');
+    expect(await plan()).toMatchObject({ trial: null, number: null, purchase_enabled: false, agents_available: false });
+    expect((await status()).own_number).toBe(false);
+    expect(x.asked).toEqual([]);
+  });
+
+  it('is offered by the server, and nothing is bought until the person confirms', async () => {
+    trialOn();
+    expect((await status()).own_number).toBe(true);
+    expect((await plan()).trial).toEqual({ offered: true, days: 14, agent_minutes: 15, active: null, used: false });
+    expect((await get()).body.error.code).toBe('PHONE_NOT_VERIFIED');
+    w.addVerified();
+    expect((await get({ country: 'US' })).body.error.code).toBe('PHONE_TRIAL_CONFIRM_REQUIRED');
+    await maintain();
+    expect(bought()).toBe(0);
+    expect(x.trials.size).toBe(0);
+    const r = await get();
+    expect(r.body).toMatchObject({ phone_number: OUR });
+    expect(x.asked.filter((a) => /^(start-trial|rent|buy)/.test(a)).map((a) => a.split(' ')[0])).toEqual(['start-trial', 'rent', 'buy']);
+    expect((await get()).body.id).toBe(r.body.id);
+    expect(bought()).toBe(1);
+    expect(await plan()).toMatchObject({ agents_available: true, subscription: null, trial: { offered: false, used: false, active: { agent_minutes_left: 15 } } });
+    expect(w.steps()).toEqual(expect.arrayContaining(['own_number_added', 'trial_started']));
+    expect(w.steps().filter((s) => s === 'trial_started')).toHaveLength(1);
+    expect(JSON.stringify([logged, w.events])).not.toContain(OUR.slice(2));
+  });
+
+  it('buys nothing when the trial is refused, and a failed purchase does not use it up', async () => {
+    trialOn(); w.addVerified();
+    for (const [reason, code] of [['trial_full', 'PHONE_TRIAL_FULL'], ['trial_used', 'PHONE_TRIAL_USED'], ['budget_used', 'PHONE_BUDGET_USED']]) {
+      x.state.trialRefusal = reason!;
+      expect((await get()).body.error.code).toBe(code);
+    }
+    expect(bought()).toBe(0);
+    expect(w.events.filter((e) => e.step === 'trial_refused').map((e) => e.props.reason)).toEqual(['trial_full', 'trial_used', 'budget_used']);
+    x.state.trialRefusal = null; x.state.buyFails = true;
+    expect((await get()).status).toBe(502);
+    expect(x.trials.size).toBe(0);
+    expect(w.alerts).toContain('NUMBER_BUY_FAILED');
+    expect(w.steps()).toContain('own_number_failed');
+    expect(w.steps()).not.toContain('trial_started');
+  });
+
+  it('needs the agent service', async () => {
+    trialOn(); w.addVerified(); w.deps.extras!.calldesk = null;
+    expect((await get()).body.error.code).toBe('PHONE_AGENT_UNAVAILABLE');
+    expect(x.trials.size).toBe(0);
+    expect((await status()).own_number).toBe(false);
+  });
+
+  it('works like a paid number, on company money: agent, forwarding and outgoing calls', async () => {
+    trialOn(); w.addVerified();
+    const n = x.addNumber('personal', USER); x.startedTrial();
+    const put = await api('PUT', '/api/phone/agent', { prompt: 'Take a message and ask for a call back number.', language: 'en' });
+    expect(put.status).toBe(200);
+    expect((await api('GET', '/api/phone/agent')).body).toMatchObject({ prompt: 'Take a message.', language: 'en' });
+    await inbound();
+    expect(x.asked).toContain('reserve agent company=true');
+    w.ledger.length = 0; x.state.sessionFails = true;
+    expect(await inbound()).toContain('<Dial');
+    expect(x.asked).toContain('reserve inbound company=true');
+    w.ledger.length = 0;
+    const out = await api('POST', '/api/phone/calls', { to: DEST, consent_version: CONSENT_VERSION, from_id: n.id });
+    expect(out.body).toMatchObject({ from_number: OUR, time_limit_seconds: 1800 });
+    expect(x.asked.some((a) => a.startsWith('reserve call'))).toBe(false);
+  });
+
+  it('gives back the allowance of an agent change the service refused', async () => {
+    trialOn(); w.addVerified(); x.addNumber('personal', USER); x.startedTrial();
+    x.state.draftError = new CalldeskError(429, 'limit_drafts');
+    expect((await api('PUT', '/api/phone/agent', { prompt: 'Take a message please.' })).body.error.code).toBe('PHONE_AGENT_LIMIT');
+    expect(x.asked).toContain('release-draft 7');
+    x.asked.length = 0; x.state.draftError = new CalldeskError(502, 'draft_failed');
+    await api('PUT', '/api/phone/agent', { prompt: 'Take a message please.' });
+    expect(x.asked.some((a) => a.startsWith('release-draft'))).toBe(false);
+    expect(w.events.filter((e) => e.step === 'agent_failed').map((e) => e.props.reason)).toEqual(['limit_drafts', 'draft_failed']);
+  });
+
+  it('the person ends it: number and agent are released, also with the feature switched off', async () => {
+    trialOn(); w.addVerified();
+    x.addNumber('personal', USER, { agent_id: 'agent-1' }); const t = x.startedTrial(USER, { open_call: true });
+    expect((await api('DELETE', '/api/phone/number')).body.error.code).toBe('PHONE_CALL_IN_PROGRESS');
+    t.open_call = false; process.env.FEATURE_PHONE_CALLS = '';
+    expect((await api('DELETE', '/api/phone/number')).body).toEqual({ released: true });
+    expect(x.asked).toEqual(['end-trial ended_by_user', 'delete-agent agent-1', 'release PNx', 'delete-user']);
+    expect(x.numbers[0]!.status).toBe('released');
+    expect((await api('DELETE', '/api/phone/number')).status).toBe(404);
+    process.env.FEATURE_PHONE_CALLS = '1';
+    expect((await plan()).trial).toMatchObject({ offered: false, active: null, used: true });
+    expect((await get()).body.error.code).toBe('PHONE_TRIAL_USED');
+  });
+
+  it('somebody with a live subscription never starts a trial', async () => {
+    x.state.trialOn = true; x.state.purchaseEnabled = false; x.subscribe(); w.addVerified();
+    expect((await get()).body.error.code).toBe('PHONE_PURCHASE_OFF');
+    expect(x.trials.size).toBe(0);
+    expect(bought()).toBe(0);
+  });
+
+  it('a paid number cannot be ended this way', async () => {
+    trialOn(); x.subscribe(); x.addNumber('personal', USER);
+    expect((await api('DELETE', '/api/phone/number')).body.error.code).toBe('PHONE_NUMBER_PAID');
+    expect(x.numbers[0]!.status).toBe('active');
+  });
+
+  it('keeps the number while the trial runs', async () => {
+    trialOn(); x.addNumber('personal', USER); x.startedTrial();
+    await maintain();
+    expect(x.numbers[0]!.status).toBe('active');
+    expect(x.asked.some((a) => a.startsWith('release'))).toBe(false);
+  });
+
+  it.each([
+    ['expired', () => { w.state.now += 15 * 86_400_000; }],
+    ['used_up', () => { x.trials.get(USER)!.seconds_left = 40; }],
+    ['switched_off', () => { x.state.trialOn = false; }],
+    ['budget', () => { x.state.rentRefusal = 'budget_used'; }],
+  ])('releases the number when the trial is over: %s', async (reason, happen) => {
+    trialOn(); x.addNumber('personal', USER, { agent_id: 'agent-1' }); x.startedTrial();
+    happen();
+    await maintain();
+    expect(x.asked).toEqual(expect.arrayContaining([`end-trial ${reason}`, 'delete-agent agent-1', 'release PNx', 'delete-user']));
+    expect(x.numbers[0]!.status).toBe('released');
+    expect(w.events.find((e) => e.step === 'trial_ended')!.props).toMatchObject({ reason });
+    expect(w.events.find((e) => e.step === 'own_number_released')!.props).toMatchObject({ reason });
+  });
+
+  it('waits for a call under way and for its result before releasing', async () => {
+    trialOn(); x.addNumber('personal', USER, { agent_id: 'agent-1' }); const t = x.startedTrial(USER, { seconds_left: 0, open_call: true });
+    await maintain();
+    t.open_call = false; x.state.pending = [{ id: 'c', user_id: USER, agent_id: 'agent-1', created_at: new Date(w.state.now).toISOString() }];
+    await maintain();
+    expect(x.numbers[0]!.status).toBe('active');
+    x.state.pending = [];
+    await maintain();
+    expect(x.numbers[0]!.status).toBe('released');
+  });
+
+  it('repeats a release that failed, and says so when it stays failed', async () => {
+    trialOn(); x.addNumber('personal', USER); x.startedTrial(USER, { seconds_left: 0 });
+    x.state.releaseFails = true;
+    await maintain();
+    expect(w.alerts).toEqual(expect.arrayContaining(['NUMBER_RELEASE_FAILED', 'TRIAL_RELEASE_FAILED']));
+    w.state.now += 2 * 3600_000;
+    await maintain();
+    expect(w.alerts).toContain('TRIAL_RELEASE_OVERDUE');
+    x.state.releaseFails = false;
+    await maintain();
+    expect(x.numbers[0]!.status).toBe('released');
+  });
+
+  it('one number that cannot be checked does not stop the others', async () => {
+    trialOn(); x.addNumber('personal', USER); x.addNumber('personal', OTHER, { provider_sid: 'PNother' });
+    const read = w.deps.extras!.numbers.trialState;
+    w.deps.extras!.numbers.trialState = async (u) => { if (u === USER) throw new Error('db'); return read(u); };
+    await maintain();
+    expect(w.alerts).toContain('NUMBER_MAINTENANCE_FAILED');
+    expect(x.numbers[0]!.status).toBe('active');
+    expect(x.numbers[1]!.status).toBe('released');
+  });
+
+  it('a subscription taken during the trial keeps the number', async () => {
+    trialOn(); x.addNumber('personal', USER); x.startedTrial(); x.subscribe();
+    await maintain();
+    expect(x.asked).toContain('end-trial subscribed');
+    expect(x.numbers[0]!.status).toBe('active');
+  });
+
+  it('counts every step for the owner, behind the secret', async () => {
+    expect((await api('GET', '/internal/phone/steps')).status).toBe(401);
+    expect((await api('GET', '/internal/phone/steps', undefined, { 'x-internal-secret': 'internal-secret' })).body.rows).toHaveLength(1);
+    for (const step of ['own_number_opened', 'own_number_confirm_shown', 'own_number_confirm_declined', 'agent_form_opened', 'call_result_opened']) {
+      expect((await api('POST', '/api/phone/events', { step })).status).toBe(204);
+    }
+    expect((await api('POST', '/api/phone/events', { step: 'trial_started' })).status).toBe(400);
+  });
+});
+
+describe('what the agent collected', () => {
+  const base_ = { external_call_id: 'c', external_user_id: USER, agent_id: 'a' };
+
+  it('keeps bounded name and value pairs', () => {
+    expect(cleanResult({ ...base_, collected: { name: 'Ana', times: 2, extra: { a: 1 }, empty: '', none: null } })!.collected).toEqual({ name: 'Ana', times: '2', extra: '{"a":1}' });
+    for (const bad of [null, undefined, 'text', [1], {}]) expect(cleanResult({ ...base_, collected: bad })!.collected).toBeNull();
+    const big = cleanResult({ ...base_, collected: Object.fromEntries(Array.from({ length: 60 }, (_, i) => [`k${i}`, 'v'.repeat(900)])) })!.collected!;
+    expect(Object.keys(big)).toHaveLength(40);
+    expect(big.k0).toHaveLength(500);
+  });
+
+  it('shows them with the call, and counts a result once without its content', async () => {
+    x.addNumber('personal', USER, { agent_id: 'agent-1' }); w.addVerified();
+    await inbound();
+    const id = w.calls[0]!.id;
+    const body = JSON.stringify({ event: 'call.completed', data: { external_call_id: id, external_user_id: USER, agent_id: 'agent-1', duration_seconds: 30,
+      transcript: [{ role: 'caller', text: 'It is Ana' }], summary: 'Ana called.', collected: { caller_name: 'Ana Lopez' } } });
+    const at = Math.floor(Date.now() / 1000);
+    for (let i = 0; i < 2; i++) {
+      await fetch(`${base}/webhooks/calldesk`, { method: 'POST', body, headers: { 'content-type': 'application/json', 'x-calldesk-timestamp': String(at),
+        'x-calldesk-signature': `sha256=${createHmac('sha256', SECRET).update(`${at}.${body}`).digest('hex')}` } });
+    }
+    expect((await api('GET', `/api/phone/calls/${id}`)).body.call.agent.collected).toEqual({ caller_name: 'Ana Lopez' });
+    expect(w.events.filter((e) => e.step === 'agent_result')).toEqual([expect.objectContaining({ props: { turns: 1, seconds: 30, fields: 1, summary: true } })]);
+    expect(JSON.stringify([logged, w.events])).not.toContain('Ana');
   });
 });

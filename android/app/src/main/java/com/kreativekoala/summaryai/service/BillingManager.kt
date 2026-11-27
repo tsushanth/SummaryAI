@@ -11,7 +11,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -40,6 +42,11 @@ class BillingManager @Inject constructor(
     companion object {
         private const val TAG = "BillingManager"
         const val COACHING_SUB_PRODUCT_ID = "mm_coach_unlimited_monthly"
+        /**
+         * Subscriptions for an own phone number start with this. They are confirmed (and acknowledged) by the server and
+         * never unlock MM Pro. The server names the product; one without this prefix is not offered by the app.
+         */
+        const val PHONE_PRODUCT_PREFIX = "mm_phone_"
         // MM Pro subscription IDs only. Coaching is queried separately so a
         // misconfigured coaching IAP can never break the main paywall.
         private val PRODUCT_IDS = listOf(
@@ -60,6 +67,10 @@ class BillingManager @Inject constructor(
     var onCoachingSubscriptionPurchased: ((productId: String, purchaseToken: String) -> Unit)? = null
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    private val _phonePurchases = MutableSharedFlow<Pair<String, String>>(extraBufferCapacity = 4)
+    /** (product, purchase token) of own-number subscriptions bought in the purchase screen. */
+    val phonePurchases: SharedFlow<Pair<String, String>> = _phonePurchases
 
     private val _isSubscribed = MutableStateFlow(false)
     val isSubscribed: StateFlow<Boolean> = _isSubscribed
@@ -217,7 +228,7 @@ class BillingManager @Inject constructor(
         // Coaching subscription is separate from MM Pro — don't let it flip the Pro gate.
         val hasActive = result.purchasesList.any { purchase ->
             purchase.purchaseState == Purchase.PurchaseState.PURCHASED &&
-                purchase.products.none { it == COACHING_SUB_PRODUCT_ID }
+                purchase.products.none { it == COACHING_SUB_PRODUCT_ID || isPhoneProduct(it) }
         }
         _isSubscribed.value = hasActive
         subscriptionStatus.setActive(hasActive)
@@ -225,7 +236,9 @@ class BillingManager @Inject constructor(
 
         // Acknowledge any unacknowledged purchases
         result.purchasesList.forEach { purchase ->
-            if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED && !purchase.isAcknowledged) {
+            if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED && !purchase.isAcknowledged &&
+                purchase.products.none { isPhoneProduct(it) }
+            ) {
                 acknowledgePurchase(purchase)
             }
         }
@@ -246,6 +259,65 @@ class BillingManager @Inject constructor(
         }
         launchBillingFlow(activity, product)
         return true
+    }
+
+    private fun isPhoneProduct(productId: String) = productId.startsWith(PHONE_PRODUCT_PREFIX)
+
+    /** The own-number subscription as Google Play offers it here, or null. Asked only when the server offers it. */
+    suspend fun phoneProduct(productId: String): BillingProduct? {
+        if (!isPhoneProduct(productId) || !billingClient.isReady) return null
+        val params = QueryProductDetailsParams.newBuilder()
+            .setProductList(
+                listOf(
+                    QueryProductDetailsParams.Product.newBuilder()
+                        .setProductId(productId)
+                        .setProductType(BillingClient.ProductType.SUBS)
+                        .build()
+                )
+            )
+            .build()
+        val result = billingClient.queryProductDetails(params)
+        if (result.billingResult.responseCode != BillingClient.BillingResponseCode.OK) return null
+        val details = result.productDetailsList?.firstOrNull() ?: return null
+        val selected = selectOffer(details) ?: return null
+        val paid = selected.paidPhase
+        return BillingProduct(
+            productId = details.productId,
+            title = details.title,
+            localizedPrice = paid.formattedPrice,
+            price = paid.priceAmountMicros / 1_000_000.0,
+            currencyCode = paid.priceCurrencyCode,
+            period = BillingProduct.Period.MONTHLY,
+            productDetails = details,
+            offerToken = selected.offer.offerToken,
+        )
+    }
+
+    /** Opens the purchase screen; [accountHash] ties the purchase to the signed-in account. */
+    fun launchPhonePurchase(activity: Activity, product: BillingProduct, accountHash: String): Boolean {
+        val params = BillingFlowParams.newBuilder()
+            .setProductDetailsParamsList(
+                listOf(
+                    BillingFlowParams.ProductDetailsParams.newBuilder()
+                        .setProductDetails(product.productDetails)
+                        .setOfferToken(product.offerToken)
+                        .build()
+                )
+            )
+            .setObfuscatedAccountId(accountHash)
+            .build()
+        return billingClient.launchBillingFlow(activity, params).responseCode == BillingClient.BillingResponseCode.OK
+    }
+
+    /** The token of an own-number subscription this Google account already holds. */
+    suspend fun phonePurchaseToken(productId: String): String? {
+        if (!isPhoneProduct(productId) || !billingClient.isReady) return null
+        val result = billingClient.queryPurchasesAsync(
+            QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build()
+        )
+        return result.purchasesList.firstOrNull {
+            it.purchaseState == Purchase.PurchaseState.PURCHASED && productId in it.products
+        }?.purchaseToken
     }
 
     fun launchBillingFlow(activity: Activity, product: BillingProduct) {
@@ -338,6 +410,11 @@ class BillingManager @Inject constructor(
                 purchases?.forEach { purchase ->
                     if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
                         val productId = purchase.products.firstOrNull() ?: ""
+                        // An own number: the server checks it with Google and acknowledges it. Not MM Pro.
+                        if (isPhoneProduct(productId)) {
+                            _phonePurchases.tryEmit(productId to purchase.purchaseToken)
+                            return@forEach
+                        }
                         // Coaching subscription has its own credit pipeline — do NOT mark
                         // the user as MM Pro. Fire callback to the owner so the token gets
                         // shipped to the backend for verification + credit grant.

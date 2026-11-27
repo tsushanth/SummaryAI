@@ -63,13 +63,28 @@ data class PhoneCall(
     val recordingDuration: Int?,
     val recordingId: String?,
     val startedAt: String?,
-    val createdAt: String
+    val createdAt: String,
+    val incoming: Boolean = false,
+    val agent: AgentReport? = null
 ) {
     val formattedToNumber: String get() = formatPhoneNumber(toNumber)
 
     val formattedDuration: String
         get() {
-            val duration = recordingDuration ?: return "--:--"
+            val duration = durationSeconds ?: return "--:--"
             return String.format(java.util.Locale.US, "%d:%02d", duration / 60, duration % 60)
         }
+
+    val durationSeconds: Int? get() = recordingDuration ?: agent?.durationSeconds
 }
+
+data class AgentTurn(val fromAgent: Boolean, val text: String)
+
+/** What the agent reported about a call it took. */
+data class AgentReport(
+    val summary: String?,
+    val durationSeconds: Int?,
+    val transcript: List<AgentTurn>,
+    /** Name and value of each thing the agent collected. */
+    val collected: List<Pair<String, String>>
+)

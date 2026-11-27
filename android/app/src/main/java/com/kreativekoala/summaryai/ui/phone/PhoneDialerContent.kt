@@ -56,6 +56,15 @@ internal fun PhoneHeader(
                     }
                 }
             }
+            state.ownNumber?.takeIf { state.phones.isNotEmpty() }?.let { own ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(selected = state.selectedPhone?.id == own.id, onClick = { onSelect(own.id) })
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(own.formattedPhoneNumber, fontWeight = FontWeight.Medium)
+                        Text(stringResource(R.string.phone_own_number_label), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            }
             if (state.phones.size < state.maxNumbers) {
                 if (state.phones.isEmpty()) {
                     Text(stringResource(R.string.phone_verify_intro), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
