@@ -4,7 +4,7 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 
 | Component | Fly app | Release | Image | Built from | Date |
 |---|---|---|---|---|---|
-| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v72 | `registry.fly.io/summary-ai-backend:deployment-01M8DHZ8Z3FYNECDJASJCMQ80S` | `origin/main` at `7f30172` (#127; `backend/` tree `e717c247f220c9df40afc304671bf093416b6a09`) | 2026-11-27 (UTC) |
+| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v73 | `registry.fly.io/summary-ai-backend:deployment-01M8DMBSHZRNPKZ2JD071FSDAG` | `origin/main` at `7f3672a` (#129; `backend/` tree `4af7e2a61ec023ee860d221c6a531f15d4d03789`) | 2026-11-27 (UTC) |
 | Web (`web/`, meetingmind.org) | `meeting-mind-web` | v43 | `registry.fly.io/meeting-mind-web:deployment-01M8CNXBE7KE1AJAXTEMJHWPBE` | `origin/main` at `464634a` (#119, deployed by the web-deploy workflow; `web/` tree `eaca6a737c817ac6f6def0a61e7c0e477a68902b` identical to main) | 2026-11-26 (UTC) |
 
 ## Android: merged, NOT released (next release: after 1.7.15, versionCode 68)
@@ -18,6 +18,14 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 - Android now posts anonymous record steps to `POST /api/activation/events` (platform `android`, no server change): `record_clicked` with `step` = tap, mic_granted, mic_denied, start_failed, stop_ok, held_short, held_silent, keep_going, record_again, upload_anyway or check_dismissed; `first_recording_started` (every start, `again` after Record again); `first_recording_done` (every upload: `ok`, `seconds`, `auto`). `test` is true on debug builds and Firebase Test Lab. The web funnel check filters `platform = 'web'`, so it is unaffected.
 - Before release: the privacy page names these steps for the website only; add the app.
 - Checks: `:app:testDebugUnitTest` 314 tests, 0 failures; `:app:assembleDebug`. No device run.
+
+## 2026-11-27 Calling shown only in supported countries, still switched off (migration 035): backend v73
+- Change (#129): who is shown calling is decided on the server by account switch, tester list, SIM or network country (`PHONE_COUNTRIES`, unset, so `US,CA`; device region only without either) and verified numbers; a request without a country is "not available"; no answer asks an app to update; usage counts include only accounts that were shown the feature, by country. **All switches unset.**
+- Database: migration `035_phone_audience_counts` applied before the deploy (dry run in a rolled-back transaction first; there were no phone usage events). It only redefines the two count functions and adds `phone_audience()`. Reverse: `backend/supabase/rollbacks/035_phone_audience_counts_down.sql` (run it before ever re-applying 032 or 034).
+- Backend: `flyctl deploy --remote-only` from a clean detached worktree of `origin/main` at `7f3672a`. No secret set or unset. Quiet moment checked: no unfinished recording, bot run, live segment, due auto-join, coaching session or phone call.
+- Verified: `tsc` clean, vitest 109 files / 1569 tests; `/health/detailed` healthy, nine loops fresh; all 142 compiled `.js` files on the machine identical to a fresh build of the same tree; secret names and states unchanged and no phone switch in the machine's environment; with a throwaway example.com account (since deleted), with and without US country headers, `/api/phone/status` answered `enabled: false`, the two lists were empty and every other route tried answered 404 `FEATURE_DISABLED`, with no event or phone row written; unauthenticated 401; unsigned carrier and agent webhooks 403; owner funnel and steps routes refuse without the secret (401) and answer with it (no rows).
+- NOT verified in production: any answer to somebody who is shown the feature (calling is off), so the country rule itself is covered by tests only; no device run, so the app reading a real SIM or network country is untested.
+- Rollback: `flyctl deploy -a summary-ai-backend --image registry.fly.io/summary-ai-backend:deployment-01M8DHZ8Z3FYNECDJASJCMQ80S` (v72); the new count functions also work with v72.
 
 ## 2026-11-27 Free agent trial, switched off, and collected call details (migration 034): backend v72
 - Change (#127): a free trial of an own number with an agent (design: `docs/superpowers/specs/2026-11-26-mm-phone-calls-design.md`), the agent result's collected details kept and returned, step counts and alerts. **All switches unset**, `PHONE_AGENT_TRIAL` included.
