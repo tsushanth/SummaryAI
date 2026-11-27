@@ -62,8 +62,8 @@ afterEach(() => {
   process.env = { ...env };
 });
 
-const call = (method: string, path: string, body?: unknown) =>
-  fetch(base + path, { method, headers: { 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+const call = (method: string, path: string, body?: unknown, headers: Record<string, string> = {}) =>
+  fetch(base + path, { method, headers: { 'content-type': 'application/json', ...headers }, body: body ? JSON.stringify(body) : undefined });
 
 describe('FEATURE_PHONE_CALLS', () => {
   it('is off when unset or not an explicit yes', () => {
@@ -95,8 +95,12 @@ describe('/api/phone with phone calls off', () => {
     process.env.FEATURE_PHONE_CALLS = '1';
     process.env.PHONE_TWILIO_ACCOUNT_SID = 'x'; // partly configured: still unusable
     expect(await (await call('GET', '/api/phone/status')).json()).toEqual({ enabled: false });
-    expect((await call('GET', '/api/phone/verified')).status).toBe(503);
-    expect((await call('POST', '/api/phone/calls', {})).status).toBe(503);
+    const sim = { 'x-mm-sim-country': 'US' };
+    expect(await (await call('GET', '/api/phone/status', undefined, sim)).json()).toEqual({ enabled: false });
+    expect((await call('GET', '/api/phone/verified', undefined, sim)).status).toBe(503);
+    expect((await call('POST', '/api/phone/calls', {}, sim)).status).toBe(503);
+    // An app that sends no country does not see the feature at all.
+    expect((await call('POST', '/api/phone/calls', {})).status).toBe(404);
     expect(db.tables).toEqual([]);
   });
 

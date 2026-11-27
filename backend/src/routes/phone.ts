@@ -5,13 +5,13 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { authenticate } from '../middleware/auth.js';
 import { asyncHandler, AppError, Errors } from '../middleware/errorHandler.js';
-import { phoneCallsApiGate } from '../middleware/phoneCallsGate.js';
-import { hasPhoneCalls } from '../config/featureFlags.js';
+import { phoneCallsApiGate, PHONE_CALLS_OFF_CODE, PHONE_CALLS_OFF_MESSAGE } from '../middleware/phoneCallsGate.js';
+import { phoneVisibility, readClientCountries, TEST_DEVICE_HEADER, type Visibility } from '../phone/availability.js';
 import { createLimiter } from '../services/activationEvents.js';
 import { PhoneError, type PhoneDeps } from '../phone/deps.js';
 import { getPhoneDeps } from '../phone/index.js';
 import { safeError } from '../phone/gateway.js';
-import { startVerification, verificationStatus, removeNumber, verifiedPhones, countryOf } from '../phone/verification.js';
+import { startVerification, verificationStatus, removeNumber, verifiedPhones } from '../phone/verification.js';
 import { startCall, hangupCall, isUuid } from '../phone/calls.js';
 import { hashNumber } from '../phone/numbers.js';
 import { BUSINESS_ANSWERS, BUSINESS_TYPES, CALL_LANGUAGES, CONSENT_VERSION, MAX_VERIFIED_NUMBERS } from '../phone/constants.js';
@@ -40,7 +40,31 @@ export function createPhoneRouter(getDeps: () => PhoneDeps | null = getPhoneDeps
   const router = Router();
   router.use(authMw);
 
-  const available = (userId: string): PhoneDeps | null => (hasPhoneCalls(userId) ? getDeps() : null);
+  /** Whether this person is shown phone calls on this request, and under which country they are counted. */
+  const visibility = (req: Request): Promise<Visibility | null> => {
+    const userId = req.user!.id;
+    return phoneVisibility(userId, readClientCountries((name) => req.get(name)), async () => {
+      const d = getDeps();
+      return !!d && verifiedPhones(await d.store.phonesOfUser(userId)).length > 0;
+    });
+  };
+  const testDevice = (req: Request): boolean => req.get(TEST_DEVICE_HEADER) === '1' || req.body?.test === true;
+  /** What the gate found, kept for the routes behind it. */
+  const shownTo = new WeakMap<Request, Visibility>();
+
+  /**
+   * Counts the people who could see phone calls: one event per account, country and day (kept in memory, so a restart
+   * may repeat one). Usage counts include only accounts that have this event (migration 035). Never delays the answer.
+   */
+  const counted = new Set<string>();
+  const countSeen = (d: PhoneDeps, userId: string, v: Visibility, test: boolean): void => {
+    const country = v.country ?? 'unknown';
+    const key = `${new Date(d.now()).toISOString().slice(0, 10)}|${userId}|${country}|${test}`;
+    if (counted.has(key)) return;
+    if (counted.size >= 20_000) counted.clear();
+    counted.add(key);
+    void d.track('feature_seen', userId, { country, via: v.via, ...(test ? { test: true } : {}) });
+  };
   const deps = () => {
     const d = getDeps();
     if (!d) throw new AppError(503, 'PHONE_NOT_CONFIGURED', 'Phone calls are not available right now.');
@@ -66,9 +90,13 @@ export function createPhoneRouter(getDeps: () => PhoneDeps | null = getPhoneDeps
   /** Whether to show the Phone tab, and what it needs. Never refused: the app asks this on every start. */
   router.get('/status', asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
-    const d = available(userId);
-    if (!d) return void res.json({ enabled: false });
-    try { await sendStatus(res, d, userId); } catch (e) { throw safeError(e); }
+    try {
+      const shown = await visibility(req);
+      const d = shown ? getDeps() : null;
+      if (!shown || !d) return void res.json({ enabled: false });
+      await sendStatus(res, d, userId);
+      countSeen(d, userId, shown, testDevice(req));
+    } catch (e) { throw safeError(e); }
   }));
 
   /** Whether the app shows the own-number screens: the trial or purchase is on, or the account already has a number. */
@@ -112,8 +140,20 @@ export function createPhoneRouter(getDeps: () => PhoneDeps | null = getPhoneDeps
     res.json(await endTrialByUser(d, d.extras, userId));
   }));
 
-  // Off for this account unless the feature or the tester list says otherwise: nothing below runs then.
-  router.use(phoneCallsApiGate);
+  // Endpoints of app versions that predate the consent screen and carrier verification. Those versions send no country,
+  // so phone calls are not available to them, and no released version could do better: never ask them to update.
+  router.all(['/verify/send', '/verify/check', '/voip/token', '/calls/:id/record'], (_req: Request, _res: Response, next: NextFunction) => {
+    next(new AppError(404, PHONE_CALLS_OFF_CODE, PHONE_CALLS_OFF_MESSAGE));
+  });
+
+  // Hidden from this person (account switch, country, no verified number): nothing below runs then.
+  router.use(phoneCallsApiGate(async (req) => {
+    try {
+      const shown = await visibility(req);
+      if (shown) shownTo.set(req, shown);
+      return !!shown;
+    } catch (e) { throw safeError(e); }
+  }));
 
   router.get('/verified', route(async (_req, res, d, userId) => {
     res.json({ phones: verifiedPhones(await d.store.phonesOfUser(userId)).map(publicPhone) });
@@ -157,14 +197,11 @@ export function createPhoneRouter(getDeps: () => PhoneDeps | null = getPhoneDeps
   const limited = (userId: string) => {
     if (!limiter.take(userId, 1, 60, 3_600_000)) throw new PhoneError(429, 'RATE_LIMITED', 'Too many requests');
   };
-  /** The device's two-letter region, only ever used to split the funnel. */
-  const region = (v: unknown) => (typeof v === 'string' && /^[A-Za-z]{2}$/.test(v) ? v.toUpperCase() : undefined);
-
   router.post('/events', route(async (req, res, d, userId) => {
     limited(userId);
     const step = req.body?.step as PhoneStep;
     if (!CLIENT_STEPS.includes(step)) throw Errors.badRequest('Unknown step');
-    await d.track(step, userId, { country: region(req.body?.country), ...(req.body?.test === true ? { test: true } : {}) });
+    await d.track(step, userId, { country: shownTo.get(req)?.country, ...(testDevice(req) ? { test: true } : {}) });
     res.status(204).end();
   }));
 
@@ -174,11 +211,9 @@ export function createPhoneRouter(getDeps: () => PhoneDeps | null = getPhoneDeps
     const answer = req.body?.business;
     if (!BUSINESS_ANSWERS.includes(answer)) throw Errors.badRequest('Unknown answer');
     const type = answer === 'business' && BUSINESS_TYPES.includes(req.body?.business_type) ? req.body.business_type : undefined;
-    const mine = verifiedPhones(await d.store.phonesOfUser(userId))[0];
     await d.track('business_answer', userId, {
       answer, business_type: type, context: req.body?.context === 'agent' ? 'agent' : 'number',
-      country: (mine ? countryOf(mine.phone_number) : undefined) ?? region(req.body?.country),
-      ...(req.body?.test === true ? { test: true } : {}),
+      country: shownTo.get(req)?.country, ...(testDevice(req) ? { test: true } : {}),
     });
     res.status(204).end();
   }));
@@ -245,11 +280,6 @@ export function createPhoneRouter(getDeps: () => PhoneDeps | null = getPhoneDeps
   router.get('/agent', extra(async (_req, res, d, x, userId) => { res.json(await getAgent(d, x, userId)); }));
   router.put('/agent', extra(async (req, res, d, x, userId) => { res.json(await setAgent(d, x, userId, req.body ?? {})); }));
   router.delete('/agent', extra(async (_req, res, d, x, userId) => { await removeAgent(d, x, userId); res.json({ deleted: true }); }));
-
-  // Endpoints of app versions that predate the consent screen and carrier verification.
-  router.all(['/verify/send', '/verify/check', '/voip/token', '/calls/:id/record'], (_req: Request, _res: Response, next: NextFunction) => {
-    next(new AppError(410, 'APP_UPDATE_REQUIRED', 'Update Meeting Mind to make phone calls.'));
-  });
 
   return router;
 }

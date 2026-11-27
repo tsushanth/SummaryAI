@@ -22,6 +22,7 @@ import com.kreativekoala.summaryai.data.repository.OwnNumberSource
 import com.kreativekoala.summaryai.data.repository.toDomain
 import com.kreativekoala.summaryai.service.PhonePurchases
 import com.kreativekoala.summaryai.service.accountHash
+import com.kreativekoala.summaryai.util.CountrySignals
 import com.kreativekoala.summaryai.util.PhoneDevice
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -107,6 +108,7 @@ class OwnNumberTest {
 
     private val device = object : PhoneDevice {
         override val region = "CA"
+        override val countries = CountrySignals(region = "CA")
         override val language = "es-US"
         override val isTest = true
     }
