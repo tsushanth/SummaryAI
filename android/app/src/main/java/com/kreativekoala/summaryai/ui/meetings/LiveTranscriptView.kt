@@ -26,6 +26,7 @@ import com.kreativekoala.summaryai.data.LanguageCatalog
 import com.kreativekoala.summaryai.domain.model.LiveTranscriptSegment
 import com.kreativekoala.summaryai.ui.coaching.ActiveCoachingSession
 import com.kreativekoala.summaryai.ui.coaching.CoachingLivePanel
+import com.kreativekoala.summaryai.ui.coaching.CoachingPhase
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -41,7 +42,8 @@ interface ActiveCoachingSessionEntryPoint {
 fun LiveTranscriptView(
     meetingId: String,
     viewModel: LiveTranscriptViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    botInMeeting: Boolean = true
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
@@ -51,9 +53,7 @@ fun LiveTranscriptView(
         EntryPointAccessors.fromApplication(context, ActiveCoachingSessionEntryPoint::class.java)
             .activeCoachingSession()
     }
-    val coachingInsights by coaching.insights.collectAsState()
-    val coachingActive by coaching.isActive.collectAsState()
-    val hasCoachingSession = coaching.sessionId(meetingId) != null
+    val coachingState by coaching.state.collectAsState()
 
     // Update meeting ID and start polling
     LaunchedEffect(meetingId) {
@@ -61,14 +61,9 @@ fun LiveTranscriptView(
         viewModel.startPolling()
     }
 
-    // Stop polling + end coaching when composable leaves
+    // Stop polling when composable leaves. The coaching session carries on: leaving this view does not end it.
     DisposableEffect(Unit) {
-        onDispose {
-            viewModel.stopPolling()
-            if (coaching.sessionId(meetingId) != null) {
-                coaching.endActive()
-            }
-        }
+        onDispose { viewModel.stopPolling() }
     }
 
     // Auto-scroll to bottom when new segments arrive
@@ -112,17 +107,18 @@ fun LiveTranscriptView(
 
     Box(modifier = modifier.fillMaxSize()) {
     Column(modifier = Modifier.fillMaxSize()) {
-        // AI Coach live panel — only when a session is active for this meeting.
-        if (hasCoachingSession) {
+        // AI Coach live panel — only when there is a session (or a failed start) for this meeting.
+        if (coachingState.meetingId == meetingId && coachingState.phase != CoachingPhase.IDLE) {
             CoachingLivePanel(
-                insights = coachingInsights,
-                isActive = coachingActive,
+                state = coachingState,
+                onStop = coaching::stop,
+                onRetry = coaching::retry,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
         }
 
-        // Live indicator
-        LiveIndicator()
+        // Live indicator: not while the bot is still outside the meeting.
+        if (botInMeeting) LiveIndicator()
 
         // Active transcription language + change action
         LanguageBar(

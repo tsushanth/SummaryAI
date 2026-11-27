@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">Bot đang tham gia</string>
+    <string name="bot_status_joining_body">Thường mất chưa đến một phút.</string>
+    <string name="bot_status_waiting_title">Hãy cho bot vào</string>
+    <string name="bot_status_waiting_body">Bot đang chờ được cho vào. Trong cuộc họp, hãy chấp nhận Meeting Mind (hoặc tên bot bạn đã chọn). Bot sẽ từ bỏ sau 10 phút.</string>
+    <string name="bot_status_in_call_title">Sắp sẵn sàng</string>
+    <string name="bot_status_in_call_body">Bot đã vào cuộc họp và chưa ghi âm. Nếu cuộc họp hỏi có thể ghi âm không, hãy cho phép.</string>
+    <string name="bot_failed_title">Bot đã không ghi lại cuộc họp này</string>
+    <string name="bot_failed_not_admitted">Không ai cho bot vào từ phòng chờ kịp thời. Hãy tham gia lại và chấp nhận bot khi được yêu cầu.</string>
+    <string name="bot_failed_removed_waiting">Bot đã bị xóa khỏi phòng chờ. Hãy nhờ chủ phòng cho bot vào, rồi tham gia lại.</string>
+    <string name="bot_failed_not_started">Cuộc họp chưa bắt đầu. Hãy bắt đầu cuộc họp, rồi tham gia lại.</string>
+    <string name="bot_failed_passcode">Mật khẩu cuộc họp sai hoặc bị thiếu. Hãy dán toàn bộ liên kết mời, kèm mật khẩu, rồi tham gia lại.</string>
+    <string name="bot_failed_link">Không tìm thấy cuộc họp. Hãy kiểm tra liên kết và tham gia lại.</string>
+    <string name="bot_failed_sign_in">Cuộc họp này chỉ cho phép người đã đăng nhập hoặc đã đăng ký. Hãy nhờ chủ phòng cho phép khách, rồi tham gia lại.</string>
+    <string name="bot_failed_blocked">Cuộc họp không cho phép bot tham gia. Hãy nhờ chủ phòng cho phép, rồi tham gia lại.</string>
+    <string name="bot_failed_permission">Ghi âm không được cho phép. Hãy nhờ chủ phòng cho phép ghi âm, rồi tham gia lại.</string>
+    <string name="bot_failed_generic">Bot không thể tham gia. Hãy kiểm tra liên kết cuộc họp và tham gia lại.</string>
+    <string name="coach_starting">Đang khởi động Huấn luyện viên AI…</string>
+    <string name="coach_listening_hint">Gợi ý xuất hiện khoảng 30 giây một lần khi bot đã vào cuộc họp và mọi người đang nói chuyện.</string>
+    <string name="coach_reconnecting">Đang kết nối lại…</string>
+    <string name="coach_stop">Dừng</string>
+    <string name="coach_ended">Huấn luyện viên AI đã kết thúc.</string>
+    <string name="coach_ended_not_admitted">Huấn luyện viên AI đã dừng vì bot không được cho vào cuộc họp.</string>
+    <string name="coach_ended_bot_failed">Huấn luyện viên AI đã dừng vì bot không thể tham gia cuộc họp.</string>
+    <string name="coach_ended_no_speech">Huấn luyện viên AI kết thúc mà không nghe thấy lời nói nào.</string>
+    <string name="coach_ended_model_failed">Huấn luyện viên AI không thể tạo gợi ý do sự cố từ phía chúng tôi.</string>
+    <string name="coach_credit_returned">Tín dụng phiên của bạn đã được hoàn lại.</string>
+    <string name="coach_no_credit_used">Không có tín dụng nào được dùng.</string>
+    <string name="coach_error_no_credits">Huấn luyện viên AI không khởi động vì bạn không còn phiên nào.</string>
+    <string name="coach_error_meeting_over">Huấn luyện viên AI không khởi động vì bot không còn trong cuộc họp.</string>
+    <string name="coach_error_generic">Huấn luyện viên AI không thể khởi động. Hãy kiểm tra kết nối và thử lại.</string>
+    <string name="coach_join_hint">Gợi ý xuất hiện trong ứng dụng này, trên tab Bản phiên âm của cuộc họp. Hãy chấp nhận bot khi nó yêu cầu tham gia.</string>
+    <string name="coach_delayed_language">Với ngôn ngữ này, bản phiên âm trực tiếp đến trễ vài phút, nên gợi ý cũng sẽ bị trễ theo.</string>
+</resources>

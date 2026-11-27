@@ -101,6 +101,15 @@ export function isBotCapMessage(message: string | null | undefined): boolean {
   return !!message && (message.includes(BOT_MONTHLY_CAP_REACHED) || CAP_TEXT.test(message));
 }
 
+export const BOT_ON_ITS_WAY = 'Bot is joining the meeting...';
+export const BOT_WAITING =
+  'The bot is waiting to be let in. In your meeting, admit "Meeting Mind" (or the bot name you chose). It gives up after 10 minutes.';
+
+/** What to say while the bot is not in the meeting yet. Older servers send no bot_state. */
+export function botJoiningText(meeting: { bot_state?: { state: string } | null }): string {
+  return meeting.bot_state?.state === 'waiting_room' ? BOT_WAITING : BOT_ON_ITS_WAY;
+}
+
 /** The text to show for a failed meeting, or null when it did not fail or no reason was recorded. */
 export function meetingFailureReason(
   meeting: { status: string; error_message?: string | null },

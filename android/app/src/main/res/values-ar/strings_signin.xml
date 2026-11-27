@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">لم يتم قبول تسجيل الدخول (%1$s). يُرجى المحاولة مرة أخرى.</string>
+    <string name="calendar_return_connected">تم ربط %1$s.</string>
+    <string name="calendar_return_cancelled">لم يتم ربط التقويم: لم يُمنح الإذن بالوصول.</string>
+    <string name="calendar_return_expired">لم يتم ربط التقويم: استغرق تسجيل الدخول وقتًا طويلًا أو سبق استخدامه. يُرجى الربط مرة أخرى.</string>
+    <string name="calendar_return_admin_approval">يحتاج حساب العمل أو المدرسة إلى موافقة المسؤول على Meeting Mind. اطلب ذلك من فريق تقنية المعلومات، أو اربط حسابًا شخصيًا.</string>
+    <string name="calendar_return_failed">لم يتم ربط التقويم. يُرجى المحاولة مرة أخرى بعد بضع دقائق.</string>
+    <string name="calendar_no_browser">لم يُعثر على متصفح ويب لفتح صفحة تسجيل الدخول.</string>
+</resources>

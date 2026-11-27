@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">Conectarea nu a fost acceptată (%1$s). Încercați din nou.</string>
+    <string name="calendar_return_connected">%1$s conectat.</string>
+    <string name="calendar_return_cancelled">Calendarul nu a fost conectat: accesul nu a fost acordat.</string>
+    <string name="calendar_return_expired">Calendarul nu a fost conectat: conectarea a durat prea mult sau a fost deja folosită. Conectați din nou.</string>
+    <string name="calendar_return_admin_approval">Contul de serviciu sau de școală necesită aprobarea Meeting Mind de către un administrator. Cereți echipei IT sau conectați un cont personal.</string>
+    <string name="calendar_return_failed">Calendarul nu a fost conectat. Încercați din nou peste câteva minute.</string>
+    <string name="calendar_no_browser">Nu s-a găsit niciun browser web pentru a deschide pagina de conectare.</string>
+</resources>

@@ -93,7 +93,7 @@ describe('coaching tick: emission and insight_count', () => {
     await runOneTick();
     expect(state.insertedInsights).toHaveLength(2);
     expect(state.insertedInsights[0]).toMatchObject({ session_id: SESSION_ID, transcript_offset_seconds: 42 });
-    expect(state.sessionUpdates.find(u => 'insight_count' in u)).toEqual({ insight_count: 2 });
+    expect(state.sessionUpdates.filter(u => 'insight_count' in u)).toEqual([{ insight_count: 1 }, { insight_count: 2 }]);
   });
 
   it('does not count insights the validator rejected', async () => {

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">Log masuk tidak diterima (%1$s). Sila cuba lagi.</string>
+    <string name="calendar_return_connected">%1$s disambungkan.</string>
+    <string name="calendar_return_cancelled">Kalendar tidak disambungkan: akses tidak diberikan.</string>
+    <string name="calendar_return_expired">Kalendar tidak disambungkan: log masuk mengambil masa terlalu lama atau sudah digunakan. Sila sambungkan semula.</string>
+    <string name="calendar_return_admin_approval">Akaun kerja atau sekolah anda memerlukan pentadbir meluluskan Meeting Mind. Minta pasukan IT anda, atau sambungkan akaun peribadi.</string>
+    <string name="calendar_return_failed">Kalendar tidak disambungkan. Sila cuba lagi dalam beberapa minit.</string>
+    <string name="calendar_no_browser">Tiada pelayar web ditemui untuk membuka halaman log masuk.</string>
+</resources>

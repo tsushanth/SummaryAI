@@ -54,6 +54,7 @@ import {
 import { getLiveInsights } from '../services/liveInsightsService.js';
 import { enforceBotMonthlyCap, BOT_CAP_ERROR_CODE } from '../services/botUsageCap.js';
 import { upcomingMeetingsFilter } from '../lib/meetingListFilter.js';
+import { deriveBotState } from '../services/meetingBotState.js';
 
 const router = Router();
 
@@ -447,7 +448,7 @@ router.get(
     // Get latest bot run if exists
     const { data: botRun } = await supabaseAdmin
       .from('bot_runs')
-      .select('id, status, joined_at, left_at, duration_seconds, error_message')
+      .select('id, status, joined_at, left_at, duration_seconds, error_message, recall_status, error_code')
       .eq('meeting_id', meetingId)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -496,6 +497,7 @@ router.get(
       status: meeting.status,
       recording_id: meeting.recording_id,
       bot_run: botRunResponse,
+      bot_state: botRun ? deriveBotState(botRun) : null,
       error_message: meeting.error_message,
       created_at: meeting.created_at,
       transcription_language: language,

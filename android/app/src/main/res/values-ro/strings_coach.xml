@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">Botul se alătură</string>
+    <string name="bot_status_joining_body">De obicei durează mai puțin de un minut.</string>
+    <string name="bot_status_waiting_title">Admite botul</string>
+    <string name="bot_status_waiting_body">Botul așteaptă să fie admis. În ședința ta, admite Meeting Mind (sau numele de bot ales). Renunță după 10 minute.</string>
+    <string name="bot_status_in_call_title">Aproape gata</string>
+    <string name="bot_status_in_call_body">Botul este în ședință și nu înregistrează încă. Dacă ședința întreabă dacă poate înregistra, permite-i.</string>
+    <string name="bot_failed_title">Botul nu a înregistrat această ședință</string>
+    <string name="bot_failed_not_admitted">Nimeni nu a admis botul din sala de așteptare la timp. Alătură-te din nou și admite-l când cere.</string>
+    <string name="bot_failed_removed_waiting">Botul a fost eliminat din sala de așteptare. Roagă gazda să îl admită, apoi alătură-te din nou.</string>
+    <string name="bot_failed_not_started">Ședința nu începuse. Pornește ședința, apoi alătură-te din nou.</string>
+    <string name="bot_failed_passcode">Codul de acces era greșit sau lipsea. Lipește linkul complet de invitație, cu codul de acces, și alătură-te din nou.</string>
+    <string name="bot_failed_link">Ședința nu a fost găsită. Verifică linkul și alătură-te din nou.</string>
+    <string name="bot_failed_sign_in">Această ședință admite doar persoane autentificate sau înregistrate. Roagă gazda să permită invitații, apoi alătură-te din nou.</string>
+    <string name="bot_failed_blocked">Ședința nu a permis botului să se alăture. Roagă gazda să îl permită, apoi alătură-te din nou.</string>
+    <string name="bot_failed_permission">Înregistrarea nu a fost permisă. Roagă gazda să permită înregistrarea, apoi alătură-te din nou.</string>
+    <string name="bot_failed_generic">Botul nu s-a putut alătura. Verifică linkul ședinței și alătură-te din nou.</string>
+    <string name="coach_starting">Se pornește Coach AI…</string>
+    <string name="coach_listening_hint">Sfaturile apar aproximativ la fiecare 30 de secunde, odată ce botul este în ședință și oamenii vorbesc.</string>
+    <string name="coach_reconnecting">Se reconectează…</string>
+    <string name="coach_stop">Oprește</string>
+    <string name="coach_ended">Coach AI s-a încheiat.</string>
+    <string name="coach_ended_not_admitted">Coach AI s-a oprit deoarece botul nu a fost admis în ședință.</string>
+    <string name="coach_ended_bot_failed">Coach AI s-a oprit deoarece botul nu s-a putut alătura ședinței.</string>
+    <string name="coach_ended_no_speech">Coach AI s-a încheiat fără a detecta nicio vorbire.</string>
+    <string name="coach_ended_model_failed">Coach AI nu a putut genera sfaturi din cauza unei probleme pe partea noastră.</string>
+    <string name="coach_credit_returned">Creditul sesiunii tale a fost returnat.</string>
+    <string name="coach_no_credit_used">Niciun credit nu a fost utilizat.</string>
+    <string name="coach_error_no_credits">Coach AI nu a pornit deoarece nu mai ai sesiuni disponibile.</string>
+    <string name="coach_error_meeting_over">Coach AI nu a pornit deoarece botul nu mai este în ședință.</string>
+    <string name="coach_error_generic">Coach AI nu a putut porni. Verifică conexiunea și încearcă din nou.</string>
+    <string name="coach_join_hint">Sfaturile apar în această aplicație, în fila Transcriere a ședinței. Admite botul când cere să se alăture.</string>
+    <string name="coach_delayed_language">În această limbă, transcrierea live sosește cu câteva minute întârziere, astfel că și sfaturile vor întârzia.</string>
+</resources>

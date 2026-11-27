@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">Accesso non accettato (%1$s). Riprova.</string>
+    <string name="calendar_return_connected">%1$s collegato.</string>
+    <string name="calendar_return_cancelled">Calendario non collegato: l’accesso non è stato concesso.</string>
+    <string name="calendar_return_expired">Calendario non collegato: l’accesso ha richiesto troppo tempo o è già stato usato. Collegalo di nuovo.</string>
+    <string name="calendar_return_admin_approval">Il tuo account di lavoro o scolastico richiede che un amministratore approvi Meeting Mind. Chiedi al reparto IT o collega un account personale.</string>
+    <string name="calendar_return_failed">Calendario non collegato. Riprova tra qualche minuto.</string>
+    <string name="calendar_no_browser">Nessun browser web trovato per aprire la pagina di accesso.</string>
+</resources>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">Le bot rejoint la réunion</string>
+    <string name="bot_status_joining_body">Cela prend généralement moins d\'une minute.</string>
+    <string name="bot_status_waiting_title">Admettez le bot</string>
+    <string name="bot_status_waiting_body">Le bot attend d\'être admis. Dans votre réunion, admettez Meeting Mind (ou le nom de bot que vous avez choisi). Il abandonne après 10 minutes.</string>
+    <string name="bot_status_in_call_title">Presque prêt</string>
+    <string name="bot_status_in_call_body">Le bot est dans la réunion et n\'enregistre pas encore. Si votre réunion demande l\'autorisation d\'enregistrer, acceptez.</string>
+    <string name="bot_failed_title">Le bot n\'a pas enregistré cette réunion</string>
+    <string name="bot_failed_not_admitted">Personne n\'a admis le bot depuis la salle d\'attente à temps. Rejoignez à nouveau et admettez-le lorsqu\'il demande.</string>
+    <string name="bot_failed_removed_waiting">Le bot a été retiré de la salle d\'attente. Demandez à l\'hôte de l\'admettre, puis rejoignez à nouveau.</string>
+    <string name="bot_failed_not_started">La réunion n\'avait pas commencé. Démarrez la réunion, puis rejoignez à nouveau.</string>
+    <string name="bot_failed_passcode">Le code d\'accès était incorrect ou manquant. Collez le lien d\'invitation complet, avec le code d\'accès, puis rejoignez à nouveau.</string>
+    <string name="bot_failed_link">La réunion est introuvable. Vérifiez le lien et rejoignez à nouveau.</string>
+    <string name="bot_failed_sign_in">Cette réunion n\'admet que les personnes connectées ou enregistrées. Demandez à l\'hôte d\'autoriser les invités, puis rejoignez à nouveau.</string>
+    <string name="bot_failed_blocked">La réunion n\'a pas autorisé le bot à rejoindre. Demandez à l\'hôte de l\'autoriser, puis rejoignez à nouveau.</string>
+    <string name="bot_failed_permission">L\'enregistrement n\'était pas autorisé. Demandez à l\'hôte d\'autoriser l\'enregistrement, puis rejoignez à nouveau.</string>
+    <string name="bot_failed_generic">Le bot n\'a pas pu rejoindre. Vérifiez le lien de réunion et rejoignez à nouveau.</string>
+    <string name="coach_starting">Démarrage du Coach IA…</string>
+    <string name="coach_listening_hint">Des conseils apparaissent environ toutes les 30 secondes une fois que le bot est dans la réunion et que des personnes parlent.</string>
+    <string name="coach_reconnecting">Reconnexion…</string>
+    <string name="coach_stop">Arrêter</string>
+    <string name="coach_ended">Le Coach IA a pris fin.</string>
+    <string name="coach_ended_not_admitted">Le Coach IA s\'est arrêté car le bot n\'a pas été admis dans la réunion.</string>
+    <string name="coach_ended_bot_failed">Le Coach IA s\'est arrêté car le bot n\'a pas pu rejoindre la réunion.</string>
+    <string name="coach_ended_no_speech">Le Coach IA a pris fin sans avoir détecté de parole.</string>
+    <string name="coach_ended_model_failed">Le Coach IA n\'a pas pu générer de conseils en raison d\'un problème de notre côté.</string>
+    <string name="coach_credit_returned">Votre crédit de session a été restitué.</string>
+    <string name="coach_no_credit_used">Aucun crédit n\'a été utilisé.</string>
+    <string name="coach_error_no_credits">Le Coach IA n\'a pas démarré car vous n\'avez plus de sessions disponibles.</string>
+    <string name="coach_error_meeting_over">Le Coach IA n\'a pas démarré car le bot n\'est plus dans la réunion.</string>
+    <string name="coach_error_generic">Le Coach IA n\'a pas pu démarrer. Vérifiez votre connexion et réessayez.</string>
+    <string name="coach_join_hint">Les conseils apparaissent dans cette application, dans l\'onglet Transcription de la réunion. Admettez le bot lorsqu\'il demande à rejoindre.</string>
+    <string name="coach_delayed_language">Dans cette langue, la transcription en direct arrive avec plusieurs minutes de retard, les conseils seront donc également en retard.</string>
+</resources>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">봇이 참가 중입니다</string>
+    <string name="bot_status_joining_body">보통 1분 이내에 완료됩니다.</string>
+    <string name="bot_status_waiting_title">봇을 입장시켜 주세요</string>
+    <string name="bot_status_waiting_body">봇이 대기실에서 입장을 기다리고 있습니다. 회의에서 Meeting Mind(또는 선택한 봇 이름)를 승인해 주세요. 10분 후에는 자동으로 종료됩니다.</string>
+    <string name="bot_status_in_call_title">거의 준비됐습니다</string>
+    <string name="bot_status_in_call_body">봇이 회의에 참가했으며 아직 녹화 중이 아닙니다. 회의에서 녹화 허용 여부를 묻는 경우 허용해 주세요.</string>
+    <string name="bot_failed_title">봇이 이 회의를 녹화하지 못했습니다</string>
+    <string name="bot_failed_not_admitted">대기실에서 봇을 제때 입장시키지 못했습니다. 다시 참가하여 봇을 승인해 주세요.</string>
+    <string name="bot_failed_removed_waiting">봇이 대기실에서 제거되었습니다. 호스트에게 입장 허용을 요청한 후 다시 참가해 주세요.</string>
+    <string name="bot_failed_not_started">회의가 아직 시작되지 않았습니다. 회의를 시작한 후 다시 참가해 주세요.</string>
+    <string name="bot_failed_passcode">회의 비밀번호가 잘못되었거나 없습니다. 비밀번호가 포함된 전체 초대 링크를 붙여넣고 다시 참가해 주세요.</string>
+    <string name="bot_failed_link">회의를 찾을 수 없습니다. 링크를 확인하고 다시 참가해 주세요.</string>
+    <string name="bot_failed_sign_in">이 회의는 로그인하거나 등록된 사용자만 참가할 수 있습니다. 호스트에게 게스트 허용을 요청한 후 다시 참가해 주세요.</string>
+    <string name="bot_failed_blocked">이 회의는 봇 참가를 허용하지 않습니다. 호스트에게 허용을 요청한 후 다시 참가해 주세요.</string>
+    <string name="bot_failed_permission">녹화가 허용되지 않았습니다. 호스트에게 녹화 허용을 요청한 후 다시 참가해 주세요.</string>
+    <string name="bot_failed_generic">봇이 참가하지 못했습니다. 회의 링크를 확인하고 다시 참가해 주세요.</string>
+    <string name="coach_starting">AI 코치 시작 중…</string>
+    <string name="coach_listening_hint">봇이 회의에 참가하고 대화가 시작되면 약 30초마다 팁이 표시됩니다.</string>
+    <string name="coach_reconnecting">다시 연결 중…</string>
+    <string name="coach_stop">중지</string>
+    <string name="coach_ended">AI 코치가 종료되었습니다.</string>
+    <string name="coach_ended_not_admitted">봇이 회의에 입장하지 못해 AI 코치가 중단되었습니다.</string>
+    <string name="coach_ended_bot_failed">봇이 회의에 참가하지 못해 AI 코치가 중단되었습니다.</string>
+    <string name="coach_ended_no_speech">음성이 감지되지 않아 AI 코치가 종료되었습니다.</string>
+    <string name="coach_ended_model_failed">서버 문제로 AI 코치가 팁을 생성하지 못했습니다.</string>
+    <string name="coach_credit_returned">세션 크레딧이 반환되었습니다.</string>
+    <string name="coach_no_credit_used">크레딧이 사용되지 않았습니다.</string>
+    <string name="coach_error_no_credits">남은 세션이 없어 AI 코치를 시작하지 못했습니다.</string>
+    <string name="coach_error_meeting_over">봇이 더 이상 회의에 없어 AI 코치를 시작하지 못했습니다.</string>
+    <string name="coach_error_generic">AI 코치를 시작하지 못했습니다. 연결을 확인하고 다시 시도해 주세요.</string>
+    <string name="coach_join_hint">팁은 이 앱의 회의 전사 텍스트 탭에 표시됩니다. 봇이 참가를 요청하면 승인해 주세요.</string>
+    <string name="coach_delayed_language">이 언어는 실시간 전사 텍스트가 몇 분 늦게 도착하므로 팁도 늦게 표시될 수 있습니다.</string>
+</resources>

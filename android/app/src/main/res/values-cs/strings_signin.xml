@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">Přihlášení nebylo přijato (%1$s). Zkuste to prosím znovu.</string>
+    <string name="calendar_return_connected">%1$s: připojeno.</string>
+    <string name="calendar_return_cancelled">Kalendář není připojen: přístup nebyl povolen.</string>
+    <string name="calendar_return_expired">Kalendář není připojen: přihlášení trvalo příliš dlouho nebo už bylo použito. Připojte ho prosím znovu.</string>
+    <string name="calendar_return_admin_approval">Váš pracovní nebo školní účet vyžaduje, aby správce Meeting Mind schválil. Požádejte oddělení IT, nebo připojte osobní účet.</string>
+    <string name="calendar_return_failed">Kalendář není připojen. Zkuste to prosím za několik minut znovu.</string>
+    <string name="calendar_no_browser">Nebyl nalezen žádný webový prohlížeč pro otevření přihlašovací stránky.</string>
+</resources>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">ボットが参加中です</string>
+    <string name="bot_status_joining_body">通常1分以内に完了します。</string>
+    <string name="bot_status_waiting_title">ボットを入室させてください</string>
+    <string name="bot_status_waiting_body">ボットが待機室で待っています。ミーティング内でMeeting Mind（または設定したボット名）を承認してください。10分後に自動的にキャンセルされます。</string>
+    <string name="bot_status_in_call_title">もうすぐ準備完了</string>
+    <string name="bot_status_in_call_body">ボットはミーティングに参加していますが、まだ録音していません。録音の許可を求められた場合は、許可してください。</string>
+    <string name="bot_failed_title">ボットはこのミーティングを録音できませんでした</string>
+    <string name="bot_failed_not_admitted">待機室からボットを承認する人がいませんでした。再度参加し、承認してください。</string>
+    <string name="bot_failed_removed_waiting">ボットが待機室から削除されました。ホストに承認を依頼し、再度参加してください。</string>
+    <string name="bot_failed_not_started">ミーティングがまだ開始されていませんでした。ミーティングを開始してから再度参加してください。</string>
+    <string name="bot_failed_passcode">ミーティングのパスコードが違うか、入力されていません。パスコード付きの招待リンクをそのまま貼り付け、再度参加してください。</string>
+    <string name="bot_failed_link">ミーティングが見つかりませんでした。リンクを確認して再度参加してください。</string>
+    <string name="bot_failed_sign_in">このミーティングはサインイン済みまたは登録済みの参加者のみ入室できます。ホストにゲストの許可を依頼し、再度参加してください。</string>
+    <string name="bot_failed_blocked">ミーティングがボットの参加を許可しませんでした。ホストに許可を依頼し、再度参加してください。</string>
+    <string name="bot_failed_permission">録音が許可されませんでした。ホストに録音の許可を依頼し、再度参加してください。</string>
+    <string name="bot_failed_generic">ボットが参加できませんでした。ミーティングリンクを確認して再度参加してください。</string>
+    <string name="coach_starting">AIコーチを起動中…</string>
+    <string name="coach_listening_hint">ボットがミーティングに参加し、会話が始まると、約30秒ごとにヒントが表示されます。</string>
+    <string name="coach_reconnecting">再接続中…</string>
+    <string name="coach_stop">停止</string>
+    <string name="coach_ended">AIコーチが終了しました。</string>
+    <string name="coach_ended_not_admitted">ボットがミーティングに承認されなかったため、AIコーチを停止しました。</string>
+    <string name="coach_ended_bot_failed">ボットがミーティングに参加できなかったため、AIコーチを停止しました。</string>
+    <string name="coach_ended_no_speech">音声が検出されなかったため、AIコーチが終了しました。</string>
+    <string name="coach_ended_model_failed">サーバー側の問題により、AIコーチはヒントを生成できませんでした。</string>
+    <string name="coach_credit_returned">セッションのクレジットが返還されました。</string>
+    <string name="coach_no_credit_used">クレジットは使用されませんでした。</string>
+    <string name="coach_error_no_credits">セッションのクレジットが不足しているため、AIコーチを開始できませんでした。</string>
+    <string name="coach_error_meeting_over">ボットがすでにミーティングにいないため、AIコーチを開始できませんでした。</string>
+    <string name="coach_error_generic">AIコーチを開始できませんでした。接続を確認して再度お試しください。</string>
+    <string name="coach_join_hint">ヒントはこのアプリのミーティングの文字起こしタブに表示されます。ボットの参加リクエストを承認してください。</string>
+    <string name="coach_delayed_language">この言語ではライブ文字起こしが数分遅れて届くため、ヒントの表示も遅くなります。</string>
+</resources>

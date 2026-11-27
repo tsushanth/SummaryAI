@@ -105,7 +105,17 @@ data class LiveCapabilitiesDto(
 data class MeetingDetailDto(
     val id: String? = null,
     @SerializedName("transcription_language") val transcriptionLanguage: String? = null,
-    @SerializedName("live_language") val liveLanguage: LiveLanguageDto? = null
+    @SerializedName("live_language") val liveLanguage: LiveLanguageDto? = null,
+    @SerializedName("bot_state") val botState: BotStateDto? = null
+)
+
+/**
+ * What the meeting bot is doing: joining, waiting_room, in_call, recording, ended or failed (with a reason [code]).
+ */
+data class BotStateDto(
+    @SerializedName("state") val state: String? = null,
+    @SerializedName("code") val code: String? = null,
+    @SerializedName("joined") val joined: Boolean? = null
 )
 
 /**

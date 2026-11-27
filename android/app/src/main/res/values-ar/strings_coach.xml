@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">البوت يلتحق بالاجتماع</string>
+    <string name="bot_status_joining_body">يستغرق هذا عادةً أقل من دقيقة.</string>
+    <string name="bot_status_waiting_title">اسمح للبوت بالدخول</string>
+    <string name="bot_status_waiting_body">البوت في غرفة الانتظار. في اجتماعك، اقبل Meeting Mind (أو الاسم الذي اخترته للبوت). سيتوقف عن المحاولة بعد 10 دقائق.</string>
+    <string name="bot_status_in_call_title">جاهز تقريباً</string>
+    <string name="bot_status_in_call_body">البوت في الاجتماع ولم يبدأ التسجيل بعد. إذا طُلب منك السماح بالتسجيل، فاقبل الطلب.</string>
+    <string name="bot_failed_title">لم يسجّل البوت هذا الاجتماع</string>
+    <string name="bot_failed_not_admitted">لم يُقبَل البوت من غرفة الانتظار في الوقت المحدد. انضم مجدداً واقبله عند طلبه.</string>
+    <string name="bot_failed_removed_waiting">تمت إزالة البوت من غرفة الانتظار. اطلب من المضيف قبوله، ثم انضم مجدداً.</string>
+    <string name="bot_failed_not_started">لم يكن الاجتماع قد بدأ. ابدأ الاجتماع، ثم انضم مجدداً.</string>
+    <string name="bot_failed_passcode">رمز الاجتماع غير صحيح أو مفقود. الصق رابط الدعوة كاملاً مع رمز المرور، ثم انضم مجدداً.</string>
+    <string name="bot_failed_link">لم يُعثر على الاجتماع. تحقق من الرابط وانضم مجدداً.</string>
+    <string name="bot_failed_sign_in">يقبل هذا الاجتماع المستخدمين المسجّلين فقط. اطلب من المضيف السماح للضيوف، ثم انضم مجدداً.</string>
+    <string name="bot_failed_blocked">لم يسمح الاجتماع للبوت بالانضمام. اطلب من المضيف السماح له، ثم انضم مجدداً.</string>
+    <string name="bot_failed_permission">التسجيل غير مسموح به. اطلب من المضيف السماح بالتسجيل، ثم انضم مجدداً.</string>
+    <string name="bot_failed_generic">تعذّر على البوت الانضمام. تحقق من رابط الاجتماع وانضم مجدداً.</string>
+    <string name="coach_starting">جارٍ تشغيل مدرّب الذكاء الاصطناعي…</string>
+    <string name="coach_listening_hint">تظهر النصائح كل 30 ثانية تقريباً بعد انضمام البوت وبدء الحديث.</string>
+    <string name="coach_reconnecting">جارٍ إعادة الاتصال…</string>
+    <string name="coach_stop">إيقاف</string>
+    <string name="coach_ended">انتهت جلسة مدرّب الذكاء الاصطناعي.</string>
+    <string name="coach_ended_not_admitted">توقف مدرّب الذكاء الاصطناعي لأن البوت لم يُقبَل في الاجتماع.</string>
+    <string name="coach_ended_bot_failed">توقف مدرّب الذكاء الاصطناعي لأن البوت لم يتمكن من الانضمام.</string>
+    <string name="coach_ended_no_speech">انتهت جلسة مدرّب الذكاء الاصطناعي دون رصد أي كلام.</string>
+    <string name="coach_ended_model_failed">تعذّر على مدرّب الذكاء الاصطناعي إنشاء نصائح بسبب خطأ من جانبنا.</string>
+    <string name="coach_credit_returned">تمت إعادة رصيد الجلسة إليك.</string>
+    <string name="coach_no_credit_used">لم يُستخدم أي رصيد.</string>
+    <string name="coach_error_no_credits">لم يبدأ مدرّب الذكاء الاصطناعي لأنك استنفدت جميع جلساتك.</string>
+    <string name="coach_error_meeting_over">لم يبدأ مدرّب الذكاء الاصطناعي لأن البوت لم يعد في الاجتماع.</string>
+    <string name="coach_error_generic">تعذّر تشغيل مدرّب الذكاء الاصطناعي. تحقق من اتصالك وأعد المحاولة.</string>
+    <string name="coach_join_hint">تظهر النصائح في هذا التطبيق ضمن تبويب النص المفرّغ للاجتماع. اقبل البوت عند طلبه الانضمام.</string>
+    <string name="coach_delayed_language">في هذه اللغة يصل النص المفرّغ المباشر متأخراً بعدة دقائق، لذا ستتأخر النصائح أيضاً.</string>
+</resources>

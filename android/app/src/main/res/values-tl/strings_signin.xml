@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">Hindi tinanggap ang pag-sign in (%1$s). Pakisubukan ulit.</string>
+    <string name="calendar_return_connected">Nakakonekta na ang %1$s.</string>
+    <string name="calendar_return_cancelled">Hindi nakakonekta ang kalendaryo: hindi ibinigay ang access.</string>
+    <string name="calendar_return_expired">Hindi nakakonekta ang kalendaryo: masyadong nagtagal ang pag-sign in o nagamit na ito. Pakikonekta ulit.</string>
+    <string name="calendar_return_admin_approval">Kailangang aprubahan ng administrator ang Meeting Mind para sa iyong account sa trabaho o paaralan. Magtanong sa IT team, o magkonekta ng personal na account.</string>
+    <string name="calendar_return_failed">Hindi nakakonekta ang kalendaryo. Pakisubukan ulit pagkalipas ng ilang minuto.</string>
+    <string name="calendar_no_browser">Walang nakitang web browser para buksan ang pahina ng pag-sign in.</string>
+</resources>

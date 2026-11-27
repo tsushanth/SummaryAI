@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">बॉट जुड़ रहा है</string>
+    <string name="bot_status_joining_body">इसमें आमतौर पर एक मिनट से कम समय लगता है।</string>
+    <string name="bot_status_waiting_title">बॉट को अंदर आने दें</string>
+    <string name="bot_status_waiting_body">बॉट प्रतीक्षा कक्ष में है। अपनी मीटिंग में Meeting Mind (या आपका चुना हुआ बॉट नाम) को अनुमति दें। यह 10 मिनट बाद छोड़ देगा।</string>
+    <string name="bot_status_in_call_title">लगभग तैयार</string>
+    <string name="bot_status_in_call_body">बॉट मीटिंग में है और अभी रिकॉर्डिंग शुरू नहीं हुई है। यदि मीटिंग रिकॉर्डिंग की अनुमति माँगे, तो अनुमति दें।</string>
+    <string name="bot_failed_title">बॉट इस मीटिंग को रिकॉर्ड नहीं कर सका</string>
+    <string name="bot_failed_not_admitted">समय पर किसी ने बॉट को प्रतीक्षा कक्ष से अंदर नहीं आने दिया। दोबारा जुड़ें और अनुमति दें।</string>
+    <string name="bot_failed_removed_waiting">बॉट को प्रतीक्षा कक्ष से हटा दिया गया। होस्ट से अनुमति देने को कहें, फिर दोबारा जुड़ें।</string>
+    <string name="bot_failed_not_started">मीटिंग शुरू नहीं हुई थी। मीटिंग शुरू करें, फिर दोबारा जुड़ें।</string>
+    <string name="bot_failed_passcode">मीटिंग का पासकोड गलत या अनुपस्थित था। पासकोड सहित पूरा आमंत्रण लिंक पेस्ट करें और दोबारा जुड़ें।</string>
+    <string name="bot_failed_link">मीटिंग नहीं मिली। लिंक जाँचें और दोबारा जुड़ें।</string>
+    <string name="bot_failed_sign_in">यह मीटिंग केवल साइन-इन या पंजीकृत लोगों को अनुमति देती है। होस्ट से अतिथियों को अनुमति देने को कहें, फिर दोबारा जुड़ें।</string>
+    <string name="bot_failed_blocked">मीटिंग ने बॉट को जुड़ने की अनुमति नहीं दी। होस्ट से अनुमति देने को कहें, फिर दोबारा जुड़ें।</string>
+    <string name="bot_failed_permission">रिकॉर्डिंग की अनुमति नहीं मिली। होस्ट से रिकॉर्डिंग की अनुमति देने को कहें, फिर दोबारा जुड़ें।</string>
+    <string name="bot_failed_generic">बॉट जुड़ नहीं सका। मीटिंग लिंक जाँचें और दोबारा जुड़ें।</string>
+    <string name="coach_starting">एआई कोच शुरू हो रहा है…</string>
+    <string name="coach_listening_hint">बॉट के मीटिंग में आने और बातचीत शुरू होने के बाद लगभग हर 30 सेकंड में सुझाव दिखेंगे।</string>
+    <string name="coach_reconnecting">पुनः कनेक्ट हो रहा है…</string>
+    <string name="coach_stop">रोकें</string>
+    <string name="coach_ended">एआई कोच समाप्त हो गया।</string>
+    <string name="coach_ended_not_admitted">एआई कोच रुक गया क्योंकि बॉट को मीटिंग में आने नहीं दिया गया।</string>
+    <string name="coach_ended_bot_failed">एआई कोच रुक गया क्योंकि बॉट मीटिंग में नहीं जुड़ सका।</string>
+    <string name="coach_ended_no_speech">एआई कोच बिना कोई बातचीत सुने समाप्त हो गया।</string>
+    <string name="coach_ended_model_failed">एआई कोच हमारी तरफ से समस्या के कारण सुझाव नहीं बना सका।</string>
+    <string name="coach_credit_returned">आपका सत्र क्रेडिट वापस कर दिया गया।</string>
+    <string name="coach_no_credit_used">कोई क्रेडिट उपयोग नहीं हुआ।</string>
+    <string name="coach_error_no_credits">एआई कोच शुरू नहीं हुआ क्योंकि आपके पास कोई सत्र शेष नहीं है।</string>
+    <string name="coach_error_meeting_over">एआई कोच शुरू नहीं हुआ क्योंकि बॉट अब मीटिंग में नहीं है।</string>
+    <string name="coach_error_generic">एआई कोच शुरू नहीं हो सका। अपना कनेक्शन जाँचें और पुनः प्रयास करें।</string>
+    <string name="coach_join_hint">सुझाव इस ऐप में, मीटिंग के प्रतिलेख टैब पर दिखेंगे। बॉट के जुड़ने का अनुरोध करने पर उसे अनुमति दें।</string>
+    <string name="coach_delayed_language">इस भाषा में लाइव प्रतिलेख कुछ मिनट देर से आता है, इसलिए सुझाव भी देर से मिलेंगे।</string>
+</resources>

@@ -251,6 +251,19 @@ fun JoinMeetingScreen(
                     activity?.let { viewModel.purchaseCoachingSubscription(it) }
                 }
             )
+            if (uiState.coachingEnabled) {
+                Text(
+                    text = stringResource(
+                        if (uiState.languageCatalog.liveCaptionsDelayed(uiState.transcriptionLanguage)) R.string.coach_delayed_language
+                        else R.string.coach_join_hint
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 

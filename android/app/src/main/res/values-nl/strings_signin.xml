@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">Aanmelden is niet geaccepteerd (%1$s). Probeer het opnieuw.</string>
+    <string name="calendar_return_connected">%1$s gekoppeld.</string>
+    <string name="calendar_return_cancelled">Agenda niet gekoppeld: er is geen toegang gegeven.</string>
+    <string name="calendar_return_expired">Agenda niet gekoppeld: het aanmelden duurde te lang of is al gebruikt. Koppel opnieuw.</string>
+    <string name="calendar_return_admin_approval">Voor je werk- of schoolaccount moet een beheerder Meeting Mind goedkeuren. Vraag het je IT-afdeling of koppel een persoonlijk account.</string>
+    <string name="calendar_return_failed">Agenda niet gekoppeld. Probeer het over een paar minuten opnieuw.</string>
+    <string name="calendar_no_browser">Er is geen webbrowser gevonden om de aanmeldpagina te openen.</string>
+</resources>

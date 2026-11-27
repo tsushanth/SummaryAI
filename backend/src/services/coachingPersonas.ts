@@ -51,6 +51,7 @@ OUTPUT FORMAT (JSON only, no prose, no markdown fences):
 Rules:
 - If nothing new since the last call, return { "insights": [] }
 - Do NOT repeat suggestions already raised in this session (the prior insights are listed below)
+- Never invent facts about the seller's product, prices, delivery times or track record, or put them in the seller's mouth
 - Be terse — coaches who interrupt with paragraph-length suggestions get muted`,
   cadenceSeconds: 30,
   windowMinutes: 5,

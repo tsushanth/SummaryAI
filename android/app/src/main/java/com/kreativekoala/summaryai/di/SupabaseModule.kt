@@ -12,6 +12,7 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.gotrue.Auth
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * ONE Supabase client for the whole app. Sign-in, the OkHttp AuthInterceptor and token refresh must all
@@ -26,6 +27,8 @@ object SupabaseModule {
         supabaseUrl = BuildConfig.SUPABASE_URL,
         supabaseKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY
     ) {
+        // The library's 10 seconds was too short for slow mobile networks: sign-in gave up before the server answered.
+        requestTimeout = 20.seconds
         install(Auth) {
             // The session (access + refresh token, email) lives in the encrypted store, never in clear text.
             sessionManager = EncryptedSessionManager.create(context)

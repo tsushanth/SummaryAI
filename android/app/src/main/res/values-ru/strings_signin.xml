@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">Вход не принят (%1$s). Повторите попытку.</string>
+    <string name="calendar_return_connected">Подключено: %1$s.</string>
+    <string name="calendar_return_cancelled">Календарь не подключён: доступ не был предоставлен.</string>
+    <string name="calendar_return_expired">Календарь не подключён: вход занял слишком много времени или уже был использован. Подключите ещё раз.</string>
+    <string name="calendar_return_admin_approval">Для рабочего или учебного аккаунта администратор должен одобрить Meeting Mind. Обратитесь в ИТ-отдел или подключите личный аккаунт.</string>
+    <string name="calendar_return_failed">Календарь не подключён. Повторите попытку через несколько минут.</string>
+    <string name="calendar_no_browser">Не найден веб-браузер, чтобы открыть страницу входа.</string>
+</resources>

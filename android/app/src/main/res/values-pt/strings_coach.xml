@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">O bot está a entrar</string>
+    <string name="bot_status_joining_body">Normalmente demora menos de um minuto.</string>
+    <string name="bot_status_waiting_title">Deixe o bot entrar</string>
+    <string name="bot_status_waiting_body">O bot está à espera de ser admitido. Na sua reunião, admita o Meeting Mind (ou o nome de bot que escolheu). Desiste após 10 minutos.</string>
+    <string name="bot_status_in_call_title">Quase pronto</string>
+    <string name="bot_status_in_call_body">O bot está na reunião e ainda não está a gravar. Se a reunião perguntar se pode gravar, permita.</string>
+    <string name="bot_failed_title">O bot não gravou esta reunião</string>
+    <string name="bot_failed_not_admitted">Ninguém admitiu o bot da sala de espera a tempo. Junte-se novamente e admita-o quando pedir.</string>
+    <string name="bot_failed_removed_waiting">O bot foi removido da sala de espera. Peça ao anfitrião que o admita e junte-se novamente.</string>
+    <string name="bot_failed_not_started">A reunião ainda não tinha começado. Inicie a reunião e junte-se novamente.</string>
+    <string name="bot_failed_passcode">O código de acesso da reunião estava errado ou em falta. Cole o link de convite completo, com o código de acesso, e junte-se novamente.</string>
+    <string name="bot_failed_link">A reunião não foi encontrada. Verifique o link e junte-se novamente.</string>
+    <string name="bot_failed_sign_in">Esta reunião só admite pessoas com sessão iniciada ou registadas. Peça ao anfitrião que permita convidados e junte-se novamente.</string>
+    <string name="bot_failed_blocked">A reunião não permitiu a entrada do bot. Peça ao anfitrião que o permita e junte-se novamente.</string>
+    <string name="bot_failed_permission">A gravação não foi permitida. Peça ao anfitrião que permita gravar e junte-se novamente.</string>
+    <string name="bot_failed_generic">O bot não conseguiu entrar. Verifique o link da reunião e junte-se novamente.</string>
+    <string name="coach_starting">A iniciar o Coach de IA…</string>
+    <string name="coach_listening_hint">As sugestões aparecem aproximadamente a cada 30 segundos assim que o bot estiver na reunião e houver pessoas a falar.</string>
+    <string name="coach_reconnecting">A restabelecer ligação…</string>
+    <string name="coach_stop">Parar</string>
+    <string name="coach_ended">O Coach de IA terminou.</string>
+    <string name="coach_ended_not_admitted">O Coach de IA parou porque o bot não foi admitido na reunião.</string>
+    <string name="coach_ended_bot_failed">O Coach de IA parou porque o bot não conseguiu entrar na reunião.</string>
+    <string name="coach_ended_no_speech">O Coach de IA terminou sem detetar nenhuma fala.</string>
+    <string name="coach_ended_model_failed">O Coach de IA não conseguiu criar sugestões devido a um problema do nosso lado.</string>
+    <string name="coach_credit_returned">O seu crédito de sessão foi devolvido.</string>
+    <string name="coach_no_credit_used">Nenhum crédito foi utilizado.</string>
+    <string name="coach_error_no_credits">O Coach de IA não iniciou porque não tem sessões disponíveis.</string>
+    <string name="coach_error_meeting_over">O Coach de IA não iniciou porque o bot já não está na reunião.</string>
+    <string name="coach_error_generic">O Coach de IA não conseguiu iniciar. Verifique a sua ligação e tente novamente.</string>
+    <string name="coach_join_hint">As sugestões aparecem nesta aplicação, no separador Transcrição da reunião. Admita o bot quando pedir para entrar.</string>
+    <string name="coach_delayed_language">Neste idioma, a transcrição em direto chega com minutos de atraso, pelo que as sugestões também serão tardias.</string>
+</resources>

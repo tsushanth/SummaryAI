@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">บอตกำลังเข้าร่วม</string>
+    <string name="bot_status_joining_body">โดยปกติใช้เวลาไม่ถึงหนึ่งนาที</string>
+    <string name="bot_status_waiting_title">อนุญาตให้บอตเข้าได้เลย</string>
+    <string name="bot_status_waiting_body">บอตกำลังรออยู่ในห้องรอ กรุณาอนุญาต Meeting Mind (หรือชื่อบอตที่คุณตั้งไว้) ในการประชุมของคุณ บอตจะหยุดรอหลังจาก 10 นาที</string>
+    <string name="bot_status_in_call_title">เกือบพร้อมแล้ว</string>
+    <string name="bot_status_in_call_body">บอตอยู่ในการประชุมแล้ว แต่ยังไม่ได้บันทึก หากการประชุมถามว่าอนุญาตให้บันทึกได้หรือไม่ กรุณาอนุญาต</string>
+    <string name="bot_failed_title">บอตไม่ได้บันทึกการประชุมนี้</string>
+    <string name="bot_failed_not_admitted">ไม่มีใครอนุญาตให้บอตเข้าจากห้องรอทันเวลา กรุณาเข้าร่วมใหม่และอนุญาตบอตเมื่อได้รับแจ้ง</string>
+    <string name="bot_failed_removed_waiting">บอตถูกนำออกจากห้องรอ ขอให้โฮสต์อนุญาตบอต แล้วเข้าร่วมใหม่อีกครั้ง</string>
+    <string name="bot_failed_not_started">การประชุมยังไม่เริ่ม กรุณาเริ่มการประชุม แล้วเข้าร่วมใหม่อีกครั้ง</string>
+    <string name="bot_failed_passcode">รหัสผ่านการประชุมไม่ถูกต้องหรือขาดหายไป กรุณาวางลิงก์เชิญเต็มรูปแบบพร้อมรหัสผ่าน แล้วเข้าร่วมใหม่</string>
+    <string name="bot_failed_link">ไม่พบการประชุม กรุณาตรวจสอบลิงก์และเข้าร่วมใหม่</string>
+    <string name="bot_failed_sign_in">การประชุมนี้อนุญาตเฉพาะผู้ที่ลงชื่อเข้าใช้หรือลงทะเบียนแล้วเท่านั้น ขอให้โฮสต์อนุญาตผู้เยี่ยมชม แล้วเข้าร่วมใหม่</string>
+    <string name="bot_failed_blocked">การประชุมไม่อนุญาตให้บอตเข้าร่วม ขอให้โฮสต์อนุญาต แล้วเข้าร่วมใหม่</string>
+    <string name="bot_failed_permission">ไม่ได้รับอนุญาตให้บันทึก ขอให้โฮสต์อนุญาตการบันทึก แล้วเข้าร่วมใหม่</string>
+    <string name="bot_failed_generic">บอตไม่สามารถเข้าร่วมได้ กรุณาตรวจสอบลิงก์การประชุมและเข้าร่วมใหม่</string>
+    <string name="coach_starting">กำลังเริ่ม โค้ช AI…</string>
+    <string name="coach_listening_hint">เคล็ดลับจะปรากฏประมาณทุก 30 วินาที เมื่อบอตอยู่ในการประชุมและมีคนกำลังพูด</string>
+    <string name="coach_reconnecting">กำลังเชื่อมต่อใหม่…</string>
+    <string name="coach_stop">หยุด</string>
+    <string name="coach_ended">โค้ช AI สิ้นสุดแล้ว</string>
+    <string name="coach_ended_not_admitted">โค้ช AI หยุดทำงานเนื่องจากบอตไม่ได้รับอนุญาตให้เข้าร่วมการประชุม</string>
+    <string name="coach_ended_bot_failed">โค้ช AI หยุดทำงานเนื่องจากบอตไม่สามารถเข้าร่วมการประชุมได้</string>
+    <string name="coach_ended_no_speech">โค้ช AI สิ้นสุดโดยไม่ได้ยินเสียงพูดใดๆ</string>
+    <string name="coach_ended_model_failed">โค้ช AI ไม่สามารถสร้างเคล็ดลับได้เนื่องจากปัญหาทางฝั่งเรา</string>
+    <string name="coach_credit_returned">เครดิตเซสชันของคุณได้รับคืนแล้ว</string>
+    <string name="coach_no_credit_used">ไม่มีการใช้เครดิต</string>
+    <string name="coach_error_no_credits">โค้ช AI ไม่ได้เริ่มทำงานเนื่องจากคุณไม่มีเซสชันเหลืออยู่</string>
+    <string name="coach_error_meeting_over">โค้ช AI ไม่ได้เริ่มทำงานเนื่องจากบอตไม่ได้อยู่ในการประชุมแล้ว</string>
+    <string name="coach_error_generic">โค้ช AI ไม่สามารถเริ่มได้ กรุณาตรวจสอบการเชื่อมต่อและลองใหม่</string>
+    <string name="coach_join_hint">เคล็ดลับจะปรากฏในแอปนี้ที่แท็บ บทถอดเสียง ของการประชุม กรุณาอนุญาตบอตเมื่อขอเข้าร่วม</string>
+    <string name="coach_delayed_language">ในภาษานี้ บทถอดเสียงสดจะมาช้าหลายนาที ดังนั้นเคล็ดลับอาจล่าช้าด้วยเช่นกัน</string>
+</resources>

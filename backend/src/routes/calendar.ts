@@ -28,6 +28,7 @@
 
 import { reportAlert } from '../lib/alerts.js';
 import { callbackProviderCode, OAuthExchangeError } from '../lib/oauthError.js';
+import { calendarErrorText, providerRefusalCode } from '../lib/calendarReturn.js';
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { supabaseAdmin } from '../lib/supabase.js';
@@ -58,8 +59,8 @@ const router = Router();
 // Separate router for OAuth callback (no auth required - browser redirect from Google)
 export const calendarCallbackRouter = Router();
 
-// OAuth state expiry in milliseconds (5 minutes)
-const OAUTH_STATE_EXPIRY = 5 * 60 * 1000;
+// OAuth state expiry. 15 minutes: signing in to an account with a second factor can take longer than the 5 allowed before.
+const OAUTH_STATE_EXPIRY = 15 * 60 * 1000;
 
 type CalendarProviderName = 'google' | 'microsoft';
 
@@ -264,7 +265,7 @@ function generateOAuthSuccessPage(provider: string, email: string, nonce: string
 /**
  * Generate HTML page for OAuth errors (web flow)
  */
-function generateOAuthErrorPage(message: string, nonce: string): string {
+function generateOAuthErrorPage(code: string, nonce: string): string {
   return `
 <!DOCTYPE html>
 <html>
@@ -347,9 +348,8 @@ function generateOAuthErrorPage(message: string, nonce: string): string {
       </svg>
     </div>
     <h1>Connection Failed</h1>
-    <p class="error-msg">${escapeHtml(message)}</p>
-    <p class="status" id="status">Closing window...</p>
-    <button class="close-btn" id="closeBtn" style="display: none;">Close Window</button>
+    <p class="error-msg">${escapeHtml(calendarErrorText(code))}</p>
+    <button class="close-btn" id="closeBtn">Close Window</button>
   </div>
   <script nonce="${nonce}">
     document.getElementById('closeBtn').addEventListener('click', handleClose);
@@ -361,31 +361,29 @@ function generateOAuthErrorPage(message: string, nonce: string): string {
       }, 100);
     }
 
-    function tryClose() {
-      if (window.opener) {
-        try {
-          window.opener.postMessage({
-            type: 'calendar-error',
-            error: ${scriptValue(message)}
-          }, '*');
-        } catch (e) {}
-      }
-
-      window.close();
-
-      setTimeout(() => {
-        if (!window.closed) {
-          document.getElementById('status').textContent = 'You can now close this window';
-          document.getElementById('closeBtn').style.display = 'inline-block';
-        }
-      }, 500);
+    // The window stays open: it used to close itself before the reason could be read.
+    if (window.opener) {
+      try {
+        window.opener.postMessage({
+          type: 'calendar-error',
+          error: ${scriptValue(code)}
+        }, '*');
+      } catch (e) {}
     }
-
-    tryClose();
   </script>
 </body>
 </html>
 `;
+}
+
+/**
+ * Whether to answer with a web page or a deep link into the app. The state says where the sign-in started; the browser's
+ * user agent is only the fallback, because the website used on a phone looks the same as a sign-in from the app.
+ */
+function returnsToWeb(req: Request): boolean {
+  const state = req.query.state;
+  const client = typeof state === 'string' ? parseOAuthState(state)?.client : undefined;
+  return client ? client === 'web' : isWebRequest(req);
 }
 
 /**
@@ -420,7 +418,8 @@ router.post(
 
     // Generate state token for CSRF protection
     const nonce = crypto.randomUUID();
-    const state = generateOAuthState(userId, nonce);
+    // Browsers send Origin on this cross-site POST; the apps do not.
+    const state = generateOAuthState(userId, nonce, req.headers.origin ? 'web' : 'app');
 
     // Store state temporarily for validation
     const expiresAt = new Date(Date.now() + OAUTH_STATE_EXPIRY).toISOString();
@@ -458,7 +457,8 @@ router.post(
 
     // Generate state token for CSRF protection
     const nonce = crypto.randomUUID();
-    const state = generateOAuthState(userId, nonce);
+    // Browsers send Origin on this cross-site POST; the apps do not.
+    const state = generateOAuthState(userId, nonce, req.headers.origin ? 'web' : 'app');
 
     // Store state temporarily for validation
     const expiresAt = new Date(Date.now() + OAUTH_STATE_EXPIRY).toISOString();
@@ -485,7 +485,7 @@ router.post(
  */
 calendarCallbackRouter.get('/callback/google', async (req: Request, res: Response) => {
   const { code, state, error: oauthError } = req.query;
-  const isWeb = isWebRequest(req);
+  const isWeb = returnsToWeb(req);
 
   // Helper to send response based on platform
   const sendError = (message: string) => {
@@ -508,7 +508,7 @@ calendarCallbackRouter.get('/callback/google', async (req: Request, res: Respons
   if (oauthError) {
     console.error('[Calendar] OAuth error:', oauthError);
     await reportProviderRefusal('google', state, oauthError, req.query.error_description);
-    sendError(String(oauthError));
+    sendError(providerRefusalCode(oauthError, req.query.error_description));
     return;
   }
 
@@ -645,7 +645,7 @@ calendarCallbackRouter.get('/callback/google', async (req: Request, res: Respons
  */
 calendarCallbackRouter.get('/callback/microsoft', async (req: Request, res: Response) => {
   const { code, state, error: oauthError, error_description } = req.query;
-  const isWeb = isWebRequest(req);
+  const isWeb = returnsToWeb(req);
 
   // Helper to send response based on platform
   const sendError = (message: string) => {
@@ -668,7 +668,7 @@ calendarCallbackRouter.get('/callback/microsoft', async (req: Request, res: Resp
   if (oauthError) {
     console.error('[Calendar] Microsoft OAuth error:', oauthError, error_description);
     await reportProviderRefusal('microsoft', state, oauthError, error_description);
-    sendError(String(oauthError));
+    sendError(providerRefusalCode(oauthError, error_description));
     return;
   }
 

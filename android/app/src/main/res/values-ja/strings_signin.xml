@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign-in and calendar connection results the person is told about. -->
+<resources>
+    <string name="auth_error_server_rejected">ログインが承認されませんでした（%1$s）。もう一度お試しください。</string>
+    <string name="calendar_return_connected">%1$s を接続しました。</string>
+    <string name="calendar_return_cancelled">カレンダーは接続されていません。アクセスが許可されませんでした。</string>
+    <string name="calendar_return_expired">カレンダーは接続されていません。ログインに時間がかかりすぎたか、すでに使用されています。もう一度接続してください。</string>
+    <string name="calendar_return_admin_approval">職場または学校のアカウントでは、管理者による Meeting Mind の承認が必要です。IT 部門に依頼するか、個人アカウントを接続してください。</string>
+    <string name="calendar_return_failed">カレンダーは接続されていません。数分後にもう一度お試しください。</string>
+    <string name="calendar_no_browser">ログインページを開くウェブブラウザが見つかりませんでした。</string>
+</resources>

@@ -137,16 +137,16 @@ class JoinMeetingViewModel @Inject constructor(
             result.fold(
                 onSuccess = { (meeting, recordingId) ->
                     preferencesManager.setLastMeetingLanguage(meeting.id, state.transcriptionLanguage)
+                    // Handed to the app-wide coach first: this screen (and its scope) closes as soon as we report the join.
+                    if (state.coachingEnabled && recordingId != null) {
+                        activeCoachingSession.start(meeting.id, recordingId, state.coachingPersona)
+                    }
                     _uiState.value = _uiState.value.copy(
                         isJoining = false,
                         meetingJoined = true,
                         joinedMeetingId = meeting.id,
                         joinedRecordingId = recordingId
                     )
-                    // Auto-start coaching session if requested
-                    if (state.coachingEnabled && recordingId != null) {
-                        startCoachingSession(meetingId = meeting.id, recordingId = recordingId)
-                    }
                 },
                 onFailure = { error ->
                     _uiState.value = _uiState.value.copy(
@@ -221,20 +221,6 @@ class JoinMeetingViewModel @Inject constructor(
             )
         }
         return launched
-    }
-
-    private fun startCoachingSession(meetingId: String, recordingId: String) {
-        viewModelScope.launch {
-            runCatching {
-                coachingRepository.startSession(recordingId, _uiState.value.coachingPersona)
-            }.onSuccess { resp ->
-                activeCoachingSession.start(meetingId = meetingId, sessionId = resp.sessionId)
-            }.onFailure { e ->
-                _uiState.value = _uiState.value.copy(
-                    coachingError = e.message ?: "Could not start AI Coach."
-                )
-            }
-        }
     }
 
     /**

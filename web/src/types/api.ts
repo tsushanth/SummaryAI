@@ -279,6 +279,8 @@ export interface Meeting {
   transcription_language?: string;
   /** Returned by GET /api/meetings/:id: what the live transcript is doing and whether its language can be changed now. */
   live_language?: LiveLanguageState;
+  /** Returned by GET /api/meetings/:id: what the meeting bot is doing. */
+  bot_state?: { state: 'joining' | 'waiting_room' | 'in_call' | 'recording' | 'ended' | 'failed'; code: string | null; joined: boolean } | null;
 }
 
 export interface LiveLanguageState {

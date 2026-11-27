@@ -289,7 +289,9 @@ export default function RecordingDetailPage() {
               {isLive
                 ? 'Recording in progress. The transcript and summary appear after the meeting ends.'
                 : recording.status === 'pending'
-                ? 'Waiting for meeting to start...'
+                ? recording.meeting_id
+                  ? 'The meeting bot is joining. If your meeting has a waiting room, admit "Meeting Mind".'
+                  : 'Waiting for meeting to start...'
                 : recording.status === 'transcribing'
                   ? 'Transcribing audio...'
                   : recording.status === 'summarizing'

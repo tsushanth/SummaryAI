@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_status_joining_title">El bot se está uniendo</string>
+    <string name="bot_status_joining_body">Esto suele tardar menos de un minuto.</string>
+    <string name="bot_status_waiting_title">Deja entrar al bot</string>
+    <string name="bot_status_waiting_body">El bot está esperando para entrar. En tu reunión, admite a Meeting Mind (o el nombre de bot que hayas elegido). Se rinde después de 10 minutos.</string>
+    <string name="bot_status_in_call_title">Casi listo</string>
+    <string name="bot_status_in_call_body">El bot está en la reunión y aún no graba. Si tu reunión pregunta si puede grabar, permítelo.</string>
+    <string name="bot_failed_title">El bot no grabó esta reunión</string>
+    <string name="bot_failed_not_admitted">Nadie dejó entrar al bot desde la sala de espera a tiempo. Únete de nuevo y admítelo cuando lo solicite.</string>
+    <string name="bot_failed_removed_waiting">El bot fue eliminado de la sala de espera. Pide al anfitrión que lo admita y únete de nuevo.</string>
+    <string name="bot_failed_not_started">La reunión no había comenzado. Inicia la reunión y únete de nuevo.</string>
+    <string name="bot_failed_passcode">El código de acceso era incorrecto o faltaba. Pega el enlace de invitación completo, con el código de acceso, y únete de nuevo.</string>
+    <string name="bot_failed_link">No se encontró la reunión. Comprueba el enlace y únete de nuevo.</string>
+    <string name="bot_failed_sign_in">Esta reunión solo admite personas registradas o con sesión iniciada. Pide al anfitrión que permita invitados y únete de nuevo.</string>
+    <string name="bot_failed_blocked">La reunión no permitió que el bot se uniera. Pide al anfitrión que lo permita y únete de nuevo.</string>
+    <string name="bot_failed_permission">No se permitió grabar. Pide al anfitrión que permita la grabación y únete de nuevo.</string>
+    <string name="bot_failed_generic">El bot no pudo unirse. Comprueba el enlace de la reunión y únete de nuevo.</string>
+    <string name="coach_starting">Iniciando Coach de IA…</string>
+    <string name="coach_listening_hint">Los consejos aparecen cada 30 segundos aproximadamente cuando el bot está en la reunión y hay personas hablando.</string>
+    <string name="coach_reconnecting">Reconectando…</string>
+    <string name="coach_stop">Detener</string>
+    <string name="coach_ended">El Coach de IA ha finalizado.</string>
+    <string name="coach_ended_not_admitted">El Coach de IA se detuvo porque no se dejó entrar al bot en la reunión.</string>
+    <string name="coach_ended_bot_failed">El Coach de IA se detuvo porque el bot no pudo unirse a la reunión.</string>
+    <string name="coach_ended_no_speech">El Coach de IA finalizó sin detectar ninguna voz.</string>
+    <string name="coach_ended_model_failed">El Coach de IA no pudo generar consejos por un problema en nuestro lado.</string>
+    <string name="coach_credit_returned">Se ha devuelto tu crédito de sesión.</string>
+    <string name="coach_no_credit_used">No se usó ningún crédito.</string>
+    <string name="coach_error_no_credits">El Coach de IA no se inició porque no te quedan sesiones.</string>
+    <string name="coach_error_meeting_over">El Coach de IA no se inició porque el bot ya no está en la reunión.</string>
+    <string name="coach_error_generic">El Coach de IA no pudo iniciarse. Comprueba tu conexión e inténtalo de nuevo.</string>
+    <string name="coach_join_hint">Los consejos aparecen en esta app, en la pestaña Transcripción de la reunión. Admite al bot cuando solicite unirse.</string>
+    <string name="coach_delayed_language">En este idioma la transcripción en directo llega con minutos de retraso, por lo que los consejos también llegarán tarde.</string>
+</resources>
