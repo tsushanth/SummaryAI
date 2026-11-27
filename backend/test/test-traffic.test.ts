@@ -59,7 +59,7 @@ describe('which accounts are test accounts', () => {
 describe('automated callers', () => {
   it('knows headless browsers, crawlers and command-line checks', () => {
     for (const ua of ['Mozilla/5.0 (X11) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.0.0 Safari/537.36',
-      'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)', 'curl/8.7.1', 'python-requests/2.32']) {
+      'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)', 'curl/8.7.1', 'python-requests/2.32', 'node']) {
       expect(isAutomatedUserAgent(ua), ua).toBe(true);
     }
   });

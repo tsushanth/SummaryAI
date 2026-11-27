@@ -41,6 +41,6 @@ export async function isTestAccount(userId: string): Promise<boolean> {
  * checks). Matched on whole product names, so a phone brand containing "bot" is not caught. The user agent is only
  * looked at, never stored.
  */
-const AUTOMATED_UA_RE = /HeadlessChrome|Chrome-Lighthouse|Googlebot|Google-InspectionTool|AdsBot-Google|Mediapartners-Google|Google Page Speed|bingbot|BingPreview|facebookexternalhit|AhrefsBot|SemrushBot|PetalBot|YandexBot|Applebot|DuckDuckBot|GPTBot|ClaudeBot|Bytespider|PhantomJS|^(curl|Wget|python-requests|Python-urllib)\//i;
+const AUTOMATED_UA_RE = /HeadlessChrome|Chrome-Lighthouse|Googlebot|Google-InspectionTool|AdsBot-Google|Mediapartners-Google|Google Page Speed|bingbot|BingPreview|facebookexternalhit|AhrefsBot|SemrushBot|PetalBot|YandexBot|Applebot|DuckDuckBot|GPTBot|ClaudeBot|Bytespider|PhantomJS|^(curl|Wget|python-requests|Python-urllib|node-fetch|axios)\/|^(node|undici)$/i;
 
 export const isAutomatedUserAgent = (userAgent: string | null | undefined): boolean => AUTOMATED_UA_RE.test(userAgent ?? '');
