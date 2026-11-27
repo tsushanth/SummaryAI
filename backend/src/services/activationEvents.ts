@@ -62,7 +62,10 @@ export function validateEvent(body: unknown, userId: string | null): ActivationE
   if (typeof b.name !== 'string' || !NAME_SET.has(b.name)) return null;
   const platform = typeof b.platform === 'string' && PLATFORMS.has(b.platform) ? b.platform : 'web';
   const app_version = typeof b.app_version === 'string' && VERSION_RE.test(b.app_version) ? b.app_version : null;
-  return { anon_id: b.anon_id, user_id: userId, name: b.name as ActivationEventName, props: sanitizeProps(b.props), platform, app_version };
+  const props = sanitizeProps(b.props);
+  // The sender's "this is a test" mark (migration 039 acts on it) must survive the key limit.
+  if ((b.props as { test?: unknown } | null | undefined)?.test === true) props.test = true;
+  return { anon_id: b.anon_id, user_id: userId, name: b.name as ActivationEventName, props, platform, app_version };
 }
 
 /** In-memory sliding-window limiter (single Fly machine scale; resets on restart). */

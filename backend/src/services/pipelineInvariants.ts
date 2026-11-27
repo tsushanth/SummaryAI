@@ -11,11 +11,16 @@
  *   ZERO_SUCCESS_24H         3+ recordings in the last 24 h and none completed with speech. 'No speech' is not success;
  *                            empty ones under 10 s (tap and stop) are not counted as attempts either
  *   HIGH_FAILURE_RATE_24H    at least 5 created and at least half failed
+ *
+ * The two 24 h rates leave out test accounts (services/testTraffic.ts): our own and robot recordings would otherwise
+ * hide a day on which no person succeeded, or raise an alert nobody hit. The stuck and missing-summary checks keep them:
+ * a stuck job is a fault whoever made it.
  */
 import { supabaseAdmin } from '../lib/supabase.js';
 import { reportAlert } from '../lib/alerts.js';
 import { registerLoop, runLoopPass, reportLoopScanError } from '../lib/loopMonitor.js';
 import { NO_SPEECH_CODE, TOO_SHORT_CODE } from './shortRecordingGuard.js';
+import { testAccountsAmong } from './testTraffic.js';
 
 /** error_codes of recordings that finish 'completed' without a summaries row by design. */
 const INTENTIONALLY_SUMMARYLESS: string[] = [NO_SPEECH_CODE, TOO_SHORT_CODE];
@@ -60,7 +65,13 @@ export async function checkPipelineInvariants(now: number = Date.now()): Promise
     .gte('created_at', iso(BOT_ALERT_MAX_AGE_MS));
   if (!botStuck.error && (botStuck.count ?? 0) > 0) fire('BOT_NEVER_JOINED', botStuck.count ?? 0);
 
-  const inWindow = () => supabaseAdmin.from('recordings').select('id', { count: 'exact', head: true }).gte('created_at', iso(24 * HOUR)).lt('created_at', iso(30 * 60_000));
+  const owners = await supabaseAdmin.from('recordings').select('user_id').gte('created_at', iso(24 * HOUR)).lt('created_at', iso(30 * 60_000)).limit(1000);
+  if (owners.error) { reportLoopScanError('PipelineInvariants'); return breaches; }
+  const testers = [...(await testAccountsAmong((owners.data ?? []).map((r: { user_id?: string | null }) => r.user_id)))];
+  const inWindow = () => {
+    const q = supabaseAdmin.from('recordings').select('id', { count: 'exact', head: true }).gte('created_at', iso(24 * HOUR)).lt('created_at', iso(30 * 60_000));
+    return testers.length ? q.not('user_id', 'in', `(${testers.join(',')})`) : q;
+  };
   const [created, completed, failed, taps] = await Promise.all([
     inWindow(),
     // PostgREST's `neq` drops NULLs, hence the explicit `is.null`.

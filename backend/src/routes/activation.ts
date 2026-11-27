@@ -18,6 +18,7 @@ import {
   ANON_LIMIT, IP_LIMIT, createLimiter, validateAttribution, validateEvent,
   type ActivationEventRow, type AttributionRow,
 } from '../services/activationEvents.js';
+import { isAutomatedUserAgent, isTestAccount } from '../services/testTraffic.js';
 
 export interface ActivationDeps {
   enabled(): boolean;
@@ -27,6 +28,8 @@ export interface ActivationDeps {
   /** Outreach metrics layer (OUTREACH_EVENTS_URL set). Independent of `enabled`. */
   outreachEnabled(): boolean;
   reportSignup(attribution: OutreachAttribution, email: string): void;
+  /** Our own and automated accounts are not reported to the outreach counts. */
+  isTestAccount(userId: string): Promise<boolean>;
   /** Optional Bearer user; null for anonymous or any auth trouble (this endpoint must never fail the client). */
   resolveUser(req: Request): Promise<string | null>;
   limiter: ReturnType<typeof createLimiter>;
@@ -51,6 +54,7 @@ const defaults = (): ActivationDeps => ({
   },
   outreachEnabled: () => outreachEnabled(),
   reportSignup: (attribution, email) => reportOutreachEvent({ event: 'signup', attribution, email }),
+  isTestAccount,
   resolveUser: resolveUserViaMiddleware,
   limiter: createLimiter(),
 });
@@ -69,7 +73,11 @@ export function createActivationRouter(overrides: Partial<ActivationDeps> = {}, 
     if (!d.limiter.take(`anon:${probe.anon_id}`, 1, ANON_LIMIT.limit, ANON_LIMIT.windowMs)) return void res.status(429).json({ error: 'rate_limited' });
     let userId: string | null = null;
     try { userId = await d.resolveUser(req); } catch { userId = null; }
-    try { await d.insertEvent({ ...probe, user_id: userId }); }
+    // Headless browsers, crawlers and command-line checks are stored, marked as test. The user agent is not stored.
+    const props = isAutomatedUserAgent(req.get('user-agent'))
+      ? { ...probe.props, test: true, test_reason: 'automated_agent' }
+      : probe.props;
+    try { await d.insertEvent({ ...probe, props, user_id: userId }); }
     catch (e) { console.error('[Activation] event insert failed:', (e as Error).message); } // never fail the client
     res.status(204).end();
   });
@@ -91,7 +99,7 @@ export function createActivationRouter(overrides: Partial<ActivationDeps> = {}, 
         ? outreachAttribution({ utm_source: row.utm_source, utm_campaign: row.utm_campaign, utm_content: (req.body as Record<string, unknown> | undefined)?.utm_content })
         : null;
       const email = req.user?.email;
-      if (attribution && email) d.reportSignup(attribution, email);
+      if (attribution && email && !(await d.isTestAccount(req.user!.id))) d.reportSignup(attribution, email);
     } catch { /* swallowed on purpose */ }
     res.status(204).end();
   });
