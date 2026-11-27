@@ -28,8 +28,13 @@ export function submitBlockedReason(input: {
   hasAudio: boolean;
   isRecording: boolean;
   isSubmitting: boolean;
+  /** Held back as short or silent (lib/recordingCheck.ts), or still being looked at. */
+  held?: boolean;
+  checking?: boolean;
 }): string | null {
   if (input.isSubmitting) return null;
+  if (input.checking) return 'Checking the file...';
+  if (input.held) return input.mode === 'record' ? 'Choose what to do with this recording above.' : 'This file was not uploaded. See above.';
   if (input.mode === 'record') {
     if (input.isRecording) return 'Stop the recording to continue.';
     if (!input.hasAudio) return 'Record something first, then you can create the recording.';

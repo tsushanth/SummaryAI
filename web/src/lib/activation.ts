@@ -34,6 +34,23 @@ export const ANON_KEY = 'mm_act_anon';
 export const ATTRIBUTION_KEY = 'mm_act_attr';
 export const FIRST_KEY = 'mm_act_first';
 export const SIGNUP_DONE_KEY = 'mm_act_signup_done';
+export const TEST_KEY = 'mm_act_test';
+
+/**
+ * Why this browser's events are our own, or null: a browser driven by automation (synthetic runs, deploy checks), or one
+ * marked by opening the home page with ?mm_test=1 (?mm_test=0 removes the mark). The events are still sent, marked, and
+ * the database keeps them out of the counts (backend migration 039). The server also recognises headless user agents.
+ */
+export function testBrowserReason(store: KV | null, search: string, webdriver: boolean | undefined): 'automation' | 'marker' | null {
+  const asked = new URLSearchParams(search).get('mm_test');
+  try {
+    if (asked === '1' || asked === '0') store?.setItem(TEST_KEY, asked);
+  } catch { /* storage unusable */ }
+  if (webdriver === true) return 'automation';
+  if (asked === '1') return 'marker';
+  if (asked === '0') return null;
+  try { return store?.getItem(TEST_KEY) === '1' ? 'marker' : null; } catch { return null; }
+}
 
 export function isValidAnonId(v: unknown): v is string {
   return typeof v === 'string' && ANON_RE.test(v);

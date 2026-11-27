@@ -6,6 +6,8 @@ import { cn } from '@/lib/utils/cn';
 
 interface UploadDropzoneProps {
   onFileSelect: (file: File) => void;
+  /** The chosen file was removed. */
+  onClear?: () => void;
   accept?: string;
   maxSize?: number; // in bytes
   disabled?: boolean;
@@ -13,6 +15,7 @@ interface UploadDropzoneProps {
 
 export function UploadDropzone({
   onFileSelect,
+  onClear,
   accept = 'audio/*',
   maxSize = 500 * 1024 * 1024, // 500MB default
   disabled = false,
@@ -92,7 +95,8 @@ export function UploadDropzone({
   const clearFile = useCallback(() => {
     setSelectedFile(null);
     setError(null);
-  }, []);
+    onClear?.();
+  }, [onClear]);
 
   const formatFileSize = (bytes: number): string => {
     if (bytes < 1024) return `${bytes} B`;

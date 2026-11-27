@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { RecordingClock, sanitizeDurationSeconds } from '@/lib/recordingDuration';
+import { LevelMeter, openAudioContext, startLevelSampling, type LevelSampling } from '@/lib/recordingCheck';
 
 interface AudioRecorderState {
   isRecording: boolean;
@@ -27,9 +28,13 @@ export function useAudioRecorder() {
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const clockRef = useRef<RecordingClock>(new RecordingClock());
+  const meterRef = useRef<LevelMeter>(new LevelMeter());
+  const samplingRef = useRef<LevelSampling | null>(null);
 
   /** Resolves true when recording started, false when the microphone could not be opened. */
   const startRecording = useCallback(async (): Promise<boolean> => {
+    samplingRef.current?.stop();
+    const levelContext = openAudioContext(); // before the await, while this is still the click
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
@@ -48,7 +53,12 @@ export function useAudioRecorder() {
         }
       };
 
+      meterRef.current = new LevelMeter();
+      const sampling = startLevelSampling(levelContext, stream, meterRef.current, () => mediaRecorder.state === 'recording');
+      samplingRef.current = sampling;
+
       mediaRecorder.onstop = () => {
+        sampling.stop();
         const blob = new Blob(chunksRef.current, {
           type: mediaRecorder.mimeType,
         });
@@ -79,6 +89,7 @@ export function useAudioRecorder() {
       });
       return true;
     } catch (error) {
+      levelContext?.close().catch(() => {});
       setState((prev) => ({
         ...prev,
         error: 'Failed to access microphone. Please grant permission.',
@@ -123,7 +134,34 @@ export function useAudioRecorder() {
     }
   }, [state.isRecording, state.isPaused]);
 
+  /** Throws away the recording in progress and starts a new one. */
+  const restartRecording = useCallback(async (): Promise<boolean> => {
+    const old = mediaRecorderRef.current;
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (old && old.state !== 'inactive') {
+      old.ondataavailable = null;
+      old.onstop = () => old.stream.getTracks().forEach((track) => track.stop());
+      old.stop();
+    }
+    // The old recording is gone even if the microphone cannot be opened again.
+    setState((prev) => ({ ...prev, isRecording: false, isPaused: false, duration: 0, recordedSeconds: undefined, audioBlob: null }));
+    return startRecording();
+  }, [startRecording]);
+
+  /** Active recording time so far, in whole seconds, pauses excluded. */
+  const activeSeconds = useCallback(() => clockRef.current.seconds(), []);
+
+  /** Loudest level of this recording (0..1), or null when it could not be judged. */
+  const measuredPeak = useCallback(() => {
+    samplingRef.current?.sampleNow();
+    return meterRef.current.peak(clockRef.current.seconds());
+  }, []);
+
+  // Leaving the page mid-recording must not leave the meter running.
+  useEffect(() => () => samplingRef.current?.stop(), []);
+
   const reset = useCallback(() => {
+    samplingRef.current?.stop();
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
@@ -144,6 +182,9 @@ export function useAudioRecorder() {
     stopRecording,
     pauseRecording,
     resumeRecording,
+    restartRecording,
+    activeSeconds,
+    measuredPeak,
     reset,
   };
 }

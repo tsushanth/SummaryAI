@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import {
   ACTIVATION_EVENT_NAMES, newAnonId, getOrCreateAnonId, isValidAnonId, parseUtm, rememberAttribution, attributionProps, buildEvent,
   trackingAllowed, shouldEmitOnce, observeRecordingsList, isFirstRecording, markFirstRecordingDone, isFreshSignup, summaryViewedState,
-  ATTRIBUTION_KEY,
+  ATTRIBUTION_KEY, testBrowserReason,
 } from '../src/lib/activation.ts';
 
 const fakeStore = () => { const m = new Map(); return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => void m.set(k, String(v)), m }; };
@@ -123,4 +123,27 @@ test('the step counts are on in the production build and reach next build', () =
 test('a recording counts as started only after the microphone opened', () => {
   const page = fs.readFileSync(new URL('../src/app/(dashboard)/recordings/new/page.tsx', import.meta.url), 'utf8');
   assert.match(page, /await recorder\.startRecording\(\)[\s\S]{0,80}first_recording_started/);
+});
+
+test('our own browsers are marked: automation, or ?mm_test=1 until ?mm_test=0', () => {
+  const s = fakeStore();
+  assert.equal(testBrowserReason(s, '', false), null);
+  assert.equal(testBrowserReason(s, '', undefined), null);
+  assert.equal(testBrowserReason(s, '', true), 'automation');
+  assert.equal(testBrowserReason(s, '?mm_test=1', false), 'marker');
+  assert.equal(testBrowserReason(s, '?utm_source=x', false), 'marker'); // remembered
+  assert.equal(testBrowserReason(s, '?mm_test=0', false), null);
+  assert.equal(testBrowserReason(s, '', false), null);
+  assert.equal(testBrowserReason(s, '?mm_test=yes', false), null);
+  assert.equal(testBrowserReason(null, '', false), null);
+  assert.equal(testBrowserReason(null, '?mm_test=1', false), 'marker');
+});
+
+test('the test mark survives the property limit and the emitter puts it first', () => {
+  const props = Object.fromEntries(Array.from({ length: 8 }, (_, i) => [`k${i}`, i]));
+  const ev = buildEvent('record_clicked', 'a1b2c3d4-e5f6-4a7b-8c9d-0123456789ab', { test: true, test_reason: 'automation', ...props });
+  assert.equal(ev.props.test, true);
+  assert.equal(ev.props.test_reason, 'automation');
+  const client = fs.readFileSync(new URL('../src/lib/activationClient.ts', import.meta.url), 'utf8');
+  assert.match(client, /\{ test: true, test_reason: why, \.\.\.props \}/);
 });
