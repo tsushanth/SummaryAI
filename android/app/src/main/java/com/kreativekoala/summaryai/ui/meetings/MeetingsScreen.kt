@@ -1,6 +1,7 @@
 package com.kreativekoala.summaryai.ui.meetings
 
 import com.kreativekoala.summaryai.util.LocaleDates
+import com.kreativekoala.summaryai.util.ServerTime
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -31,7 +32,7 @@ import com.kreativekoala.summaryai.ui.components.MmEmptyState
 import com.kreativekoala.summaryai.ui.components.MmStatusPill
 import com.kreativekoala.summaryai.ui.components.SkeletonCardList
 import com.kreativekoala.summaryai.ui.navigation.LocalTabReselection
-import java.text.SimpleDateFormat
+import java.time.ZoneId
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -248,7 +249,8 @@ private fun MeetingCardIOS(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = formatMeetingTime(meeting.startTime),
+                    text = meeting.startTime?.let { meetingTimeText(it, meeting.endTime) }
+                        ?: stringResource(R.string.now),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -343,16 +345,12 @@ private fun EmptyMeetingsContentIOS() {
     )
 }
 
-@Composable
-private fun formatMeetingTime(dateString: String?): String {
-    if (dateString == null) return stringResource(R.string.now)
-    return try {
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
-        val date = inputFormat.parse(dateString)
-        date?.let { LocaleDates.weekdayMonthDayTime(it) } ?: dateString
-    } catch (e: Exception) {
-        dateString
+/** Start of a meeting in the device's time zone; an all-day calendar event shows its date and no time. */
+internal fun meetingTimeText(start: String, end: String?): String {
+    ServerTime.allDayDate(start, end)?.let { day ->
+        return LocaleDates.weekdayMonthDay(Date.from(day.atStartOfDay(ZoneId.systemDefault()).toInstant()))
     }
+    return ServerTime.date(start)?.let { LocaleDates.weekdayMonthDayTime(it) } ?: start
 }
 
 @Composable

@@ -25,11 +25,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.kreativekoala.summaryai.domain.model.PhoneCall
 import com.kreativekoala.summaryai.util.LocaleDates
+import com.kreativekoala.summaryai.util.ServerTime
 import com.kreativekoala.summaryai.domain.model.PhoneCallStatus
 import com.kreativekoala.summaryai.ui.components.MmCard
 import com.kreativekoala.summaryai.ui.components.MmEmptyState
 import com.kreativekoala.summaryai.ui.components.SkeletonCardList
-import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -211,9 +211,7 @@ internal fun callStatusColor(status: PhoneCallStatus): Color {
 
 internal fun formatCallDate(context: Context, dateString: String): String {
     return try {
-        // Server times are UTC; shown in the device's time zone.
-        val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).apply { timeZone = TimeZone.getTimeZone("UTC") }
-        val date = parser.parse(dateString) ?: return dateString
+        val date = ServerTime.date(dateString) ?: return dateString
 
         val now = Calendar.getInstance()
         val callDate = Calendar.getInstance().apply { time = date }

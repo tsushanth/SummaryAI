@@ -7,7 +7,7 @@ import java.util.Locale
 /**
  * Date and time text for display, in the order and with the month names, 12/24 hour clock and separators the
  * user's language expects. Use it instead of `SimpleDateFormat("h:mm a", Locale.US)`, which shows a 12 hour clock
- * and English month names to every user. Parsing of server dates must keep using fixed patterns with Locale.US.
+ * and English month names to every user. Server times are parsed by [ServerTime].
  */
 object LocaleDates {
     /** `h:mm a` in English, `HH:mm` in Russian. */
@@ -38,6 +38,7 @@ object LocaleDates {
     fun monthDayTime(date: Date) = format(date, MONTH_DAY_TIME, "MMM d, h:mm a")
     fun dateMedium(date: Date) = format(date, DATE_MEDIUM, "MMM d, yyyy")
     fun dateNumeric(date: Date) = format(date, DATE_NUMERIC, "MM/dd/yy")
+    fun weekdayMonthDay(date: Date) = format(date, "EEEMMMd", "EEE, MMM d")
     fun weekdayMonthDayTime(date: Date) = format(date, "EEEMMMdjm", "EEE, MMM d, h:mm a")
     fun monthName(date: Date) = format(date, MONTH_NAME, "MMMM")
 
