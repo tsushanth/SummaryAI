@@ -40,7 +40,9 @@ function seed(run: Record<string, unknown> = {}) {
   db.seed('recordings', { id: REC, user_id: 'user-1', meeting_id: 'meet-1' });
   return db.seed('bot_runs', { id: 'run-1', meeting_id: 'meet-1', status: 'recording', recall_status: 'in_call_recording', joined_at: new Date().toISOString(), ...run });
 }
-const say = (text: string) => db.seed('live_transcripts', { meeting_id: 'meet-1', speaker_name: 'Prospect', segment_text: text, end_timestamp: 40, is_partial: false, shadow: false });
+const say = (text: string, speaker = 'Prospect', at = 40) => db.seed('live_transcripts', { meeting_id: 'meet-1', speaker_name: speaker, segment_text: text, end_timestamp: at, is_partial: false, shadow: false });
+/** The user message of the nth model call. */
+const asked = (n: number): string => (h.claude.mock.calls[n]![0] as any).messages[0].content;
 const balance = () => db.rows('coaching_credits')[0]!.balance;
 const session = () => db.rows('coaching_sessions')[0]!;
 const start = () => coaching.startSession('user-1', REC, 'sales_discovery');
@@ -53,8 +55,13 @@ beforeEach(() => {
   db = new LiveDb();
   // The columns the real tables default.
   const from = db.from;
+  let emitted = 0;
   db.from = (t: string) => {
     const q = from(t);
+    if (t === 'coaching_insights') {
+      const insert = q.insert;
+      q.insert = (row: any) => insert({ emitted_at: new Date(1_800_000_000_000 + ++emitted * 1000).toISOString(), ...row });
+    }
     if (t === 'coaching_sessions') {
       const insert = q.insert;
       q.insert = (row: any) => insert({ ended_at: null, insight_count: 0, refunded: false, refund_reason: null, started_at: new Date().toISOString(), ...row });
@@ -214,6 +221,8 @@ describe('ending while tips are being delivered', () => {
     let ended: Promise<{ refunded: boolean }> | undefined;
     coaching.subscribe(sessionId, (event) => { if (event === 'insight' && ++delivered === 3) ended = coaching.endSession(sessionId); });
     await tick();
+    say('Our budget is five hundred a month');
+    await tick();
     expect((await ended!).refunded).toBe(false);
     expect(balance()).toBe(2);
     expect(session().insight_count).toBeGreaterThanOrEqual(3);
@@ -238,9 +247,86 @@ describe('ending while tips are being delivered', () => {
       return q;
     };
     await tick();
+    say('Our budget is five hundred a month');
+    await tick();
     expect((await ended!).refunded).toBe(true);
     expect(session().insight_count).toBe(2);
     expect(db.rows('coaching_insights').map((i) => i.text)).toEqual(['One', 'Two']);
+  });
+});
+
+describe('what the model is asked, and how much of its answer is used', () => {
+  it('gets one sentence per speaker turn, not the pieces speech recognition delivered', async () => {
+    seed();
+    await start();
+    for (const piece of ['we plan to', 'roll out', 'in', 'march']) say(piece);
+    say('understood', 'Seller');
+    await tick();
+    expect(asked(0)).toContain('[Prospect]: we plan to roll out in march\n[Seller]: understood');
+    expect(asked(0)).not.toContain('New since you last looked');
+  });
+  it('is shown what is new since it last looked, with the whole sentence above', async () => {
+    seed();
+    await start();
+    say('the part that slows us down');
+    await tick();
+    say('is onboarding');
+    await tick();
+    expect(asked(1)).toContain('[Prospect]: the part that slows us down is onboarding');
+    expect(asked(1)).toContain('New since you last looked (also included above):\n[Prospect]: is onboarding\n');
+  });
+  it('holds a line that stops mid-sentence until the rest arrives', async () => {
+    seed();
+    await start();
+    say('we need a shared calendar');
+    say('the most we can spend is about');
+    await tick();
+    expect(asked(0)).toContain('we need a shared calendar');
+    expect(asked(0)).not.toContain('spend');
+    say('two thousand a year');
+    await tick();
+    expect(asked(1)).toContain('the most we can spend is about two thousand a year');
+  });
+  it('holds it for one tick only, when nothing more is said', async () => {
+    seed();
+    await start();
+    say('the last vendor we met with');
+    await tick();
+    expect(h.claude).not.toHaveBeenCalled();
+    await tick();
+    expect(asked(0)).toContain('the last vendor we met with');
+    await tick();
+    expect(h.claude).toHaveBeenCalledTimes(1);
+  });
+  it('times a tip by the newest line it was given', async () => {
+    seed();
+    await start();
+    say('first thing said', 'Prospect', 12);
+    say('latest thing said', 'Prospect', 95);
+    h.claude.mockResolvedValue(reply('Ask about budget'));
+    await tick();
+    expect(db.rows('coaching_insights')[0]!.transcript_offset_seconds).toBe(95);
+  });
+  it('delivers at most two tips a tick', async () => {
+    seed();
+    await start();
+    say('We need this live before January');
+    h.claude.mockResolvedValue(reply('One', 'Two', 'Three', 'Four'));
+    await tick();
+    expect(db.rows('coaching_insights').map((i) => i.text)).toEqual(['One', 'Two']);
+    expect(session().insight_count).toBe(2);
+  });
+  it('is given every earlier tip of the call, oldest first', async () => {
+    seed();
+    await start();
+    for (let n = 1; n <= 11; n++) {
+      say(`point number ${n}`);
+      h.claude.mockResolvedValue(reply(`tip ${n}a`, `tip ${n}b`));
+      await tick();
+    }
+    const last = asked(10);
+    expect(last.indexOf('- tip 1a')).toBeGreaterThan(-1);
+    expect(last.indexOf('- tip 1a')).toBeLessThan(last.indexOf('- tip 10b'));
   });
 });
 
