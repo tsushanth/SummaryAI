@@ -1,6 +1,7 @@
 package com.kreativekoala.summaryai.ui.recordings.organize
 
 import com.kreativekoala.summaryai.R
+import com.kreativekoala.summaryai.util.ServerTime
 import androidx.compose.ui.res.stringResource
 import android.content.Context
 import android.content.Intent
@@ -119,10 +120,10 @@ fun PublicLinkSheet(
                 state.shares.forEach { s ->
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            (s.createdAt?.take(10) ?: "") +
+                            (s.createdAt?.let { ServerTime.dayText(it) } ?: "") +
                                 (if (s.includeTranscript) " • transcript" else "") +
                                 " • ${s.viewCount} views" +
-                                (s.expiresAt?.let { " • expires ${it.take(10)}" } ?: ""),
+                                (s.expiresAt?.let { " • expires ${ServerTime.dayText(it)}" } ?: ""),
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.weight(1f),
                         )

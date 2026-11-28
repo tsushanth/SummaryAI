@@ -1,7 +1,7 @@
 package com.kreativekoala.summaryai.data.repository
 
 import com.google.gson.JsonParser
-import java.time.Instant
+import com.kreativekoala.summaryai.util.ServerTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -32,11 +32,11 @@ internal fun parseBotCapError(httpCode: Int, body: String?): BotCapReachedExcept
 /**
  * The reset date for display in the user's locale. The allowance resets at the start of a UTC month, so the date is
  * rendered in UTC: in time zones behind UTC a local rendering would show the day before the reset.
- * Null when [resetsAt] is missing or not an ISO instant.
+ * Null when [resetsAt] is missing or not a timestamp.
  */
 internal fun formatBotCapResetDate(resetsAt: String?, locale: Locale): String? {
     if (resetsAt.isNullOrBlank()) return null
-    val instant = runCatching { Instant.parse(resetsAt) }.getOrNull() ?: return null
+    val instant = ServerTime.parse(resetsAt) ?: return null
     return DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(locale).withZone(ZoneOffset.UTC).format(instant)
 }
 

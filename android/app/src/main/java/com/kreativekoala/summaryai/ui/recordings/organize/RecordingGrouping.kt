@@ -1,9 +1,8 @@
 package com.kreativekoala.summaryai.ui.recordings.organize
 
 import com.kreativekoala.summaryai.domain.model.Recording
+import com.kreativekoala.summaryai.util.ServerTime
 import java.time.LocalDate
-import java.time.OffsetDateTime
-import java.time.ZoneId
 import java.time.ZonedDateTime
 
 /** Which header a group of recordings sits under. Resolved to text by the UI so it follows the user's language. */
@@ -21,19 +20,6 @@ sealed interface GroupLabel {
 }
 
 data class RecordingGroup(val label: GroupLabel, val recordings: List<Recording>)
-
-/** Parses the server's ISO-8601 timestamp; null when it cannot be parsed. */
-internal fun parseCreatedAt(value: String, zone: ZoneId): LocalDate? = try {
-    OffsetDateTime.parse(value).atZoneSameInstant(zone).toLocalDate()
-} catch (e: Exception) {
-    try {
-        // Timestamps without an offset are treated as UTC (the server stores timestamptz).
-        java.time.LocalDateTime.parse(value.substringBefore('.')).atZone(ZoneId.of("UTC"))
-            .withZoneSameInstant(zone).toLocalDate()
-    } catch (e2: Exception) {
-        null
-    }
-}
 
 /**
  * Starred (favorite) recordings first, then Today / Yesterday / This week /
@@ -56,7 +42,7 @@ fun groupRecordingsByDate(
             starred += r
             continue
         }
-        val d = parseCreatedAt(r.createdAt, zone)
+        val d = ServerTime.localDate(r.createdAt, zone)
         val label = when {
             d == null -> GroupLabel.Earlier
             !d.isBefore(today) -> GroupLabel.Today

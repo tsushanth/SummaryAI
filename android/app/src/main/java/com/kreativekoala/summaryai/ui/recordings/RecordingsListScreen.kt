@@ -2,6 +2,7 @@ package com.kreativekoala.summaryai.ui.recordings
 
 import com.kreativekoala.summaryai.ui.components.ConfirmDeleteAudioDialog
 import com.kreativekoala.summaryai.util.LocaleDates
+import com.kreativekoala.summaryai.util.ServerTime
 import android.util.Log
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
@@ -70,7 +71,6 @@ import com.kreativekoala.summaryai.ui.theme.Green50
 import com.kreativekoala.summaryai.ui.theme.Orange50
 import com.kreativekoala.summaryai.ui.theme.RecordingRed
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.util.*
 
 private const val TAG = "RecordingsListScreen"
@@ -695,25 +695,11 @@ private fun StatusBadge(status: RecordingStatus) {
     }
 }
 
-private fun formatDate(dateString: String): String {
-    return try {
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
-        val date = inputFormat.parse(dateString)
-        date?.let { LocaleDates.dateMedium(it) } ?: dateString
-    } catch (e: Exception) {
-        dateString
-    }
-}
+internal fun formatDate(dateString: String): String =
+    ServerTime.date(dateString)?.let { LocaleDates.dateMedium(it) } ?: dateString
 
-private fun formatDateIOS(dateString: String): String {
-    return try {
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
-        val date = inputFormat.parse(dateString)
-        date?.let { LocaleDates.monthDay(it) } ?: dateString
-    } catch (e: Exception) {
-        dateString
-    }
-}
+internal fun formatDateIOS(dateString: String): String =
+    ServerTime.date(dateString)?.let { LocaleDates.monthDay(it) } ?: dateString
 
 @Composable
 private fun PendingUploadsBanner(
