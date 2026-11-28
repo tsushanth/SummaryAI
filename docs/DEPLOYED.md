@@ -4,8 +4,12 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 
 | Component | Fly app | Release | Image | Built from | Date |
 |---|---|---|---|---|---|
-| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v80 | `registry.fly.io/summary-ai-backend:deployment-01M8FT5CC77BFK092BFMH4AYJH` | `origin/main` at `036a8fc` (#147; `backend/` tree `3f573ad7b242806a173ff7d763d7576192d9b342`) | 2026-11-28 (UTC) |
+| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v81 | `registry.fly.io/summary-ai-backend:deployment-01M8FXEAXFBGV1JXTDTJ72MJJ9` | `origin/main` at `8590ff1` (#150; `backend/` tree `5ac5af9dca46b0980c7b56b766f7de055df952f9`) | 2026-11-28 (UTC) |
 | Web (`web/`, meetingmind.org) | `meeting-mind-web` | v48 | `registry.fly.io/meeting-mind-web:deployment-01M8FRPN55VWW76VDD8TM76XGH` | `origin/main` at `338d04d` (#145, deployed by the web-deploy workflow; `web/` tree `f8558cb250ef3db0b035bfd221cbc6e67b15833c`) | 2026-11-28 (UTC) |
+
+## 2026-11-27 AI Coach failures answered as failures (#150): backend v81
+- A stop that cannot close the session, and a database error during a coach lookup or credit read, now answer 500 so the app and web retry; 404 stays for missing sessions or recordings.
+- Checks: backend 1712 tests; local server with a real database and rights removed answered 500. Deployed from a clean checkout of `origin/main` with nothing open; detailed health healthy. No migration or secret change. Rollback: image `deployment-01M8FT5CC77BFK092BFMH4AYJH` (v80).
 
 ## 2026-11-27 AI Coach: fewer tips, only what was said (#147): backend v80
 - After the live test: at most 2 tips per tick (usually 1 or none), only facts in the transcript, one tip per topic, a half-spoken sentence waits one tick, all earlier tips shown to the model.
