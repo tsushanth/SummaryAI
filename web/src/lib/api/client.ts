@@ -10,7 +10,7 @@ export class ApiError extends Error {
   }
 }
 
-async function getAccessToken(): Promise<string | null> {
+export async function getAccessToken(): Promise<string | null> {
   const supabase = createClient();
 
   // First try getSession (fast, from memory/storage)

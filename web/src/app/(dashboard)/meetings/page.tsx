@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Link as LinkIcon, Calendar, Loader2, RefreshCw } from 'lucide-react';
@@ -18,9 +19,12 @@ import { CalendarConnectionCard } from '@/components/meetings/CalendarConnection
 import { ConnectCalendarButton } from '@/components/meetings/ConnectCalendarButton';
 import { MeetingCard } from '@/components/meetings/MeetingCard';
 import { JoinMeetingModal } from '@/components/meetings/JoinMeetingModal';
+import { coachSession } from '@/lib/coaching/browser';
+import { COACH_TEXT } from '@/lib/coaching/messages';
 import type { CreateMeetingRequest, JoinMeetingRequest } from '@/types/api';
 
 export default function MeetingsPage() {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSyncingAfterConnect, setIsSyncingAfterConnect] = useState(false);
   const [banner, setBanner] = useState<string | null>(null);
@@ -72,20 +76,29 @@ export default function MeetingsPage() {
     }
   };
 
-  const handleAddMeeting = async (data: CreateMeetingRequest) => {
+  const handleAddMeeting = async (data: CreateMeetingRequest, { coachWanted }: { coachWanted: boolean }) => {
     const result = await create(data);
-    if (result?.warning) {
-      setBanner(result.warning);
+    const notices = [result?.warning, coachWanted ? COACH_TEXT.notStartedForAdded : null].filter(Boolean);
+    if (notices.length) {
+      setBanner(notices.join(' '));
     }
     return result;
   };
 
-  const handleJoinNow = async (data: JoinMeetingRequest) => {
+  const handleJoinNow = async (data: JoinMeetingRequest, { coachPersona }: { coachPersona: string | null }) => {
     const result = await join(data);
+    if (coachPersona && result.recording_id) {
+      // The tab-wide store takes it from here; the meeting page shows the tips.
+      coachSession().start(result.meeting.id, result.recording_id, coachPersona);
+      router.push(`/meetings/${result.meeting.id}`);
+      return;
+    }
     setBanner(
-      result.already_exists
-        ? 'A bot is already in this meeting or on its way.'
-        : 'The bot is on its way. If the meeting has a waiting room, admit "Meeting Mind".'
+      coachPersona
+        ? COACH_TEXT.noRecording
+        : result.already_exists
+          ? 'A bot is already in this meeting or on its way.'
+          : 'The bot is on its way. If the meeting has a waiting room, admit "Meeting Mind".'
     );
   };
 
