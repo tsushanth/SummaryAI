@@ -5,7 +5,7 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 | Component | Fly app | Release | Image | Built from | Date |
 |---|---|---|---|---|---|
 | Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v79 | `registry.fly.io/summary-ai-backend:deployment-01M8FNANH58YCSRQ4VNAX3K0NP` | `origin/main` at `ef0c285` (#143; `backend/` tree `ded8495a0e4d6fb58b3033fbab3b8307863a11e6`) | 2026-11-27 (UTC) |
-| Web (`web/`, meetingmind.org) | `meeting-mind-web` | v47 | `registry.fly.io/meeting-mind-web:deployment-01M8FNBGBYVHFRE0DW6JGA6E2Y` | `origin/main` at `ef0c285` (#143, deployed by the web-deploy workflow; `web/` tree `6ccc7ccbe9fa5e15009bbda184df98e783936746`) | 2026-11-27 (UTC) |
+| Web (`web/`, meetingmind.org) | `meeting-mind-web` | v48 | `registry.fly.io/meeting-mind-web:deployment-01M8FRPN55VWW76VDD8TM76XGH` | `origin/main` at `338d04d` (#145, deployed by the web-deploy workflow; `web/` tree `f8558cb250ef3db0b035bfd221cbc6e67b15833c`) | 2026-11-28 (UTC) |
 
 ## 2026-11-27 Release fixes: AI Coach, sign-in, test traffic, release-check defects (#140 to #143, migrations 039 and 040): backend v77 to v79, web v44 to v47
 - #142 AI Coach follows the meeting bot; #140 sign-in retries and calendar connect results; #141 our own and robot traffic left out of counts, web holds short or silent recordings; #143 speaker names on Android, keyboard insets, speaker numbers from 1, pending uploads shown to their owner, confirmation before deleting audio, join errors, Slack and Notion action items.
@@ -15,7 +15,13 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 - Checks: backend 1693 tests; web 225; Android 406 unit tests, lint 0 errors (branch runs before merge).
 - NOT verified: a live meeting with AI Coach, a real Google sign-in or calendar connect, a real Slack or Notion delivery.
 
-## Android: merged, NOT released (next release: after 1.7.15, versionCode 68)
+## 2026-11-27 Android 1.7.18 (71) released to production; privacy text and Data safety updated
+- Owner approved on 27 November. Play edit committed 16:27 PT: production, beta, alpha and internal all `completed` on 71 at 100% (before: 68 on production, beta and alpha). Built from `origin/main` `69ca700` (#144), tag `play/1.7.18-71`, AAB sha256 `1e7b9d59c6582a3a...`, upload-key signature, no new permission. Committed is not yet served: Play review was pending at the time of writing.
+- Before the release: #145 updated meetingmind.org privacy and terms (web deployed by the workflow); the company privacy page was updated (kreative-koala-legal #20); the Data safety form was resubmitted with one change from the 24 November answers ("App functionality" for approximate location), accepted by the API.
+- Checks: 406 Android unit tests, lint 0 errors; emulator smoke test of this bundle passed (upgrade from 68 with a pending upload, two-voice recording, summary, delete confirmations, second account, tabs). On the test phone: upgrade kept sign-in and recordings, speaker names, keyboard on Chat and Record. AI Coach live meeting passed: bot admitted, 14 tips, first after 77 s.
+- NOT verified: the Play-signed APK, a real Google sign-in, a calendar connect, a denied bot.
+
+Included since 1.7.15 (68):
 
 - AI Coach follows the meeting bot: a session is no longer ended by leaving the live transcript view, a start is not lost when the join screen closes, the tips stream reconnects and a restarted app picks the session up; the app says when the bot is waiting to be let in, why it failed and what to do, and why the coach stopped (strings in all languages). Needs the backend from the same change (older backends: no new messages, nothing breaks). No new permission. Checks: `:app:testDebugUnitTest` and `lintDebug` 0 errors. No device run, no live meeting.
 - Phone calls by country: the app sends the SIM and network country (device region only without either) on phone requests, no new permission; the server decides whether the Phone tab is shown (design: "Who is shown the feature"). Builds without this are told "not available" unless the account is a tester. Checks: `:app:testDebugUnitTest` 337 tests, 0 failures; `lintDebug` 0 errors. No device run.
