@@ -255,6 +255,57 @@ describe('ending while tips are being delivered', () => {
   });
 });
 
+describe('closing a session the database does not accept', () => {
+  const down = () => db.failing.set('coaching_sessions.update', { code: '57014', message: 'statement timeout' });
+  const up = () => db.failing.delete('coaching_sessions.update');
+
+  it('is an error, not a success, and a repeat closes and refunds it', async () => {
+    seed();
+    const { sessionId } = await start();
+    const events: string[] = [];
+    coaching.subscribe(sessionId, (e) => events.push(e));
+    down();
+    await expect(coaching.endSession(sessionId)).rejects.toThrow('could not end coaching session');
+    expect(session().ended_at).toBeNull();
+    expect(balance()).toBe(2);
+    expect(events).toEqual([]);
+    expect(h.alerts.map((a) => a.code)).toContain('END_FAILED');
+    up();
+    expect(await coaching.endSession(sessionId)).toEqual({ refunded: true });
+    expect(balance()).toBe(3);
+  });
+  it('asks the model nothing more once the user has said stop', async () => {
+    seed();
+    const { sessionId } = await start();
+    down();
+    await coaching.endSession(sessionId, 'client').catch(() => undefined);
+    say('and one more thing');
+    await tick();
+    expect(h.claude).not.toHaveBeenCalled();
+    up();
+  });
+  it('is tried again by the ticker when the bot has gone', async () => {
+    const run = seed();
+    await start();
+    Object.assign(run, { status: 'processing', recall_status: 'call_ended' });
+    down();
+    await tick();
+    expect(session().ended_at).toBeNull();
+    up();
+    await tick();
+    expect(session().ended_at).not.toBeNull();
+    expect(balance()).toBe(3);
+  });
+  it('does not take the credit question for an answer when it cannot be read', async () => {
+    seed();
+    db.failing.set('coaching_credits.select', { message: 'fetch failed' });
+    const failure = await start().then(() => null, (e) => e);
+    expect(failure).toBeInstanceOf(Error);
+    expect(failure).not.toBeInstanceOf(coaching.NoCreditsError);
+    expect(db.rows('coaching_sessions')).toHaveLength(0);
+  });
+});
+
 describe('what the model is asked, and how much of its answer is used', () => {
   it('gets one sentence per speaker turn, not the pieces speech recognition delivered', async () => {
     seed();
@@ -357,6 +408,48 @@ describe('routes', () => {
   afterEach(async () => { server.closeAllConnections(); await new Promise<void>((r) => server.close(() => r())); });
   const post = (path: string, body?: unknown) => fetch(base + path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body ?? {}) });
 
+  const unreachable = { message: 'TypeError: fetch failed' };
+  const requests = (sessionId: string) => [
+    ['start', 'recordings.select', () => post('/sessions', { recording_id: REC, persona: 'sales_discovery' })],
+    ['latest session', 'recordings.select', () => fetch(`${base}/recordings/${REC}/session`)],
+    ['latest session, session', 'coaching_sessions.select', () => fetch(`${base}/recordings/${REC}/session`)],
+    ['latest session, tips', 'coaching_insights.select', () => fetch(`${base}/recordings/${REC}/session`)],
+    ['stream', 'coaching_sessions.select', () => fetch(`${base}/sessions/${sessionId}/stream`)],
+    ['end', 'coaching_sessions.select', () => post(`/sessions/${sessionId}/end`)],
+    ['end, closing', 'coaching_sessions.update', () => post(`/sessions/${sessionId}/end`)],
+    ['insights', 'coaching_sessions.select', () => fetch(`${base}/sessions/${sessionId}/insights`)],
+    ['insights, tips', 'coaching_insights.select', () => fetch(`${base}/sessions/${sessionId}/insights`)],
+  ] as const;
+
+  it('answers 500, so the client tries again, when the database cannot be read or written', async () => {
+    seed();
+    const { sessionId } = await start();
+    for (const [name, key, request] of requests(sessionId)) {
+      db.failing.set(key, unreachable);
+      expect([name, (await request()).status]).toEqual([name, 500]);
+      db.failing.clear();
+    }
+    expect(session().ended_at).toBeNull();
+    expect((await post(`/sessions/${sessionId}/end`)).status).toBe(200);
+  });
+  it('keeps 404 for what is really not there, including an id that is no id', async () => {
+    seed();
+    expect((await post('/sessions/none/end')).status).toBe(404);
+    expect((await fetch(`${base}/sessions/none/insights`)).status).toBe(404);
+    expect((await fetch(`${base}/sessions/none/stream`)).status).toBe(404);
+    db.failing.set('coaching_sessions.select', { code: '22P02', message: 'invalid input syntax for type uuid' });
+    expect((await post('/sessions/not-a-uuid/end')).status).toBe(404);
+    db.failing.set('recordings.select', { code: '22P02', message: 'invalid input syntax for type uuid' });
+    expect((await fetch(`${base}/recordings/not-a-uuid/session`)).status).toBe(404);
+  });
+  it('closes a stream whose earlier tips cannot be read, so the client reconnects', async () => {
+    seed();
+    const { sessionId } = await start();
+    db.failing.set('coaching_insights.select', unreachable);
+    const res = await fetch(`${base}/sessions/${sessionId}/stream`);
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe(''); // resolves only if the server closes it
+  });
   it('answers 409 with the reason for a bot that already failed', async () => {
     seed({ status: 'failed', recall_status: 'fatal', error_code: 'meeting_not_found', joined_at: null });
     const r = await post('/sessions', { recording_id: REC, persona: 'sales_discovery' });
