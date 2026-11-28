@@ -23,6 +23,8 @@ import { useLiveMeeting } from '@/hooks/useLiveTranscript';
 import { LiveTranscriptViewer } from '@/components/meetings/LiveTranscriptViewer';
 import { AIInsightsPanel } from '@/components/meetings/AIInsightsPanel';
 import { LiveLanguageControl } from '@/components/meetings/LiveLanguageControl';
+import { CoachPanel } from '@/components/coaching/CoachPanel';
+import { useCoaching } from '@/hooks/useCoaching';
 import { cn } from '@/lib/utils/cn';
 import { botJoiningText, meetingFailureReason } from '@/lib/meetingFailure';
 import type { Meeting, MeetingStatus, MeetingPlatform } from '@/types/api';
@@ -142,6 +144,8 @@ export default function MeetingDetailPage() {
     id,
     isLive && isLiveEnabled
   );
+
+  const coach = useCoaching(meeting ? id : null, meeting?.recording_id);
 
   if (isMeetingLoading) {
     return (
@@ -282,6 +286,9 @@ export default function MeetingDetailPage() {
 
       {/* Content */}
       <div className="flex-1 overflow-auto p-6">
+        {coach.state && (
+          <CoachPanel state={coach.state} onStop={coach.stop} onRetry={coach.retry} className="mx-auto mb-4 max-w-4xl" />
+        )}
         {isLive ? (
           <div className="max-w-4xl mx-auto">
             {activeTab === 'transcript' && (

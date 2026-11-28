@@ -80,6 +80,8 @@ import { getSummaryView } from '@/lib/summaryState';
 import { recordingBotFailureReason } from '@/lib/meetingFailure';
 import { summaryViewedState } from '@/lib/activation';
 import { track } from '@/lib/activationClient';
+import { CoachPanel } from '@/components/coaching/CoachPanel';
+import { useCoaching } from '@/hooks/useCoaching';
 
 type Tab = 'summary' | 'transcript' | 'qa';
 
@@ -99,6 +101,8 @@ export default function RecordingDetailPage() {
   const [seekRequest, setSeekRequest] = useState<SeekRequest | null>(null);
   const [isUpdatingSpeakers, setIsUpdatingSpeakers] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  // AI Coach belongs to meeting-bot recordings: live tips during the call, kept here afterwards.
+  const coach = useCoaching(recording?.meeting_id, recording?.meeting_id ? recording.id : null);
 
   // Activation funnel: the user saw a result (a summary, or the "too short / no speech" notice). Once per recording per tab session.
   useEffect(() => {
@@ -326,6 +330,10 @@ export default function RecordingDetailPage() {
 
       {/* Content */}
       <div className="flex-1 overflow-auto px-4 py-6 sm:px-8">
+        {coach.state && (
+          <CoachPanel state={coach.state} onStop={coach.stop} onRetry={coach.retry} className="mb-6 max-w-3xl" />
+        )}
+
         {activeTab === 'transcript' && (
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_17rem]">
             <div className="min-w-0 max-w-3xl space-y-4">

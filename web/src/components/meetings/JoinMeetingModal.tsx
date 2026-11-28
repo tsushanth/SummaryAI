@@ -8,15 +8,18 @@ import { X, Link as LinkIcon, Loader2, Calendar, Clock } from 'lucide-react';
 import { getTranscriptionLanguages, setDefaultTranscriptionLanguage } from '@/lib/api/meetings';
 import { languageChoiceHint, normalizeChoice } from '@/lib/transcriptionLanguages';
 import { LanguageSelect } from './LanguageSelect';
+import { CoachJoinOption } from '@/components/coaching/CoachJoinOption';
+import { useCoachingCredits } from '@/hooks/useCoaching';
+import { COACH_PERSONA } from '@/lib/coaching/messages';
 import { getDefaultDateTime, zoomLinkWarning } from '@/lib/meetingLink';
 import type { CreateMeetingRequest, JoinMeetingRequest } from '@/types/api';
 
 interface JoinMeetingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateMeetingRequest) => Promise<{ warning?: string } | void>;
-  /** Send the bot immediately (POST /api/meetings/join). */
-  onJoinNow: (data: JoinMeetingRequest) => Promise<unknown>;
+  onSubmit: (data: CreateMeetingRequest, options: { coachWanted: boolean }) => Promise<{ warning?: string } | void>;
+  /** Send the bot immediately (POST /api/meetings/join). `coachPersona` is set when AI Coach is switched on. */
+  onJoinNow: (data: JoinMeetingRequest, options: { coachPersona: string | null }) => Promise<unknown>;
   isSubmitting: boolean;
   isJoining: boolean;
 }
@@ -81,6 +84,9 @@ export function JoinMeetingModal({
   });
   const savedDefault = normalizeChoice(languages?.default_language);
   const language = pickedLanguage ?? savedDefault;
+  const [coachChecked, setCoachChecked] = useState(false);
+  const credits = useCoachingCredits();
+  const coachOn = coachChecked && (credits.balance ?? 0) > 0;
 
   if (!isOpen) return null;
 
@@ -112,13 +118,16 @@ export function JoinMeetingModal({
 
     try {
       const scheduled_start = new Date(`${date}T${time}`).toISOString();
-      await onSubmit({
-        title: title.trim(),
-        join_url: normalizedUrl,
-        scheduled_start,
-        auto_join: autoJoin,
-        transcription_language: language,
-      });
+      await onSubmit(
+        {
+          title: title.trim(),
+          join_url: normalizedUrl,
+          scheduled_start,
+          auto_join: autoJoin,
+          transcription_language: language,
+        },
+        { coachWanted: coachOn }
+      );
       rememberLanguage();
       onClose();
     } catch (err) {
@@ -141,11 +150,14 @@ export function JoinMeetingModal({
       return;
     }
     try {
-      await onJoinNow({
-        join_url: normalizedUrl,
-        ...(title.trim() ? { title: title.trim() } : {}),
-        transcription_language: language,
-      });
+      await onJoinNow(
+        {
+          join_url: normalizedUrl,
+          ...(title.trim() ? { title: title.trim() } : {}),
+          transcription_language: language,
+        },
+        { coachPersona: coachOn ? COACH_PERSONA.key : null }
+      );
       rememberLanguage();
       onClose();
     } catch (err) {
@@ -289,6 +301,15 @@ export function JoinMeetingModal({
               </label>
             </div>
 
+            <CoachJoinOption
+              checked={coachChecked}
+              onChange={setCoachChecked}
+              balance={credits.balance}
+              failed={credits.failed}
+              onReload={credits.reload}
+              delayedCaptions={!!languages?.live?.english_only_low_latency && language !== 'auto' && language !== 'en'}
+            />
+
             {error && (
               <p className="text-sm text-destructive">{error}</p>
             )}
@@ -311,7 +332,8 @@ export function JoinMeetingModal({
             >
               Cancel
             </Button>
-            <Button type="button" variant="outline" onClick={handleJoinNow} disabled={!isValidUrl || isBusy}>
+            {/* With AI Coach on, "Join now" is the action that starts it, so it takes the primary style. */}
+            <Button type="button" variant={coachOn ? 'default' : 'outline'} onClick={handleJoinNow} disabled={!isValidUrl || isBusy}>
               {isJoining ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -321,7 +343,7 @@ export function JoinMeetingModal({
                 'Join now'
               )}
             </Button>
-            <Button type="submit" disabled={!isValidForm || isBusy}>
+            <Button type="submit" variant={coachOn ? 'outline' : 'default'} disabled={!isValidForm || isBusy}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
