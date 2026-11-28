@@ -4,8 +4,13 @@ Newest first. Parity rule: what runs in production is on `main` (tree compared f
 
 | Component | Fly app | Release | Image | Built from | Date |
 |---|---|---|---|---|---|
-| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v79 | `registry.fly.io/summary-ai-backend:deployment-01M8FNANH58YCSRQ4VNAX3K0NP` | `origin/main` at `ef0c285` (#143; `backend/` tree `ded8495a0e4d6fb58b3033fbab3b8307863a11e6`) | 2026-11-27 (UTC) |
+| Backend (`backend/`, summary-ai-backend.fly.dev) | `summary-ai-backend` | v80 | `registry.fly.io/summary-ai-backend:deployment-01M8FT5CC77BFK092BFMH4AYJH` | `origin/main` at `036a8fc` (#147; `backend/` tree `3f573ad7b242806a173ff7d763d7576192d9b342`) | 2026-11-28 (UTC) |
 | Web (`web/`, meetingmind.org) | `meeting-mind-web` | v48 | `registry.fly.io/meeting-mind-web:deployment-01M8FRPN55VWW76VDD8TM76XGH` | `origin/main` at `338d04d` (#145, deployed by the web-deploy workflow; `web/` tree `f8558cb250ef3db0b035bfd221cbc6e67b15833c`) | 2026-11-28 (UTC) |
+
+## 2026-11-27 AI Coach: fewer tips, only what was said (#147): backend v80
+- After the live test: at most 2 tips per tick (usually 1 or none), only facts in the transcript, one tip per topic, a half-spoken sentence waits one tick, all earlier tips shown to the model.
+- Checks: backend 1705 tests. Replay of a fragmented transcript with real model calls: 4 tips per call instead of 13; invented facts in 0 of 8 runs (1 of 8 at the default temperature, now 0.2). NOT verified in a live meeting. No code checks a tip against the transcript.
+- Deployed from a clean detached checkout of `origin/main` with no bot, coach session, recording or call open; no migration or secret change; detailed health healthy. Rollback: image `deployment-01M8FNANH58YCSRQ4VNAX3K0NP` (v79).
 
 ## 2026-11-27 Release fixes: AI Coach, sign-in, test traffic, release-check defects (#140 to #143, migrations 039 and 040): backend v77 to v79, web v44 to v47
 - #142 AI Coach follows the meeting bot; #140 sign-in retries and calendar connect results; #141 our own and robot traffic left out of counts, web holds short or silent recordings; #143 speaker names on Android, keyboard insets, speaker numbers from 1, pending uploads shown to their owner, confirmation before deleting audio, join errors, Slack and Notion action items.
