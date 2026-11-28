@@ -10,7 +10,7 @@ export default function TermsPage() {
     <div className="min-h-screen bg-background text-foreground py-16">
       <div className="max-w-[900px] mx-auto px-6">
         <h1 className="text-3xl md:text-4xl font-bold mb-2">Terms of Service</h1>
-        <p className="text-muted-foreground text-sm mb-12">Last updated: 2026-11-03</p>
+        <p className="text-muted-foreground text-sm mb-12">Last updated: 2026-11-27</p>
 
         <section className="mb-10">
           <h2 className="text-xl font-semibold mb-4">1. Agreement to Terms</h2>
@@ -30,6 +30,9 @@ export default function TermsPage() {
             <li>Manage phone calls and call recordings</li>
             <li>Sync with calendar services</li>
           </ul>
+          <p className="text-muted-foreground mt-3">
+            Phone calls made through the app cannot reach emergency services. In an emergency, use your phone&apos;s own dialer.
+          </p>
         </section>
 
         <section className="mb-10">
