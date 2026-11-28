@@ -27,11 +27,16 @@ const START_RETRY_MS = [2_000, 5_000];
 const RECONNECT_MS = [2_000, 5_000, 10_000, 20_000, 30_000];
 /** Consecutive failed reconnects after which the failure is reported (once per outage). */
 const REPORT_AFTER_FAILURES = 5;
+/** A connection counts as recovered only once it has held this long (the server's heartbeat interval). */
+const STABLE_AFTER_MS = 20_000;
+/** Consecutive refused streams, with the server also showing no such session, after which it is taken to be gone. */
+const REFUSALS_BEFORE_GONE = 5;
 const STOPS_KEY = 'mm_coach_stops';
 
 export interface CoachSessionOptions {
   startRetryMs?: number[];
   reconnectMs?: number[];
+  stableAfterMs?: number;
   onFailure?: (flow: 'coach_start' | 'coach_stream', status: number) => void;
   /** Where unacknowledged stops are kept across a reload (sessionStorage). It may throw; the store carries on. */
   storage?: Pick<Storage, 'getItem' | 'setItem'>;
@@ -84,6 +89,7 @@ const fresh = (phase: CoachingPhase, insights: CoachingInsight[] = []): Coaching
 export function createCoachSession(api: CoachingApi, options: CoachSessionOptions = {}) {
   const startRetryMs = options.startRetryMs ?? START_RETRY_MS;
   const reconnectMs = options.reconnectMs ?? RECONNECT_MS;
+  const stableAfterMs = options.stableAfterMs ?? STABLE_AFTER_MS;
   const backoff = (attempt: number) => reconnectMs[Math.min(attempt, reconnectMs.length - 1)]!;
 
   const meetings = new Map<string, Entry>();
@@ -112,6 +118,27 @@ export function createCoachSession(api: CoachingApi, options: CoachSessionOption
 
   const latestOrNull = (recordingId: string): Promise<LatestSessionResponse | null> =>
     api.latestSession(recordingId).catch(() => null);
+
+  /**
+   * What the server says about one session. A refusal of the stream or of /end is not proof: the backend also answers
+   * 404 when it merely failed to read the session, and may then show no session at all.
+   * `over`: it ended, or a newer one exists on the recording. `missing`: the server answered but showed neither.
+   */
+  async function lookUp(recordingId: string, sessionId: string) {
+    let latest: LatestSessionResponse;
+    try {
+      latest = await api.latestSession(recordingId);
+    } catch (error) {
+      return { session: null, insights: [], over: false, missing: statusOf(error) === 404 };
+    }
+    const session = latest.session?.id === sessionId ? latest.session : null;
+    return {
+      session,
+      insights: session ? latest.insights : [],
+      over: session ? !!session.ended_at : !!latest.session,
+      missing: !latest.session,
+    };
+  }
 
   async function requestSession(meetingId: string, entry: Entry, persona: string): Promise<string | null> {
     const { signal } = entry.abort;
@@ -144,17 +171,19 @@ export function createCoachSession(api: CoachingApi, options: CoachSessionOption
   async function follow(meetingId: string, entry: Entry, sessionId: string) {
     const { signal } = entry.abort;
     let attempt = 0;
+    let refusedAndMissing = 0;
     while (!signal.aborted) {
       let over = false;
       let refused = false;
       let status = 0;
+      let connectedAt: number | null = null;
       try {
         await api.streamSession(
           sessionId,
           (event) => {
             if (signal.aborted) return;
             if (event.type === 'connected') {
-              attempt = 0;
+              connectedAt = performance.now();
               change(meetingId, entry, { phase: 'live' });
             } else if (event.type === 'tip') {
               if (!entry.state.insights.some((i) => i.id === event.insight.id)) {
@@ -171,16 +200,20 @@ export function createCoachSession(api: CoachingApi, options: CoachSessionOption
         if (signal.aborted) return;
         status = statusOf(error);
         if (status === 401 || status === 403) return forget(meetingId, entry);
-        // 400: already ended. 404: gone. Anything else is the connection.
+        // 400: already ended. 404: gone, or the server could not read it.
         refused = status === 400 || status === 404;
       }
       if (over || signal.aborted) return;
-      const latest = await latestOrNull(entry.recordingId);
+      // A stream that opens and closes at once is not a recovery: keep backing off.
+      if (connectedAt !== null && performance.now() - connectedAt >= stableAfterMs) attempt = 0;
+      const found = await lookUp(entry.recordingId, sessionId);
       if (signal.aborted) return;
-      const session = latest?.session?.id === sessionId ? latest.session : null;
       // Tips given while we were not listening.
-      if (latest && session) change(meetingId, entry, { insights: newestFirst([...entry.state.insights, ...latest.insights]) });
-      if (refused || session?.ended_at) return ended(meetingId, entry, session?.end_reason ?? null, session?.refunded === true);
+      if (found.session) change(meetingId, entry, { insights: newestFirst([...entry.state.insights, ...found.insights]) });
+      refusedAndMissing = refused && found.missing ? refusedAndMissing + 1 : 0;
+      if (found.over || refusedAndMissing >= REFUSALS_BEFORE_GONE) {
+        return ended(meetingId, entry, found.session?.end_reason ?? null, found.session?.refunded === true);
+      }
       change(meetingId, entry, { phase: 'reconnecting' });
       if (attempt === REPORT_AFTER_FAILURES) options.onFailure?.('coach_stream', status);
       await sleep(backoff(attempt++), signal);
@@ -220,6 +253,10 @@ export function createCoachSession(api: CoachingApi, options: CoachSessionOption
   }
 
   async function endOnServer(sessionId: string, recordingId: string, signal: AbortSignal, repeat: boolean) {
+    const creditReturned = (refunded: boolean) =>
+      meetings.forEach((entry, meetingId) => {
+        if (refunded && entry.sessionId === sessionId && entry.state.phase === 'ended') change(meetingId, entry, { refunded });
+      });
     for (let attempt = 0; !signal.aborted; attempt++) {
       try {
         let { refunded } = await api.endSession(sessionId);
@@ -229,14 +266,21 @@ export function createCoachSession(api: CoachingApi, options: CoachSessionOption
           refunded = session?.id === sessionId && session.refunded === true;
         }
         if (signal.aborted) return;
-        meetings.forEach((entry, meetingId) => {
-          if (refunded && entry.sessionId === sessionId && entry.state.phase === 'ended') change(meetingId, entry, { refunded });
-        });
+        creditReturned(refunded);
         break;
       } catch (error) {
-        // Signed out, or no such session: repeating cannot help.
+        // Signed out: repeating cannot help.
         const status = statusOf(error);
-        if (status === 401 || status === 403 || status === 404) break;
+        if (status === 401 || status === 403) break;
+        // A 404 stops the retries only once the session is seen to be over.
+        if (status === 404) {
+          const found = await lookUp(recordingId, sessionId);
+          if (signal.aborted) return;
+          if (found.over) {
+            creditReturned(found.session?.refunded === true);
+            break;
+          }
+        }
         await sleep(backoff(attempt), signal);
       }
     }

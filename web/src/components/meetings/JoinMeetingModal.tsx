@@ -165,8 +165,11 @@ export function JoinMeetingModal({
     }
   };
 
-  // The form is unmounted on close, so there is nothing to reset.
-  const handleClose = onClose;
+  // The form is unmounted on close, so there is nothing to reset. While a request is out it stays open: closing would
+  // not cancel it, and what follows (starting AI Coach, opening the meeting) would happen behind the user's back.
+  const handleClose = () => {
+    if (!isBusy) onClose();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -178,8 +181,11 @@ export function JoinMeetingModal({
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Add Meeting</h2>
           <button
+            type="button"
             onClick={handleClose}
-            className="p-1 hover:bg-accent rounded"
+            disabled={isBusy}
+            aria-label="Close"
+            className="p-1 hover:bg-accent rounded disabled:opacity-50 disabled:hover:bg-transparent"
           >
             <X className="w-5 h-5" />
           </button>

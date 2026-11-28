@@ -202,14 +202,94 @@ scenario('a session that ended while disconnected stops reconnecting', async ({ 
   assert.equal(api.streamCalls, 1);
 });
 
-scenario('a stream the server refuses as ended or gone ends the session here', async ({ api, start, until }) => {
-  for (const status of [400, 404]) {
+const OVER = { id: 's1', ended_at: '2026-01-01T00:10:00', refunded: true, end_reason: 'bot_failed' };
+
+for (const status of [400, 404]) {
+  scenario(`a stream refused with ${status} while the server shows the session open is reopened`, async ({ api, add, start, until }) => {
+    api.latest = latest({ id: 's1' }, [tip('t1')]);
+    api.streams.push(...Array.from({ length: 8 }, () => refusal(status))); // more than it takes to give up on a missing one
+    const stream = add();
+    start();
+    const s = await until((x) => x?.phase === 'live');
+    assert.deepEqual(ids(s), ['t1']);
+    assert.equal(api.streamCalls, 9);
+    assert.equal(stream.aborted, false);
+  });
+
+  scenario(`a stream refused with ${status} for a session the server shows ended ends it here`, async ({ api, start, until }) => {
+    api.latest = latest(OVER);
     api.streams.push(refusal(status));
     start();
-    await until((s) => s?.phase === 'ended');
+    const end = await until((s) => s?.phase === 'ended');
+    assert.equal(end.endReason, 'bot_failed');
+    assert.equal(end.refunded, true);
+    await wait();
+    assert.equal(api.streamCalls, 1);
+  });
+}
+
+scenario('a refused stream ends the session at once when a newer one exists on the recording', async ({ api, start, until }) => {
+  api.latest = latest({ id: 's2' }, [tip('t9')]);
+  api.streams.push(refusal(404));
+  start();
+  const end = await until((s) => s?.phase === 'ended');
+  assert.deepEqual(ids(end), [], 'the other session\'s tips are not taken over');
+  assert.equal(api.streamCalls, 1);
+});
+
+scenario('a refused stream is given up only after the server keeps showing no such session', async ({ api, start, until }) => {
+  for (const missing of [() => {}, () => { api.latestSession = async () => { throw refusal(404); }; }]) {
+    missing(); // an empty answer, then a recording that is not found
+    const before = api.streamCalls;
+    api.streams.push(...Array.from({ length: 20 }, () => refusal(404)));
+    start();
+    await until((s) => s?.phase === 'ended' && api.streamCalls > before);
+    await wait();
+    assert.equal(api.streamCalls - before, 5);
+    api.streams.length = 0;
   }
-  await wait();
-  assert.equal(api.streamCalls, 2);
+});
+
+scenario('a refused stream is never given up while the session cannot be looked up', async ({ api, start, until }) => {
+  api.latestSession = async () => { throw refusal(503); };
+  api.streams.push(...Array.from({ length: 200 }, () => refusal(404)));
+  start();
+  await until((s) => s?.phase === 'reconnecting' && api.streamCalls >= 12);
+});
+
+/** A stream that answers 200 and closes straight away. */
+const closesAtOnce = () => ({ open: (onEvent) => (onEvent({ type: 'connected' }), Promise.resolve()) });
+
+async function reconnects(options, act) {
+  const t = setup(options, (api) => (api.latest = latest({ id: 's1' })));
+  try {
+    await act(t);
+  } finally {
+    t.coach.reset();
+  }
+}
+
+test('a stream that opens and closes at once keeps backing off', async () => {
+  await reconnects({ reconnectMs: [1, 60_000], stableAfterMs: 1_000 }, async ({ api, start }) => {
+    api.streams.push(...Array.from({ length: 50 }, closesAtOnce));
+    start();
+    await wait(80);
+    assert.equal(api.streamCalls, 2, 'the second wait is the long one');
+  });
+});
+
+test('a connection that held starts the backoff over', async () => {
+  await reconnects({ reconnectMs: [1, 60_000], stableAfterMs: 20 }, async ({ api, add, start, until }) => {
+    api.streams.push(closesAtOnce()); // uses up the short wait
+    const held = add();
+    const next = add();
+    start();
+    await until((s) => s?.phase === 'live' && api.streamCalls === 2);
+    await wait(40);
+    held.drop();
+    await until((s) => s.phase === 'live' && api.streamCalls === 3);
+    assert.equal(next.aborted, false);
+  });
 });
 
 scenario('a long outage keeps reconnecting and is reported once', async ({ api, start, until, failures }) => {
@@ -299,6 +379,58 @@ scenario('a refund is still said when the first answer to a stop was lost', asyn
   coach.stop(MEET);
   await until((s) => s.refunded);
 });
+
+for (const [what, answer] of [
+  ['shows it open', latest({ id: 's1' })],
+  ['shows no session', latest(null)],
+  ['cannot be read', refusal(404)],
+]) {
+  test(`a stop answered 404 is repeated while the server ${what}`, async () => {
+    const storage = tabStorage();
+    const t = setup({ storage });
+    try {
+      t.add();
+      t.start();
+      await t.until((s) => s?.phase === 'live');
+      if (answer instanceof Error) t.api.latestSession = async () => { throw answer; };
+      else t.api.latest = answer;
+      t.api.endFailures.push(...Array.from({ length: 1000 }, () => refusal(404)));
+      t.coach.stop(MEET);
+      await t.until(() => t.api.endCalls >= 5);
+      assert.equal(storage.saved().length, 1, 'still remembered across a reload');
+      t.api.endFailures.length = 0;
+      await t.until((s) => s.refunded);
+      assert.deepEqual(t.api.ended, ['s1']);
+      assert.deepEqual(storage.saved(), []);
+    } finally {
+      t.coach.reset();
+    }
+  });
+}
+
+for (const [what, answer, refunded] of [
+  ['ended', latest({ id: 's1', ended_at: '2026-01-01T00:10:00', refunded: true }), true],
+  ['replaced by a newer session', latest({ id: 's2' }), false],
+]) {
+  test(`a stop answered 404 is dropped once the session is seen to be ${what}`, async () => {
+    const storage = tabStorage();
+    const t = setup({ storage });
+    try {
+      t.add();
+      t.start();
+      await t.until((s) => s?.phase === 'live');
+      t.api.latest = answer;
+      t.api.endFailures.push(...Array.from({ length: 1000 }, () => refusal(404)));
+      t.coach.stop(MEET);
+      await t.until(() => storage.saved().length === 0);
+      await wait();
+      assert.equal(t.api.endCalls, 1);
+      assert.equal(t.coach.getState(MEET).refunded, refunded);
+    } finally {
+      t.coach.reset();
+    }
+  });
+}
 
 scenario('an unacknowledged stop is not shown as running again', async ({ api, add, coach, start, until }) => {
   add();
