@@ -19,10 +19,13 @@ import { supabaseAdmin } from '../lib/supabase.js';
 import { reportAlert } from '../lib/alerts.js';
 import { getPersona, personaSystemPrompt, CoachingPersona } from './coachingPersonas.js';
 import { pickOutputLanguage } from '../lib/outputLanguage.js';
+import { endsMidSentence, joinTranscript } from './coachingTranscript.js';
 import { botEndReason, getMeetingBotState, BotEndReason } from './meetingBotState.js';
 
 const REFUND_THRESHOLD_INSIGHTS = 3;
-const TRANSCRIPT_TAIL_SEGMENTS = 30; // ~5min of typical meeting transcript
+const TRANSCRIPT_TAIL_SEGMENTS = 300; // lines are often a word or two; joinTranscript trims by length
+const PRIOR_TIPS_SHOWN = 50;
+const MAX_TIPS_PER_TICK = 2;
 
 // In-memory registry of active session ticker timers.
 const activeTimers = new Map<string, NodeJS.Timeout>();
@@ -33,7 +36,8 @@ const subscribers = new Map<string, Set<EmitFn>>();
 const sessionLanguages = new Map<string, string>();
 // Per-session tick bookkeeping, in memory only: a restart costs at most one repeated model call.
 const ticking = new Set<string>();
-const lastTranscriptSent = new Map<string, string>();
+const lastTranscriptSent = new Map<string, { newest: string; createdAt: string }>();
+const heldBack = new Map<string, string>();
 const modelCalls = new Map<string, 'answered' | 'failed'>();
 
 /** Why a session ended: the app or the user asked, the bot ended it, or it outlived SESSION_MAX_AGE_HOURS. */
@@ -265,6 +269,7 @@ export async function endSession(sessionId: string, reason: EndReason = 'client'
   subscribers.delete(sessionId);
   sessionLanguages.delete(sessionId);
   lastTranscriptSent.delete(sessionId);
+  heldBack.delete(sessionId);
   modelCalls.delete(sessionId);
   return { refunded };
 }
@@ -410,15 +415,27 @@ async function runTick(sessionId: string, persona: CoachingPersona): Promise<voi
     console.log(`[Coaching] tick: no transcript segments yet for meeting ${recording.meeting_id}, skipping`);
     return;
   }
-  // Newest first here. Silence since the last answered call means there is nothing new to coach on.
-  const newest = `${segments[0]!.created_at}|${segments[0]!.end_timestamp}|${segments[0]!.segment_text}`;
-  if (lastTranscriptSent.get(sessionId) === newest) return;
-  console.log(`[Coaching] tick: ${segments.length} transcript segments to feed`);
+  const lineKey = (s: (typeof segments)[number]) => `${s.created_at}|${s.end_timestamp}|${s.segment_text}`;
+  let lines = [...segments].reverse();
+  // A live transcript often stops mid-sentence. Such a last line waits one tick, so the model judges the whole thought.
+  const last = lines[lines.length - 1]!;
+  if (endsMidSentence(last.segment_text) && heldBack.get(sessionId) !== lineKey(last)) {
+    heldBack.set(sessionId, lineKey(last));
+    lines = lines.slice(0, -1);
+  }
+  const latest = lines[lines.length - 1];
+  if (!latest) return;
+  // Silence since the last answered call means there is nothing new to coach on.
+  const newest = lineKey(latest);
+  const seen = lastTranscriptSent.get(sessionId);
+  if (seen?.newest === newest) return;
+  console.log(`[Coaching] tick: ${lines.length} transcript segments to feed`);
 
-  const transcriptTail = segments
-    .reverse()
-    .map(s => `[${s.speaker_name || 'Speaker'}]: ${s.segment_text}`)
-    .join('\n');
+  const newestCreatedAt = String(latest.created_at);
+  const transcriptTail = joinTranscript(lines);
+  // What arrived since the last answered call, so the model can tell news from what it has already coached on.
+  const fresh = seen ? joinTranscript(lines.filter(s => String(s.created_at) > seen.createdAt)) : '';
+  const freshBlock = fresh ? `\n\nNew since you last looked (also included above):\n${fresh}` : '';
 
   // Avoid re-suggesting already-emitted insights.
   const { data: priorInsights } = await supabaseAdmin
@@ -426,14 +443,15 @@ async function runTick(sessionId: string, persona: CoachingPersona): Promise<voi
     .select('text')
     .eq('session_id', sessionId)
     .order('emitted_at', { ascending: false })
-    .limit(15);
-  const priorBlock = (priorInsights ?? []).map(p => `- ${p.text}`).join('\n') || '(none yet)';
+    .limit(PRIOR_TIPS_SHOWN);
+  const priorBlock = (priorInsights ?? []).map(p => `- ${p.text}`).reverse().join('\n') || '(none yet)';
 
   const anthropic = instrumentAnthropic(new Anthropic({ apiKey: config.ANTHROPIC_API_KEY }));
   modelCalls.set(sessionId, 'failed'); // until a readable answer arrives
   const resp = await withFeature('coaching', () => anthropic.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 1024,
+    temperature: 0.2, // coaching must stay close to what was said
     system: [{
       type: 'text',
       text: personaSystemPrompt(
@@ -444,7 +462,7 @@ async function runTick(sessionId: string, persona: CoachingPersona): Promise<voi
     }] as any,
     messages: [{
       role: 'user',
-      content: `Transcript (most recent ~${persona.windowMinutes} min):\n${transcriptTail}\n\nAlready suggested earlier in this session:\n${priorBlock}\n\nReturn JSON only.`,
+      content: `Transcript (most recent ~${persona.windowMinutes} min, oldest first):\n${transcriptTail}${freshBlock}\n\nTips already given in this call (their topics are used up):\n${priorBlock}\n\nReturn JSON only.`,
     }],
   }));
 
@@ -469,19 +487,19 @@ async function runTick(sessionId: string, persona: CoachingPersona): Promise<voi
     return;
   }
   modelCalls.set(sessionId, 'answered');
-  lastTranscriptSent.set(sessionId, newest);
+  lastTranscriptSent.set(sessionId, { newest, createdAt: newestCreatedAt });
   const insights = parsed.insights;
   console.log(`[Coaching] parsed ${insights.length} insights`);
   if (!insights.length) return;
 
-  const lastSegment = segments[segments.length - 1];
-  const offset = Math.floor(lastSegment?.end_timestamp ?? 0);
+  const offset = Math.floor(latest.end_timestamp ?? 0);
 
   // Insert, count, then emit, one tip at a time. The count drives the end-of-session auto-refund, so it must be exactly the
   // tips delivered: no rejected or failed rows, and never behind what the user has already been shown.
   const countBefore: number = session.insight_count;
   let persisted = 0;
   for (const i of insights) {
+    if (persisted >= MAX_TIPS_PER_TICK) break;
     if (!isValidInsight(i)) continue;
     const { data, error } = await supabaseAdmin
       .from('coaching_insights')
