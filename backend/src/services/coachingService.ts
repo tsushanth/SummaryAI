@@ -148,7 +148,7 @@ export async function startSession(
   // Pick the oldest non-empty unexpired credit row (FIFO consumption — free
   // credits go first, then earliest-purchased IAP).
   const nowIso = new Date().toISOString();
-  const { data: credit } = await supabaseAdmin
+  const { data: credit, error: creditError } = await supabaseAdmin
     .from('coaching_credits')
     .select('id, balance')
     .eq('user_id', userId)
@@ -157,6 +157,8 @@ export async function startSession(
     .order('granted_at', { ascending: true })
     .limit(1)
     .maybeSingle();
+  // Not "no credits": the app takes that for an answer and does not try again.
+  if (creditError) throw new Error(`could not read coaching credits: ${creditError.message}`);
   if (!credit) throw new NoCreditsError();
 
   if (!(await changeCreditBalance(credit.id, -1))) throw new NoCreditsError();
@@ -226,7 +228,9 @@ async function changeCreditBalance(creditId: string, delta: 1 | -1): Promise<boo
 
 /** End a session. Auto-refunds the credit if too few insights were emitted. */
 export async function endSession(sessionId: string, reason: EndReason = 'client'): Promise<{ refunded: boolean }> {
-  stopTicker(sessionId);
+  // The user's stop silences the coach whatever the database does. For any other reason the ticker runs until the session
+  // is really closed, so that the next tick tries again.
+  if (reason === 'client') stopTicker(sessionId);
 
   // Close first, and only if still open: of repeated or simultaneous calls exactly one gets the row, so only one can refund.
   const { data: session, error: closeError } = await supabaseAdmin
@@ -236,7 +240,12 @@ export async function endSession(sessionId: string, reason: EndReason = 'client'
     .is('ended_at', null)
     .select('id, credit_id, insight_count, recording_id, started_at')
     .maybeSingle();
-  if (closeError) console.error(`[Coaching] could not end session ${sessionId}:`, closeError.message);
+  if (closeError) {
+    // Still open: answering "ended" would make the app drop its stop.
+    reportAlert('coaching', 'END_FAILED', { code: closeError.code, ended_by: reason });
+    throw new Error(`could not end coaching session: ${closeError.message}`);
+  }
+  stopTicker(sessionId);
   if (!session) return { refunded: false };
 
   let refunded = false;
@@ -310,7 +319,7 @@ export async function endSessionsIfBotGone(meetingId: string): Promise<void> {
 
 /** The caller's most recent session on a recording, open or ended, for an app that lost track of it. */
 export async function getLatestSession(userId: string, recordingId: string) {
-  const { data } = await supabaseAdmin
+  const { data, error } = await supabaseAdmin
     .from('coaching_sessions')
     .select('id, persona, started_at, ended_at, insight_count, refunded, refund_reason')
     .eq('recording_id', recordingId)
@@ -318,6 +327,7 @@ export async function getLatestSession(userId: string, recordingId: string) {
     .order('started_at', { ascending: false })
     .limit(1)
     .maybeSingle();
+  if (error) throw new Error(`could not read coaching session: ${error.message}`);
   return data ?? null;
 }
 
@@ -330,11 +340,12 @@ export function subscribe(sessionId: string, emit: EmitFn): () => void {
 
 /** All insights emitted in this session — used by the post-meeting summary view. */
 export async function getInsights(sessionId: string) {
-  const { data } = await supabaseAdmin
+  const { data, error } = await supabaseAdmin
     .from('coaching_insights')
     .select('*')
     .eq('session_id', sessionId)
     .order('emitted_at', { ascending: true });
+  if (error) throw new Error(`could not read coaching insights: ${error.message}`);
   return data ?? [];
 }
 
@@ -587,6 +598,7 @@ setInterval(async () => {
     .lt('started_at', cutoff);
   for (const s of stale ?? []) {
     console.log(`[Coaching] auto-closing stale session ${s.id}`);
-    await endSession(s.id, 'expired');
+    // A failure is already alerted; the next pass tries again.
+    await endSession(s.id, 'expired').catch(e => console.error(`[Coaching] ${(e as Error).message}`));
   }
 }, 5 * 60 * 1000).unref();

@@ -8,6 +8,8 @@ export type Row = Record<string, any>;
 export class LiveDb {
   tables: Record<string, Row[]> = {};
   missing = new Set<string>();
+  /** 'table.op' that the database cannot answer right now: that operation returns the error and changes nothing. */
+  failing = new Map<string, { code?: string; message: string }>();
   private n = 0;
 
   rows(t: string): Row[] { return (this.tables[t] ??= []); }
@@ -37,6 +39,8 @@ export class LiveDb {
     const like = (v: any, pat: string) => new RegExp('^' + pat.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/%/g, '.*') + '$').test(String(v ?? ''));
 
     const exec = (): { data: any; error: any } => {
+      const down = db.failing.get(`${table}.${op}`);
+      if (down) return { data: null, error: down };
       const touched = op === 'select' ? (cols[0] === '*' ? [] : cols) : Object.keys(Array.isArray(payload) ? payload[0] ?? {} : payload);
       const bad = db.bad(table, touched);
       if (bad) return { data: null, error: { code: '42703', message: `column "${bad}" of relation "${table}" does not exist` } };

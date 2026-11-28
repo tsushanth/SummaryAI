@@ -45,6 +45,14 @@ router.use(authenticate);
 
 const FREE_TIER_CREDITS = 2;
 
+/**
+ * A lookup the database could not answer is a 500, so the app and the web try again: a 404 tells them there is nothing
+ * there. An id that is not even an id (22P02) is simply not there.
+ */
+function assertAnswered(error: { code?: string; message?: string } | null | undefined): void {
+  if (error && error.code !== '22P02') throw new Error(`coaching lookup failed: ${error.code || error.message}`);
+}
+
 // ----- POST /api/coaching/credits/claim-free -----
 //
 // One-shot free tier: 2 sessions on first tap of "Enable AI Coach". Idempotent
@@ -93,12 +101,13 @@ router.post('/sessions', asyncHandler(async (req: Request, res: Response) => {
   const body = startSchema.parse(req.body);
 
   // The session reads the recording's live transcript, so it must be the caller's own recording.
-  const { data: recording } = await supabaseAdmin
+  const { data: recording, error } = await supabaseAdmin
     .from('recordings')
     .select('id')
     .eq('id', body.recording_id)
     .eq('user_id', userId)
     .maybeSingle();
+  assertAnswered(error);
   if (!recording) throw Errors.notFound('Recording not found.');
 
   try {
@@ -117,12 +126,13 @@ router.post('/sessions', asyncHandler(async (req: Request, res: Response) => {
 router.get('/recordings/:recordingId/session', asyncHandler(async (req: Request, res: Response) => {
   const userId = (req as any).user.id;
   const recordingId = req.params.recordingId!;
-  const { data: recording } = await supabaseAdmin
+  const { data: recording, error } = await supabaseAdmin
     .from('recordings')
     .select('id')
     .eq('id', recordingId)
     .eq('user_id', userId)
     .maybeSingle();
+  assertAnswered(error);
   if (!recording) throw Errors.notFound('Recording');
 
   const latest = await getLatestSession(userId, recordingId);
@@ -138,11 +148,12 @@ router.get('/sessions/:id/stream', asyncHandler(async (req: Request, res: Respon
   const sessionId = req.params.id;
 
   // Auth check: session must belong to this user
-  const { data: session } = await supabaseAdmin
+  const { data: session, error } = await supabaseAdmin
     .from('coaching_sessions')
     .select('user_id, ended_at')
     .eq('id', sessionId)
     .maybeSingle();
+  assertAnswered(error);
   if (!session || session.user_id !== userId) throw Errors.notFound('Session not found.');
   if (session.ended_at) throw Errors.badRequest('Session already ended.');
 
@@ -184,7 +195,15 @@ router.get('/sessions/:id/stream', asyncHandler(async (req: Request, res: Respon
   }, 20_000);
   req.on('close', close);
 
-  for (const i of await getInsights(sessionId)) emit('insight', i);
+  try {
+    for (const i of await getInsights(sessionId)) emit('insight', i);
+  } catch (e) {
+    // The stream is already open, so there is no status to send: close it and the client reconnects.
+    console.error('[Coaching] stream replay failed:', (e as Error).message);
+    reportAlert('coaching', 'STREAM_REPLAY_FAILED');
+    close();
+    res.end();
+  }
 }));
 
 // ----- POST /api/coaching/sessions/:id/end -----
@@ -193,11 +212,12 @@ router.post('/sessions/:id/end', asyncHandler(async (req: Request, res: Response
   const userId = (req as any).user.id;
   const sessionId = req.params.id;
 
-  const { data: session } = await supabaseAdmin
+  const { data: session, error } = await supabaseAdmin
     .from('coaching_sessions')
     .select('user_id')
     .eq('id', sessionId)
     .maybeSingle();
+  assertAnswered(error);
   if (!session || session.user_id !== userId) throw Errors.notFound('Session not found.');
 
   const { refunded } = await endSession(sessionId);
@@ -210,11 +230,12 @@ router.get('/sessions/:id/insights', asyncHandler(async (req: Request, res: Resp
   const userId = (req as any).user.id;
   const sessionId = req.params.id;
 
-  const { data: session } = await supabaseAdmin
+  const { data: session, error } = await supabaseAdmin
     .from('coaching_sessions')
     .select('user_id, persona, started_at, ended_at, insight_count, refunded')
     .eq('id', sessionId)
     .maybeSingle();
+  assertAnswered(error);
   if (!session || session.user_id !== userId) throw Errors.notFound('Session not found.');
 
   const insights = await getInsights(sessionId);
